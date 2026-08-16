@@ -13,7 +13,8 @@
 │  ┌────────────────────┐       ┌──────────────────────────────┐  │
 │  │      iPhone         │       │           Mac                 │  │
 │  │                     │       │                              │  │
-│  │  Expo React Native  │       │  Expo Web / Electron         │  │
+│  │  Expo React Native  │       │  Electron + Tamagui          │  │
+│  │  + Tamagui UI       │       │  (shared components)         │  │
 │  │                     │       │                              │  │
 │  │  ┌──────────────┐  │       │  ┌────────────────────────┐  │  │
 │  │  │ Zustand Store│  │       │  │   MCP Server            │  │  │
@@ -34,11 +35,23 @@
 
 ## Layers
 
-### Presentation Layer (React Native)
+### Presentation Layer (Tamagui)
 
 - **Expo Router** — file-based routing
-- **React Native Paper** — Material Design UI components
+- **Tamagui** — cross-platform UI kit (shared components for mobile + desktop)
 - **Zustand** — state management
+
+### Shared UI Package
+
+```
+packages/ui/
+├── src/
+│   ├── components/        # Shared components (Button, Card, Input, etc.)
+│   ├── theme/             # Tamagui config (colors, spacing, typography)
+│   └── tokens/            # Design tokens (raw values)
+├── tamagui.config.ts      # Tamagui configuration
+└── package.json
+```
 
 ### Domain Layer
 
@@ -62,23 +75,30 @@
 
 ```
 apps/
-├── mobile/              # Presentation + Domain + Data (mobile)
-│   ├── app/             # Expo Router pages
-│   ├── components/      # UI components
-│   ├── hooks/           # React hooks
-│   ├── services/        # Domain services
-│   └── stores/          # Zustand stores
-├── mcp-server/          # MCP Server (infrastructure)
+├── mobile/                # Presentation + Domain + Data (mobile)
+│   ├── app/               # Expo Router pages
+│   ├── components/        # Mobile-specific components
+│   ├── hooks/             # React hooks
+│   ├── services/          # Domain services
+│   └── stores/            # Zustand stores
+├── desktop/               # Electron wrapper (shares packages/ui)
+│   ├── electron/          # Electron main process
+│   └── renderer/          # Tamagui renderer (shared + desktop-specific)
+├── mcp-server/            # MCP Server (infrastructure)
 │   └── src/
-│       ├── index.ts     # Entry point
-│       ├── tools/       # Tool implementations
-│       ├── db.ts        # Database access
-│       └── ledger.ts    # Ledger logic
+│       ├── index.ts       # Entry point
+│       ├── tools/         # Tool implementations
+│       ├── db.ts          # Database access
+│       └── ledger.ts      # Ledger logic
 packages/
-└── shared/              # Shared types + utils
+├── ui/                    # Shared Tamagui components + theme
+│   ├── src/components/    # Button, Card, Input, Chip, FAB, List, Dialog
+│   ├── src/theme/         # Tamagui theme tokens
+│   └── tamagui.config.ts  # Tamagui config
+└── shared/                # Shared types + utils
     └── src/
-        ├── types.ts     # All type definitions
-        └── utils.ts     # Utility functions
+        ├── types.ts       # All type definitions
+        └── utils.ts       # Utility functions
 ```
 
 ## Data Flow

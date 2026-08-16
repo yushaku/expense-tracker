@@ -48,6 +48,12 @@ docs/
 
 ---
 
+## 🎨 Design
+
+- **Design System:** `design-system.md` — color palette, typography, spacing, components, theme tokens
+
+---
+
 ## 📖 Product Spec
 
 - Full spec: `../PRODUCT_SPEC.md`
