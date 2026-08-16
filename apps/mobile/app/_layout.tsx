@@ -10,6 +10,11 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="index" options={{ title: 'Chi tiêu' }} />
         <Stack.Screen name="add" options={{ title: 'Thêm chi tiêu' }} />
+        <Stack.Screen name="expenses" options={{ title: 'Chi tiêu' }} />
+        <Stack.Screen name="expenses/index" options={{ title: 'Chi tiêu' }} />
+        <Stack.Screen name="expenses/new" options={{ title: 'Thêm chi tiêu' }} />
+        <Stack.Screen name="expenses/[id]" options={{ title: 'Chi tiết chi tiêu' }} />
+        <Stack.Screen name="expenses/[id]/edit" options={{ title: 'Sửa chi tiêu' }} />
         <Stack.Screen name="wallets" options={{ title: 'Ví' }} />
         <Stack.Screen name="wallets/index" options={{ title: 'Ví của tôi' }} />
         <Stack.Screen name="wallets/[id]" options={{ title: 'Chi tiết ví' }} />

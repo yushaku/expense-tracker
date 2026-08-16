@@ -22,6 +22,6 @@ export type {
 } from 'tamagui';
 
 // Custom components
-export { Chip } from './src/components/Chip';
+export { Chip, ChipText } from './src/components/Chip';
 export { FAB } from './src/components/FAB';
 export { ListItem } from './src/components/ListItem';
