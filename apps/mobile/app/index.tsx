@@ -1,8 +1,8 @@
 // apps/mobile/app/index.tsx
 import React, { useState, useEffect } from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
-import { FAB, Card, Text, Chip, IconButton } from 'react-native-paper';
-import { Link, useRouter } from 'expo-router';
+import { FAB, Card, Text, Chip } from 'react-native-paper';
+import { useRouter } from 'expo-router';
 import { formatCurrency } from '@expense/shared';
 import type { Expense } from '@expense/shared';
 

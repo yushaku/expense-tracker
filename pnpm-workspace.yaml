@@ -1,6 +1,11 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+
+# Expo/Metro: flat node_modules (symlink store breaks web bundle URL)
+nodeLinker: hoisted
+
+# Native/postinstall scripts required by deps
 allowBuilds:
-  better-sqlite3: false
-  esbuild: false
+  better-sqlite3: true
+  esbuild: true
