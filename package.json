@@ -1,0 +1,26 @@
+{
+  "name": "expense-tracker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Personal expense tracker with MCP server for AI agents",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:mobile": "npm run dev --workspace=@expense/mobile",
+    "dev:mcp": "npm run dev --workspace=@expense/mcp-server",
+    "build:mobile": "npm run build --workspace=@expense/mobile",
+    "build:mcp": "npm run build --workspace=@expense/mcp-server",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "clean": "npm run clean --workspaces"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}

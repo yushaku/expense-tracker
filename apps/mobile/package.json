@@ -1,0 +1,42 @@
+{
+  "name": "@expense/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Expo mobile app for iOS and macOS Desktop",
+  "main": "expo-router/entry",
+  "scripts": {
+    "dev": "expo start",
+    "dev:ios": "expo start --ios",
+    "dev:macos": "expo start --web",
+    "build": "expo export --platform all",
+    "build:ios": "expo export --platform ios",
+    "build:macos": "expo export --platform web",
+    "lint": "eslint .",
+    "test": "jest",
+    "clean": "rmrf .expo dist node_modules"
+  },
+  "dependencies": {
+    "@expense/shared": "workspace:*",
+    "expo": "~50.0.0",
+    "expo-router": "^3.4.0",
+    "expo-status-bar": "~1.11.0",
+    "react": "18.2.0",
+    "react-native": "0.73.0",
+    "react-native-web": "~0.19.6",
+    "@expo/vector-icons": "^14.0.0",
+    "react-native-paper": "^5.12.0",
+    "expo-file-system": "~16.0.0",
+    "expo-secure-store": "~12.8.0",
+    "zustand": "^4.5.0",
+    "@react-native-async-storage/async-storage": "1.21.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@types/react": "~18.2.45",
+    "eslint": "^8.56.0",
+    "eslint-config-universe": "^12.0.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.2.0",
+    "typescript": "^5.3.0"
+  }
+}
