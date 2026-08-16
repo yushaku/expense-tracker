@@ -130,10 +130,12 @@ export interface Database {
   createTransfer(data: Omit<TransferRow, 'createdAt'>): TransferRow;
   getTransfer(id: string): TransferRow | null;
   getAllTransfers(options?: QueryOptions): QueryResult<TransferRow>;
+  updateTransfer(id: string, updates: Partial<TransferRow>): TransferRow;
 
   // Ledger
   createLedgerEntry(data: LedgerEntryRow): LedgerEntryRow;
   getLedgerEntries(walletId: string): LedgerEntryRow[];
+  updateLedgerEntry(id: string, updates: Partial<LedgerEntryRow>): LedgerEntryRow;
 
   // Budgets
   createBudget(data: Omit<BudgetRow, 'createdAt' | 'updatedAt'>): BudgetRow;

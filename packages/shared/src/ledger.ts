@@ -187,6 +187,7 @@ export class LedgerEngine {
 
   /**
    * Soft void expense — mark as voided, exclude from balance/metrics.
+   * Invariant #3: Record kept in history, excluded from balance/metrics.
    */
   voidExpense(id: string): void {
     const expense = this.db.getExpense(id);
@@ -195,25 +196,53 @@ export class LedgerEngine {
 
     this.db.transaction(() => {
       this.db.updateExpense(id, { status: 'voided' });
-      // Mark ledger entry as voided
+      // Mark ledger entry as voided to exclude from balance/metrics
       const entries = this.db.getLedgerEntries(expense.walletId);
       const entry = entries.find(e => e.refId === id && e.refType === 'expense');
       if (entry) {
-        // Note: ledger entry status update would need a method in DB interface
-        // For now, we just mark the expense as voided
+        this.db.updateLedgerEntry(entry.id, { status: 'voided' });
       }
     });
   }
 
   /**
-   * Soft void income.
+   * Soft void income — mark as voided, exclude from balance/metrics.
    */
   voidIncome(id: string): void {
     const income = this.db.getIncome(id);
     if (!income) throw new Error('NOT_FOUND: income not found');
     if (income.status === 'voided') throw new Error('ALREADY_VOIDED: income already voided');
 
-    this.db.updateIncome(id, { status: 'voided' });
+    this.db.transaction(() => {
+      this.db.updateIncome(id, { status: 'voided' });
+      // Mark ledger entry as voided to exclude from balance/metrics
+      const entries = this.db.getLedgerEntries(income.walletId);
+      const entry = entries.find(e => e.refId === id && e.refType === 'income');
+      if (entry) {
+        this.db.updateLedgerEntry(entry.id, { status: 'voided' });
+      }
+    });
+  }
+
+  /**
+   * Soft void transfer — mark both ledger legs as voided.
+   * Invariant #10: Void both legs or reject.
+   */
+  voidTransfer(id: string): void {
+    const transfer = this.db.getTransfer(id);
+    if (!transfer) throw new Error('NOT_FOUND: transfer not found');
+    if (transfer.status === 'voided') throw new Error('ALREADY_VOIDED: transfer already voided');
+
+    this.db.transaction(() => {
+      this.db.updateTransfer(id, { status: 'voided' });
+      // Mark both ledger legs as voided
+      const fromEntries = this.db.getLedgerEntries(transfer.fromWalletId);
+      const toEntries = this.db.getLedgerEntries(transfer.toWalletId);
+      const outLeg = fromEntries.find(e => e.refId === id && e.type === 'transfer_out');
+      const inLeg = toEntries.find(e => e.refId === id && e.type === 'transfer_in');
+      if (outLeg) this.db.updateLedgerEntry(outLeg.id, { status: 'voided' });
+      if (inLeg) this.db.updateLedgerEntry(inLeg.id, { status: 'voided' });
+    });
   }
 
   /**
