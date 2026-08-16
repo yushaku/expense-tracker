@@ -1,0 +1,22 @@
+{
+  "name": "@expense/ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared Tamagui components and theme",
+  "main": "index.ts",
+  "types": "index.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint .",
+    "clean": "rmrf dist node_modules"
+  },
+  "dependencies": {
+    "@tamagui/font-inter": "^1.100.0",
+    "@tamagui/shorthands": "^1.100.0",
+    "@tamagui/themes": "^1.100.0",
+    "tamagui": "^1.100.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}

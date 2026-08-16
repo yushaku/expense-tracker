@@ -19,12 +19,10 @@
     "@expense/shared": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "better-sqlite3": "^11.0.0",
-    "express": "^4.18.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.8",
-    "@types/express": "^4.17.21",
     "@types/node": "^20.11.0",
     "eslint": "^8.56.0",
     "jest": "^29.7.0",

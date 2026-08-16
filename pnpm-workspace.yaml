@@ -8,4 +8,5 @@ nodeLinker: hoisted
 # Native/postinstall scripts required by deps
 allowBuilds:
   better-sqlite3: true
+  electron: true
   esbuild: true

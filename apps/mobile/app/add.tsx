@@ -1,16 +1,12 @@
-import { View, StyleSheet } from 'react-native';
-import { Text } from 'react-native-paper';
+import { YStack, Text } from '@expense/ui';
 
 export default function AddScreen() {
   return (
-    <View style={styles.container}>
-      <Text variant="titleMedium">Thêm chi tiêu</Text>
-      <Text style={styles.hint}>Form sẽ thêm ở bước tiếp theo.</Text>
-    </View>
+    <YStack flex={1} padding="$4" gap="$4">
+      <Text fontSize="$xl" fontWeight="bold">
+        Thêm chi tiêu
+      </Text>
+      <Text opacity={0.6}>Form sẽ thêm ở bước tiếp theo.</Text>
+    </YStack>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, gap: 8 },
-  hint: { opacity: 0.6 },
-});

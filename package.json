@@ -9,11 +9,9 @@
   ],
   "scripts": {
     "dev:mobile": "npm run dev --workspace=@expense/mobile",
+    "dev:desktop": "npm run dev --workspace=@expense/desktop",
     "dev:mcp": "npm run dev --workspace=@expense/mcp-server",
-    "build:mobile": "npm run build --workspace=@expense/mobile",
-    "build:mcp": "npm run build --workspace=@expense/mcp-server",
-    "test": "npm run test --workspaces",
-    "lint": "npm run lint --workspaces",
+    "build:all": "npm run build --workspaces",
     "clean": "npm run clean --workspaces"
   },
   "engines": {

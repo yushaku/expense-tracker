@@ -1,15 +1,21 @@
 import { Stack } from 'expo-router';
-import { PaperProvider } from 'react-native-paper';
+import { TamaguiProvider } from '@expense/ui';
+import { config } from '@expense/ui';
 import { StatusBar } from 'expo-status-bar';
 
 export default function RootLayout() {
   return (
-    <PaperProvider>
+    <TamaguiProvider config={config}>
       <StatusBar style="auto" />
       <Stack>
         <Stack.Screen name="index" options={{ title: 'Chi tiêu' }} />
         <Stack.Screen name="add" options={{ title: 'Thêm chi tiêu' }} />
+        <Stack.Screen name="wallets" options={{ title: 'Ví' }} />
+        <Stack.Screen name="wallets/index" options={{ title: 'Ví của tôi' }} />
+        <Stack.Screen name="wallets/[id]" options={{ title: 'Chi tiết ví' }} />
+        <Stack.Screen name="wallets/new" options={{ title: 'Tạo ví' }} />
+        <Stack.Screen name="wallets/transfer" options={{ title: 'Chuyển tiền' }} />
       </Stack>
-    </PaperProvider>
+    </TamaguiProvider>
   );
 }
