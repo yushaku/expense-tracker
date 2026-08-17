@@ -95,6 +95,14 @@ export const INCOME_TYPE_COLORS: Record<string, string> = {
   other: '#64748B',
 };
 
+export const INCOME_TYPE_ICONS: Record<string, string> = {
+  salary: 'briefcase',
+  freelance: 'laptop',
+  investment: 'chart-line',
+  gift: 'gift',
+  other: 'dots-horizontal',
+};
+
 export const useIncomeStore = create<IncomeState>((set, get) => ({
   incomes: [],
   loading: false,
