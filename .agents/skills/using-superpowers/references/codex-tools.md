@@ -95,6 +95,15 @@ BRANCH=$(git branch --show-current)
 See `using-git-worktrees` Step 0 and `finishing-a-development-branch`
 Step 1 for how each skill uses these signals.
 
+## Personal / project skills
+
+| Scope | Path |
+|-------|------|
+| Project (this repo) | `.agents/skills/` |
+| Personal | `~/.agents/skills/` |
+
+Each skill is a subdirectory with `SKILL.md` (`name` + `description` frontmatter). Prefer these paths over runtime-specific trees so Cursor / Claude / Codex share one source of truth.
+
 ## Codex App Finishing
 
 When the sandbox blocks branch/push operations (detached HEAD in an
