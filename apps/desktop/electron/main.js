@@ -9,6 +9,11 @@ function createWindow() {
     height: 800,
     minWidth: 768,
     minHeight: 600,
+    icon: path.join(
+      __dirname,
+      '../assets',
+      process.platform === 'win32' ? 'icon.ico' : 'icon.png'
+    ),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -27,7 +32,12 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  if (process.platform === 'darwin' && app.dock) {
+    app.dock.setIcon(path.join(__dirname, '../assets/icon.png'));
+  }
+  createWindow();
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
