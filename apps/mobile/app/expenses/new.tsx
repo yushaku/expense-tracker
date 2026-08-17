@@ -3,9 +3,9 @@
 
 import React from 'react';
 import { YStack } from '@expense/ui';
-import { useExpenseStore } from '../../src/stores/expenseStore';
-import { useWalletStore } from '../../src/stores/walletStore';
-import { ExpenseForm } from '../../src/components/expenses/ExpenseForm';
+import { useExpenseStore } from '@/src/stores/expenseStore';
+import { useWalletStore } from '@/src/stores/walletStore';
+import { ExpenseForm } from '@/src/components/expenses/ExpenseForm';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
 

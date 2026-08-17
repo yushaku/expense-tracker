@@ -3,8 +3,7 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./*"],
-      "@expense/domain": ["../../packages/domain/src/index.ts"]
+      "@/*": ["./*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"]

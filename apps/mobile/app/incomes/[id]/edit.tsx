@@ -3,9 +3,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { YStack, Text } from '@expense/ui';
-import { useIncomeStore } from '../../../src/stores/incomeStore';
-import { useWalletStore } from '../../../src/stores/walletStore';
-import { IncomeForm } from '../../../src/components/incomes/IncomeForm';
+import { useIncomeStore } from '@/src/stores/incomeStore';
+import { useWalletStore } from '@/src/stores/walletStore';
+import { IncomeForm } from '@/src/components/incomes/IncomeForm';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import type { Income } from '@expense/shared';
 import { Wallet } from '@expense/shared';

@@ -3,10 +3,10 @@
 
 import { useEffect } from 'react';
 import { YStack, ScrollView, Text, Spinner } from '@expense/ui';
-import { useDashboardStore } from '../src/stores/dashboardStore';
-import { DashboardSummary } from '../src/components/dashboard/DashboardSummary';
-import { CategoryChart } from '../src/components/dashboard/CategoryChart';
-import { WalletSummary } from '../src/components/dashboard/WalletSummary';
+import { useDashboardStore } from '@/src/stores/dashboardStore';
+import { DashboardSummary } from '@/src/components/dashboard/DashboardSummary';
+import { CategoryChart } from '@/src/components/dashboard/CategoryChart';
+import { WalletSummary } from '@/src/components/dashboard/WalletSummary';
 
 export default function HomeScreen() {
   const {

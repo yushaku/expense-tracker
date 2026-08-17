@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { YStack, Text } from '@expense/ui';
-import type { WalletWithBalance } from '../../src/stores/walletStore';
+import type { WalletWithBalance } from '@/src/stores/walletStore';
 import { WalletCard } from './WalletCard';
 
 interface WalletListProps {

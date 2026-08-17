@@ -2,7 +2,7 @@
 // Bar chart for category breakdown (v3: @expense/domain)
 
 import { Card, XStack, YStack, Text } from '@expense/ui';
-import type { CategoryBreakdownItem } from '../../stores/dashboardStore';
+import type { CategoryBreakdownItem } from '@/src/stores/dashboardStore';
 import { formatMoney } from '@expense/domain';
 
 interface CategoryChartProps {

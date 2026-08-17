@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { YStack, Text, XStack } from '@expense/ui';
-import { useWalletStore } from '../../src/stores/walletStore';
+import { useWalletStore } from '@/src/stores/walletStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import type { WalletWithBalance } from '@expense/shared';
 import { formatCurrency } from '@expense/shared';

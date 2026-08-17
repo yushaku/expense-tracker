@@ -6,8 +6,8 @@ import { YStack, Text, Input, XStack, ScrollView } from '@expense/ui';
 import type { Income } from '@expense/shared';
 import { Chip, ChipText } from '@expense/ui';
 import { IncomeCard } from './IncomeCard';
-import type { IncomeFilters } from '../../stores/incomeStore';
-import { INCOME_TYPE_LABELS } from '../../stores/incomeStore';
+import type { IncomeFilters } from '@/src/stores/incomeStore';
+import { INCOME_TYPE_LABELS } from '@/src/stores/incomeStore';
 import type { IncomeType } from '@expense/shared';
 
 interface IncomeListProps {

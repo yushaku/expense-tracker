@@ -3,8 +3,8 @@
 
 import React from 'react';
 import { YStack } from '@expense/ui';
-import { useWalletStore } from '../../src/stores/walletStore';
-import { WalletForm } from '../../src/components/wallets/WalletForm';
+import { useWalletStore } from '@/src/stores/walletStore';
+import { WalletForm } from '@/src/components/wallets/WalletForm';
 import { useRouter } from 'expo-router';
 
 export default function NewWalletScreen() {

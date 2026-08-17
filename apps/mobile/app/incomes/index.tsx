@@ -3,9 +3,9 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { YStack, Text } from '@expense/ui';
-import { useIncomeStore } from '../../src/stores/incomeStore';
-import { useWalletStore } from '../../src/stores/walletStore';
-import { IncomeList } from '../../src/components/incomes/IncomeList';
+import { useIncomeStore } from '@/src/stores/incomeStore';
+import { useWalletStore } from '@/src/stores/walletStore';
+import { IncomeList } from '@/src/components/incomes/IncomeList';
 import { FAB } from '@expense/ui';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';

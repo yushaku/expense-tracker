@@ -3,8 +3,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { YStack, Text } from '@expense/ui';
-import { useWalletStore } from '../../src/stores/walletStore';
-import { WalletList } from '../../src/components/wallets/WalletList';
+import { useWalletStore } from '@/src/stores/walletStore';
+import { WalletList } from '@/src/components/wallets/WalletList';
 import { FAB } from '@expense/ui';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';

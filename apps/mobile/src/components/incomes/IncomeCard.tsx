@@ -10,7 +10,7 @@ import {
   INCOME_TYPE_LABELS,
   INCOME_TYPE_COLORS,
   INCOME_TYPE_ICONS,
-} from '../../stores/incomeStore';
+} from '@/src/stores/incomeStore';
 
 interface IncomeCardProps {
   income: Income;

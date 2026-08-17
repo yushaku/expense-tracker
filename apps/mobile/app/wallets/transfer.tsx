@@ -3,8 +3,8 @@
 
 import React from 'react';
 import { YStack } from '@expense/ui';
-import { useWalletStore } from '../../src/stores/walletStore';
-import { TransferForm } from '../../src/components/wallets/TransferForm';
+import { useWalletStore } from '@/src/stores/walletStore';
+import { TransferForm } from '@/src/components/wallets/TransferForm';
 import { useRouter } from 'expo-router';
 
 export default function TransferScreen() {

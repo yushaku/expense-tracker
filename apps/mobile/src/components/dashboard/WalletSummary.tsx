@@ -2,7 +2,7 @@
 // Wallet balances overview (v3: @expense/domain)
 
 import { Card, XStack, YStack, Text } from '@expense/ui';
-import type { WalletBalanceItem } from '../../stores/dashboardStore';
+import type { WalletBalanceItem } from '@/src/stores/dashboardStore';
 import { formatMoney } from '@expense/domain';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
