@@ -38,7 +38,7 @@ export const LedgerEntryTypeSchema = z.enum([
   'opening_balance',
 ]);
 export const BudgetPeriodSchema = z.enum(['weekly', 'monthly', 'yearly']);
-export const CurrencySchema = z.enum(['VND', 'USD', 'EUR']);
+export const CurrencySchema = z.enum(['VND']);
 export const SyncStatusSchema = z.enum(['synced', 'pending', 'error']);
 
 // ── Money helpers ───────────────────────────────────────────────────────────

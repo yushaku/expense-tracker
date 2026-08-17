@@ -31,7 +31,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         type: 'object',
         properties: {
           amount: { type: 'number', description: 'Số tiền (> 0)' },
-          currency: { type: 'string', enum: ['VND', 'USD', 'EUR'], description: 'Đơn vị tiền tệ', default: 'VND' },
+          currency: { type: 'string', enum: ['VND'], description: 'Đơn vị tiền tệ', default: 'VND' },
           category: {
             type: 'string',
             enum: ['food', 'transport', 'shopping', 'entertainment', 'healthcare', 'education', 'bills', 'savings', 'other'],

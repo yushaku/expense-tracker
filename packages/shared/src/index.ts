@@ -9,7 +9,7 @@ export * from './inMemoryDatabase.js';
 
 import type { ExpenseCategory, SupportedCurrency } from './types.js';
 
-export const SUPPORTED_CURRENCIES = ['VND', 'USD', 'EUR'] as const satisfies readonly SupportedCurrency[];
+export const SUPPORTED_CURRENCIES = ['VND'] as const satisfies readonly SupportedCurrency[];
 export const DEFAULT_CURRENCY: SupportedCurrency = 'VND';
 
 export const CATEGORY_LABELS: Record<ExpenseCategory, string> = {
