@@ -1,132 +1,43 @@
-# System: Security
+# System: Security and Privacy
 
-> Auth, encryption, privacy
+## Trust boundaries
 
----
+- The iOS/macOS application sandbox and CloudKit identity/permissions are security boundaries.
+- Face ID/Touch ID is an optional local privacy gate and convenience control, not authentication or authorization. A compromised unlocked OS account is outside what biometric UI locking can prevent.
+- Phase 3 Electron renderer and MCP clients are untrusted inputs. Domain validation and repository constraints remain mandatory.
 
-## Overview
+## Local data
 
-Security model for each phase.
+- Store the database, managed receipt assets, and backups only in sandbox-managed directories with iOS Data Protection (`CompleteUntilFirstUserAuthentication` or stricter where compatible).
+- Database/asset files are owner-only on macOS (`0600` files, `0700` directories); verify permissions at startup and after restore.
+- Store keys/tokens in Keychain, never SQLite, settings JSON, environment dumps, or logs.
+- Exclude temporary OCR images from broad backups; delete them after import. Managed assets use opaque IDs and sanitized generated filenames, never user-provided paths.
+- SQLite uses foreign keys, parameterized statements, bounded queries, and integrity checks. Never concatenate search strings into SQL.
 
-## Phase 1 — Local Only
+## Application controls
 
-### Threat Model
+- Re-authentication may guard opening the app, revealing receipt images, exporting, restoring, or enabling MCP writes.
+- Clipboard and screen content should minimize sensitive persistence; obscure protected views in app-switcher snapshots.
+- Validate backup schema, hashes, sizes, paths, currency scales, and IDs before any restore mutation.
+- Native OCR is on-device by default. Any future cloud OCR requires a separate opt-in and privacy review.
 
-| Threat | Mitigation |
-|--------|-----------|
-| Unauthorized access to device | Face ID / system auth |
-| Data at rest | iOS Data Protection / macOS FileVault |
-| MCP exposure | Local-only, user-configured |
+## CloudKit and CKShare
 
-### App Lock
+Use Apple private/shared databases, least-privilege CKShare roles, and explicit participant revocation. Do not treat record ownership fields sent by a client as authorization. Account changes lock pending shared writes until identity is re-established.
 
-- **iPhone:** Face ID or passcode
-- **macOS:** System authentication (Touch ID or password)
-- Timeout: configurable (1min, 5min, 15min, never)
+## Electron and MCP (Phase 3)
 
-### Data Protection
+- Electron: context isolation and sandbox enabled, `nodeIntegration=false`, restrictive CSP, allowlisted navigation, typed/allowlisted preload IPC, signed/notarized builds.
+- MCP: stdio only, no listener; read-only defaults to true; explicit opt-in for writes; bounded inputs/results/time; `clientRequestId`, dry-run, audit logging, and domain validation on all writes.
+- Environment variables configure policy but are not secrets. Avoid exposing DB paths or raw arguments in diagnostics.
 
-- iOS: `NSFileProtectionComplete` for SQLite file
-- macOS: FileVault encryption
-- Keychain for sensitive data (not needed Phase 1)
+## Logging and retention
 
-### MCP Security
+Logs/audit details redact money, merchant, note, OCR text, receipt content/path, backup content, CloudKit tokens, and raw MCP inputs. Financial audit records retain identifiers/action/outcome durably; diagnostic logs use a bounded retention period and user-controlled deletion.
 
-- Server runs locally only
-- No network exposure
-- Configured per user (not shared)
-- `EXPENSE_MCP_READONLY` for analysis-only agents
+## Security acceptance
 
-## Phase 2 — CloudKit Sync
-
-### iCloud Account
-
-- User authenticated via iCloud
-- Private database (only user can access)
-- End-to-end encrypted (CloudKit default)
-
-### Data in Transit
-
-- HTTPS for CloudKit communication
-- Certificate pinning (CloudKit SDK handles)
-
-## Phase 3 — Family Sharing
-
-### Authentication
-
-- Email/password signup
-- Or Sign in with Apple
-- OAuth 2.0 / OpenID Connect
-
-### Authorization
-
-| Role | Permissions |
-|------|-------------|
-| Admin | Full control, invite/delete members |
-| Member | View shared, edit own |
-| Viewer | Read-only access |
-
-### Data Isolation
-
-- Private records: only visible to owner
-- Shared records: visible to family members
-- Join/leave: private stays, shared remains
-
-## Audit Log
-
-Track all mutations:
-
-```
-AuditLog
-├── id: uuid
-├── userId: string (or 'agent' for MCP)
-├── action: enum [create, update, void, delete]
-├── entityType: string
-├── entityId: string
-├── changes: JSON (before/after)
-├── timestamp: ISO datetime
-```
-
-## Backup & Restore
-
-### Export
-
-- JSON format with metadata
-- Optional password encryption
-- Include all entities
-
-### Import
-
-- Schema validation
-- Conflict detection
-- Dry-run option
-
-### Encryption (Optional Phase 2)
-
-- User-provided password
-- AES-256 encryption
-- PBKDF2 key derivation
-
-## Privacy
-
-### Phase 1-2
-
-- No data leaves device (except CloudKit sync)
-- No analytics (or opt-in only)
-- No third-party tracking
-
-### Phase 3
-
-- Family data shared per user consent
-- Leave family removes personal data
-- GDPR-compliant data deletion
-
-## Vulnerability Considerations
-
-| Vulnerability | Prevention |
-|---------------|------------|
-| SQL injection | Parameterized queries |
-| Timing attacks | Constant-time comparison |
-| Replay attacks | Idempotency keys |
-| Data leakage | Strict access controls |
-| Man-in-the-middle | HTTPS / certificate pinning |
+- Permission checks pass on fresh install, upgrade, restore, and asset creation.
+- Biometric cancellation never corrupts data and is never the sole access-control check.
+- SQL injection, malformed backup, path traversal, oversized asset/query, IPC abuse, MCP mutation-default, and secret/log leakage tests pass.
+- Threat model is reviewed at each phase boundary and before enabling sharing or MCP writes.

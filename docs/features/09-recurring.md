@@ -1,76 +1,27 @@
-# Feature: Recurring Expenses (Phase 1.5)
+# Feature: Recurring Transactions (Phase 1.5)
 
-> Recurring expenses: rent, subscription, etc.
+Recurring rules generate ordinary domain commands; generated transactions and ledger entries are not a separate accounting path.
 
----
+## Rule model
 
-## Overview
+Store template type/amount/category/wallet, frequency, interval, anchor local date, original day-of-month, month-end policy, IANA timezone, next due local date, optional end/count, catch-up policy, status, and common timestamps. Monetary values are integer minor units.
 
-Automatically generate recurring expenses on a schedule. Reduces manual entry for predictable expenses.
+Occurrence ID is deterministic UUID v5 from `(ruleId, dueLocalDate, templateVersion)`. Enforce `UNIQUE(rule_id, due_local_date)` and use the same stable `clientRequestId` for the generated financial command.
 
-## Recurring Entity
+## Scheduling
 
-```
-RecurringExpense
-├── id: uuid
-├── amount: number
-├── currency: string (VND)
-├── category: enum
-├── description: string
-├── walletId: string (FK → Wallet)
-├── frequency: enum [daily, weekly, monthly, yearly]
-├── startDate: ISO datetime
-├── endDate: ISO datetime | null (null = ongoing)
-├── lastGenerated: ISO datetime
-├── nextDue: ISO datetime
-├── isActive: boolean
-├── createdAt, updatedAt: ISO datetime
-```
+On app foreground/start and after rule changes, enumerate every due local date from `nextDue` through today/end. Apply the user’s catch-up policy (`all`, `latest_only`, or `ask`) with a visible preview; cap one batch and continue via cursor so long absences cannot freeze the UI.
 
-## Operations
+Monthly rule behavior is explicit:
 
-### Create Recurring
-- Input: amount, category, description, walletId, frequency, startDate, endDate?
-- Validation: amount > 0, startDate >= today (or past for backfill)
+- `clamp`: day 29/30/31 becomes the last valid day, but the original desired day is retained for later months.
+- `last_day`: always use calendar month end.
+- Yearly Feb 29 follows the selected clamp/skip policy.
 
-### Update Recurring
-- Input: all fields except id
-- Cannot change: createdAt
+Compute dates in the rule timezone, then store the resulting UTC instant and offset. DST does not duplicate or omit a local due date.
 
-### Pause/Resume
-- Toggle `isActive`
+## Update and missed periods
 
-### Delete Recurring
-- Hard delete (does NOT delete already-generated expenses)
+Rule edits create a template version and affect only ungenerated occurrences. Existing transactions remain historical. Pausing stops generation without moving the schedule; resume previews missed periods. Generation commits the occurrence marker and transaction atomically.
 
-## Generation Logic
-
-- Cron job runs daily (or on app open)
-- For each active recurring where `nextDue <= today`:
-  - Create expense
-  - Update `lastGenerated` = today
-  - Compute `nextDue` based on frequency
-
-### Frequency → Next Due
-
-| Frequency | Next Due |
-|-----------|----------|
-| daily | today + 1 day |
-| weekly | today + 7 days |
-| monthly | today + 1 month |
-| yearly | today + 1 year |
-
-## UI Screens
-
-- `/recurring` — list active/paused recurrings
-- `/recurring/[id]` — detail/edit
-- `/recurring/new` — create form
-- Dashboard widget: "Hóa đơn sắp đến hạn"
-
-## Edge Cases
-
-- End date reached → auto-pause
-- Skip one occurrence → manual pause + resume
-- Wallet has insufficient balance → still create (overdraft)
-- Delete wallet → cascade delete recurrings
-- Duplicate creation prevention: check if expense already exists for that date
+Acceptance covers crash/retry, concurrent devices, long catch-up, pause/resume, timezone/DST, 29/30/31, leap years, template edits, end dates, voided generated transactions, and backup/sync replay.

@@ -1,145 +1,72 @@
 # System: Architecture
 
-> High-level system architecture
+## Decision
 
----
+The product is iPhone-first and expands without changing domain semantics.
 
-## Overview
+| Phase | Runtime architecture |
+|---|---|
+| 1/1.5 | `apps/iphone` → `packages/domain` → SQLite repository |
+| 2 | iPhone + `apps/mac-web` → domain → local projection + CloudKit operation sync |
+| 3 | Adds Electron and local MCP adapters over the same domain and synced projection |
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                          User Devices                            │
-│                                                                   │
-│  ┌────────────────────┐       ┌──────────────────────────────┐  │
-│  │      iPhone         │       │           Mac                 │  │
-│  │                     │       │                              │  │
-│  │  Expo React Native  │       │  Electron + Tamagui          │  │
-│  │  + Tamagui UI       │       │  (shared components)         │  │
-│  │                     │       │                              │  │
-│  │  ┌──────────────┐  │       │  ┌────────────────────────┐  │  │
-│  │  │ Zustand Store│  │       │  │   MCP Server            │  │  │
-│  │  └──────┬───────┘  │       │  │   (Node.js/TS)          │  │  │
-│  │         │          │       │  │                         │  │  │
-│  │  ┌──────▼───────┐  │       │  │   better-sqlite3        │  │  │
-│  │  │ expo-file-  │  │       │  │                         │  │  │
-│  │  │ system      │  │       │  └───────────┬─────────────┘  │  │
-│  │  └──────┬───────┘  │       │              │                 │  │
-│  │         │          │ Export/│              │                 │  │
-│  │  ┌──────▼───────┐  │ Import │  ┌───────────▼─────────────┐  │  │
-│  │  │ SQLite DB    │──┼────────┼──► SQLite DB               │  │  │
-│  │  └──────────────┘  │ (1.5+) │  └─────────────────────────┘  │  │
-│  └────────────────────┘       └──────────────────────────────┘  │
-│                                                                   │
-└──────────────────────────────────────────────────────────────────┘
-```
+There is no Mac process, shared filesystem database, Electron runtime, MCP server, or CloudKit dependency in Phase 1.
 
-## Layers
+## Repository boundaries
 
-### Presentation Layer (Tamagui)
-
-- **Expo Router** — file-based routing
-- **Tamagui** — cross-platform UI kit (shared components for mobile + desktop)
-- **Zustand** — state management
-
-### Shared UI Package
-
-```
-packages/ui/
-├── src/
-│   ├── components/        # Shared components (Button, Card, Input, etc.)
-│   ├── theme/             # Tamagui config (colors, spacing, typography)
-│   └── tokens/            # Design tokens (raw values)
-├── tamagui.config.ts      # Tamagui configuration
-└── package.json
-```
-
-### Domain Layer
-
-- **LedgerEngine** — balance derivation, invariant enforcement
-- **TransactionService** — CRUD operations
-- **SyncService** — export/import, future CloudKit
-
-### Data Layer
-
-- **SQLite** — local database
-- **expo-file-system** — file operations on mobile
-- **better-sqlite3** — SQLite driver for MCP server
-
-### Infrastructure Layer
-
-- **MCP Server** — AI agent interface
-- **Notifications** — daily reminders
-- **OCR** — receipt scanning
-
-## Module Boundaries
-
-```
+```text
 apps/
-├── mobile/                # Presentation + Domain + Data (mobile)
-│   ├── app/               # Expo Router pages
-│   ├── components/        # Mobile-specific components
-│   ├── hooks/             # React hooks
-│   ├── services/          # Domain services
-│   └── stores/            # Zustand stores
-├── desktop/               # Electron wrapper (shares packages/ui)
-│   ├── electron/          # Electron main process
-│   └── renderer/          # Tamagui renderer (shared + desktop-specific)
-├── mcp-server/            # MCP Server (infrastructure)
-│   └── src/
-│       ├── index.ts       # Entry point
-│       ├── tools/         # Tool implementations
-│       ├── db.ts          # Database access
-│       └── ledger.ts      # Ledger logic
+  iphone/          # Expo React Native; Phase 1+
+  mac-web/         # Expo Web wrapper; Phase 2+
+  mac-electron/    # Electron shell; Phase 3+
+  mcp-server/      # local stdio adapter; Phase 3+
 packages/
-├── ui/                    # Shared Tamagui components + theme
-│   ├── src/components/    # Button, Card, Input, Chip, FAB, List, Dialog
-│   ├── src/theme/         # Tamagui theme tokens
-│   └── tamagui.config.ts  # Tamagui config
-└── shared/                # Shared types + utils
-    └── src/
-        ├── types.ts       # All type definitions
-        └── utils.ts       # Utility functions
+  domain/          # canonical entities, money, commands, ledger, schedules
+  storage-sqlite/  # migrations and repositories
+  sync-cloudkit/   # operation/asset sync; Phase 2+
+  ui/              # platform-neutral components only
 ```
 
-## Data Flow
+Dependencies point inward. `domain` imports no Expo, Electron, SQLite, CloudKit, or MCP module. Adapters translate transport/storage types but do not recalculate balances or schedules.
 
-### Read (Dashboard)
-```
-UI → Zustand Store → SQLite Query → UI Render
-```
+## Write path
 
-### Write (Add Expense)
-```
-UI Form → Validate → LedgerEngine.createExpense() → SQLite Insert → Update Store → UI Refresh
+```text
+UI/MCP command → validate in domain → idempotency check → SQL transaction
+  → append Operation → change projection rows → append LedgerEntry/AuditLog
+  → store result → commit → publish UI event / enqueue sync
 ```
 
-### MCP Write
-```
-AI Agent → MCP Server → Validate → LedgerEngine.createExpense() → SQLite Insert → Response
-```
+The repository transaction is the consistency boundary. Phase 2 uploads committed operations after local commit; it never makes CloudKit availability a prerequisite for a local write.
 
-### Transfer
-```
-UI Form → Validate → LedgerEngine.createTransfer() → SQLite Insert (2 entries) → Update Store → UI Refresh
-```
+## Read path
 
-## Sync Strategy
+Screens and MCP query local projections through repositories. Queries use stable `(occurredAtUtc, id)` cursor ordering, bounded filters, and do not read raw CloudKit records in presentation code.
 
-| Phase | Strategy | Implementation |
-|-------|----------|----------------|
-| 1 | No sync | Single device, local SQLite |
-| 1.5 | Export/Import | JSON/CSV file transfer |
-| 2 | CloudKit | Apple private database, auto-sync |
+## Platform decisions
 
-## Security
+- Expo React Native targets iPhone in Phase 1.
+- Native Vision/VisionKit is exposed through an Expo module in Phase 1.5.
+- Phase 2 Mac uses an Expo Web wrapper and CloudKit-capable bridge; no Node privileges.
+- Phase 3 Electron owns its hardened preload/IPC boundary. Renderer code has no direct filesystem or Node access.
+- MCP is a local stdio child process in Phase 3 and has no network listener.
+- Apple CKShare supplies family access control; there is no custom identity/backend.
 
-- **Phase 1:** Local only, no auth (Face ID for app lock)
-- **Phase 2:** iCloud account for sync
-- **Phase 3:** Email/password or OAuth for family sharing
+## Failure model
 
-## Scaling Considerations
+- SQLite write failure: roll back every projection, ledger, operation, and idempotency change.
+- Sync failure: retain operation in outbox and retry with bounded exponential backoff.
+- Asset failure: keep metadata pending; never claim receipt synchronization until checksum verifies.
+- Projection corruption: rebuild from immutable operations after validating backup.
+- MCP timeout: cancel/interrupt the query and return a structured tool error.
 
-- Single user: SQLite handles millions of records
-- No server needed (Phase 1-2)
-- MCP server runs locally
-- Future: CloudKit handles multi-device sync
+## Observability
+
+Record event names, duration, row counts, schema version, and redacted error codes. Never log financial values, notes, OCR text, asset bytes/paths, tokens, or raw MCP arguments.
+
+## Architecture acceptance
+
+- A Phase 1 build contains no Mac, CloudKit, Electron, or MCP runtime dependency.
+- All adapters pass the same `packages/domain` contract tests.
+- Offline writes survive restart and later converge in Phase 2.
+- No UI or transport layer writes ledger rows directly.

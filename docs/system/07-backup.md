@@ -1,129 +1,55 @@
-# System: Backup
+# System: Backup and Restore
 
-> Export/Import, backup/restore
+## Scope
 
----
+A full backup contains every user-relevant and recovery-critical record:
 
-## Overview
+- wallets, categories, income, expenses, transfers, and every ledger entry;
+- budgets, investments, recurring rules and generated-occurrence state;
+- managed receipt `Asset` metadata and binary files;
+- settings, exchange-rate snapshots, sync/share references where portable;
+- immutable operations, durable idempotency records, and audit logs.
 
-Data portability and disaster recovery.
+Ephemeral cache, CloudKit change tokens, temporary OCR images, and device secrets are excluded. The manifest says which device-local sync state must be recreated.
 
-## Export
+## Format
 
-### CSV Export
+Use a versioned archive, e.g. `expense-tracker-backup-v3-2026-08-17T10-30-00Z.etbackup`, containing `manifest.json`, canonical JSONL tables, and `assets/<asset-id>`. Money is a base-10 minor-unit string; instants are UTC `Z` plus offset minutes. Manifest includes schema/app versions, creation instant, table counts, file sizes, and SHA-256 for every member.
 
-**Format:**
-```csv
-date,type,category,amount,currency,description,wallet,status
-2024-01-15,expense,food,50000,VND,An truong,VI TIEN MAT,active
-2024-01-15,income,salary,15000000,VND,Luong,TK NGAN HANG,active
-2024-01-16,transfer,_,1000000,VND,Chuyen khoan,VI TIEN MAT,active
-```
+The archive must not contain absolute paths. Optional user-selected encryption uses authenticated encryption and a Keychain-backed or user-supplied secret; never imply that a plain exported file is encrypted.
 
-**Options:**
-- Include voided: yes/no
-- Include transfers: yes/no
-- Date range: all/custom
-- Encoding: UTF-8 (with BOM for Excel)
+## Creation
 
-### JSON Export (Full Backup)
+1. Obtain a consistent SQLite read snapshot.
+2. Reconcile ledger and validate foreign keys.
+3. Stream canonical records and referenced assets with size limits.
+4. Hash every member and write the manifest last.
+5. Re-open and verify the completed archive before reporting “Sao lưu hoàn tất”.
 
-```json
-{
-  "version": "1.0.0",
-  "exportedAt": "2024-01-15T10:30:00Z",
-  "deviceId": "abc123",
-  "data": {
-    "wallets": [...],
-    "expenses": [...],
-    "incomes": [...],
-    "transfers": [...],
-    "budgets": [...],
-    "investments": [...]
-  },
-  "metadata": {
-    "totalRecords": 150,
-    "checksum": "sha256:abc..."
-  }
-}
-```
+## Restore
 
-## Import
+Restore is staged, never in-place:
 
-### JSON Import
+1. Check archive/magic, schema compatibility, total/uncompressed sizes, safe relative paths, hashes, required entities, types, constraints, and duplicate IDs.
+2. Import into a new temporary database with foreign keys enabled.
+3. Run migrations, `foreign_key_check`, ledger reconciliation, transfer conservation, and asset verification.
+4. Present a Vietnamese summary and require confirmation for replacement/merge choice.
+5. Make a verified pre-restore backup, atomically swap databases/assets, then reopen and health-check.
+6. On failure, retain the original database unchanged and remove only the known staging directory.
 
-1. Parse file
-2. Validate schema
-3. Preview changes
-4. Confirm overwrite
-5. Apply atomically
+Merge restore replays immutable operations and durable idempotency keys; it never inserts rows ad hoc or uses timestamps as duplicate detection. Payload-hash conflicts require user resolution.
 
-### Conflict Resolution
+## Compatibility
 
-| Scenario | Resolution |
-|----------|------------|
-| Duplicate clientRequestId | Skip (keep existing) |
-| Same ID different content | Prompt user |
-| Missing wallet | Create from data |
-| Unknown category | Map to "other" |
+- Current version restores the current and immediately previous released backup versions.
+- Export remains forward-readable through documented versioned decoders.
+- Unknown required fields fail safely; unknown optional fields are preserved where possible.
+- CloudKit sync is paused during restore and resumes only after a new local consistency checkpoint.
 
-### CSV Import
+## CSV
 
-1. Parse rows
-2. Map columns to fields
-3. Validate each row
-4. Report errors (don't import)
-5. Import valid rows
+CSV is a lossy transaction export/import convenience, not a backup. It cannot represent ledger history, assets, operations, audit logs, recurring state, or settings and must never be presented as disaster recovery.
 
-## Backup Strategies
+## Tests
 
-### Manual Backup
-
-- User taps "Export" in settings
-- Save to Files app (iOS) or disk (macOS)
-- Can upload to personal cloud storage
-
-### Auto-Backup (Phase 1.5)
-
-- Daily auto-export to app document directory
-- Keep last 7 backups
-- Cleanup older backups
-
-### iCloud Backup (Phase 2)
-
-- Part of iCloud sync
-- Automatic, no user action needed
-
-## Restore Flow
-
-1. User selects backup file
-2. App reads and validates schema
-3. Shows preview: "Restore will replace all current data"
-4. Confirm: "Backup current data first?"
-5. Apply import
-6. Recalculate balances
-7. Show success/failure
-
-## Disaster Recovery
-
-### Data Loss Scenarios
-
-| Scenario | Recovery |
-|----------|----------|
-| Lost iPhone | Restore from iCloud backup / Mac app |
-| App deleted | Reinstall, restore from backup |
-| Corrupted DB | Restore from latest backup |
-| Accidental void | Export shows history, can recreate |
-
-### Backup Reminders
-
-- Weekly reminder: "Last backup: X days ago"
-- Before major changes
-- Before app update
-
-## Testing
-
-- Export/Import round-trip test
-- Large dataset test
-- Corrupted file handling
-- Schema migration test
+Golden fixtures cover every supported version; round-trip equality covers all tables and asset hashes. Tests include corruption, truncation, zip bombs, path traversal, missing ledger legs/assets, integer boundaries, duplicate operations, disk-full, cancellation, and rollback after each restore stage.

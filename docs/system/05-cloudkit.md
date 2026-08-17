@@ -1,134 +1,50 @@
 # System: CloudKit Sync (Phase 2)
 
-> CloudKit sync design
+CloudKit begins in Phase 2. Phase 1 remains a single iPhone SQLite database with backup/restore only. Phase 2 adds iPhone and Mac Expo Web clients; Phase 3 clients reuse this sync contract.
 
----
+## Storage model
 
-## Overview
+- Private database: one custom zone per user-owned dataset.
+- Shared database: Phase 3 CKShare zones only.
+- Records: immutable `Operation`, entity projections, every `LedgerEntry`, `Asset` metadata/CKAsset, settings, budgets, investments, recurring rules/occurrences, exchange-rate snapshots, and tombstones.
+- Local SQLite remains the queryable projection and outbox/inbox store.
 
-Phase 2 introduces true multi-device sync via CloudKit (Apple private database).
+Every record carries stable ID, schema version, operation ID, UTC instant, offset minutes, actor/device ID, and payload hash. Receipt files are managed assets addressed by `Asset.id`; CKAsset upload/download validates byte count and SHA-256.
 
-## Why CloudKit
+## Sync loop
 
-| Criteria | CloudKit | Supabase |
-|----------|----------|----------|
-| Privacy | ✅ End-to-end encrypted | ⚠️ Server can read |
-| Apple integration | ✅ Native | ⚠️ SDK required |
-| Cost | ✅ Free tier generous | ⚠️ Paid at scale |
-| Cross-platform | ❌ Apple only | ✅ Any platform |
-| MCP access | ⚠️ Indirect | ✅ Direct |
+1. Commit local operation and projection atomically; mark outbox pending.
+2. Upload assets required by the operation, then immutable operation records.
+3. Fetch zone changes using a persisted server change token.
+4. Deduplicate by operation ID; verify hash and schema version.
+5. Apply operations transactionally through `packages/domain` and rebuild affected projections/ledger.
+6. Persist the new token only after the whole batch commits.
 
-**Decision:** CloudKit (Apple-only, privacy-first).
+Retries use capped exponential backoff with jitter and honor CloudKit retry hints. Expired tokens trigger a full zone enumeration without deleting unsynced local operations.
 
-## Architecture
+## Conflict resolution
 
-```
-┌─────────────────────────────────────────────────┐
-│                   CloudKit                        │
-│                                                   │
-│  ┌─────────────────────────────────────────────┐ │
-│  │         Private Database                     │ │
-│  │                                               │ │
-│  │  Record Types:                                │ │
-│  │  • Expense                                    │ │
-│  │  • Income                                     │ │
-│  │  • Wallet                                     │ │
-│  │  • Transfer                                   │ │
-│  │  • Budget                                     │ │
-│  │  • Investment                                 │ │
-│  └─────────────────────────────────────────────┘ │
-│                                                   │
-└──────────────────────┬──────────────────────────┘
-                       │
-        ┌──────────────┼──────────────┐
-        ▼              ▼              ▼
-   ┌─────────┐   ┌─────────┐   ┌──────────┐
-   │ iPhone   │   │  Mac    │   │  MCP     │
-   │ App      │   │  App    │   │  Server  │
-   └─────────┘   └─────────┘   └──────────┘
-```
+Financial state is operation-based, not last-writer-wins.
 
-## Sync Strategy
+- Create/update/void operations are immutable and deterministically ordered by causal dependency, then `(createdAtUtc, operationId)` only as a tie-breaker.
+- Duplicate ID + same hash is idempotent; same ID + different hash is quarantined and surfaced.
+- A transfer is one logical operation containing both wallet effects; both ledger legs apply in one local transaction or neither does.
+- Concurrent incompatible edits are retained and flagged for user resolution; no silent amount/wallet overwrite.
+- Void dominates prior active projection but does not erase history. Later edits to a voided entity are rejected.
+- Non-financial metadata may use documented field-level merge; raw record-level LWW is not used for financial operations.
 
-### Record Types
+## Identity and sharing
 
-Each entity maps to a CloudKit record type:
+CloudKit account identity and zone permissions control access. Phase 3 family sharing uses Apple CKShare invitations, participant permissions, shared database scopes, and revocation. No custom backend, password system, or home-grown ACL exists.
 
-| Entity | Record Type | Fields |
-|--------|-------------|--------|
-| Wallet | `Wallet` | id, name, type, currency, creditLimit |
-| Expense | `Expense` | id, amount, currency, category, description, date, walletId, status, clientRequestId |
-| Income | `Income` | id, amount, currency, source, description, date, walletId, type, status, clientRequestId |
-| Transfer | `Transfer` | id, fromWalletId, toWalletId, amount, currency, date, status |
+## Recovery and observability
 
-### Conflict Resolution
+Sync state displays pending count, last successful instant, and Vietnamese actionable errors. Logging records record type/count, duration, retry class, and redacted codes only. Users can retry, export a full backup, reset a local projection after backup, and rebuild from verified CloudKit operations.
 
-**Last-writer-wins with vector clock:**
+## Acceptance tests
 
-1. Each record has `modifiedAt` timestamp
-2. On sync, compare `modifiedAt`
-3. Newer timestamp wins
-4. If equal, device ID breaks tie
-
-### Sync Flow
-
-```
-1. Local change → save to SQLite (immediately)
-2. Mark record as `syncStatus: 'pending'`
-3. Background sync → push to CloudKit
-4. On success → mark `syncStatus: 'synced'`
-5. On failure → mark `syncStatus: 'error'`, retry later
-```
-
-### Pull Flow
-
-```
-1. Fetch changes from CloudKit (using change token)
-2. Apply to local SQLite
-3. If conflict → last-writer-wins
-4. Update UI
-```
-
-## MCP Integration
-
-MCP server reads from local SQLite. Sync happens at app layer:
-
-```
-iPhone App ← CloudKit → Mac App → SQLite → MCP Server
-```
-
-MCP always reads from local DB. If Mac app hasn't synced, MCP sees stale data.
-
-### Alternative: MCP Reads from CloudKit Directly
-
-```
-MCP Server → CloudKit SDK → CloudKit
-```
-
-**Tradeoff:**
-- ✅ Always fresh data
-- ❌ Adds complexity (MCP needs CloudKit auth)
-- ❌ MCP on non-Apple platforms blocked
-
-**Decision:** MCP reads local SQLite. Mac app handles sync.
-
-## Schema Migration
-
-When CloudKit schema changes:
-1. Add fields to local SQLite
-2. Push to CloudKit (auto-creates fields)
-3. Older app versions ignore new fields
-
-## Offline Support
-
-- Full functionality offline
-- Queue changes while offline
-- Auto-sync when back online
-- Conflict resolution on reconnect
-
-## Testing
-
-- Mock CloudKit for unit tests
-- Integration tests with CloudKit sandbox
-- Conflict simulation
-- Offline queue tests
+- Two clients converge under duplicate, reordered, delayed, and offline delivery.
+- Ledger entries and assets converge with their source entities.
+- Concurrent transfer/edit/void sequences preserve conservation and history.
+- Token expiration, partial asset failure, quota, account switch, and CKShare revoke recover safely.
+- A clean device rebuild equals the originating device’s reconciled ledger and hashes.

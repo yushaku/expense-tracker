@@ -1,87 +1,29 @@
 # Feature: Dashboard
 
-> Cash flow, Category breakdown, Savings rate, Wallet balances
-
----
-
-## Overview
-
-Dashboard shows a quick snapshot of the user's financial status. All metrics derived from ledger (active transactions only).
-
 ## Metrics
 
-### Cash Flow (Phase 1)
+All metrics derive from active ledger/source records and integer arithmetic for a selected local-calendar period.
 
-```
-Cash flow = Σ(income active) − Σ(expense active)
-```
-
-- Period: current month (or custom range)
-- Exclude: transfer, voided, opening_balance
-- Display: positive (surplus) / negative (deficit)
-
-### Category Breakdown (Phase 1)
-
-```
-Category % = (Σ(expense active in category) / Σ(all expense active)) × 100
+```text
+nonCreditAssets = Σ active non-credit wallet balances
+creditCardDebt = Σ(card expenses - card payments)
+investmentValue = Σ latest active investment currentValueMinor
+netWorth = nonCreditAssets + investmentValue - creditCardDebt
+cashFlow = income - expenses
+savingsRate = income == 0 ? null : (income - expenses) / income
 ```
 
-- Display: pie chart or bar chart
-- Period: current month
-- Categories with 0% can be hidden
+Transfers are excluded from income/expense/cash-flow totals. Credit limits and available credit are excluded from assets and net worth. Voided and sample data follow the user’s explicit sample visibility selection.
 
-### Savings Rate (Phase 1)
+Phase 1 supports one currency (VND). Phase 2 converts each metric with immutable rate snapshots to the selected reporting currency and labels rate time/source; missing rates produce partial-data UI, never an assumed 1:1 conversion.
 
-```
-Savings rate = (Cash flow / Σ(income active)) × 100
-```
+## UI
 
-- If income = 0 → display 0%
-- Period: current month
+Vietnamese cards show “Tài sản”, “Dư nợ thẻ”, “Giá trị đầu tư”, “Tài sản ròng”, “Thu”, and “Chi”. Negative net worth/cash flow is visually and textually explicit. Category charts use source categories and reconcile to the displayed expense total.
 
-### Wallet Balances (Phase 1)
+## Acceptance
 
-- Show all wallets with derived balance
-- CC wallet shows available credit (not balance)
-
-### Net Worth (Phase 1.5)
-
-```
-Net Worth = Σ(Wallet balance) + Σ(Investment currentValue)
-```
-
-### Asset Allocation (Phase 1.5)
-
-```
-Allocation % = (Asset value / Net Worth) × 100
-```
-
-## Period Selection
-
-- Default: current month
-- Options: this week, this month, last month, custom range
-- All metrics recalculate based on selected period
-
-## Monthly Report (Basic Phase 1)
-
-- Total income, total expense, cash flow
-- Top 3 categories by spending
-- Savings rate
-- Compare to last month (% change)
-
-## UI Screens
-
-- `/` — dashboard home
-  - Period selector (week/month/custom)
-  - Cash flow card
-  - Category breakdown chart
-  - Savings rate card
-  - Wallet balances list
-- `/stats` — detailed statistics (Phase 1.5)
-
-## Edge Cases
-
-- No transactions in period → show 0 / empty state
-- No income → savings rate = 0%
-- All categories 0 → hide breakdown
-- Voided transactions excluded from all metrics
+- Dashboard totals equal independent ledger reconciliation for every filter.
+- Card purchase/payment and transfer do not inflate assets or cash flow.
+- Empty income yields “Chưa có dữ liệu” savings rate, not infinity/NaN.
+- Month boundaries use the user timezone and UTC instants; pagination cannot change aggregate totals.

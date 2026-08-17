@@ -1,436 +1,142 @@
-# Expense Tracker — Product Spec v2
+# Expense Tracker — Product Specification v3
 
-> Personal finance management app with AI advisor via MCP
-> Chạy trên iPhone + MacBook, single-device Phase 1 → CloudKit sync Phase 2
+> Ứng dụng quản lý tài chính cá nhân, triển khai theo hướng iPhone-first; đồng bộ Apple và AI advisor được bổ sung theo từng giai đoạn.
 
----
+**Status:** Approved · **Version:** 3.0 · **Updated:** 2026-08-17
 
-## 🎯 Vision
+## 1. Product outcome
 
-> App nhỏ gọn giúp bạn **biết tiền đi đâu, còn bao nhiêu, nên làm gì tiếp** — manual entry nhanh, AI agent truy cập data trực tiếp qua MCP.
+Người dùng có thể ghi nhận thu, chi, chuyển tiền và hiểu dòng tiền của mình một cách đáng tin cậy. Dữ liệu tài chính phải chính xác, có thể kiểm toán, hoạt động offline và không phụ thuộc AI.
 
----
+Vietnamese is used for UI copy and user-visible validation. English is used for code, schemas, protocols, and engineering documentation.
 
-## 👤 Target User
+## 2. Delivery boundaries
 
-| Phase | User | Scope |
-|-------|------|-------|
-| **Phase 1** | Solo | iPhone + Mac local, expense/income/wallet/thin dashboard |
-| **Phase 1.5** | Solo | + Budget, Investment, Recurring, OCR, export/import |
-| **Phase 2** | Solo | + CloudKit sync, Mac UI, automation, multi-currency |
-| **Phase 3** | Family | + Multi-user, shared budgets |
+| Phase | Clients | Storage and scope |
+|---|---|---|
+| **1 — MVP** | iPhone only (Expo React Native) | One local SQLite database; wallets, income, expense, transfer, ledger, dashboard, onboarding, JSON backup |
+| **1.5** | iPhone only | Budget, investment, recurring transactions, native receipt OCR |
+| **2** | iPhone + Mac Expo Web wrapper | CloudKit/iCloud sync, managed receipt assets, multi-currency |
+| **3** | iPhone + Mac Electron | Local MCP server over the synced store; CKShare family sharing |
 
----
+Phase 1 explicitly excludes Mac, Expo Web, Electron, MCP, CloudKit, shared databases, and family sharing. Phase 2 Mac is an Expo Web wrapper. Electron and MCP start only in Phase 3.
 
-## 🗺️ Feature Roadmap
+## 3. Product principles
 
-### Phase 1 — Foundation (MVP)
+- Offline-first: every Phase 1 workflow completes without a network.
+- Ledger-first: balances and reports derive from active ledger entries, never mutable cached balances.
+- Exact money: monetary values are signed 64-bit integer minor units plus ISO 4217 currency; JavaScript `number` and SQL `REAL` are forbidden for money.
+- Immutable financial history: correction uses update operations that preserve audit history, or void-and-recreate when wallet/currency/transfer legs change.
+- One domain implementation: business rules, validation, schedules, money arithmetic, and operation construction live in `packages/domain`.
+- Progressive trust: AI is optional, Phase 3 only, read-only by default, bounded, auditable, and idempotent.
+- Apple-native privacy: private CloudKit databases and CKShare; no custom family backend.
 
-**Clients:**
-- iPhone (Expo React Native) — primary
-- Mac (Expo Web wrapper) — secondary, same codebase
-- MCP Server (Node.js/TS) — chạy Mac, đọc local SQLite
-
-**Wallets:**
-- Cash / Bank / E-wallet / Credit Card (credit limit cho CC)
-- Transfer giữa các ví
-- Opening balance tạo ledger entry (không set balance trực tiếp)
-- `Wallet.balance` derived từ ledger (invariant #1)
-
-**Expense/Income:**
-- Manual entry
-- Soft void (đánh dấu `voided: true`, giữ trong history, không tính vào metrics)
-- Edit/Update (voided record không update được)
-- Timezone: `Asia/Ho_Chi_Minh` cố định
-- Idempotency key `clientRequestId` cho MCP writes
-
-**Dashboard:**
-- Cash flow (thu - chi ròng)
-- Category breakdown (%)
-- Savings rate (% thu nhập tiết kiệm)
-- Wallet balances (derived)
-
-**Monthly report:** cơ bản
-
-**Other:**
-- Local auth: Face ID (iPhone), system auth (Mac)
-- Onboarding: tạo ví mặc định, danh mục VND, sample data (`isSample` flag)
-- Daily reminder notification
-- Export CSV / Backup (JSON)
-- Custom app icon
-
-### Phase 1.5 — Budget + Investment + Automation
-
-- Budget management + alert (80% warning)
-- Recurring expenses (rent, subscription)
-- Investment tracking: Gold / Crypto / ETF / Real Estate / Fund / Stock
-- Net Worth + Asset Allocation
-- OCR receipt scanning
-- Export/import polish (Mac migrate)
-
-### Phase 2 — Sync + True Multi-device
-
-- **CloudKit sync** (Apple-only, privacy)
-- Mac Electron wrapper nếu cần
-- Open banking / Email forwarding
-- Multi-currency support
-
-### Phase 3 — Family
-
-- Multi-user, shared budgets, per-person tracking
-
----
-
-## 🏗️ Architecture
-
-```
-┌──────────────────────────────────────────────────────────┐
-│                      User Devices                         │
-│                                                            │
-│  ┌─────────────────┐       ┌─────────────────────────┐   │
-│  │    iPhone        │       │       Mac                │   │
-│  │  (Expo RN)       │       │  (Expo Web / Electron)   │   │
-│  │                  │       │                          │   │
-│  │  Local SQLite    │       │  MCP Server (Node.js/TS) │   │
-│  │  single-device   │       │  đọc local SQLite        │   │
-│  └────────┬─────────┘       └───────────┬──────────────┘   │
-│           │                              │                  │
-│           │    Export/Import (Phase 1.5) │                  │
-│           └──────────┬───────────────────┘                  │
-│                      │                                      │
-│           Phase 2: CloudKit sync                            │
-│                      │                                      │
-└──────────────────────┼──────────────────────────────────────┘
-                       │
-                       ▼
-              ┌─────────────────┐
-              │   CloudKit       │
-              │   (Apple-only)   │
-              └─────────────────┘
-```
-
-**Phase 1 note:** MCP gắn 1 DB path local; iPhone↔Mac = export/import (Phase 1.5+).
-
----
-
-## 📊 Data Model
-
-### Expense
-
-```
-Expense
-├── id: string (uuid)
-├── amount: number (positive)
-├── currency: string (VND only Phase 1)
-├── category: enum [food, transport, shopping, entertainment, healthcare, education, bills, savings, other]
-├── description: string
-├── date: ISO datetime (Asia/Ho_Chi_Minh)
-├── walletId: string (FK → Wallet)
-├── merchant: string (optional)
-├── receiptImage: string (file path, optional)
-├── status: enum [active, voided]
-├── clientRequestId: string (idempotency key)
-├── createdAt: ISO datetime
-├── updatedAt: ISO datetime
-```
-
-### Income
-
-```
-Income
-├── id: string (uuid)
-├── amount: number (positive)
-├── currency: string (VND only Phase 1)
-├── source: string (lương / thu nhập phụ / đầu tư)
-├── description: string
-├── date: ISO datetime (Asia/Ho_Chi_Minh)
-├── walletId: string (FK → Wallet)
-├── type: enum [salary, freelance, investment, gift, other]
-├── status: enum [active, voided]
-├── clientRequestId: string (idempotency key)
-├── createdAt: ISO datetime
-├── updatedAt: ISO datetime
-```
-
-### Wallet
-
-```
-Wallet
-├── id: string (uuid)
-├── name: string (Ví tiền mặt, Vietcombank, Momo, ...)
-├── type: enum [cash, bank, ewallet, credit_card]
-├── balance: DERIVED (không lưu trực tiếp)
-├── currency: string (VND only Phase 1)
-├── creditLimit: number (cho credit_card)
-├── createdAt: ISO datetime
-├── updatedAt: ISO datetime
-```
-
-### Transfer
-
-```
-Transfer
-├── id: string (uuid)
-├── fromWalletId: string (FK → Wallet)
-├── toWalletId: string (FK → Wallet)
-├── amount: number
-├── currency: string
-├── date: ISO datetime
-├── note: string
-├── status: enum [active, voided]
-├── clientRequestId: string (idempotency key)
-├── createdAt: ISO datetime
-```
-
-### LedgerEntry (internal — không expose qua API)
-
-```
-LedgerEntry
-├── id: string
-├── walletId: string
-├── type: enum [expense, income, transfer_out, transfer_in, opening_balance]
-├── amount: number (signed)
-├── refId: string (FK → Expense/Income/Transfer)
-├── refType: enum [expense, income, transfer]
-├── date: ISO datetime
-```
-
-### Budget (Phase 1.5)
-
-```
-Budget
-├── id: string (uuid)
-├── category: enum [food, transport, shopping, entertainment, healthcare, education, bills, savings, other, all]
-├── amount: number
-├── currency: string (VND)
-├── period: enum [weekly, monthly, yearly]
-├── startDate: ISO datetime
-├── endDate: ISO datetime | null (null = ongoing)
-├── createdAt: ISO datetime
-├── updatedAt: ISO datetime
-```
-
-### Investment (Phase 1.5)
-
-```
-Investment
-├── id: string (uuid)
-├── name: string (Vàng SJC, Căn hộ Q7, BTC, VTI, ...)
-├── type: enum [gold, real_estate, fund, crypto, etf, bond, stock, other]
-├── currentValue: number
-├── costBasis: number
-├── quantity: number
-├── unit: string (lượng, BTC, cổ phần, ...)
-├── purchaseDate: ISO datetime
-├── currency: string (VND)
-├── notes: string
-├── createdAt: ISO datetime
-├── updatedAt: ISO datetime
-```
-
----
-
-## 📊 Metrics
+## 4. Functional scope
 
 ### Phase 1
 
-| Metric | Công thức | Ghi chú |
-|--------|-----------|---------|
-| Cash flow ròng | Σ(income active) − Σ(expense active) | Loại transfer, voided, opening_balance |
-| Savings rate | (Cash flow ròng / Σ(income active)) × 100 | Income = 0 → 0% |
-| Category breakdown | % theo danh mục (chỉ expense active) | — |
-| Wallet balance | Σ(ledger entries for wallet) | Chỉ tính entry `active` |
-| CC debt | Σ(expense CC active) − Σ(transfer to CC) | — |
-| CC available | creditLimit − debt | — |
+- Create and manage cash, bank, e-wallet, and credit-card wallets.
+- Record income and expense; update allowed descriptive fields/amount; void without destructive deletion.
+- Transfer atomically between wallets with two balanced ledger legs.
+- Dashboard: assets, credit-card debt, net worth, cash flow, category totals.
+- Vietnamese onboarding with optional records marked `isSample = 1`.
+- Full versioned JSON backup and validated restore.
 
 ### Phase 1.5
 
-| Metric | Công thức |
-|--------|-----------|
-| Tổng tài sản ròng | Σ(Wallet balance) + Σ(Investment currentValue) |
-| Phân bổ tài sản | % Cash, Gold, Crypto, Real Estate, ETF, v.v. |
-| Lợi nhuận đầu tư | Σ(CurrentValue − CostBasis) |
-| Budget utilization | % ngân sách đã dùng |
+- Category/wallet budgets, investments, deterministic recurring generation, and missed-period catch-up.
+- Receipt capture and OCR using iOS Vision/VisionKit through an Expo native module; user confirmation is mandatory.
 
----
+### Phase 2
 
-## 🔒 Invariants (Critical)
+- CloudKit operation sync for every syncable entity, including `LedgerEntry` and receipt assets.
+- Expo Web wrapper for Mac; no Electron and no MCP.
+- Multi-currency with immutable transaction-time exchange-rate snapshots.
 
-1. **Balance derived:** `Wallet.balance` = Σ(income active to wallet) − Σ(expense active from wallet) + Σ(transfer in active) − Σ(transfer out active) + opening_balance. Không lưu trực tiếp.
+### Phase 3
 
-2. **CC payment ≠ expense:** `transfer(from=bank, to=cc)` = debt settlement. Spending CC = `add_expense(wallet=cc)`. Không cho `add_expense` kiểu "trả thẻ".
+- Electron Mac client using `packages/domain` and a local projection of synced CloudKit data.
+- MCP server with bounded reads and opt-in audited writes.
+- Family sharing via Apple `CKShare`, scoped per shared wallet/family zone.
 
-3. **Soft void:** Record giữ nguyên trong history/audit, `status: voided`. Không tính vào balance/metrics. Voided record không update được.
+## 5. Architecture contract
 
-4. **Idempotency:** Cùng `clientRequestId` + cùng payload → return original. Cùng key + khác payload → error `IDEMPOTENCY_CONFLICT`. Dry-run không consume key.
-
-5. **Conservation (transfer):** `amount_out == amount_in`, atomic 2 legs, reject `from == to`.
-
-6. **Metrics hygiene:** Chỉ từ expense+income `active`. Loại transfer, voided, opening_balance. CC spending là expense. CC payment không là expense.
-
-7. **CC balance semantics:** `debt = Σ(expense CC) − Σ(payments CC)`. `available = creditLimit − debt`.
-
-8. **Currency Phase 1:** Mọi ví/giao dịch VND. Reject khác.
-
-9. **Local day:** Bucket theo `Asia/Ho_Chi_Minh` timezone cố định.
-
-10. **Void transfer:** Void cả cặp hoặc reject nếu chưa support.
-
-11. **No negative money:** Không cho expense âm / income âm.
-
-12. **Credit limit:** Hard block — không cho spend quá credit limit.
-
-13. **Income vào CC wallet:** Reject (CC là debt, income vào CC không make sense).
-
----
-
-## 🤖 MCP Server Design
-
-### Transport
-
-stdio (local) — chạy như CLI tool trên máy.
-
-### Cách dùng
-
-Config block trong Claude Code / Codex / bất kỳ agent nào hỗ trợ MCP:
-
-```json
-{
-  "mcpServers": {
-    "expense-tracker": {
-      "command": "node",
-      "args": ["/Users/nami/work/expense-tracker/apps/mcp-server/dist/index.js"],
-      "env": {
-        "EXPENSE_DB_PATH": "~/Library/Application Support/expense-tracker/expenses.db",
-        "EXPENSE_MCP_READONLY": "false"
-      }
-    }
-  }
-}
+```text
+apps/iphone (Phase 1+) ─┐
+apps/mac-web (Phase 2+) ├─> packages/domain ─> repositories/operation log
+apps/mac-electron (P3) ─┤                         │
+apps/mcp-server (P3) ───┘                    SQLite / CloudKit adapter
 ```
 
-### Tools Phase 1 (9 tools)
+`packages/domain` is the only owner of money types, entity types, invariants, ledger posting, recurring schedules, and commands. UI and MCP adapters may not reimplement these rules.
 
-| # | Tool | Mô tả | Params |
-|---|------|--------|--------|
-| 1 | `add_expense` | Thêm chi tiêu | amount, currency(VND), category, description?, date?, walletId, merchant?, dryRun?, clientRequestId |
-| 2 | `update_expense` | Cập nhật chi tiêu | id, amount?, category?, description?, date? |
-| 3 | `void_expense` | Soft void chi tiêu | id |
-| 4 | `add_income` | Thêm thu nhập | amount, currency(VND), source?, description?, date?, walletId, type?, dryRun?, clientRequestId |
-| 5 | `update_income` | Cập nhật thu nhập | id, amount?, source?, description?, date? |
-| 6 | `void_income` | Soft void thu nhập | id |
-| 7 | `get_wallets` | Xem danh sách ví | — |
-| 8 | `transfer` | Transfer giữa ví | fromWalletId, toWalletId, amount, date?, note?, dryRun?, clientRequestId |
-| 9 | `search_transactions` | Tìm giao dịch | from?, to?, walletId?, category?, type?, text?, includeVoided?, limit?, offset? |
+## 6. Canonical data rules
 
-### Tools Phase 1.5 (thêm)
+- IDs are UUID v4 strings; recurring occurrence IDs are UUID v5 derived from `scheduleId + dueLocalDate`.
+- Money is `{ minorUnits: string, currency: string }` at JSON boundaries and 64-bit `INTEGER` in SQLite. Decimal input is parsed as text with currency scale and range checks.
+- Every entity has `createdAtUtc`, `createdOffsetMinutes`, `updatedAtUtc`, and `updatedOffsetMinutes`. UTC fields are RFC 3339 instants ending in `Z`; offsets preserve user context.
+- Financial entities and `LedgerEntry` have `status IN ('active','voided')`.
+- Receipts use `Asset.id`; local paths are adapter-private and never persisted as domain identifiers.
+- All writes emit immutable `Operation` rows. A global `IdempotencyRecord(operation, clientRequestId)` stores canonical payload hash and result permanently for financial writes.
 
-- `set_budget`, `get_budgets`
-- `add_investment`, `get_investments`, `update_investment_value`
+The complete schema and constraints are normative in [docs/system/01-data-model.md](docs/system/01-data-model.md).
 
-### Resources
+## 7. Accounting
 
-- `expense://categories` — danh mục chi tiêu
-- `expense://wallets` — danh sách ví
+For non-credit wallets, balance is the sum of signed active ledger entries. For a credit card:
 
-### Structured Errors
-
-| Code | Mô tả |
-|------|-------|
-| `VALIDATION_ERROR` | Input không hợp lệ |
-| `NOT_FOUND` | Record không tồn tại |
-| `ALREADY_VOIDED` | Record đã void |
-| `IDEMPOTENCY_CONFLICT` | clientRequestId conflict |
-| `INSUFFICIENT_AVAILABLE_CREDIT` | Vượt credit limit |
-| `TRANSFER_SAME_WALLET` | from == to |
-| `CURRENCY_UNSUPPORTED` | Không phải VND |
-| `DB_UNAVAILABLE` | DB không accessible |
-
----
-
-## 🔧 Tech Stack
-
-| Layer | Tech | Lý do |
-|-------|------|-------|
-| Mobile + Desktop | **Expo React Native** | 1 codebase → iOS + macOS Web |
-| State | **Zustand** | Nhẹ, đơn giản |
-| Local DB | **expo-file-system + SQLite** | Ghi trực tiếp file |
-| Sync | **Phase 1:** None. **Phase 2:** CloudKit | Apple-only, privacy |
-| MCP Server | **Node.js + TypeScript** | `@modelcontextprotocol/sdk` |
-| Server DB | **better-sqlite3** | SQLite native, nhanh |
-| OCR | **Phase 1.5+:** Tesseract on-device | Không gửi data ra ngoài |
-| Notifications | **expo-notifications** | Native push |
-| Auth | **Phase 1:** Face ID / system auth | Local only |
-
----
-
-## ✅ MVP Checklist — Phase 1
-
-```
-[ ]  Setup monorepo (npm workspaces)
-[ ]  Shared types (Expense, Income, Wallet, Transfer)
-[ ]  Mobile scaffold (Expo Router, iPhone + Mac)
-[ ]  Local SQLite + ledger logic
-[ ]  Manual expense entry UI
-[ ]  Manual income entry UI
-[ ]  Wallet management UI (Cash / Bank / E-wallet / Credit Card)
-[ ]  Transfer between wallets UI
-[ ]  Soft void + Edit UI
-[ ]  Onboarding (default wallets, VND categories, sample data)
-[ ]  Dashboard: Cash flow + Category % + Savings rate + Wallet balances
-[ ]  Monthly report (basic)
-[ ]  Daily reminder notification
-[ ]  Local auth (Face ID / system auth)
-[ ]  Export CSV / Backup JSON
-[ ]  MCP Server: 9 tools + Resources + Structured errors
-[ ]  MCP dry-run + idempotency
-[ ]  EXPENSE_MCP_READONLY env support
-[ ]  Custom app icon
-[ ]  MCP config block cho Claude Code / Codex
+```text
+debt = sum(active expense minor units posted to card)
+     - sum(active payment minor units posted to card)
+availableCredit = creditLimitMinor - debt
+netWorth = nonCreditAssets + investmentValue - creditCardDebt
 ```
 
-## ✅ Checklist — Phase 1.5
+Purchases increase debt; payments reduce debt. Credit limits are not assets. A transfer creates two legs in one SQL transaction and one immutable transfer operation.
 
-```
-[ ]  Budget CRUD + alert (80%)
-[ ]  Recurring expenses
-[ ]  Investment CRUD (Gold / Crypto / ETF / Real Estate / Fund / Stock)
-[ ]  Net Worth + Asset Allocation UI
-[ ]  OCR receipt scanning
-[ ]  Export/import polish
-[ ]  MCP tools: set_budget, get_budgets, add_investment, get_investments
-```
+## 8. Sync and conflict policy
 
-## ✅ Checklist — Phase 2
+Phase 2 synchronizes immutable operations, then deterministically rebuilds projections. Transfers and their ledger legs are never merged with last-writer-wins. Duplicate operation IDs are ignored; operation payload mismatch is quarantined. Metadata may use field-level merge only where documented. Tombstones/void operations are retained. CloudKit subscriptions and change tokens drive incremental sync; token expiration triggers a zone rescan.
 
-```
-[ ]  CloudKit sync
-[ ]  Mac Electron wrapper
-[ ]  Open banking / Email forwarding
-[ ]  Multi-currency support
-```
+## 9. MCP contract
 
----
+Phase 3 MCP runs locally over stdio. `EXPENSE_MCP_READONLY` defaults to `true`. Every tool has valid JSON `inputSchema` and `outputSchema`, requires `walletId` where wallet scope matters, returns `structuredContent`, and mirrors it as text for compatibility. Domain/tool failures are successful JSON-RPC tool responses with `isError: true`; JSON-RPC errors are reserved for protocol failures.
 
-## ❓ Đóng Spec — Không còn open questions
+Every write tool—including add, update, void, transfer, budget, investment, and recurring writes—requires `clientRequestId` and accepts `dryRun`. Committed MCP writes create an `AuditLog`. Read requests enforce query length, page size, cursor pagination, and timeout limits.
 
-| # | Câu hỏi | Quyết định |
-|---|---------|------------|
-| 1 | Phase 1 primary client | iPhone + Mac UI (same codebase) |
-| 2 | OCR | Cắt khỏi Phase 1, sang 1.5 |
-| 3 | Credit card | Phase 1, transfer = debt settlement |
-| 4 | Transfer giữa ví | Phase 1, atomic 2 legs |
-| 5 | Sync Phase 2 | CloudKit |
-| 6 | Recurring | Phase 1.5 |
-| 7 | MCP tool count | 9 tools |
-| 8 | List/search tool | `search_transactions` bắt buộc |
-| 9 | Opening balance | Ledger entry |
-| 10 | MCP single-device | Ghi rõ export/import 1.5+ |
-| 11 | Void transfer | Void cả cặp hoặc reject |
-| 12 | Over-limit | Hard block |
-| 13 | Income vào CC | Reject |
-| 14 | Savings category | Transfer vào ví savings |
-| 15 | Sample data | `isSample` flag |
-| 16 | Timezone | Asia/Ho_Chi_Minh cố định |
-| 17 | Currency | VND only Phase 1 |
-| 18 | Placeholder env vars | EXPENSE_DB_PATH, EXPENSE_MCP_READONLY |
+## 10. Security and privacy
+
+- iOS Data Protection, least-privilege file permissions, Keychain secrets, and encrypted CloudKit transport/storage are required.
+- Face ID is a privacy/convenience gate, not an authorization boundary; OS sandbox and CloudKit identity/permissions enforce access.
+- Logs must redact amounts, notes, OCR text, receipt data, CloudKit tokens, and filesystem paths.
+- MCP has no network listener, inherits local-user permissions, and remains read-only unless explicitly enabled.
+
+## 11. Acceptance criteria
+
+- Phase boundaries match Section 2 with no hidden dependency on a later client/service.
+- Every financial write is atomic, idempotent, audited where required, and preserves ledger invariants.
+- Randomized ledger tests prove balances; transfer tests prove two-leg conservation; credit-card tests prove debt and available-credit formulas.
+- All money round-trips exactly at supported currency scales and rejects overflow/fractional minor units.
+- Backup/restore round-trips all entities, assets, settings, audit logs, operations, and recurring state.
+- Recurring generation is deterministic across relaunch, timezone changes, missed periods, leap years, and month ends.
+- Sync convergence tests cover duplicate delivery, reordering, offline concurrent edits, transfer atomicity, tombstones, and token reset.
+- MCP contract tests verify schemas, `structuredContent`, `isError`, read-only default, dry-run non-mutation, audit logs, limits, pagination, and idempotency.
+- Accessibility, Vietnamese copy, offline behavior, migration, restore, and privacy checks pass on supported devices.
+
+## 12. Definition of done
+
+A phase is done only when its in-scope acceptance criteria pass; schema and docs match shipped behavior; migrations work from every released version and rollback is documented; backups made by the previous version restore; telemetry/logging contains no sensitive content; and release builds pass unit, integration, end-to-end, accessibility, and manual recovery tests. Deferred work is named in the next phase, never represented as implemented.
+
+## 13. Testing and migration policy
+
+Use domain unit/property tests, SQLite integration tests with foreign keys enabled, device E2E tests, backup fixtures, CloudKit simulator/sandbox convergence tests, and MCP protocol tests. CI runs schema linting and link/terminology checks.
+
+Migrations are ordered, transactional, forward-only in production, and recorded in `schema_migrations`. Before a destructive rewrite, create and verify a backup. Additive compatibility spans at least one released version; CloudKit record changes use versioned decoders. Failed migrations roll back entirely and leave the prior database usable.
+
+## 14. Source of truth
+
+- Phase scope: `docs/phases/`
+- Schema/accounting: `docs/system/01-data-model.md` and `03-ledger.md`
+- Sync/MCP/security/backup contracts: corresponding `docs/system/` pages
+- Feature behavior: `docs/features/`
+- Review traceability: `docs/REVIEW_RESPONSE.md`

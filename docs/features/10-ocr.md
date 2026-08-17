@@ -1,80 +1,18 @@
-# Feature: OCR Receipt (Phase 1.5)
+# Feature: Receipt OCR (Phase 1.5)
 
-> Receipt scanning to auto-fill expense data
+Receipt capture is iPhone-only in Phase 1.5 and uses Apple Vision/VisionKit through a maintained Expo native module. Tesseract.js is not used in React Native. OCR runs on-device by default.
 
----
+## Flow
 
-## Overview
+1. User grants camera/photo permission and captures/imports a receipt.
+2. App normalizes orientation/size in a protected temporary directory.
+3. Vision recognizes text; deterministic parsers propose merchant, date, currency, and decimal-string amount with confidence.
+4. Vietnamese confirmation screen shows image and editable suggestions.
+5. Only explicit confirmation creates the expense through `packages/domain` and promotes the image to a managed `Asset.id`.
+6. Temporary image/OCR text is removed.
 
-Use camera to capture receipt, OCR extracts amount, date, merchant. User confirms and saves.
+Never auto-post based on OCR. Ambiguous totals, multiple currencies/dates, low confidence, permission denial, unsupported device, and recognition failure fall back to manual entry. Decimal text is parsed to integer minor units using currency scale; floats are forbidden.
 
-## Pipeline
+Asset metadata stores opaque ID, generated managed name, media type, size, hash, and timestamps—not an absolute path. Full backup includes metadata and bytes; Phase 2 CloudKit sync uses CKAsset and verifies the hash.
 
-```
-Capture Image → OCR Extract → Parse Fields → User Confirm → Save Expense
-```
-
-## Implementation
-
-### Capture
-- Camera: `react-native-vision-camera`
-- Guide frame: align receipt within border
-- Auto-capture on detection (optional)
-
-### OCR Engine
-- **Phase 1.5:** Tesseract.js on-device
-- Vietnamese language support
-- Output: raw text from receipt
-
-### Parse Fields
-
-| Field | Parse Strategy |
-|-------|----------------|
-| amount | Find "Tổng", "Total", "Thành tiền" + number |
-| date | Find date pattern (dd/mm/yyyy, dd-mm-yyyy) |
-| merchant | First line or store name pattern |
-| category | Map merchant → category (user-defined rules) |
-
-### User Confidence
-
-- High confidence (>80%): auto-fill, user taps save
-- Medium (50-80%): pre-fill, user confirms/edits
-- Low (<50%): empty form, show OCR text for reference
-
-## Data Flow
-
-```
-1. User taps "Scan receipt"
-2. Camera opens
-3. Capture image
-4. OCR processes (1-3 seconds)
-5. Parse fields
-6. Show confirmation screen with:
-   - Thumbnail of receipt
-   - Pre-filled form (amount, date, merchant, category)
-   - Edit button for each field
-7. User taps "Save"
-8. Create expense + attach receipt image
-```
-
-## Receipt Storage
-
-- Save image to app document directory
-- Path stored in `expense.receiptImage`
-- Compress before store (max 1MB)
-- Cleanup: delete images when expense is voided
-
-## UI Screens
-
-- `/add/scan` → camera capture
-- `/add/scan/confirm` → OCR result + edit form
-- Expense detail → show receipt thumbnail
-
-## Edge Cases
-
-- OCR fails → fallback to manual entry
-- Receipt in foreign language → try generic number parsing
-- Multiple receipts → queue processing
-- Poor lighting → prompt retake
-- No camera permission → prompt settings
-- Offline → works fully on-device
+Acceptance covers Vietnamese/English receipts, rotated/blurred images, multiple totals, malicious metadata/oversized files, cancellation, privacy cleanup, exact amount parsing, backup/restore, and asset sync failure.

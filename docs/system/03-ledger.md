@@ -1,221 +1,83 @@
-# System: Ledger Engine
+# System: Ledger and Accounting
 
-> Balance derivation and invariant enforcement
+## Rules
 
----
+Money is stored as 64-bit integer minor units. Commands accept decimal strings, never floating-point values. Ledger rows are append-only except for an atomic status transition from `active` to `voided`; corrections append operations and replacement entries.
 
-## Overview
+Signed entry effects:
 
-The LedgerEngine is the core domain logic that ensures financial data consistency. It's the single source of truth for balance calculations and enforces all invariants.
+| Entry kind | Non-credit wallet | Credit card debt effect |
+|---|---:|---:|
+| `opening_balance` | signed opening asset | signed opening debt |
+| `income` | `+amount` | not allowed |
+| `expense` | `-amount` | `+amount` |
+| `transfer_out` | `-amount` | payment reversal only |
+| `transfer_in` | `+amount` | `-amount` (card payment) |
 
-## Design Principles
+`amountMinor` on source entities is positive. `signedMinor` on ledger entries carries the projection sign. Currency must equal the wallet currency.
 
-1. **Balance is derived, never stored** — compute from ledger entries
-2. **Single transaction boundary** — all writes are atomic
-3. **Invariants enforced at write time** — reject invalid operations early
-4. **Void is retrospective** — voided entries remain in history
+## Formulas
 
-## Core Operations
-
-### createExpense(input)
-
-```typescript
-function createExpense(input: ExpenseInput): Expense {
-  // 1. Validate
-  validateAmount(input.amount);
-  validateCategory(input.category);
-  validateWallet(input.walletId);
-  
-  // 2. Check idempotency
-  if (input.clientRequestId) {
-    const existing = findByClientRequestId(input.clientRequestId);
-    if (existing && samePayload(existing, input)) return existing;
-    if (existing) throw new Error('IDEMPOTENCY_CONFLICT');
-  }
-  
-  // 3. Check CC limit
-  const wallet = getWallet(input.walletId);
-  if (wallet.type === 'credit_card') {
-    const newDebt = calculateDebt(wallet) + input.amount;
-    if (newDebt > wallet.creditLimit) {
-      throw new Error('INSUFFICIENT_AVAILABLE_CREDIT');
-    }
-  }
-  
-  // 4. Create expense + ledger entry in single transaction
-  return db.transaction(() => {
-    const expense = db.insert('expenses', {
-      ...input,
-      status: 'active',
-      createdAt: now(),
-      updatedAt: now(),
-    });
-    
-    db.insert('ledgerEntries', {
-      walletId: input.walletId,
-      type: 'expense',
-      amount: -input.amount,
-      refId: expense.id,
-      refType: 'expense',
-      date: input.date,
-    });
-    
-    return expense;
-  });
-}
+```text
+assetBalance(wallet) = Σ active LedgerEntry.signedMinor
+creditCardDebt(card) = Σ active expense amounts to card
+                     - Σ active payment amounts to card
+availableCredit(card) = creditLimitMinor - creditCardDebt(card)
+netWorth = Σ non-credit asset balances + Σ investment current values
+         - Σ credit-card debts
+cashFlow(period) = income - expenses          # transfers excluded
 ```
 
-### createTransfer(input)
+Refunds are explicit refund operations, not negative expenses. Overpayment may make card debt negative only if product policy permits; `availableCredit` then exceeds the nominal limit and UI labels the credit balance.
 
-```typescript
-function createTransfer(input: TransferInput): Transfer {
-  // 1. Validate
-  if (input.fromWalletId === input.toWalletId) {
-    throw new Error('TRANSFER_SAME_WALLET');
-  }
-  validateAmount(input.amount);
-  
-  // 2. Check idempotency
-  if (input.clientRequestId) {
-    const existing = findByClientRequestId(input.clientRequestId);
-    if (existing && samePayload(existing, input)) return existing;
-    if (existing) throw new Error('IDEMPOTENCY_CONFLICT');
-  }
-  
-  // 3. Create transfer + 2 ledger entries in single transaction
-  return db.transaction(() => {
-    const transfer = db.insert('transfers', {
-      ...input,
-      status: 'active',
-      createdAt: now(),
-    });
-    
-    // Outgoing
-    db.insert('ledgerEntries', {
-      walletId: input.fromWalletId,
-      type: 'transfer_out',
-      amount: -input.amount,
-      refId: transfer.id,
-      refType: 'transfer',
-      date: input.date,
-    });
-    
-    // Incoming
-    db.insert('ledgerEntries', {
-      walletId: input.toWalletId,
-      type: 'transfer_in',
-      amount: input.amount,
-      refId: transfer.id,
-      refType: 'transfer',
-      date: input.date,
-    });
-    
-    return transfer;
-  });
-}
-```
+## Posting transactions
 
-### voidExpense(id)
+- Expense: source row + one ledger expense row + operation in one SQL transaction.
+- Income: source row + one ledger income row + operation.
+- Transfer: transfer row + exactly two entries (`transfer_out`, `transfer_in`) sharing `transferId`; equal positive magnitude and currency; one operation.
+- Card payment: a transfer from an asset wallet to the credit-card wallet. The asset leg decreases assets; card leg decreases debt.
+- Void: append void operation and mark source plus every associated active ledger entry voided atomically.
+- Update: amount/category/note/date changes append an update operation and replace affected active entry. Wallet/currency changes require void-and-recreate.
 
-```typescript
-function voidExpense(id: string): void {
-  const expense = db.findById('expenses', id);
-  if (!expense) throw new Error('NOT_FOUND');
-  if (expense.status === 'voided') throw new Error('ALREADY_VOIDED');
-  
-  db.transaction(() => {
-    // Soft void
-    db.update('expenses', id, { status: 'voided', updatedAt: now() });
-    
-    // Mark ledger entry as voided
-    db.update('ledgerEntries', { refId: id, refType: 'expense' }, { status: 'voided' });
-  });
-}
-```
+## SQL constraints
 
-### getWalletBalance(walletId)
+The full DDL is in the data-model document. Ledger-specific invariants also use transactional repository checks because SQLite `CHECK` cannot validate cross-row two-leg conservation. Foreign keys are enabled on every connection.
 
-```typescript
-function getWalletBalance(walletId: string): number {
-  const result = db.query(`
-    SELECT COALESCE(SUM(amount), 0) as balance
-    FROM ledgerEntries
-    WHERE walletId = ?
-    AND status = 'active'
-  `, [walletId]);
-  
-  return result.balance;
-}
-```
+```sql
+PRAGMA foreign_keys = ON;
 
-### getCreditCardInfo(walletId)
+CREATE TABLE ledger_entries (
+  id TEXT PRIMARY KEY NOT NULL,
+  wallet_id TEXT NOT NULL REFERENCES wallets(id) ON DELETE RESTRICT,
+  source_type TEXT NOT NULL CHECK (source_type IN ('expense','income','transfer','opening_balance','refund')),
+  source_id TEXT NOT NULL,
+  entry_kind TEXT NOT NULL CHECK (entry_kind IN ('expense','income','transfer_out','transfer_in','opening_balance','refund')),
+  signed_minor INTEGER NOT NULL CHECK (signed_minor != 0),
+  currency TEXT NOT NULL CHECK (length(currency) = 3),
+  status TEXT NOT NULL CHECK (status IN ('active','voided')),
+  occurred_at_utc TEXT NOT NULL CHECK (occurred_at_utc GLOB '*Z'),
+  occurred_offset_minutes INTEGER NOT NULL CHECK (occurred_offset_minutes BETWEEN -840 AND 840),
+  created_at_utc TEXT NOT NULL CHECK (created_at_utc GLOB '*Z'),
+  created_offset_minutes INTEGER NOT NULL CHECK (created_offset_minutes BETWEEN -840 AND 840),
+  updated_at_utc TEXT NOT NULL CHECK (updated_at_utc GLOB '*Z'),
+  updated_offset_minutes INTEGER NOT NULL CHECK (updated_offset_minutes BETWEEN -840 AND 840),
+  UNIQUE(source_type, source_id, entry_kind, wallet_id)
+);
 
-```typescript
-function getCreditCardInfo(walletId: string): {
-  debt: number;
-  available: number;
-  creditLimit: number;
-} {
-  const wallet = getWallet(walletId);
-  const debt = calculateDebt(wallet);
-  
-  return {
-    debt,
-    available: wallet.creditLimit - debt,
-    creditLimit: wallet.creditLimit,
-  };
-}
-```
-
-## Invariant Enforcement
-
-| Invariant | Where Enforced |
-|-----------|----------------|
-| Balance derived | Always computed from ledger |
-| Transfer atomicity | `createTransfer` transaction |
-| No negative money | `validateAmount` |
-| CC limit | `createExpense` checks debt before insert |
-| Void exclusion | `getWalletBalance` filters `status = active` |
-| Idempotency | Check `clientRequestId` before insert |
-
-## Ledger Entry Lifecycle
-
-```
-Create → Active → [Voided]
-                → [Never voided, stays active forever]
-```
-
-## Balance Calculation
-
-### For Regular Wallets
-
-```
-balance = Σ(ledgerEntries.amount WHERE walletId = ? AND status = 'active')
-```
-
-### For Credit Cards
-
-```
-debt = Σ(expense amounts WHERE wallet = CC AND status = 'active')
-     − Σ(transfer amounts TO CC AND status = 'available')
-available = creditLimit − debt
+CREATE INDEX idx_ledger_wallet_status_time
+  ON ledger_entries(wallet_id, status, occurred_at_utc, id);
+CREATE INDEX idx_ledger_source ON ledger_entries(source_type, source_id);
 ```
 
 ## Reconciliation
 
-Periodically verify:
-```
-wallet.balance == SUM(ledgerEntries for wallet)
-```
+On backup validation, migration, and explicit diagnostics:
 
-If mismatch:
-- Log error
-- Trigger recalculation
-- Alert user
+1. Recompute projections from active ledger entries.
+2. Assert each active transfer has exactly two opposite/equivalent legs.
+3. Assert source/ledger amount, currency, status, and wallet agreement.
+4. Report orphan or duplicate source keys; do not silently repair.
 
-## Testing
+## Tests
 
-- Unit tests for each operation
-- Invariant tests (never drift)
-- Concurrency tests (simultaneous writes)
-- Idempotency tests
+Property tests cover conservation under arbitrary create/update/void sequences, integer overflow boundaries, card purchases/payments/refunds/overpayments, and transfer rollback at every injected failure point.

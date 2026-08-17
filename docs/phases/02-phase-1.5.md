@@ -1,48 +1,29 @@
-# Phase 1.5 — Budget + Investment + Automation
+# Phase 1.5 — Planning and Capture
 
-> Budget, Investment, Recurring, OCR, export/import
+## Goal
 
----
+Extend the iPhone-only offline app with budgets, investments, deterministic recurring transactions, and native receipt OCR.
 
-## 🎯 Goal
+## In scope
 
-Add planning (budget), asset tracking (investment), automation (recurring, OCR), and portability (export/import).
+- Category/wallet budgets with weekly, monthly, and yearly local-calendar periods.
+- Investments with integer minor-unit valuation and scaled quantities.
+- Recurring income/expense rules, missed-period catch-up, pause/resume, deterministic occurrence IDs.
+- Receipt scanning through iOS Vision/VisionKit via an Expo native module; explicit confirmation before creating an expense.
+- Full backup/migration support for every new entity and asset.
 
----
+## Out of scope
 
-## 📋 Scope
+Mac clients, CloudKit, Electron, MCP, family sharing, cloud OCR, automatic brokerage feeds, and autonomous AI categorization.
 
-### Features
-- Budget management + 80% alert
-- Recurring expenses (rent, subscription)
-- Investment tracking (Gold/Crypto/ETF/Real Estate/Fund/Stock)
-- Net Worth + Asset Allocation
-- OCR receipt scanning
-- Export/import polish (Mac migrate)
+## Acceptance criteria
 
-### MCP Tools (thêm)
-- `set_budget`, `get_budgets`
-- `add_investment`, `get_investments`, `update_investment_value`
+- Budget totals exclude voided expenses and transfers and respect local period boundaries.
+- Investment gain/loss uses exact integer/scaled arithmetic with an explicit valuation timestamp.
+- Recurring relaunch/catch-up creates each due occurrence once, including 29/30/31 and leap-year cases.
+- OCR uses native Vision/VisionKit, operates on-device, stores a managed asset ID, and never saves without review.
+- Phase 1 backups migrate and Phase 1.5 backups round-trip all added state.
 
----
+## Definition of done
 
-## 📅 Checklist
-
-```
-[ ] Budget CRUD + alert (80%)
-[ ] Recurring expenses
-[ ] Investment CRUD (Gold / Crypto / ETF / Real Estate / Fund / Stock)
-[ ] Net Worth + Asset Allocation UI
-[ ] OCR receipt scanning
-[ ] Export/import polish
-[ ] MCP tools: set_budget, get_budgets, add_investment, get_investments
-```
-
----
-
-## 📝 Design Docs
-
-- Feature: Budget → `features/07-budget.md`
-- Feature: Investment → `features/08-investment.md`
-- Feature: Recurring → `features/09-recurring.md`
-- Feature: OCR → `features/10-ocr.md`
+Domain, migration, device, accessibility, backup, calendar/timezone, and OCR permission/failure tests pass on supported iPhones without introducing a network or Mac dependency.

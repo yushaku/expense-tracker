@@ -1,62 +1,21 @@
-# Feature: Sync & Export/Import
+# Feature: Sync
 
-> Export CSV/JSON → Import → CloudKit sync (Phase 2)
+## Phase behavior
 
----
+- Phase 1/1.5: no live sync. Full backup/restore is available; CSV is only a lossy interchange format.
+- Phase 2: CloudKit operation sync across iPhone and Mac Expo Web wrapper.
+- Phase 3: Electron uses the same sync contract; CKShare adds family zones.
 
-## Overview
+## Synced scope
 
-Phase 1 has no sync. Data lives on single device. Users can export/import to move data.
+Every source entity, `LedgerEntry`, category, budget, investment, recurring rule/occurrence, setting, exchange-rate snapshot, immutable operation/tombstone, managed asset metadata, and receipt CKAsset is synchronized. Device secrets and ephemeral change tokens are not portable data.
 
-## Phase 1: Export/Import
+## UX
 
-### Export CSV
-- All expense+income+transfer records
-- Columns: date, type, category/source, amount, currency, description, wallet, status
-- Voided records: include with `[VOIDED]` marker
-- Filename: `expenses_YYYY-MM-DD.csv`
+Display “Đã đồng bộ”, “Đang chờ đồng bộ”, last success instant, pending count, account/quota/permission errors, and retry/rebuild actions. Never claim success before assets and operation batches verify and the local transaction commits.
 
-### Export JSON (Backup)
-- Full data dump including:
-  - wallets
-  - expenses
-  - incomes
-  - transfers
-  - budgets (Phase 1.5)
-  - investments (Phase 1.5)
-- Format: JSON with metadata (`version`, `exportedAt`, `deviceId`)
-- Filename: `expense_tracker_backup_YYYY-MM-DD.json`
+## Integrity
 
-### Import JSON
-- Restore from backup
-- Validation: schema check
-- Warning: "Import sẽ ghi đè toàn bộ dữ liệu hiện tại"
-- Confirm before apply
+Transfers sync as one immutable operation and rebuild two legs atomically; financial conflicts are never record-level LWW. Deduplicate by operation ID+hash. Cursor/token reset, offline edits, duplicate/reordered changes, asset failure, account switch, and CKShare revocation must preserve local unsynced work or surface explicit recovery.
 
-### Import CSV (Phase 1.5+)
-- Parse CSV → create records
-- Required columns: date, amount, category
-- Validation errors → show summary
-
-## Phase 2: CloudKit Sync
-
-See `system/05-cloudkit.md` for details.
-
-- Apple-only, privacy-focused
-- Private database per user
-- Conflict resolution: last-write-wins with vector clock
-- MCP reads from synced DB
-
-## UI Screens
-
-- `/settings/export` — export options
-- `/settings/import` — import file picker
-- Sync status indicator (Phase 2)
-
-## Edge Cases
-
-- Import with no wallets → create from data
-- Import with duplicate clientRequestId → skip
-- Export with no data → empty file
-- Import from different schema version → migration
-- Large dataset export → stream to file
+Detailed algorithms and tests are normative in `docs/system/05-cloudkit.md`.

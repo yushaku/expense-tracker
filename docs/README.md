@@ -1,75 +1,43 @@
-# Expense Tracker — Documentation
+# Expense Tracker Documentation v3
 
-> Personal finance management app with AI advisor via MCP
+> Tài liệu chuẩn cho ứng dụng quản lý chi tiêu cá nhân iPhone-first.
 
-## 📂 Structure
+## Roadmap
 
-```
+| Phase | Deliverable | Explicit exclusions |
+|---|---|---|
+| 1 | iPhone Expo app + local SQLite | Mac, Web, Electron, MCP, CloudKit |
+| 1.5 | Budget, investment, recurring, native OCR on iPhone | sync, Mac, MCP |
+| 2 | CloudKit sync + Mac Expo Web wrapper + multi-currency | Electron, MCP, family |
+| 3 | Mac Electron + local MCP + CKShare family | custom family backend |
+
+## Reading order
+
+1. [Product specification](../PRODUCT_SPEC.md) — outcomes, decisions, acceptance, definition of done.
+2. `phases/` — release scope and gates.
+3. `system/01-data-model.md`, `03-ledger.md` — normative storage and accounting.
+4. Remaining `system/` pages — architecture, MCP, CloudKit, security, backup.
+5. `features/` — user behavior and feature-specific acceptance criteria.
+6. [Review response](REVIEW_RESPONSE.md) — traceability for all 84 findings.
+
+## Non-negotiable conventions
+
+- User-facing text is Vietnamese; technical/code sections are English.
+- Monetary values are 64-bit integer minor units; JSON uses decimal strings. Never use JS `number`, SQL `REAL`, or floats for money.
+- UTC instants plus timezone offsets are stored for all domain timestamps.
+- Every entity has creation/update timestamps; financial records and ledger entries have status.
+- Business logic exists once in `packages/domain`.
+- Receipts use managed asset IDs, not stored filesystem paths.
+- Phase 3 MCP is read-only by default; every write supports dry-run, durable idempotency, and audit.
+
+## Document map
+
+```text
 docs/
-├── README.md           ← Bạn đang đọc
-├── phases/
-│   01-phase-1.md       ← MVP: iPhone + Mac + local SQLite
-│   02-phase-1.5.md     ← Budget + Investment + Recurring + OCR
-│   03-phase-2.md       ← CloudKit sync + Mac UI + Multi-currency
-│   04-phase-3.md       ← Family sharing
-├── features/
-│   01-wallets.md       ← Wallet CRUD, Transfer, Opening balance
-│   02-expenses.md      ← Expense/Income CRUD, Soft void, Edit
-│   03-dashboard.md     ← Cash flow, Category breakdown, Savings rate
-│   04-mcp-server.md    ← MCP tools, Resources, Structured errors
-│   05-onboarding.md    ← Default wallets, Sample data, First run
-│   06-sync.md          ← Export/Import → CloudKit sync
-│   07-budget.md        ← Budget CRUD + Alert (Phase 1.5)
-│   08-investment.md    ← Investment tracking (Phase 1.5)
-│   09-recurring.md     ← Recurring expenses (Phase 1.5)
-│   10-ocr.md           ← Receipt scanning (Phase 1.5)
-│   11-multi-currency.md ← Multi-currency support (Phase 2)
-│   12-family.md        ← Multi-user sharing (Phase 3)
-├── system/
-│   01-data-model.md    ← Entities, relationships, invariants
-│   02-architecture.md  ← High-level system architecture
-│   03-ledger.md        ← Ledger engine (balance derivation)
-│   04-mcp-protocol.md  ← MCP protocol implementation details
-│   05-cloudkit.md      ← CloudKit sync design (Phase 2)
-│   06-security.md      ← Auth, encryption, privacy
-│   07-backup.md        ← Export/Import, backup/restore
+  phases/   01 Phase 1 · 02 Phase 1.5 · 03 Phase 2 · 04 Phase 3
+  system/   data model · architecture · ledger · MCP · CloudKit · security · backup
+  features/ wallets · expenses · dashboard · MCP · onboarding · sync
+            budget · investment · recurring · OCR · multi-currency · family
 ```
 
----
-
-## 🚀 Quick Start
-
-| Phase | Goal | Status |
-|-------|------|--------|
-| **Phase 1** | iPhone + Mac, local SQLite, manual entry, basic dashboard, MCP | 📝 Planning |
-| **Phase 1.5** | Budget, Investment, Recurring, OCR, export/import | 📝 Planning |
-| **Phase 2** | CloudKit sync, Mac Electron, multi-currency | 📝 Planning |
-| **Phase 3** | Family sharing, multi-user | 📝 Planning |
-
----
-
-## 🎨 Design
-
-- **Design System:** `design-system.md` — color palette, typography, spacing, components, theme tokens
-
----
-
-## 📖 Product Spec
-
-- Full spec: `../PRODUCT_SPEC.md`
-- This folder: design documents (feature + system)
-
----
-
-## 🔧 Tech Stack
-
-| Layer | Tech |
-|-------|------|
-| Mobile + Desktop | Expo React Native |
-| State | Zustand |
-| Local DB | expo-file-system + SQLite |
-| Sync | Phase 1: None. Phase 2: CloudKit |
-| MCP Server | Node.js + TypeScript + better-sqlite3 |
-| OCR | Phase 1.5+: Tesseract on-device |
-| Notifications | expo-notifications |
-| Auth | Phase 1: Face ID / system auth |
+When documents conflict, the product phase table governs scope; the data model and ledger pages govern persistence/accounting; the stricter security or validation rule wins. Update all affected documents in the same change.

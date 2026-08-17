@@ -1,76 +1,23 @@
 # Feature: Family Sharing (Phase 3)
 
-> Multi-user, shared budgets, per-person tracking
+Family sharing uses Apple CloudKit `CKShare`; no custom backend, credentials, invitations, or ACL tables are authoritative.
 
----
+## Model
 
-## Overview
+An owner shares a wallet/family CloudKit zone. CKShare and participant records determine identity, role, read/write permission, invite status, and revocation. Local `ShareReference` rows cache CloudKit identifiers/status for UI and sync but never grant authority.
 
-Allow multiple users (family members) to share budgets and track expenses together.
+Shared scope includes explicitly selected wallets and their operations, ledger entries, categories, budgets, recurring rules/occurrences, receipt assets, and audit references. Private wallets and unrelated settings remain in the owner’s private zone. UI labels shared data and actor attribution in Vietnamese.
 
-## User Entity
+## Operations
 
-```
-User
-├── id: uuid
-├── email: string
-├── name: string
-├── avatar: string (url/path)
-├── role: enum [admin, member]
-├── createdAt, updatedAt: ISO datetime
-```
+- Owner creates a CKShare and sends the system invitation.
+- Participant accepts through Apple flow; app verifies account and permission before syncing.
+- Writes pass CloudKit permission checks and normal domain/idempotency rules.
+- Revocation/leave stops future access, cancels pending unauthorized writes, and removes local shared projections/assets after safe confirmation/cache policy.
+- Ownership transfer and deletion follow supported CloudKit semantics; the app does not emulate them.
 
-## Family/Group Entity
+Financial conflicts remain immutable-operation based. Transfers touching private and shared scopes require an explicit supported bridge operation or are rejected; data is never partially copied.
 
-```
-Family
-├── id: uuid
-├── name: string
-├── createdBy: string (FK → User)
-├── inviteCode: string
-├── createdAt, updatedAt: ISO datetime
-```
+MCP family reads/writes require an explicit share/wallet scope. Read-only default, dry-run, durable request IDs, and audit attribution still apply.
 
-## Membership
-
-```
-FamilyMember
-├── familyId: string (FK → Family)
-├── userId: string (FK → User)
-├── role: enum [admin, member]
-├── joinedAt: ISO datetime
-```
-
-## Shared vs Private
-
-- **Shared expenses:** visible to all family members
-- **Private expenses:** visible only to creator
-- **Shared budgets:** family-wide spending limits
-- **Per-person tracking:** attribute expenses to members
-
-## Invite Flow
-
-1. Admin generates invite code
-2. New user enters code
-3. Family appears in their app
-4. All shared data syncs
-
-## UI Changes
-
-- Family switcher (top nav)
-- Shared expenses tab
-- Per-person breakdown
-- Invite member screen
-
-## MCP Implications
-
-- MCP needs auth to determine which family
-- Read-only mode per agent
-- Audit log for agent actions
-
-## Edge Cases
-
-- Member leaves → private expenses stay, shared expenses remain
-- Delete family → cascade delete shared data
-- Conflict: two members edit same expense → last-writer-wins
-- No internet → queue invite acceptance
+Acceptance covers owner/read-only/read-write roles, invite/decline, offline write then revoke, account switch, asset permission, duplicate operations, private-data isolation, transfer boundary, participant removal, backup disclosure, and clean-device rebuild.
