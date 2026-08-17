@@ -12,12 +12,12 @@ Vietnamese is used for UI copy and user-visible validation. English is used for 
 
 ## 2. Delivery boundaries
 
-| Phase | Clients | Storage and scope |
-|---|---|---|
+| Phase       | Clients                         | Storage and scope                                                                                         |
+| ----------- | ------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | **1 — MVP** | iPhone only (Expo React Native) | One local SQLite database; wallets, income, expense, transfer, ledger, dashboard, onboarding, JSON backup |
-| **1.5** | iPhone only | Budget, investment, recurring transactions, native receipt OCR |
-| **2** | iPhone + Mac Expo Web wrapper | CloudKit/iCloud sync, managed receipt assets, multi-currency |
-| **3** | iPhone + Mac Electron | Local MCP server over the synced store; CKShare family sharing |
+| **1.5**     | iPhone only                     | Budget, investment, recurring transactions, native receipt OCR                                            |
+| **2**       | iPhone + Mac Expo Web wrapper   | CloudKit/iCloud sync, managed receipt assets, multi-currency                                              |
+| **3**       | iPhone + Mac Electron           | Local MCP server over the synced store; CKShare family sharing                                            |
 
 Phase 1 explicitly excludes Mac, Expo Web, Electron, MCP, CloudKit, shared databases, and family sharing. Phase 2 Mac is an Expo Web wrapper. Electron and MCP start only in Phase 3.
 

@@ -1,9 +1,9 @@
 // apps/mobile/src/components/wallets/WalletList.tsx
-// List of wallets with balance
+// List of wallets with balance (v3: @expense/domain)
 
 import React from 'react';
 import { YStack, Text } from '@expense/ui';
-import { WalletWithBalance } from '@expense/shared';
+import type { WalletWithBalance } from '../../src/stores/walletStore';
 import { WalletCard } from './WalletCard';
 
 interface WalletListProps {

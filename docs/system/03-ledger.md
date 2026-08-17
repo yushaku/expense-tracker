@@ -6,13 +6,13 @@ Money is stored as 64-bit integer minor units. Commands accept decimal strings, 
 
 Signed entry effects:
 
-| Entry kind | Non-credit wallet | Credit card debt effect |
-|---|---:|---:|
-| `opening_balance` | signed opening asset | signed opening debt |
-| `income` | `+amount` | not allowed |
-| `expense` | `-amount` | `+amount` |
-| `transfer_out` | `-amount` | payment reversal only |
-| `transfer_in` | `+amount` | `-amount` (card payment) |
+| Entry kind        |    Non-credit wallet |  Credit card debt effect |
+| ----------------- | -------------------: | -----------------------: |
+| `opening_balance` | signed opening asset |      signed opening debt |
+| `income`          |            `+amount` |              not allowed |
+| `expense`         |            `-amount` |                `+amount` |
+| `transfer_out`    |            `-amount` |    payment reversal only |
+| `transfer_in`     |            `+amount` | `-amount` (card payment) |
 
 `amountMinor` on source entities is positive. `signedMinor` on ledger entries carries the projection sign. Currency must equal the wallet currency.
 

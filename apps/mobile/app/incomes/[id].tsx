@@ -6,9 +6,14 @@ import { YStack, Text, XStack, Card, Button, Dialog } from '@expense/ui';
 import { useIncomeStore } from '../../src/stores/incomeStore';
 import { useWalletStore } from '../../src/stores/walletStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Income, formatCurrency } from '@expense/shared';
+import type { Income } from '@expense/shared';
+import { formatCurrency } from '@expense/shared';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { INCOME_TYPE_LABELS, INCOME_TYPE_COLORS, INCOME_TYPE_ICONS } from '../../src/stores/incomeStore';
+import {
+  INCOME_TYPE_LABELS,
+  INCOME_TYPE_COLORS,
+  INCOME_TYPE_ICONS,
+} from '../../src/stores/incomeStore';
 
 export default function IncomeDetailScreen() {
   const router = useRouter();
@@ -183,8 +188,8 @@ export default function IncomeDetailScreen() {
                 Hủy thu nhập?
               </Text>
               <Text fontSize="$sm" color="$onSurfaceVariant">
-                Thu nhập sẽ được đánh dấu là "Đã hủy" và không tính vào báo cáo.
-                Bạn có thể xem lại trong lịch sử.
+                Thu nhập sẽ được đánh dấu là "Đã hủy" và không tính vào báo cáo. Bạn có thể xem lại
+                trong lịch sử.
               </Text>
               <XStack gap="$3" justifyContent="flex-end">
                 <Button variant="outlined" onPress={() => setShowVoidDialog(false)}>

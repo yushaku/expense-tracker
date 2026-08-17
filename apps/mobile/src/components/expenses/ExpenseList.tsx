@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { YStack, Text, Input, XStack } from '@expense/ui';
-import { Expense } from '@expense/shared';
+import type { Expense } from '@expense/shared';
 import { ExpenseCard } from './ExpenseCard';
 import { ExpenseFilters } from './ExpenseFilters';
 

@@ -4,12 +4,12 @@
 
 ## Roadmap
 
-| Phase | Deliverable | Explicit exclusions |
-|---|---|---|
-| 1 | iPhone Expo app + local SQLite | Mac, Web, Electron, MCP, CloudKit |
-| 1.5 | Budget, investment, recurring, native OCR on iPhone | sync, Mac, MCP |
-| 2 | CloudKit sync + Mac Expo Web wrapper + multi-currency | Electron, MCP, family |
-| 3 | Mac Electron + local MCP + CKShare family | custom family backend |
+| Phase | Deliverable                                           | Explicit exclusions               |
+| ----- | ----------------------------------------------------- | --------------------------------- |
+| 1     | iPhone Expo app + local SQLite                        | Mac, Web, Electron, MCP, CloudKit |
+| 1.5   | Budget, investment, recurring, native OCR on iPhone   | sync, Mac, MCP                    |
+| 2     | CloudKit sync + Mac Expo Web wrapper + multi-currency | Electron, MCP, family             |
+| 3     | Mac Electron + local MCP + CKShare family             | custom family backend             |
 
 ## Reading order
 

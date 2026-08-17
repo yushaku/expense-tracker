@@ -7,7 +7,8 @@ import { useIncomeStore } from '../../../src/stores/incomeStore';
 import { useWalletStore } from '../../../src/stores/walletStore';
 import { IncomeForm } from '../../../src/components/incomes/IncomeForm';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Income, Wallet } from '@expense/shared';
+import type { Income } from '@expense/shared';
+import { Wallet } from '@expense/shared';
 
 export default function EditIncomeScreen() {
   const router = useRouter();

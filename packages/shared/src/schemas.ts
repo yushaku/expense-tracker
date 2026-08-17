@@ -22,13 +22,7 @@ export const ExpenseCategorySchema = z.enum([
   'savings',
   'other',
 ]);
-export const IncomeTypeSchema = z.enum([
-  'salary',
-  'freelance',
-  'investment',
-  'gift',
-  'other',
-]);
+export const IncomeTypeSchema = z.enum(['salary', 'freelance', 'investment', 'gift', 'other']);
 export const TransactionStatusSchema = z.enum(['active', 'voided']);
 export const LedgerEntryTypeSchema = z.enum([
   'expense',
@@ -268,21 +262,13 @@ export const SetBudgetInputSchema = z.object({
 
 // ── Verify helpers ──────────────────────────────────────────────────────────
 
-export type ParseResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: z.ZodError };
+export type ParseResult<T> = { success: true; data: T } | { success: false; error: z.ZodError };
 
-export function parseWithSchema<T>(
-  schema: z.ZodType<T>,
-  data: unknown
-): T {
+export function parseWithSchema<T>(schema: z.ZodType<T>, data: unknown): T {
   return schema.parse(data);
 }
 
-export function safeParseWithSchema<T>(
-  schema: z.ZodType<T>,
-  data: unknown
-): ParseResult<T> {
+export function safeParseWithSchema<T>(schema: z.ZodType<T>, data: unknown): ParseResult<T> {
   const result = schema.safeParse(data);
   if (result.success) {
     return { success: true, data: result.data };

@@ -1,30 +1,38 @@
 // apps/mobile/src/stores/walletStore.ts
-// Wallet store — CRUD + Transfer using Zustand
+// Wallet store — CRUD + Transfer using Zustand (v3: @expense/domain)
 
 import { create } from 'zustand';
 import {
-  WalletType,
-  SupportedCurrency,
-  WalletWithBalance,
+  WalletService,
   CreateWalletInput,
-  UpdateWalletInput,
-  TransferInput,
-  LedgerEngine,
-  generateId,
-  formatCurrency,
+  CreateTransferInput,
   getSharedDb,
-  WalletRow,
-  getVietnamNow,
-} from '@expense/shared';
+} from '@expense/domain';
 
-// Singleton ledger instance (shares DB with expenseStore)
-let ledger: LedgerEngine | null = null;
+// Singleton wallet service (shares DB with other stores)
+let service: WalletService | null = null;
 
-function getLedger(): LedgerEngine {
-  if (!ledger) {
-    ledger = new LedgerEngine(getSharedDb());
+function getService(): WalletService {
+  if (!service) {
+    service = new WalletService(getSharedDb());
   }
-  return ledger;
+  return service;
+}
+
+export interface WalletWithBalance {
+  id: string;
+  name: string;
+  type: 'cash' | 'bank' | 'ewallet' | 'credit_card';
+  currency: string;
+  creditLimitMinor: bigint;
+  balanceMinor: bigint;
+}
+
+export interface TransferInput {
+  fromWalletId: string;
+  toWalletId: string;
+  amount: bigint;
+  note?: string;
 }
 
 interface WalletState {
@@ -36,7 +44,11 @@ interface WalletState {
   // Actions
   loadWallets: () => Promise<void>;
   createWallet: (input: CreateWalletInput) => Promise<WalletWithBalance>;
-  updateWallet: (input: UpdateWalletInput) => Promise<WalletWithBalance>;
+  updateWallet: (input: {
+    id: string;
+    name?: string;
+    creditLimitMinor?: bigint;
+  }) => Promise<WalletWithBalance>;
   deleteWallet: (id: string) => Promise<void>;
   transfer: (input: TransferInput) => Promise<void>;
   getWalletById: (id: string) => WalletWithBalance | null;
@@ -52,12 +64,12 @@ export const useWalletStore = create<WalletState>((set, get) => ({
   loadWallets: async () => {
     set({ loading: true, error: null });
     try {
-      const database = getSharedDb();
-      const ledgerEngine = getLedger();
-      const walletRows = database.getAllWallets();
-      const walletsWithBalance: WalletWithBalance[] = walletRows.map((w: WalletRow) => ({
+      const svc = getService();
+      const db = getSharedDb();
+      const allWallets = db.getAllWallets();
+      const walletsWithBalance: WalletWithBalance[] = allWallets.map((w: any) => ({
         ...w,
-        balance: ledgerEngine.getWalletBalance(w.id),
+        balanceMinor: svc.getBalance(w.id),
       }));
       set({ wallets: walletsWithBalance, loading: false });
     } catch (err: any) {
@@ -68,36 +80,17 @@ export const useWalletStore = create<WalletState>((set, get) => ({
   createWallet: async (input: CreateWalletInput) => {
     set({ loading: true, error: null });
     try {
-      const database = getSharedDb();
-      const ledgerEngine = getLedger();
-      const id = generateId();
-      const now = getVietnamNow();
-
-      const wallet = database.createWallet({
-        id,
-        name: input.name,
-        type: input.type,
-        currency: input.currency ?? 'VND',
-        creditLimit: input.creditLimit ?? 0,
-      });
-
-      // Create opening balance ledger entry if > 0
-      if (input.openingBalance > 0) {
-        database.createLedgerEntry({
-          id: generateId(),
-          walletId: id,
-          type: 'opening_balance',
-          amount: input.openingBalance,
-          refId: id,
-          refType: 'wallet',
-          date: now,
-          status: 'active',
-        });
-      }
+      const svc = getService();
+      const wallet = svc.createWallet(input);
+      const balanceMinor = svc.getBalance(wallet.id);
 
       const walletWithBalance: WalletWithBalance = {
-        ...wallet,
-        balance: ledgerEngine.getWalletBalance(id),
+        id: wallet.id,
+        name: wallet.name,
+        type: wallet.type,
+        currency: wallet.currency,
+        creditLimitMinor: wallet.creditLimitMinor,
+        balanceMinor,
       };
 
       set((state) => ({
@@ -112,20 +105,24 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     }
   },
 
-  updateWallet: async (input: UpdateWalletInput) => {
+  updateWallet: async (input: { id: string; name?: string; creditLimitMinor?: bigint }) => {
     set({ loading: true, error: null });
     try {
-      const database = getSharedDb();
-      const ledgerEngine = getLedger();
+      const db = getSharedDb();
+      const svc = getService();
 
-      const wallet = database.updateWallet(input.id, {
+      const wallet = db.updateWallet(input.id, {
         name: input.name,
-        creditLimit: input.creditLimit,
-      });
+        creditLimitMinor: input.creditLimitMinor,
+      } as any);
 
       const walletWithBalance: WalletWithBalance = {
-        ...wallet,
-        balance: ledgerEngine.getWalletBalance(input.id),
+        id: wallet.id,
+        name: wallet.name,
+        type: wallet.type,
+        currency: wallet.currency,
+        creditLimitMinor: wallet.creditLimitMinor,
+        balanceMinor: svc.getBalance(wallet.id),
       };
 
       set((state) => ({
@@ -143,8 +140,8 @@ export const useWalletStore = create<WalletState>((set, get) => ({
   deleteWallet: async (id: string) => {
     set({ loading: true, error: null });
     try {
-      const database = getSharedDb();
-      database.deleteWallet(id);
+      const db = getSharedDb();
+      db.deleteWallet(id);
       set((state) => ({
         wallets: state.wallets.filter((w) => w.id !== id),
         selectedWalletId: state.selectedWalletId === id ? null : state.selectedWalletId,
@@ -159,8 +156,12 @@ export const useWalletStore = create<WalletState>((set, get) => ({
   transfer: async (input: TransferInput) => {
     set({ loading: true, error: null });
     try {
-      const ledgerEngine = getLedger();
-      ledgerEngine.createTransfer(input);
+      const svc = getService();
+      svc.createTransfer({
+        fromWalletId: input.fromWalletId,
+        toWalletId: input.toWalletId,
+        amount: { minorUnits: input.amount, currency: 'VND' },
+      });
 
       // Refresh wallets after transfer
       await get().loadWallets();
@@ -180,5 +181,3 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     set({ selectedWalletId: id });
   },
 }));
-
-export { formatCurrency };

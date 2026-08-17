@@ -1,5 +1,5 @@
 // apps/mobile/app/wallets/index.tsx
-// Wallet list screen
+// Wallet list screen (v3: @expense/domain)
 
 import React, { useEffect, useState } from 'react';
 import { YStack, Text } from '@expense/ui';
@@ -34,11 +34,7 @@ export default function WalletsScreen() {
           </Text>
         )}
 
-        <WalletList
-          wallets={wallets}
-          onWalletPress={handleWalletPress}
-          loading={loading}
-        />
+        <WalletList wallets={wallets} onWalletPress={handleWalletPress} loading={loading} />
       </YStack>
 
       <FAB

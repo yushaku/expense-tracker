@@ -142,7 +142,7 @@ export class InMemoryDatabase implements Database {
   }
 
   getLedgerEntries(walletId: string): LedgerEntryRow[] {
-    return Array.from(this.ledgerEntries.values()).filter(e => e.walletId === walletId);
+    return Array.from(this.ledgerEntries.values()).filter((e) => e.walletId === walletId);
   }
 
   updateLedgerEntry(id: string, updates: Partial<LedgerEntryRow>): LedgerEntryRow {

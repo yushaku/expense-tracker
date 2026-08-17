@@ -18,11 +18,7 @@ export default function TransferScreen() {
 
   return (
     <YStack flex={1} backgroundColor="$background">
-      <TransferForm
-        wallets={wallets}
-        onSubmit={handleSubmit}
-        onCancel={() => router.back()}
-      />
+      <TransferForm wallets={wallets} onSubmit={handleSubmit} onCancel={() => router.back()} />
     </YStack>
   );
 }

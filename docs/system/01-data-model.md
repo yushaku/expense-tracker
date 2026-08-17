@@ -21,25 +21,25 @@ Rules:
 
 ## Entities
 
-| Entity | Phase | Required domain fields beyond common timestamps |
-|---|---:|---|
-| `Wallet` | 1 | `id`, `name`, `type`, `currency`, `creditLimitMinor`, `status`, `isSample` |
-| `Category` | 1 | `id`, `kind`, `labelVi`, `status`, `isSystem` |
-| `Expense` | 1 | `id`, `walletId`, `categoryId`, `amountMinor`, `currency`, occurred instant/offset, `status`, `merchant`, `note`, `receiptAssetId`, `isSample` |
-| `Income` | 1 | same shape with optional `categoryId/source`; `status`, `isSample` |
-| `Transfer` | 1 | `id`, `fromWalletId`, `toWalletId`, `amountMinor`, `currency`, occurred instant/offset, `status`, `isSample` |
-| `LedgerEntry` | 1 | `id`, `walletId`, `sourceType`, `sourceId`, `entryKind`, `signedMinor`, `currency`, occurred instant/offset, `status` |
-| `Asset` | 1 | `id`, `kind`, `mediaType`, `byteCount`, `sha256`, `managedName`, `status`; local path is not a domain field |
-| `Setting` | 1 | `key`, `valueJson`, timestamps |
-| `Operation` | 1 | `id`, `kind`, `entityType`, `entityId`, `payloadJson`, `payloadHash`, `actorId`, timestamps |
-| `IdempotencyRecord` | 1 | `operation`, `clientRequestId`, `payloadHash`, `resultJson`, `createdAtUtc`; no expiry for financial writes |
-| `AuditLog` | 1 | `id`, `actorType`, `actorId`, `action`, `entityType`, `entityId`, `requestId`, `outcome`, redacted details, timestamps |
-| `Budget` | 1.5 | category/wallet scope, `limitMinor`, currency, period and local anchor, `status` |
-| `Investment` | 1.5 | type, currency, `costBasisMinor`, `currentValueMinor`, scaled quantity, valuation instant/offset, `status` |
-| `RecurringRule` | 1.5 | template, frequency, interval, anchor local date/day policy, timezone, next due, catch-up policy, `status` |
-| `ExchangeRateSnapshot` | 2 | pair, integer numerator/denominator, source, observed instant/offset |
-| `SyncState` | 2 | zone, change token, retry state, timestamps |
-| `ShareReference` | 3 | CKShare record name/zone, scope entity, permission, status |
+| Entity                 | Phase | Required domain fields beyond common timestamps                                                                                                |
+| ---------------------- | ----: | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Wallet`               |     1 | `id`, `name`, `type`, `currency`, `creditLimitMinor`, `status`, `isSample`                                                                     |
+| `Category`             |     1 | `id`, `kind`, `labelVi`, `status`, `isSystem`                                                                                                  |
+| `Expense`              |     1 | `id`, `walletId`, `categoryId`, `amountMinor`, `currency`, occurred instant/offset, `status`, `merchant`, `note`, `receiptAssetId`, `isSample` |
+| `Income`               |     1 | same shape with optional `categoryId/source`; `status`, `isSample`                                                                             |
+| `Transfer`             |     1 | `id`, `fromWalletId`, `toWalletId`, `amountMinor`, `currency`, occurred instant/offset, `status`, `isSample`                                   |
+| `LedgerEntry`          |     1 | `id`, `walletId`, `sourceType`, `sourceId`, `entryKind`, `signedMinor`, `currency`, occurred instant/offset, `status`                          |
+| `Asset`                |     1 | `id`, `kind`, `mediaType`, `byteCount`, `sha256`, `managedName`, `status`; local path is not a domain field                                    |
+| `Setting`              |     1 | `key`, `valueJson`, timestamps                                                                                                                 |
+| `Operation`            |     1 | `id`, `kind`, `entityType`, `entityId`, `payloadJson`, `payloadHash`, `actorId`, timestamps                                                    |
+| `IdempotencyRecord`    |     1 | `operation`, `clientRequestId`, `payloadHash`, `resultJson`, `createdAtUtc`; no expiry for financial writes                                    |
+| `AuditLog`             |     1 | `id`, `actorType`, `actorId`, `action`, `entityType`, `entityId`, `requestId`, `outcome`, redacted details, timestamps                         |
+| `Budget`               |   1.5 | category/wallet scope, `limitMinor`, currency, period and local anchor, `status`                                                               |
+| `Investment`           |   1.5 | type, currency, `costBasisMinor`, `currentValueMinor`, scaled quantity, valuation instant/offset, `status`                                     |
+| `RecurringRule`        |   1.5 | template, frequency, interval, anchor local date/day policy, timezone, next due, catch-up policy, `status`                                     |
+| `ExchangeRateSnapshot` |     2 | pair, integer numerator/denominator, source, observed instant/offset                                                                           |
+| `SyncState`            |     2 | zone, change token, retry state, timestamps                                                                                                    |
+| `ShareReference`       |     3 | CKShare record name/zone, scope entity, permission, status                                                                                     |
 
 ## Core SQLite DDL
 

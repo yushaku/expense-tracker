@@ -4,7 +4,8 @@
 import React from 'react';
 import { XStack, Text, ScrollView } from '@expense/ui';
 import { Chip, ChipText } from '@expense/ui';
-import { ExpenseCategory, CATEGORY_LABELS } from '@expense/shared';
+import type { ExpenseCategory } from '@expense/shared';
+import { CATEGORY_LABELS } from '@expense/shared';
 
 interface ExpenseFiltersProps {
   filters: {
@@ -47,7 +48,9 @@ export function ExpenseFilters({ filters, onFilterChange }: ExpenseFiltersProps)
           {STATUS_OPTIONS.map((status) => (
             <Chip
               key={status.value}
-              selected={filters.status === status.value || (!filters.status && status.value === 'all')}
+              selected={
+                filters.status === status.value || (!filters.status && status.value === 'all')
+              }
               onPress={() => onFilterChange({ ...filters, status: status.value as any })}
             >
               <ChipText
@@ -72,9 +75,7 @@ export function ExpenseFilters({ filters, onFilterChange }: ExpenseFiltersProps)
               selected={filters.category === cat || (!filters.category && cat === 'all')}
               onPress={() => onFilterChange({ ...filters, category: cat })}
             >
-              <ChipText
-                selected={filters.category === cat || (!filters.category && cat === 'all')}
-              >
+              <ChipText selected={filters.category === cat || (!filters.category && cat === 'all')}>
                 {getCategoryLabel(cat)}
               </ChipText>
             </Chip>

@@ -184,89 +184,89 @@ This document maps all 84 findings from the v2 code review to the corrective con
 
 ## Summary
 
-| Issue # | Category | Status | Fix Location |
-|---:|---|---|---|
-| 1 | Critical | Fixed | `PRODUCT_SPEC.md` §2; Phase 1/2 docs |
-| 2 | Critical | Fixed | `PRODUCT_SPEC.md` §2; all phase docs |
-| 3 | Critical | Fixed | Architecture; CloudKit |
-| 4 | Critical | Fixed | `PRODUCT_SPEC.md` §5; Architecture |
-| 5 | Critical | Fixed | Architecture; MCP protocol; Phase 3 |
-| 6 | Critical | Fixed | Data model; Multi-currency |
-| 7 | Critical | Fixed | Data model; Ledger |
-| 8 | Critical | Fixed | Ledger; Wallets; Dashboard |
-| 9 | Critical | Fixed | Data model; Ledger |
-| 10 | Critical | Fixed | Ledger; Architecture |
-| 11 | Critical | Fixed | Ledger; CloudKit |
-| 12 | Critical | Fixed | Sync; CloudKit; Phase 2 |
-| 13 | Data Model | Fixed | Data model DDL |
-| 14 | Data Model | Fixed | Product spec §6; Recurring |
-| 15 | Data Model | Fixed | Data model idempotency; MCP |
-| 16 | Data Model | Fixed | Data model idempotency; MCP |
-| 17 | Data Model | Fixed | MCP feature/protocol |
-| 18 | Data Model | Fixed | Ledger; Income/Expenses |
-| 19 | Data Model | Fixed | Wallets; Ledger; Multi-currency |
-| 20 | Data Model | Fixed | Data model lifecycle; Wallets |
-| 21 | Data Model | Fixed | Ledger; Wallets |
-| 22 | Data Model | Fixed | Ledger; CloudKit |
-| 23 | Data Model | Fixed | Data model categories; Expenses |
-| 24 | Data Model | Fixed | Data model; Onboarding |
-| 25 | Data Model | Fixed | Data model Asset; OCR; Backup |
-| 26 | Data Model | Fixed | OCR; Data model lifecycle |
-| 27 | Data Model | Fixed | Data model time types; Recurring |
-| 28 | Data Model | Fixed | Dashboard; Recurring |
-| 29 | Data Model | Fixed | Data model indexes |
-| 30 | Data Model | Fixed | Data model ShareReference; Family |
-| 31 | Data Model | Fixed | Data model lifecycle; Budget; Investment |
-| 32 | Data Model | Fixed | Product spec §7; Dashboard |
-| 33 | Data Model | Fixed | Investment; Phase 1.5 |
-| 34 | Data Model | Fixed | Multi-currency; Data model rates |
-| 35 | MCP | Fixed | MCP protocol; Phase 3 |
-| 36 | MCP | Fixed | MCP protocol; MCP feature |
-| 37 | MCP | Fixed | MCP protocol schemas |
-| 38 | MCP | Fixed | MCP protocol; MCP feature |
-| 39 | MCP | Fixed | Product spec §9; Phase 3 |
-| 40 | MCP | Fixed | MCP protocol authorization |
-| 41 | MCP | Fixed | MCP protocol; Security |
-| 42 | MCP | Fixed | MCP feature; Security; Phase 3 |
-| 43 | MCP | Fixed | MCP protocol reads |
-| 44 | MCP | Fixed | MCP protocol pagination |
-| 45 | MCP | Fixed | MCP protocol resources |
-| 46 | MCP | Fixed | MCP protocol startup; Security |
-| 47 | MCP | Fixed | MCP protocol tests |
-| 48 | MCP | Fixed | MCP compatibility; Architecture |
-| 49 | MCP | Fixed | MCP read limits |
-| 50 | Sync | Fixed | Product spec §8; CloudKit |
-| 51 | Sync | Fixed | Sync; CloudKit |
-| 52 | Sync | Fixed | CloudKit tombstones/recovery |
-| 53 | Sync | Fixed | Sync scope; CloudKit |
-| 54 | Sync | Fixed | CloudKit schema deployment |
-| 55 | Sync | Fixed | Security; CloudKit |
-| 56 | Sync | Fixed | CloudKit recovery; Sync UX |
-| 57 | Sync | Fixed | MCP reads; Sync UX |
-| 58 | Sync | Fixed | Family; Phase 3 |
-| 59 | Sync | Fixed | Family permissions; Security |
-| 60 | Sync | Fixed | Family operations; CloudKit |
-| 61 | Feature | Fixed | OCR; Phase 1.5 |
-| 62 | Feature | Fixed | Recurring scheduling; CloudKit |
-| 63 | Feature | Fixed | Recurring scheduling/update |
-| 64 | Feature | Fixed | Recurring IDs; Data model index |
-| 65 | Feature | Fixed | Budget; Data model |
-| 66 | Feature | Fixed | Budget; Security; Onboarding |
-| 67 | Feature | Fixed | Backup archive contents |
-| 68 | Feature | Fixed | Backup restore/import modes |
-| 69 | Feature | Fixed | Backup integrity |
-| 70 | Feature | Fixed | Backup encryption |
-| 71 | Feature | Fixed | Backup storage/recovery |
-| 72 | Feature | Fixed | Backup CSV; Sync |
-| 73 | Security | Fixed | Product spec §10; Security |
-| 74 | Security | Fixed | Security storage; OCR; Backup |
-| 75 | Security | Fixed | Security secrets |
-| 76 | Security | Fixed | Security threat model |
-| 77 | Security | Fixed | Product/phase scope; Security |
-| 78 | Security | Fixed | Architecture packaging; Phase 3 |
-| 79 | Security | Fixed | Architecture runtime strategy; OCR |
-| 80 | Security | Fixed | Product spec §§11–12; phase docs |
-| 81 | Security | Fixed | Product spec §§11, 13; system tests |
-| 82 | Security | Fixed | Product spec §§12–13; data/MCP policy |
-| 83 | Security | Fixed | Security diagnostics; CloudKit; Backup |
-| 84 | Security | Fixed | Product spec §§2, 4; all phase docs |
+| Issue # | Category   | Status | Fix Location                             |
+| ------: | ---------- | ------ | ---------------------------------------- |
+|       1 | Critical   | Fixed  | `PRODUCT_SPEC.md` §2; Phase 1/2 docs     |
+|       2 | Critical   | Fixed  | `PRODUCT_SPEC.md` §2; all phase docs     |
+|       3 | Critical   | Fixed  | Architecture; CloudKit                   |
+|       4 | Critical   | Fixed  | `PRODUCT_SPEC.md` §5; Architecture       |
+|       5 | Critical   | Fixed  | Architecture; MCP protocol; Phase 3      |
+|       6 | Critical   | Fixed  | Data model; Multi-currency               |
+|       7 | Critical   | Fixed  | Data model; Ledger                       |
+|       8 | Critical   | Fixed  | Ledger; Wallets; Dashboard               |
+|       9 | Critical   | Fixed  | Data model; Ledger                       |
+|      10 | Critical   | Fixed  | Ledger; Architecture                     |
+|      11 | Critical   | Fixed  | Ledger; CloudKit                         |
+|      12 | Critical   | Fixed  | Sync; CloudKit; Phase 2                  |
+|      13 | Data Model | Fixed  | Data model DDL                           |
+|      14 | Data Model | Fixed  | Product spec §6; Recurring               |
+|      15 | Data Model | Fixed  | Data model idempotency; MCP              |
+|      16 | Data Model | Fixed  | Data model idempotency; MCP              |
+|      17 | Data Model | Fixed  | MCP feature/protocol                     |
+|      18 | Data Model | Fixed  | Ledger; Income/Expenses                  |
+|      19 | Data Model | Fixed  | Wallets; Ledger; Multi-currency          |
+|      20 | Data Model | Fixed  | Data model lifecycle; Wallets            |
+|      21 | Data Model | Fixed  | Ledger; Wallets                          |
+|      22 | Data Model | Fixed  | Ledger; CloudKit                         |
+|      23 | Data Model | Fixed  | Data model categories; Expenses          |
+|      24 | Data Model | Fixed  | Data model; Onboarding                   |
+|      25 | Data Model | Fixed  | Data model Asset; OCR; Backup            |
+|      26 | Data Model | Fixed  | OCR; Data model lifecycle                |
+|      27 | Data Model | Fixed  | Data model time types; Recurring         |
+|      28 | Data Model | Fixed  | Dashboard; Recurring                     |
+|      29 | Data Model | Fixed  | Data model indexes                       |
+|      30 | Data Model | Fixed  | Data model ShareReference; Family        |
+|      31 | Data Model | Fixed  | Data model lifecycle; Budget; Investment |
+|      32 | Data Model | Fixed  | Product spec §7; Dashboard               |
+|      33 | Data Model | Fixed  | Investment; Phase 1.5                    |
+|      34 | Data Model | Fixed  | Multi-currency; Data model rates         |
+|      35 | MCP        | Fixed  | MCP protocol; Phase 3                    |
+|      36 | MCP        | Fixed  | MCP protocol; MCP feature                |
+|      37 | MCP        | Fixed  | MCP protocol schemas                     |
+|      38 | MCP        | Fixed  | MCP protocol; MCP feature                |
+|      39 | MCP        | Fixed  | Product spec §9; Phase 3                 |
+|      40 | MCP        | Fixed  | MCP protocol authorization               |
+|      41 | MCP        | Fixed  | MCP protocol; Security                   |
+|      42 | MCP        | Fixed  | MCP feature; Security; Phase 3           |
+|      43 | MCP        | Fixed  | MCP protocol reads                       |
+|      44 | MCP        | Fixed  | MCP protocol pagination                  |
+|      45 | MCP        | Fixed  | MCP protocol resources                   |
+|      46 | MCP        | Fixed  | MCP protocol startup; Security           |
+|      47 | MCP        | Fixed  | MCP protocol tests                       |
+|      48 | MCP        | Fixed  | MCP compatibility; Architecture          |
+|      49 | MCP        | Fixed  | MCP read limits                          |
+|      50 | Sync       | Fixed  | Product spec §8; CloudKit                |
+|      51 | Sync       | Fixed  | Sync; CloudKit                           |
+|      52 | Sync       | Fixed  | CloudKit tombstones/recovery             |
+|      53 | Sync       | Fixed  | Sync scope; CloudKit                     |
+|      54 | Sync       | Fixed  | CloudKit schema deployment               |
+|      55 | Sync       | Fixed  | Security; CloudKit                       |
+|      56 | Sync       | Fixed  | CloudKit recovery; Sync UX               |
+|      57 | Sync       | Fixed  | MCP reads; Sync UX                       |
+|      58 | Sync       | Fixed  | Family; Phase 3                          |
+|      59 | Sync       | Fixed  | Family permissions; Security             |
+|      60 | Sync       | Fixed  | Family operations; CloudKit              |
+|      61 | Feature    | Fixed  | OCR; Phase 1.5                           |
+|      62 | Feature    | Fixed  | Recurring scheduling; CloudKit           |
+|      63 | Feature    | Fixed  | Recurring scheduling/update              |
+|      64 | Feature    | Fixed  | Recurring IDs; Data model index          |
+|      65 | Feature    | Fixed  | Budget; Data model                       |
+|      66 | Feature    | Fixed  | Budget; Security; Onboarding             |
+|      67 | Feature    | Fixed  | Backup archive contents                  |
+|      68 | Feature    | Fixed  | Backup restore/import modes              |
+|      69 | Feature    | Fixed  | Backup integrity                         |
+|      70 | Feature    | Fixed  | Backup encryption                        |
+|      71 | Feature    | Fixed  | Backup storage/recovery                  |
+|      72 | Feature    | Fixed  | Backup CSV; Sync                         |
+|      73 | Security   | Fixed  | Product spec §10; Security               |
+|      74 | Security   | Fixed  | Security storage; OCR; Backup            |
+|      75 | Security   | Fixed  | Security secrets                         |
+|      76 | Security   | Fixed  | Security threat model                    |
+|      77 | Security   | Fixed  | Product/phase scope; Security            |
+|      78 | Security   | Fixed  | Architecture packaging; Phase 3          |
+|      79 | Security   | Fixed  | Architecture runtime strategy; OCR       |
+|      80 | Security   | Fixed  | Product spec §§11–12; phase docs         |
+|      81 | Security   | Fixed  | Product spec §§11, 13; system tests      |
+|      82 | Security   | Fixed  | Product spec §§12–13; data/MCP policy    |
+|      83 | Security   | Fixed  | Security diagnostics; CloudKit; Backup   |
+|      84 | Security   | Fixed  | Product spec §§2, 4; all phase docs      |

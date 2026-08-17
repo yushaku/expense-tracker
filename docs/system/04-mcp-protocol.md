@@ -4,14 +4,14 @@ MCP is absent from Phases 1, 1.5, and 2. In Phase 3 a local Node.js/TypeScript s
 
 ## Defaults and limits
 
-| Setting | Default | Maximum |
-|---|---:|---:|
-| `EXPENSE_MCP_READONLY` | `true` | writes require explicit `false` |
-| query text | — | 200 characters |
-| page size | 50 | 100 rows |
-| tool execution | 5 s | 10 s for export-like reads |
-| note/merchant input | — | 1,000 / 120 characters |
-| date range | 31 days | 366 days |
+| Setting                | Default |                         Maximum |
+| ---------------------- | ------: | ------------------------------: |
+| `EXPENSE_MCP_READONLY` |  `true` | writes require explicit `false` |
+| query text             |       — |                  200 characters |
+| page size              |      50 |                        100 rows |
+| tool execution         |     5 s |      10 s for export-like reads |
+| note/merchant input    |       — |          1,000 / 120 characters |
+| date range             | 31 days |                        366 days |
 
 Reads use opaque, signed/versioned cursors based on stable `(occurredAtUtc, id)` ordering. Responses include `items`, `nextCursor`, and `hasMore`; offset pagination is forbidden. SQLite progress handlers/abort signals cancel timed-out work.
 
@@ -45,7 +45,15 @@ Money crosses JSON as a decimal-string count of minor units so precision does no
       "clientRequestId": { "type": "string", "minLength": 8, "maxLength": 128 },
       "dryRun": { "type": "boolean", "default": false }
     },
-    "required": ["walletId", "amountMinor", "currency", "categoryId", "occurredAtUtc", "occurredOffsetMinutes", "clientRequestId"]
+    "required": [
+      "walletId",
+      "amountMinor",
+      "currency",
+      "categoryId",
+      "occurredAtUtc",
+      "occurredOffsetMinutes",
+      "clientRequestId"
+    ]
   },
   "outputSchema": {
     "type": "object",
@@ -56,7 +64,11 @@ Money crosses JSON as a decimal-string count of minor units so precision does no
       "expenseId": { "type": "string" },
       "error": {
         "type": "object",
-        "properties": { "code": { "type": "string" }, "message": { "type": "string" }, "field": { "type": "string" } },
+        "properties": {
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "field": { "type": "string" }
+        },
         "required": ["code", "message"]
       }
     },
@@ -81,7 +93,15 @@ Domain/tool failures are not JSON-RPC errors:
 
 ```json
 {
-  "structuredContent": { "ok": false, "dryRun": false, "error": { "code": "VALIDATION_ERROR", "message": "Số tiền không hợp lệ", "field": "amountMinor" } },
+  "structuredContent": {
+    "ok": false,
+    "dryRun": false,
+    "error": {
+      "code": "VALIDATION_ERROR",
+      "message": "Số tiền không hợp lệ",
+      "field": "amountMinor"
+    }
+  },
   "content": [{ "type": "text", "text": "Không thể thêm khoản chi: số tiền không hợp lệ." }],
   "isError": true
 }

@@ -7,7 +7,8 @@ import { useExpenseStore } from '../../../src/stores/expenseStore';
 import { useWalletStore } from '../../../src/stores/walletStore';
 import { ExpenseForm } from '../../../src/components/expenses/ExpenseForm';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Expense, Wallet } from '@expense/shared';
+import type { Expense } from '@expense/shared';
+import { Wallet } from '@expense/shared';
 
 export default function EditExpenseScreen() {
   const router = useRouter();

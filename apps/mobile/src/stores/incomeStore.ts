@@ -1,59 +1,46 @@
 // apps/mobile/src/stores/incomeStore.ts
-// Income store — CRUD + Soft void + Edit using Zustand
+// Income store — CRUD + Soft void + Edit using Zustand (v3: @expense/domain)
 
 import { create } from 'zustand';
-import {
-  IncomeType,
-  SupportedCurrency,
-  Income,
-  AddIncomeInput,
-  UpdateIncomeInput,
-  LedgerEngine,
-  generateId,
-  formatCurrency,
-  getSharedDb,
-  getVietnamNow,
-} from '@expense/shared';
+import { getSharedDb } from '@expense/domain';
 
-// Singleton ledger instance (shares DB with walletStore and expenseStore)
-let ledger: LedgerEngine | null = null;
-
-function getLedger(): LedgerEngine {
-  if (!ledger) {
-    ledger = new LedgerEngine(getSharedDb());
-  }
-  return ledger;
+export interface IncomeViewModel {
+  id: string;
+  walletId: string;
+  categoryId?: string;
+  amountMinor: bigint;
+  currency: string;
+  source?: string;
+  type: 'salary' | 'freelance' | 'investment' | 'gift' | 'other';
+  description?: string;
+  occurredAtUtc: string;
+  status: 'active' | 'voided';
+  isSample: boolean;
 }
 
-// Income type labels (Vietnamese)
-export const INCOME_TYPE_LABELS: Record<IncomeType, string> = {
-  salary: 'Lương',
-  freelance: 'Thu nhập phụ',
-  investment: 'Đầu tư',
-  gift: 'Quà tặng',
-  other: 'Khác',
-};
+export interface AddIncomeInput {
+  walletId: string;
+  categoryId?: string;
+  amountMinor: bigint;
+  currency: string;
+  source?: string;
+  type?: 'salary' | 'freelance' | 'investment' | 'gift' | 'other';
+  description?: string;
+  occurredAtUtc?: string;
+}
 
-// Income type colors
-export const INCOME_TYPE_COLORS: Record<IncomeType, string> = {
-  salary: '#3B82F6', // blue
-  freelance: '#A855F7', // purple
-  investment: '#22C55E', // green
-  gift: '#EC4899', // pink
-  other: '#64748B', // gray
-};
-
-// Income type icons
-export const INCOME_TYPE_ICONS: Record<IncomeType, string> = {
-  salary: 'briefcase',
-  freelance: 'laptop',
-  investment: 'chart-line',
-  gift: 'gift',
-  other: 'dots-horizontal',
-};
+export interface UpdateIncomeInput {
+  id: string;
+  amountMinor?: bigint;
+  categoryId?: string;
+  source?: string;
+  type?: 'salary' | 'freelance' | 'investment' | 'gift' | 'other';
+  description?: string;
+  occurredAtUtc?: string;
+}
 
 export interface IncomeFilters {
-  type?: IncomeType | 'all';
+  type?: string;
   search?: string;
   startDate?: string;
   endDate?: string;
@@ -61,20 +48,52 @@ export interface IncomeFilters {
 }
 
 interface IncomeState {
-  incomes: Income[];
+  incomes: IncomeViewModel[];
   loading: boolean;
   error: string | null;
   filters: IncomeFilters;
 
   // Actions
   loadIncomes: () => Promise<void>;
-  addIncome: (input: AddIncomeInput) => Promise<Income>;
-  updateIncome: (input: UpdateIncomeInput) => Promise<Income>;
+  addIncome: (input: AddIncomeInput) => Promise<IncomeViewModel>;
+  updateIncome: (input: UpdateIncomeInput) => Promise<IncomeViewModel>;
   voidIncome: (id: string) => Promise<void>;
-  getIncomeById: (id: string) => Income | null;
+  getIncomeById: (id: string) => IncomeViewModel | null;
   setFilters: (filters: IncomeFilters) => void;
-  filteredIncomes: () => Income[];
+  filteredIncomes: () => IncomeViewModel[];
 }
+
+function mapToViewModel(i: any): IncomeViewModel {
+  return {
+    id: i.id,
+    walletId: i.walletId,
+    categoryId: i.categoryId,
+    amountMinor: i.amountMinor,
+    currency: i.currency,
+    source: i.source,
+    type: i.type,
+    description: i.description,
+    occurredAtUtc: i.occurredAtUtc,
+    status: i.status,
+    isSample: i.isSample,
+  };
+}
+
+export const INCOME_TYPE_LABELS: Record<string, string> = {
+  salary: 'Lương',
+  freelance: 'Thu nhập phụ',
+  investment: 'Đầu tư',
+  gift: 'Quà tặng',
+  other: 'Khác',
+};
+
+export const INCOME_TYPE_COLORS: Record<string, string> = {
+  salary: '#3B82F6',
+  freelance: '#A855F7',
+  investment: '#22C55E',
+  gift: '#EC4899',
+  other: '#64748B',
+};
 
 export const useIncomeStore = create<IncomeState>((set, get) => ({
   incomes: [],
@@ -85,22 +104,9 @@ export const useIncomeStore = create<IncomeState>((set, get) => ({
   loadIncomes: async () => {
     set({ loading: true, error: null });
     try {
-      const database = getSharedDb();
-      const { rows } = database.getAllIncomes();
-      const incomes: Income[] = rows.map((row) => ({
-        id: row.id,
-        amount: row.amount,
-        currency: row.currency as SupportedCurrency,
-        source: row.source ?? '',
-        description: row.description,
-        date: row.date,
-        walletId: row.walletId,
-        type: (row.type ?? 'other') as IncomeType,
-        status: row.status as 'active' | 'voided',
-        clientRequestId: row.clientRequestId ?? undefined,
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-      }));
+      const db = getSharedDb();
+      const allIncomes = db.getAllIncomes();
+      const incomes: IncomeViewModel[] = allIncomes.map(mapToViewModel);
       set({ incomes, loading: false });
     } catch (err: any) {
       set({ loading: false, error: err.message ?? 'Failed to load incomes' });
@@ -110,27 +116,46 @@ export const useIncomeStore = create<IncomeState>((set, get) => ({
   addIncome: async (input: AddIncomeInput) => {
     set({ loading: true, error: null });
     try {
-      const ledgerEngine = getLedger();
-      const row = ledgerEngine.createIncome(input);
-      const income: Income = {
-        id: row.id,
-        amount: row.amount,
-        currency: row.currency as SupportedCurrency,
-        source: row.source ?? '',
-        description: row.description,
-        date: row.date,
-        walletId: row.walletId,
-        type: (row.type ?? 'other') as IncomeType,
-        status: row.status as 'active' | 'voided',
-        clientRequestId: row.clientRequestId ?? undefined,
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-      };
+      const db = getSharedDb();
+      const now = new Date().toISOString();
+      const id = crypto.randomUUID();
+
+      const income = db.createIncome({
+        id,
+        walletId: input.walletId,
+        categoryId: input.categoryId,
+        amountMinor: input.amountMinor,
+        currency: input.currency,
+        source: input.source,
+        type: input.type ?? 'other',
+        description: input.description,
+        occurredAtUtc: input.occurredAtUtc ?? now,
+        status: 'active',
+        isSample: false,
+        createdAtUtc: now,
+        updatedAtUtc: now,
+      } as any);
+
+      // Create ledger entry
+      db.createLedgerEntry({
+        id: crypto.randomUUID(),
+        walletId: input.walletId,
+        sourceType: 'income',
+        sourceId: id,
+        entryKind: 'income',
+        signedMinor: input.amountMinor,
+        currency: input.currency,
+        status: 'active',
+        occurredAtUtc: input.occurredAtUtc ?? now,
+        createdAtUtc: now,
+      });
+
+      const incomeVm = mapToViewModel(income);
       set((state) => ({
-        incomes: [income, ...state.incomes],
+        incomes: [incomeVm, ...state.incomes],
         loading: false,
       }));
-      return income;
+      return incomeVm;
     } catch (err: any) {
       set({ loading: false, error: err.message ?? 'Failed to add income' });
       throw err;
@@ -140,43 +165,31 @@ export const useIncomeStore = create<IncomeState>((set, get) => ({
   updateIncome: async (input: UpdateIncomeInput) => {
     set({ loading: true, error: null });
     try {
-      const database = getSharedDb();
-      const existing = database.getIncome(input.id);
+      const db = getSharedDb();
+      const existing = db.getIncome(input.id);
       if (!existing) throw new Error('NOT_FOUND: income not found');
-      if (existing.status === 'voided') throw new Error('ALREADY_VOIDED: cannot update voided income');
+      if (existing.status === 'voided')
+        throw new Error('ALREADY_VOIDED: cannot update voided income');
 
-      // Validate amount if provided
-      if (input.amount !== undefined && input.amount <= 0) {
+      if (input.amountMinor !== undefined && input.amountMinor <= 0n) {
         throw new Error('VALIDATION_ERROR: amount must be positive');
       }
 
-      const row = database.updateIncome(input.id, {
-        amount: input.amount,
+      const income = db.updateIncome(input.id, {
+        amountMinor: input.amountMinor,
+        categoryId: input.categoryId,
         source: input.source,
+        type: input.type,
         description: input.description,
-        date: input.date,
-      });
+        occurredAtUtc: input.occurredAtUtc,
+      } as any);
 
-      const income: Income = {
-        id: row.id,
-        amount: row.amount,
-        currency: row.currency as SupportedCurrency,
-        source: row.source ?? '',
-        description: row.description,
-        date: row.date,
-        walletId: row.walletId,
-        type: (row.type ?? 'other') as IncomeType,
-        status: row.status as 'active' | 'voided',
-        clientRequestId: row.clientRequestId ?? undefined,
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-      };
-
+      const incomeVm = mapToViewModel(income);
       set((state) => ({
-        incomes: state.incomes.map((i) => (i.id === input.id ? income : i)),
+        incomes: state.incomes.map((i) => (i.id === input.id ? incomeVm : i)),
         loading: false,
       }));
-      return income;
+      return incomeVm;
     } catch (err: any) {
       set({ loading: false, error: err.message ?? 'Failed to update income' });
       throw err;
@@ -186,13 +199,22 @@ export const useIncomeStore = create<IncomeState>((set, get) => ({
   voidIncome: async (id: string) => {
     set({ loading: true, error: null });
     try {
-      const ledgerEngine = getLedger();
-      ledgerEngine.voidIncome(id);
+      const db = getSharedDb();
+      const existing = db.getIncome(id);
+      if (!existing) throw new Error('NOT_FOUND: income not found');
+
+      db.updateIncome(id, { status: 'voided' } as any);
+
+      // Mark ledger entry as voided
+      const ledgerEntries = db.getLedgerEntries(existing.walletId);
+      ledgerEntries
+        .filter((e: any) => e.sourceId === id && e.sourceType === 'income')
+        .forEach((e: any) => {
+          e.status = 'voided';
+        });
 
       set((state) => ({
-        incomes: state.incomes.map((i) =>
-          i.id === id ? { ...i, status: 'voided' as const, updatedAt: getVietnamNow() } : i
-        ),
+        incomes: state.incomes.map((i) => (i.id === id ? { ...i, status: 'voided' as const } : i)),
         loading: false,
       }));
     } catch (err: any) {
@@ -201,7 +223,7 @@ export const useIncomeStore = create<IncomeState>((set, get) => ({
     }
   },
 
-  getIncomeById: (id: string): Income | null => {
+  getIncomeById: (id: string): IncomeViewModel | null => {
     const { incomes } = get();
     return incomes.find((i) => i.id === id) ?? null;
   },
@@ -210,46 +232,35 @@ export const useIncomeStore = create<IncomeState>((set, get) => ({
     set({ filters });
   },
 
-  filteredIncomes: (): Income[] => {
+  filteredIncomes: (): IncomeViewModel[] => {
     const { incomes, filters } = get();
     let filtered = [...incomes];
 
-    // Filter by type
     if (filters.type && filters.type !== 'all') {
       filtered = filtered.filter((i) => i.type === filters.type);
     }
 
-    // Filter by search text
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       filtered = filtered.filter(
         (i) =>
-          i.description.toLowerCase().includes(searchLower) ||
-          i.source.toLowerCase().includes(searchLower) ||
-          INCOME_TYPE_LABELS[i.type].toLowerCase().includes(searchLower)
+          (i.description && i.description.toLowerCase().includes(searchLower)) ||
+          (i.source && i.source.toLowerCase().includes(searchLower)),
       );
     }
 
-    // Filter by date range
     if (filters.startDate) {
-      const start = new Date(filters.startDate).getTime();
-      filtered = filtered.filter((i) => new Date(i.date).getTime() >= start);
+      filtered = filtered.filter((i) => i.occurredAtUtc >= filters.startDate!);
     }
     if (filters.endDate) {
-      const end = new Date(filters.endDate).getTime();
-      filtered = filtered.filter((i) => new Date(i.date).getTime() <= end);
+      filtered = filtered.filter((i) => i.occurredAtUtc <= filters.endDate!);
     }
 
-    // Filter by status
     if (filters.status && filters.status !== 'all') {
       filtered = filtered.filter((i) => i.status === filters.status);
     }
 
-    // Sort by date descending (most recent first)
-    filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
+    filtered.sort((a, b) => b.occurredAtUtc.localeCompare(a.occurredAtUtc));
     return filtered;
   },
 }));
-
-export { formatCurrency };

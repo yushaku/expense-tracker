@@ -3,7 +3,8 @@
 
 import React, { useState } from 'react';
 import { YStack, Text, XStack, Input, Card, Button, ScrollView } from '@expense/ui';
-import { ExpenseCategory, CATEGORY_LABELS, Wallet, generateId } from '@expense/shared';
+import type { ExpenseCategory, Wallet } from '@expense/shared';
+import { CATEGORY_LABELS, generateId } from '@expense/shared';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface ExpenseFormProps {
@@ -182,10 +183,7 @@ export function ExpenseForm({
                 padding="$2"
                 borderRadius="$2"
               >
-                <Text
-                  fontSize="$xs"
-                  color={walletId === wallet.id ? '$primary' : '$onSurface'}
-                >
+                <Text fontSize="$xs" color={walletId === wallet.id ? '$primary' : '$onSurface'}>
                   {wallet.name}
                 </Text>
               </Card>
@@ -222,12 +220,7 @@ export function ExpenseForm({
           <Button flex={1} variant="outlined" onPress={onCancel}>
             Hủy
           </Button>
-          <Button
-            flex={1}
-            variant="contained"
-            onPress={handleSubmit}
-            loading={loading}
-          >
+          <Button flex={1} variant="contained" onPress={handleSubmit} loading={loading}>
             {isEdit ? 'Lưu' : 'Thêm'}
           </Button>
         </XStack>

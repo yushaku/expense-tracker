@@ -1,13 +1,13 @@
 // apps/mobile/src/components/wallets/WalletForm.tsx
-// Create/Edit wallet form
+// Create/Edit wallet form (v3: @expense/domain — BigInt amounts)
 
 import React, { useState } from 'react';
 import { YStack, Text, XStack, Input, Card } from '@expense/ui';
-import { WalletType } from '@expense/shared';
+import type { WalletType } from '@expense/shared';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface WalletFormProps {
-  initialData?: { id: string; name?: string; type?: WalletType; creditLimit?: number };
+  initialData?: { id: string; name?: string; type?: WalletType; creditLimitMinor?: bigint };
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
   loading?: boolean;
@@ -24,7 +24,7 @@ export function WalletForm({ initialData, onSubmit, onCancel, loading }: WalletF
   const [name, setName] = useState(initialData?.name ?? '');
   const [type, setType] = useState<WalletType>(initialData?.type ?? 'cash');
   const [creditLimit, setCreditLimit] = useState(
-    initialData?.creditLimit ? String(initialData.creditLimit) : ''
+    initialData?.creditLimitMinor ? String(initialData.creditLimitMinor) : '',
   );
   const [openingBalance, setOpeningBalance] = useState('0');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -56,14 +56,16 @@ export function WalletForm({ initialData, onSubmit, onCancel, loading }: WalletF
         await onSubmit({
           id: initialData!.id,
           name,
-          creditLimit: type === 'credit_card' ? parseFloat(creditLimit) || undefined : undefined,
+          creditLimitMinor:
+            type === 'credit_card' ? BigInt(Math.round(parseFloat(creditLimit))) : 0n,
         });
       } else {
         await onSubmit({
           name,
           type,
-          creditLimit: type === 'credit_card' ? parseFloat(creditLimit) || undefined : undefined,
-          openingBalance: parseFloat(openingBalance) || 0,
+          creditLimitMinor:
+            type === 'credit_card' ? BigInt(Math.round(parseFloat(creditLimit))) : 0n,
+          openingBalance: BigInt(Math.round(parseFloat(openingBalance))),
         });
       }
     } catch (err: any) {
@@ -98,10 +100,7 @@ export function WalletForm({ initialData, onSubmit, onCancel, loading }: WalletF
                   size={20}
                   color={type === wt.type ? '#0F766E' : '#49454F'}
                 />
-                <Text
-                  fontSize="$sm"
-                  color={type === wt.type ? '$primary' : '$onSurface'}
-                >
+                <Text fontSize="$sm" color={type === wt.type ? '$primary' : '$onSurface'}>
                   {wt.label}
                 </Text>
               </XStack>
@@ -115,11 +114,7 @@ export function WalletForm({ initialData, onSubmit, onCancel, loading }: WalletF
         <Text fontSize="$sm" color="$onSurfaceVariant">
           Tên ví
         </Text>
-        <Input
-          value={name}
-          onChangeText={setName}
-          placeholder="Ví dụ: Ví chính, Tiền mặt"
-        />
+        <Input value={name} onChangeText={setName} placeholder="Ví dụ: Ví chính, Tiền mặt" />
         {errors.name && (
           <Text fontSize="$xs" color="$error">
             {errors.name}

@@ -1,17 +1,24 @@
 // apps/mobile/src/components/wallets/TransferForm.tsx
-// Transfer between wallets form
+// Transfer between wallets form (v3: @expense/domain — BigInt amounts)
 
 import React, { useState } from 'react';
 import { YStack, Text, XStack, Input, Card } from '@expense/ui';
-import { WalletWithBalance, formatCurrency } from '@expense/shared';
+import { formatMoney } from '@expense/domain';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface TransferFormProps {
-  wallets: WalletWithBalance[];
+  wallets: {
+    id: string;
+    name: string;
+    type: 'cash' | 'bank' | 'ewallet' | 'credit_card';
+    currency: string;
+    creditLimitMinor: bigint;
+    balanceMinor: bigint;
+  }[];
   onSubmit: (data: {
     fromWalletId: string;
     toWalletId: string;
-    amount: number;
+    amountMinor: bigint;
     note?: string;
     clientRequestId: string;
   }) => Promise<void>;
@@ -38,7 +45,6 @@ export function TransferForm({ wallets, onSubmit, onCancel, loading }: TransferF
 
   const handleSubmit = async () => {
     const newErrors: Record<string, string> = {};
-    const parsedAmount = parseFloat(amount);
 
     if (!fromWalletId) {
       newErrors.fromWalletId = 'Chọn ví nguồn';
@@ -49,7 +55,7 @@ export function TransferForm({ wallets, onSubmit, onCancel, loading }: TransferF
     if (fromWalletId === toWalletId) {
       newErrors.toWalletId = 'Ví đích phải khác ví nguồn';
     }
-    if (!amount || parsedAmount <= 0) {
+    if (!amount || parseFloat(amount) <= 0) {
       newErrors.amount = 'Số tiền phải > 0';
     }
 
@@ -59,12 +65,15 @@ export function TransferForm({ wallets, onSubmit, onCancel, loading }: TransferF
     }
 
     try {
+      // Parse to minor units (VND scale = 0)
+      const amountMinor = BigInt(Math.round(parseFloat(amount)));
+
       await onSubmit({
         fromWalletId,
         toWalletId,
-        amount: parsedAmount,
+        amountMinor,
         note: note || undefined,
-        clientRequestId: Date.now().toString(36) + Math.random().toString(36).substr(2, 9),
+        clientRequestId: crypto.randomUUID(),
       });
     } catch (err: any) {
       setErrors({ form: err.message ?? 'Thất bại' });
@@ -98,10 +107,7 @@ export function TransferForm({ wallets, onSubmit, onCancel, loading }: TransferF
                   size={20}
                   color={fromWalletId === wallet.id ? '#0F766E' : '#49454F'}
                 />
-                <Text
-                  fontSize="$sm"
-                  color={fromWalletId === wallet.id ? '$primary' : '$onSurface'}
-                >
+                <Text fontSize="$sm" color={fromWalletId === wallet.id ? '$primary' : '$onSurface'}>
                   {wallet.name}
                 </Text>
               </XStack>
@@ -115,7 +121,8 @@ export function TransferForm({ wallets, onSubmit, onCancel, loading }: TransferF
         )}
         {fromWallet && (
           <Text fontSize="$xs" color="$onSurfaceVariant">
-            Số dư: {formatCurrency(fromWallet.balance, fromWallet.currency)}
+            Số dư:{' '}
+            {formatMoney({ minorUnits: fromWallet.balanceMinor, currency: fromWallet.currency })}
           </Text>
         )}
       </YStack>
@@ -141,10 +148,7 @@ export function TransferForm({ wallets, onSubmit, onCancel, loading }: TransferF
                   size={20}
                   color={toWalletId === wallet.id ? '#0F766E' : '#49454F'}
                 />
-                <Text
-                  fontSize="$sm"
-                  color={toWalletId === wallet.id ? '$primary' : '$onSurface'}
-                >
+                <Text fontSize="$sm" color={toWalletId === wallet.id ? '$primary' : '$onSurface'}>
                   {wallet.name}
                 </Text>
               </XStack>
@@ -181,11 +185,7 @@ export function TransferForm({ wallets, onSubmit, onCancel, loading }: TransferF
         <Text fontSize="$sm" color="$onSurfaceVariant">
           Ghi chú (tùy chọn)
         </Text>
-        <Input
-          value={note}
-          onChangeText={setNote}
-          placeholder="Ví dụ: Trả nợ thẻ tín dụng"
-        />
+        <Input value={note} onChangeText={setNote} placeholder="Ví dụ: Trả nợ thẻ tín dụng" />
       </YStack>
 
       {errors.form && (

@@ -5,7 +5,8 @@ import React, { useEffect, useState } from 'react';
 import { YStack, Text, XStack } from '@expense/ui';
 import { useWalletStore } from '../../src/stores/walletStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { WalletWithBalance, formatCurrency } from '@expense/shared';
+import type { WalletWithBalance } from '@expense/shared';
+import { formatCurrency } from '@expense/shared';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const WALLET_ICONS: Record<string, string> = {

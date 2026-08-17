@@ -1,9 +1,9 @@
 // apps/mobile/src/components/dashboard/WalletSummary.tsx
-// Wallet balances overview
+// Wallet balances overview (v3: @expense/domain)
 
 import { Card, XStack, YStack, Text } from '@expense/ui';
-import { WalletBalanceItem } from '../../stores/dashboardStore';
-import { formatCurrency } from '@expense/shared';
+import type { WalletBalanceItem } from '../../stores/dashboardStore';
+import { formatMoney } from '@expense/domain';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface WalletSummaryProps {
@@ -39,11 +39,7 @@ export function WalletSummary({ wallets, currency = 'VND' }: WalletSummaryProps)
         </Text>
         <YStack gap="$2">
           {wallets.map((wallet) => (
-            <WalletRow
-              key={wallet.id}
-              wallet={wallet}
-              currency={currency}
-            />
+            <WalletRow key={wallet.id} wallet={wallet} currency={currency} />
           ))}
         </YStack>
       </YStack>
@@ -63,18 +59,14 @@ function WalletRow({ wallet, currency }: WalletRowProps) {
   return (
     <XStack justifyContent="space-between" alignItems="center" paddingVertical="$1">
       <XStack gap="$2" alignItems="center" flex={1}>
-        <MaterialCommunityIcons
-          name={iconName as any}
-          size={20}
-          color="#0F766E"
-        />
+        <MaterialCommunityIcons name={iconName as any} size={20} color="#0F766E" />
         <YStack flex={1}>
           <Text fontSize="$sm" fontWeight="500" numberOfLines={1}>
             {wallet.name}
           </Text>
-          {isCreditCard && wallet.creditLimit > 0 && (
+          {isCreditCard && wallet.creditLimitMinor > 0n && (
             <Text fontSize="$xs" color="$onSurfaceVariant">
-              Hạn mức: {formatCurrency(wallet.creditLimit, currency)}
+              Hạn mức: {formatMoney({ minorUnits: wallet.creditLimitMinor, currency })}
             </Text>
           )}
         </YStack>
@@ -82,9 +74,12 @@ function WalletRow({ wallet, currency }: WalletRowProps) {
       <Text
         fontSize="$md"
         fontWeight="600"
-        color={isCreditCard ? '$expense' : wallet.balance >= 0 ? '$income' : '$expense'}
+        color={isCreditCard ? '$expense' : wallet.balanceMinor >= 0n ? '$income' : '$expense'}
       >
-        {formatCurrency(Math.abs(wallet.balance), currency)}
+        {formatMoney({
+          minorUnits: wallet.balanceMinor >= 0n ? wallet.balanceMinor : -wallet.balanceMinor,
+          currency,
+        })}
       </Text>
     </XStack>
   );

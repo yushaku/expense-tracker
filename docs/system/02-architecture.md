@@ -4,11 +4,11 @@
 
 The product is iPhone-first and expands without changing domain semantics.
 
-| Phase | Runtime architecture |
-|---|---|
-| 1/1.5 | `apps/iphone` → `packages/domain` → SQLite repository |
-| 2 | iPhone + `apps/mac-web` → domain → local projection + CloudKit operation sync |
-| 3 | Adds Electron and local MCP adapters over the same domain and synced projection |
+| Phase | Runtime architecture                                                            |
+| ----- | ------------------------------------------------------------------------------- |
+| 1/1.5 | `apps/iphone` → `packages/domain` → SQLite repository                           |
+| 2     | iPhone + `apps/mac-web` → domain → local projection + CloudKit operation sync   |
+| 3     | Adds Electron and local MCP adapters over the same domain and synced projection |
 
 There is no Mac process, shared filesystem database, Electron runtime, MCP server, or CloudKit dependency in Phase 1.
 

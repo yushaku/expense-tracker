@@ -12,8 +12,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function IncomesScreen() {
   const router = useRouter();
-  const { filteredIncomes, loading, error, loadIncomes, filters, setFilters } =
-    useIncomeStore();
+  const { filteredIncomes, loading, error, loadIncomes, filters, setFilters } = useIncomeStore();
   const { wallets, loadWallets } = useWalletStore();
   const [searchQuery, setSearchQuery] = useState('');
 

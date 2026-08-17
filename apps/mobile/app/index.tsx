@@ -49,12 +49,7 @@ export default function HomeScreen() {
 
         {/* Error state */}
         {error && (
-          <YStack
-            backgroundColor="$error"
-            borderRadius="$3"
-            padding="$3"
-            gap="$1"
-          >
+          <YStack backgroundColor="$error" borderRadius="$3" padding="$3" gap="$1">
             <Text fontSize="$sm" color="white">
               {error}
             </Text>
@@ -62,10 +57,7 @@ export default function HomeScreen() {
         )}
 
         {/* Cash Flow + Savings Rate */}
-        <DashboardSummary
-          cashFlow={cashFlow}
-          savingsRate={savingsRate}
-        />
+        <DashboardSummary cashFlow={cashFlow} savingsRate={savingsRate} />
 
         {/* Category Breakdown */}
         <CategoryChart categories={categoryBreakdown} />

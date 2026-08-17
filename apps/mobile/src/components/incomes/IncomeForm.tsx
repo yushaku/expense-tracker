@@ -3,9 +3,14 @@
 
 import React, { useState } from 'react';
 import { YStack, Text, XStack, Input, Card, Button, ScrollView } from '@expense/ui';
-import { IncomeType, Wallet, generateId } from '@expense/shared';
+import type { IncomeType, Wallet } from '@expense/shared';
+import { generateId } from '@expense/shared';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { INCOME_TYPE_LABELS, INCOME_TYPE_COLORS, INCOME_TYPE_ICONS } from '../../stores/incomeStore';
+import {
+  INCOME_TYPE_LABELS,
+  INCOME_TYPE_COLORS,
+  INCOME_TYPE_ICONS,
+} from '../../stores/incomeStore';
 
 interface IncomeFormProps {
   initialData?: {
@@ -31,13 +36,7 @@ const INCOME_TYPE_LIST: { type: IncomeType; label: string; icon: string }[] = [
   { type: 'other', label: INCOME_TYPE_LABELS.other, icon: 'dots-horizontal' },
 ];
 
-export function IncomeForm({
-  initialData,
-  wallets,
-  onSubmit,
-  onCancel,
-  loading,
-}: IncomeFormProps) {
+export function IncomeForm({ initialData, wallets, onSubmit, onCancel, loading }: IncomeFormProps) {
   const [amount, setAmount] = useState(initialData?.amount ? String(initialData.amount) : '');
   const [type, setType] = useState<IncomeType | undefined>(initialData?.type);
   const [source, setSource] = useState(initialData?.source ?? '');
@@ -139,10 +138,7 @@ export function IncomeForm({
                     size={16}
                     color={type === item.type ? '#0F766E' : INCOME_TYPE_COLORS[item.type]}
                   />
-                  <Text
-                    fontSize="$xs"
-                    color={type === item.type ? '$primary' : '$onSurface'}
-                  >
+                  <Text fontSize="$xs" color={type === item.type ? '$primary' : '$onSurface'}>
                     {item.label}
                   </Text>
                 </XStack>
@@ -183,10 +179,7 @@ export function IncomeForm({
                 padding="$2"
                 borderRadius="$2"
               >
-                <Text
-                  fontSize="$xs"
-                  color={walletId === wallet.id ? '$primary' : '$onSurface'}
-                >
+                <Text fontSize="$xs" color={walletId === wallet.id ? '$primary' : '$onSurface'}>
                   {wallet.name}
                 </Text>
               </Card>
@@ -223,12 +216,7 @@ export function IncomeForm({
           <Button flex={1} variant="outlined" onPress={onCancel}>
             Hủy
           </Button>
-          <Button
-            flex={1}
-            variant="contained"
-            onPress={handleSubmit}
-            loading={loading}
-          >
+          <Button flex={1} variant="contained" onPress={handleSubmit} loading={loading}>
             {isEdit ? 'Lưu' : 'Thêm'}
           </Button>
         </XStack>

@@ -18,10 +18,7 @@ export default function NewWalletScreen() {
 
   return (
     <YStack flex={1} backgroundColor="$background">
-      <WalletForm
-        onSubmit={handleSubmit}
-        onCancel={() => router.back()}
-      />
+      <WalletForm onSubmit={handleSubmit} onCancel={() => router.back()} />
     </YStack>
   );
 }

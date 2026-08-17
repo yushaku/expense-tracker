@@ -12,8 +12,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function ExpensesScreen() {
   const router = useRouter();
-  const { filteredExpenses, loading, error, loadExpenses, filters, setFilters } =
-    useExpenseStore();
+  const { filteredExpenses, loading, error, loadExpenses, filters, setFilters } = useExpenseStore();
   const { wallets, loadWallets } = useWalletStore();
   const [searchQuery, setSearchQuery] = useState('');
 

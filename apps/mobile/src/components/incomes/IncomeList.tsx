@@ -3,11 +3,12 @@
 
 import React from 'react';
 import { YStack, Text, Input, XStack, ScrollView } from '@expense/ui';
-import { Income } from '@expense/shared';
+import type { Income } from '@expense/shared';
 import { Chip, ChipText } from '@expense/ui';
 import { IncomeCard } from './IncomeCard';
-import { INCOME_TYPE_LABELS, IncomeFilters } from '../../stores/incomeStore';
-import { IncomeType } from '@expense/shared';
+import type { IncomeFilters } from '../../stores/incomeStore';
+import { INCOME_TYPE_LABELS } from '../../stores/incomeStore';
+import type { IncomeType } from '@expense/shared';
 
 interface IncomeListProps {
   incomes: Income[];
@@ -92,7 +93,9 @@ export function IncomeList({
             {STATUS_OPTIONS.map((status) => (
               <Chip
                 key={status.value}
-                selected={filters.status === status.value || (!filters.status && status.value === 'all')}
+                selected={
+                  filters.status === status.value || (!filters.status && status.value === 'all')
+                }
                 onPress={() => onFilterChange({ ...filters, status: status.value as any })}
               >
                 <ChipText
@@ -117,9 +120,7 @@ export function IncomeList({
                 selected={filters.type === type || (!filters.type && type === 'all')}
                 onPress={() => onFilterChange({ ...filters, type })}
               >
-                <ChipText
-                  selected={filters.type === type || (!filters.type && type === 'all')}
-                >
+                <ChipText selected={filters.type === type || (!filters.type && type === 'all')}>
                   {getTypeLabel(type)}
                 </ChipText>
               </Chip>

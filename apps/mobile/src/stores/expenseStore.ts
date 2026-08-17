@@ -1,33 +1,43 @@
 // apps/mobile/src/stores/expenseStore.ts
-// Expense store — CRUD + Soft void + Edit using Zustand
+// Expense store — CRUD + Soft void + Edit using Zustand (v3: @expense/domain)
 
 import { create } from 'zustand';
-import {
-  ExpenseCategory,
-  SupportedCurrency,
-  Expense,
-  AddExpenseInput,
-  UpdateExpenseInput,
-  LedgerEngine,
-  generateId,
-  formatCurrency,
-  CATEGORY_LABELS,
-  getSharedDb,
-  getVietnamNow,
-} from '@expense/shared';
+import { InMemoryDatabase, getSharedDb } from '@expense/domain';
 
-// Singleton ledger instance (shares DB with walletStore)
-let ledger: LedgerEngine | null = null;
+export interface ExpenseViewModel {
+  id: string;
+  walletId: string;
+  categoryId: string;
+  amountMinor: bigint;
+  currency: string;
+  description?: string;
+  merchant?: string;
+  occurredAtUtc: string;
+  status: 'active' | 'voided';
+  isSample: boolean;
+}
 
-function getLedger(): LedgerEngine {
-  if (!ledger) {
-    ledger = new LedgerEngine(getSharedDb());
-  }
-  return ledger;
+export interface AddExpenseInput {
+  walletId: string;
+  categoryId: string;
+  amountMinor: bigint;
+  currency: string;
+  description?: string;
+  merchant?: string;
+  occurredAtUtc?: string;
+  clientRequestId?: string;
+}
+
+export interface UpdateExpenseInput {
+  id: string;
+  amountMinor?: bigint;
+  categoryId?: string;
+  description?: string;
+  occurredAtUtc?: string;
 }
 
 export interface ExpenseFilters {
-  category?: ExpenseCategory | 'all';
+  categoryId?: string;
   search?: string;
   startDate?: string;
   endDate?: string;
@@ -35,19 +45,34 @@ export interface ExpenseFilters {
 }
 
 interface ExpenseState {
-  expenses: Expense[];
+  expenses: ExpenseViewModel[];
   loading: boolean;
   error: string | null;
   filters: ExpenseFilters;
 
   // Actions
   loadExpenses: () => Promise<void>;
-  addExpense: (input: AddExpenseInput) => Promise<Expense>;
-  updateExpense: (input: UpdateExpenseInput) => Promise<Expense>;
+  addExpense: (input: AddExpenseInput) => Promise<ExpenseViewModel>;
+  updateExpense: (input: UpdateExpenseInput) => Promise<ExpenseViewModel>;
   voidExpense: (id: string) => Promise<void>;
-  getExpenseById: (id: string) => Expense | null;
+  getExpenseById: (id: string) => ExpenseViewModel | null;
   setFilters: (filters: ExpenseFilters) => void;
-  filteredExpenses: () => Expense[];
+  filteredExpenses: () => ExpenseViewModel[];
+}
+
+function mapToViewModel(e: any): ExpenseViewModel {
+  return {
+    id: e.id,
+    walletId: e.walletId,
+    categoryId: e.categoryId,
+    amountMinor: e.amountMinor,
+    currency: e.currency,
+    description: e.description,
+    merchant: e.merchant,
+    occurredAtUtc: e.occurredAtUtc,
+    status: e.status,
+    isSample: e.isSample,
+  };
 }
 
 export const useExpenseStore = create<ExpenseState>((set, get) => ({
@@ -59,23 +84,9 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
   loadExpenses: async () => {
     set({ loading: true, error: null });
     try {
-      const database = getSharedDb();
-      const { rows } = database.getAllExpenses();
-      const expenses: Expense[] = rows.map((row) => ({
-        id: row.id,
-        amount: row.amount,
-        currency: row.currency as SupportedCurrency,
-        category: row.category as ExpenseCategory,
-        description: row.description,
-        date: row.date,
-        walletId: row.walletId,
-        merchant: row.merchant ?? undefined,
-        receiptImage: row.receiptImage ?? undefined,
-        status: row.status as 'active' | 'voided',
-        clientRequestId: row.clientRequestId ?? undefined,
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-      }));
+      const db = getSharedDb();
+      const allExpenses = db.getAllExpenses();
+      const expenses: ExpenseViewModel[] = allExpenses.map(mapToViewModel);
       set({ expenses, loading: false });
     } catch (err: any) {
       set({ loading: false, error: err.message ?? 'Failed to load expenses' });
@@ -85,28 +96,45 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
   addExpense: async (input: AddExpenseInput) => {
     set({ loading: true, error: null });
     try {
-      const ledgerEngine = getLedger();
-      const row = ledgerEngine.createExpense(input);
-      const expense: Expense = {
-        id: row.id,
-        amount: row.amount,
-        currency: row.currency as SupportedCurrency,
-        category: row.category as ExpenseCategory,
-        description: row.description,
-        date: row.date,
-        walletId: row.walletId,
-        merchant: row.merchant ?? undefined,
-        receiptImage: row.receiptImage ?? undefined,
-        status: row.status as 'active' | 'voided',
-        clientRequestId: row.clientRequestId ?? undefined,
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-      };
+      const db = getSharedDb();
+      const now = new Date().toISOString();
+      const id = crypto.randomUUID();
+
+      const expense = db.createExpense({
+        id,
+        walletId: input.walletId,
+        categoryId: input.categoryId,
+        amountMinor: input.amountMinor,
+        currency: input.currency,
+        description: input.description,
+        merchant: input.merchant,
+        occurredAtUtc: input.occurredAtUtc ?? now,
+        status: 'active',
+        isSample: false,
+        createdAtUtc: now,
+        updatedAtUtc: now,
+      } as any);
+
+      // Create ledger entry
+      db.createLedgerEntry({
+        id: crypto.randomUUID(),
+        walletId: input.walletId,
+        sourceType: 'expense',
+        sourceId: id,
+        entryKind: 'expense',
+        signedMinor: input.amountMinor,
+        currency: input.currency,
+        status: 'active',
+        occurredAtUtc: input.occurredAtUtc ?? now,
+        createdAtUtc: now,
+      });
+
+      const expenseVm = mapToViewModel(expense);
       set((state) => ({
-        expenses: [expense, ...state.expenses],
+        expenses: [expenseVm, ...state.expenses],
         loading: false,
       }));
-      return expense;
+      return expenseVm;
     } catch (err: any) {
       set({ loading: false, error: err.message ?? 'Failed to add expense' });
       throw err;
@@ -116,44 +144,29 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
   updateExpense: async (input: UpdateExpenseInput) => {
     set({ loading: true, error: null });
     try {
-      const database = getSharedDb();
-      const existing = database.getExpense(input.id);
+      const db = getSharedDb();
+      const existing = db.getExpense(input.id);
       if (!existing) throw new Error('NOT_FOUND: expense not found');
-      if (existing.status === 'voided') throw new Error('ALREADY_VOIDED: cannot update voided expense');
+      if (existing.status === 'voided')
+        throw new Error('ALREADY_VOIDED: cannot update voided expense');
 
-      // Validate amount if provided
-      if (input.amount !== undefined && input.amount <= 0) {
+      if (input.amountMinor !== undefined && input.amountMinor <= 0n) {
         throw new Error('VALIDATION_ERROR: amount must be positive');
       }
 
-      const row = database.updateExpense(input.id, {
-        amount: input.amount,
-        category: input.category,
+      const expense = db.updateExpense(input.id, {
+        amountMinor: input.amountMinor,
+        categoryId: input.categoryId,
         description: input.description,
-        date: input.date,
-      });
+        occurredAtUtc: input.occurredAtUtc,
+      } as any);
 
-      const expense: Expense = {
-        id: row.id,
-        amount: row.amount,
-        currency: row.currency as SupportedCurrency,
-        category: row.category as ExpenseCategory,
-        description: row.description,
-        date: row.date,
-        walletId: row.walletId,
-        merchant: row.merchant ?? undefined,
-        receiptImage: row.receiptImage ?? undefined,
-        status: row.status as 'active' | 'voided',
-        clientRequestId: row.clientRequestId ?? undefined,
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-      };
-
+      const expenseVm = mapToViewModel(expense);
       set((state) => ({
-        expenses: state.expenses.map((e) => (e.id === input.id ? expense : e)),
+        expenses: state.expenses.map((e) => (e.id === input.id ? expenseVm : e)),
         loading: false,
       }));
-      return expense;
+      return expenseVm;
     } catch (err: any) {
       set({ loading: false, error: err.message ?? 'Failed to update expense' });
       throw err;
@@ -163,12 +176,24 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
   voidExpense: async (id: string) => {
     set({ loading: true, error: null });
     try {
-      const ledgerEngine = getLedger();
-      ledgerEngine.voidExpense(id);
+      const db = getSharedDb();
+      const existing = db.getExpense(id);
+      if (!existing) throw new Error('NOT_FOUND: expense not found');
+      if (existing.status === 'voided') throw new Error('ALREADY_VOIDED: expense already voided');
+
+      db.updateExpense(id, { status: 'voided' } as any);
+
+      // Mark ledger entry as voided
+      const ledgerEntries = db.getLedgerEntries(existing.walletId);
+      ledgerEntries
+        .filter((e: any) => e.sourceId === id && e.sourceType === 'expense')
+        .forEach((e: any) => {
+          e.status = 'voided';
+        });
 
       set((state) => ({
         expenses: state.expenses.map((e) =>
-          e.id === id ? { ...e, status: 'voided' as const, updatedAt: getVietnamNow() } : e
+          e.id === id ? { ...e, status: 'voided' as const } : e,
         ),
         loading: false,
       }));
@@ -178,7 +203,7 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
     }
   },
 
-  getExpenseById: (id: string): Expense | null => {
+  getExpenseById: (id: string): ExpenseViewModel | null => {
     const { expenses } = get();
     return expenses.find((e) => e.id === id) ?? null;
   },
@@ -187,46 +212,35 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
     set({ filters });
   },
 
-  filteredExpenses: (): Expense[] => {
+  filteredExpenses: (): ExpenseViewModel[] => {
     const { expenses, filters } = get();
     let filtered = [...expenses];
 
-    // Filter by category
-    if (filters.category && filters.category !== 'all') {
-      filtered = filtered.filter((e) => e.category === filters.category);
+    if (filters.categoryId) {
+      filtered = filtered.filter((e) => e.categoryId === filters.categoryId);
     }
 
-    // Filter by search text
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       filtered = filtered.filter(
         (e) =>
-          e.description.toLowerCase().includes(searchLower) ||
-          CATEGORY_LABELS[e.category].toLowerCase().includes(searchLower) ||
-          (e.merchant && e.merchant.toLowerCase().includes(searchLower))
+          (e.description && e.description.toLowerCase().includes(searchLower)) ||
+          (e.merchant && e.merchant.toLowerCase().includes(searchLower)),
       );
     }
 
-    // Filter by date range
     if (filters.startDate) {
-      const start = new Date(filters.startDate).getTime();
-      filtered = filtered.filter((e) => new Date(e.date).getTime() >= start);
+      filtered = filtered.filter((e) => e.occurredAtUtc >= filters.startDate!);
     }
     if (filters.endDate) {
-      const end = new Date(filters.endDate).getTime();
-      filtered = filtered.filter((e) => new Date(e.date).getTime() <= end);
+      filtered = filtered.filter((e) => e.occurredAtUtc <= filters.endDate!);
     }
 
-    // Filter by status
     if (filters.status && filters.status !== 'all') {
       filtered = filtered.filter((e) => e.status === filters.status);
     }
 
-    // Sort by date descending (most recent first)
-    filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
+    filtered.sort((a, b) => b.occurredAtUtc.localeCompare(a.occurredAtUtc));
     return filtered;
   },
 }));
-
-export { formatCurrency, CATEGORY_LABELS };

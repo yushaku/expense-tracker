@@ -14,13 +14,7 @@ export {
   AnimatePresence,
   Spinner,
 } from 'tamagui';
-export type {
-  ButtonProps,
-  CardProps,
-  InputProps,
-  TextProps,
-  DialogProps,
-} from 'tamagui';
+export type { ButtonProps, CardProps, InputProps, TextProps, DialogProps } from 'tamagui';
 
 // Custom components
 export { Chip, ChipText } from './src/components/Chip';

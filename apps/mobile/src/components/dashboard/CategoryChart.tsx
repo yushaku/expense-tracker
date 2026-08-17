@@ -1,9 +1,9 @@
 // apps/mobile/src/components/dashboard/CategoryChart.tsx
-// Bar chart for category breakdown
+// Bar chart for category breakdown (v3: @expense/domain)
 
 import { Card, XStack, YStack, Text } from '@expense/ui';
-import { CategoryBreakdownItem } from '../../stores/dashboardStore';
-import { formatCurrency } from '@expense/shared';
+import type { CategoryBreakdownItem } from '../../stores/dashboardStore';
+import { formatMoney } from '@expense/domain';
 
 interface CategoryChartProps {
   categories: CategoryBreakdownItem[];
@@ -32,9 +32,9 @@ export function CategoryChart({ categories, currency = 'VND' }: CategoryChartPro
         <YStack gap="$2">
           {categories.map((item) => (
             <CategoryBar
-              key={item.category}
+              key={item.categoryId}
               label={item.label}
-              amount={item.amount}
+              amountMinor={item.amountMinor}
               percentage={item.percentage}
               color={item.color}
               currency={currency}
@@ -48,23 +48,18 @@ export function CategoryChart({ categories, currency = 'VND' }: CategoryChartPro
 
 interface CategoryBarProps {
   label: string;
-  amount: number;
+  amountMinor: bigint;
   percentage: number;
   color: string;
   currency: string;
 }
 
-function CategoryBar({ label, amount, percentage, color, currency }: CategoryBarProps) {
+function CategoryBar({ label, amountMinor, percentage, color, currency }: CategoryBarProps) {
   return (
     <YStack gap="$1">
       <XStack justifyContent="space-between" alignItems="center">
         <XStack gap="$2" alignItems="center" flex={1}>
-          <XStack
-            width={12}
-            height={12}
-            borderRadius={2}
-            backgroundColor={color}
-          />
+          <XStack width={12} height={12} borderRadius={2} backgroundColor={color} />
           <Text fontSize="$sm" flex={1} numberOfLines={1}>
             {label}
           </Text>
@@ -74,14 +69,10 @@ function CategoryBar({ label, amount, percentage, color, currency }: CategoryBar
         </Text>
       </XStack>
       <XStack height={8} backgroundColor="$surfaceVariant" borderRadius={4} overflow="hidden">
-        <XStack
-          width={`${Math.min(percentage, 100)}%`}
-          backgroundColor={color}
-          borderRadius={4}
-        />
+        <XStack width={`${Math.min(percentage, 100)}%`} backgroundColor={color} borderRadius={4} />
       </XStack>
       <Text fontSize="$xs" color="$onSurfaceVariant">
-        {formatCurrency(amount, currency)}
+        {formatMoney({ minorUnits: amountMinor, currency })}
       </Text>
     </YStack>
   );

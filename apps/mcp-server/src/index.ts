@@ -3,10 +3,7 @@
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
+import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 
 // MCP Server
 const server = new Server(
@@ -18,7 +15,7 @@ const server = new Server(
     capabilities: {
       tools: {},
     },
-  }
+  },
 );
 
 // Tools list
@@ -31,10 +28,25 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         type: 'object',
         properties: {
           amount: { type: 'number', description: 'Số tiền (> 0)' },
-          currency: { type: 'string', enum: ['VND'], description: 'Đơn vị tiền tệ', default: 'VND' },
+          currency: {
+            type: 'string',
+            enum: ['VND'],
+            description: 'Đơn vị tiền tệ',
+            default: 'VND',
+          },
           category: {
             type: 'string',
-            enum: ['food', 'transport', 'shopping', 'entertainment', 'healthcare', 'education', 'bills', 'savings', 'other'],
+            enum: [
+              'food',
+              'transport',
+              'shopping',
+              'entertainment',
+              'healthcare',
+              'education',
+              'bills',
+              'savings',
+              'other',
+            ],
             description: 'Danh mục chi tiêu',
           },
           description: { type: 'string', description: 'Mô tả chi tiêu' },
@@ -81,22 +93,47 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     switch (name) {
       case 'add_expense':
         return {
-          content: [{ type: 'text', text: JSON.stringify({ message: 'Tool not yet implemented', tool: name, args }, null, 2) }],
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                { message: 'Tool not yet implemented', tool: name, args },
+                null,
+                2,
+              ),
+            },
+          ],
         };
       case 'get_wallets':
         return {
-          content: [{ type: 'text', text: JSON.stringify({ message: 'Tool not yet implemented', tool: name }, null, 2) }],
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({ message: 'Tool not yet implemented', tool: name }, null, 2),
+            },
+          ],
         };
       case 'search_transactions':
         return {
-          content: [{ type: 'text', text: JSON.stringify({ message: 'Tool not yet implemented', tool: name, args }, null, 2) }],
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                { message: 'Tool not yet implemented', tool: name, args },
+                null,
+                2,
+              ),
+            },
+          ],
         };
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
   } catch (error) {
     return {
-      content: [{ type: 'text', text: JSON.stringify({ error: (error as Error).message }, null, 2) }],
+      content: [
+        { type: 'text', text: JSON.stringify({ error: (error as Error).message }, null, 2) },
+      ],
       isError: true,
     };
   }

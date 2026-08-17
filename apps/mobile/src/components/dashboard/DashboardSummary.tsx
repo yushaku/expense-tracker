@@ -10,7 +10,11 @@ interface DashboardSummaryProps {
   currency?: string;
 }
 
-export function DashboardSummary({ cashFlow, savingsRate, currency = 'VND' }: DashboardSummaryProps) {
+export function DashboardSummary({
+  cashFlow,
+  savingsRate,
+  currency = 'VND',
+}: DashboardSummaryProps) {
   const isPositive = cashFlow >= 0;
   const isSavingsPositive = savingsRate >= 0;
 
@@ -22,12 +26,9 @@ export function DashboardSummary({ cashFlow, savingsRate, currency = 'VND' }: Da
           <Text fontSize="$sm" color="$onSurfaceVariant">
             Dòng tiền
           </Text>
-          <Text
-            fontSize="$3xl"
-            fontWeight="bold"
-            color={isPositive ? '$income' : '$expense'}
-          >
-            {isPositive ? '+' : ''}{formatCurrency(cashFlow, currency)}
+          <Text fontSize="$3xl" fontWeight="bold" color={isPositive ? '$income' : '$expense'}>
+            {isPositive ? '+' : ''}
+            {formatCurrency(cashFlow, currency)}
           </Text>
           <Text fontSize="$xs" color="$onSurfaceVariant">
             {isPositive ? 'Thặng dư' : 'Thâm hụt'}

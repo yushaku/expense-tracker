@@ -16,6 +16,7 @@
     "clean": "rmrf .expo dist node_modules"
   },
   "dependencies": {
+    "@expense/domain": "workspace:*",
     "@expense/shared": "workspace:*",
     "@expense/ui": "workspace:*",
     "@expo/vector-icons": "^14.0.0",

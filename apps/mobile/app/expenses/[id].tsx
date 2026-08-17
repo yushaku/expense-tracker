@@ -6,7 +6,8 @@ import { YStack, Text, XStack, Card, Button, Dialog } from '@expense/ui';
 import { useExpenseStore } from '../../src/stores/expenseStore';
 import { useWalletStore } from '../../src/stores/walletStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Expense, formatCurrency, CATEGORY_LABELS } from '@expense/shared';
+import type { Expense } from '@expense/shared';
+import { formatCurrency, CATEGORY_LABELS } from '@expense/shared';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -199,8 +200,8 @@ export default function ExpenseDetailScreen() {
                 Hủy chi tiêu?
               </Text>
               <Text fontSize="$sm" color="$onSurfaceVariant">
-                Chi tiêu sẽ được đánh dấu là "Đã hủy" và không tính vào báo cáo.
-                Bạn có thể xem lại trong lịch sử.
+                Chi tiêu sẽ được đánh dấu là "Đã hủy" và không tính vào báo cáo. Bạn có thể xem lại
+                trong lịch sử.
               </Text>
               <XStack gap="$3" justifyContent="flex-end">
                 <Button variant="outlined" onPress={() => setShowVoidDialog(false)}>

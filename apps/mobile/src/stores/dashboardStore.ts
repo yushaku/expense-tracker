@@ -1,32 +1,13 @@
 // apps/mobile/src/stores/dashboardStore.ts
-// Dashboard store — Cash flow, Savings rate, Category breakdown, Wallet balances
+// Dashboard store — Cash flow, Savings rate, Category breakdown, Wallet balances (v3: @expense/domain)
 
 import { create } from 'zustand';
-import {
-  ExpenseCategory,
-  SupportedCurrency,
-  WalletWithBalance,
-  LedgerEngine,
-  formatCurrency,
-  CATEGORY_LABELS,
-  getSharedDb,
-  getVietnamNow,
-} from '@expense/shared';
-
-// Singleton ledger instance (shares DB with other stores)
-let ledger: LedgerEngine | null = null;
-
-function getLedger(): LedgerEngine {
-  if (!ledger) {
-    ledger = new LedgerEngine(getSharedDb());
-  }
-  return ledger;
-}
+import { getSharedDb, formatMoney } from '@expense/domain';
 
 export interface CategoryBreakdownItem {
-  category: ExpenseCategory;
+  categoryId: string;
   label: string;
-  amount: number;
+  amountMinor: bigint;
   percentage: number;
   color: string;
 }
@@ -35,13 +16,13 @@ export interface WalletBalanceItem {
   id: string;
   name: string;
   type: string;
-  balance: number;
-  currency: SupportedCurrency;
-  creditLimit: number;
+  balanceMinor: bigint;
+  currency: string;
+  creditLimitMinor: bigint;
 }
 
 interface DashboardState {
-  cashFlow: number;
+  cashFlowMinor: bigint;
   savingsRate: number;
   categoryBreakdown: CategoryBreakdownItem[];
   walletBalances: WalletBalanceItem[];
@@ -53,29 +34,30 @@ interface DashboardState {
   refreshDashboard: () => Promise<void>;
 }
 
-// Category colors from design system
-const CATEGORY_COLORS: Record<ExpenseCategory, string> = {
-  food: '#F97316',
-  transport: '#3B82F6',
-  shopping: '#EC4899',
-  entertainment: '#A855F7',
-  healthcare: '#EF4444',
-  education: '#6366F1',
-  bills: '#78716C',
-  savings: '#0369A1',
-  other: '#64748B',
+const CATEGORY_COLORS: Record<string, string> = {
+  cat_food: '#F97316',
+  cat_transport: '#3B82F6',
+  cat_shopping: '#EC4899',
+  cat_entertainment: '#A855F7',
+  cat_healthcare: '#EF4444',
+  cat_education: '#6366F1',
+  cat_bills: '#78716C',
+  cat_other: '#64748B',
 };
 
-// Wallet type icons
-const WALLET_TYPE_ICONS: Record<string, string> = {
-  cash: 'cash',
-  bank: 'bank',
-  ewallet: 'cellphone',
-  credit_card: 'credit-card',
+const CATEGORY_LABELS: Record<string, string> = {
+  cat_food: 'Ăn uống',
+  cat_transport: 'Di chuyển',
+  cat_shopping: 'Mua sắm',
+  cat_entertainment: 'Giải trí',
+  cat_healthcare: 'Y tế',
+  cat_education: 'Giáo dục',
+  cat_bills: 'Hóa đơn',
+  cat_other: 'Khác',
 };
 
 export const useDashboardStore = create<DashboardState>((set, get) => ({
-  cashFlow: 0,
+  cashFlowMinor: 0n,
   savingsRate: 0,
   categoryBreakdown: [],
   walletBalances: [],
@@ -85,63 +67,60 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
   loadDashboardData: async () => {
     set({ loading: true, error: null });
     try {
-      const database = getSharedDb();
-      const ledgerEngine = getLedger();
+      const db = getSharedDb();
       const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth();
-      const monthStart = new Date(year, month, 1).toISOString();
-      const monthEnd = new Date(year, month + 1, 0, 23, 59, 59).toISOString();
+      const year = now.getUTCFullYear();
+      const month = now.getUTCMonth();
+      const monthStart = new Date(Date.UTC(year, month, 1)).toISOString();
+      const monthEnd = new Date(Date.UTC(year, month + 1, 0, 23, 59, 59)).toISOString();
 
-      // Get all active expenses and incomes for current month
-      const { rows: allExpenses } = database.getAllExpenses();
-      const { rows: allIncomes } = database.getAllIncomes();
+      const allExpenses = db.getAllExpenses();
+      const allIncomes = db.getAllIncomes();
 
       const activeExpenses = allExpenses.filter(
-        (e) => e.status === 'active' && e.date >= monthStart && e.date <= monthEnd
+        (e: any) =>
+          e.status === 'active' && e.occurredAtUtc >= monthStart && e.occurredAtUtc <= monthEnd,
       );
       const activeIncomes = allIncomes.filter(
-        (i) => i.status === 'active' && i.date >= monthStart && i.date <= monthEnd
+        (i: any) =>
+          i.status === 'active' && i.occurredAtUtc >= monthStart && i.occurredAtUtc <= monthEnd,
       );
 
-      // Calculate cash flow
-      const totalExpense = activeExpenses.reduce((sum, e) => sum + e.amount, 0);
-      const totalIncome = activeIncomes.reduce((sum, i) => sum + i.amount, 0);
-      const cashFlow = totalIncome - totalExpense;
+      const totalExpense = activeExpenses.reduce((sum: bigint, e: any) => sum + e.amountMinor, 0n);
+      const totalIncome = activeIncomes.reduce((sum: bigint, i: any) => sum + i.amountMinor, 0n);
+      const cashFlowMinor = totalIncome - totalExpense;
 
-      // Calculate savings rate
-      const savingsRate = totalIncome > 0 ? (cashFlow / totalIncome) * 100 : 0;
+      const savingsRate =
+        totalIncome > 0n ? (Number(cashFlowMinor) / Number(totalIncome)) * 100 : 0;
 
-      // Calculate category breakdown
-      const categoryTotals: Record<string, number> = {};
-      activeExpenses.forEach((e) => {
-        categoryTotals[e.category] = (categoryTotals[e.category] || 0) + e.amount;
+      const categoryTotals: Record<string, bigint> = {};
+      activeExpenses.forEach((e: any) => {
+        categoryTotals[e.categoryId] = (categoryTotals[e.categoryId] ?? 0n) + e.amountMinor;
       });
 
       const categoryBreakdown: CategoryBreakdownItem[] = Object.entries(categoryTotals)
-        .map(([category, amount]) => ({
-          category: category as ExpenseCategory,
-          label: CATEGORY_LABELS[category as ExpenseCategory],
-          amount,
-          percentage: totalExpense > 0 ? (amount / totalExpense) * 100 : 0,
-          color: CATEGORY_COLORS[category as ExpenseCategory],
+        .map(([categoryId, amountMinor]) => ({
+          categoryId,
+          label: CATEGORY_LABELS[categoryId] ?? categoryId,
+          amountMinor,
+          percentage: totalExpense > 0n ? (Number(amountMinor) / Number(totalExpense)) * 100 : 0,
+          color: CATEGORY_COLORS[categoryId] ?? '#64748B',
         }))
         .filter((item) => item.percentage > 0)
-        .sort((a, b) => b.amount - a.amount);
+        .sort((a, b) => Number(b.amountMinor - a.amountMinor));
 
-      // Calculate wallet balances
-      const walletRows = database.getAllWallets();
-      const walletBalances: WalletBalanceItem[] = walletRows.map((w) => ({
+      const walletRows = db.getAllWallets();
+      const walletBalances: WalletBalanceItem[] = walletRows.map((w: any) => ({
         id: w.id,
         name: w.name,
         type: w.type,
-        balance: ledgerEngine.getWalletBalance(w.id),
-        currency: w.currency as SupportedCurrency,
-        creditLimit: w.creditLimit,
+        balanceMinor: db.getBalance(w.id),
+        currency: w.currency,
+        creditLimitMinor: w.creditLimitMinor,
       }));
 
       set({
-        cashFlow,
+        cashFlowMinor,
         savingsRate,
         categoryBreakdown,
         walletBalances,
@@ -157,4 +136,4 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
   },
 }));
 
-export { formatCurrency, CATEGORY_LABELS, WALLET_TYPE_ICONS };
+export { formatMoney, CATEGORY_LABELS };

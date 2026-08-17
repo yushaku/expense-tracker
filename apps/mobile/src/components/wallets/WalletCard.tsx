@@ -1,13 +1,20 @@
 // apps/mobile/src/components/wallets/WalletCard.tsx
-// Single wallet card component
+// Single wallet card component (v3: @expense/domain)
 
 import React from 'react';
 import { Card, Text, XStack, YStack } from '@expense/ui';
-import { WalletWithBalance, formatCurrency } from '@expense/shared';
+import { formatMoney } from '@expense/domain';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface WalletCardProps {
-  wallet: WalletWithBalance;
+  wallet: {
+    id: string;
+    name: string;
+    type: 'cash' | 'bank' | 'ewallet' | 'credit_card';
+    currency: string;
+    creditLimitMinor: bigint;
+    balanceMinor: bigint;
+  };
   onPress?: () => void;
 }
 
@@ -30,30 +37,19 @@ export function WalletCard({ wallet, onPress }: WalletCardProps) {
   const label = WALLET_LABELS[wallet.type] ?? wallet.type;
   const isCreditCard = wallet.type === 'credit_card';
 
-  // For credit cards, show debt and available
-  const displayBalance = isCreditCard ? wallet.balance : wallet.balance;
-
   return (
-    <Card
-      pressable={!!onPress}
-      elevated
-      onPress={onPress}
-    >
+    <Card pressable={!!onPress} elevated onPress={onPress}>
       <XStack justifyContent="space-between" alignItems="center">
         <XStack gap="$3" alignItems="center" flex={1}>
-          <MaterialCommunityIcons
-            name={iconName as any}
-            size={24}
-            color="#0F766E"
-          />
+          <MaterialCommunityIcons name={iconName as any} size={24} color="#0F766E" />
           <YStack gap="$1" flex={1}>
             <Text fontSize="$md" fontWeight="600" numberOfLines={1}>
               {wallet.name}
             </Text>
             <Text fontSize="$xs" color="$onSurfaceVariant">
               {label}
-              {isCreditCard && wallet.creditLimit > 0
-                ? ` • Hạn mức: ${formatCurrency(wallet.creditLimit, wallet.currency)}`
+              {isCreditCard && wallet.creditLimitMinor > 0n
+                ? ` • Hạn mức: ${formatMoney({ minorUnits: wallet.creditLimitMinor, currency: wallet.currency })}`
                 : ''}
             </Text>
           </YStack>
@@ -62,9 +58,12 @@ export function WalletCard({ wallet, onPress }: WalletCardProps) {
           <Text
             fontSize="$lg"
             fontWeight="600"
-            color={isCreditCard ? '$expense' : displayBalance >= 0 ? '$income' : '$expense'}
+            color={isCreditCard ? '$expense' : wallet.balanceMinor >= 0n ? '$income' : '$expense'}
           >
-            {formatCurrency(Math.abs(displayBalance), wallet.currency)}
+            {formatMoney({
+              minorUnits: wallet.balanceMinor >= 0n ? wallet.balanceMinor : -wallet.balanceMinor,
+              currency: wallet.currency,
+            })}
           </Text>
           {isCreditCard && (
             <Text fontSize="$xs" color="$onSurfaceVariant">

@@ -1,7 +1,14 @@
 // packages/shared/src/ledger.ts
 // Ledger engine — balance derivation and invariant enforcement
 
-import type { Database, WalletRow, ExpenseRow, IncomeRow, TransferRow, LedgerEntryRow } from './database.js';
+import type {
+  Database,
+  WalletRow,
+  ExpenseRow,
+  IncomeRow,
+  TransferRow,
+  LedgerEntryRow,
+} from './database.js';
 import type { AddExpenseInput, AddIncomeInput, TransferInput } from './types.js';
 import { generateId, getVietnamNow } from './utils.js';
 
@@ -198,7 +205,7 @@ export class LedgerEngine {
       this.db.updateExpense(id, { status: 'voided' });
       // Mark ledger entry as voided to exclude from balance/metrics
       const entries = this.db.getLedgerEntries(expense.walletId);
-      const entry = entries.find(e => e.refId === id && e.refType === 'expense');
+      const entry = entries.find((e) => e.refId === id && e.refType === 'expense');
       if (entry) {
         this.db.updateLedgerEntry(entry.id, { status: 'voided' });
       }
@@ -217,7 +224,7 @@ export class LedgerEngine {
       this.db.updateIncome(id, { status: 'voided' });
       // Mark ledger entry as voided to exclude from balance/metrics
       const entries = this.db.getLedgerEntries(income.walletId);
-      const entry = entries.find(e => e.refId === id && e.refType === 'income');
+      const entry = entries.find((e) => e.refId === id && e.refType === 'income');
       if (entry) {
         this.db.updateLedgerEntry(entry.id, { status: 'voided' });
       }
@@ -238,8 +245,8 @@ export class LedgerEngine {
       // Mark both ledger legs as voided
       const fromEntries = this.db.getLedgerEntries(transfer.fromWalletId);
       const toEntries = this.db.getLedgerEntries(transfer.toWalletId);
-      const outLeg = fromEntries.find(e => e.refId === id && e.type === 'transfer_out');
-      const inLeg = toEntries.find(e => e.refId === id && e.type === 'transfer_in');
+      const outLeg = fromEntries.find((e) => e.refId === id && e.type === 'transfer_out');
+      const inLeg = toEntries.find((e) => e.refId === id && e.type === 'transfer_in');
       if (outLeg) this.db.updateLedgerEntry(outLeg.id, { status: 'voided' });
       if (inLeg) this.db.updateLedgerEntry(inLeg.id, { status: 'voided' });
     });
@@ -251,9 +258,7 @@ export class LedgerEngine {
    */
   getWalletBalance(walletId: string): number {
     const entries = this.db.getLedgerEntries(walletId);
-    return entries
-      .filter(e => e.status === 'active')
-      .reduce((sum, e) => sum + e.amount, 0);
+    return entries.filter((e) => e.status === 'active').reduce((sum, e) => sum + e.amount, 0);
   }
 
   /**
@@ -262,7 +267,8 @@ export class LedgerEngine {
   getCreditCardInfo(walletId: string): { debt: number; available: number; creditLimit: number } {
     const wallet = this.db.getWallet(walletId);
     if (!wallet) throw new Error('NOT_FOUND: wallet not found');
-    if (wallet.type !== 'credit_card') throw new Error('VALIDATION_ERROR: not a credit card wallet');
+    if (wallet.type !== 'credit_card')
+      throw new Error('VALIDATION_ERROR: not a credit card wallet');
 
     const debt = this.calculateCcDebt(walletId);
     return {
@@ -278,7 +284,7 @@ export class LedgerEngine {
   private calculateCcDebt(walletId: string): number {
     const entries = this.db.getLedgerEntries(walletId);
     return entries
-      .filter(e => e.status === 'active')
+      .filter((e) => e.status === 'active')
       .reduce((debt, e) => {
         if (e.type === 'expense') return debt + Math.abs(e.amount);
         if (e.type === 'transfer_in') return debt - e.amount;
@@ -289,17 +295,17 @@ export class LedgerEngine {
   // Helper methods for idempotency
   private findExpenseByRequestId(requestId: string): ExpenseRow | null {
     const { rows } = this.db.getAllExpenses({ limit: 1000 });
-    return rows.find(e => e.clientRequestId === requestId) ?? null;
+    return rows.find((e) => e.clientRequestId === requestId) ?? null;
   }
 
   private findIncomeByRequestId(requestId: string): IncomeRow | null {
     const { rows } = this.db.getAllIncomes({ limit: 1000 });
-    return rows.find(i => i.clientRequestId === requestId) ?? null;
+    return rows.find((i) => i.clientRequestId === requestId) ?? null;
   }
 
   private findTransferByRequestId(requestId: string): TransferRow | null {
     const { rows } = this.db.getAllTransfers({ limit: 1000 });
-    return rows.find(t => t.clientRequestId === requestId) ?? null;
+    return rows.find((t) => t.clientRequestId === requestId) ?? null;
   }
 
   private sameExpensePayload(existing: ExpenseRow, input: AddExpenseInput): boolean {
@@ -311,10 +317,7 @@ export class LedgerEngine {
   }
 
   private sameIncomePayload(existing: IncomeRow, input: AddIncomeInput): boolean {
-    return (
-      existing.amount === input.amount &&
-      existing.walletId === input.walletId
-    );
+    return existing.amount === input.amount && existing.walletId === input.walletId;
   }
 
   private sameTransferPayload(existing: TransferRow, input: TransferInput): boolean {

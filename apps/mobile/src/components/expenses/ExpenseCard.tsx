@@ -3,7 +3,8 @@
 
 import React from 'react';
 import { Card, Text, XStack, YStack } from '@expense/ui';
-import { Expense, formatCurrency, CATEGORY_LABELS } from '@expense/shared';
+import type { Expense } from '@expense/shared';
+import { formatCurrency, CATEGORY_LABELS } from '@expense/shared';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface ExpenseCardProps {
@@ -53,11 +54,7 @@ export function ExpenseCard({ expense, onPress, walletName }: ExpenseCardProps) 
     <Card pressable={!!onPress} elevated onPress={onPress}>
       <XStack justifyContent="space-between" alignItems="center" opacity={isVoided ? 0.5 : 1}>
         <XStack gap="$3" alignItems="center" flex={1}>
-          <MaterialCommunityIcons
-            name={iconName as any}
-            size={24}
-            color={categoryColor}
-          />
+          <MaterialCommunityIcons name={iconName as any} size={24} color={categoryColor} />
           <YStack gap="$1" flex={1}>
             <Text
               fontSize="$md"
