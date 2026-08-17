@@ -23,3 +23,4 @@ export const CATEGORY_LABELS: Record<ExpenseCategory, string> = {
   savings: 'Tiết kiệm',
   other: 'Khác',
 };
+// test
