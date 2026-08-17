@@ -5,6 +5,7 @@ export * from './types.js';
 export * from './database.js';
 export * from './ledger.js';
 export * from './utils.js';
+export * from './inMemoryDatabase.js';
 
 import type { ExpenseCategory, SupportedCurrency } from './types.js';
 
