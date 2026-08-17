@@ -12,6 +12,7 @@ export {
   Dialog,
   ScrollView,
   AnimatePresence,
+  Spinner,
 } from 'tamagui';
 export type {
   ButtonProps,
