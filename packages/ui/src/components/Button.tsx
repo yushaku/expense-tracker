@@ -1,27 +1,34 @@
-import { styled, Button as TamaguiButton } from 'tamagui';
+import { styled, Button as TamaguiButton, Text } from 'tamagui';
 
 export const Button = styled(TamaguiButton, {
   name: 'Button',
+  fontFamily: '$body',
+  fontWeight: '600',
+  borderRadius: '$3',
+  cursor: 'pointer',
+  transition: 'all 150ms ease-out',
+  pressStyle: {
+    opacity: 0.85,
+    scale: 0.98,
+  },
   variants: {
     variant: {
-      contained: {
+      primary: {
         backgroundColor: '$primary',
         color: '$onPrimary',
         pressStyle: {
           backgroundColor: '$primary',
-          opacity: 0.8,
+          opacity: 0.85,
         },
       },
-      outlined: {
-        backgroundColor: 'transparent',
-        borderWidth: 1,
-        borderColor: '$outline',
-        color: '$onSurface',
+      secondary: {
+        backgroundColor: '$secondaryContainer',
+        color: '$secondary',
         pressStyle: {
           backgroundColor: '$surfaceVariant',
         },
       },
-      text: {
+      ghost: {
         backgroundColor: 'transparent',
         color: '$primary',
         pressStyle: {
@@ -32,23 +39,44 @@ export const Button = styled(TamaguiButton, {
     size: {
       sm: {
         height: 32,
-        paddingHorizontal: 12,
-        fontSize: 14,
+        paddingHorizontal: '$3',
+        fontSize: 13,
+        borderRadius: '$2',
       },
       md: {
         height: 44,
-        paddingHorizontal: 16,
-        fontSize: 16,
+        paddingHorizontal: '$4',
+        fontSize: 15,
+        borderRadius: '$3',
       },
       lg: {
-        height: 56,
-        paddingHorizontal: 24,
-        fontSize: 18,
+        height: 52,
+        paddingHorizontal: '$6',
+        fontSize: 17,
+        borderRadius: '$4',
+      },
+    },
+    fullWidth: {
+      true: {
+        width: '100%',
+      },
+    },
+    disabled: {
+      true: {
+        opacity: 0.5,
+        pointerEvents: 'none',
       },
     },
   } as const,
   defaultVariants: {
-    variant: 'contained',
+    variant: 'primary',
     size: 'md',
   },
+});
+
+export const ButtonText = styled(Text, {
+  name: 'ButtonText',
+  fontFamily: '$body',
+  fontWeight: '600',
+  color: 'inherit',
 });
