@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#2296F3"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
@@ -17,15 +17,22 @@
       "bundleIdentifier": "com.expense.tracker",
       "buildNumber": "1"
     },
-    "macos": {
-      "supportsTablet": false,
-      "bundleIdentifier": "com.expense.tracker"
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#2296F3"
+      },
+      "package": "com.expense.tracker"
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "plugins": ["expo-router"],
-    "scheme": "expense-tracker"
+    "plugins": ["expo-router", "expo-secure-store"],
+    "scheme": "expense-tracker",
+    "experiments": {
+      "autolinkingModuleResolution": true,
+      "tsconfigPaths": true
+    }
   }
 }
