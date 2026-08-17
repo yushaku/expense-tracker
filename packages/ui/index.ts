@@ -1,8 +1,5 @@
 export { config } from './tamagui.config';
 export {
-  Button,
-  Card,
-  Input,
   YStack,
   XStack,
   Stack,
@@ -13,13 +10,20 @@ export {
   ScrollView,
   AnimatePresence,
   Spinner,
+  TamaguiProvider,
 } from 'tamagui';
-export type { ButtonProps, CardProps, InputProps, TextProps, DialogProps } from 'tamagui';
+export type { TextProps, DialogProps } from 'tamagui';
 
-// Custom components
-export { Button as AppButton } from './src/components/Button';
-export { Card as AppCard } from './src/components/Card';
-export { Input as AppInput, InputLabel, InputError, InputWrapper } from './src/components/Input';
+// Custom styled components (variants like elevated/pressable)
+export { Button, Button as AppButton } from './src/components/Button';
+export { Card, Card as AppCard } from './src/components/Card';
+export {
+  Input,
+  Input as AppInput,
+  InputLabel,
+  InputError,
+  InputWrapper,
+} from './src/components/Input';
 export {
   Dialog as AppDialog,
   DialogContent,

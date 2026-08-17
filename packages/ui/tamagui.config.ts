@@ -14,14 +14,17 @@ const tokens = createTokens({
   space: {
     ...defaultTokens.space,
     ...spacing,
+    true: spacing['4'], // default = $4
   },
   size: {
     ...defaultTokens.size,
     ...size,
+    true: size['4'], // default = $4
   },
   radius: {
     ...defaultTokens.radius,
     ...radius,
+    true: radius['2'], // default = $2
   },
   zIndex: {
     ...defaultTokens.zIndex,
