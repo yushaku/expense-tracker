@@ -7,7 +7,7 @@ function App() {
   return (
     <TamaguiProvider config={config}>
       <YStack flex={1} padding="$6" gap="$4" alignItems="center" justifyContent="center">
-        <Text fontSize="$2xl" fontWeight="bold">
+        <Text fontSize={16} fontWeight="bold">
           Expense Tracker
         </Text>
         <Text>Desktop app placeholder. Coming soon.</Text>
