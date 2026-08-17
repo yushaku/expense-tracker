@@ -8,6 +8,25 @@ export function generateId(): string {
 }
 
 /**
+ * Get current time as ISO string in Asia/Ho_Chi_Minh timezone (UTC+7).
+ * Vietnam does not observe DST, so offset is always +7.
+ */
+export function getVietnamNow(): string {
+  const now = new Date();
+  const offsetMs = 7 * 60 * 60 * 1000;
+  const vnTime = new Date(now.getTime() + offsetMs);
+  return vnTime.toISOString();
+}
+
+/**
+ * Convert a Date to Asia/Ho_Chi_Minh ISO string.
+ */
+export function toVietnamISO(date: Date): string {
+  const offsetMs = 7 * 60 * 60 * 1000;
+  return new Date(date.getTime() + offsetMs).toISOString();
+}
+
+/**
  * Format currency using vi-VN locale.
  */
 export function formatCurrency(amount: number, currency: string): string {
@@ -20,10 +39,12 @@ export function formatCurrency(amount: number, currency: string): string {
 }
 
 /**
- * Get month range (start and end ISO strings).
+ * Get month range (start and end ISO strings) in Vietnam timezone.
  */
 export function getMonthRange(date: Date): { start: string; end: string } {
-  const start = new Date(date.getFullYear(), date.getMonth(), 1);
-  const end = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59);
-  return { start: start.toISOString(), end: end.toISOString() };
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const start = new Date(year, month, 1);
+  const end = new Date(year, month + 1, 0, 23, 59, 59);
+  return { start: toVietnamISO(start), end: toVietnamISO(end) };
 }

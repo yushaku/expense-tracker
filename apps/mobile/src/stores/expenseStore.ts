@@ -13,6 +13,7 @@ import {
   formatCurrency,
   CATEGORY_LABELS,
   getSharedDb,
+  getVietnamNow,
 } from '@expense/shared';
 
 // Singleton ledger instance (shares DB with walletStore)
@@ -167,7 +168,7 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
 
       set((state) => ({
         expenses: state.expenses.map((e) =>
-          e.id === id ? { ...e, status: 'voided' as const, updatedAt: new Date().toISOString() } : e
+          e.id === id ? { ...e, status: 'voided' as const, updatedAt: getVietnamNow() } : e
         ),
         loading: false,
       }));

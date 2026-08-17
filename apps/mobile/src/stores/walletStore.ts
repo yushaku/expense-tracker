@@ -14,6 +14,7 @@ import {
   formatCurrency,
   getSharedDb,
   WalletRow,
+  getVietnamNow,
 } from '@expense/shared';
 
 // Singleton ledger instance (shares DB with expenseStore)
@@ -70,7 +71,7 @@ export const useWalletStore = create<WalletState>((set, get) => ({
       const database = getSharedDb();
       const ledgerEngine = getLedger();
       const id = generateId();
-      const now = new Date().toISOString();
+      const now = getVietnamNow();
 
       const wallet = database.createWallet({
         id,

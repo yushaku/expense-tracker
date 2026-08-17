@@ -3,7 +3,7 @@
 
 import type { Database, WalletRow, ExpenseRow, IncomeRow, TransferRow, LedgerEntryRow } from './database.js';
 import type { AddExpenseInput, AddIncomeInput, TransferInput } from './types.js';
-import { generateId } from './utils.js';
+import { generateId, getVietnamNow } from './utils.js';
 
 export class LedgerEngine {
   constructor(private db: Database) {}
@@ -39,7 +39,7 @@ export class LedgerEngine {
         if (existing) throw new Error('IDEMPOTENCY_CONFLICT: duplicate request');
       }
 
-      const now = new Date().toISOString();
+      const now = getVietnamNow();
       const expense = this.db.createExpense({
         id: generateId(),
         amount: input.amount,
@@ -91,7 +91,7 @@ export class LedgerEngine {
         if (existing) throw new Error('IDEMPOTENCY_CONFLICT: duplicate request');
       }
 
-      const now = new Date().toISOString();
+      const now = getVietnamNow();
       const income = this.db.createIncome({
         id: generateId(),
         amount: input.amount,
@@ -144,7 +144,7 @@ export class LedgerEngine {
         if (existing) throw new Error('IDEMPOTENCY_CONFLICT: duplicate request');
       }
 
-      const now = new Date().toISOString();
+      const now = getVietnamNow();
       const transfer = this.db.createTransfer({
         id: generateId(),
         fromWalletId: input.fromWalletId,

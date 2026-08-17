@@ -13,6 +13,7 @@ import type {
   QueryOptions,
   QueryResult,
 } from './database.js';
+import { getVietnamNow } from './utils.js';
 
 export class InMemoryDatabase implements Database {
   private wallets: Map<string, WalletRow> = new Map();
@@ -25,7 +26,7 @@ export class InMemoryDatabase implements Database {
 
   // Wallets
   createWallet(data: Omit<WalletRow, 'createdAt' | 'updatedAt'>): WalletRow {
-    const now = new Date().toISOString();
+    const now = getVietnamNow();
     const wallet = { ...data, createdAt: now, updatedAt: now };
     this.wallets.set(data.id, wallet);
     return wallet;
@@ -42,7 +43,7 @@ export class InMemoryDatabase implements Database {
   updateWallet(id: string, updates: Partial<WalletRow>): WalletRow {
     const wallet = this.wallets.get(id);
     if (!wallet) throw new Error('NOT_FOUND: wallet not found');
-    const updated = { ...wallet, ...updates, updatedAt: new Date().toISOString() };
+    const updated = { ...wallet, ...updates, updatedAt: getVietnamNow() };
     this.wallets.set(id, updated);
     return updated;
   }
@@ -53,7 +54,7 @@ export class InMemoryDatabase implements Database {
 
   // Expenses
   createExpense(data: Omit<ExpenseRow, 'createdAt' | 'updatedAt'>): ExpenseRow {
-    const now = new Date().toISOString();
+    const now = getVietnamNow();
     const expense = { ...data, createdAt: now, updatedAt: now };
     this.expenses.set(data.id, expense);
     return expense;
@@ -71,7 +72,7 @@ export class InMemoryDatabase implements Database {
   updateExpense(id: string, updates: Partial<ExpenseRow>): ExpenseRow {
     const expense = this.expenses.get(id);
     if (!expense) throw new Error('NOT_FOUND: expense not found');
-    const updated = { ...expense, ...updates, updatedAt: new Date().toISOString() };
+    const updated = { ...expense, ...updates, updatedAt: getVietnamNow() };
     this.expenses.set(id, updated);
     return updated;
   }
@@ -82,7 +83,7 @@ export class InMemoryDatabase implements Database {
 
   // Incomes
   createIncome(data: Omit<IncomeRow, 'createdAt' | 'updatedAt'>): IncomeRow {
-    const now = new Date().toISOString();
+    const now = getVietnamNow();
     const income = { ...data, createdAt: now, updatedAt: now };
     this.incomes.set(data.id, income);
     return income;
@@ -100,7 +101,7 @@ export class InMemoryDatabase implements Database {
   updateIncome(id: string, updates: Partial<IncomeRow>): IncomeRow {
     const income = this.incomes.get(id);
     if (!income) throw new Error('NOT_FOUND: income not found');
-    const updated = { ...income, ...updates, updatedAt: new Date().toISOString() };
+    const updated = { ...income, ...updates, updatedAt: getVietnamNow() };
     this.incomes.set(id, updated);
     return updated;
   }
@@ -111,7 +112,7 @@ export class InMemoryDatabase implements Database {
 
   // Transfers
   createTransfer(data: Omit<TransferRow, 'createdAt'>): TransferRow {
-    const now = new Date().toISOString();
+    const now = getVietnamNow();
     const transfer = { ...data, createdAt: now };
     this.transfers.set(data.id, transfer);
     return transfer;
@@ -129,7 +130,7 @@ export class InMemoryDatabase implements Database {
   updateTransfer(id: string, updates: Partial<TransferRow>): TransferRow {
     const transfer = this.transfers.get(id);
     if (!transfer) throw new Error('NOT_FOUND: transfer not found');
-    const updated = { ...transfer, ...updates, updatedAt: new Date().toISOString() };
+    const updated = { ...transfer, ...updates, updatedAt: getVietnamNow() };
     this.transfers.set(id, updated);
     return updated;
   }
@@ -154,7 +155,7 @@ export class InMemoryDatabase implements Database {
 
   // Budgets
   createBudget(data: Omit<BudgetRow, 'createdAt' | 'updatedAt'>): BudgetRow {
-    const now = new Date().toISOString();
+    const now = getVietnamNow();
     const budget = { ...data, createdAt: now, updatedAt: now };
     this.budgets.set(data.id, budget);
     return budget;
@@ -167,7 +168,7 @@ export class InMemoryDatabase implements Database {
   updateBudget(id: string, updates: Partial<BudgetRow>): BudgetRow {
     const budget = this.budgets.get(id);
     if (!budget) throw new Error('NOT_FOUND: budget not found');
-    const updated = { ...budget, ...updates, updatedAt: new Date().toISOString() };
+    const updated = { ...budget, ...updates, updatedAt: getVietnamNow() };
     this.budgets.set(id, updated);
     return updated;
   }
@@ -178,7 +179,7 @@ export class InMemoryDatabase implements Database {
 
   // Investments
   createInvestment(data: Omit<InvestmentRow, 'createdAt' | 'updatedAt'>): InvestmentRow {
-    const now = new Date().toISOString();
+    const now = getVietnamNow();
     const investment = { ...data, createdAt: now, updatedAt: now };
     this.investments.set(data.id, investment);
     return investment;
@@ -191,7 +192,7 @@ export class InMemoryDatabase implements Database {
   updateInvestment(id: string, updates: Partial<InvestmentRow>): InvestmentRow {
     const investment = this.investments.get(id);
     if (!investment) throw new Error('NOT_FOUND: investment not found');
-    const updated = { ...investment, ...updates, updatedAt: new Date().toISOString() };
+    const updated = { ...investment, ...updates, updatedAt: getVietnamNow() };
     this.investments.set(id, updated);
     return updated;
   }
