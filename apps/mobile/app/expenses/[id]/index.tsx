@@ -1,10 +1,10 @@
-// apps/mobile/app/expenses/[id].tsx
+// apps/mobile/app/expenses/[id]/index.tsx
 // Expense detail screen
 
 import React, { useEffect, useState } from 'react';
 import { YStack, Text, XStack, Card, Button, Dialog } from '@expense/ui';
-import { useExpenseStore } from '../../src/stores/expenseStore';
-import { useWalletStore } from '../../src/stores/walletStore';
+import { useExpenseStore } from '@/src/stores/expenseStore';
+import { useWalletStore } from '@/src/stores/walletStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import type { Expense } from '@expense/shared';
 import { formatCurrency, CATEGORY_LABELS } from '@expense/shared';

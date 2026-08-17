@@ -1,19 +1,19 @@
-// apps/mobile/app/incomes/[id].tsx
+// apps/mobile/app/incomes/[id]/index.tsx
 // Income detail screen
 
 import React, { useEffect, useState } from 'react';
 import { YStack, Text, XStack, Card, Button, Dialog } from '@expense/ui';
-import { useIncomeStore } from '../../src/stores/incomeStore';
-import { useWalletStore } from '../../src/stores/walletStore';
+import {
+  useIncomeStore,
+  INCOME_TYPE_LABELS,
+  INCOME_TYPE_COLORS,
+  INCOME_TYPE_ICONS,
+} from '@/src/stores/incomeStore';
+import { useWalletStore } from '@/src/stores/walletStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import type { Income } from '@expense/shared';
 import { formatCurrency } from '@expense/shared';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import {
-  INCOME_TYPE_LABELS,
-  INCOME_TYPE_COLORS,
-  INCOME_TYPE_ICONS,
-} from '../../src/stores/incomeStore';
 
 export default function IncomeDetailScreen() {
   const router = useRouter();
