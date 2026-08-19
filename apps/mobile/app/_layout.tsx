@@ -49,9 +49,7 @@ function TabLayout() {
               color={color}
             />
           ),
-          tabBarLabel: ({ focused }) => (
-            <TabBarLabel focused={focused}>Tổng quan</TabBarLabel>
-          ),
+          tabBarLabel: ({ focused }) => <TabBarLabel focused={focused}>Tổng quan</TabBarLabel>,
         }}
       />
       <Tabs.Screen
@@ -65,9 +63,7 @@ function TabLayout() {
               color={color}
             />
           ),
-          tabBarLabel: ({ focused }) => (
-            <TabBarLabel focused={focused}>Giao dịch</TabBarLabel>
-          ),
+          tabBarLabel: ({ focused }) => <TabBarLabel focused={focused}>Giao dịch</TabBarLabel>,
         }}
       />
       <Tabs.Screen
@@ -81,9 +77,7 @@ function TabLayout() {
               color={color}
             />
           ),
-          tabBarLabel: ({ focused }) => (
-            <TabBarLabel focused={focused}>Ví</TabBarLabel>
-          ),
+          tabBarLabel: ({ focused }) => <TabBarLabel focused={focused}>Ví</TabBarLabel>,
         }}
       />
       <Tabs.Screen
@@ -97,9 +91,7 @@ function TabLayout() {
               color={color}
             />
           ),
-          tabBarLabel: ({ focused }) => (
-            <TabBarLabel focused={focused}>Đầu tư</TabBarLabel>
-          ),
+          tabBarLabel: ({ focused }) => <TabBarLabel focused={focused}>Đầu tư</TabBarLabel>,
         }}
       />
       <Tabs.Screen
@@ -113,9 +105,7 @@ function TabLayout() {
               color={color}
             />
           ),
-          tabBarLabel: ({ focused }) => (
-            <TabBarLabel focused={focused}>Cài đặt</TabBarLabel>
-          ),
+          tabBarLabel: ({ focused }) => <TabBarLabel focused={focused}>Cài đặt</TabBarLabel>,
         }}
       />
     </Tabs>

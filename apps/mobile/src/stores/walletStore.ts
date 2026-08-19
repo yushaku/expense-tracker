@@ -157,10 +157,13 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const svc = getService();
+      const db = getSharedDb();
+      const fromWallet = db.getWallet(input.fromWalletId);
+      const currency = fromWallet?.currency ?? 'VND';
       svc.createTransfer({
         fromWalletId: input.fromWalletId,
         toWalletId: input.toWalletId,
-        amount: { minorUnits: input.amount, currency: 'VND' },
+        amount: { minorUnits: input.amount, currency },
       });
 
       // Refresh wallets after transfer

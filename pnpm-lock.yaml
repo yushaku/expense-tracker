@@ -206,6 +206,9 @@ importers:
 
   packages/shared:
     dependencies:
+      '@expense/domain':
+        specifier: workspace:*
+        version: link:../domain
       zod:
         specifier: ^3.22.0
         version: 3.25.76

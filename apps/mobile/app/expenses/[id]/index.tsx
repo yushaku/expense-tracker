@@ -1,37 +1,44 @@
 // apps/mobile/app/expenses/[id]/index.tsx
 // Expense detail screen
-
 import React, { useEffect, useState } from 'react';
-import { YStack, Text, XStack, Card, Button, Dialog } from '@expense/ui';
-import { useExpenseStore } from '@/src/stores/expenseStore';
+import { YStack, Text, XStack, Card, Button, Dialog, Spinner } from '@expense/ui';
+import { useExpenseStore, ExpenseViewModel } from '@/src/stores/expenseStore';
 import { useWalletStore } from '@/src/stores/walletStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import type { Expense } from '@expense/shared';
-import { formatCurrency, CATEGORY_LABELS } from '@expense/shared';
+import { formatMoney } from '@expense/domain';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const CATEGORY_ICONS: Record<string, string> = {
-  food: 'food',
-  transport: 'bus',
-  shopping: 'shopping',
-  entertainment: 'movie-open',
-  healthcare: 'medical-bag',
-  education: 'school',
-  bills: 'file-document-outline',
-  savings: 'piggy-bank',
-  other: 'dots-horizontal',
+  cat_food: 'food',
+  cat_transport: 'bus',
+  cat_shopping: 'shopping',
+  cat_entertainment: 'movie-open',
+  cat_healthcare: 'medical-bag',
+  cat_education: 'school',
+  cat_bills: 'file-document-outline',
+  cat_other: 'dots-horizontal',
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  food: '#F97316',
-  transport: '#3B82F6',
-  shopping: '#EC4899',
-  entertainment: '#A855F7',
-  healthcare: '#EF4444',
-  education: '#6366F1',
-  bills: '#78716C',
-  savings: '#0369A1',
-  other: '#64748B',
+  cat_food: '#F97316',
+  cat_transport: '#3B82F6',
+  cat_shopping: '#EC4899',
+  cat_entertainment: '#A855F7',
+  cat_healthcare: '#EF4444',
+  cat_education: '#6366F1',
+  cat_bills: '#78716C',
+  cat_other: '#64748B',
+};
+
+const CATEGORY_LABELS: Record<string, string> = {
+  cat_food: 'Ăn uống',
+  cat_transport: 'Di chuyển',
+  cat_shopping: 'Mua sắm',
+  cat_entertainment: 'Giải trí',
+  cat_healthcare: 'Y tế',
+  cat_education: 'Giáo dục',
+  cat_bills: 'Hóa đơn',
+  cat_other: 'Khác',
 };
 
 export default function ExpenseDetailScreen() {
@@ -39,20 +46,30 @@ export default function ExpenseDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getExpenseById, voidExpense, loadExpenses } = useExpenseStore();
   const { wallets, loadWallets } = useWalletStore();
-  const [expense, setExpense] = useState<Expense | null>(null);
+  const [expense, setExpense] = useState<ExpenseViewModel | null>(null);
+  const [loading, setLoading] = useState(true);
   const [showVoidDialog, setShowVoidDialog] = useState(false);
   const [voidLoading, setVoidLoading] = useState(false);
 
   useEffect(() => {
-    loadExpenses().then(() => {
+    Promise.all([loadExpenses(), loadWallets()]).then(() => {
       if (id) {
         setExpense(getExpenseById(id));
       }
+      setLoading(false);
     });
-    loadWallets();
   }, [id]);
 
   const wallet = wallets.find((w) => w.id === expense?.walletId);
+
+  if (loading) {
+    return (
+      <YStack flex={1} padding="$4" gap="$4" justifyContent="center" alignItems="center">
+        <Spinner size="large" color="$primary" />
+        <Text color="$onSurfaceVariant">Đang tải...</Text>
+      </YStack>
+    );
+  }
 
   if (!expense) {
     return (
@@ -62,12 +79,12 @@ export default function ExpenseDetailScreen() {
     );
   }
 
-  const iconName = CATEGORY_ICONS[expense.category] ?? 'dots-horizontal';
-  const categoryColor = CATEGORY_COLORS[expense.category] ?? '#64748B';
-  const categoryLabel = CATEGORY_LABELS[expense.category];
+  const iconName = CATEGORY_ICONS[expense.categoryId] ?? 'dots-horizontal';
+  const categoryColor = CATEGORY_COLORS[expense.categoryId] ?? '#64748B';
+  const categoryLabel = CATEGORY_LABELS[expense.categoryId] ?? expense.categoryId;
   const isVoided = expense.status === 'voided';
 
-  const formattedDate = new Date(expense.date).toLocaleDateString('vi-VN', {
+  const formattedDate = new Date(expense.occurredAtUtc).toLocaleDateString('vi-VN', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -91,7 +108,6 @@ export default function ExpenseDetailScreen() {
   return (
     <YStack flex={1} backgroundColor="$background">
       <YStack flex={1} padding="$4" gap="$4">
-        {/* Header */}
         <XStack justifyContent="space-between" alignItems="center">
           <Text fontSize="$2xl" fontWeight="bold">
             Chi tiết chi tiêu
@@ -113,7 +129,7 @@ export default function ExpenseDetailScreen() {
               color={isVoided ? '$onSurfaceVariant' : '$expense'}
               textDecorationLine={isVoided ? 'line-through' : 'none'}
             >
-              {formatCurrency(expense.amount, expense.currency)}
+              {formatMoney({ minorUnits: expense.amountMinor, currency: expense.currency })}
             </Text>
             {isVoided && (
               <Text fontSize="$sm" color="$onSurfaceVariant">
@@ -169,7 +185,6 @@ export default function ExpenseDetailScreen() {
           </YStack>
         </Card>
 
-        {/* Action Buttons */}
         {!isVoided && (
           <YStack gap="$3" marginTop="$auto">
             <Button
@@ -180,8 +195,9 @@ export default function ExpenseDetailScreen() {
               Sửa
             </Button>
             <Button
-              theme="red"
+              variant="contained"
               onPress={() => setShowVoidDialog(true)}
+              backgroundColor="$error"
               icon={<MaterialCommunityIcons name="cancel" size={18} color="white" />}
             >
               Hủy chi tiêu
@@ -190,11 +206,10 @@ export default function ExpenseDetailScreen() {
         )}
       </YStack>
 
-      {/* Void Confirmation Dialog */}
       <Dialog open={showVoidDialog} onOpenChange={setShowVoidDialog}>
         <Dialog.Portal>
           <Dialog.Overlay />
-          <DialogContent>
+          <Dialog.Content>
             <YStack gap="$4">
               <Text fontSize="$lg" fontWeight="600">
                 Hủy chi tiêu?
@@ -207,12 +222,12 @@ export default function ExpenseDetailScreen() {
                 <Button variant="outlined" onPress={() => setShowVoidDialog(false)}>
                   Giữ lại
                 </Button>
-                <Button theme="red" onPress={handleVoid} loading={voidLoading}>
+                <Button variant="contained" onPress={handleVoid} loading={voidLoading} backgroundColor="$error">
                   Hủy chi tiêu
                 </Button>
               </XStack>
             </YStack>
-          </DialogContent>
+          </Dialog.Content>
         </Dialog.Portal>
       </Dialog>
     </YStack>

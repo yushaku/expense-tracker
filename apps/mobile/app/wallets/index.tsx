@@ -68,11 +68,7 @@ export default function WalletsScreen() {
           ) : wallets.length === 0 ? (
             <Card borderRadius="$4" padding="$6">
               <YStack alignItems="center" gap="$2">
-                <MaterialCommunityIcons
-                  name="wallet-outline"
-                  size={48}
-                  color="#737994"
-                />
+                <MaterialCommunityIcons name="wallet-outline" size={48} color="#737994" />
                 <Text fontSize="$sm" color="$onSurfaceMuted">
                   Chưa có ví nào
                 </Text>
@@ -84,13 +80,11 @@ export default function WalletsScreen() {
           ) : (
             <WalletList
               wallets={wallets}
-              onWalletPress={(wallet: any) =>
-                router.push(`/wallets/${wallet.id}` as any)
-              }
+              onWalletPress={(wallet: any) => router.push(`/wallets/${wallet.id}` as any)}
             />
           )}
         </YStack>
-      </YStack>
+      </ScrollView>
 
       {/* FAB */}
       <FAB

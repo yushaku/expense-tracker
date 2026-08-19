@@ -74,10 +74,7 @@ export default function TransactionsScreen() {
     if (filter !== 'all' && t.type !== filter) return false;
     if (search) {
       const q = search.toLowerCase();
-      if (
-        !t.description?.toLowerCase().includes(q) &&
-        t.categoryId?.toLowerCase() !== q
-      ) {
+      if (!t.description?.toLowerCase().includes(q) && t.categoryId?.toLowerCase() !== q) {
         return false;
       }
     }
@@ -101,11 +98,7 @@ export default function TransactionsScreen() {
         </Text>
 
         {/* Search */}
-        <Input
-          placeholder="Tìm kiếm..."
-          value={search}
-          onChangeText={setSearch}
-        />
+        <Input placeholder="Tìm kiếm..." value={search} onChangeText={setSearch} />
 
         {/* Filter Chips */}
         <XStack gap="$2" flexWrap="wrap">
@@ -143,24 +136,15 @@ export default function TransactionsScreen() {
                   <Card
                     key={tx.id}
                     pressable
-                    onPress={() =>
-                      router.push(`/${tx.type}s/${tx.id}` as any)
-                    }
+                    onPress={() => router.push(`/${tx.type}s/${tx.id}` as any)}
                     padding="$3"
                   >
-                    <XStack
-                      justifyContent="space-between"
-                      alignItems="center"
-                    >
+                    <XStack justifyContent="space-between" alignItems="center">
                       <XStack gap="$3" alignItems="center">
                         <MaterialCommunityIcons
                           name={tx.type === 'expense' ? 'arrow-up' : 'arrow-down'}
                           size={20}
-                          color={
-                            tx.type === 'expense'
-                              ? '#e78284'
-                              : '#a6d189'
-                          }
+                          color={tx.type === 'expense' ? '#e78284' : '#a6d189'}
                         />
                         <YStack>
                           <Text fontSize="$sm" fontWeight="500">
@@ -174,11 +158,7 @@ export default function TransactionsScreen() {
                       <Text
                         fontSize="$sm"
                         fontWeight="600"
-                        color={
-                          tx.type === 'expense'
-                            ? '$expense'
-                            : '$income'
-                        }
+                        color={tx.type === 'expense' ? '$expense' : '$income'}
                       >
                         {tx.type === 'expense' ? '-' : '+'}
                         {formatMoney({

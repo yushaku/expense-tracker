@@ -21,11 +21,28 @@ export const Button = styled(TamaguiButton, {
           opacity: 0.85,
         },
       },
+      contained: {
+        backgroundColor: '$primary',
+        color: '$onPrimary',
+        pressStyle: {
+          backgroundColor: '$primary',
+          opacity: 0.85,
+        },
+      },
       secondary: {
         backgroundColor: '$secondaryContainer',
         color: '$secondary',
         pressStyle: {
           backgroundColor: '$surfaceVariant',
+        },
+      },
+      outlined: {
+        backgroundColor: 'transparent',
+        color: '$primary',
+        borderWidth: 1,
+        borderColor: '$primary',
+        pressStyle: {
+          backgroundColor: '$primaryContainer',
         },
       },
       ghost: {

@@ -57,11 +57,7 @@ export default function InvestmentsScreen() {
           Danh sách đầu tư
         </Text>
         <YStack gap="$2" alignItems="center" paddingVertical="$8">
-          <MaterialCommunityIcons
-            name="briefcase-outline"
-            size={48}
-            color="#737994"
-          />
+          <MaterialCommunityIcons name="briefcase-outline" size={48} color="#737994" />
           <Text color="$muted" textAlign="center">
             Chưa có khoản đầu tư nào
           </Text>

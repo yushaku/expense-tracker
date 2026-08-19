@@ -183,6 +183,32 @@ export const useIncomeStore = create<IncomeState>((set, get) => ({
         throw new Error('VALIDATION_ERROR: amount must be positive');
       }
 
+      // If amount changed, use void-and-recreate pattern to update ledger entry
+      if (input.amountMinor !== undefined && input.amountMinor !== existing.amountMinor) {
+        // Mark old ledger entry as voided
+        const ledgerEntries = db.getLedgerEntries(existing.walletId);
+        ledgerEntries
+          .filter((e: any) => e.sourceId === input.id && e.sourceType === 'income')
+          .forEach((e: any) => {
+            e.status = 'voided';
+          });
+
+        // Create new ledger entry with updated amount
+        const now = new Date().toISOString();
+        db.createLedgerEntry({
+          id: crypto.randomUUID(),
+          walletId: existing.walletId,
+          sourceType: 'income',
+          sourceId: input.id,
+          entryKind: 'income',
+          signedMinor: input.amountMinor,
+          currency: existing.currency,
+          status: 'active',
+          occurredAtUtc: existing.occurredAtUtc,
+          createdAtUtc: now,
+        });
+      }
+
       const income = db.updateIncome(input.id, {
         amountMinor: input.amountMinor,
         categoryId: input.categoryId,

@@ -1,10 +1,10 @@
 // packages/shared/src/utils.ts
 
 /**
- * Generate a unique ID (timestamp + random).
+ * Generate a UUID v4 (cryptographically random).
  */
 export function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+  return crypto.randomUUID();
 }
 
 /**
@@ -27,7 +27,14 @@ export function toVietnamISO(date: Date): string {
 }
 
 /**
- * Format currency using vi-VN locale.
+ * Format money using BigInt minor units (vi-VN locale).
+ * Re-export from @expense/domain for backward compatibility.
+ */
+export { formatMoney } from '@expense/domain';
+
+/**
+ * @deprecated Use formatMoney from @expense/domain instead.
+ * This function uses JS number which loses precision for large amounts.
  */
 export function formatCurrency(amount: number, currency: string): string {
   return new Intl.NumberFormat('vi-VN', {

@@ -1,10 +1,10 @@
 // apps/mobile/src/components/expenses/ExpenseCard.tsx
 // Single expense card component
-
 import React from 'react';
 import { Card, Text, XStack, YStack } from '@expense/ui';
 import type { Expense } from '@expense/shared';
-import { formatCurrency, CATEGORY_LABELS } from '@expense/shared';
+import { formatMoney } from '@expense/domain';
+import { CATEGORY_LABELS } from '@expense/shared';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface ExpenseCardProps {
@@ -86,7 +86,7 @@ export function ExpenseCard({ expense, onPress, walletName }: ExpenseCardProps) 
             color={isVoided ? '$onSurfaceVariant' : '$expense'}
             textDecorationLine={isVoided ? 'line-through' : 'none'}
           >
-            {formatCurrency(expense.amount, expense.currency)}
+            {formatMoney({ minorUnits: BigInt(expense.amount), currency: expense.currency })}
           </Text>
           {isVoided && (
             <Text fontSize="$xs" color="$onSurfaceVariant">

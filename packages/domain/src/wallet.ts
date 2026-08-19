@@ -134,14 +134,14 @@ export class WalletService {
     const now = new Date().toISOString();
     const transferId = generateId();
 
-    // Outgoing leg
+    // Outgoing leg (negative — reduces from-wallet balance)
     this.db.createLedgerEntry({
       id: generateId(),
       walletId: input.fromWalletId,
       sourceType: 'transfer',
       sourceId: transferId,
       entryKind: 'transfer_out',
-      signedMinor: input.amount.minorUnits,
+      signedMinor: -input.amount.minorUnits,
       currency: input.amount.currency,
       status: 'active',
       occurredAtUtc: now,

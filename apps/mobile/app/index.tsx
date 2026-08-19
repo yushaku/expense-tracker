@@ -10,6 +10,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 export default function HomeScreen() {
   const {
     cashFlowMinor,
+    totalIncomeMinor,
+    totalExpenseMinor,
     savingsRate,
     categoryBreakdown,
     walletBalances,
@@ -34,19 +36,11 @@ export default function HomeScreen() {
   }
 
   // Calculate total balance from all wallets
-  const totalBalance = walletBalances.reduce(
-    (sum, w) => sum + w.balanceMinor,
-    0n
-  );
+  const totalBalance = walletBalances.reduce((sum, w) => sum + w.balanceMinor, 0n);
 
-  // Calculate total income & expense from cashFlow
-  // cashFlow = income - expense (positive = surplus)
-  // For demo: derive income/expense from categories
-  const totalExpense = categoryBreakdown.reduce(
-    (sum, c) => sum + c.amountMinor,
-    0n
-  );
-  const totalIncome = totalExpense + cashFlowMinor;
+  // Get income & expense directly from dashboard store (single source of truth)
+  const totalIncome = totalIncomeMinor;
+  const totalExpense = totalExpenseMinor;
 
   return (
     <ScrollView
@@ -75,12 +69,7 @@ export default function HomeScreen() {
         )}
 
         {/* Hero Balance Card */}
-        <Card
-          elevated
-          backgroundColor="$primary"
-          borderRadius="$6"
-          padding="$5"
-        >
+        <Card elevated backgroundColor="$primary" borderRadius="$6" padding="$5">
           <YStack gap="$2">
             <Text fontSize="$sm" color="$onPrimary" opacity={0.8}>
               Tổng tài sản
@@ -100,11 +89,7 @@ export default function HomeScreen() {
           <Card flex={1} elevated borderRadius="$4" padding="$4">
             <YStack gap="$2">
               <XStack alignItems="center" gap="$2">
-                <MaterialCommunityIcons
-                  name="arrow-down"
-                  size={16}
-                  color="#a6d189"
-                />
+                <MaterialCommunityIcons name="arrow-down" size={16} color="#a6d189" />
                 <Text fontSize="$xs" color="$onSurfaceMuted">
                   Thu nhập
                 </Text>
@@ -119,11 +104,7 @@ export default function HomeScreen() {
           <Card flex={1} elevated borderRadius="$4" padding="$4">
             <YStack gap="$2">
               <XStack alignItems="center" gap="$2">
-                <MaterialCommunityIcons
-                  name="arrow-up"
-                  size={16}
-                  color="#e78284"
-                />
+                <MaterialCommunityIcons name="arrow-up" size={16} color="#e78284" />
                 <Text fontSize="$xs" color="$onSurfaceMuted">
                   Chi tiêu
                 </Text>
@@ -142,7 +123,11 @@ export default function HomeScreen() {
               <Text fontSize="$sm" color="$onSurfaceMuted">
                 Tỷ lệ tiết kiệm
               </Text>
-              <Text fontSize="$2xl" fontWeight="bold" color={savingsRate >= 0 ? '$savings' : '$expense'}>
+              <Text
+                fontSize="$2xl"
+                fontWeight="bold"
+                color={savingsRate >= 0 ? '$savings' : '$expense'}
+              >
                 {savingsRate.toFixed(1)}%
               </Text>
             </YStack>
@@ -178,11 +163,7 @@ export default function HomeScreen() {
                       alignItems="center"
                       justifyContent="center"
                     >
-                      <MaterialCommunityIcons
-                        name="tag"
-                        size={18}
-                        color={item.color}
-                      />
+                      <MaterialCommunityIcons name="tag" size={18} color={item.color} />
                     </XStack>
                     <YStack gap="$0.5">
                       <Text fontSize="$sm" fontWeight="500" color="$onSurface">

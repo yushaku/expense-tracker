@@ -1,23 +1,32 @@
 // apps/mobile/src/components/expenses/ExpenseForm.tsx
 // Create/Edit expense form
-
 import React, { useState } from 'react';
 import { YStack, Text, XStack, Input, Card, Button, ScrollView } from '@expense/ui';
 import type { ExpenseCategory, Wallet } from '@expense/shared';
-import { CATEGORY_LABELS, generateId } from '@expense/shared';
+import { CATEGORY_LABELS } from '@expense/shared';
+import { createMoney, formatMoney } from '@expense/domain';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface ExpenseFormProps {
   initialData?: {
     id: string;
-    amount?: number;
+    amountMinor?: bigint;
+    currency?: string;
     category?: ExpenseCategory;
     description?: string;
     date?: string;
     walletId?: string;
   };
   wallets: Wallet[];
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data: {
+    id?: string;
+    amountMinor: bigint;
+    currency: string;
+    category?: ExpenseCategory;
+    description?: string;
+    walletId?: string;
+    clientRequestId?: string;
+  }) => Promise<void>;
   onCancel: () => void;
   loading?: boolean;
 }
@@ -53,19 +62,31 @@ export function ExpenseForm({
   onCancel,
   loading,
 }: ExpenseFormProps) {
-  const [amount, setAmount] = useState(initialData?.amount ? String(initialData.amount) : '');
+  const [amountStr, setAmountStr] = useState(
+    initialData?.amountMinor ? initialData.amountMinor.toString() : '',
+  );
   const [category, setCategory] = useState<ExpenseCategory | undefined>(initialData?.category);
   const [description, setDescription] = useState(initialData?.description ?? '');
   const [walletId, setWalletId] = useState(initialData?.walletId ?? '');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const isEdit = !!initialData;
+  const currency = 'VND';
 
   const handleSubmit = async () => {
     const newErrors: Record<string, string> = {};
 
-    if (!amount || parseFloat(amount) <= 0) {
-      newErrors.amount = 'Số tiền phải > 0';
+    // Validate amount using createMoney (BigInt minor units)
+    let amountMinor: bigint | null = null;
+    if (!amountStr || amountStr.trim() === '') {
+      newErrors.amount = 'Số tiền là bắt buộc';
+    } else {
+      try {
+        const money = createMoney(amountStr.trim(), currency);
+        amountMinor = money.minorUnits;
+      } catch {
+        newErrors.amount = 'Số tiền không hợp lệ (phải > 0)';
+      }
     }
 
     if (!category) {
@@ -85,18 +106,20 @@ export function ExpenseForm({
       if (isEdit) {
         await onSubmit({
           id: initialData!.id,
-          ...(amount ? { amount: parseFloat(amount) } : {}),
+          amountMinor: amountMinor!,
+          currency,
           ...(category ? { category } : {}),
           ...(description !== undefined ? { description } : {}),
           ...(walletId ? { walletId } : {}),
         });
       } else {
         await onSubmit({
-          amount: parseFloat(amount),
+          amountMinor: amountMinor!,
+          currency,
           category,
           description,
           walletId,
-          clientRequestId: generateId(),
+          clientRequestId: crypto.randomUUID(),
         });
       }
     } catch (err: any) {
@@ -117,11 +140,13 @@ export function ExpenseForm({
             Số tiền (VND)
           </Text>
           <Input
-            value={amount}
-            onChangeText={setAmount}
+            value={amountStr}
+            onChangeText={setAmountStr}
             placeholder="Ví dụ: 50000"
             keyboardType="numeric"
             size="lg"
+            accessibilityLabel="Số tiền chi tiêu"
+            accessibilityHint="Nhập số tiền bằng đồng Việt Nam"
           />
           {errors.amount && (
             <Text fontSize="$xs" color="$error">
@@ -144,6 +169,9 @@ export function ExpenseForm({
                 backgroundColor={category === cat.category ? '$primaryContainer' : '$surface'}
                 padding="$2"
                 borderRadius="$2"
+                accessibilityRole="button"
+                accessibilityLabel={cat.label}
+                accessibilityState={{ selected: category === cat.category }}
               >
                 <XStack gap="$1" alignItems="center">
                   <MaterialCommunityIcons
@@ -182,6 +210,9 @@ export function ExpenseForm({
                 backgroundColor={walletId === wallet.id ? '$primaryContainer' : '$surface'}
                 padding="$2"
                 borderRadius="$2"
+                accessibilityRole="button"
+                accessibilityLabel={wallet.name}
+                accessibilityState={{ selected: walletId === wallet.id }}
               >
                 <Text fontSize="$xs" color={walletId === wallet.id ? '$primary' : '$onSurface'}>
                   {wallet.name}
@@ -206,6 +237,7 @@ export function ExpenseForm({
             onChangeText={setDescription}
             placeholder="Mô tả chi tiêu..."
             multiline
+            accessibilityLabel="Ghi chú chi tiêu"
           />
         </YStack>
 
@@ -217,10 +249,16 @@ export function ExpenseForm({
 
         {/* Action Buttons */}
         <XStack gap="$3" paddingTop="$4">
-          <Button flex={1} variant="outlined" onPress={onCancel}>
+          <Button flex={1} variant="outlined" onPress={onCancel} accessibilityLabel="Hủy">
             Hủy
           </Button>
-          <Button flex={1} variant="contained" onPress={handleSubmit} loading={loading}>
+          <Button
+            flex={1}
+            variant="contained"
+            onPress={handleSubmit}
+            loading={loading}
+            accessibilityLabel={isEdit ? 'Lưu thay đổi' : 'Thêm chi tiêu'}
+          >
             {isEdit ? 'Lưu' : 'Thêm'}
           </Button>
         </XStack>

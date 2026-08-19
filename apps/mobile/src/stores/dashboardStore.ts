@@ -23,6 +23,8 @@ export interface WalletBalanceItem {
 
 interface DashboardState {
   cashFlowMinor: bigint;
+  totalIncomeMinor: bigint;
+  totalExpenseMinor: bigint;
   savingsRate: number;
   categoryBreakdown: CategoryBreakdownItem[];
   walletBalances: WalletBalanceItem[];
@@ -58,6 +60,8 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export const useDashboardStore = create<DashboardState>((set, get) => ({
   cashFlowMinor: 0n,
+  totalIncomeMinor: 0n,
+  totalExpenseMinor: 0n,
   savingsRate: 0,
   categoryBreakdown: [],
   walletBalances: [],
@@ -90,8 +94,9 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
       const totalIncome = activeIncomes.reduce((sum: bigint, i: any) => sum + i.amountMinor, 0n);
       const cashFlowMinor = totalIncome - totalExpense;
 
+      // Use BigInt arithmetic for savings rate (avoid precision loss with Number())
       const savingsRate =
-        totalIncome > 0n ? (Number(cashFlowMinor) / Number(totalIncome)) * 100 : 0;
+        totalIncome > 0n ? Number((cashFlowMinor * 1000n) / totalIncome) / 10 : 0;
 
       const categoryTotals: Record<string, bigint> = {};
       activeExpenses.forEach((e: any) => {
@@ -103,7 +108,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
           categoryId,
           label: CATEGORY_LABELS[categoryId] ?? categoryId,
           amountMinor,
-          percentage: totalExpense > 0n ? (Number(amountMinor) / Number(totalExpense)) * 100 : 0,
+          percentage: totalExpense > 0n ? Number((amountMinor * 1000n) / totalExpense) / 10 : 0,
           color: CATEGORY_COLORS[categoryId] ?? '#64748B',
         }))
         .filter((item) => item.percentage > 0)
@@ -121,6 +126,8 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
 
       set({
         cashFlowMinor,
+        totalIncomeMinor: totalIncome,
+        totalExpenseMinor: totalExpense,
         savingsRate,
         categoryBreakdown,
         walletBalances,

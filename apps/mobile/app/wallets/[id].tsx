@@ -1,12 +1,10 @@
 // apps/mobile/app/wallets/[id].tsx
 // Wallet detail screen
-
 import React, { useEffect, useState } from 'react';
 import { YStack, Text, XStack } from '@expense/ui';
-import { useWalletStore } from '@/src/stores/walletStore';
+import { useWalletStore, WalletWithBalance } from '@/src/stores/walletStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import type { WalletWithBalance } from '@expense/shared';
-import { formatCurrency } from '@expense/shared';
+import { formatMoney } from '@expense/domain';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const WALLET_ICONS: Record<string, string> = {
@@ -28,14 +26,24 @@ export default function WalletDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getWalletById, loadWallets } = useWalletStore();
   const [wallet, setWallet] = useState<WalletWithBalance | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadWallets().then(() => {
       if (id) {
         setWallet(getWalletById(id));
       }
+      setLoading(false);
     });
   }, [id]);
+
+  if (loading) {
+    return (
+      <YStack flex={1} padding="$4" gap="$4" justifyContent="center" alignItems="center">
+        <Text color="$onSurfaceVariant">Đang tải...</Text>
+      </YStack>
+    );
+  }
 
   if (!wallet) {
     return (
@@ -48,6 +56,10 @@ export default function WalletDetailScreen() {
   const iconName = WALLET_ICONS[wallet.type] ?? 'wallet';
   const label = WALLET_LABELS[wallet.type] ?? wallet.type;
   const isCreditCard = wallet.type === 'credit_card';
+  const currency = wallet.currency ?? 'VND';
+
+  const balanceMinor = wallet.balanceMinor;
+  const creditLimitMinor = wallet.creditLimitMinor;
 
   return (
     <YStack flex={1} backgroundColor="$background">
@@ -78,28 +90,28 @@ export default function WalletDetailScreen() {
             <Text
               fontSize="$3xl"
               fontWeight="bold"
-              color={isCreditCard ? '$expense' : wallet.balance >= 0 ? '$income' : '$expense'}
+              color={isCreditCard ? '$expense' : balanceMinor >= 0n ? '$income' : '$expense'}
             >
               {isCreditCard
-                ? formatCurrency(Math.abs(wallet.balance), wallet.currency)
-                : formatCurrency(wallet.balance, wallet.currency)}
+                ? formatMoney({ minorUnits: balanceMinor < 0n ? -balanceMinor : balanceMinor, currency })
+                : formatMoney({ minorUnits: balanceMinor, currency })}
             </Text>
           </YStack>
 
-          {isCreditCard && wallet.creditLimit > 0 && (
+          {isCreditCard && creditLimitMinor > 0n && (
             <YStack gap="$2">
               <XStack justifyContent="space-between">
                 <Text fontSize={14} color="$onSurfaceVariant">
                   Hạn mức
                 </Text>
-                <Text fontSize={14}>{formatCurrency(wallet.creditLimit, wallet.currency)}</Text>
+                <Text fontSize={14}>{formatMoney({ minorUnits: creditLimitMinor, currency })}</Text>
               </XStack>
               <XStack justifyContent="space-between">
                 <Text fontSize={14} color="$onSurfaceVariant">
                   Đã sử dụng
                 </Text>
                 <Text fontSize={14} color="$expense">
-                  {formatCurrency(Math.abs(wallet.balance), wallet.currency)}
+                  {formatMoney({ minorUnits: balanceMinor < 0n ? -balanceMinor : balanceMinor, currency })}
                 </Text>
               </XStack>
               <XStack justifyContent="space-between">
@@ -107,7 +119,7 @@ export default function WalletDetailScreen() {
                   Còn lại
                 </Text>
                 <Text fontSize={14} color="$income">
-                  {formatCurrency(wallet.creditLimit - Math.abs(wallet.balance), wallet.currency)}
+                  {formatMoney({ minorUnits: creditLimitMinor - (balanceMinor < 0n ? -balanceMinor : balanceMinor), currency })}
                 </Text>
               </XStack>
             </YStack>

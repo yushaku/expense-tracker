@@ -1,18 +1,17 @@
 // apps/mobile/app/incomes/[id]/index.tsx
 // Income detail screen
-
 import React, { useEffect, useState } from 'react';
-import { YStack, Text, XStack, Card, Button, Dialog } from '@expense/ui';
+import { YStack, Text, XStack, Card, Button, Dialog, Spinner } from '@expense/ui';
 import {
   useIncomeStore,
   INCOME_TYPE_LABELS,
   INCOME_TYPE_COLORS,
   INCOME_TYPE_ICONS,
+  IncomeViewModel,
 } from '@/src/stores/incomeStore';
 import { useWalletStore } from '@/src/stores/walletStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import type { Income } from '@expense/shared';
-import { formatCurrency } from '@expense/shared';
+import { formatMoney } from '@expense/domain';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function IncomeDetailScreen() {
@@ -20,20 +19,30 @@ export default function IncomeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getIncomeById, voidIncome, loadIncomes } = useIncomeStore();
   const { wallets, loadWallets } = useWalletStore();
-  const [income, setIncome] = useState<Income | null>(null);
+  const [income, setIncome] = useState<IncomeViewModel | null>(null);
+  const [loading, setLoading] = useState(true);
   const [showVoidDialog, setShowVoidDialog] = useState(false);
   const [voidLoading, setVoidLoading] = useState(false);
 
   useEffect(() => {
-    loadIncomes().then(() => {
+    Promise.all([loadIncomes(), loadWallets()]).then(() => {
       if (id) {
         setIncome(getIncomeById(id));
       }
+      setLoading(false);
     });
-    loadWallets();
   }, [id]);
 
   const wallet = wallets.find((w) => w.id === income?.walletId);
+
+  if (loading) {
+    return (
+      <YStack flex={1} padding="$4" gap="$4" justifyContent="center" alignItems="center">
+        <Spinner size="large" color="$primary" />
+        <Text color="$onSurfaceVariant">Đang tải...</Text>
+      </YStack>
+    );
+  }
 
   if (!income) {
     return (
@@ -48,7 +57,7 @@ export default function IncomeDetailScreen() {
   const typeLabel = INCOME_TYPE_LABELS[income.type];
   const isVoided = income.status === 'voided';
 
-  const formattedDate = new Date(income.date).toLocaleDateString('vi-VN', {
+  const formattedDate = new Date(income.occurredAtUtc).toLocaleDateString('vi-VN', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -72,7 +81,6 @@ export default function IncomeDetailScreen() {
   return (
     <YStack flex={1} backgroundColor="$background">
       <YStack flex={1} padding="$4" gap="$4">
-        {/* Header */}
         <XStack justifyContent="space-between" alignItems="center">
           <Text fontSize="$2xl" fontWeight="bold">
             Chi tiết thu nhập
@@ -94,7 +102,7 @@ export default function IncomeDetailScreen() {
               color={isVoided ? '$onSurfaceVariant' : '$income'}
               textDecorationLine={isVoided ? 'line-through' : 'none'}
             >
-              +{formatCurrency(income.amount, income.currency)}
+              +{formatMoney({ minorUnits: income.amountMinor, currency: income.currency })}
             </Text>
             {isVoided && (
               <Text fontSize="$sm" color="$onSurfaceVariant">
@@ -157,7 +165,6 @@ export default function IncomeDetailScreen() {
           </YStack>
         </Card>
 
-        {/* Action Buttons */}
         {!isVoided && (
           <YStack gap="$3" marginTop="$auto">
             <Button
@@ -168,8 +175,9 @@ export default function IncomeDetailScreen() {
               Sửa
             </Button>
             <Button
-              theme="red"
+              variant="contained"
               onPress={() => setShowVoidDialog(true)}
+              backgroundColor="$error"
               icon={<MaterialCommunityIcons name="cancel" size={18} color="white" />}
             >
               Hủy thu nhập
@@ -178,7 +186,6 @@ export default function IncomeDetailScreen() {
         )}
       </YStack>
 
-      {/* Void Confirmation Dialog */}
       <Dialog open={showVoidDialog} onOpenChange={setShowVoidDialog}>
         <Dialog.Portal>
           <Dialog.Overlay />
@@ -195,7 +202,7 @@ export default function IncomeDetailScreen() {
                 <Button variant="outlined" onPress={() => setShowVoidDialog(false)}>
                   Giữ lại
                 </Button>
-                <Button theme="red" onPress={handleVoid} loading={voidLoading}>
+                <Button variant="contained" onPress={handleVoid} loading={voidLoading} backgroundColor="$error">
                   Hủy thu nhập
                 </Button>
               </XStack>

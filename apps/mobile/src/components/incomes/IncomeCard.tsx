@@ -1,10 +1,9 @@
 // apps/mobile/src/components/incomes/IncomeCard.tsx
 // Single income card component with income color scheme
-
 import React from 'react';
 import { Card, Text, XStack, YStack } from '@expense/ui';
 import type { Income } from '@expense/shared';
-import { formatCurrency } from '@expense/shared';
+import { formatMoney } from '@expense/domain';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import {
   INCOME_TYPE_LABELS,
@@ -67,7 +66,7 @@ export function IncomeCard({ income, onPress, walletName }: IncomeCardProps) {
             color={isVoided ? '$onSurfaceVariant' : '$income'}
             textDecorationLine={isVoided ? 'line-through' : 'none'}
           >
-            +{formatCurrency(income.amount, income.currency)}
+            +{formatMoney({ minorUnits: BigInt(income.amount), currency: income.currency })}
           </Text>
           {isVoided && (
             <Text fontSize="$xs" color="$onSurfaceVariant">

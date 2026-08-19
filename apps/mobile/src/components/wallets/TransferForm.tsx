@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { YStack, Text, XStack, Input, Card } from '@expense/ui';
-import { formatMoney } from '@expense/domain';
+import { formatMoney, createMoney, type Money } from '@expense/domain';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface TransferFormProps {
@@ -55,8 +55,16 @@ export function TransferForm({ wallets, onSubmit, onCancel, loading }: TransferF
     if (fromWalletId === toWalletId) {
       newErrors.toWalletId = 'Ví đích phải khác ví nguồn';
     }
-    if (!amount || parseFloat(amount) <= 0) {
-      newErrors.amount = 'Số tiền phải > 0';
+    // Validate positive amount using createMoney
+    let money: Money | null = null;
+    if (!amount || amount.trim() === '') {
+      newErrors.amount = 'Vui lòng nhập số tiền';
+    } else {
+      try {
+        money = createMoney(amount.trim(), fromWallet?.currency ?? 'VND');
+      } catch {
+        newErrors.amount = 'Số tiền không hợp lệ (phải > 0)';
+      }
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -65,13 +73,12 @@ export function TransferForm({ wallets, onSubmit, onCancel, loading }: TransferF
     }
 
     try {
-      // Parse to minor units (VND scale = 0)
-      const amountMinor = BigInt(Math.round(parseFloat(amount)));
+      if (!money) return;
 
       await onSubmit({
         fromWalletId,
         toWalletId,
-        amountMinor,
+        amountMinor: money.minorUnits,
         note: note || undefined,
         clientRequestId: crypto.randomUUID(),
       });
