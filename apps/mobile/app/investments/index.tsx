@@ -2,9 +2,8 @@
 // Investments list — portfolio overview
 
 import React from 'react';
-import { ScrollView, Text, XStack, YStack, Card, FAB } from '@expense/ui';
+import { ScrollView, Text, XStack, YStack, Card } from '@expense/ui';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 
 const INVESTMENT_TYPES = [
   { type: 'gold', label: 'Vàng', icon: 'gold', color: '#e5c890' },
@@ -67,11 +66,14 @@ export default function InvestmentsScreen() {
         </YStack>
       </YStack>
 
+      {/* FAB temporarily disabled until investments/new route is implemented */}
+      {/*
       <FAB
         icon={<MaterialCommunityIcons name="plus" size={24} color="white" />}
         onPress={() => router.push('/investments/new' as any)}
         ariaLabel="Thêm đầu tư"
       />
+      */}
     </ScrollView>
   );
 }
