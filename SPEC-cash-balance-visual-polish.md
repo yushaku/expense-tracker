@@ -44,7 +44,8 @@ source directly against `arm64-apple-ios18.0-simulator` with warnings as errors.
 MonMon/
   Design/MonMonTheme.swift       Shared semantic colors and spacing
   Accounts/AccountListView.swift Dashboard, empty state, account cards
-  Accounts/AddAccountView.swift  Shared add-account form
+  Accounts/AddAccountView.swift  Form state, toolbar, save orchestration
+  Accounts/AddAccountForm.swift  Shared add-account presentation
 ```
 
 ## Code Style

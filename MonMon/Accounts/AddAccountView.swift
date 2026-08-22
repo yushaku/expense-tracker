@@ -12,7 +12,7 @@ struct AddAccountView: View {
     var body: some View {
         #if os(macOS)
             form
-                .frame(minWidth: 400, minHeight: 360)
+                .frame(minWidth: 440, minHeight: 520)
         #else
             form
         #endif
@@ -20,50 +20,11 @@ struct AddAccountView: View {
 
     private var form: some View {
         NavigationStack {
-            Form {
-                Section("Account") {
-                    TextField("Account name", text: $draft.name)
-                        .accessibilityIdentifier("account-name")
-
-                    if let nameErrorMessage {
-                        validationMessage(nameErrorMessage, id: "account-name-error")
-                    }
-
-                    Picker("Type", selection: $draft.kind) {
-                        ForEach(CashAccountKind.allCases, id: \.rawValue) { kind in
-                            Text(kind.displayName)
-                                .tag(kind)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .accessibilityIdentifier("account-kind")
-                }
-
-                Section {
-                    #if os(iOS)
-                        TextField("0", text: $draft.openingBalanceText)
-                            .keyboardType(.numberPad)
-                            .accessibilityIdentifier("opening-balance")
-                    #else
-                        TextField("0", text: $draft.openingBalanceText)
-                            .accessibilityIdentifier("opening-balance")
-                    #endif
-
-                    if let balanceErrorMessage {
-                        validationMessage(balanceErrorMessage, id: "opening-balance-error")
-                    }
-                } header: {
-                    Text("Opening balance")
-                } footer: {
-                    Text("Amount in VND")
-                }
-
-                if let saveErrorMessage {
-                    Section {
-                        validationMessage(saveErrorMessage, id: "save-account-error")
-                    }
-                }
-            }
+            AddAccountForm(
+                draft: $draft,
+                validationError: validationError,
+                saveErrorMessage: saveErrorMessage
+            )
             .navigationTitle("Add account")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -77,33 +38,12 @@ struct AddAccountView: View {
                     Button("Save") {
                         save()
                     }
+                    .fontWeight(.semibold)
                     .accessibilityIdentifier("save-account")
                 }
             }
+            .tint(MonMonTheme.accent)
         }
-    }
-
-    private var nameErrorMessage: String? {
-        guard validationError == .emptyName else { return nil }
-        return "Enter an account name."
-    }
-
-    private var balanceErrorMessage: String? {
-        switch validationError {
-        case .invalidOpeningBalance:
-            "Enter a valid balance."
-        case .negativeOpeningBalance:
-            "Balance cannot be negative."
-        default:
-            nil
-        }
-    }
-
-    private func validationMessage(_ message: String, id: String) -> some View {
-        Text(message)
-            .font(.caption)
-            .foregroundStyle(.red)
-            .accessibilityIdentifier(id)
     }
 
     private func save() {

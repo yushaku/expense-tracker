@@ -1,5 +1,7 @@
 # Checklist: cash-balance-visual-polish
 
+**Status:** Automated implementation complete; awaiting owner visual review
+
 ## Documentation
 
 - [x] Objective and visual direction are explicit.
@@ -22,10 +24,17 @@ project validation, and direct iOS 18 type-check all exited 0 (2026-08-23).
 
 ## Slice 2: Add form
 
-- [ ] Name, kind, and opening balance have clear grouped hierarchy.
-- [ ] Existing identifiers, validation, Cancel, Save, and rollback remain intact.
-- [ ] Errors use icon and text rather than color alone.
-- [ ] Full tests/builds, iOS type-check, formatter, and review pass.
+- [x] Name, kind, and opening balance have clear grouped hierarchy.
+- [x] Existing identifiers, validation, Cancel, Save, and rollback remain intact.
+- [x] Errors use icon and text rather than color alone.
+- [x] Full tests/builds, iOS type-check, formatter, and review pass.
+
+**Evidence:** Presentation moved into a focused `AddAccountForm` while
+`AddAccountView` retains the original state and save orchestration. Name, type,
+and amount use native fields inside semantic cards; every validation and save
+error includes an SF Symbol and text. Existing accessibility identifiers are
+unchanged. Full macOS tests, macOS Debug, direct iOS 18 type-check with warnings
+as errors, strict formatting, and project validation all exited 0 (2026-08-23).
 
 ## Owner runtime gate
 
