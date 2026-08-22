@@ -1,0 +1,23 @@
+# Apple platform build output
+build/
+DerivedData/
+*.dSYM
+*.dSYM.zip
+*.ipa
+
+# Xcode user-specific state
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+xcuserdata/
+
+# Local machine and signing material
+.DS_Store
+.env
+.env.*
+*.cer
+*.key
+*.mobileprovision
+*.p12
+Config/Local.xcconfig
+

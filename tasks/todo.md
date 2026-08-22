@@ -11,17 +11,22 @@ Debug/Release settings before creating the Xcode project graph.
 
 **Acceptance criteria:**
 
-- [ ] Build products, DerivedData, signing files, and Xcode user state are ignored.
-- [ ] Swift 6 language mode, strict concurrency, deployment targets, bundle ID,
+- [x] Build products, DerivedData, signing files, and Xcode user state are ignored.
+- [x] Swift 6 language mode, strict concurrency, deployment targets, bundle ID,
   and warning settings are defined in reviewed `.xcconfig` files.
-- [ ] Debug and Release configuration differences are explicit and minimal.
+- [x] Debug and Release configuration differences are explicit and minimal.
 
 **Verification:**
 
-- [ ] `swift format lint --strict --recursive MonMon MonMonTests` can read the
+- [x] `swift format lint --strict --recursive MonMon MonMonTests` can read the
   checked-in formatting configuration once sources exist.
-- [ ] Manual review confirms no credential, signing identity, or absolute
+- [x] Manual review confirms no credential, signing identity, or absolute
   developer-machine path is present.
+
+**Evidence:** `swift format dump-configuration --effective --configuration
+.swift-format` parsed the configuration; `git check-ignore -v` matched
+DerivedData, local xcconfig, Xcode user state, and signing fixtures; targeted
+secret/path scan returned no configuration finding (2026-08-22).
 
 **Dependencies:** None
 
