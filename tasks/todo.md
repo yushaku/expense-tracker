@@ -1,266 +1,324 @@
-# Task List: app-bootstrap
+# Task List: cash-balance
 
-This checklist implements `SPEC-app-bootstrap.md` and `tasks/plan.md`. Complete
-tasks in order. Record verification evidence beneath each task before checking it
-off.
+**Status:** Approved (2026-08-23)  
+**Spec:** `SPEC-cash-balance.md`  
+**Plan:** `tasks/plan.md`
 
-## Task 1: Add repository and build configuration
+Complete tasks in order. Record red/green evidence before checking off each TDD
+task. Do not start implementation until the owner approves this checklist.
 
-**Description:** Establish deterministic formatting, ignore rules, and explicit
-Debug/Release settings before creating the Xcode project graph.
+## Command Reference
+
+Focused work may run only the relevant test, but each green task runs the full
+macOS test target because the project is still small:
+
+```sh
+rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon \
+  -destination 'platform=macOS,arch=arm64' \
+  -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO test
+```
+
+Debug compile checks:
+
+```sh
+rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug \
+  -destination 'platform=macOS,arch=arm64' \
+  -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO build
+rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug \
+  -sdk iphonesimulator -derivedDataPath /tmp/MonMonDerivedData \
+  CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=NO build
+```
+
+Formatting check:
+
+```sh
+rtk swift format lint --strict --recursive MonMon MonMonTests
+```
+
+## Task 1: Define the persistence contract in a failing test
+
+**Description:** Add the first Swift Testing contract for a cash account before
+any production model exists. The intended red state must fail only because the
+approved SwiftData types are missing.
 
 **Acceptance criteria:**
 
-- [x] Build products, DerivedData, signing files, and Xcode user state are ignored.
-- [x] Swift 6 language mode, strict concurrency, deployment targets, bundle ID,
-  and warning settings are defined in reviewed `.xcconfig` files.
-- [x] Debug and Release configuration differences are explicit and minimal.
+- [ ] The test constructs a cash account with fixed UUID, date, kind, exact
+  `Decimal` opening balance, and VND currency code.
+- [ ] The test inserts, saves, and fetches through an in-memory
+  `ModelContainer`, then compares every persisted field.
+- [ ] The initial test command fails for the expected missing-model contract,
+  not a broken project reference or unrelated bootstrap error.
 
 **Verification:**
 
-- [x] `swift format lint --strict --recursive MonMon MonMonTests` can read the
-  checked-in formatting configuration once sources exist.
-- [x] Manual review confirms no credential, signing identity, or absolute
-  developer-machine path is present.
-
-**Evidence:** `swift format dump-configuration --effective --configuration
-.swift-format` parsed the configuration; `git check-ignore -v` matched
-DerivedData, local xcconfig, Xcode user state, and signing fixtures; targeted
-secret/path scan returned no configuration finding (2026-08-22).
+- [ ] Run the macOS test command and record the exact intended compiler/test
+  failure.
+- [ ] `rtk git diff --check` passes for the test and project changes.
 
 **Dependencies:** None
 
 **Files likely touched:**
 
-- `.gitignore`
-- `.swift-format`
-- `Config/Base.xcconfig`
-- `Config/Debug.xcconfig`
-- `Config/Release.xcconfig`
+- `MonMonTests/Accounts/CashAccountPersistenceTests.swift`
+- `MonMon.xcodeproj/project.pbxproj`
 
-**Estimated scope:** Medium (5 files)
+**Estimated scope:** Small (2 files)
 
-## Task 2: Create the discoverable multiplatform project graph
+**Evidence:** Pending.
 
-**Description:** Add the Xcode project, one iOS/macOS application target, one unit
-test target, Debug/Release configuration mappings, and the shared scheme. Source
-references may point to the files created by later tasks.
+## Task 2: Implement the persisted cash-account model
+
+**Description:** Make Task 1 green with the smallest SwiftData model and install
+the production model container at the app root.
 
 **Acceptance criteria:**
 
-- [x] The application target supports iOS and native macOS from one target.
-- [x] The unit-test target depends on and hosts against the application target.
-- [x] The shared `MonMon` scheme builds the app and runs the test target.
+- [ ] `CashAccountKind` and `CashAccount` match the approved data contract and
+  preserve `Decimal` exactly in an in-memory save/fetch round trip.
+- [ ] `MonMonApp` provides a local `ModelContainer` containing `CashAccount` and
+  adds no CloudKit configuration.
+- [ ] No repository, service layer, migration plan, or third-party dependency is
+  introduced.
 
 **Verification:**
 
-- [x] `xcodebuild -project MonMon.xcodeproj -list` reports project, targets,
-  configurations, and scheme.
-- [x] `xcodebuild -project MonMon.xcodeproj -scheme MonMon -showdestinations`
-  reports macOS and iOS Simulator destination families, or records a scoped
-  CoreSimulator environment blocker.
-
-**Evidence:** `xcodebuild -list` reported `MonMon`, `MonMonTests`, Debug, Release,
-and the shared `MonMon` scheme. `-showdestinations` reported My Mac, Any Mac, Any
-iOS Device, and Any iOS Simulator Device; individual Simulator runtimes remain
-blocked by sandboxed CoreSimulator access. `plutil` validated the project and
-`xmllint` validated the scheme (2026-08-22).
+- [ ] The macOS test command passes, including the new persistence test.
+- [ ] Both Debug compile commands and the formatting check pass.
 
 **Dependencies:** Task 1
 
 **Files likely touched:**
 
+- `MonMon/Accounts/CashAccountKind.swift`
+- `MonMon/Accounts/CashAccount.swift`
+- `MonMon/App/MonMonApp.swift`
 - `MonMon.xcodeproj/project.pbxproj`
-- `MonMon.xcodeproj/xcshareddata/xcschemes/MonMon.xcscheme`
 
-**Estimated scope:** Small (2 files)
+**Estimated scope:** Medium (4 files)
 
-## Checkpoint A: Project discovered
+**Evidence:** Pending.
 
-- [x] Tasks 1–2 acceptance criteria pass.
-- [x] `xcodebuild` discovers the shared scheme and both targets.
-- [x] No implementation code or out-of-scope feature has been added.
+## Task 3: Define VND validation in failing tests
 
-## Task 2A: Add a neutral compile harness
-
-**Description:** Add the files referenced by the project without implementing the
-greeting contract. This isolates the next TDD failure to `AppCopy.greeting`
-instead of unrelated missing-file or asset-catalog errors.
+**Description:** Specify the complete account-draft input boundary before its
+implementation, using fixed inputs and no system locale or clock dependency.
 
 **Acceptance criteria:**
 
-- [x] The app has a valid SwiftUI entry point and renders an empty shared view.
-- [x] `AppCopy` exists but has no greeting member.
-- [x] The resource catalog is structurally valid and does not require an app icon
-  before design assets exist.
+- [ ] Tests cover trimmed and empty names plus cash/bank kind preservation.
+- [ ] Tests cover zero, positive ungrouped, Vietnamese-grouped, nonnumeric, and
+  negative balances with the exact typed error expected.
+- [ ] The initial test command fails only because the draft/formatter contract is
+  not implemented.
 
 **Verification:**
 
-- [x] macOS Debug build succeeds before the greeting test is added.
-- [x] No visible financial feature or greeting behavior exists.
-
-**Evidence:** Strict Swift formatting passed and the unsigned arm64 macOS Debug
-build succeeded with an empty `ContentView`. The only emitted warnings came from
-sandboxed CoreSimulator/Xcode filesystem services, not project source or compiler
-diagnostics (2026-08-22).
+- [ ] Run the macOS test command and record the exact intended red-state failure.
+- [ ] `rtk git diff --check` passes for the test and project changes.
 
 **Dependencies:** Task 2
 
 **Files likely touched:**
 
-- `Config/Base.xcconfig`
-- `MonMon/App/MonMonApp.swift`
-- `MonMon/App/AppCopy.swift`
-- `MonMon/App/ContentView.swift`
-- `MonMon/Resources/Assets.xcassets/Contents.json`
+- `MonMonTests/Accounts/AccountDraftTests.swift`
+- `MonMon.xcodeproj/project.pbxproj`
 
-**Estimated scope:** Medium (5 small files)
+**Estimated scope:** Small (2 files)
 
-## Task 3: Write the failing greeting smoke test
+**Evidence:** Pending.
 
-**Description:** Define the first observable app contract before implementation:
-the stable greeting is exactly “Hello, MonMon”.
+## Task 4: Implement deterministic VND validation and formatting
 
-**Acceptance criteria:**
-
-- [x] A Swift Testing test imports the app module and asserts the greeting copy.
-- [x] The test initially fails to compile or fails its assertion because the app
-  contract has not been implemented yet.
-- [x] The failure is recorded as TDD red-state evidence.
-
-**Verification:**
-
-- [x] Run the macOS test command from `SPEC-app-bootstrap.md` and confirm the
-  failure is specifically caused by the missing greeting contract.
-
-**Evidence:** The macOS test build reached `MonMonTests/AppSmokeTests.swift` and
-failed with `Type 'AppCopy' has no member 'greeting'`; the app target itself built
-successfully. This is the intended TDD red state (2026-08-22).
-
-**Dependencies:** Task 2A
-
-**Files likely touched:**
-
-- `MonMonTests/AppSmokeTests.swift`
-
-**Estimated scope:** Extra small (1 file)
-
-## Task 4: Implement the Hello app shell
-
-**Description:** Add the minimum SwiftUI source and resource catalog needed to
-make the failing smoke test pass and render the accessible greeting on both
-platforms.
+**Description:** Make Task 3 green with a value-type draft and one focused VND
+utility. Parsing and display must use an explicit Vietnamese locale.
 
 **Acceptance criteria:**
 
-- [x] `MonMonApp` uses the SwiftUI lifecycle and opens `ContentView`.
-- [x] `ContentView` centers “Hello, MonMon” and exposes the
-  `app-greeting` accessibility identifier.
-- [x] The greeting smoke test passes without adding unrelated abstractions.
+- [ ] Successful validation returns a trimmed name, selected kind, exact
+  nonnegative `Decimal`, `VND`, and caller-supplied identity/date values.
+- [ ] Empty, nonnumeric, and negative inputs return their approved typed errors
+  without creating a SwiftData model.
+- [ ] VND display uses locale-aware grouping and zero fractional digits without
+  consulting the device's current locale.
 
 **Verification:**
 
-- [x] macOS unit-test command passes.
-- [x] macOS Debug build passes.
-- [x] Generic iOS Simulator Debug build passes.
-
-**Evidence:** After adding only `AppCopy.greeting` and the accessible centered
-`Text`, the macOS smoke test passed via local `testmanagerd`; the unsigned macOS
-Debug build exited 0; the `iphonesimulator26.5` Debug build produced a universal
-arm64/x86_64 `MonMon.app` executable. Strict Swift formatting passed
-(2026-08-22).
+- [ ] The macOS test command passes, including every draft and formatting case.
+- [ ] Both Debug compile commands and the formatting check pass.
 
 **Dependencies:** Task 3
 
 **Files likely touched:**
 
-- `MonMon/App/MonMonApp.swift`
-- `MonMon/App/AppCopy.swift`
-- `MonMon/App/ContentView.swift`
-- `MonMon/Resources/Assets.xcassets/Contents.json`
+- `MonMon/Accounts/AccountDraft.swift`
+- `MonMon/Accounts/VNDCurrency.swift`
+- `MonMon.xcodeproj/project.pbxproj`
 
-**Estimated scope:** Medium (4 files)
+**Estimated scope:** Medium (3 files)
 
-## Checkpoint B: Hello compiles on both platforms
+**Evidence:** Pending.
 
-- [x] Task 3 red-state and Task 4 green-state evidence are recorded.
-- [x] macOS and generic iOS Simulator Debug builds pass without compiler warnings.
-- [x] Strict formatting lint passes.
-- [x] Git status contains no DerivedData, build product, or Xcode user-state file.
+## Checkpoint A: Data foundation
 
-## Task 5: Verify release configurations and repository hygiene
+- [ ] Tasks 1–4 contain recorded red/green evidence.
+- [ ] SwiftData round-trip preserves all approved fields and exact money values.
+- [ ] Validation and VND formatting are deterministic under tests.
+- [ ] macOS and iOS Simulator SDK Debug builds pass.
+- [ ] No UI beyond the bootstrap screen has changed yet.
 
-**Description:** Exercise every non-runtime quality gate and correct only bootstrap
-configuration defects found by those checks.
+## Task 5: Define total calculation in failing tests
+
+**Description:** Specify the pure combined-balance behavior before connecting
+SwiftData results to the visible list.
 
 **Acceptance criteria:**
 
-- [x] Debug and Release build successfully for macOS and the iOS Simulator SDK.
-- [x] Unit tests and strict formatting pass.
-- [x] Build logs contain no project compiler warnings.
+- [ ] Tests cover empty, one-account, and multiple-account totals.
+- [ ] Tests use exact `Decimal` values and include both cash and bank kinds.
+- [ ] The initial test command fails only because `CashBalanceSummary` is absent.
 
 **Verification:**
 
-- [x] Run every applicable command in the Verification Commands section of
-  `tasks/plan.md`.
-- [x] `git status --short` contains only intended source, project, configuration,
-  documentation, spec, plan, and task files.
+- [ ] Run the macOS test command and record the exact intended red-state failure.
+- [ ] `rtk git diff --check` passes for the test and project changes.
 
-**Evidence:** macOS Debug/Release builds exited 0; iOS Simulator SDK Debug/Release
-builds exited 0 and produced arm64/x86_64 app executables; the macOS Swift Testing
-suite and strict formatter passed. Xcode emitted only host-environment diagnostics
-about sandboxed CoreSimulator/FileSystem services and destination selection—no
-project compiler warning. The runtime-specific destination command remains Task 6
-because no Simulator runtime is installed (2026-08-22).
-
-**Dependencies:** Task 4
+**Dependencies:** Checkpoint A
 
 **Files likely touched:**
 
-- No planned source change; only files from Tasks 1–4 if verification exposes a
-  defect.
+- `MonMonTests/Accounts/CashBalanceSummaryTests.swift`
+- `MonMon.xcodeproj/project.pbxproj`
 
-**Estimated scope:** Extra small (verification-focused)
+**Estimated scope:** Small (2 files)
 
-## Task 6: Run both apps and document the handoff
+**Evidence:** Pending.
 
-**Description:** Launch the Mac product, hand device testing to the owner, and
-document how the owner can reproduce every check.
+## Task 6: Render query-backed cash balances
+
+**Description:** Make Task 5 green and replace the bootstrap greeting with a
+shared SwiftUI screen that reads locally persisted accounts.
 
 **Acceptance criteria:**
 
-- [x] Native Mac app visibly displays “Hello, MonMon”.
-- [x] The owner confirms the app has been run and takes ownership of further
-  hands-on testing.
-- [x] README documents prerequisites, Xcode opening, build, test, Mac run, iPhone
-  Simulator run, and the later physical-iPhone signing step.
+- [ ] `CashBalanceSummary` returns the exact tested totals and
+  `AccountListView` queries accounts ordered by creation date.
+- [ ] The empty state is understandable; the populated state displays total
+  first and then each account's name, kind, and formatted VND balance.
+- [ ] `ContentView` hosts the feature root and the list exposes the approved
+  `account-list` accessibility identifier on both platforms.
 
 **Verification:**
 
-- [x] Capture or inspect runtime evidence for the Mac destination.
-- [x] Follow README commands from a clean invocation and confirm they match the
-  checked-in scheme/configuration.
-- [x] Owner confirms they have run the app and will perform future app testing.
-
-**Evidence:** The native Mac process launched from the Debug product, exposed a
-900×450 `MonMon` window, and a window-only screenshot visibly showed the centered
-greeting. The owner then reported the app had been run and asked to own further
-app testing. The attempted iOS runtime download was cancelled immediately; iOS
-Debug/Release SDK compilation remains verified (2026-08-22).
+- [ ] The macOS test command passes, including total-calculation tests.
+- [ ] Both Debug compile commands and the formatting check pass.
 
 **Dependencies:** Task 5
 
 **Files likely touched:**
 
+- `MonMon/Accounts/CashBalanceSummary.swift`
+- `MonMon/Accounts/AccountListView.swift`
+- `MonMon/App/ContentView.swift`
+- `MonMon.xcodeproj/project.pbxproj`
+
+**Estimated scope:** Medium (4 files)
+
+**Evidence:** Pending.
+
+## Task 7: Complete the add-account flow
+
+**Description:** Add the single write path so the owner can open a shared form,
+validate input, save an account, and see the query-backed total update.
+
+**Acceptance criteria:**
+
+- [ ] The approved Add action and form controls exist with stable accessibility
+  identifiers, Cancel behavior, and inline validation errors.
+- [ ] Valid input inserts and explicitly saves before dismissal; the account list
+  and total update through SwiftData `@Query`.
+- [ ] A save error rolls back the failed insert, keeps the draft visible, shows a
+  general error, and does not dismiss the sheet.
+
+**Verification:**
+
+- [ ] The macOS test command, both Debug compile commands, and formatting pass.
+- [ ] Code inspection traces valid, validation-error, and save-error paths and
+  confirms no dead Add action or pending failed row remains.
+
+**Dependencies:** Task 6
+
+**Files likely touched:**
+
+- `MonMon/Accounts/AddAccountView.swift`
+- `MonMon/Accounts/AccountListView.swift`
+- `MonMon.xcodeproj/project.pbxproj`
+
+**Estimated scope:** Medium (3 files)
+
+**Evidence:** Pending.
+
+## Checkpoint B: Complete vertical flow
+
+- [ ] Tasks 5–7 contain recorded red/green or inspection evidence.
+- [ ] All automated tests and strict formatting pass.
+- [ ] macOS and iOS Simulator SDK Debug builds pass without project compiler
+  warnings.
+- [ ] The complete add/list/total path is ready for owner-run UI testing.
+- [ ] No edit, delete, iCloud, network, market-data, AI, or MCP behavior exists.
+
+## Task 8: Run the final quality gate and prepare handoff
+
+**Description:** Remove obsolete bootstrap-only greeting artifacts, run every
+approved automated gate, update only necessary documentation, and hand the
+feature to the owner for runtime evaluation.
+
+**Acceptance criteria:**
+
+- [ ] Obsolete greeting-only production/test code is removed without weakening
+  cash-balance coverage or the shared scheme.
+- [ ] Debug and Release builds pass for macOS and the iOS Simulator SDK; the full
+  macOS test target and strict formatting pass without feature compiler warnings.
+- [ ] Documentation and checklist evidence accurately describe the runnable
+  feature and preserve the owner-managed UI testing boundary.
+
+**Verification:**
+
+- [ ] Run every command in `SPEC-cash-balance.md` and record exit status plus any
+  host-environment diagnostics separately from project warnings.
+- [ ] `rtk git status --short` contains only intended source, test, project, and
+  documentation changes; no build products or user Xcode state appear.
+- [ ] Targeted staged-diff review finds no credentials, API keys, account numbers,
+  secrets, unrelated refactors, or out-of-scope behavior.
+
+**Dependencies:** Checkpoint B
+
+**Files likely touched:**
+
+- `MonMon/App/AppCopy.swift` (remove)
+- `MonMonTests/AppSmokeTests.swift` (remove)
+- `MonMon.xcodeproj/project.pbxproj`
 - `README.md`
+- `tasks/todo.md`
 
-**Estimated scope:** Extra small (1 file plus runtime verification)
+**Estimated scope:** Medium (5 files)
 
-## Checkpoint C: app-bootstrap complete
+**Evidence:** Pending.
 
-- [x] All tasks and their verification steps are checked off with evidence.
-- [x] Every success criterion in `SPEC-app-bootstrap.md` is satisfied under the
-  owner-managed runtime-test boundary.
-- [x] No SwiftData, CloudKit, finance, networking, or MCP code exists.
-- [x] The owner can open and run the project and has the handoff instructions.
-- [x] Stop for owner feedback before planning `cash-balance`.
+## Checkpoint C: cash-balance complete
+
+Automated implementation gate:
+
+- [ ] Every task acceptance criterion and implementation-owned verification is
+  checked with evidence.
+- [ ] Every success criterion in `SPEC-cash-balance.md` is met except the explicit
+  owner-run checks below.
+- [ ] The branch contains small verified commits aligned with the approved slices.
+
+Owner-run gate:
+
+- [ ] Empty state and Add Account presentation feel correct on a chosen device.
+- [ ] Valid and invalid submissions behave clearly.
+- [ ] Accounts survive relaunch on the same device.
+- [ ] iPhone keyboard/Dynamic Type and Mac window resizing remain usable.
+- [ ] The owner accepts `cash-balance` before planning `income-expense`.
