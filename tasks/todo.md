@@ -48,17 +48,23 @@ references may point to the files created by later tasks.
 
 **Acceptance criteria:**
 
-- [ ] The application target supports iOS and native macOS from one target.
-- [ ] The unit-test target depends on and hosts against the application target.
-- [ ] The shared `MonMon` scheme builds the app and runs the test target.
+- [x] The application target supports iOS and native macOS from one target.
+- [x] The unit-test target depends on and hosts against the application target.
+- [x] The shared `MonMon` scheme builds the app and runs the test target.
 
 **Verification:**
 
-- [ ] `xcodebuild -project MonMon.xcodeproj -list` reports project, targets,
+- [x] `xcodebuild -project MonMon.xcodeproj -list` reports project, targets,
   configurations, and scheme.
-- [ ] `xcodebuild -project MonMon.xcodeproj -scheme MonMon -showdestinations`
+- [x] `xcodebuild -project MonMon.xcodeproj -scheme MonMon -showdestinations`
   reports macOS and iOS Simulator destination families, or records a scoped
   CoreSimulator environment blocker.
+
+**Evidence:** `xcodebuild -list` reported `MonMon`, `MonMonTests`, Debug, Release,
+and the shared `MonMon` scheme. `-showdestinations` reported My Mac, Any Mac, Any
+iOS Device, and Any iOS Simulator Device; individual Simulator runtimes remain
+blocked by sandboxed CoreSimulator access. `plutil` validated the project and
+`xmllint` validated the scheme (2026-08-22).
 
 **Dependencies:** Task 1
 
@@ -71,9 +77,9 @@ references may point to the files created by later tasks.
 
 ## Checkpoint A: Project discovered
 
-- [ ] Tasks 1–2 acceptance criteria pass.
-- [ ] `xcodebuild` discovers the shared scheme and both targets.
-- [ ] No implementation code or out-of-scope feature has been added.
+- [x] Tasks 1–2 acceptance criteria pass.
+- [x] `xcodebuild` discovers the shared scheme and both targets.
+- [x] No implementation code or out-of-scope feature has been added.
 
 ## Task 3: Write the failing greeting smoke test
 

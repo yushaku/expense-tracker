@@ -1,0 +1,348 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A00000000000000000000201 /* MonMonApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000110 /* MonMonApp.swift */; };
+		A00000000000000000000202 /* AppCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000111 /* AppCopy.swift */; };
+		A00000000000000000000203 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000112 /* ContentView.swift */; };
+		A00000000000000000000204 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000113 /* Assets.xcassets */; };
+		A00000000000000000000205 /* AppSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000114 /* AppSmokeTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A00000000000000000000602 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A00000000000000000000003 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A00000000000000000000001;
+			remoteInfo = MonMon;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		A00000000000000000000101 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
+		A00000000000000000000102 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		A00000000000000000000103 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		A00000000000000000000110 /* MonMonApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonMonApp.swift; sourceTree = "<group>"; };
+		A00000000000000000000111 /* AppCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCopy.swift; sourceTree = "<group>"; };
+		A00000000000000000000112 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A00000000000000000000113 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A00000000000000000000114 /* AppSmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSmokeTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000120 /* MonMon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MonMon.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A00000000000000000000121 /* MonMonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonMonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A00000000000000000000302 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A00000000000000000000305 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A00000000000000000000010 = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000011 /* Config */,
+				A00000000000000000000012 /* MonMon */,
+				A00000000000000000000015 /* MonMonTests */,
+				A00000000000000000000016 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A00000000000000000000011 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000101 /* Base.xcconfig */,
+				A00000000000000000000102 /* Debug.xcconfig */,
+				A00000000000000000000103 /* Release.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000012 /* MonMon */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000013 /* App */,
+				A00000000000000000000014 /* Resources */,
+			);
+			path = MonMon;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000013 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000110 /* MonMonApp.swift */,
+				A00000000000000000000111 /* AppCopy.swift */,
+				A00000000000000000000112 /* ContentView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000014 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000113 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000015 /* MonMonTests */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000114 /* AppSmokeTests.swift */,
+			);
+			path = MonMonTests;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000016 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000120 /* MonMon.app */,
+				A00000000000000000000121 /* MonMonTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A00000000000000000000001 /* MonMon */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A00000000000000000000402 /* Build configuration list for PBXNativeTarget "MonMon" */;
+			buildPhases = (
+				A00000000000000000000301 /* Sources */,
+				A00000000000000000000302 /* Frameworks */,
+				A00000000000000000000303 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MonMon;
+			productName = MonMon;
+			productReference = A00000000000000000000120 /* MonMon.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A00000000000000000000002 /* MonMonTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A00000000000000000000403 /* Build configuration list for PBXNativeTarget "MonMonTests" */;
+			buildPhases = (
+				A00000000000000000000304 /* Sources */,
+				A00000000000000000000305 /* Frameworks */,
+				A00000000000000000000306 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A00000000000000000000601 /* PBXTargetDependency */,
+			);
+			name = MonMonTests;
+			productName = MonMonTests;
+			productReference = A00000000000000000000121 /* MonMonTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A00000000000000000000003 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2660;
+				LastUpgradeCheck = 2660;
+				TargetAttributes = {
+					A00000000000000000000001 = {
+						CreatedOnToolsVersion = 26.6;
+					};
+					A00000000000000000000002 = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = A00000000000000000000001;
+					};
+				};
+			};
+			buildConfigurationList = A00000000000000000000401 /* Build configuration list for PBXProject "MonMon" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A00000000000000000000010;
+			productRefGroup = A00000000000000000000016 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A00000000000000000000001 /* MonMon */,
+				A00000000000000000000002 /* MonMonTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A00000000000000000000303 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A00000000000000000000204 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A00000000000000000000306 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A00000000000000000000301 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A00000000000000000000202 /* AppCopy.swift in Sources */,
+				A00000000000000000000203 /* ContentView.swift in Sources */,
+				A00000000000000000000201 /* MonMonApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A00000000000000000000304 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A00000000000000000000205 /* AppSmokeTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A00000000000000000000601 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A00000000000000000000001 /* MonMon */;
+			targetProxy = A00000000000000000000602 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		A00000000000000000000501 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A00000000000000000000102 /* Debug.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		A00000000000000000000502 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A00000000000000000000103 /* Release.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		A00000000000000000000503 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sonlv.monmon;
+				PRODUCT_NAME = MonMon;
+			};
+			name = Debug;
+		};
+		A00000000000000000000504 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sonlv.monmon;
+				PRODUCT_NAME = MonMon;
+			};
+			name = Release;
+		};
+		A00000000000000000000505 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sonlv.monmon.tests;
+				PRODUCT_NAME = MonMonTests;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MonMon.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MonMon";
+			};
+			name = Debug;
+		};
+		A00000000000000000000506 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sonlv.monmon.tests;
+				PRODUCT_NAME = MonMonTests;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MonMon.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MonMon";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A00000000000000000000401 /* Build configuration list for PBXProject "MonMon" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A00000000000000000000501 /* Debug */,
+				A00000000000000000000502 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A00000000000000000000402 /* Build configuration list for PBXNativeTarget "MonMon" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A00000000000000000000503 /* Debug */,
+				A00000000000000000000504 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A00000000000000000000403 /* Build configuration list for PBXNativeTarget "MonMonTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A00000000000000000000505 /* Debug */,
+				A00000000000000000000506 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A00000000000000000000003 /* Project object */;
+}
+
