@@ -78,17 +78,17 @@ the production model container at the app root.
 
 **Acceptance criteria:**
 
-- [ ] `CashAccountKind` and `CashAccount` match the approved data contract and
+- [x] `CashAccountKind` and `CashAccount` match the approved data contract and
   preserve `Decimal` exactly in an in-memory save/fetch round trip.
-- [ ] `MonMonApp` provides a local `ModelContainer` containing `CashAccount` and
+- [x] `MonMonApp` provides a local `ModelContainer` containing `CashAccount` and
   adds no CloudKit configuration.
-- [ ] No repository, service layer, migration plan, or third-party dependency is
+- [x] No repository, service layer, migration plan, or third-party dependency is
   introduced.
 
 **Verification:**
 
-- [ ] The macOS test command passes, including the new persistence test.
-- [ ] Both Debug compile commands and the formatting check pass.
+- [x] The macOS test command passes, including the new persistence test.
+- [x] Both Debug compile commands and the formatting check pass.
 
 **Dependencies:** Task 1
 
@@ -101,7 +101,14 @@ the production model container at the app root.
 
 **Estimated scope:** Medium (4 files)
 
-**Evidence:** Pending.
+**Evidence:** Outside the restricted sandbox, the full macOS Swift Testing target
+passed and the in-memory round trip preserved every field, including the exact
+`Decimal`. macOS Debug and the approved `-sdk iphonesimulator` Debug command
+exited 0; because the iOS platform component has no eligible generic destination,
+an additional direct Swift compiler check targeting
+`arm64-apple-ios18.0-simulator` type-checked all app sources successfully. Strict
+formatting and project plist validation passed. No CloudKit configuration or new
+dependency was added (2026-08-23).
 
 ## Task 3: Define VND validation in failing tests
 
