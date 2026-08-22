@@ -35,6 +35,9 @@ and amount use native fields inside semantic cards; every validation and save
 error includes an SF Symbol and text. Existing accessibility identifiers are
 unchanged. Full macOS tests, macOS Debug, direct iOS 18 type-check with warnings
 as errors, strict formatting, and project validation all exited 0 (2026-08-23).
+Final review also removed an accessibility-label override that could hide the
+total amount from VoiceOver; tests, macOS Release, and iOS type-check passed
+after that correction.
 
 ## Owner runtime gate
 

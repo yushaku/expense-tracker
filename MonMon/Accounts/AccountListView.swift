@@ -58,7 +58,6 @@ struct AccountListView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.58)
                 .foregroundStyle(.white)
-                .accessibilityLabel("Total cash")
 
             Label(accountCountLabel, systemImage: "rectangle.stack.fill")
                 .font(.subheadline.weight(.medium))
