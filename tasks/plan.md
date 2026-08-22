@@ -1,127 +1,158 @@
-# Implementation Plan: app-bootstrap
+# Implementation Plan: cash-balance
+
+**Status:** Approved (2026-08-23)  
+**Spec:** `SPEC-cash-balance.md` (approved 2026-08-23)
 
 ## Overview
 
-Create the smallest reproducible MonMon application shell: a checked-in Xcode
-multiplatform project, explicit Debug/Release configuration, one shared scheme,
-one SwiftUI greeting screen, and one smoke-test target. Finish by building both
-platforms and launching the same app on Mac and iPhone Simulator.
+Replace the bootstrap greeting with the smallest complete cash-account workflow:
+persist exact VND opening balances locally, show an empty or populated account
+list with a combined total, and add new cash or bank accounts through one shared
+SwiftUI form. Implementation proceeds in test-first increments and stops after
+the owner can evaluate this feature on iPhone and Mac.
 
 ## Architecture Decisions
 
-- Use one native multiplatform application target for iOS and macOS, following
-  Apple's documented SwiftUI/Xcode model.
-- Keep the project dependency-free and generator-free; the `.xcodeproj` is the
-  checked-in source of truth.
-- Put reviewed settings in `Base.xcconfig`, `Debug.xcconfig`, and
-  `Release.xcconfig`; keep only structural target settings in `project.pbxproj`.
-- Commit one shared `MonMon` scheme so Xcode and command-line verification use the
-  same build and test graph.
-- Keep the visible greeting behind a small `AppCopy` constant so the smoke test
-  validates actual app content without introducing UI-test complexity.
-- Build unsigned for automated Mac and Simulator verification. Signing remains a
-  user-controlled Xcode setting for later physical-device testing.
+- Use one SwiftData `@Model` for `CashAccount` and install its `ModelContainer`
+  at the app root. No repository layer is added because this slice has one local
+  store and one write path.
+- Persist `Decimal` balances and a `String`-backed `Codable` account-kind enum.
+  Verify this model immediately with an in-memory container before building UI.
+- Keep parsing and validation in the value-type `AccountDraft`. Use an explicit
+  Vietnamese locale for parsing and VND formatting so behavior does not depend
+  on the device's current locale.
+- Use `@Query` in `AccountListView` for live ordered results. Compute the total
+  through a pure `CashBalanceSummary` helper that is independently testable.
+- Insert and explicitly save from `AddAccountView`. If save fails, roll back the
+  failed insert, keep the draft visible, and show a general save error.
+- Share the same SwiftUI views on iPhone and Mac. The owner handles hands-on UI
+  and relaunch testing; automated work covers logic, persistence, formatting,
+  and both platform builds.
 
 ## Dependency Graph
 
 ```text
-Repository hygiene and build settings
-  -> Xcode project and shared scheme
-    -> SwiftUI app and greeting screen
-      -> Smoke-test target
-        -> Debug/Release builds
-          -> Mac and iPhone Simulator runtime checks
+SwiftData model contract
+  -> deterministic VND validation and formatting
+    -> query-backed empty/list/total screen
+      -> add-account form and save path
+        -> full verification and owner handoff
 ```
 
-These steps are sequential because later checks require a valid project graph.
-Formatting and repository-hygiene checks can run alongside platform builds once
-the project exists.
+The sequence is intentional. Each later slice consumes contracts proven by the
+previous slice, and the riskiest framework compatibility is tested first.
 
 ## Implementation Slices
 
-### Slice 1: Reproducible project configuration
+### Slice 1: Prove the persisted cash-account model
 
-- Add repository ignore rules, Swift formatting rules, build configuration files,
-  project structure, supported destinations, and the shared scheme.
-- Verify `xcodebuild -list` and `-showdestinations` can discover the project.
+- Write a failing in-memory persistence test for identity, account kind, exact
+  `Decimal` balance, currency code, creation date, save, and fetch.
+- Add `CashAccountKind`, the SwiftData `CashAccount` model, project references,
+  and the app-level model container.
+- Make the focused persistence test and macOS Debug build pass.
 
-### Slice 2: Runnable Hello screen
+### Slice 2: Prove deterministic VND input
 
-- Add the SwiftUI app entry point, stable greeting copy, and accessible centered
-  view.
-- Build Debug for native macOS and generic iOS Simulator.
+- Write failing tests for trimmed names, empty names, zero/positive balances,
+  Vietnamese grouping separators, nonnumeric input, and negative input.
+- Implement `AccountDraft` validation plus VND parsing/formatting without reading
+  the machine's current locale.
+- Keep all money values as `Decimal` from successful parsing onward.
 
-### Slice 3: Tests and release readiness
+### Checkpoint A: Data foundation
 
-- Add the smoke-test target and test the greeting contract.
-- Run strict formatting, unit tests, Debug builds, and Release builds.
-- Confirm no warning, build artifact, signing material, or user-specific Xcode
-  file has entered the repository.
+- SwiftData round-trip preserves the exact approved model fields.
+- Validation and VND formatting tests pass.
+- macOS Debug and generic iOS Simulator Debug builds pass.
+- No UI or behavior outside `cash-balance` has been introduced.
 
-### Slice 4: Runtime proof and handoff
+### Slice 3: Show empty and populated cash balances
 
-- Launch and visually verify the Mac app.
-- Provide exact iPhone Simulator and physical-device run instructions for the
-  owner-managed hands-on check.
-- Add exact setup/build/test/run instructions to README and provide the owner with
-  the commands needed to reproduce the checks.
+- Write failing total-calculation tests for zero, one, and multiple accounts.
+- Add `CashBalanceSummary` and a query-backed `AccountListView` with the approved
+  empty state, total-first layout, ordered rows, VND formatting, and stable
+  accessibility identifiers.
+- Replace the bootstrap greeting in `ContentView` with the feature root while
+  retaining one shared implementation for both platforms.
 
-## Checkpoints
+### Slice 4: Complete the add-account save path
 
-### Checkpoint A: Project discovered
+- Add the shared Add Account sheet with name, kind, opening-balance, Cancel, and
+  Save controls.
+- Connect `AccountDraft` validation to inline errors and insert only valid data.
+- Explicitly save before dismissing; on failure, keep the form data visible,
+  roll back the failed insert, and show the save error.
+- Verify the query-backed list and total update after a successful save through
+  focused logic/persistence tests and compilation.
 
-- `xcodebuild` lists the `MonMon` project, scheme, app target, and test target.
-- Debug/Release configurations resolve through the checked-in `.xcconfig` files.
-- Human review is not required here unless the project contract differs from the
-  approved spec.
+### Checkpoint B: Complete vertical flow
 
-### Checkpoint B: Both platforms compile
+- All unit and in-memory persistence tests pass.
+- macOS and generic iOS Simulator Debug builds pass.
+- Strict Swift formatting passes.
+- Code inspection confirms the form does not dismiss or retain a pending row
+  after a failed save.
+- Stop if any acceptance criterion would require editing, deletion, iCloud, or a
+  new dependency.
 
-- macOS Debug build passes without compiler warnings.
-- Generic iOS Simulator Debug build passes without compiler warnings.
-- Formatting lint passes.
+### Slice 5: Quality gate and owner handoff
 
-### Checkpoint C: app-bootstrap complete
+- Run macOS and iOS Simulator SDK builds in Debug and Release.
+- Run the full macOS test suite, strict formatting, repository-hygiene, and
+  compiler-warning checks.
+- Update project documentation only where the runnable app behavior or commands
+  changed.
+- Hand the complete feature to the owner for the approved iPhone/Mac checks and
+  record their result before starting `income-expense`.
 
-- Unit tests pass.
-- macOS and iOS Simulator Debug and Release builds pass.
-- “Hello, MonMon” is visually confirmed on Mac; the owner confirms the app can be
-  run and takes ownership of device testing.
-- Repository hygiene check passes.
-- Owner receives the runnable project and tests it before `cash-balance` work.
+## Checkpoint C: cash-balance complete
+
+- Every success criterion in `SPEC-cash-balance.md` is satisfied within the
+  owner-managed runtime-test boundary.
+- No third-party package, CloudKit entitlement, network access, market data, AI,
+  or MCP behavior has been added.
+- The branch contains small, verified commits corresponding to the slices.
+- The owner has enough instructions to run and judge the feature independently.
 
 ## Verification Commands
 
-```sh
-xcodebuild -project MonMon.xcodeproj -list
-xcodebuild -project MonMon.xcodeproj -scheme MonMon -showdestinations
-swift format lint --strict --recursive MonMon MonMonTests
-xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO build
-xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -sdk iphonesimulator -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=NO build
-xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO test
-xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Release -destination 'platform=macOS' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO build
-xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Release -sdk iphonesimulator -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=NO build
-```
+Use the exact commands from `SPEC-cash-balance.md`. Focused tests may use
+`-only-testing:MonMonTests/<suite-or-test>` during a slice; every checkpoint runs
+the complete macOS test target. iOS runtime automation is not required because
+the owner has taken responsibility for hands-on device testing.
 
-Runtime commands will use the specific installed Simulator destination returned by
-`-showdestinations`; the device name is not hard-coded in the project.
+## Expected Change Map
+
+```text
+SPEC-cash-balance.md              approved source of truth
+tasks/plan.md                     implementation order and checkpoints
+tasks/todo.md                     detailed execution checklist after plan approval
+MonMon.xcodeproj/project.pbxproj  explicit source/test file references
+MonMon/App/                       model-container installation and feature root
+MonMon/Accounts/                  model, validation, formatting, summary, and views
+MonMonTests/Accounts/             validation, total, and persistence tests
+README.md                         only if run or usage instructions change
+```
 
 ## Risks and Mitigations
 
 | Risk | Impact | Mitigation |
 |---|---|---|
-| Hand-authored Xcode project graph contains a stale or missing reference | High | Make project discovery and both platform builds the first checkpoints |
-| Build settings drift into opaque `project.pbxproj` entries | Medium | Keep shared settings in small reviewed `.xcconfig` files |
-| Physical-device signing blocks basic verification | Medium | Verify unsigned Mac/Simulator builds now; configure the owner's team only when testing a physical iPhone |
-| CoreSimulator runtime is unavailable in the environment | Low | Keep iOS SDK compilation as automated evidence and let the owner run the app on their chosen device |
-| A platform-specific API accidentally enters shared code | Medium | Compile the same application target for both platforms after every source change |
+| SwiftData macro rejects or transforms `Decimal` or the enum unexpectedly | High | Make an exact in-memory save/fetch test the first implementation slice |
+| Vietnamese separators parse differently under another system locale | High | Use an explicit locale and cover grouped/ungrouped values in unit tests |
+| A failed save leaves an unsaved row visible through `@Query` | Medium | Roll back the failed insert and retain only the form draft/error state |
+| Shared form layout behaves differently on iPhone and Mac | Medium | Keep controls adaptive and give the owner a focused cross-platform checklist |
+| No local iOS Simulator runtime is installed | Low | Compile against the Simulator SDK automatically; owner runs the chosen device |
+| The first persisted schema complicates later CloudKit work | Medium | Keep fields nonoptional with stable defaults and defer CloudKit configuration to its approved module |
 
 ## Scope Guard
 
-This plan ends at the greeting screen. It does not add SwiftData, CloudKit,
-financial models, navigation architecture, network access, or MCP behavior.
+This plan ends after adding and listing local VND cash/bank opening balances. It
+does not add account maintenance, transactions, multiple currencies, iCloud,
+financial APIs, market prices, AI analysis, or MCP tools.
 
 ## Open Questions
 
-None. Any unavailable Simulator runtime is an environment condition to resolve
-during verification, not a product-design decision.
+None. Detailed task execution begins only after the owner approves this plan and
+then approves its checklist.
