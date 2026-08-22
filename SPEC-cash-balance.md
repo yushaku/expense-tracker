@@ -1,115 +1,83 @@
 # Spec: cash-balance
 
+**Status:** Approved (2026-08-23)  
 **Depends on:** `app-bootstrap`
 
 ## Objective
 
-Deliver the smallest useful MonMon app that the owner can run on iPhone and Mac.
-The owner can create cash or bank accounts with an opening balance, see those
-accounts after relaunching the app, and see a total cash balance.
+Deliver the first useful MonMon feature: the owner can create cash or bank
+accounts with an opening balance, see a total cash balance, and find the same
+accounts after relaunching the app on that device.
 
-This slice deliberately uses local storage only. iCloud synchronization, income
-and expense transactions, debt, investments, live prices, and MCP are separate
-approved modules in `CAPABILITY-MAP.md`.
+This slice uses local storage only. iCloud synchronization, income and expense
+transactions, debt, investments, live prices, and MCP remain separate modules in
+`CAPABILITY-MAP.md`.
+
+## Scope
 
 ### User flow
 
 1. Launch MonMon and see an empty state when no account exists.
-2. Choose Add Account.
-3. Enter a name, select Cash or Bank, and enter a nonnegative opening balance in
-   VND.
+2. Choose **Add Account**.
+3. Enter a name, choose **Cash** or **Bank**, and enter a nonnegative opening
+   balance in VND.
 4. Save and return to the account list.
-5. See each account's balance and the combined cash total.
+5. See each account's opening balance and their combined total.
 6. Relaunch on the same device and see the saved accounts.
 
-### Domain contract
+### Included
+
+- Add and list cash or bank accounts.
+- One currency: VND.
+- Local SwiftData persistence.
+- Empty, populated, validation-error, and persistence-error states.
+- Shared SwiftUI implementation for native iPhone and Mac apps.
+
+### Excluded
+
+- Editing, deleting, archiving, or reordering accounts.
+- Transactions or calculated balances after the opening balance.
+- Multiple currencies, exchange rates, or financial institution connections.
+- iCloud, CloudKit, market data, AI, or MCP access.
+- UI automation; the owner performs hands-on app testing.
+
+## Domain and Data Contract
+
+SwiftData owns the persisted model. `CashAccountKind` is a `String`-backed,
+`Codable` enum so the stored value remains explicit and readable.
 
 ```swift
-struct CashAccount: Identifiable, Sendable, Equatable {
-    let id: UUID
+enum CashAccountKind: String, Codable, CaseIterable {
+    case cash
+    case bank
+}
+
+@Model
+final class CashAccount {
+    var id: UUID
     var name: String
-    let kind: CashAccountKind
+    var kind: CashAccountKind
     var openingBalance: Decimal
-    let currencyCode: String
-    let createdAt: Date
+    var currencyCode: String
+    var createdAt: Date
 }
 ```
 
-The form is the external-input boundary. It trims the account name, rejects an
-empty name, rejects negative or nonnumeric balances, and converts valid text to
-`Decimal` before saving. The initial slice supports VND only so totals never mix
-currencies without exchange rates.
+Rules:
 
-## Tech Stack
+- `name` is trimmed and must contain at least one non-whitespace character.
+- `openingBalance` must parse as a finite, nonnegative decimal value.
+- Input accepts ungrouped digits or Vietnamese grouping separators; display uses
+  a locale-aware VND currency format with no fractional digits.
+- The first slice always writes `currencyCode = "VND"`.
+- Duplicate account names are allowed; `id` is the stable identity.
+- Until transactions exist, the displayed account balance equals
+  `openingBalance`.
+- Totals use `Decimal`; `Double` and `Float` are forbidden for money.
+- `createdAt` is supplied by the caller so tests do not depend on wall-clock
+  time.
 
-- Xcode 26.6 (build 17F113) and Swift 6.3.3, detected locally.
-- One Xcode multiplatform app target producing native iOS and macOS apps.
-- SwiftUI for shared UI and platform-adaptive presentation.
-- SwiftData for local persistence.
-- Swift Testing for unit and model tests; XCTest/XCUITest only if a UI behavior
-  cannot be verified reliably below the UI layer.
-- Minimum deployment versions: iOS 18 and macOS 15, as previously approved.
-- Provisional bundle identifier: `com.sonlv.monmon`; it can be changed before the
-  CloudKit container is created.
-
-Official platform references:
-
-- <https://developer.apple.com/documentation/Xcode/configuring-a-multiplatform-app-target>
-- <https://developer.apple.com/documentation/SwiftUI>
-- <https://developer.apple.com/documentation/SwiftData>
-
-## Commands
-
-The project scheme is `MonMon`. Run from the repository root:
-
-```sh
-xcodebuild -project MonMon.xcodeproj -scheme MonMon -destination 'platform=macOS' build
-xcodebuild -project MonMon.xcodeproj -scheme MonMon -destination 'platform=macOS' test
-xcodebuild -project MonMon.xcodeproj -scheme MonMon -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
-xcodebuild -project MonMon.xcodeproj -scheme MonMon -destination 'platform=iOS Simulator,name=iPhone 17 Pro' test
-```
-
-If the named simulator is unavailable, select an installed iPhone simulator from
-`xcrun simctl list devices available` and record the actual destination in the
-task evidence.
-
-## Project Structure
-
-```text
-MonMon.xcodeproj/
-MonMon/
-  App/
-    MonMonApp.swift
-  Accounts/
-    CashAccount.swift
-    CashAccountKind.swift
-    AccountListView.swift
-    AddAccountView.swift
-    AccountFormModel.swift
-  Shared/
-    CurrencyFormatting.swift
-MonMonTests/
-  Accounts/
-    AccountFormModelTests.swift
-    CashAccountTests.swift
-MonMonUITests/
-  CashBalanceFlowTests.swift
-```
-
-Feature code stays together so a small slice can be understood without traversing
-several architecture layers. Shared code is extracted only after a second feature
-actually needs it.
-
-## Code Style
-
-- Types use `UpperCamelCase`; properties, functions, and enum cases use
-  `lowerCamelCase`.
-- Use Swift's observation and SwiftData property wrappers only where their
-  ownership is clear; do not create global mutable state.
-- Pass dependencies through initializers or the SwiftUI environment.
-- Use `Decimal` for balances and `FormatStyle` for locale-aware VND display.
-- Keep views declarative; parsing and validation belong in the form model.
-- Provide accessibility labels for controls whose visible text is insufficient.
+The form is the external-input boundary:
 
 ```swift
 enum AccountFormError: Error, Equatable {
@@ -125,34 +93,145 @@ struct AccountDraft: Equatable {
 }
 ```
 
+Validation returns a valid account value or a typed error. A persistence error
+keeps the form contents visible and shows a general save error; the app does not
+dismiss the form as though the save succeeded.
+
+## UI Contract
+
+- `AccountListView` is the feature root and replaces the bootstrap Hello screen.
+- The empty state explains that no cash accounts exist and provides one primary
+  **Add Account** action.
+- The populated state shows the total first, then rows ordered by `createdAt`
+  ascending. Each row shows name, kind, and formatted balance.
+- Add Account appears as a sheet with Name, Type, and Opening Balance fields,
+  plus Cancel and Save actions.
+- Validation errors appear inline beside the affected field. Save remains
+  available so submitting invalid input reveals the exact error.
+- Controls expose stable accessibility identifiers:
+  `account-list`, `add-account`, `account-name`, `account-kind`,
+  `opening-balance`, and `save-account`.
+- Layout must remain usable with iPhone Dynamic Type and a resizable Mac window.
+
+No platform-specific screen is introduced unless shared SwiftUI cannot express
+the required behavior.
+
+## Persistence Contract
+
+- `MonMonApp` installs one `ModelContainer` containing `CashAccount`.
+- `AccountListView` uses SwiftData `@Query` for live list updates.
+- Add Account obtains `ModelContext` from the SwiftUI environment, inserts only
+  after validation, and explicitly calls `save()` before dismissing. This makes
+  save failure visible even though the main context supports autosave.
+- Production uses the default local on-disk store.
+- Automated persistence tests use `ModelConfiguration(isStoredInMemoryOnly:
+  true)` and never touch the owner's app database.
+- No CloudKit configuration or entitlement is added in this slice.
+
+## Tech Stack
+
+- Xcode 26.6 (17F113), Swift 6.3.3, and Swift language mode 6.
+- One multiplatform Xcode target producing native iOS and macOS apps.
+- SwiftUI and SwiftData only; no third-party dependencies.
+- Swift Testing for unit and persistence tests.
+- Minimum deployment versions: iOS 18 and macOS 15.
+- Bundle identifier remains `com.sonlv.monmon`; changing it requires approval.
+
+Official platform references:
+
+- <https://developer.apple.com/documentation/swiftdata/preserving-your-apps-model-data-across-launches>
+- <https://developer.apple.com/documentation/swiftdata/adding-and-editing-persistent-data-in-your-app>
+- <https://developer.apple.com/documentation/swiftdata/modelconfiguration/init(isstoredinmemoryonly:)>
+- <https://developer.apple.com/documentation/foundation/decimal>
+
+## Project Structure
+
+```text
+MonMon/
+  App/
+    MonMonApp.swift
+    ContentView.swift
+  Accounts/
+    AccountDraft.swift
+    AccountListView.swift
+    AddAccountView.swift
+    CashAccount.swift
+    CashAccountKind.swift
+    VNDCurrency.swift
+MonMonTests/
+  Accounts/
+    AccountDraftTests.swift
+    CashAccountPersistenceTests.swift
+    CashBalanceSummaryTests.swift
+```
+
+Feature code stays together. Shared utilities are extracted only after another
+feature actually needs them.
+
 ## Testing Strategy
 
-- Start each behavior with a failing Swift Testing test.
-- Unit-test name trimming and every balance-validation outcome.
-- Test SwiftData persistence with an in-memory `ModelContainer`; do not use the
-  developer's real app database in automated tests.
-- Test total-balance calculation with zero, one, and multiple accounts.
-- Test the primary add-account flow on macOS and one iPhone simulator.
-- Manually verify launch, empty state, add form, relaunch persistence, keyboard
-  behavior on iPhone, and window resizing on Mac.
-- No test may depend on network access, iCloud, current locale, or wall-clock time.
+Automated checks owned by the implementation:
+
+- Start each validation, total-calculation, and persistence behavior with a
+  failing Swift Testing test.
+- Test name trimming and empty-name rejection.
+- Test valid zero and positive balances plus nonnumeric and negative input.
+- Test VND parsing without relying on the machine's current locale.
+- Test total calculation for zero, one, and multiple accounts.
+- Test insert, save, and fetch using an in-memory `ModelContainer`.
+- Run unit/persistence tests on macOS, compile Debug and Release for macOS and
+  the iOS Simulator SDK, and run strict formatting checks.
+
+Hands-on checks owned by the owner:
+
+- Empty state and Add Account presentation.
+- Valid and invalid form submissions.
+- Relaunch persistence on an actual chosen device.
+- iPhone keyboard and Dynamic Type behavior.
+- Mac window resizing and native interaction feel.
+
+No automated test may depend on network access, iCloud, current locale,
+wall-clock time, or the owner's real app database.
+
+## Verification Commands
+
+Run from the repository root:
+
+```sh
+rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug \
+  -destination 'platform=macOS,arch=arm64' \
+  -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO build
+rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Release \
+  -destination 'platform=macOS,arch=arm64' \
+  -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO build
+rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug \
+  -sdk iphonesimulator -derivedDataPath /tmp/MonMonDerivedData \
+  CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=NO build
+rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Release \
+  -sdk iphonesimulator -derivedDataPath /tmp/MonMonDerivedData \
+  CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=NO build
+rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon \
+  -destination 'platform=macOS,arch=arm64' \
+  -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO test
+rtk swift format lint --strict --recursive MonMon MonMonTests
+```
 
 ## Boundaries
 
 ### Always do
 
-- Keep the project buildable for both iOS and macOS after every task.
-- Validate user input before inserting a SwiftData model.
-- Format balances as VND consistently and preserve exact `Decimal` values.
-- Show a clear empty state and accessible form errors.
-- Run focused tests and both platform builds before the module checkpoint.
+- Keep both platform builds healthy after every implementation increment.
+- Validate input before inserting a SwiftData model.
+- Preserve exact `Decimal` values and consistently format VND.
+- Show clear empty, validation-error, and save-error states.
+- Keep the feature small enough for the owner to evaluate before the next one.
 
 ### Ask first
 
-- Change the minimum OS versions or bundle identifier.
+- Change minimum OS versions or bundle identifier.
 - Add a third-party dependency.
 - Add editing, deletion, multiple currencies, or account-number fields.
-- Enable iCloud or create a production CloudKit schema.
+- Enable iCloud or create a CloudKit schema.
 
 ### Never do
 
@@ -164,17 +243,18 @@ struct AccountDraft: Equatable {
 
 ## Success Criteria
 
-- One shared Xcode target builds native apps for iOS and macOS.
 - With no records, the app shows an understandable empty state and Add Account
   action.
-- A valid cash or bank account with a nonnegative VND opening balance can be saved.
-- Invalid input is not saved and produces a clear inline error.
-- Saved accounts survive app relaunch on the same device.
-- The account list displays each balance and the exact combined total.
-- Automated unit/model tests pass; macOS and iPhone simulator builds pass.
-- The owner can complete the full flow manually on at least one device and decide
-  whether the feature is useful before `income-expense` begins.
+- A valid cash or bank account with a nonnegative VND opening balance saves.
+- Invalid input does not save and produces a clear inline error.
+- A save failure is visible and does not discard entered form data.
+- Saved accounts survive relaunch on the same device.
+- The list displays every account balance and the exact combined total.
+- Automated unit/persistence tests, strict formatting, and both platform builds
+  pass without warnings introduced by this feature.
+- The owner completes the hands-on checks and decides whether the feature is
+  useful before `income-expense` begins.
 
 ## Open Questions
 
-None. The provisional bundle identifier remains changeable until CloudKit work.
+None. Any new requirement moves back through spec approval before implementation.
