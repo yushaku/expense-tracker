@@ -81,6 +81,41 @@ blocked by sandboxed CoreSimulator access. `plutil` validated the project and
 - [x] `xcodebuild` discovers the shared scheme and both targets.
 - [x] No implementation code or out-of-scope feature has been added.
 
+## Task 2A: Add a neutral compile harness
+
+**Description:** Add the files referenced by the project without implementing the
+greeting contract. This isolates the next TDD failure to `AppCopy.greeting`
+instead of unrelated missing-file or asset-catalog errors.
+
+**Acceptance criteria:**
+
+- [x] The app has a valid SwiftUI entry point and renders an empty shared view.
+- [x] `AppCopy` exists but has no greeting member.
+- [x] The resource catalog is structurally valid and does not require an app icon
+  before design assets exist.
+
+**Verification:**
+
+- [x] macOS Debug build succeeds before the greeting test is added.
+- [x] No visible financial feature or greeting behavior exists.
+
+**Evidence:** Strict Swift formatting passed and the unsigned arm64 macOS Debug
+build succeeded with an empty `ContentView`. The only emitted warnings came from
+sandboxed CoreSimulator/Xcode filesystem services, not project source or compiler
+diagnostics (2026-08-22).
+
+**Dependencies:** Task 2
+
+**Files likely touched:**
+
+- `Config/Base.xcconfig`
+- `MonMon/App/MonMonApp.swift`
+- `MonMon/App/AppCopy.swift`
+- `MonMon/App/ContentView.swift`
+- `MonMon/Resources/Assets.xcassets/Contents.json`
+
+**Estimated scope:** Medium (5 small files)
+
 ## Task 3: Write the failing greeting smoke test
 
 **Description:** Define the first observable app contract before implementation:
@@ -98,7 +133,7 @@ the stable greeting is exactly “Hello, MonMon”.
 - [ ] Run the macOS test command from `SPEC-app-bootstrap.md` and confirm the
   failure is specifically caused by the missing greeting contract.
 
-**Dependencies:** Task 2
+**Dependencies:** Task 2A
 
 **Files likely touched:**
 
