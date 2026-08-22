@@ -225,17 +225,17 @@ shared SwiftUI screen that reads locally persisted accounts.
 
 **Acceptance criteria:**
 
-- [ ] `CashBalanceSummary` returns the exact tested totals and
+- [x] `CashBalanceSummary` returns the exact tested totals and
   `AccountListView` queries accounts ordered by creation date.
-- [ ] The empty state is understandable; the populated state displays total
+- [x] The empty state is understandable; the populated state displays total
   first and then each account's name, kind, and formatted VND balance.
-- [ ] `ContentView` hosts the feature root and the list exposes the approved
+- [x] `ContentView` hosts the feature root and the list exposes the approved
   `account-list` accessibility identifier on both platforms.
 
 **Verification:**
 
-- [ ] The macOS test command passes, including total-calculation tests.
-- [ ] Both Debug compile commands and the formatting check pass.
+- [x] The macOS test command passes, including total-calculation tests.
+- [x] Both Debug compile commands and the formatting check pass.
 
 **Dependencies:** Task 5
 
@@ -248,7 +248,11 @@ shared SwiftUI screen that reads locally persisted accounts.
 
 **Estimated scope:** Medium (4 files)
 
-**Evidence:** Pending.
+**Evidence:** The three total tests passed with exact `Decimal` results. The
+query-backed view compiles with forward `createdAt` sorting, native empty/list
+states, total-first sections, formatted rows, and `account-list`. Full macOS
+tests, macOS Debug, the approved iOS SDK command, strict formatting, and direct
+`arm64-apple-ios18.0-simulator` type-check passed (2026-08-23).
 
 ## Task 7: Complete the add-account flow
 
