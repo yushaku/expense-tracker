@@ -61,7 +61,8 @@ the project exists.
 ### Slice 4: Runtime proof and handoff
 
 - Launch and visually verify the Mac app.
-- Launch and visually verify the same target on an installed iPhone Simulator.
+- Provide exact iPhone Simulator and physical-device run instructions for the
+  owner-managed hands-on check.
 - Add exact setup/build/test/run instructions to README and provide the owner with
   the commands needed to reproduce the checks.
 
@@ -84,7 +85,8 @@ the project exists.
 
 - Unit tests pass.
 - macOS and iOS Simulator Debug and Release builds pass.
-- “Hello, MonMon” is visually confirmed on Mac and iPhone Simulator.
+- “Hello, MonMon” is visually confirmed on Mac; the owner confirms the app can be
+  run and takes ownership of device testing.
 - Repository hygiene check passes.
 - Owner receives the runnable project and tests it before `cash-balance` work.
 
@@ -95,10 +97,10 @@ xcodebuild -project MonMon.xcodeproj -list
 xcodebuild -project MonMon.xcodeproj -scheme MonMon -showdestinations
 swift format lint --strict --recursive MonMon MonMonTests
 xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO build
-xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO build
+xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -sdk iphonesimulator -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=NO build
 xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO test
 xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Release -destination 'platform=macOS' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO build
-xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Release -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO build
+xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Release -sdk iphonesimulator -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=NO build
 ```
 
 Runtime commands will use the specific installed Simulator destination returned by
@@ -111,7 +113,7 @@ Runtime commands will use the specific installed Simulator destination returned 
 | Hand-authored Xcode project graph contains a stale or missing reference | High | Make project discovery and both platform builds the first checkpoints |
 | Build settings drift into opaque `project.pbxproj` entries | Medium | Keep shared settings in small reviewed `.xcconfig` files |
 | Physical-device signing blocks basic verification | Medium | Verify unsigned Mac/Simulator builds now; configure the owner's team only when testing a physical iPhone |
-| CoreSimulator service remains inaccessible in the sandbox | Medium | Request scoped approval for local Simulator access; keep generic iOS compilation as independent evidence |
+| CoreSimulator runtime is unavailable in the environment | Low | Keep iOS SDK compilation as automated evidence and let the owner run the app on their chosen device |
 | A platform-specific API accidentally enters shared code | Medium | Compile the same application target for both platforms after every source change |
 
 ## Scope Guard

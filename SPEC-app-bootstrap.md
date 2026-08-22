@@ -45,15 +45,16 @@ do not dirty the repository.
 
 ```sh
 xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO build
-xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO build
+xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -sdk iphonesimulator -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=NO build
 xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO test
 xcodebuild -project MonMon.xcodeproj -scheme MonMon -showdestinations
 swift format lint --strict --recursive MonMon MonMonTests
 ```
 
-An installed iPhone destination returned by `-showdestinations` is selected for
-the runtime smoke test. Release builds are also compiled once at the completion
-checkpoint.
+Building through the `iphonesimulator` SDK keeps compilation independent from an
+installed runtime. An installed iPhone destination returned by `-showdestinations`
+is still required for the runtime smoke test. Release builds are also compiled
+once at the completion checkpoint.
 
 ## Project Structure
 
@@ -110,8 +111,8 @@ struct ContentView: View {
 - Build Release for native macOS and a generic iOS Simulator destination at the
   completion checkpoint.
 - Run unit tests on macOS.
-- Launch the macOS app and an installed iPhone Simulator app, then visually verify
-  that each displays “Hello, MonMon”.
+- Launch the macOS app for agent-side visual verification. The owner performs
+  hands-on iPhone Simulator or physical-device testing and reports the result.
 - Record any Simulator-runtime or signing limitation separately from compilation
   failures.
 
@@ -148,14 +149,13 @@ struct ContentView: View {
   compiler warnings.
 - Unit tests and strict Swift formatting checks pass.
 - The macOS app launches and visibly shows “Hello, MonMon”.
-- The same target launches on an installed iPhone Simulator and visibly shows
-  “Hello, MonMon”.
+- The owner can launch the same target on an iPhone Simulator or physical iPhone
+  and verify “Hello, MonMon”.
 - The repository remains free of DerivedData, build output, signing material, and
   user-specific Xcode files.
 - README contains exact open, build, test, and run instructions.
 
 ## Open Questions
 
-The installed iOS SDK is present, but Simulator services are inaccessible from the
-current sandbox. Implementation may require a one-time approval to access the
-local CoreSimulator service for the runtime smoke test.
+None. The owner handles hands-on app testing; automated verification remains part
+of the repository workflow.

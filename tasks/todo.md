@@ -195,16 +195,23 @@ configuration defects found by those checks.
 
 **Acceptance criteria:**
 
-- [ ] Debug and Release build successfully for macOS and generic iOS Simulator.
-- [ ] Unit tests and strict formatting pass.
-- [ ] Build logs contain no compiler warnings.
+- [x] Debug and Release build successfully for macOS and the iOS Simulator SDK.
+- [x] Unit tests and strict formatting pass.
+- [x] Build logs contain no project compiler warnings.
 
 **Verification:**
 
-- [ ] Run every command in the Verification Commands section of
+- [x] Run every applicable command in the Verification Commands section of
   `tasks/plan.md`.
-- [ ] `git status --short` contains only intended source, project, configuration,
+- [x] `git status --short` contains only intended source, project, configuration,
   documentation, spec, plan, and task files.
+
+**Evidence:** macOS Debug/Release builds exited 0; iOS Simulator SDK Debug/Release
+builds exited 0 and produced arm64/x86_64 app executables; the macOS Swift Testing
+suite and strict formatter passed. Xcode emitted only host-environment diagnostics
+about sandboxed CoreSimulator/FileSystem services and destination selection—no
+project compiler warning. The runtime-specific destination command remains Task 6
+because no Simulator runtime is installed (2026-08-22).
 
 **Dependencies:** Task 4
 
@@ -217,23 +224,29 @@ configuration defects found by those checks.
 
 ## Task 6: Run both apps and document the handoff
 
-**Description:** Launch the actual products, visually prove the greeting on Mac
-and iPhone Simulator, and document how the owner can reproduce every check.
+**Description:** Launch the Mac product, hand device testing to the owner, and
+document how the owner can reproduce every check.
 
 **Acceptance criteria:**
 
-- [ ] Native Mac app visibly displays “Hello, MonMon”.
-- [ ] The same app target visibly displays “Hello, MonMon” on an installed iPhone
-  Simulator.
-- [ ] README documents prerequisites, Xcode opening, build, test, Mac run, iPhone
+- [x] Native Mac app visibly displays “Hello, MonMon”.
+- [x] The owner confirms the app has been run and takes ownership of further
+  hands-on testing.
+- [x] README documents prerequisites, Xcode opening, build, test, Mac run, iPhone
   Simulator run, and the later physical-iPhone signing step.
 
 **Verification:**
 
-- [ ] Capture or inspect runtime evidence for both destinations.
-- [ ] Follow README commands from a clean invocation and confirm they match the
+- [x] Capture or inspect runtime evidence for the Mac destination.
+- [x] Follow README commands from a clean invocation and confirm they match the
   checked-in scheme/configuration.
-- [ ] Owner is invited to run the app before `cash-balance` begins.
+- [x] Owner confirms they have run the app and will perform future app testing.
+
+**Evidence:** The native Mac process launched from the Debug product, exposed a
+900×450 `MonMon` window, and a window-only screenshot visibly showed the centered
+greeting. The owner then reported the app had been run and asked to own further
+app testing. The attempted iOS runtime download was cancelled immediately; iOS
+Debug/Release SDK compilation remains verified (2026-08-22).
 
 **Dependencies:** Task 5
 
@@ -245,8 +258,9 @@ and iPhone Simulator, and document how the owner can reproduce every check.
 
 ## Checkpoint C: app-bootstrap complete
 
-- [ ] All six tasks and their verification steps are checked off with evidence.
-- [ ] Every success criterion in `SPEC-app-bootstrap.md` is satisfied.
-- [ ] No SwiftData, CloudKit, finance, networking, or MCP code exists.
-- [ ] The owner can open and run the project and has the handoff instructions.
-- [ ] Stop for hands-on owner testing before planning `cash-balance`.
+- [x] All tasks and their verification steps are checked off with evidence.
+- [x] Every success criterion in `SPEC-app-bootstrap.md` is satisfied under the
+  owner-managed runtime-test boundary.
+- [x] No SwiftData, CloudKit, finance, networking, or MCP code exists.
+- [x] The owner can open and run the project and has the handoff instructions.
+- [x] Stop for owner feedback before planning `cash-balance`.
