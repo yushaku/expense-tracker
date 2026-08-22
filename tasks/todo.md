@@ -150,17 +150,17 @@ utility. Parsing and display must use an explicit Vietnamese locale.
 
 **Acceptance criteria:**
 
-- [ ] Successful validation returns a trimmed name, selected kind, exact
+- [x] Successful validation returns a trimmed name, selected kind, exact
   nonnegative `Decimal`, `VND`, and caller-supplied identity/date values.
-- [ ] Empty, nonnumeric, and negative inputs return their approved typed errors
+- [x] Empty, nonnumeric, and negative inputs return their approved typed errors
   without creating a SwiftData model.
-- [ ] VND display uses locale-aware grouping and zero fractional digits without
+- [x] VND display uses locale-aware grouping and zero fractional digits without
   consulting the device's current locale.
 
 **Verification:**
 
-- [ ] The macOS test command passes, including every draft and formatting case.
-- [ ] Both Debug compile commands and the formatting check pass.
+- [x] The macOS test command passes, including every draft and formatting case.
+- [x] Both Debug compile commands and the formatting check pass.
 
 **Dependencies:** Task 3
 
@@ -172,15 +172,21 @@ utility. Parsing and display must use an explicit Vietnamese locale.
 
 **Estimated scope:** Medium (3 files)
 
-**Evidence:** Pending.
+**Evidence:** All seven draft/format tests passed: trimmed values, cash/bank kind,
+zero, ungrouped and Vietnamese-grouped amounts, nonnumeric and negative errors,
+and localized VND display. The first GREEN run exposed a duplicate hand-authored
+project reference ID; assigning `VNDCurrency.swift` a unique ID removed the
+malformed-project warning and made the suite pass. macOS Debug, the approved iOS
+SDK command, strict formatting, and direct
+`arm64-apple-ios18.0-simulator` type-check all exited 0 (2026-08-23).
 
 ## Checkpoint A: Data foundation
 
-- [ ] Tasks 1–4 contain recorded red/green evidence.
-- [ ] SwiftData round-trip preserves all approved fields and exact money values.
-- [ ] Validation and VND formatting are deterministic under tests.
-- [ ] macOS and iOS Simulator SDK Debug builds pass.
-- [ ] No UI beyond the bootstrap screen has changed yet.
+- [x] Tasks 1–4 contain recorded red/green evidence.
+- [x] SwiftData round-trip preserves all approved fields and exact money values.
+- [x] Validation and VND formatting are deterministic under tests.
+- [x] macOS and iOS Simulator SDK Debug builds pass.
+- [x] No UI beyond the bootstrap screen has changed yet.
 
 ## Task 5: Define total calculation in failing tests
 
