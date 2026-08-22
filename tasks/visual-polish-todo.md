@@ -8,11 +8,17 @@
 
 ## Slice 1: Dashboard
 
-- [ ] Semantic Light/Dark colors are shared across iPhone and Mac.
-- [ ] Total is the primary visual element and handles large values.
-- [ ] Empty state has one clear primary Add action.
-- [ ] Account cards show icon, name, kind, and exact formatted balance.
-- [ ] Existing tests, macOS Debug build, formatter, and project validation pass.
+- [x] Semantic Light/Dark colors are shared across iPhone and Mac.
+- [x] Total is the primary visual element and handles large values.
+- [x] Empty state has one clear primary Add action.
+- [x] Account cards show icon, name, kind, and exact formatted balance.
+- [x] Existing tests, macOS Debug build, formatter, and project validation pass.
+
+**Evidence:** The dashboard uses platform-semantic canvas, surface, and field
+colors plus shared navy/emerald tokens. The total scales on one line, account
+cards use `ViewThatFits` to fall back to a vertical layout, and the Add action
+retains its identifier. Full macOS tests, macOS Debug, strict formatting,
+project validation, and direct iOS 18 type-check all exited 0 (2026-08-23).
 
 ## Slice 2: Add form
 
