@@ -1,6 +1,6 @@
 # Task List: cash-balance
 
-**Status:** Approved (2026-08-23)  
+**Status:** Automated implementation complete; awaiting owner verification (2026-08-23)  
 **Spec:** `SPEC-cash-balance.md`  
 **Plan:** `tasks/plan.md`
 
@@ -312,20 +312,20 @@ feature to the owner for runtime evaluation.
 
 **Acceptance criteria:**
 
-- [ ] Obsolete greeting-only production/test code is removed without weakening
+- [x] Obsolete greeting-only production/test code is removed without weakening
   cash-balance coverage or the shared scheme.
-- [ ] Debug and Release builds pass for macOS and the iOS Simulator SDK; the full
+- [x] Debug and Release builds pass for macOS and the iOS Simulator SDK; the full
   macOS test target and strict formatting pass without feature compiler warnings.
-- [ ] Documentation and checklist evidence accurately describe the runnable
+- [x] Documentation and checklist evidence accurately describe the runnable
   feature and preserve the owner-managed UI testing boundary.
 
 **Verification:**
 
-- [ ] Run every command in `SPEC-cash-balance.md` and record exit status plus any
+- [x] Run every command in `SPEC-cash-balance.md` and record exit status plus any
   host-environment diagnostics separately from project warnings.
-- [ ] `rtk git status --short` contains only intended source, test, project, and
+- [x] `rtk git status --short` contains only intended source, test, project, and
   documentation changes; no build products or user Xcode state appear.
-- [ ] Targeted staged-diff review finds no credentials, API keys, account numbers,
+- [x] Targeted staged-diff review finds no credentials, API keys, account numbers,
   secrets, unrelated refactors, or out-of-scope behavior.
 
 **Dependencies:** Checkpoint B
@@ -340,17 +340,29 @@ feature to the owner for runtime evaluation.
 
 **Estimated scope:** Medium (5 files)
 
-**Evidence:** Pending.
+**Evidence:** The obsolete greeting constant and greeting-only smoke test were
+removed from disk and the project while all finance-focused tests remained.
+macOS Debug and Release builds, both approved iOS SDK commands, and the full
+macOS test target exited 0. Strict formatting, project plist validation, direct
+`arm64-apple-ios18.0-simulator` type-check with warnings as errors, and diff
+checks also exited 0. The host still makes the SDK-only commands select macOS
+because no iOS platform runtime is installed; the direct iOS compiler invocation
+therefore provides the authoritative iOS source check. Xcode's code-signing-off
+test copies report that bundled XCTest frameworks are already signed, and
+Release metadata extraction reports no AppIntents dependency; neither diagnostic
+originates in MonMon source. README now describes the runnable local feature and
+owner testing boundary. Final status/diff inspection contains only intended files
+and no secret-like values, build outputs, or Xcode user state (2026-08-23).
 
 ## Checkpoint C: cash-balance complete
 
 Automated implementation gate:
 
-- [ ] Every task acceptance criterion and implementation-owned verification is
+- [x] Every task acceptance criterion and implementation-owned verification is
   checked with evidence.
-- [ ] Every success criterion in `SPEC-cash-balance.md` is met except the explicit
+- [x] Every success criterion in `SPEC-cash-balance.md` is met except the explicit
   owner-run checks below.
-- [ ] The branch contains small verified commits aligned with the approved slices.
+- [x] The branch contains small verified commits aligned with the approved slices.
 
 Owner-run gate:
 

@@ -1,8 +1,8 @@
 # MonMon
 
 MonMon is a private personal-finance app for iPhone and Mac. The current
-`app-bootstrap` slice contains one shared SwiftUI target and displays
-“Hello, MonMon”. Financial features are intentionally not included yet.
+`cash-balance` slice lets one owner add local cash or bank accounts with a VND
+opening balance, then see each balance and the exact combined total.
 
 ## Requirements
 
@@ -14,7 +14,7 @@ MonMon is a private personal-finance app for iPhone and Mac. The current
 ## Open the project
 
 ```sh
-open MonMon.xcodeproj
+rtk open MonMon.xcodeproj
 ```
 
 Use the shared `MonMon` scheme in Xcode.
@@ -24,27 +24,27 @@ Use the shared `MonMon` scheme in Xcode.
 Build the native Mac app:
 
 ```sh
-xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO build
+rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO build
 ```
 
 Build against the iPhone Simulator SDK without requiring an installed runtime:
 
 ```sh
-xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -sdk iphonesimulator -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=NO build
+rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -sdk iphonesimulator -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=NO build
 ```
 
 ## Test and format
 
-Run the macOS smoke test:
+Run the macOS unit and in-memory persistence tests:
 
 ```sh
-xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO test
+rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO test
 ```
 
 Check Swift formatting:
 
 ```sh
-swift format lint --strict --recursive MonMon MonMonTests
+rtk swift format lint --strict --recursive MonMon MonMonTests
 ```
 
 ## Run on Mac
@@ -80,7 +80,19 @@ and are excluded by `.gitignore`.
 
 ## Current scope
 
-- Included: multiplatform project, Debug/Release configuration, shared scheme,
-  strict formatter, smoke test, and Hello screen.
-- Next after owner feedback: create cash/bank accounts and show balances.
-- Not included yet: SwiftData, iCloud, investments, market prices, or MCP.
+- Included: add and list local cash/bank accounts, VND validation and formatting,
+  exact `Decimal` totals, on-device SwiftData persistence, and shared SwiftUI UI.
+- Owner validation: form behavior, relaunch persistence, iPhone Dynamic Type and
+  keyboard, and Mac window resizing.
+- Not included yet: transactions, editing, deletion, iCloud, investments, market
+  prices, network access, AI, or MCP.
+
+## Architecture
+
+- One multiplatform app target shares SwiftUI source between iOS and macOS.
+- SwiftData stores `CashAccount` records locally; `@Query` drives the visible
+  account list and combined total.
+- `AccountDraft` validates external text before any model is inserted, and money
+  uses `Decimal` throughout.
+- The approved boundaries and verification contract live in
+  `SPEC-cash-balance.md`.
