@@ -5,6 +5,8 @@ struct AccountListView: View {
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
 
+    @State private var isAddingAccount = false
+
     var body: some View {
         NavigationStack {
             Group {
@@ -16,6 +18,16 @@ struct AccountListView: View {
             }
             .navigationTitle("Cash balances")
             .accessibilityIdentifier("account-list")
+            .toolbar {
+                if !accounts.isEmpty {
+                    ToolbarItem(placement: .primaryAction) {
+                        addAccountButton
+                    }
+                }
+            }
+            .sheet(isPresented: $isAddingAccount) {
+                AddAccountView()
+            }
         }
     }
 
@@ -24,7 +36,17 @@ struct AccountListView: View {
             Label("No cash accounts", systemImage: "wallet.bifold")
         } description: {
             Text("Your cash and bank accounts will appear here.")
+        } actions: {
+            addAccountButton
+                .buttonStyle(.borderedProminent)
         }
+    }
+
+    private var addAccountButton: some View {
+        Button("Add Account", systemImage: "plus") {
+            isAddingAccount = true
+        }
+        .accessibilityIdentifier("add-account")
     }
 
     private var accountList: some View {
@@ -54,17 +76,6 @@ struct AccountListView: View {
                     .accessibilityElement(children: .combine)
                 }
             }
-        }
-    }
-}
-
-private extension CashAccountKind {
-    var displayName: String {
-        switch self {
-        case .cash:
-            "Cash"
-        case .bank:
-            "Bank"
         }
     }
 }

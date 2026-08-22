@@ -261,17 +261,17 @@ validate input, save an account, and see the query-backed total update.
 
 **Acceptance criteria:**
 
-- [ ] The approved Add action and form controls exist with stable accessibility
+- [x] The approved Add action and form controls exist with stable accessibility
   identifiers, Cancel behavior, and inline validation errors.
-- [ ] Valid input inserts and explicitly saves before dismissal; the account list
+- [x] Valid input inserts and explicitly saves before dismissal; the account list
   and total update through SwiftData `@Query`.
-- [ ] A save error rolls back the failed insert, keeps the draft visible, shows a
+- [x] A save error rolls back the failed insert, keeps the draft visible, shows a
   general error, and does not dismiss the sheet.
 
 **Verification:**
 
-- [ ] The macOS test command, both Debug compile commands, and formatting pass.
-- [ ] Code inspection traces valid, validation-error, and save-error paths and
+- [x] The macOS test command, both Debug compile commands, and formatting pass.
+- [x] Code inspection traces valid, validation-error, and save-error paths and
   confirms no dead Add action or pending failed row remains.
 
 **Dependencies:** Task 6
@@ -284,16 +284,25 @@ validate input, save an account, and see the query-backed total update.
 
 **Estimated scope:** Medium (3 files)
 
-**Evidence:** Pending.
+**Evidence:** The shared form exposes stable identifiers for Add, name, kind,
+opening balance, Cancel, Save, and error messages. Inspection confirms typed
+validation returns before insertion; valid input inserts, explicitly saves, and
+only then dismisses; a thrown save rolls back the pending insert and leaves the
+unchanged draft plus a general error visible. SwiftData `@Query` remains the only
+list/total source. The full macOS test target, macOS Debug build, approved iOS
+SDK command, strict formatting, and direct
+`arm64-apple-ios18.0-simulator` type-check all exited 0. The SDK command still
+reports the host's known destination fallback, so the direct compiler check is
+the authoritative iOS source-compatibility evidence (2026-08-23).
 
 ## Checkpoint B: Complete vertical flow
 
-- [ ] Tasks 5–7 contain recorded red/green or inspection evidence.
-- [ ] All automated tests and strict formatting pass.
-- [ ] macOS and iOS Simulator SDK Debug builds pass without project compiler
+- [x] Tasks 5–7 contain recorded red/green or inspection evidence.
+- [x] All automated tests and strict formatting pass.
+- [x] macOS and iOS Simulator SDK Debug builds pass without project compiler
   warnings.
-- [ ] The complete add/list/total path is ready for owner-run UI testing.
-- [ ] No edit, delete, iCloud, network, market-data, AI, or MCP behavior exists.
+- [x] The complete add/list/total path is ready for owner-run UI testing.
+- [x] No edit, delete, iCloud, network, market-data, AI, or MCP behavior exists.
 
 ## Task 8: Run the final quality gate and prepare handoff
 
