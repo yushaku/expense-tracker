@@ -117,16 +117,16 @@ implementation, using fixed inputs and no system locale or clock dependency.
 
 **Acceptance criteria:**
 
-- [ ] Tests cover trimmed and empty names plus cash/bank kind preservation.
-- [ ] Tests cover zero, positive ungrouped, Vietnamese-grouped, nonnumeric, and
+- [x] Tests cover trimmed and empty names plus cash/bank kind preservation.
+- [x] Tests cover zero, positive ungrouped, Vietnamese-grouped, nonnumeric, and
   negative balances with the exact typed error expected.
-- [ ] The initial test command fails only because the draft/formatter contract is
+- [x] The initial test command fails only because the draft/formatter contract is
   not implemented.
 
 **Verification:**
 
-- [ ] Run the macOS test command and record the exact intended red-state failure.
-- [ ] `rtk git diff --check` passes for the test and project changes.
+- [x] Run the macOS test command and record the exact intended red-state failure.
+- [x] `rtk git diff --check` passes for the test and project changes.
 
 **Dependencies:** Task 2
 
@@ -137,7 +137,11 @@ implementation, using fixed inputs and no system locale or clock dependency.
 
 **Estimated scope:** Small (2 files)
 
-**Evidence:** Pending.
+**Evidence:** The macOS test build reached `AccountDraftTests.swift` and failed
+only on the intentionally absent `AccountDraft`, `AccountFormError`, and
+`VNDCurrency` contracts. The existing app/model target compiled first. The new
+test's strict-format lint, project plist validation, and `git diff --check` all
+passed (2026-08-23).
 
 ## Task 4: Implement deterministic VND validation and formatting
 

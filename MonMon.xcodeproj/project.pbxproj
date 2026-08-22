@@ -15,6 +15,7 @@
 		A00000000000000000000206 /* CashAccountPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000115 /* CashAccountPersistenceTests.swift */; };
 		A00000000000000000000207 /* CashAccountKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000116 /* CashAccountKind.swift */; };
 		A00000000000000000000208 /* CashAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000117 /* CashAccount.swift */; };
+		A00000000000000000000209 /* AccountDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000118 /* AccountDraftTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,6 +40,7 @@
 		A00000000000000000000115 /* CashAccountPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashAccountPersistenceTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000116 /* CashAccountKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashAccountKind.swift; sourceTree = "<group>"; };
 		A00000000000000000000117 /* CashAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashAccount.swift; sourceTree = "<group>"; };
+		A00000000000000000000118 /* AccountDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDraftTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000120 /* MonMon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MonMon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00000000000000000000121 /* MonMonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonMonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -121,6 +123,7 @@
 		A00000000000000000000017 /* Accounts */ = {
 			isa = PBXGroup;
 			children = (
+				A00000000000000000000118 /* AccountDraftTests.swift */,
 				A00000000000000000000115 /* CashAccountPersistenceTests.swift */,
 			);
 			path = Accounts;
@@ -255,6 +258,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A00000000000000000000209 /* AccountDraftTests.swift in Sources */,
 				A00000000000000000000205 /* AppSmokeTests.swift in Sources */,
 				A00000000000000000000206 /* CashAccountPersistenceTests.swift in Sources */,
 			);
