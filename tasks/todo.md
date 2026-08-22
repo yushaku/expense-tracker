@@ -43,18 +43,18 @@ approved SwiftData types are missing.
 
 **Acceptance criteria:**
 
-- [ ] The test constructs a cash account with fixed UUID, date, kind, exact
+- [x] The test constructs a cash account with fixed UUID, date, kind, exact
   `Decimal` opening balance, and VND currency code.
-- [ ] The test inserts, saves, and fetches through an in-memory
+- [x] The test inserts, saves, and fetches through an in-memory
   `ModelContainer`, then compares every persisted field.
-- [ ] The initial test command fails for the expected missing-model contract,
+- [x] The initial test command fails for the expected missing-model contract,
   not a broken project reference or unrelated bootstrap error.
 
 **Verification:**
 
-- [ ] Run the macOS test command and record the exact intended compiler/test
+- [x] Run the macOS test command and record the exact intended compiler/test
   failure.
-- [ ] `rtk git diff --check` passes for the test and project changes.
+- [x] `rtk git diff --check` passes for the test and project changes.
 
 **Dependencies:** None
 
@@ -65,7 +65,11 @@ approved SwiftData types are missing.
 
 **Estimated scope:** Small (2 files)
 
-**Evidence:** Pending.
+**Evidence:** The macOS test build reached
+`CashAccountPersistenceTests.swift` and failed with `Cannot find 'CashAccount'
+in scope` plus the expected unresolved `.bank` references. `plutil` validated
+the updated project, the focused strict-format lint passed, and
+`git diff --check` returned clean (2026-08-23).
 
 ## Task 2: Implement the persisted cash-account model
 
