@@ -195,14 +195,14 @@ SwiftData results to the visible list.
 
 **Acceptance criteria:**
 
-- [ ] Tests cover empty, one-account, and multiple-account totals.
-- [ ] Tests use exact `Decimal` values and include both cash and bank kinds.
-- [ ] The initial test command fails only because `CashBalanceSummary` is absent.
+- [x] Tests cover empty, one-account, and multiple-account totals.
+- [x] Tests use exact `Decimal` values and include both cash and bank kinds.
+- [x] The initial test command fails only because `CashBalanceSummary` is absent.
 
 **Verification:**
 
-- [ ] Run the macOS test command and record the exact intended red-state failure.
-- [ ] `rtk git diff --check` passes for the test and project changes.
+- [x] Run the macOS test command and record the exact intended red-state failure.
+- [x] `rtk git diff --check` passes for the test and project changes.
 
 **Dependencies:** Checkpoint A
 
@@ -213,7 +213,10 @@ SwiftData results to the visible list.
 
 **Estimated scope:** Small (2 files)
 
-**Evidence:** Pending.
+**Evidence:** The full macOS test build compiled the existing app/model code and
+failed only in `CashBalanceSummaryTests.swift` with three expected `Cannot find
+'CashBalanceSummary' in scope` errors. Focused strict formatting, project plist
+validation, and `git diff --check` passed (2026-08-23).
 
 ## Task 6: Render query-backed cash balances
 

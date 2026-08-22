@@ -18,6 +18,7 @@
 		A00000000000000000000209 /* AccountDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000118 /* AccountDraftTests.swift */; };
 		A00000000000000000000210 /* AccountDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000119 /* AccountDraft.swift */; };
 		A00000000000000000000211 /* VNDCurrency.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000122 /* VNDCurrency.swift */; };
+		A00000000000000000000212 /* CashBalanceSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000123 /* CashBalanceSummaryTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +46,7 @@
 		A00000000000000000000118 /* AccountDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDraftTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000119 /* AccountDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDraft.swift; sourceTree = "<group>"; };
 		A00000000000000000000122 /* VNDCurrency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VNDCurrency.swift; sourceTree = "<group>"; };
+		A00000000000000000000123 /* CashBalanceSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashBalanceSummaryTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000120 /* MonMon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MonMon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00000000000000000000121 /* MonMonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonMonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -128,6 +130,7 @@
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000118 /* AccountDraftTests.swift */,
+				A00000000000000000000123 /* CashBalanceSummaryTests.swift */,
 				A00000000000000000000115 /* CashAccountPersistenceTests.swift */,
 			);
 			path = Accounts;
@@ -268,6 +271,7 @@
 			files = (
 				A00000000000000000000209 /* AccountDraftTests.swift in Sources */,
 				A00000000000000000000205 /* AppSmokeTests.swift in Sources */,
+				A00000000000000000000212 /* CashBalanceSummaryTests.swift in Sources */,
 				A00000000000000000000206 /* CashAccountPersistenceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
