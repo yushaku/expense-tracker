@@ -123,15 +123,19 @@ the stable greeting is exactly “Hello, MonMon”.
 
 **Acceptance criteria:**
 
-- [ ] A Swift Testing test imports the app module and asserts the greeting copy.
-- [ ] The test initially fails to compile or fails its assertion because the app
+- [x] A Swift Testing test imports the app module and asserts the greeting copy.
+- [x] The test initially fails to compile or fails its assertion because the app
   contract has not been implemented yet.
-- [ ] The failure is recorded as TDD red-state evidence.
+- [x] The failure is recorded as TDD red-state evidence.
 
 **Verification:**
 
-- [ ] Run the macOS test command from `SPEC-app-bootstrap.md` and confirm the
+- [x] Run the macOS test command from `SPEC-app-bootstrap.md` and confirm the
   failure is specifically caused by the missing greeting contract.
+
+**Evidence:** The macOS test build reached `MonMonTests/AppSmokeTests.swift` and
+failed with `Type 'AppCopy' has no member 'greeting'`; the app target itself built
+successfully. This is the intended TDD red state (2026-08-22).
 
 **Dependencies:** Task 2A
 
@@ -149,16 +153,22 @@ platforms.
 
 **Acceptance criteria:**
 
-- [ ] `MonMonApp` uses the SwiftUI lifecycle and opens `ContentView`.
-- [ ] `ContentView` centers “Hello, MonMon” and exposes the
+- [x] `MonMonApp` uses the SwiftUI lifecycle and opens `ContentView`.
+- [x] `ContentView` centers “Hello, MonMon” and exposes the
   `app-greeting` accessibility identifier.
-- [ ] The greeting smoke test passes without adding unrelated abstractions.
+- [x] The greeting smoke test passes without adding unrelated abstractions.
 
 **Verification:**
 
-- [ ] macOS unit-test command passes.
-- [ ] macOS Debug build passes.
-- [ ] Generic iOS Simulator Debug build passes.
+- [x] macOS unit-test command passes.
+- [x] macOS Debug build passes.
+- [x] Generic iOS Simulator Debug build passes.
+
+**Evidence:** After adding only `AppCopy.greeting` and the accessible centered
+`Text`, the macOS smoke test passed via local `testmanagerd`; the unsigned macOS
+Debug build exited 0; the `iphonesimulator26.5` Debug build produced a universal
+arm64/x86_64 `MonMon.app` executable. Strict Swift formatting passed
+(2026-08-22).
 
 **Dependencies:** Task 3
 
@@ -173,10 +183,10 @@ platforms.
 
 ## Checkpoint B: Hello compiles on both platforms
 
-- [ ] Task 3 red-state and Task 4 green-state evidence are recorded.
-- [ ] macOS and generic iOS Simulator Debug builds pass without warnings.
-- [ ] Strict formatting lint passes.
-- [ ] Git status contains no DerivedData, build product, or Xcode user-state file.
+- [x] Task 3 red-state and Task 4 green-state evidence are recorded.
+- [x] macOS and generic iOS Simulator Debug builds pass without compiler warnings.
+- [x] Strict formatting lint passes.
+- [x] Git status contains no DerivedData, build product, or Xcode user-state file.
 
 ## Task 5: Verify release configurations and repository hygiene
 
