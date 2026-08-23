@@ -7,6 +7,9 @@ import SwiftUI
 enum InvestmentEditorMode: Identifiable {
     case savings(SavingsEditorMode)
     case fund(FundEditorMode)
+    /// The instrument catalogue. It travels here for the same reason the other
+    /// two do, not because it is an editor.
+    case instruments
 
     var id: String {
         switch self {
@@ -14,6 +17,8 @@ enum InvestmentEditorMode: Identifiable {
             "savings-\(mode.id)"
         case .fund(let mode):
             "fund-\(mode.id)"
+        case .instruments:
+            "instruments"
         }
     }
 }
@@ -34,7 +39,6 @@ struct InvestmentsView: View {
     private var accounts: [CashAccount]
 
     @State private var segment: InvestmentSegment = .savings
-    @State private var isManagingInstruments = false
     @State private var editor: InvestmentEditorMode?
 
     var body: some View {
@@ -75,13 +79,10 @@ struct InvestmentsView: View {
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Instruments", systemImage: "list.bullet.rectangle") {
-                        isManagingInstruments = true
+                        editor = .instruments
                     }
                     .accessibilityIdentifier("manage-instruments")
                 }
-            }
-            .sheet(isPresented: $isManagingInstruments) {
-                FundInstrumentListView()
             }
             .sheet(item: $editor) { mode in
                 switch mode {
@@ -89,6 +90,8 @@ struct InvestmentsView: View {
                     SavingsEditorView(mode: savingsMode)
                 case .fund(let fundMode):
                     FundEditorView(mode: fundMode)
+                case .instruments:
+                    FundInstrumentListView()
                 }
             }
             .tint(MonMonTheme.accent)
