@@ -35,6 +35,7 @@ enum MonMonTheme {
     static let accent = Frappe.green
     static let onAccent = Frappe.crust
     static let bank = Frappe.blue
+    static let credit = Frappe.peach
     static let savings = Frappe.yellow
     static let danger = Frappe.red
 

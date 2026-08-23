@@ -1,10 +1,14 @@
 import SwiftUI
 
-struct AddAccountForm: View {
+struct AccountEditorForm: View {
     @Binding var draft: AccountDraft
 
+    let isEditing: Bool
+    let canDelete: Bool
+    let deleteBlockedReason: String?
     let validationError: AccountFormError?
     let saveErrorMessage: String?
+    let onDelete: () -> Void
 
     var body: some View {
         ZStack {
@@ -20,6 +24,10 @@ struct AddAccountForm: View {
                     if let saveErrorMessage {
                         errorBanner(saveErrorMessage)
                     }
+
+                    if isEditing {
+                        deleteSection
+                    }
                 }
                 .frame(maxWidth: 560)
                 .padding(.horizontal, 20)
@@ -31,7 +39,7 @@ struct AddAccountForm: View {
 
     private var introduction: some View {
         HStack(spacing: 16) {
-            Image(systemName: "plus")
+            Image(systemName: isEditing ? "pencil" : "plus")
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(MonMonTheme.onAccent)
                 .frame(width: 46, height: 46)
@@ -39,14 +47,55 @@ struct AddAccountForm: View {
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("Give your money a home")
+                Text(isEditing ? "Keep this account honest" : "Give your money a home")
                     .font(.title3.weight(.semibold))
 
-                Text("Start with the balance available today.")
-                    .font(.subheadline)
-                    .foregroundStyle(MonMonTheme.textSecondary)
+                Text(
+                    isEditing
+                        ? "Update its name, type, or balance."
+                        : "Start with the balance available today."
+                )
+                .font(.subheadline)
+                .foregroundStyle(MonMonTheme.textSecondary)
             }
         }
+    }
+
+    private var deleteSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            deleteButton
+
+            if let deleteBlockedReason {
+                Text(deleteBlockedReason)
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .accessibilityIdentifier("delete-account-blocked")
+            }
+        }
+    }
+
+    private var deleteButton: some View {
+        Button(role: .destructive, action: onDelete) {
+            Label("Delete account", systemImage: "trash.fill")
+                .font(.subheadline.weight(.semibold))
+                .frame(maxWidth: .infinity)
+                .padding(14)
+        }
+        .buttonStyle(.plain)
+        .disabled(!canDelete)
+        .foregroundStyle(canDelete ? MonMonTheme.danger : MonMonTheme.textMuted)
+        .background(
+            (canDelete ? MonMonTheme.danger : MonMonTheme.textMuted).opacity(0.14),
+            in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(
+                    (canDelete ? MonMonTheme.danger : MonMonTheme.textMuted).opacity(0.35),
+                    lineWidth: 1
+                )
+        }
+        .accessibilityIdentifier("delete-account")
     }
 
     private var accountDetailsCard: some View {
@@ -117,7 +166,7 @@ struct AddAccountForm: View {
                     validationMessage(balanceErrorMessage, id: "opening-balance-error")
                 }
 
-                Text("VND · This becomes the current balance for this account.")
+                Text(balanceHint)
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
@@ -127,13 +176,23 @@ struct AddAccountForm: View {
     @ViewBuilder
     private var balanceTextField: some View {
         #if os(iOS)
+            // A credit card balance can be negative, and `.numberPad` has no
+            // minus key, so that kind needs the punctuation keyboard.
             TextField("0", text: $draft.openingBalanceText)
-                .keyboardType(.numberPad)
+                .keyboardType(
+                    draft.kind.allowsNegativeBalance ? .numbersAndPunctuation : .numberPad
+                )
                 .accessibilityIdentifier("opening-balance")
         #else
             TextField("0", text: $draft.openingBalanceText)
                 .accessibilityIdentifier("opening-balance")
         #endif
+    }
+
+    private var balanceHint: String {
+        draft.kind.allowsNegativeBalance
+            ? "VND · Enter a negative amount for money you owe."
+            : "VND · This becomes the current balance for this account."
     }
 
     private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {
@@ -184,7 +243,7 @@ struct AddAccountForm: View {
         case .invalidOpeningBalance:
             "Enter a valid balance."
         case .negativeOpeningBalance:
-            "Balance cannot be negative."
+            "Only a credit card can hold a negative balance."
         default:
             nil
         }
@@ -192,19 +251,26 @@ struct AddAccountForm: View {
 }
 
 #if DEBUG
-    private struct AddAccountFormPreview: View {
+    private struct AccountEditorFormPreview: View {
         @State var draft: AccountDraft
+        var isEditing = false
+        var canDelete = false
+        var deleteBlockedReason: String?
         var validationError: AccountFormError?
         var saveErrorMessage: String?
 
         var body: some View {
             NavigationStack {
-                AddAccountForm(
+                AccountEditorForm(
                     draft: $draft,
+                    isEditing: isEditing,
+                    canDelete: canDelete,
+                    deleteBlockedReason: deleteBlockedReason,
                     validationError: validationError,
-                    saveErrorMessage: saveErrorMessage
+                    saveErrorMessage: saveErrorMessage,
+                    onDelete: {}
                 )
-                .navigationTitle("Add account")
+                .navigationTitle(isEditing ? "Edit account" : "Add account")
             }
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
@@ -213,17 +279,37 @@ struct AddAccountForm: View {
     }
 
     #Preview("Form · empty") {
-        AddAccountFormPreview(draft: AccountDraft())
+        AccountEditorFormPreview(draft: AccountDraft())
     }
 
     #Preview("Form · filled") {
-        AddAccountFormPreview(
+        AccountEditorFormPreview(
             draft: AccountDraft(name: "Techcombank", kind: .bank, openingBalanceText: "48.900.000")
         )
     }
 
+    #Preview("Form · edit deletable") {
+        AccountEditorFormPreview(
+            draft: AccountDraft(name: "Old wallet", kind: .cash, openingBalanceText: "0"),
+            isEditing: true,
+            canDelete: true
+        )
+    }
+
+    #Preview("Form · edit blocked") {
+        AccountEditorFormPreview(
+            draft: AccountDraft(
+                name: "Visa credit",
+                kind: .credit,
+                openingBalanceText: "-5.200.000"
+            ),
+            isEditing: true,
+            deleteBlockedReason: "Set the balance to 0 before deleting this account."
+        )
+    }
+
     #Preview("Form · errors") {
-        AddAccountFormPreview(
+        AccountEditorFormPreview(
             draft: AccountDraft(name: "", kind: .cash, openingBalanceText: "-10"),
             validationError: .negativeOpeningBalance,
             saveErrorMessage: "Couldn’t save this account. Try again."

@@ -8,7 +8,7 @@ struct AccountListView: View {
     @Query(sort: \SavingsDeposit.createdAt, order: .forward)
     private var deposits: [SavingsDeposit]
 
-    @State private var isAddingAccount = false
+    @State private var editorMode: AccountEditorMode?
 
     var body: some View {
         NavigationStack {
@@ -41,8 +41,8 @@ struct AccountListView: View {
                     }
                 }
             }
-            .sheet(isPresented: $isAddingAccount) {
-                AddAccountView()
+            .sheet(item: $editorMode) { mode in
+                AccountEditorView(mode: mode)
             }
             .tint(MonMonTheme.accent)
         }
@@ -155,7 +155,7 @@ struct AccountListView: View {
 
     private var addAccountButton: some View {
         Button("Add Account", systemImage: "plus") {
-            isAddingAccount = true
+            editorMode = .add
         }
         .accessibilityIdentifier("add-account")
     }
@@ -177,7 +177,14 @@ struct AccountListView: View {
             }
 
             ForEach(accounts) { account in
-                CashAccountCard(account: account, deposits: deposits)
+                Button {
+                    editorMode = .edit(account)
+                } label: {
+                    CashAccountCard(account: account, deposits: deposits)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("account-\(account.id.uuidString)")
+                .accessibilityHint("Opens the account editor.")
             }
         }
     }

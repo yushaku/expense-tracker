@@ -19,10 +19,10 @@
 		A00000000000000000000212 /* CashBalanceSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000123 /* CashBalanceSummaryTests.swift */; };
 		A00000000000000000000213 /* CashBalanceSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000124 /* CashBalanceSummary.swift */; };
 		A00000000000000000000214 /* AccountListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000125 /* AccountListView.swift */; };
-		A00000000000000000000215 /* AddAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000126 /* AddAccountView.swift */; };
+		A00000000000000000000215 /* AccountEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000126 /* AccountEditorView.swift */; };
 		A00000000000000000000216 /* MonMonTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000127 /* MonMonTheme.swift */; };
 		A00000000000000000000217 /* CashAccountCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000128 /* CashAccountCard.swift */; };
-		A00000000000000000000218 /* AddAccountForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000129 /* AddAccountForm.swift */; };
+		A00000000000000000000218 /* AccountEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000129 /* AccountEditorForm.swift */; };
 		A00000000000000000000219 /* SavingsDeposit.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000130 /* SavingsDeposit.swift */; };
 		A00000000000000000000220 /* SavingsInterest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000131 /* SavingsInterest.swift */; };
 		A00000000000000000000221 /* PercentInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000132 /* PercentInput.swift */; };
@@ -66,10 +66,10 @@
 		A00000000000000000000123 /* CashBalanceSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashBalanceSummaryTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000124 /* CashBalanceSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashBalanceSummary.swift; sourceTree = "<group>"; };
 		A00000000000000000000125 /* AccountListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountListView.swift; sourceTree = "<group>"; };
-		A00000000000000000000126 /* AddAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAccountView.swift; sourceTree = "<group>"; };
+		A00000000000000000000126 /* AccountEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEditorView.swift; sourceTree = "<group>"; };
 		A00000000000000000000127 /* MonMonTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonMonTheme.swift; sourceTree = "<group>"; };
 		A00000000000000000000128 /* CashAccountCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashAccountCard.swift; sourceTree = "<group>"; };
-		A00000000000000000000129 /* AddAccountForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAccountForm.swift; sourceTree = "<group>"; };
+		A00000000000000000000129 /* AccountEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEditorForm.swift; sourceTree = "<group>"; };
 		A00000000000000000000120 /* MonMon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MonMon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00000000000000000000121 /* MonMonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonMonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00000000000000000000130 /* SavingsDeposit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsDeposit.swift; sourceTree = "<group>"; };
@@ -179,8 +179,8 @@
 		A00000000000000000000018 /* Accounts */ = {
 			isa = PBXGroup;
 			children = (
-				A00000000000000000000129 /* AddAccountForm.swift */,
-				A00000000000000000000126 /* AddAccountView.swift */,
+				A00000000000000000000129 /* AccountEditorForm.swift */,
+				A00000000000000000000126 /* AccountEditorView.swift */,
 				A00000000000000000000119 /* AccountDraft.swift */,
 				A00000000000000000000125 /* AccountListView.swift */,
 				A00000000000000000000128 /* CashAccountCard.swift */,
@@ -336,8 +336,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A00000000000000000000218 /* AddAccountForm.swift in Sources */,
-				A00000000000000000000215 /* AddAccountView.swift in Sources */,
+				A00000000000000000000218 /* AccountEditorForm.swift in Sources */,
+				A00000000000000000000215 /* AccountEditorView.swift in Sources */,
 				A00000000000000000000210 /* AccountDraft.swift in Sources */,
 				A00000000000000000000214 /* AccountListView.swift in Sources */,
 				A00000000000000000000213 /* CashBalanceSummary.swift in Sources */,

@@ -52,13 +52,16 @@ struct CashAccountCard: View {
 
     private func balance(alignment: HorizontalAlignment) -> some View {
         VStack(alignment: alignment, spacing: 3) {
-            Text(VNDCurrency.format(CashBalanceSummary.available(for: account, deposits: deposits)))
+            Text(VNDCurrency.format(availableBalance))
                 .font(.headline)
                 .monospacedDigit()
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
+                .foregroundStyle(
+                    availableBalance < 0 ? MonMonTheme.danger : MonMonTheme.textPrimary
+                )
 
-            Text("AVAILABLE BALANCE")
+            Text(account.kind == .credit ? "CURRENT BALANCE" : "AVAILABLE BALANCE")
                 .font(.caption2.weight(.semibold))
                 .tracking(0.5)
                 .foregroundStyle(MonMonTheme.textSecondary)
@@ -74,6 +77,10 @@ struct CashAccountCard: View {
         }
     }
 
+    private var availableBalance: Decimal {
+        CashBalanceSummary.available(for: account, deposits: deposits)
+    }
+
     private var fundedAmount: Decimal {
         CashBalanceSummary.fundedAmount(for: account, deposits: deposits)
     }
@@ -86,6 +93,8 @@ private extension CashAccountKind {
             "banknote.fill"
         case .bank:
             "building.columns.fill"
+        case .credit:
+            "creditcard.fill"
         }
     }
 
@@ -95,6 +104,8 @@ private extension CashAccountKind {
             MonMonTheme.accent
         case .bank:
             MonMonTheme.bank
+        case .credit:
+            MonMonTheme.credit
         }
     }
 }
@@ -113,6 +124,15 @@ private extension CashAccountKind {
 
                 CashAccountCard(
                     account: .preview(name: "Techcombank", kind: .bank, openingBalance: 48_900_000),
+                    deposits: []
+                )
+
+                CashAccountCard(
+                    account: .preview(
+                        name: "Visa credit",
+                        kind: .credit,
+                        openingBalance: -5_200_000
+                    ),
                     deposits: []
                 )
 
