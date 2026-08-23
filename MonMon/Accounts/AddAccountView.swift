@@ -43,6 +43,8 @@ struct AddAccountView: View {
                 }
             }
             .tint(MonMonTheme.accent)
+            .foregroundStyle(MonMonTheme.textPrimary)
+            .preferredColorScheme(MonMonTheme.colorScheme)
         }
     }
 

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct CashAccountCard: View {
     let account: CashAccount
+    let deposits: [SavingsDeposit]
 
     var body: some View {
         ViewThatFits(in: .horizontal) {
@@ -34,7 +35,7 @@ struct CashAccountCard: View {
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(account.kind.tint)
                 .frame(width: 44, height: 44)
-                .background(account.kind.tint.opacity(0.12), in: RoundedRectangle(cornerRadius: 13))
+                .background(account.kind.tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 13))
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 3) {
@@ -44,24 +45,37 @@ struct CashAccountCard: View {
 
                 Text(account.kind.displayName)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(MonMonTheme.textSecondary)
             }
         }
     }
 
     private func balance(alignment: HorizontalAlignment) -> some View {
         VStack(alignment: alignment, spacing: 3) {
-            Text(VNDCurrency.format(account.openingBalance))
+            Text(VNDCurrency.format(CashBalanceSummary.available(for: account, deposits: deposits)))
                 .font(.headline)
                 .monospacedDigit()
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
 
-            Text("CURRENT BALANCE")
+            Text("AVAILABLE BALANCE")
                 .font(.caption2.weight(.semibold))
                 .tracking(0.5)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(MonMonTheme.textSecondary)
+
+            if fundedAmount > 0 {
+                Text("In savings \(VNDCurrency.format(fundedAmount))")
+                    .font(.caption)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .foregroundStyle(MonMonTheme.savings)
+            }
         }
+    }
+
+    private var fundedAmount: Decimal {
+        CashBalanceSummary.fundedAmount(for: account, deposits: deposits)
     }
 }
 
@@ -84,3 +98,36 @@ private extension CashAccountKind {
         }
     }
 }
+
+#if DEBUG
+    #Preview("Cards") {
+        ZStack {
+            MonMonTheme.canvas
+                .ignoresSafeArea()
+
+            VStack(spacing: 16) {
+                CashAccountCard(
+                    account: .preview(name: "Wallet", kind: .cash, openingBalance: 1_250_000),
+                    deposits: []
+                )
+
+                CashAccountCard(
+                    account: .preview(name: "Techcombank", kind: .bank, openingBalance: 48_900_000),
+                    deposits: []
+                )
+
+                CashAccountCard(
+                    account: .preview(
+                        name: "Very long account name that wraps to two lines",
+                        kind: .bank,
+                        openingBalance: 987_654_321_000
+                    ),
+                    deposits: []
+                )
+            }
+            .padding(20)
+        }
+        .foregroundStyle(MonMonTheme.textPrimary)
+        .preferredColorScheme(MonMonTheme.colorScheme)
+    }
+#endif

@@ -24,4 +24,10 @@ enum VNDCurrency {
     static func format(_ amount: Decimal) -> String {
         currencyFormat.format(amount)
     }
+
+    /// Grouped digits without the currency symbol, for prefilling an editable
+    /// amount field with a value the same parser accepts back.
+    static func formatPlain(_ amount: Decimal) -> String {
+        numberFormat.format(amount)
+    }
 }

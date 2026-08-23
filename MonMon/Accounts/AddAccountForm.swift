@@ -33,7 +33,7 @@ struct AddAccountForm: View {
         HStack(spacing: 16) {
             Image(systemName: "plus")
                 .font(.system(size: 18, weight: .bold))
-                .foregroundStyle(.white)
+                .foregroundStyle(MonMonTheme.onAccent)
                 .frame(width: 46, height: 46)
                 .background(MonMonTheme.accent, in: RoundedRectangle(cornerRadius: 14))
                 .accessibilityHidden(true)
@@ -44,7 +44,7 @@ struct AddAccountForm: View {
 
                 Text("Start with the balance available today.")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(MonMonTheme.textSecondary)
             }
         }
     }
@@ -119,7 +119,7 @@ struct AddAccountForm: View {
 
                 Text("VND · This becomes the current balance for this account.")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(MonMonTheme.textSecondary)
             }
         }
     }
@@ -153,24 +153,24 @@ struct AddAccountForm: View {
     private func sectionHeader(_ title: String, systemImage: String) -> some View {
         Label(title, systemImage: systemImage)
             .font(.headline)
-            .foregroundStyle(.primary)
+            .foregroundStyle(MonMonTheme.textPrimary)
     }
 
     private func errorBanner(_ message: String) -> some View {
         validationMessage(message, id: "save-account-error")
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
-            .background(Color.red.opacity(0.10), in: RoundedRectangle(cornerRadius: 14))
+            .background(MonMonTheme.danger.opacity(0.14), in: RoundedRectangle(cornerRadius: 14))
             .overlay {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(Color.red.opacity(0.22), lineWidth: 1)
+                    .stroke(MonMonTheme.danger.opacity(0.35), lineWidth: 1)
             }
     }
 
     private func validationMessage(_ message: String, id: String) -> some View {
         Label(message, systemImage: "exclamationmark.circle.fill")
             .font(.caption)
-            .foregroundStyle(.red)
+            .foregroundStyle(MonMonTheme.danger)
             .accessibilityIdentifier(id)
     }
 
@@ -190,3 +190,43 @@ struct AddAccountForm: View {
         }
     }
 }
+
+#if DEBUG
+    private struct AddAccountFormPreview: View {
+        @State var draft: AccountDraft
+        var validationError: AccountFormError?
+        var saveErrorMessage: String?
+
+        var body: some View {
+            NavigationStack {
+                AddAccountForm(
+                    draft: $draft,
+                    validationError: validationError,
+                    saveErrorMessage: saveErrorMessage
+                )
+                .navigationTitle("Add account")
+            }
+            .tint(MonMonTheme.accent)
+            .foregroundStyle(MonMonTheme.textPrimary)
+            .preferredColorScheme(MonMonTheme.colorScheme)
+        }
+    }
+
+    #Preview("Form · empty") {
+        AddAccountFormPreview(draft: AccountDraft())
+    }
+
+    #Preview("Form · filled") {
+        AddAccountFormPreview(
+            draft: AccountDraft(name: "Techcombank", kind: .bank, openingBalanceText: "48.900.000")
+        )
+    }
+
+    #Preview("Form · errors") {
+        AddAccountFormPreview(
+            draft: AccountDraft(name: "", kind: .cash, openingBalanceText: "-10"),
+            validationError: .negativeOpeningBalance,
+            saveErrorMessage: "Couldn’t save this account. Try again."
+        )
+    }
+#endif

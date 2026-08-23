@@ -7,6 +7,6 @@ struct MonMonApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: CashAccount.self)
+        .modelContainer(for: [CashAccount.self, SavingsDeposit.self])
     }
 }

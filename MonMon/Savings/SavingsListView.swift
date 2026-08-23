@@ -1,14 +1,14 @@
 import SwiftData
 import SwiftUI
 
-struct AccountListView: View {
-    @Query(sort: \CashAccount.createdAt, order: .forward)
-    private var accounts: [CashAccount]
-
+struct SavingsListView: View {
     @Query(sort: \SavingsDeposit.createdAt, order: .forward)
     private var deposits: [SavingsDeposit]
 
-    @State private var isAddingAccount = false
+    @Query(sort: \CashAccount.createdAt, order: .forward)
+    private var accounts: [CashAccount]
+
+    @State private var editorMode: SavingsEditorMode?
 
     var body: some View {
         NavigationStack {
@@ -18,12 +18,12 @@ struct AccountListView: View {
 
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                        totalCard
+                        summaryCard
 
-                        if accounts.isEmpty {
+                        if deposits.isEmpty {
                             emptyState
                         } else {
-                            accountsSection
+                            depositsSection
                         }
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -32,30 +32,30 @@ struct AccountListView: View {
                     .frame(maxWidth: .infinity)
                 }
             }
-            .navigationTitle("Cash balances")
-            .accessibilityIdentifier("account-list")
+            .navigationTitle("Savings")
+            .accessibilityIdentifier("savings-list")
             .toolbar {
-                if !accounts.isEmpty {
+                if !deposits.isEmpty {
                     ToolbarItem(placement: .primaryAction) {
-                        addAccountButton
+                        addDepositButton
                     }
                 }
             }
-            .sheet(isPresented: $isAddingAccount) {
-                AddAccountView()
+            .sheet(item: $editorMode) { mode in
+                SavingsEditorView(mode: mode)
             }
             .tint(MonMonTheme.accent)
         }
     }
 
-    private var totalCard: some View {
+    private var summaryCard: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Label("TOTAL ASSETS", systemImage: "chart.pie.fill")
+            Label("TOTAL SAVINGS", systemImage: "building.columns.fill")
                 .font(.caption.weight(.semibold))
                 .tracking(0.8)
                 .foregroundStyle(MonMonTheme.textSecondary)
 
-            Text(VNDCurrency.format(netWorth))
+            Text(VNDCurrency.format(AssetSummary.totalPrincipal(of: deposits)))
                 .font(.system(.largeTitle, design: .rounded, weight: .bold))
                 .monospacedDigit()
                 .lineLimit(1)
@@ -64,18 +64,12 @@ struct AccountListView: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 Label(
-                    "Cash \(VNDCurrency.format(availableCash))",
-                    systemImage: "banknote.fill"
+                    "Projected interest \(VNDCurrency.format(projectedInterest))",
+                    systemImage: "chart.line.uptrend.xyaxis"
                 )
                 .font(.subheadline.weight(.medium))
 
-                Label(
-                    "Savings \(VNDCurrency.format(savingsPrincipal))",
-                    systemImage: "building.columns.fill"
-                )
-                .font(.subheadline.weight(.medium))
-
-                Label(accountCountLabel, systemImage: "rectangle.stack.fill")
+                Label(depositCountLabel, systemImage: "rectangle.stack.fill")
                     .font(.subheadline.weight(.medium))
             }
             .foregroundStyle(MonMonTheme.textSecondary)
@@ -93,50 +87,44 @@ struct AccountListView: View {
         .accessibilityElement(children: .combine)
     }
 
-    private var availableCash: Decimal {
-        CashBalanceSummary.totalAvailable(of: accounts, deposits: deposits)
+    private var projectedInterest: Decimal {
+        AssetSummary.totalProjectedInterest(of: deposits)
     }
 
-    private var savingsPrincipal: Decimal {
-        AssetSummary.totalPrincipal(of: deposits)
-    }
-
-    private var netWorth: Decimal {
-        AssetSummary.netWorth(accounts: accounts, deposits: deposits)
-    }
-
-    private var accountCountLabel: String {
-        switch accounts.count {
+    private var depositCountLabel: String {
+        switch deposits.count {
         case 0:
-            "Ready for your first account"
+            "Ready for your first savings book"
         case 1:
-            "Across 1 account"
+            "Across 1 savings book"
         default:
-            "Across \(accounts.count) accounts"
+            "Across \(deposits.count) savings books"
         }
     }
 
     private var emptyState: some View {
         VStack(spacing: 18) {
-            Image(systemName: "wallet.bifold.fill")
+            Image(systemName: "building.columns.fill")
                 .font(.system(size: 28, weight: .semibold))
-                .foregroundStyle(MonMonTheme.accent)
+                .foregroundStyle(MonMonTheme.savings)
                 .frame(width: 64, height: 64)
-                .background(MonMonTheme.accent.opacity(0.16), in: Circle())
+                .background(MonMonTheme.savings.opacity(0.16), in: Circle())
                 .accessibilityHidden(true)
 
             VStack(spacing: 6) {
-                Text("Build your cash picture")
+                Text("Track your savings books")
                     .font(.title3.weight(.semibold))
 
-                Text("Add cash and bank accounts to see everything in one calm overview.")
-                    .font(.subheadline)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: 360)
+                Text(
+                    "Add a term deposit to see its maturity date and the interest it will pay."
+                )
+                .font(.subheadline)
+                .foregroundStyle(MonMonTheme.textSecondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 360)
             }
 
-            addAccountButton
+            addDepositButton
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
         }
@@ -153,47 +141,65 @@ struct AccountListView: View {
         }
     }
 
-    private var addAccountButton: some View {
-        Button("Add Account", systemImage: "plus") {
-            isAddingAccount = true
+    private func accountName(for deposit: SavingsDeposit) -> String? {
+        guard let sourceAccountID = deposit.sourceAccountID else {
+            return nil
         }
-        .accessibilityIdentifier("add-account")
+
+        return accounts.first { $0.id == sourceAccountID }?.name
     }
 
-    private var accountsSection: some View {
+    private var addDepositButton: some View {
+        Button("Add Savings Book", systemImage: "plus") {
+            editorMode = .add
+        }
+        .accessibilityIdentifier("add-savings")
+    }
+
+    private var depositsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Accounts")
+                Text("Savings books")
                     .font(.title3.weight(.semibold))
 
                 Spacer()
 
-                Text(accounts.count.formatted())
+                Text(deposits.count.formatted())
                     .font(.caption.weight(.bold))
-                    .foregroundStyle(MonMonTheme.accent)
+                    .foregroundStyle(MonMonTheme.savings)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
-                    .background(MonMonTheme.accent.opacity(0.16), in: Capsule())
+                    .background(MonMonTheme.savings.opacity(0.16), in: Capsule())
             }
 
-            ForEach(accounts) { account in
-                CashAccountCard(account: account, deposits: deposits)
+            ForEach(deposits) { deposit in
+                Button {
+                    editorMode = .edit(deposit)
+                } label: {
+                    SavingsDepositCard(
+                        deposit: deposit,
+                        sourceAccountName: accountName(for: deposit)
+                    )
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("savings-\(deposit.id.uuidString)")
+                .accessibilityHint("Opens this savings book for editing")
             }
         }
     }
 }
 
 #if DEBUG
-    #Preview("List · accounts") {
-        AccountListView()
+    #Preview("Savings · deposits") {
+        SavingsListView()
             .modelContainer(PreviewData.populated)
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
             .preferredColorScheme(MonMonTheme.colorScheme)
     }
 
-    #Preview("List · empty state") {
-        AccountListView()
+    #Preview("Savings · empty state") {
+        SavingsListView()
             .modelContainer(PreviewData.empty)
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)

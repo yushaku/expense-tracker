@@ -26,3 +26,118 @@ final class CashAccount {
         self.createdAt = createdAt
     }
 }
+
+#if DEBUG
+    extension CashAccount {
+        static func preview(
+            name: String,
+            kind: CashAccountKind,
+            openingBalance: Decimal,
+            createdOffset: TimeInterval = 0
+        ) -> CashAccount {
+            CashAccount(
+                id: UUID(),
+                name: name,
+                kind: kind,
+                openingBalance: openingBalance,
+                currencyCode: VNDCurrency.code,
+                createdAt: Date(timeIntervalSince1970: 1_700_000_000 + createdOffset)
+            )
+        }
+    }
+
+    extension SavingsDeposit {
+        static func preview(
+            name: String,
+            principal: Decimal,
+            annualInterestRate: Decimal,
+            termMonths: Int,
+            openedOffset: TimeInterval = 0,
+            sourceAccountID: UUID? = nil
+        ) -> SavingsDeposit {
+            let openedAt = Date(timeIntervalSince1970: 1_700_000_000 + openedOffset)
+
+            return SavingsDeposit(
+                id: UUID(),
+                name: name,
+                principal: principal,
+                annualInterestRate: annualInterestRate,
+                termMonths: termMonths,
+                openedAt: openedAt,
+                currencyCode: VNDCurrency.code,
+                createdAt: openedAt,
+                sourceAccountID: sourceAccountID
+            )
+        }
+    }
+
+    @MainActor
+    enum PreviewData {
+        static let empty = makeContainer(accounts: [], deposits: [])
+
+        static let populated: ModelContainer = {
+            let wallet = CashAccount.preview(
+                name: "Wallet",
+                kind: .cash,
+                openingBalance: 1_250_000
+            )
+            let techcombank = CashAccount.preview(
+                name: "Techcombank",
+                kind: .bank,
+                openingBalance: 148_900_000,
+                createdOffset: 60
+            )
+            let emergency = CashAccount.preview(
+                name: "Emergency fund",
+                kind: .bank,
+                openingBalance: 120_000_000,
+                createdOffset: 120
+            )
+
+            return makeContainer(
+                accounts: [wallet, techcombank, emergency],
+                deposits: [
+                    .preview(
+                        name: "Techcombank 6 tháng",
+                        principal: 100_000_000,
+                        annualInterestRate: Decimal(string: "5.6") ?? 0,
+                        termMonths: 6,
+                        sourceAccountID: techcombank.id
+                    ),
+                    .preview(
+                        name: "VietinBank 12 tháng",
+                        principal: 250_000_000,
+                        annualInterestRate: Decimal(string: "6.1") ?? 0,
+                        termMonths: 12,
+                        openedOffset: 86_400 * 40
+                    ),
+                ]
+            )
+        }()
+
+        private static func makeContainer(
+            accounts: [CashAccount],
+            deposits: [SavingsDeposit]
+        ) -> ModelContainer {
+            let container: ModelContainer
+            do {
+                container = try ModelContainer(
+                    for: CashAccount.self, SavingsDeposit.self,
+                    configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+                )
+            } catch {
+                fatalError("Preview container failed: \(error)")
+            }
+
+            for account in accounts {
+                container.mainContext.insert(account)
+            }
+
+            for deposit in deposits {
+                container.mainContext.insert(deposit)
+            }
+
+            return container
+        }
+    }
+#endif

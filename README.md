@@ -1,8 +1,10 @@
 # MonMon
 
-MonMon is a private personal-finance app for iPhone and Mac. The current
-`cash-balance` slice lets one owner add local cash or bank accounts with a VND
-opening balance, then see each balance and the exact combined total.
+MonMon is a private personal-finance app for iPhone and Mac. It has two slices
+today. `cash-balance` lets one owner add local cash or bank accounts with a VND
+opening balance. `savings-deposit` adds term deposits (sổ tiết kiệm) with
+maturity dates, projected interest, and an optional funding account, plus a
+total-assets figure that counts transferred money only once.
 
 ## Requirements
 
@@ -80,19 +82,25 @@ and are excluded by `.gitignore`.
 
 ## Current scope
 
-- Included: add and list local cash/bank accounts, VND validation and formatting,
-  exact `Decimal` totals, on-device SwiftData persistence, and shared SwiftUI UI.
-- Owner validation: form behavior, relaunch persistence, iPhone Dynamic Type and
-  keyboard, and Mac window resizing.
-- Not included yet: transactions, editing, deletion, iCloud, investments, market
-  prices, network access, AI, or MCP.
+- Included: add and list local cash/bank accounts; add, edit, and delete savings
+  deposits with simple interest paid at maturity; an optional funding link that
+  lowers an account's available balance without touching its opening balance; VND
+  validation and formatting, exact `Decimal` totals, on-device SwiftData
+  persistence, and shared SwiftUI UI.
+- Owner validation: form behavior, interest against a hand calculation, relaunch
+  persistence, iPhone Dynamic Type and keyboard, and Mac window resizing.
+- Not included yet: transactions, editing or deleting cash accounts, interest paid
+  on a schedule, rollover or early withdrawal, iCloud, market-priced investments,
+  network access, AI, or MCP.
 
 ## Architecture
 
 - One multiplatform app target shares SwiftUI source between iOS and macOS.
 - SwiftData stores `CashAccount` records locally; `@Query` drives the visible
   account list and combined total.
-- `AccountDraft` validates external text before any model is inserted, and money
-  uses `Decimal` throughout.
-- The approved boundaries and verification contract live in
-  `SPEC-cash-balance.md`.
+- `AccountDraft` and `SavingsDraft` validate external text before any model is
+  inserted or mutated, and money uses `Decimal` throughout.
+- A savings deposit stores its funding account's `id`; available balances and
+  total assets are derived, so deleting a deposit needs no compensating write.
+- The approved boundaries and verification contracts live in
+  `SPEC-cash-balance.md` and `SPEC-savings-deposit.md`.

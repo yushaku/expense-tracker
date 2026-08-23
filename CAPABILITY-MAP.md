@@ -9,6 +9,7 @@ begins.
 |---|---|---|
 | `app-bootstrap` | Build and run a configured native app showing “Hello, MonMon” on iPhone and Mac | — |
 | `cash-balance` | Create cash/bank accounts and view their balances | `app-bootstrap` |
+| `savings-deposit` | Record term deposits with maturity dates, projected interest, and an optional funding account, and see total assets | `cash-balance` |
 | `income-expense` | Record income and expenses and see account balances update | `cash-balance` |
 | `debt-tracking` | Track liabilities and liability payments | `cash-balance`, `income-expense` |
 | `investment-tracking` | Record gold, equity, and crypto trades and calculate positions and cost basis | `cash-balance`, `income-expense` |
@@ -20,12 +21,13 @@ Build order:
 
 1. `app-bootstrap`
 2. `cash-balance`
-3. `income-expense`
-4. `debt-tracking`
-5. `investment-tracking`
-6. `market-valuation`
-7. `icloud-sync`
-8. `mcp-readonly`
+3. `savings-deposit`
+4. `income-expense`
+5. `debt-tracking`
+6. `investment-tracking`
+7. `market-valuation`
+8. `icloud-sync`
+9. `mcp-readonly`
 
 ## Initiative-wide boundaries
 
