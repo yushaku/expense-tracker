@@ -78,7 +78,9 @@ struct AssetAllocationTests {
             deposits: [],
             holdings: [],
             transactions: [],
-            transfers: []
+            transfers: [],
+            debts: [],
+            payments: []
         )
 
         #expect(slices.isEmpty)
@@ -101,7 +103,9 @@ struct AssetAllocationTests {
             deposits: [deposit],
             holdings: [holding],
             transactions: [],
-            transfers: []
+            transfers: [],
+            debts: [],
+            payments: []
         )
 
         // 200.000.000 − 100.000.000 deposited − 20.000.000 invested = 80.000.000
@@ -118,7 +122,9 @@ struct AssetAllocationTests {
             deposits: [],
             holdings: [],
             transactions: [],
-            transfers: []
+            transfers: [],
+            debts: [],
+            payments: []
         )
 
         #expect(slices.map(\.kind) == [.cash])
@@ -136,14 +142,16 @@ struct AssetAllocationTests {
             deposits: [],
             holdings: [],
             transactions: transactions,
-            transfers: []
+            transfers: [],
+            debts: [],
+            payments: []
         )
 
         #expect(slices.first?.amount == 9_800_000)
     }
 
-    @Test("An overdrawn account leaves the ring and is reported as debt")
-    func overdrawnAccountBecomesDebt() {
+    @Test("An overdrawn account leaves the ring and is reported as an overdraft")
+    func overdrawnAccountBecomesAnOverdraft() {
         let wallet = makeAccount(openingBalance: 10_000_000)
         let card = makeAccount(openingBalance: -5_200_000)
 
@@ -152,23 +160,27 @@ struct AssetAllocationTests {
             deposits: [],
             holdings: [],
             transactions: [],
-            transfers: []
+            transfers: [],
+            debts: [],
+            payments: []
         )
-        let debt = AssetAllocation.debt(
+        let overdraft = AssetAllocation.overdraft(
             accounts: [wallet, card],
             deposits: [],
             holdings: [],
             transactions: [],
-            transfers: []
+            transfers: [],
+            debts: [],
+            payments: []
         )
 
         // The ring shows only what is held; the card is not netted off it.
         #expect(slices.map(\.amount) == [10_000_000])
-        #expect(debt == 5_200_000)
+        #expect(overdraft == 5_200_000)
     }
 
-    @Test("The ring total minus debt equals net worth")
-    func ringMinusDebtIsNetWorth() {
+    @Test("The ring total minus what is owed equals net worth")
+    func ringMinusLiabilitiesIsNetWorth() {
         let wallet = makeAccount(openingBalance: 60_000_000)
         let card = makeAccount(openingBalance: -5_000_000)
         let deposit = makeDeposit(principal: 20_000_000, sourceAccountID: wallet.id)
@@ -187,39 +199,47 @@ struct AssetAllocationTests {
             deposits: deposits,
             holdings: holdings,
             transactions: [],
-            transfers: []
+            transfers: [],
+            debts: [],
+            payments: []
         )
-        let debt = AssetAllocation.debt(
+        let liabilities = AssetAllocation.liabilities(
             accounts: accounts,
             deposits: deposits,
             holdings: holdings,
             transactions: [],
-            transfers: []
+            transfers: [],
+            debts: [],
+            payments: []
         )
 
         #expect(
-            AssetAllocation.total(of: slices) - debt
+            AssetAllocation.total(of: slices) - liabilities
                 == AssetSummary.netWorth(
                     accounts: accounts,
                     deposits: deposits,
                     holdings: holdings,
                     transactions: [],
-                    transfers: []
+                    transfers: [],
+                    debts: [],
+                    payments: []
                 )
         )
     }
 
     @Test("Nothing overdrawn owes nothing")
-    func noOverdraftMeansNoDebt() {
+    func noOverdraftOwesNothing() {
         let account = makeAccount(openingBalance: 10_000_000)
 
         #expect(
-            AssetAllocation.debt(
+            AssetAllocation.overdraft(
                 accounts: [account],
                 deposits: [],
                 holdings: [],
                 transactions: [],
-                transfers: []
+                transfers: [],
+                debts: [],
+                payments: []
             ) == 0
         )
     }

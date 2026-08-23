@@ -104,7 +104,9 @@ struct AccountTransferPersistenceTests {
                 deposits: [],
                 holdings: [],
                 transactions: [],
-                transfers: transfers
+                transfers: transfers,
+                debts: [],
+                payments: []
             ) == 8_000_000
         )
         #expect(
@@ -113,7 +115,9 @@ struct AccountTransferPersistenceTests {
                 deposits: [],
                 holdings: [],
                 transactions: [],
-                transfers: transfers
+                transfers: transfers,
+                debts: [],
+                payments: []
             ) == 3_000_000
         )
         #expect(
@@ -122,7 +126,9 @@ struct AccountTransferPersistenceTests {
                 deposits: [],
                 holdings: [],
                 transactions: [],
-                transfers: transfers
+                transfers: transfers,
+                debts: [],
+                payments: []
             ) == 11_000_000
         )
     }
@@ -165,7 +171,9 @@ struct AccountTransferPersistenceTests {
                 deposits: [],
                 holdings: [],
                 transactions: [],
-                transfers: transfers
+                transfers: transfers,
+                debts: [],
+                payments: []
             ) == 10_000_000
         )
     }
@@ -212,7 +220,9 @@ struct AccountTransferPersistenceTests {
                 deposits: [],
                 holdings: [],
                 transactions: transactions,
-                transfers: transfers
+                transfers: transfers,
+                debts: [],
+                payments: []
             ) == 12_000_000
         )
     }

@@ -40,7 +40,9 @@ struct CashBalanceSummaryTests {
                 deposits: [],
                 holdings: [],
                 transactions: transactions,
-                transfers: []
+                transfers: [],
+                debts: [],
+                payments: []
             ) == 14_800_000
         )
     }
@@ -59,7 +61,9 @@ struct CashBalanceSummaryTests {
                 deposits: [],
                 holdings: [],
                 transactions: transactions,
-                transfers: []
+                transfers: [],
+                debts: [],
+                payments: []
             ) == 1_000_000
         )
         #expect(
@@ -68,7 +72,9 @@ struct CashBalanceSummaryTests {
                 deposits: [],
                 holdings: [],
                 transactions: transactions,
-                transfers: []
+                transfers: [],
+                debts: [],
+                payments: []
             ) == 9_600_000
         )
     }
@@ -86,7 +92,9 @@ struct CashBalanceSummaryTests {
                 deposits: [],
                 holdings: [],
                 transactions: transactions,
-                transfers: []
+                transfers: [],
+                debts: [],
+                payments: []
             ) == -250_000
         )
     }
@@ -129,7 +137,9 @@ struct CashBalanceSummaryTests {
                 deposits: [deposit],
                 holdings: [holding],
                 transactions: transactions,
-                transfers: []
+                transfers: [],
+                debts: [],
+                payments: []
             ) == 24_000_000
         )
     }

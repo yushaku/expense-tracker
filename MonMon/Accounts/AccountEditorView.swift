@@ -40,6 +40,12 @@ struct AccountEditorView: View {
     @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
     private var transfers: [AccountTransfer]
 
+    @Query(sort: \Debt.createdAt, order: .forward)
+    private var debts: [Debt]
+
+    @Query(sort: \DebtPayment.occurredAt, order: .reverse)
+    private var payments: [DebtPayment]
+
     private let mode: AccountEditorMode
 
     @State private var draft: AccountDraft
@@ -132,7 +138,9 @@ struct AccountEditorView: View {
                 deposits: deposits,
                 holdings: holdings,
                 transactions: transactions,
-                transfers: transfers
+                transfers: transfers,
+                debts: debts,
+                payments: payments
             ) == 0
 
         return isEmpty && transactionCount == 0 && transferCount == 0

@@ -5,7 +5,7 @@ import SwiftUI
 /// its amount, and its share.
 struct AssetAllocationCard: View {
     let slices: [AssetAllocationSlice]
-    let debt: Decimal
+    let liabilities: Decimal
 
     private var total: Decimal {
         AssetAllocation.total(of: slices)
@@ -31,8 +31,8 @@ struct AssetAllocationCard: View {
                 }
             }
 
-            if debt > 0 {
-                debtRow
+            if liabilities > 0 {
+                liabilitiesRow
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -130,7 +130,7 @@ struct AssetAllocationCard: View {
         return "\(PercentInput.format(percent))%"
     }
 
-    private var debtRow: some View {
+    private var liabilitiesRow: some View {
         HStack(spacing: 12) {
             Image(systemName: "creditcard.fill")
                 .font(.footnote.weight(.bold))
@@ -143,14 +143,14 @@ struct AssetAllocationCard: View {
                 Text("Owed")
                     .font(.subheadline.weight(.semibold))
 
-                Text("Overdrawn accounts, already subtracted from total assets")
+                Text("Borrowed money and overdrawn accounts, already subtracted from total assets")
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
 
             Spacer(minLength: 8)
 
-            Text("−\(VNDCurrency.format(debt))")
+            Text("−\(VNDCurrency.format(liabilities))")
                 .font(.subheadline.weight(.bold))
                 .monospacedDigit()
                 .lineLimit(1)
@@ -171,6 +171,8 @@ private extension AssetAllocationSlice.Kind {
             MonMonTheme.savings
         case .funds:
             MonMonTheme.funds
+        case .lent:
+            MonMonTheme.lent
         }
     }
 
@@ -182,6 +184,8 @@ private extension AssetAllocationSlice.Kind {
             "building.columns.fill"
         case .funds:
             "chart.line.uptrend.xyaxis"
+        case .lent:
+            "tray.and.arrow.up.fill"
         }
     }
 }
@@ -208,12 +212,12 @@ private extension Decimal {
                         AssetAllocationSlice(kind: .funds, amount: 93_565_000),
                         AssetAllocationSlice(kind: .cash, amount: 49_150_000),
                     ],
-                    debt: 5_200_000
+                    liabilities: 5_200_000
                 )
 
                 AssetAllocationCard(
                     slices: [AssetAllocationSlice(kind: .cash, amount: 1_250_000)],
-                    debt: 0
+                    liabilities: 0
                 )
             }
             .padding(20)

@@ -17,6 +17,12 @@ struct AccountListView: View {
     @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
     private var transfers: [AccountTransfer]
 
+    @Query(sort: \Debt.createdAt, order: .forward)
+    private var debts: [Debt]
+
+    @Query(sort: \DebtPayment.occurredAt, order: .reverse)
+    private var payments: [DebtPayment]
+
     @State private var editorMode: AccountEditorMode?
     @State private var isManagingTransfers = false
 
@@ -31,7 +37,7 @@ struct AccountListView: View {
                         totalCard
 
                         if !allocationSlices.isEmpty {
-                            AssetAllocationCard(slices: allocationSlices, debt: debt)
+                            AssetAllocationCard(slices: allocationSlices, liabilities: liabilities)
                         }
 
                         if accounts.isEmpty {
@@ -134,7 +140,9 @@ struct AccountListView: View {
             deposits: deposits,
             holdings: holdings,
             transactions: transactions,
-            transfers: transfers
+            transfers: transfers,
+            debts: debts,
+            payments: payments
         )
     }
 
@@ -152,7 +160,9 @@ struct AccountListView: View {
             deposits: deposits,
             holdings: holdings,
             transactions: transactions,
-            transfers: transfers
+            transfers: transfers,
+            debts: debts,
+            payments: payments
         )
     }
 
@@ -162,17 +172,21 @@ struct AccountListView: View {
             deposits: deposits,
             holdings: holdings,
             transactions: transactions,
-            transfers: transfers
+            transfers: transfers,
+            debts: debts,
+            payments: payments
         )
     }
 
-    private var debt: Decimal {
-        AssetAllocation.debt(
+    private var liabilities: Decimal {
+        AssetAllocation.liabilities(
             accounts: accounts,
             deposits: deposits,
             holdings: holdings,
             transactions: transactions,
-            transfers: transfers
+            transfers: transfers,
+            debts: debts,
+            payments: payments
         )
     }
 
@@ -256,7 +270,9 @@ struct AccountListView: View {
                         deposits: deposits,
                         holdings: holdings,
                         transactions: transactions,
-                        transfers: transfers
+                        transfers: transfers,
+                        debts: debts,
+                        payments: payments
                     )
                 }
                 .buttonStyle(.plain)

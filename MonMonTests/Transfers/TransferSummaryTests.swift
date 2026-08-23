@@ -140,7 +140,9 @@ struct TransferSummaryTests {
                 deposits: [],
                 holdings: [],
                 transactions: [],
-                transfers: transfers
+                transfers: transfers,
+                debts: [],
+                payments: []
             ) == 3_000_000
         )
         #expect(
@@ -149,7 +151,9 @@ struct TransferSummaryTests {
                 deposits: [],
                 holdings: [],
                 transactions: [],
-                transfers: transfers
+                transfers: transfers,
+                debts: [],
+                payments: []
             ) == 8_000_000
         )
         #expect(
@@ -158,7 +162,9 @@ struct TransferSummaryTests {
                 deposits: [],
                 holdings: [],
                 transactions: [],
-                transfers: transfers
+                transfers: transfers,
+                debts: [],
+                payments: []
             ) == 11_000_000
         )
     }
@@ -175,14 +181,18 @@ struct TransferSummaryTests {
             deposits: [],
             holdings: [],
             transactions: [],
-            transfers: []
+            transfers: [],
+            debts: [],
+            payments: []
         )
         let after = AssetSummary.netWorth(
             accounts: accounts,
             deposits: [],
             holdings: [],
             transactions: [],
-            transfers: transfers
+            transfers: transfers,
+            debts: [],
+            payments: []
         )
 
         #expect(before == 11_000_000)
@@ -201,16 +211,20 @@ struct TransferSummaryTests {
                 deposits: [],
                 holdings: [],
                 transactions: [],
-                transfers: transfers
+                transfers: transfers,
+                debts: [],
+                payments: []
             ) == -3_000_000
         )
         #expect(
-            AssetAllocation.debt(
+            AssetAllocation.overdraft(
                 accounts: [card, bank],
                 deposits: [],
                 holdings: [],
                 transactions: [],
-                transfers: transfers
+                transfers: transfers,
+                debts: [],
+                payments: []
             ) == 3_000_000
         )
     }

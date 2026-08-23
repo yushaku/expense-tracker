@@ -6,6 +6,9 @@ struct AssetAllocationSlice: Identifiable, Equatable {
         case cash
         case savings
         case funds
+        /// Declared last because the first three are money the owner holds,
+        /// while this is a claim on money someone else holds.
+        case lent
 
         var displayName: String {
             switch self {
@@ -15,6 +18,8 @@ struct AssetAllocationSlice: Identifiable, Equatable {
                 "Savings"
             case .funds:
                 "Funds"
+            case .lent:
+                "Lent out"
             }
         }
     }
@@ -25,14 +30,19 @@ struct AssetAllocationSlice: Identifiable, Equatable {
     var id: String { kind.rawValue }
 }
 
-/// Splits what the owner holds into the three groups `AssetSummary.netWorth`
+/// Splits what the owner holds into the four groups `AssetSummary.netWorth`
 /// adds up, so the doughnut and the total can never disagree.
 ///
 /// A doughnut cannot draw a negative wedge, and drawing one by magnitude would
 /// make debt look like an asset. Overdrawn accounts — a credit card, or cash
-/// spent past the balance — are therefore kept out of the ring and reported
-/// separately by `debt(...)`. Net worth still subtracts them:
-/// `netWorth == total(of: slices) − debt`.
+/// spent past the balance — are therefore kept out of the ring, and so is money
+/// the owner borrowed. Both are reported together by `liabilities(...)`. Net
+/// worth still subtracts them:
+/// `netWorth == total(of: slices) − liabilities`.
+///
+/// Money lent out is the opposite case and does get a wedge: it is an asset the
+/// owner holds a claim to but cannot spend, and leaving it undrawn would put the
+/// ring and its centre figure out of step by exactly the amount lent.
 enum AssetAllocation {
     /// The wedges to draw, largest first, with empty groups dropped so the ring
     /// never carries a zero-width slice.
@@ -41,7 +51,9 @@ enum AssetAllocation {
         deposits: [SavingsDeposit],
         holdings: [FundHolding],
         transactions: [MoneyTransaction],
-        transfers: [AccountTransfer]
+        transfers: [AccountTransfer],
+        debts: [Debt],
+        payments: [DebtPayment]
     ) -> [AssetAllocationSlice] {
         let candidates = [
             AssetAllocationSlice(
@@ -51,7 +63,9 @@ enum AssetAllocation {
                     deposits: deposits,
                     holdings: holdings,
                     transactions: transactions,
-                    transfers: transfers
+                    transfers: transfers,
+                    debts: debts,
+                    payments: payments
                 )
             ),
             AssetAllocationSlice(
@@ -61,6 +75,14 @@ enum AssetAllocation {
             AssetAllocationSlice(
                 kind: .funds,
                 amount: FundSummary.totalMarketValue(of: holdings)
+            ),
+            AssetAllocationSlice(
+                kind: .lent,
+                amount: DebtSummary.totalOutstanding(
+                    of: debts,
+                    payments: payments,
+                    direction: .lent
+                )
             ),
         ]
 
@@ -76,7 +98,9 @@ enum AssetAllocation {
         deposits: [SavingsDeposit],
         holdings: [FundHolding],
         transactions: [MoneyTransaction],
-        transfers: [AccountTransfer]
+        transfers: [AccountTransfer],
+        debts: [Debt],
+        payments: [DebtPayment]
     ) -> Decimal {
         accounts.reduce(Decimal.zero) { total, account in
             let available = CashBalanceSummary.available(
@@ -84,7 +108,9 @@ enum AssetAllocation {
                 deposits: deposits,
                 holdings: holdings,
                 transactions: transactions,
-                transfers: transfers
+                transfers: transfers,
+                debts: debts,
+                payments: payments
             )
 
             return available > 0 ? total + available : total
@@ -93,12 +119,19 @@ enum AssetAllocation {
 
     /// What the overdrawn accounts owe, as a positive magnitude. Zero when
     /// nothing is overdrawn.
-    static func debt(
+    ///
+    /// Named `overdraft` rather than `debt` because a `Debt` is now a record the
+    /// owner keeps, and a function meaning something narrower beside a model of
+    /// that name is a trap. `liabilities(...)` is the figure that means all of
+    /// it.
+    static func overdraft(
         accounts: [CashAccount],
         deposits: [SavingsDeposit],
         holdings: [FundHolding],
         transactions: [MoneyTransaction],
-        transfers: [AccountTransfer]
+        transfers: [AccountTransfer],
+        debts: [Debt],
+        payments: [DebtPayment]
     ) -> Decimal {
         accounts.reduce(Decimal.zero) { total, account in
             let available = CashBalanceSummary.available(
@@ -106,11 +139,42 @@ enum AssetAllocation {
                 deposits: deposits,
                 holdings: holdings,
                 transactions: transactions,
-                transfers: transfers
+                transfers: transfers,
+                debts: debts,
+                payments: payments
             )
 
             return available < 0 ? total - available : total
         }
+    }
+
+    /// Everything the owner owes, as a positive magnitude: the overdrawn
+    /// accounts plus what is still outstanding on money borrowed. This is the
+    /// figure the ring subtracts, and the two sources never overlap — an
+    /// overdrawn card and a loan from a relative are separate obligations.
+    static func liabilities(
+        accounts: [CashAccount],
+        deposits: [SavingsDeposit],
+        holdings: [FundHolding],
+        transactions: [MoneyTransaction],
+        transfers: [AccountTransfer],
+        debts: [Debt],
+        payments: [DebtPayment]
+    ) -> Decimal {
+        overdraft(
+            accounts: accounts,
+            deposits: deposits,
+            holdings: holdings,
+            transactions: transactions,
+            transfers: transfers,
+            debts: debts,
+            payments: payments
+        )
+            + DebtSummary.totalOutstanding(
+                of: debts,
+                payments: payments,
+                direction: .borrowed
+            )
     }
 
     static func total(of slices: [AssetAllocationSlice]) -> Decimal {

@@ -167,6 +167,56 @@ final class CashAccount {
         }
     }
 
+    extension Debt {
+        static func preview(
+            counterparty: String,
+            direction: DebtDirection,
+            principal: Decimal,
+            annualInterestRate: Decimal = 0,
+            dueDate: Date? = nil,
+            accountID: UUID? = nil,
+            note: String = "",
+            createdOffset: TimeInterval = 0
+        ) -> Debt {
+            let createdAt = Date(timeIntervalSince1970: 1_700_000_000 - createdOffset)
+            return Debt(
+                id: UUID(),
+                counterparty: counterparty,
+                direction: direction,
+                principal: principal,
+                annualInterestRate: annualInterestRate,
+                openedAt: createdAt,
+                dueDate: dueDate,
+                accountID: accountID,
+                note: note,
+                currencyCode: VNDCurrency.code,
+                createdAt: createdAt
+            )
+        }
+    }
+
+    extension DebtPayment {
+        static func preview(
+            debtID: UUID,
+            amount: Decimal,
+            accountID: UUID,
+            note: String = "",
+            occurredOffset: TimeInterval = 0
+        ) -> DebtPayment {
+            let occurredAt = Date(timeIntervalSince1970: 1_700_000_000 - occurredOffset)
+            return DebtPayment(
+                id: UUID(),
+                debtID: debtID,
+                amount: amount,
+                occurredAt: occurredAt,
+                accountID: accountID,
+                note: note,
+                currencyCode: VNDCurrency.code,
+                createdAt: occurredAt
+            )
+        }
+    }
+
     @MainActor
     enum PreviewData {
         static let empty = makeContainer(
@@ -284,13 +334,16 @@ final class CashAccount {
             holdings: [FundHolding],
             categories: [TransactionCategory],
             transactions: [MoneyTransaction],
-            transfers: [AccountTransfer]
+            transfers: [AccountTransfer],
+            debts: [Debt] = [],
+            payments: [DebtPayment] = []
         ) -> ModelContainer {
             let container: ModelContainer
             do {
                 container = try ModelContainer(
                     for: CashAccount.self, SavingsDeposit.self, FundHolding.self,
                     TransactionCategory.self, MoneyTransaction.self, AccountTransfer.self,
+                    Debt.self, DebtPayment.self,
                     configurations: ModelConfiguration(isStoredInMemoryOnly: true)
                 )
             } catch {
@@ -319,6 +372,14 @@ final class CashAccount {
 
             for transfer in transfers {
                 container.mainContext.insert(transfer)
+            }
+
+            for debt in debts {
+                container.mainContext.insert(debt)
+            }
+
+            for payment in payments {
+                container.mainContext.insert(payment)
             }
 
             return container

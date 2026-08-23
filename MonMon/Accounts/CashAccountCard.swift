@@ -6,6 +6,8 @@ struct CashAccountCard: View {
     let holdings: [FundHolding]
     let transactions: [MoneyTransaction]
     let transfers: [AccountTransfer]
+    let debts: [Debt]
+    let payments: [DebtPayment]
 
     var body: some View {
         ViewThatFits(in: .horizontal) {
@@ -95,7 +97,9 @@ struct CashAccountCard: View {
             deposits: deposits,
             holdings: holdings,
             transactions: transactions,
-            transfers: transfers
+            transfers: transfers,
+            debts: debts,
+            payments: payments
         )
     }
 
@@ -148,7 +152,9 @@ private extension CashAccountKind {
                     deposits: [],
                     holdings: [],
                     transactions: [],
-                    transfers: []
+                    transfers: [],
+                    debts: [],
+                    payments: []
                 )
 
                 CashAccountCard(
@@ -156,7 +162,9 @@ private extension CashAccountKind {
                     deposits: [],
                     holdings: [],
                     transactions: [],
-                    transfers: []
+                    transfers: [],
+                    debts: [],
+                    payments: []
                 )
 
                 CashAccountCard(
@@ -168,7 +176,9 @@ private extension CashAccountKind {
                     deposits: [],
                     holdings: [],
                     transactions: [],
-                    transfers: []
+                    transfers: [],
+                    debts: [],
+                    payments: []
                 )
 
                 CashAccountCard(
@@ -180,7 +190,9 @@ private extension CashAccountKind {
                     deposits: [],
                     holdings: [],
                     transactions: [],
-                    transfers: []
+                    transfers: [],
+                    debts: [],
+                    payments: []
                 )
             }
             .padding(20)

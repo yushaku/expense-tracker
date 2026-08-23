@@ -106,14 +106,18 @@ struct InvestmentSummaryTests {
             deposits: deposits,
             holdings: holdings,
             transactions: [],
-            transfers: []
+            transfers: [],
+            debts: [],
+            payments: []
         )
         let netWorth = AssetSummary.netWorth(
             accounts: [account],
             deposits: deposits,
             holdings: holdings,
             transactions: [],
-            transfers: []
+            transfers: [],
+            debts: [],
+            payments: []
         )
 
         #expect(

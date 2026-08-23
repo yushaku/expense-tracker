@@ -26,32 +26,49 @@ enum CashBalanceSummary {
     }
 
     /// Where tracking started, plus the recorded cash flow, plus what internal
-    /// transfers moved in or out, minus the money moved into savings deposits
-    /// and funds. `openingBalance` is never rewritten; every later change is
-    /// derived. Like `holdings`, `transactions` and `transfers` have no default
-    /// value on purpose — a forgotten argument would silently misreport the
-    /// spendable balance.
+    /// transfers moved in or out, plus what debts and their payments moved,
+    /// minus the money moved into savings deposits and funds. `openingBalance`
+    /// is never rewritten; every later change is derived.
+    ///
+    /// Like `holdings`, none of the collections has a default value, and the
+    /// reason has grown teeth: a forgotten argument would silently misreport the
+    /// spendable balance, and every source-balance guard in the app now reads
+    /// this figure, so the app would permit an overdraft while claiming it had
+    /// checked.
+    ///
+    /// Debt flow needs its own term rather than riding on `fundedAmount`: a
+    /// deposit only ever removes cash, whereas borrowing adds it.
     static func available(
         for account: CashAccount,
         deposits: [SavingsDeposit],
         holdings: [FundHolding],
         transactions: [MoneyTransaction],
-        transfers: [AccountTransfer]
+        transfers: [AccountTransfer],
+        debts: [Debt],
+        payments: [DebtPayment]
     ) -> Decimal {
         account.openingBalance
             + TransactionSummary.netFlow(for: account, transactions: transactions)
             + TransferSummary.netFlow(for: account, transfers: transfers)
+            + DebtSummary.netFlow(for: account, debts: debts, payments: payments)
             - fundedAmount(for: account, deposits: deposits, holdings: holdings)
     }
 
     /// Transfers cancel out here: one account's outflow is another's inflow, so
     /// moving money between two of the owner's accounts leaves this total alone.
+    ///
+    /// Debt flow does not cancel out, because the counterparty lives outside the
+    /// app: borrowing genuinely adds cash the owner did not have. That is why
+    /// `AssetSummary.netWorth` subtracts what is still owed rather than stopping
+    /// at this figure.
     static func totalAvailable(
         of accounts: [CashAccount],
         deposits: [SavingsDeposit],
         holdings: [FundHolding],
         transactions: [MoneyTransaction],
-        transfers: [AccountTransfer]
+        transfers: [AccountTransfer],
+        debts: [Debt],
+        payments: [DebtPayment]
     ) -> Decimal {
         accounts.reduce(Decimal.zero) { total, account in
             total
@@ -60,7 +77,9 @@ enum CashBalanceSummary {
                     deposits: deposits,
                     holdings: holdings,
                     transactions: transactions,
-                    transfers: transfers
+                    transfers: transfers,
+                    debts: debts,
+                    payments: payments
                 )
         }
     }

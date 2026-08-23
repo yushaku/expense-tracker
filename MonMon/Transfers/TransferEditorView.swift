@@ -43,6 +43,12 @@ struct TransferEditorView: View {
     @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
     private var transfers: [AccountTransfer]
 
+    @Query(sort: \Debt.createdAt, order: .forward)
+    private var debts: [Debt]
+
+    @Query(sort: \DebtPayment.occurredAt, order: .reverse)
+    private var payments: [DebtPayment]
+
     private let mode: TransferEditorMode
 
     @State private var draft: TransferDraft
@@ -140,7 +146,9 @@ struct TransferEditorView: View {
             deposits: deposits,
             holdings: holdings,
             transactions: transactions,
-            transfers: transfers
+            transfers: transfers,
+            debts: debts,
+            payments: payments
         )
 
         if let editedTransfer = mode.editedTransfer,
