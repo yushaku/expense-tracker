@@ -5,6 +5,7 @@ import SwiftUI
 struct MonMonApp: App {
     private let container: ModelContainer
     @State private var appLock = AppLock()
+    @Environment(\.scenePhase) private var scenePhase
 
     init() {
         do {
@@ -15,12 +16,31 @@ struct MonMonApp: App {
 
         CategorySeed.seedIfEmpty(in: container.mainContext)
         AccountSeed.ensureUnassignedExists(in: container.mainContext)
+
+        do {
+            try StoreReconciler.reconcile(in: container.mainContext)
+        } catch {
+            // A store that opened is worth showing. A duplicate that survives
+            // renders as two rows the owner can merge by hand, which is worse
+            // than folding it and better than not launching.
+            assertionFailure("Reconcile failed: \(error)")
+        }
     }
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environment(appLock)
+                // Duplicates arrive when synchronisation lands, which is after
+                // launch, so reconciling only in `init` would miss the case it
+                // exists for. Coming back to the app is the next moment the
+                // owner could see one.
+                .onChange(of: scenePhase) { _, phase in
+                    guard phase == .active else {
+                        return
+                    }
+                    _ = try? StoreReconciler.reconcile(in: container.mainContext)
+                }
         }
         .modelContainer(container)
     }

@@ -188,6 +188,15 @@ and are excluded by `.gitignore`.
   rather than valued at a price it does not have.
 - The one network boundary is `FundQuoteTransport`, behind which every provider
   is tested against a recorded reply. The default test run makes no connection.
+- Three identities are unique by a rule rather than by a database constraint: a
+  category by its kind and name, an instrument by its ticker, and the one
+  `Unassigned` account by a fixed id. CloudKit forbids unique attributes, so the
+  rule is enforced twice instead — by the draft before a write, and by
+  `StoreReconciler` afterwards, which folds a duplicate into the older row and
+  repoints everything naming it first, so no balance or history moves. Every
+  foreign key that names an account defaults to the `Unassigned` one, so a
+  record can always be counted somewhere rather than counted in a spending
+  total and in no balance at all.
 - `docs/architecture.html` draws the same picture the specs describe in prose:
   every `@Model` with its fields and foreign keys, then the components around
   the app — Apple frameworks, the one third-party package, and the services
