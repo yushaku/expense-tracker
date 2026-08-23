@@ -47,6 +47,10 @@ enum RootTab: String, CaseIterable, Identifiable {
 struct RootTabView: View {
     @State private var selection: RootTab = .home
 
+    #if os(macOS)
+        @Namespace private var pill
+    #endif
+
     var body: some View {
         #if os(macOS)
             // macOS renders a `TabView` as a segmented control pinned to the top
@@ -59,6 +63,8 @@ struct RootTabView: View {
     }
 
     #if os(macOS)
+        private static let pillID = "selected-tab"
+
         private var bottomBarLayout: some View {
             VStack(spacing: 0) {
                 destinations
@@ -110,7 +116,9 @@ struct RootTabView: View {
             let isSelected = selection == tab
 
             return Button {
-                selection = tab
+                withAnimation(.snappy(duration: 0.28, extraBounce: 0.08)) {
+                    selection = tab
+                }
             } label: {
                 VStack(spacing: 4) {
                     Image(systemName: tab.symbolName)
@@ -122,13 +130,23 @@ struct RootTabView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 7)
                 // The filled pill, not the tint alone, marks the current tab.
-                .background(
-                    isSelected ? MonMonTheme.accent.opacity(0.16) : .clear,
-                    in: RoundedRectangle(cornerRadius: 12, style: .continuous)
-                )
+                // One pill moves between the buttons rather than each drawing
+                // its own, so it slides across instead of blinking on and off.
+                .background {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(MonMonTheme.accent.opacity(0.16))
+                            .matchedGeometryEffect(id: Self.pillID, in: pill)
+                    }
+                }
+                // The padded frame, not just the glyph, takes the click. A
+                // `.clear` background draws nothing and so catches nothing,
+                // which left only the icon itself hittable.
+                .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
             .buttonStyle(.plain)
             .foregroundStyle(isSelected ? MonMonTheme.accent : MonMonTheme.textMuted)
+            .animation(.snappy(duration: 0.28), value: isSelected)
             .accessibilityIdentifier(tab.accessibilityIdentifier)
             .accessibilityLabel(tab.title)
             .accessibilityAddTraits(isSelected ? [.isSelected] : [])
