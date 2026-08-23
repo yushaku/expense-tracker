@@ -92,6 +92,7 @@
 		A00000000000000000000285 /* CategoryTransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000196 /* CategoryTransactionsView.swift */; };
 		A00000000000000000000286 /* CategoryBreakdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000197 /* CategoryBreakdownTests.swift */; };
 		33A69BFF303AE3A900432AF4 /* MijickCalendarView in Frameworks */ = {isa = PBXBuildFile; productRef = 33A69BFE303AE3A900432AF4 /* MijickCalendarView */; };
+		A00000000000000000000287 /* CalendarTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000198 /* CalendarTheme.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -194,6 +195,7 @@
 		A00000000000000000000195 /* CategoryBreakdownCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBreakdownCard.swift; sourceTree = "<group>"; };
 		A00000000000000000000196 /* CategoryTransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryTransactionsView.swift; sourceTree = "<group>"; };
 		A00000000000000000000197 /* CategoryBreakdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBreakdownTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000198 /* CalendarTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarTheme.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -326,6 +328,7 @@
 				A00000000000000000000187 /* AppTheme.swift */,
 				A00000000000000000000192 /* FloatingAddButton.swift */,
 				A00000000000000000000193 /* Percentage.swift */,
+				A00000000000000000000198 /* CalendarTheme.swift */,
 			);
 			path = Design;
 			sourceTree = "<group>";
@@ -551,6 +554,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A00000000000000000000287 /* CalendarTheme.swift in Sources */,
 				A00000000000000000000285 /* CategoryTransactionsView.swift in Sources */,
 				A00000000000000000000284 /* CategoryBreakdownCard.swift in Sources */,
 				A00000000000000000000283 /* CategoryBreakdown.swift in Sources */,

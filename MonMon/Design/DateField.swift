@@ -62,15 +62,26 @@ struct DateField: View {
     }
 
     private var calendar: some View {
-        MCalendarView(selectedDate: pickedDate, selectedRange: nil)
-            .padding(16)
-            .frame(minWidth: 320, minHeight: 380)
-            .background(MonMonTheme.surface)
-            .tint(MonMonTheme.accent)
-            .accessibilityIdentifier("\(accessibilityIdentifier)-calendar")
-            // Without this an iPhone would present a sheet instead of a
-            // popover, which reads as a heavier decision than picking a day.
-            .presentationCompactAdaptation(.popover)
+        MCalendarView(selectedDate: pickedDate, selectedRange: nil) {
+            $0
+                .startMonth(CalendarTheme.startMonth())
+                .endMonth(CalendarTheme.endMonth())
+                .dayView(ThemedDayView.init)
+                .monthLabel(ThemedMonthLabel.init)
+                .weekdaysView(ThemedWeekdaysView.init)
+                .monthLabelToDaysDistance(14)
+                .daysVerticalSpacing(4)
+                .monthsViewBackground(MonMonTheme.surface)
+                .scrollTo(date: selection)
+        }
+        .padding(16)
+        .frame(minWidth: 320, minHeight: 380)
+        .background(MonMonTheme.surface)
+        .tint(MonMonTheme.accent)
+        .accessibilityIdentifier("\(accessibilityIdentifier)-calendar")
+        // Without this an iPhone would present a sheet instead of a popover,
+        // which reads as a heavier decision than picking a day.
+        .presentationCompactAdaptation(.popover)
     }
 
     /// The calendar hands back an optional date and expects to keep offering
