@@ -1,7 +1,7 @@
 # MonMon
 
 MonMon is a private personal-finance app for iPhone and Mac, themed with
-Catppuccin — Latte in light, Frappé in dark. It has seven slices today.
+Catppuccin — Latte in light, Frappé in dark. It has eight slices today.
 `cash-balance` lets one owner add, edit, and delete local cash, bank, and credit
 card accounts with a VND opening balance. `savings-deposit` adds term
 deposits (sổ tiết kiệm) with maturity dates, projected interest, and an optional
@@ -15,6 +15,10 @@ money between two of the owner's own accounts, so both balances follow and total
 assets stay put. `debt-tracking` records money borrowed and money lent out, with
 the payments against them: the account moves by exactly the principal, what is
 outstanding follows the payments, and total assets stay put through all of it.
+`market-valuation` replaces the hand-typed NAV with one fetched from Fmarket for
+open-ended funds and VNDIRECT for listed ETFs, moving the price off the position
+and onto a `FundInstrument` catalogue so one ticker can only ever carry one
+price. Every fetch is owner-triggered.
 
 ## Requirements
 
@@ -94,8 +98,9 @@ and are excluded by `.gitignore`.
 
 - Included: add, edit, and delete cash, bank, and credit card accounts; add,
   edit, and delete savings deposits with simple interest paid at maturity; add,
-  edit, and delete fund and ETF holdings valued at a hand-entered NAV, both
-  under one Investments tab that totals them together; record
+  edit, and delete fund and ETF holdings, each held in a catalogue instrument
+  that owns its price, both under one Investments tab that totals them
+  together; record
   income and expenses against one account each under owner-managed categories,
   browsed a day, a month, a year, or a hand-picked range at a time; add, edit,
   and delete transfers between two accounts, opened from the Home toolbar; an
@@ -112,10 +117,21 @@ and are excluded by `.gitignore`.
   passcode lock that hides the screen on launch and after a minute away. The
   lock is a gate on the screen, not encryption; the records on disk are
   protected by the operating system's file protection and nothing more.
+- Market data: a fund and ETF catalogue with one price per ticker, refreshed
+  when the owner asks and never on a timer, on launch, or in the background.
+  Fmarket supplies open-ended fund NAV and VNDIRECT supplies listed ETF closes;
+  the whole Fmarket list can be imported and searched, grouped by fund manager.
+  A price older than the last completed trading day is marked stale in words,
+  not by colour alone. A fetch that fails leaves the previous price standing and
+  says why. Only a ticker ever leaves the device — never a balance, a unit
+  count, an account name, or anything identifying the owner.
 - Not included yet: budgets, recurring transactions, interest paid on a
   schedule, rollover or early withdrawal, compound interest or amortisation
-  schedules on a debt, individual buy/sell trades or realized profit and loss,
-  automatic price refresh, iCloud, network access, AI, or MCP.
+  schedules on a debt, price history or charts, a market-holiday calendar,
+  iCloud, AI, or MCP.
+- Not included, and not planned: individual buy/sell trades, realized profit and
+  loss, and gold, equity, or crypto positions. `CAPABILITY-MAP.md` records why
+  `investment-tracking` was dropped rather than deferred.
 
 ## Architecture
 
@@ -124,10 +140,13 @@ and are excluded by `.gitignore`.
   (MIT), which draws the calendar inside `DateField`. It is plain SwiftUI on
   both platforms and touches nothing but the view it is asked to draw. The
   resolved version is pinned in `Package.resolved`.
-- SwiftData stores `CashAccount`, `SavingsDeposit`, `FundHolding`,
-  `TransactionCategory`, `MoneyTransaction`, `AccountTransfer`, `Debt`, and
-  `DebtPayment` records
+- SwiftData stores `CashAccount`, `SavingsDeposit`, `FundInstrument`,
+  `FundHolding`, `TransactionCategory`, `MoneyTransaction`, `AccountTransfer`,
+  `Debt`, and `DebtPayment` records
   locally; `@Query` drives every visible list and combined total.
+- Nothing stores a balance. Every account balance, every total, and net worth
+  itself is computed from the records each time, and `openingBalance` is never
+  rewritten. That is what lets a record be deleted with no compensating write.
 - `AccountDraft`, `SavingsDraft`, `FundDraft`, `TransactionDraft`,
   `CategoryDraft`, `TransferDraft`, `DebtDraft`, and `DebtPaymentDraft` validate
   external text before any model is inserted or mutated, and money uses
@@ -162,7 +181,13 @@ and are excluded by `.gitignore`.
 - `SPEC-market-valuation.md` amends the fund data contract: it splits
   `FundHolding` into a `FundInstrument` catalogue that owns the price and a
   position that points at it, so one ticker cannot carry two prices and a
-  holding is created by picking rather than retyping.
+  holding is created by picking rather than retyping. The columns the position
+  used to carry its own ticker and price in are gone, along with the backfill
+  that copied them onto the catalogue, so there is no second copy left to
+  disagree with. A position whose instrument is missing is reported as unpriced
+  rather than valued at a price it does not have.
+- The one network boundary is `FundQuoteTransport`, behind which every provider
+  is tested against a recorded reply. The default test run makes no connection.
 - `docs/architecture.html` draws the same picture the specs describe in prose:
   every `@Model` with its fields and foreign keys, then the components around
   the app — Apple frameworks, the one third-party package, and the services
