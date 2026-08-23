@@ -26,6 +26,9 @@ struct FundInstrumentCandidate: Sendable, Equatable, Identifiable {
     let pricePerUnit: Decimal?
     /// The trading day that price belongs to.
     let priceAsOf: Date?
+    /// The fund management company, as the listing gives it. Empty when the
+    /// listing does not say.
+    let owner: String
 
     var id: String { symbol }
 
@@ -34,14 +37,50 @@ struct FundInstrumentCandidate: Sendable, Equatable, Identifiable {
         name: String,
         kind: FundHoldingKind,
         pricePerUnit: Decimal? = nil,
-        priceAsOf: Date? = nil
+        priceAsOf: Date? = nil,
+        owner: String = ""
     ) {
         self.symbol = symbol
         self.name = name
         self.kind = kind
         self.pricePerUnit = pricePerUnit
         self.priceAsOf = priceAsOf
+        self.owner = owner
     }
+}
+
+extension FundInstrumentCandidate {
+    /// The manager's name with the legal boilerplate taken off.
+    ///
+    /// Fmarket gives it in full — "CÔNG TY CỔ PHẦN QUẢN LÝ QUỸ VINACAPITAL" —
+    /// and 26 of those stacked as section headings is a wall of the same eight
+    /// words. What distinguishes them is the tail, so that is what shows.
+    var displayOwner: String {
+        let trimmed = owner.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            return "Other"
+        }
+
+        let upper = trimmed.uppercased()
+        for prefix in Self.ownerPrefixes where upper.hasPrefix(prefix) {
+            let tail = upper.dropFirst(prefix.count).trimmingCharacters(in: .whitespaces)
+            return tail.isEmpty ? trimmed : tail
+        }
+
+        return trimmed
+    }
+
+    /// Longest first, so the more specific phrasing wins over the shorter one it
+    /// starts with.
+    private static let ownerPrefixes = [
+        "CÔNG TY CỔ PHẦN QUẢN LÝ QUỸ ĐẦU TƯ CHỨNG KHOÁN",
+        "CÔNG TY TNHH QUẢN LÝ QUỸ ĐẦU TƯ CHỨNG KHOÁN",
+        "CÔNG TY CỔ PHẦN QUẢN LÝ QUỸ ĐẦU TƯ",
+        "CÔNG TY TNHH QUẢN LÝ QUỸ ĐẦU TƯ",
+        "CÔNG TY CỔ PHẦN QUẢN LÝ QUỸ",
+        "CÔNG TY TNHH QUẢN LÝ QUỸ",
+        "CÔNG TY QUẢN LÝ QUỸ",
+    ]
 }
 
 enum FundQuoteError: Error, Equatable {

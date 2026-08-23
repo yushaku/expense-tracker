@@ -66,7 +66,9 @@ struct FmarketQuoteProvider: FundQuoteProvider {
                 // Everything this endpoint lists is an open-ended fund.
                 kind: .fund,
                 pricePerUnit: try? JSONReader.price(object["nav"]),
-                priceAsOf: Self.tradingDay(fromMilliseconds: change["updateAt"])
+                priceAsOf: Self.tradingDay(fromMilliseconds: change["updateAt"]),
+                owner: (object["owner"] as? [String: Any])
+                    .flatMap { $0["name"] as? String } ?? ""
             )
         }
     }

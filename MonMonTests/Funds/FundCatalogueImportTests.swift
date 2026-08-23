@@ -28,7 +28,7 @@ struct FundCatalogueImportTests {
         await importer.load(existing: [])
 
         #expect(importer.phase == .loaded)
-        #expect(importer.candidates.map(\.symbol) == ["AEIF", "UMMF", "VESAF"])
+        #expect(importer.candidates.map(\.symbol) == ["AEIF", "UMMF", "VEOF", "VESAF"])
 
         let vesaf = try #require(importer.candidates.first { $0.symbol == "VESAF" })
         #expect(vesaf.pricePerUnit == Decimal(string: "31581.76"))
@@ -55,8 +55,8 @@ struct FundCatalogueImportTests {
 
         await importer.load(existing: [existing])
 
-        #expect(importer.candidates.count == 3)
-        #expect(importer.importable.map(\.symbol) == ["AEIF", "UMMF"])
+        #expect(importer.candidates.count == 4)
+        #expect(importer.importable.map(\.symbol) == ["AEIF", "UMMF", "VEOF"])
     }
 
     @Test("Importing writes the chosen funds with their price and source")
@@ -74,7 +74,7 @@ struct FundCatalogueImportTests {
             createdAt: stamped
         )
 
-        #expect(added == 3)
+        #expect(added == 4)
 
         let saved = try context.fetch(FetchDescriptor<FundInstrument>())
         let vesaf = try #require(saved.first { $0.symbol == "VESAF" })
@@ -107,9 +107,9 @@ struct FundCatalogueImportTests {
             existing: [existing]
         )
 
-        #expect(added == 2)
+        #expect(added == 3)
         let saved = try context.fetch(FetchDescriptor<FundInstrument>())
-        #expect(saved.count == 3)
+        #expect(saved.count == 4)
         // The stored price is untouched; the listing does not overwrite it.
         #expect(saved.first { $0.symbol == "VESAF" }?.currentPricePerUnit == 25_000)
     }
@@ -134,5 +134,97 @@ struct FundCatalogueImportTests {
         await importer.load(existing: [])
 
         #expect(importer.phase == .failed(.decoding))
+    }
+}
+
+@Suite("Fund catalogue search and grouping")
+@MainActor
+struct FundCatalogueSearchTests {
+    private func loaded() async -> FundCatalogueImport {
+        let transport = FixtureTransport([
+            "products/filter": .init(FundQuoteFixtures.fmarketCatalogue)
+        ])
+        let importer = FundCatalogueImport(
+            provider: FmarketQuoteProvider(transport: transport)
+        )
+        await importer.load(existing: [])
+        return importer
+    }
+
+    @Test("An empty search shows everything")
+    func emptySearchShowsEverything() async {
+        let importer = await loaded()
+
+        #expect(importer.matching("").count == 4)
+        #expect(importer.matching("   ").count == 4)
+    }
+
+    @Test("A ticker matches, whatever the case")
+    func tickerMatches() async {
+        let importer = await loaded()
+
+        #expect(importer.matching("vesaf").map(\.symbol) == ["VESAF"])
+        #expect(importer.matching("VESAF").map(\.symbol) == ["VESAF"])
+    }
+
+    /// Fund names carry every Vietnamese diacritic and nobody types them into a
+    /// search field.
+    @Test("A name matches without its accents")
+    func nameMatchesWithoutAccents() async {
+        let importer = await loaded()
+
+        #expect(importer.matching("amber").map(\.symbol) == ["AEIF"])
+        #expect(importer.matching("co phieu").count == 3)
+        #expect(importer.matching("CỔ PHIẾU").count == 3)
+    }
+
+    @Test("A manager matches, so one search finds its whole family")
+    func managerMatches() async {
+        let importer = await loaded()
+
+        #expect(importer.matching("vinacapital").map(\.symbol) == ["VEOF", "VESAF"])
+    }
+
+    @Test("Nothing matching yields nothing")
+    func noMatchYieldsNothing() async {
+        let importer = await loaded()
+
+        #expect(importer.matching("zzz").isEmpty)
+    }
+
+    @Test("Funds are grouped under their manager, tickers ordered inside")
+    func fundsAreGroupedByManager() async {
+        let importer = await loaded()
+
+        let groups = FundCatalogueImport.grouped(importer.importable)
+
+        #expect(groups.map(\.owner) == ["UOB ASSET MANAGEMENT (VIỆT NAM)", "VINACAPITAL", "Other"])
+        #expect(
+            groups.first { $0.owner == "VINACAPITAL" }?.funds.map(\.symbol) == ["VEOF", "VESAF"])
+    }
+
+    /// The legal boilerplate is the same eight words on every manager; what
+    /// tells them apart is the tail.
+    @Test("The manager's legal boilerplate is trimmed off")
+    func managerBoilerplateIsTrimmed() {
+        func owner(_ text: String) -> String {
+            FundInstrumentCandidate(symbol: "X", name: "X", kind: .fund, owner: text).displayOwner
+        }
+
+        #expect(owner("CÔNG TY CỔ PHẦN QUẢN LÝ QUỸ VINACAPITAL") == "VINACAPITAL")
+        #expect(owner("CÔNG TY TNHH QUẢN LÝ QUỸ SSI") == "SSI")
+        #expect(
+            owner("CÔNG TY TNHH QUẢN LÝ QUỸ ĐẦU TƯ CHỨNG KHOÁN VIETCOMBANK") == "VIETCOMBANK"
+        )
+        #expect(owner("CÔNG TY CỔ PHẦN QUẢN LÝ QUỸ ĐẦU TƯ MB") == "MB")
+        // Nothing to strip, and nothing at all.
+        #expect(owner("DRAGON CAPITAL") == "DRAGON CAPITAL")
+        #expect(owner("  ") == "Other")
+    }
+
+    /// A manager with no funds left to import must not leave an empty heading.
+    @Test("Grouping an empty list yields no groups")
+    func groupingEmptyYieldsNoGroups() {
+        #expect(FundCatalogueImport.grouped([]).isEmpty)
     }
 }

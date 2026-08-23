@@ -34,6 +34,68 @@ final class FundCatalogueImport {
         candidates.filter { !alreadyHeld.contains($0.symbol.uppercased()) }
     }
 
+    /// The importable funds a search matches. Filtering happens here rather than
+    /// through another request: the whole catalogue arrived in one call, so
+    /// typing costs nothing.
+    func matching(_ query: String) -> [FundInstrumentCandidate] {
+        Self.filter(importable, matching: query)
+    }
+
+    /// Matches a ticker or any word of the name, ignoring case and accents.
+    ///
+    /// Fund names are Vietnamese and long — "QUỸ ĐẦU TƯ TRÁI PHIẾU AN BÌNH" —
+    /// and nobody types the diacritics into a search field. `an binh` has to
+    /// find it, so both sides are folded before comparing.
+    static func filter(
+        _ candidates: [FundInstrumentCandidate],
+        matching query: String
+    ) -> [FundInstrumentCandidate] {
+        let needle = fold(query)
+        guard !needle.isEmpty else {
+            return candidates
+        }
+
+        return candidates.filter { candidate in
+            fold(candidate.symbol).contains(needle)
+                || fold(candidate.name).contains(needle)
+                || fold(candidate.owner).contains(needle)
+        }
+    }
+
+    /// One group per fund management company, each ordered by ticker, the groups
+    /// themselves ordered by name.
+    ///
+    /// Funds from one manager tend to be considered together — somebody who
+    /// holds VESAF is likelier to hold VEOF than something at random — so the
+    /// list reads better grouped than as 67 rows in ticker order.
+    struct OwnerGroup: Identifiable, Equatable {
+        let owner: String
+        let funds: [FundInstrumentCandidate]
+
+        var id: String { owner }
+    }
+
+    static func grouped(_ candidates: [FundInstrumentCandidate]) -> [OwnerGroup] {
+        Dictionary(grouping: candidates, by: \.displayOwner)
+            .map { OwnerGroup(owner: $0.key, funds: $0.value.sorted { $0.symbol < $1.symbol }) }
+            .sorted { lhs, rhs in
+                // Anything the listing could not attribute sits at the end
+                // rather than under "O" among real names.
+                if (lhs.owner == "Other") != (rhs.owner == "Other") {
+                    return rhs.owner == "Other"
+                }
+                return lhs.owner < rhs.owner
+            }
+    }
+
+    private static func fold(_ text: String) -> String {
+        text.trimmingCharacters(in: .whitespacesAndNewlines)
+            .folding(
+                options: [.diacriticInsensitive, .caseInsensitive, .widthInsensitive],
+                locale: Locale(identifier: "vi_VN")
+            )
+    }
+
     func load(existing: [FundInstrument]) async {
         guard phase != .loading else {
             return

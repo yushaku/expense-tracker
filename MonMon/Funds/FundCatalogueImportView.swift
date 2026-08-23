@@ -11,6 +11,7 @@ struct FundCatalogueImportView: View {
 
     @State private var importer = FundCatalogueImport()
     @State private var chosen: Set<String> = []
+    @State private var searchText = ""
     @State private var saveErrorMessage: String?
 
     var body: some View {
@@ -90,8 +91,16 @@ struct FundCatalogueImportView: View {
                         )
                     }
 
-                    ForEach(importer.importable) { candidate in
-                        row(candidate)
+                    if shown.isEmpty {
+                        noMatches
+                    } else {
+                        ForEach(groups) { group in
+                            ownerHeader(group)
+
+                            ForEach(group.funds) { candidate in
+                                row(candidate)
+                            }
+                        }
                     }
                 }
                 .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -102,19 +111,85 @@ struct FundCatalogueImportView: View {
         }
     }
 
+    /// The funds on show: everything importable, narrowed by the search.
+    private var shown: [FundInstrumentCandidate] {
+        importer.matching(searchText)
+    }
+
+    private var groups: [FundCatalogueImport.OwnerGroup] {
+        FundCatalogueImport.grouped(shown)
+    }
+
+    /// Tapping a manager takes all of its funds, which is the whole point of
+    /// grouping them: somebody who holds one usually holds its neighbours.
+    private func ownerHeader(_ group: FundCatalogueImport.OwnerGroup) -> some View {
+        Button {
+            toggleGroup(group)
+        } label: {
+            HStack(spacing: 10) {
+                Text(group.owner)
+                    .font(.subheadline.weight(.semibold))
+                    .lineLimit(2)
+
+                Text("\(group.funds.count)")
+                    .font(.caption.weight(.semibold))
+                    .monospacedDigit()
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(MonMonTheme.accent.opacity(0.16), in: Capsule())
+
+                Spacer(minLength: 8)
+
+                Image(systemName: isGroupChosen(group) ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(
+                        isGroupChosen(group) ? MonMonTheme.accent : MonMonTheme.textSecondary
+                    )
+                    .accessibilityHidden(true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 14)
+            .padding(.bottom, 2)
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(MonMonTheme.textPrimary)
+        .accessibilityIdentifier("import-owner-\(group.owner)")
+        .accessibilityHint("Selects every fund from this manager")
+    }
+
+    private func isGroupChosen(_ group: FundCatalogueImport.OwnerGroup) -> Bool {
+        !group.funds.isEmpty && group.funds.allSatisfy { chosen.contains($0.symbol) }
+    }
+
+    private func toggleGroup(_ group: FundCatalogueImport.OwnerGroup) {
+        let symbols = group.funds.map(\.symbol)
+        if isGroupChosen(group) {
+            symbols.forEach { chosen.remove($0) }
+        } else {
+            chosen.formUnion(symbols)
+        }
+    }
+
     private var header: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(headerText)
+                .font(.subheadline)
+                .foregroundStyle(MonMonTheme.textSecondary)
+
             Text(
-                "\(importer.importable.count) open-ended funds, each with the NAV Fmarket "
-                    + "publishes. Pick the ones you hold — nothing is added until you do."
+                "Grouped by manager · \(managerCountText). Tap a manager to take all of its funds."
             )
-            .font(.subheadline)
+            .font(.caption)
             .foregroundStyle(MonMonTheme.textSecondary)
 
+            searchField
+
             HStack(spacing: 12) {
-                Button("Select all") {
-                    chosen = Set(importer.importable.map(\.symbol))
+                // Selects what is on show, not the whole catalogue: with a search
+                // typed, "all" can only sensibly mean the ones being looked at.
+                Button(searchText.isEmpty ? "Select all" : "Select these") {
+                    chosen.formUnion(shown.map(\.symbol))
                 }
+                .disabled(shown.isEmpty)
                 .accessibilityIdentifier("select-all-import")
 
                 Button("Clear") { chosen.removeAll() }
@@ -126,6 +201,58 @@ struct FundCatalogueImportView: View {
             .foregroundStyle(MonMonTheme.accent)
         }
         .padding(.bottom, 4)
+    }
+
+    private var headerText: String {
+        let total = importer.importable.count
+        guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return "\(total) open-ended funds, each with the NAV Fmarket publishes. "
+                + "Pick the ones you hold — nothing is added until you do."
+        }
+        return "\(shown.count) of \(total) funds match."
+    }
+
+    private var managerCountText: String {
+        let count = groups.count
+        return count == 1 ? "1 manager" : "\(count) managers"
+    }
+
+    private var searchField: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(MonMonTheme.textSecondary)
+                .accessibilityHidden(true)
+
+            TextField("Ticker, name or manager", text: $searchText)
+                .textFieldStyle(.plain)
+                .accessibilityIdentifier("import-search")
+
+            if !searchText.isEmpty {
+                Button {
+                    searchText = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Clear search")
+                .accessibilityIdentifier("clear-search")
+            }
+        }
+        .padding(12)
+        .background(
+            MonMonTheme.field,
+            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+        )
+    }
+
+    private var noMatches: some View {
+        Text("No fund matches “\(searchText)”.")
+            .font(.subheadline)
+            .foregroundStyle(MonMonTheme.textSecondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 24)
+            .accessibilityIdentifier("import-no-matches")
     }
 
     private func row(_ candidate: FundInstrumentCandidate) -> some View {
@@ -226,6 +353,7 @@ struct FundCatalogueImportView: View {
 
     private func addChosen() {
         saveErrorMessage = nil
+        // Everything ticked, even if the search has since narrowed the list.
         let picked = importer.importable.filter { chosen.contains($0.symbol) }
 
         do {
