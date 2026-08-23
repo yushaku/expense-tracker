@@ -213,8 +213,11 @@ nothing. A category with no transactions deletes behind a plain confirmation.
   the note when present, the account name, the date, and the amount.
 - Direction is **never encoded by colour alone**: an explicit `+` or `−` sign and
   an arrow symbol carry the meaning, with colour as reinforcement.
-- The toolbar carries Add Transaction and a Categories button opening
-  `CategoryListView` as a sheet; there is no fifth tab.
+- Add Transaction floats over the bottom-trailing corner rather than sitting in
+  the toolbar, which leaves the toolbar carrying only the Categories button that
+  opens `CategoryListView` as a sheet. Every list leaves room beneath its last
+  card so nothing hides behind the floating button, and the button appears only
+  once there is an account to record against — the empty state carries its own.
 - `CategoryListView` groups categories under Income and Expense headings, each
   row opening the category editor.
 - Adding and editing use the same sheet in both flows; the edit sheet also offers

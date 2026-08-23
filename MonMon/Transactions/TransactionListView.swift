@@ -35,8 +35,19 @@ struct TransactionListView: View {
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
                     .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
+                    .padding(.top, 16)
+                    .padding(.bottom, FloatingAddButton.contentInset)
                     .frame(maxWidth: .infinity)
+                }
+            }
+            .overlay(alignment: .bottomTrailing) {
+                if !accounts.isEmpty {
+                    FloatingAddButton(
+                        title: "Add Transaction",
+                        accessibilityIdentifier: "add-transaction"
+                    ) {
+                        editorMode = .add
+                    }
                 }
             }
             .navigationTitle("Spending")
@@ -49,11 +60,6 @@ struct TransactionListView: View {
                     .accessibilityIdentifier("manage-categories")
                 }
 
-                if !accounts.isEmpty {
-                    ToolbarItem(placement: .primaryAction) {
-                        addTransactionButton
-                    }
-                }
             }
             .sheet(item: $editorMode) { mode in
                 TransactionEditorView(mode: mode, defaultDate: defaultDate)

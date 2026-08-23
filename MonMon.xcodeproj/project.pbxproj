@@ -85,6 +85,7 @@
 		A00000000000000000000278 /* LockScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000189 /* LockScreenView.swift */; };
 		A00000000000000000000279 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000190 /* SettingsView.swift */; };
 		A00000000000000000000280 /* AppLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000191 /* AppLockTests.swift */; };
+		A00000000000000000000281 /* FloatingAddButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000192 /* FloatingAddButton.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -181,6 +182,7 @@
 		A00000000000000000000189 /* LockScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenView.swift; sourceTree = "<group>"; };
 		A00000000000000000000190 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A00000000000000000000191 /* AppLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000192 /* FloatingAddButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingAddButton.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -356,6 +358,7 @@
 				A00000000000000000000127 /* MonMonTheme.swift */,
 				A00000000000000000000186 /* DateField.swift */,
 				A00000000000000000000187 /* AppTheme.swift */,
+				A00000000000000000000192 /* FloatingAddButton.swift */,
 			);
 			path = Design;
 			sourceTree = "<group>";
@@ -525,6 +528,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A00000000000000000000281 /* FloatingAddButton.swift in Sources */,
 				A00000000000000000000279 /* SettingsView.swift in Sources */,
 				A00000000000000000000278 /* LockScreenView.swift in Sources */,
 				A00000000000000000000277 /* AppLock.swift in Sources */,

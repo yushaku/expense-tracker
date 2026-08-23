@@ -28,19 +28,23 @@ struct FundListView: View {
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
                     .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
+                    .padding(.top, 16)
+                    .padding(.bottom, FloatingAddButton.contentInset)
                     .frame(maxWidth: .infinity)
+                }
+            }
+            .overlay(alignment: .bottomTrailing) {
+                if !holdings.isEmpty {
+                    FloatingAddButton(
+                        title: "Add Holding",
+                        accessibilityIdentifier: "add-fund"
+                    ) {
+                        editorMode = .add
+                    }
                 }
             }
             .navigationTitle("Funds")
             .accessibilityIdentifier("funds-list")
-            .toolbar {
-                if !holdings.isEmpty {
-                    ToolbarItem(placement: .primaryAction) {
-                        addHoldingButton
-                    }
-                }
-            }
             .sheet(item: $editorMode) { mode in
                 FundEditorView(mode: mode)
             }

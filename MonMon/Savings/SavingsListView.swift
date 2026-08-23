@@ -28,19 +28,23 @@ struct SavingsListView: View {
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
                     .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
+                    .padding(.top, 16)
+                    .padding(.bottom, FloatingAddButton.contentInset)
                     .frame(maxWidth: .infinity)
+                }
+            }
+            .overlay(alignment: .bottomTrailing) {
+                if !deposits.isEmpty {
+                    FloatingAddButton(
+                        title: "Add Savings Book",
+                        accessibilityIdentifier: "add-savings"
+                    ) {
+                        editorMode = .add
+                    }
                 }
             }
             .navigationTitle("Savings")
             .accessibilityIdentifier("savings-list")
-            .toolbar {
-                if !deposits.isEmpty {
-                    ToolbarItem(placement: .primaryAction) {
-                        addDepositButton
-                    }
-                }
-            }
             .sheet(item: $editorMode) { mode in
                 SavingsEditorView(mode: mode)
             }

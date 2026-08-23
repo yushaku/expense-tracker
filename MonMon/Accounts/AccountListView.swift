@@ -38,19 +38,23 @@ struct AccountListView: View {
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
                     .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
+                    .padding(.top, 16)
+                    .padding(.bottom, FloatingAddButton.contentInset)
                     .frame(maxWidth: .infinity)
+                }
+            }
+            .overlay(alignment: .bottomTrailing) {
+                if !accounts.isEmpty {
+                    FloatingAddButton(
+                        title: "Add Account",
+                        accessibilityIdentifier: "add-account"
+                    ) {
+                        editorMode = .add
+                    }
                 }
             }
             .navigationTitle("Home")
             .accessibilityIdentifier("account-list")
-            .toolbar {
-                if !accounts.isEmpty {
-                    ToolbarItem(placement: .primaryAction) {
-                        addAccountButton
-                    }
-                }
-            }
             .sheet(item: $editorMode) { mode in
                 AccountEditorView(mode: mode)
             }
