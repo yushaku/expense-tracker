@@ -25,8 +25,13 @@ final class FundHolding {
     //
     // Identity and price moved to `FundInstrument`. These stay declared so the
     // schema change is purely additive and an existing store opens without a
-    // migration, and so the backfill has something to read. Nothing else in the
-    // app reads them; a later module drops them once every store is backfilled.
+    // migration, and so the backfill has something to read once.
+    //
+    // `FundInstrumentBackfill` empties them as soon as it has copied them onto
+    // an instrument, so no position carries a second ticker or a second price
+    // for anything to disagree with. Nothing else in the app reads or writes
+    // them, and a later change drops the columns outright once
+    // `FundInstrumentBackfill.isComplete(in:)` holds for every store.
     var name: String = ""
     var symbol: String = ""
     var kind: FundHoldingKind = FundHoldingKind.fund

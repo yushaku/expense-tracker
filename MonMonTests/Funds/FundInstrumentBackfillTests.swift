@@ -261,6 +261,75 @@ struct FundInstrumentBackfillTests {
         #expect(holdings.first?.instrumentID == instrument.id)
     }
 
+    /// A second copy of the ticker and price on the position is the shape that
+    /// let two rows disagree in the first place. Once the values are on an
+    /// instrument, the position must not keep them.
+    @Test("Linking empties the pre-split fields it copied")
+    func linkingEmptiesThePreSplitFields() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        _ = insertLegacyHolding(
+            into: context,
+            symbol: "VESAF",
+            name: "VinaCapital VESAF",
+            kind: .etf,
+            units: 100,
+            averageCostPerUnit: 20_000,
+            navPerUnit: 25_000,
+            navAsOf: day0,
+            createdAt: day0
+        )
+        try context.save()
+
+        #expect(try FundInstrumentBackfill.runIfNeeded(in: context) == 1)
+
+        let holding = try #require(try context.fetch(FetchDescriptor<FundHolding>()).first)
+        let instrument = try #require(
+            try context.fetch(FetchDescriptor<FundInstrument>()).first
+        )
+
+        #expect(holding.symbol.isEmpty)
+        #expect(holding.name.isEmpty)
+        #expect(holding.currencyCode.isEmpty)
+        #expect(holding.currentNAVPerUnit == 0)
+        #expect(holding.navAsOf == Date(timeIntervalSince1970: 0))
+        // The values are not lost, they moved.
+        #expect(instrument.symbol == "VESAF")
+        #expect(instrument.name == "VinaCapital VESAF")
+        #expect(instrument.kind == .etf)
+        #expect(instrument.currentPricePerUnit == 25_000)
+        #expect(instrument.priceAsOf == day0)
+        // The position keeps everything that is actually its own.
+        #expect(holding.units == 100)
+        #expect(holding.averageCostPerUnit == 20_000)
+        #expect(holding.costBasis == 2_000_000)
+    }
+
+    @Test("Completion is reported once every position is linked")
+    func completionIsReportedWhenNothingIsWaiting() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        #expect(try FundInstrumentBackfill.isComplete(in: context))
+
+        _ = insertLegacyHolding(
+            into: context,
+            symbol: "VESAF",
+            name: "VinaCapital VESAF",
+            units: 100,
+            averageCostPerUnit: 20_000,
+            navPerUnit: 25_000,
+            navAsOf: day0,
+            createdAt: day0
+        )
+        try context.save()
+
+        #expect(try !FundInstrumentBackfill.isComplete(in: context))
+
+        _ = try FundInstrumentBackfill.runIfNeeded(in: context)
+
+        #expect(try FundInstrumentBackfill.isComplete(in: context))
+    }
+
     @Test("A holding with no ticker is skipped rather than given a blank instrument")
     func holdingWithoutSymbolIsSkipped() throws {
         let container = try makeContainer()

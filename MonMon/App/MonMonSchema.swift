@@ -83,12 +83,44 @@ enum FundInstrumentBackfill {
 
             for holding in unlinked where group.holdingIDs.contains(holding.id) {
                 holding.instrumentID = instrument.id
+                clearPreSplitFields(on: holding)
                 linked += 1
             }
         }
 
         try context.save()
         return linked
+    }
+
+    /// Empties the pre-split fields once their values are safely on an
+    /// instrument.
+    ///
+    /// The columns cannot be dropped yet — a store that has never run this still
+    /// needs them — but the *values* can go, and should. Leaving a second copy
+    /// of a ticker and a price on the position is exactly the shape that let two
+    /// rows disagree about one instrument in the first place. One source of
+    /// truth is the point of the whole change; keeping a shadow of the old one
+    /// around undoes it.
+    ///
+    /// A grouping that got something wrong is fixed by editing the instrument,
+    /// not by reading a stale duplicate back off the position.
+    private static func clearPreSplitFields(on holding: FundHolding) {
+        holding.name = ""
+        holding.symbol = ""
+        holding.kind = .fund
+        holding.currentNAVPerUnit = .zero
+        holding.navAsOf = Date(timeIntervalSince1970: 0)
+        holding.currencyCode = ""
+    }
+
+    /// True when no position is still waiting to be linked, which is the
+    /// condition a later change needs before it can drop the pre-split columns
+    /// outright.
+    static func isComplete(in context: ModelContext) throws -> Bool {
+        try context.fetch(
+            FetchDescriptor<FundHolding>(predicate: #Predicate { $0.instrumentID == nil })
+        )
+        .isEmpty
     }
 }
 
