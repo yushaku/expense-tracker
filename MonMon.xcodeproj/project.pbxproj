@@ -69,6 +69,13 @@
 		A00000000000000000000262 /* CategoryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000173 /* CategoryListView.swift */; };
 		A00000000000000000000263 /* CategoryDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000174 /* CategoryDraftTests.swift */; };
 		A00000000000000000000264 /* TransactionCategoryPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000175 /* TransactionCategoryPersistenceTests.swift */; };
+		A00000000000000000000265 /* TransactionDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000176 /* TransactionDraft.swift */; };
+		A00000000000000000000266 /* TransactionEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000177 /* TransactionEditorForm.swift */; };
+		A00000000000000000000267 /* TransactionEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000178 /* TransactionEditorView.swift */; };
+		A00000000000000000000268 /* TransactionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000179 /* TransactionCard.swift */; };
+		A00000000000000000000269 /* TransactionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000180 /* TransactionListView.swift */; };
+		A00000000000000000000270 /* TransactionDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000181 /* TransactionDraftTests.swift */; };
+		A00000000000000000000271 /* MoneyTransactionPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -149,6 +156,13 @@
 		A00000000000000000000173 /* CategoryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryListView.swift; sourceTree = "<group>"; };
 		A00000000000000000000174 /* CategoryDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryDraftTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000175 /* TransactionCategoryPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCategoryPersistenceTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000176 /* TransactionDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDraft.swift; sourceTree = "<group>"; };
+		A00000000000000000000177 /* TransactionEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionEditorForm.swift; sourceTree = "<group>"; };
+		A00000000000000000000178 /* TransactionEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionEditorView.swift; sourceTree = "<group>"; };
+		A00000000000000000000179 /* TransactionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCard.swift; sourceTree = "<group>"; };
+		A00000000000000000000180 /* TransactionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionListView.swift; sourceTree = "<group>"; };
+		A00000000000000000000181 /* TransactionDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDraftTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoneyTransactionPersistenceTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -204,6 +218,11 @@
 				A00000000000000000000171 /* CategoryReassignView.swift */,
 				A00000000000000000000172 /* CategoryEditorView.swift */,
 				A00000000000000000000173 /* CategoryListView.swift */,
+				A00000000000000000000176 /* TransactionDraft.swift */,
+				A00000000000000000000177 /* TransactionEditorForm.swift */,
+				A00000000000000000000178 /* TransactionEditorView.swift */,
+				A00000000000000000000179 /* TransactionCard.swift */,
+				A00000000000000000000180 /* TransactionListView.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
@@ -247,6 +266,8 @@
 				A00000000000000000000167 /* TransactionSummaryTests.swift */,
 				A00000000000000000000174 /* CategoryDraftTests.swift */,
 				A00000000000000000000175 /* TransactionCategoryPersistenceTests.swift */,
+				A00000000000000000000181 /* TransactionDraftTests.swift */,
+				A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
@@ -461,6 +482,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A00000000000000000000269 /* TransactionListView.swift in Sources */,
+				A00000000000000000000268 /* TransactionCard.swift in Sources */,
+				A00000000000000000000267 /* TransactionEditorView.swift in Sources */,
+				A00000000000000000000266 /* TransactionEditorForm.swift in Sources */,
+				A00000000000000000000265 /* TransactionDraft.swift in Sources */,
 				A00000000000000000000262 /* CategoryListView.swift in Sources */,
 				A00000000000000000000261 /* CategoryEditorView.swift in Sources */,
 				A00000000000000000000260 /* CategoryReassignView.swift in Sources */,
@@ -512,6 +538,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A00000000000000000000271 /* MoneyTransactionPersistenceTests.swift in Sources */,
+				A00000000000000000000270 /* TransactionDraftTests.swift in Sources */,
 				A00000000000000000000264 /* TransactionCategoryPersistenceTests.swift in Sources */,
 				A00000000000000000000263 /* CategoryDraftTests.swift in Sources */,
 				A00000000000000000000256 /* TransactionSummaryTests.swift in Sources */,
