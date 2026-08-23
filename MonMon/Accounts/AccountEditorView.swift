@@ -31,6 +31,9 @@ struct AccountEditorView: View {
     @Query(sort: \SavingsDeposit.createdAt, order: .forward)
     private var deposits: [SavingsDeposit]
 
+    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
+    private var transactions: [MoneyTransaction]
+
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
@@ -109,19 +112,32 @@ struct AccountEditorView: View {
         }
     }
 
-    /// An account may only be removed once it holds nothing: a zero available
-    /// balance also guarantees no savings deposit or fund holding still points
-    /// at it, so deleting can never orphan those records.
+    /// An account may only be removed once it holds nothing and nothing points
+    /// at it. A zero available balance rules out a savings deposit or a fund
+    /// holding, but not a transaction: an account with 100 in and 100 out sits
+    /// at zero while still owning two records, so the count is checked too.
     private var canDelete: Bool {
         guard let editedAccount = mode.editedAccount else {
             return false
         }
 
-        return CashBalanceSummary.available(
-            for: editedAccount,
-            deposits: deposits,
-            holdings: holdings
-        ) == 0
+        let isEmpty =
+            CashBalanceSummary.available(
+                for: editedAccount,
+                deposits: deposits,
+                holdings: holdings,
+                transactions: transactions
+            ) == 0
+
+        return isEmpty && transactionCount == 0
+    }
+
+    private var transactionCount: Int {
+        guard let editedAccount = mode.editedAccount else {
+            return 0
+        }
+
+        return TransactionSummary.count(for: editedAccount, transactions: transactions)
     }
 
     private var deleteBlockedReason: String? {
@@ -137,6 +153,11 @@ struct AccountEditorView: View {
 
         if fundedAmount > 0 {
             return "This account still funds savings books or funds. Move them first."
+        }
+
+        if transactionCount > 0 {
+            let noun = transactionCount == 1 ? "transaction" : "transactions"
+            return "This account still has \(transactionCount) \(noun). Delete them first."
         }
 
         return "Set the balance to 0 before deleting this account."

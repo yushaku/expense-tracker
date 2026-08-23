@@ -118,7 +118,12 @@ struct FundHoldingPersistenceTests {
 
         var holdings = try context.fetch(FetchDescriptor<FundHolding>())
         #expect(
-            CashBalanceSummary.available(for: account, deposits: [], holdings: holdings)
+            CashBalanceSummary.available(
+                for: account,
+                deposits: [],
+                holdings: holdings,
+                transactions: []
+            )
                 == 128_900_000
         )
 
@@ -131,7 +136,12 @@ struct FundHoldingPersistenceTests {
         #expect(accounts.count == 1)
         #expect(holdings.isEmpty)
         #expect(
-            CashBalanceSummary.available(for: account, deposits: [], holdings: holdings)
+            CashBalanceSummary.available(
+                for: account,
+                deposits: [],
+                holdings: holdings,
+                transactions: []
+            )
                 == 148_900_000
         )
     }

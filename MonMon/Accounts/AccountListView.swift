@@ -8,6 +8,9 @@ struct AccountListView: View {
     @Query(sort: \SavingsDeposit.createdAt, order: .forward)
     private var deposits: [SavingsDeposit]
 
+    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
+    private var transactions: [MoneyTransaction]
+
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
@@ -106,7 +109,8 @@ struct AccountListView: View {
         CashBalanceSummary.totalAvailable(
             of: accounts,
             deposits: deposits,
-            holdings: holdings
+            holdings: holdings,
+            transactions: transactions
         )
     }
 
@@ -122,7 +126,8 @@ struct AccountListView: View {
         AssetSummary.netWorth(
             accounts: accounts,
             deposits: deposits,
-            holdings: holdings
+            holdings: holdings,
+            transactions: transactions
         )
     }
 
@@ -201,7 +206,12 @@ struct AccountListView: View {
                 Button {
                     editorMode = .edit(account)
                 } label: {
-                    CashAccountCard(account: account, deposits: deposits, holdings: holdings)
+                    CashAccountCard(
+                        account: account,
+                        deposits: deposits,
+                        holdings: holdings,
+                        transactions: transactions
+                    )
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("account-\(account.id.uuidString)")

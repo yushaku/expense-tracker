@@ -4,6 +4,7 @@ struct CashAccountCard: View {
     let account: CashAccount
     let deposits: [SavingsDeposit]
     let holdings: [FundHolding]
+    let transactions: [MoneyTransaction]
 
     var body: some View {
         ViewThatFits(in: .horizontal) {
@@ -88,7 +89,12 @@ struct CashAccountCard: View {
     }
 
     private var availableBalance: Decimal {
-        CashBalanceSummary.available(for: account, deposits: deposits, holdings: holdings)
+        CashBalanceSummary.available(
+            for: account,
+            deposits: deposits,
+            holdings: holdings,
+            transactions: transactions
+        )
     }
 
     private var savingsAmount: Decimal {
@@ -138,13 +144,15 @@ private extension CashAccountKind {
                 CashAccountCard(
                     account: .preview(name: "Wallet", kind: .cash, openingBalance: 1_250_000),
                     deposits: [],
-                    holdings: []
+                    holdings: [],
+                    transactions: []
                 )
 
                 CashAccountCard(
                     account: .preview(name: "Techcombank", kind: .bank, openingBalance: 48_900_000),
                     deposits: [],
-                    holdings: []
+                    holdings: [],
+                    transactions: []
                 )
 
                 CashAccountCard(
@@ -154,7 +162,8 @@ private extension CashAccountKind {
                         openingBalance: -5_200_000
                     ),
                     deposits: [],
-                    holdings: []
+                    holdings: [],
+                    transactions: []
                 )
 
                 CashAccountCard(
@@ -164,7 +173,8 @@ private extension CashAccountKind {
                         openingBalance: 987_654_321_000
                     ),
                     deposits: [],
-                    holdings: []
+                    holdings: [],
+                    transactions: []
                 )
             }
             .padding(20)

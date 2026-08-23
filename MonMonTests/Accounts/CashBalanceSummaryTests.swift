@@ -26,6 +26,140 @@ struct CashBalanceSummaryTests {
         #expect(CashBalanceSummary.total(of: [cash, bank]) == Decimal(10_000_000))
     }
 
+    @Test("Recorded income raises the available balance and expense lowers it")
+    func flowMovesAvailableBalance() {
+        let account = makeUniqueAccount(openingBalance: 10_000_000)
+        let transactions = [
+            makeTransaction(kind: .expense, amount: 200_000, accountID: account.id),
+            makeTransaction(kind: .income, amount: 5_000_000, accountID: account.id),
+        ]
+
+        #expect(
+            CashBalanceSummary.available(
+                for: account,
+                deposits: [],
+                holdings: [],
+                transactions: transactions
+            ) == 14_800_000
+        )
+    }
+
+    @Test("Another account's transactions leave this balance alone")
+    func flowIsScopedToOneAccount() {
+        let wallet = makeUniqueAccount(openingBalance: 1_000_000)
+        let bank = makeUniqueAccount(openingBalance: 9_000_000)
+        let transactions = [
+            makeTransaction(kind: .expense, amount: 400_000, accountID: bank.id)
+        ]
+
+        #expect(
+            CashBalanceSummary.available(
+                for: wallet,
+                deposits: [],
+                holdings: [],
+                transactions: transactions
+            ) == 1_000_000
+        )
+        #expect(
+            CashBalanceSummary.totalAvailable(
+                of: [wallet, bank],
+                deposits: [],
+                holdings: [],
+                transactions: transactions
+            ) == 9_600_000
+        )
+    }
+
+    @Test("Spending past the balance is allowed and reports a negative figure")
+    func flowMayDriveTheBalanceNegative() {
+        let account = makeUniqueAccount(openingBalance: 100_000)
+        let transactions = [
+            makeTransaction(kind: .expense, amount: 350_000, accountID: account.id)
+        ]
+
+        #expect(
+            CashBalanceSummary.available(
+                for: account,
+                deposits: [],
+                holdings: [],
+                transactions: transactions
+            ) == -250_000
+        )
+    }
+
+    @Test("Flow, a deposit, and a holding each take their đồng exactly once")
+    func flowCombinesWithFundedAmounts() {
+        let account = makeUniqueAccount(openingBalance: 50_000_000)
+        let deposit = SavingsDeposit(
+            id: UUID(),
+            name: "Techcombank",
+            principal: 20_000_000,
+            annualInterestRate: 5,
+            termMonths: 6,
+            openedAt: fixedDate,
+            currencyCode: VNDCurrency.code,
+            createdAt: fixedDate,
+            sourceAccountID: account.id
+        )
+        let holding = FundHolding(
+            id: UUID(),
+            name: "VESAF",
+            symbol: "VESAF",
+            kind: .fund,
+            units: 100,
+            averageCostPerUnit: 50_000,
+            currentNAVPerUnit: 50_000,
+            navAsOf: fixedDate,
+            currencyCode: VNDCurrency.code,
+            createdAt: fixedDate,
+            sourceAccountID: account.id
+        )
+        let transactions = [
+            makeTransaction(kind: .expense, amount: 1_000_000, accountID: account.id)
+        ]
+
+        // 50.000.000 − 1.000.000 spent − 20.000.000 deposited − 5.000.000 invested
+        #expect(
+            CashBalanceSummary.available(
+                for: account,
+                deposits: [deposit],
+                holdings: [holding],
+                transactions: transactions
+            ) == 24_000_000
+        )
+    }
+
+    private let fixedDate = Date(timeIntervalSince1970: 1_700_000_000)
+
+    private func makeUniqueAccount(openingBalance: Decimal) -> CashAccount {
+        CashAccount(
+            id: UUID(),
+            name: "Account",
+            kind: .cash,
+            openingBalance: openingBalance,
+            currencyCode: VNDCurrency.code,
+            createdAt: fixedDate
+        )
+    }
+
+    private func makeTransaction(
+        kind: TransactionKind,
+        amount: Decimal,
+        accountID: UUID
+    ) -> MoneyTransaction {
+        MoneyTransaction(
+            id: UUID(),
+            kind: kind,
+            amount: amount,
+            occurredAt: fixedDate,
+            note: "",
+            accountID: accountID,
+            categoryID: nil,
+            currencyCode: VNDCurrency.code,
+            createdAt: fixedDate
+        )
+    }
+
     private func makeAccount(
         kind: CashAccountKind,
         openingBalance: Decimal

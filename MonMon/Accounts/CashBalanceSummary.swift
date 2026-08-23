@@ -25,23 +25,36 @@ enum CashBalanceSummary {
         }
     }
 
-    /// Opening balance minus the money moved into savings deposits and funds.
+    /// Where tracking started, plus the recorded cash flow, minus the money
+    /// moved into savings deposits and funds. `openingBalance` is never
+    /// rewritten; every later change is derived. Like `holdings`, `transactions`
+    /// has no default value on purpose — a forgotten argument would silently
+    /// misreport the spendable balance.
     static func available(
         for account: CashAccount,
         deposits: [SavingsDeposit],
-        holdings: [FundHolding]
+        holdings: [FundHolding],
+        transactions: [MoneyTransaction]
     ) -> Decimal {
         account.openingBalance
+            + TransactionSummary.netFlow(for: account, transactions: transactions)
             - fundedAmount(for: account, deposits: deposits, holdings: holdings)
     }
 
     static func totalAvailable(
         of accounts: [CashAccount],
         deposits: [SavingsDeposit],
-        holdings: [FundHolding]
+        holdings: [FundHolding],
+        transactions: [MoneyTransaction]
     ) -> Decimal {
         accounts.reduce(Decimal.zero) { total, account in
-            total + available(for: account, deposits: deposits, holdings: holdings)
+            total
+                + available(
+                    for: account,
+                    deposits: deposits,
+                    holdings: holdings,
+                    transactions: transactions
+                )
         }
     }
 }

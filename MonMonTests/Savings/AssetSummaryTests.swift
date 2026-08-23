@@ -101,7 +101,12 @@ struct AssetSummaryTests {
             ) == 0
         )
         #expect(
-            CashBalanceSummary.available(for: account, deposits: [unrelated], holdings: [])
+            CashBalanceSummary.available(
+                for: account,
+                deposits: [unrelated],
+                holdings: [],
+                transactions: []
+            )
                 == 148_900_000
         )
     }
@@ -116,7 +121,12 @@ struct AssetSummaryTests {
                 == 100_000_000
         )
         #expect(
-            CashBalanceSummary.available(for: account, deposits: [deposit], holdings: [])
+            CashBalanceSummary.available(
+                for: account,
+                deposits: [deposit],
+                holdings: [],
+                transactions: []
+            )
                 == 48_900_000
         )
         #expect(CashBalanceSummary.total(of: [account]) == 148_900_000)
@@ -131,14 +141,20 @@ struct AssetSummaryTests {
         ]
 
         #expect(
-            CashBalanceSummary.available(for: account, deposits: deposits, holdings: [])
+            CashBalanceSummary.available(
+                for: account,
+                deposits: deposits,
+                holdings: [],
+                transactions: []
+            )
                 == 8_900_000
         )
         #expect(
             CashBalanceSummary.totalAvailable(
                 of: [account],
                 deposits: deposits,
-                holdings: []
+                holdings: [],
+                transactions: []
             ) == 8_900_000
         )
     }
@@ -149,7 +165,12 @@ struct AssetSummaryTests {
         let funded = makeDeposit(principal: 100_000_000, sourceAccountID: account.id)
 
         #expect(
-            AssetSummary.netWorth(accounts: [account], deposits: [funded], holdings: [])
+            AssetSummary.netWorth(
+                accounts: [account],
+                deposits: [funded],
+                holdings: [],
+                transactions: []
+            )
                 == 148_900_000
         )
     }
@@ -160,7 +181,12 @@ struct AssetSummaryTests {
         let external = makeDeposit(principal: 250_000_000)
 
         #expect(
-            AssetSummary.netWorth(accounts: [account], deposits: [external], holdings: [])
+            AssetSummary.netWorth(
+                accounts: [account],
+                deposits: [external],
+                holdings: [],
+                transactions: []
+            )
                 == 398_900_000
         )
     }
@@ -180,7 +206,12 @@ struct AssetSummaryTests {
                 == 20_000_000
         )
         #expect(
-            CashBalanceSummary.available(for: account, deposits: [], holdings: [holding])
+            CashBalanceSummary.available(
+                for: account,
+                deposits: [],
+                holdings: [holding],
+                transactions: []
+            )
                 == 128_900_000
         )
     }
@@ -200,7 +231,8 @@ struct AssetSummaryTests {
             CashBalanceSummary.available(
                 for: account,
                 deposits: [deposit],
-                holdings: [holding]
+                holdings: [holding],
+                transactions: []
             ) == 28_900_000
         )
     }
@@ -218,7 +250,12 @@ struct AssetSummaryTests {
         // NAV still equals the average cost, so buying moved money without
         // changing what it is all worth.
         #expect(
-            AssetSummary.netWorth(accounts: [account], deposits: [], holdings: [flat])
+            AssetSummary.netWorth(
+                accounts: [account],
+                deposits: [],
+                holdings: [flat],
+                transactions: []
+            )
                 == 148_900_000
         )
 
@@ -232,7 +269,12 @@ struct AssetSummaryTests {
         // The NAV is 5.000 ₫ higher on 1.000 units, so net worth grows by exactly
         // the 5.000.000 ₫ unrealized gain.
         #expect(
-            AssetSummary.netWorth(accounts: [account], deposits: [], holdings: [gaining])
+            AssetSummary.netWorth(
+                accounts: [account],
+                deposits: [],
+                holdings: [gaining],
+                transactions: []
+            )
                 == 153_900_000
         )
     }
@@ -247,7 +289,12 @@ struct AssetSummaryTests {
         )
 
         #expect(
-            AssetSummary.netWorth(accounts: [account], deposits: [], holdings: [external])
+            AssetSummary.netWorth(
+                accounts: [account],
+                deposits: [],
+                holdings: [external],
+                transactions: []
+            )
                 == 173_900_000
         )
     }

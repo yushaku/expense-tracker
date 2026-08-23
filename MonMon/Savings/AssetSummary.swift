@@ -21,15 +21,19 @@ enum AssetSummary {
     /// worth today. Money moved from an account into a deposit or a holding is
     /// already removed from the spendable side, so it is counted once; a holding
     /// contributes its market value, so an unrealized gain shows up as growth.
+    /// Recorded income and expense reach this figure through the spendable side,
+    /// so an expense lowers net worth by exactly its amount.
     static func netWorth(
         accounts: [CashAccount],
         deposits: [SavingsDeposit],
-        holdings: [FundHolding]
+        holdings: [FundHolding],
+        transactions: [MoneyTransaction]
     ) -> Decimal {
         CashBalanceSummary.totalAvailable(
             of: accounts,
             deposits: deposits,
-            holdings: holdings
+            holdings: holdings,
+            transactions: transactions
         )
             + totalPrincipal(of: deposits)
             + FundSummary.totalMarketValue(of: holdings)

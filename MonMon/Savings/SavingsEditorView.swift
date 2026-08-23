@@ -34,6 +34,9 @@ struct SavingsEditorView: View {
     @Query(sort: \SavingsDeposit.createdAt, order: .forward)
     private var deposits: [SavingsDeposit]
 
+    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
+    private var transactions: [MoneyTransaction]
+
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
@@ -126,7 +129,8 @@ struct SavingsEditorView: View {
         var available = CashBalanceSummary.available(
             for: account,
             deposits: deposits,
-            holdings: holdings
+            holdings: holdings,
+            transactions: transactions
         )
 
         if let editedDeposit = mode.editedDeposit,
