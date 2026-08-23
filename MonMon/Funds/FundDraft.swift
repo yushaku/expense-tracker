@@ -1,69 +1,51 @@
 import Foundation
 
 enum FundFormError: Error, Equatable {
-    case emptyName
-    case emptySymbol
+    case missingInstrument
     case invalidUnits
     case nonPositiveUnits
     case invalidAverageCost
     case nonPositiveAverageCost
-    case invalidNAV
-    case nonPositiveNAV
     case insufficientSourceBalance
 }
 
+/// Validates a position before any `FundHolding` is written.
+///
+/// The name, the ticker, the kind, and the price are no longer here: they
+/// belong to the instrument, and the form picks one rather than retyping them.
+/// What remains is what a position actually is.
 struct FundDraft: Equatable {
-    var name: String
-    var symbol: String
-    var kind: FundHoldingKind
+    var instrumentID: UUID?
     var unitsText: String
     var averageCostText: String
-    var navText: String
-    var navAsOf: Date
     var sourceAccountID: UUID?
 
     init(
-        name: String = "",
-        symbol: String = "",
-        kind: FundHoldingKind = .fund,
+        instrumentID: UUID? = nil,
         unitsText: String = "",
         averageCostText: String = "",
-        navText: String = "",
-        navAsOf: Date,
         sourceAccountID: UUID? = nil
     ) {
-        self.name = name
-        self.symbol = symbol
-        self.kind = kind
+        self.instrumentID = instrumentID
         self.unitsText = unitsText
         self.averageCostText = averageCostText
-        self.navText = navText
-        self.navAsOf = navAsOf
         self.sourceAccountID = sourceAccountID
     }
 
     init(holding: FundHolding) {
         self.init(
-            name: holding.name,
-            symbol: holding.symbol,
-            kind: holding.kind,
+            instrumentID: holding.instrumentID,
             unitsText: UnitQuantity.format(holding.units),
             averageCostText: VNDCurrency.formatPlain(holding.averageCostPerUnit),
-            navText: VNDCurrency.formatPlain(holding.currentNAVPerUnit),
-            navAsOf: holding.navAsOf,
             sourceAccountID: holding.sourceAccountID
         )
     }
 
     /// Validated values ready to write to a model.
     struct ValidatedValues: Equatable {
-        var name: String
-        var symbol: String
-        var kind: FundHoldingKind
+        var instrumentID: UUID
         var units: Decimal
         var averageCostPerUnit: Decimal
-        var currentNAVPerUnit: Decimal
-        var navAsOf: Date
 
         var costBasis: Decimal {
             FundValuation.costBasis(units: units, averageCostPerUnit: averageCostPerUnit)
@@ -75,14 +57,8 @@ struct FundDraft: Equatable {
     ///   When editing, the caller adds this holding's current cost basis back so
     ///   re-saving unchanged values never reports an overdraft.
     func validate(availableSourceBalance: Decimal?) throws -> ValidatedValues {
-        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedName.isEmpty else {
-            throw FundFormError.emptyName
-        }
-
-        let trimmedSymbol = symbol.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedSymbol.isEmpty else {
-            throw FundFormError.emptySymbol
+        guard let instrumentID else {
+            throw FundFormError.missingInstrument
         }
 
         guard let units = UnitQuantity.parse(unitsText) else {
@@ -101,22 +77,10 @@ struct FundDraft: Equatable {
             throw FundFormError.nonPositiveAverageCost
         }
 
-        guard let currentNAVPerUnit = VNDCurrency.parse(navText) else {
-            throw FundFormError.invalidNAV
-        }
-
-        guard currentNAVPerUnit > 0 else {
-            throw FundFormError.nonPositiveNAV
-        }
-
         let values = ValidatedValues(
-            name: trimmedName,
-            symbol: trimmedSymbol.uppercased(),
-            kind: kind,
+            instrumentID: instrumentID,
             units: units,
-            averageCostPerUnit: averageCostPerUnit,
-            currentNAVPerUnit: currentNAVPerUnit,
-            navAsOf: navAsOf
+            averageCostPerUnit: averageCostPerUnit
         )
 
         if let availableSourceBalance, values.costBasis > availableSourceBalance {
@@ -135,14 +99,9 @@ struct FundDraft: Equatable {
 
         return FundHolding(
             id: id,
-            name: values.name,
-            symbol: values.symbol,
-            kind: values.kind,
+            instrumentID: values.instrumentID,
             units: values.units,
             averageCostPerUnit: values.averageCostPerUnit,
-            currentNAVPerUnit: values.currentNAVPerUnit,
-            navAsOf: values.navAsOf,
-            currencyCode: VNDCurrency.code,
             createdAt: createdAt,
             sourceAccountID: sourceAccountID
         )
@@ -154,13 +113,9 @@ struct FundDraft: Equatable {
     ) throws {
         let values = try validate(availableSourceBalance: availableSourceBalance)
 
-        holding.name = values.name
-        holding.symbol = values.symbol
-        holding.kind = values.kind
+        holding.instrumentID = values.instrumentID
         holding.units = values.units
         holding.averageCostPerUnit = values.averageCostPerUnit
-        holding.currentNAVPerUnit = values.currentNAVPerUnit
-        holding.navAsOf = values.navAsOf
         holding.sourceAccountID = sourceAccountID
     }
 }

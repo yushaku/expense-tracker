@@ -50,6 +50,7 @@ enum AssetAllocation {
         accounts: [CashAccount],
         deposits: [SavingsDeposit],
         holdings: [FundHolding],
+        instruments: [FundInstrument],
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
         debts: [Debt],
@@ -74,7 +75,7 @@ enum AssetAllocation {
             ),
             AssetAllocationSlice(
                 kind: .funds,
-                amount: FundSummary.totalMarketValue(of: holdings)
+                amount: FundSummary.totalMarketValue(of: holdings, instruments: instruments)
             ),
             AssetAllocationSlice(
                 kind: .lent,

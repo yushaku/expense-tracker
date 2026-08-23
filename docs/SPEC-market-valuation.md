@@ -170,9 +170,12 @@ final class FundHolding {
 }
 ```
 
-`FundHoldingKind` is renamed to `FundInstrumentKind`. This is a Swift-level
-rename only: the persisted raw values stay `"fund"` and `"etf"`, so no stored
-record changes and no raw value is ever renamed.
+`FundInstrumentKind` is a **typealias** for `FundHoldingKind`, not a rename.
+Renaming the type looked free — the raw values never change — but SwiftData
+hashes the attribute's Swift type name into the schema, and a renamed enum makes
+an existing store unrecognisable (`Cannot use staged migration with an unknown
+model version`). The alias gives new code the name that reads correctly while
+the stored shape stays byte-identical.
 
 Rules on the instrument:
 
@@ -227,40 +230,63 @@ the holding, so **the cash side of the app is untouched by this module**. Only
 `AssetSummary.netWorth` and `AssetAllocation` need the instrument, and only to
 read a price.
 
-### Model split and migration
+### Model split and backfill
 
 Existing stores hold `FundHolding` rows carrying `name`, `symbol`, `kind`,
-`currentNAVPerUnit`, `navAsOf`, and `currencyCode`. Those six move or disappear.
-SwiftData cannot infer a split of one entity into two, so this needs a versioned
-schema with a custom migration stage rather than a lightweight one:
+`currentNAVPerUnit`, `navAsOf`, and `currencyCode`.
 
-- `SchemaV1` is today's five-model schema plus `AccountTransfer`.
-- `SchemaV2` adds `FundInstrument` and reshapes `FundHolding`.
-- The custom stage reads every V1 holding before the change and writes the
-  catalogue and the rewritten holdings after it.
+The obvious way to move them is a `VersionedSchema` pair with a custom
+`MigrationStage`. **That does not work here, and was tried first.** A store this
+app has already written fails to open at all:
 
-Migration rule, in order:
+```
+Cannot use staged migration with an unknown model version.
+```
 
-1. Group V1 holdings by `symbol.uppercased()`.
-2. Create one `FundInstrument` per group. Take `name` and `kind` from the
-   group's **oldest** holding by `createdAt`, so the first thing the owner
-   entered wins over a later typo.
-3. Take `currentPricePerUnit` and `priceAsOf` from the group's holding with the
+Staged migration has to recognise the store as the "from" version, and a store
+created by an unversioned `ModelContainer(for:)` — every build shipped so far —
+is not recognised. The failure lands inside `ModelContainer.init`, before there
+is any UI to report it with, on the owner's real records.
+
+So the schema change is kept **purely additive** and the linking happens after
+the store is open:
+
+- `FundInstrument` is a new entity.
+- `FundHolding.instrumentID` is a new **optional**. `nil` means "not yet
+  linked", never "held in nothing"; every write from `FundDraft` requires a
+  choice.
+- The six pre-split fields **stay declared** on `FundHolding` with defaults, so
+  SwiftData opens the store with no migration at all. Nothing but the backfill
+  reads them.
+- `FundInstrumentBackfill.runIfNeeded(in:)` runs once at launch, after
+  `CategorySeed`. It is idempotent, so it does nothing on every later launch.
+
+Backfill rule, in order:
+
+1. Fetch holdings where `instrumentID == nil`. Stop if there are none.
+2. Group them by `symbol.uppercased()`. A holding with no symbol is skipped
+   rather than collapsed into a nameless instrument.
+3. Reuse an instrument the catalogue already carries for that ticker; otherwise
+   create one. Take `name` and `kind` from the group's **oldest** holding by
+   `createdAt`, so the first thing the owner entered wins over a later typo.
+4. Take `currentPricePerUnit` and `priceAsOf` from the group's holding with the
    **newest** `navAsOf`. When two rows disagreed, the more recent price is the
    better guess and the older one was already wrong.
-4. Set `priceSource = "manual"`, `priceFetchedAt = nil`,
-   `autoQuoteEnabled = true`, `currencyCode` from the same holding.
-5. Point every holding in the group at that instrument and drop the six moved
-   fields.
+5. Point every holding in the group at that instrument.
 
-No holding is deleted and no unit count or average cost is touched, so cost
-basis, funded amount, and every cash balance come out of the migration
+No holding is deleted and no unit count, average cost, or funding link is
+touched, so cost basis, funded amount, and every cash balance come out of it
 identical. Only a duplicated ticker's *price* can change, and only towards the
 more recent of the two figures it already held.
 
-A migration that throws leaves the store on V1 and surfaces the error rather
-than opening a half-built V2. The app must not silently start with an empty
-catalogue.
+A backfill that throws is reported and the app still runs: holdings it could not
+link render as "instrument missing" rather than taking the app down, and the
+next launch tries again. That is only safe because the store already opened.
+
+**The cost** is six dead columns on `FundHolding` until a later module drops
+them, once every store has been through this. That is the price of a change
+that cannot fail at launch, and it is the right trade for a store holding the
+owner's only copy of their records.
 
 ### Providers
 
@@ -520,9 +546,11 @@ This is the app's first outbound connection, and the contract is narrow:
 - `MonMonApp` installs one `ModelContainer` holding `CashAccount`,
   `SavingsDeposit`, `FundInstrument`, `FundHolding`, `TransactionCategory`,
   `MoneyTransaction`, and `AccountTransfer` — seven models.
-- The container is created with a `SchemaMigrationPlan` carrying the V1 to V2
-  stage described above. This is the first migration in the project; every
-  earlier schema change was additive.
+- `MonMonSchema.models` is the single list of registered models, used by the app
+  container and by every in-memory test container so the two cannot drift.
+- **No migration plan is installed.** Both changes are additive, so no store is
+  ever asked to stage, and `ModelContainer.init` cannot fail on a store an
+  earlier build wrote.
 - Symbol uniqueness is enforced in the draft layer against a fetch of existing
   instruments, never by `@Attribute(.unique)`.
 - Lists use SwiftData `@Query`; editors take `ModelContext` from the environment,
@@ -553,11 +581,17 @@ Automated, fixture-driven:
 - `FundHoldingPersistenceTests` — reshaped: a holding round trips with
   `instrumentID`; two holdings share one instrument and both value from its
   single price; deleting an instrument is blocked while a holding references it.
-- `FundMigrationTests` — a V1 store with two holdings of one ticker at different
-  prices migrates to one instrument at the newer `navAsOf`; name and kind come
-  from the older holding; unit counts, average costs, funding links, cost basis,
-  and every cash balance are identical before and after; a V1 store with no
-  holdings migrates to an empty catalogue; a throwing stage leaves V1 intact.
+- `FundInstrumentBackfillTests` — an empty store backfills nothing; one legacy
+  holding becomes one instrument it points at, with units, average cost, funding
+  link, and cost basis untouched; two rows of one ticker collapse to one
+  instrument taking identity from the older and price from the newer; two
+  tickers become two instruments; running twice changes nothing the second time;
+  a holding that already points somewhere is left alone; a legacy holding joins
+  an instrument the catalogue already has without overwriting its price; a
+  holding with no ticker is skipped.
+- `FundInstrumentSeedTests` — grouping is case-insensitive and keeps first-seen
+  order; an empty input produces no groups; a blank name falls back to the
+  ticker.
 - `FmarketQuoteProviderTests` — decode a recorded `/filter` body to id, symbol,
   and search candidates; decode a recorded `get-nav-history` body to the last
   point; VND needs no scaling; a missing symbol raises `symbolNotFound`; an
@@ -669,7 +703,8 @@ rtk swift format lint --strict --recursive MonMon MonMonTests
 - Add an App Transport Security exception, or accept an invalid certificate.
 - Use `Double` or `Float` for a price, in decoding or in arithmetic.
 - Overwrite a good price with zero, nil, or a placeholder on failure.
-- Open a V2 store with an empty catalogue after a migration that failed.
+- Install a migration plan that can stop the app from opening its store.
+- Read a pre-split field anywhere but the backfill.
 - Delete an instrument a holding still references.
 - Let a network failure block the app, or a refresh run without the owner asking.
 - Treat a provider's `description` or `type` as authoritative about an
@@ -690,9 +725,10 @@ rtk swift format lint --strict --recursive MonMon MonMonTests
   no floating-point residue.
 - Market value, unrealized profit or loss, and total assets move with a refreshed
   price; every cash balance and every cost basis stays where it was.
-- Migrating a populated V1 store preserves every unit count, average cost,
+- Backfilling a populated store preserves every unit count, average cost,
   funding link, cost basis, and cash balance exactly, and collapses a duplicated
-  ticker to its most recent price.
+  ticker to its most recent price. Running it again changes nothing.
+- The app opens a store written by any earlier build without a migration.
 - A failed fetch leaves all four price fields untouched and says why in text.
 - One ticker failing does not stop the rest of the refresh.
 - A second refresh inside 15 minutes makes no request, and ten positions in one
@@ -713,10 +749,13 @@ rtk swift format lint --strict --recursive MonMon MonMonTests
 1. This spec amends the approved `SPEC-fund-etf-holdings.md` by reshaping
    `FundHolding`. That spec needs a superseding note pointing here, added on
    approval rather than now.
-2. `CAPABILITY-MAP.md` lists `market-valuation` as depending on
+2. The six pre-split fields on `FundHolding` are dead weight once every store has
+   been backfilled. Dropping them needs its own change, and a way to know the
+   owner's store has run the backfill at least once.
+3. `CAPABILITY-MAP.md` lists `market-valuation` as depending on
    `investment-tracking`. Slice 1 depends only on `fund-etf-holdings`. The map
    should either split the row or record that the dependency applies to slice 2
    alone. Left unedited pending owner direction.
-3. Both providers are undocumented endpoints with no licence to reuse their data.
+4. Both providers are undocumented endpoints with no licence to reuse their data.
    That is acceptable for a private local app and is a decision to revisit before
    any distribution beyond the owner's own devices.

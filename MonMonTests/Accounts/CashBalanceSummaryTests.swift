@@ -113,17 +113,11 @@ struct CashBalanceSummaryTests {
             createdAt: fixedDate,
             sourceAccountID: account.id
         )
-        let holding = FundHolding(
-            id: UUID(),
-            name: "VESAF",
-            symbol: "VESAF",
-            kind: .fund,
+        let instrument = FundTestFactory.instrument(pricePerUnit: 50_000)
+        let holding = FundTestFactory.holding(
+            in: instrument,
             units: 100,
             averageCostPerUnit: 50_000,
-            currentNAVPerUnit: 50_000,
-            navAsOf: fixedDate,
-            currencyCode: VNDCurrency.code,
-            createdAt: fixedDate,
             sourceAccountID: account.id
         )
         let transactions = [

@@ -16,7 +16,7 @@ struct FundValuationTests {
     @Test("Market value is units times the current NAV")
     func marketValueMultiplies() {
         #expect(
-            FundValuation.marketValue(units: 1_000, currentNAVPerUnit: 25_000)
+            FundValuation.marketValue(units: 1_000, pricePerUnit: 25_000)
                 == 25_000_000
         )
     }
@@ -27,14 +27,14 @@ struct FundValuationTests {
             FundValuation.unrealizedProfitLoss(
                 units: 1_000,
                 averageCostPerUnit: 20_000,
-                currentNAVPerUnit: 25_000
+                pricePerUnit: 25_000
             ) == 5_000_000
         )
         #expect(
             FundValuation.returnPercent(
                 units: 1_000,
                 averageCostPerUnit: 20_000,
-                currentNAVPerUnit: 25_000
+                pricePerUnit: 25_000
             ) == 25
         )
     }
@@ -45,14 +45,14 @@ struct FundValuationTests {
             FundValuation.unrealizedProfitLoss(
                 units: 1_000,
                 averageCostPerUnit: 25_000,
-                currentNAVPerUnit: 20_000
+                pricePerUnit: 20_000
             ) == -5_000_000
         )
         #expect(
             FundValuation.returnPercent(
                 units: 1_000,
                 averageCostPerUnit: 25_000,
-                currentNAVPerUnit: 20_000
+                pricePerUnit: 20_000
             ) == -20
         )
     }
@@ -63,14 +63,14 @@ struct FundValuationTests {
             FundValuation.unrealizedProfitLoss(
                 units: 1_000,
                 averageCostPerUnit: 20_000,
-                currentNAVPerUnit: 20_000
+                pricePerUnit: 20_000
             ) == 0
         )
         #expect(
             FundValuation.returnPercent(
                 units: 1_000,
                 averageCostPerUnit: 20_000,
-                currentNAVPerUnit: 20_000
+                pricePerUnit: 20_000
             ) == 0
         )
     }
@@ -95,7 +95,7 @@ struct FundValuationTests {
     func nonPositiveInputsValueAtZero() {
         #expect(FundValuation.costBasis(units: 0, averageCostPerUnit: 20_000) == 0)
         #expect(FundValuation.costBasis(units: 1_000, averageCostPerUnit: 0) == 0)
-        #expect(FundValuation.marketValue(units: -5, currentNAVPerUnit: 20_000) == 0)
+        #expect(FundValuation.marketValue(units: -5, pricePerUnit: 20_000) == 0)
     }
 
     @Test("A zero cost basis returns zero percent instead of dividing by zero")
@@ -104,7 +104,7 @@ struct FundValuationTests {
             FundValuation.returnPercent(
                 units: 1_000,
                 averageCostPerUnit: 0,
-                currentNAVPerUnit: 25_000
+                pricePerUnit: 25_000
             ) == 0
         )
     }

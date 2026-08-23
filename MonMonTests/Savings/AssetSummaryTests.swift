@@ -4,7 +4,10 @@ import Testing
 @testable import MonMon
 
 @Suite("Asset summary")
-struct AssetSummaryTests {
+final class AssetSummaryTests {
+    /// Every instrument `makeHolding` minted, in the order it was asked for.
+    private var catalogue: [FundInstrument] = []
+
     private let openedAt = Date(timeIntervalSince1970: 1_700_000_000)
 
     private func makeAccount(openingBalance: Decimal) -> CashAccount {
@@ -18,23 +21,26 @@ struct AssetSummaryTests {
         )
     }
 
+    /// A position and the catalogue entry that prices it. Since the split, one
+    /// without the other cannot be valued, so the pair is built together and the
+    /// instrument is kept on the holding for the assertions below.
     private func makeHolding(
         units: Decimal,
         averageCostPerUnit: Decimal,
-        currentNAVPerUnit: Decimal,
+        pricePerUnit: Decimal,
+        symbol: String = "VESAF",
         sourceAccountID: UUID? = nil
     ) -> FundHolding {
-        FundHolding(
-            id: UUID(),
-            name: "Holding",
-            symbol: "VESAF",
-            kind: .fund,
+        let instrument = FundTestFactory.instrument(
+            symbol: symbol,
+            pricePerUnit: pricePerUnit
+        )
+        catalogue.append(instrument)
+
+        return FundTestFactory.holding(
+            in: instrument,
             units: units,
             averageCostPerUnit: averageCostPerUnit,
-            currentNAVPerUnit: currentNAVPerUnit,
-            navAsOf: openedAt,
-            currencyCode: VNDCurrency.code,
-            createdAt: openedAt,
             sourceAccountID: sourceAccountID
         )
     }
@@ -181,6 +187,7 @@ struct AssetSummaryTests {
                 accounts: [account],
                 deposits: [funded],
                 holdings: [],
+                instruments: catalogue,
                 transactions: [],
                 transfers: [],
                 debts: [],
@@ -200,6 +207,7 @@ struct AssetSummaryTests {
                 accounts: [account],
                 deposits: [external],
                 holdings: [],
+                instruments: catalogue,
                 transactions: [],
                 transfers: [],
                 debts: [],
@@ -215,7 +223,7 @@ struct AssetSummaryTests {
         let holding = makeHolding(
             units: 1_000,
             averageCostPerUnit: 20_000,
-            currentNAVPerUnit: 25_000,
+            pricePerUnit: 25_000,
             sourceAccountID: account.id
         )
 
@@ -244,7 +252,7 @@ struct AssetSummaryTests {
         let holding = makeHolding(
             units: 1_000,
             averageCostPerUnit: 20_000,
-            currentNAVPerUnit: 25_000,
+            pricePerUnit: 25_000,
             sourceAccountID: account.id
         )
 
@@ -267,7 +275,7 @@ struct AssetSummaryTests {
         let flat = makeHolding(
             units: 1_000,
             averageCostPerUnit: 20_000,
-            currentNAVPerUnit: 20_000,
+            pricePerUnit: 20_000,
             sourceAccountID: account.id
         )
 
@@ -278,6 +286,7 @@ struct AssetSummaryTests {
                 accounts: [account],
                 deposits: [],
                 holdings: [flat],
+                instruments: catalogue,
                 transactions: [],
                 transfers: [],
                 debts: [],
@@ -289,7 +298,7 @@ struct AssetSummaryTests {
         let gaining = makeHolding(
             units: 1_000,
             averageCostPerUnit: 20_000,
-            currentNAVPerUnit: 25_000,
+            pricePerUnit: 25_000,
             sourceAccountID: account.id
         )
 
@@ -300,6 +309,7 @@ struct AssetSummaryTests {
                 accounts: [account],
                 deposits: [],
                 holdings: [gaining],
+                instruments: catalogue,
                 transactions: [],
                 transfers: [],
                 debts: [],
@@ -315,7 +325,7 @@ struct AssetSummaryTests {
         let external = makeHolding(
             units: 1_000,
             averageCostPerUnit: 20_000,
-            currentNAVPerUnit: 25_000
+            pricePerUnit: 25_000
         )
 
         #expect(
@@ -323,6 +333,7 @@ struct AssetSummaryTests {
                 accounts: [account],
                 deposits: [],
                 holdings: [external],
+                instruments: catalogue,
                 transactions: [],
                 transfers: [],
                 debts: [],

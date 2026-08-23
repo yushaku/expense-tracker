@@ -37,6 +37,9 @@ struct AccountEditorView: View {
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
+    @Query(sort: \FundInstrument.symbol, order: .forward)
+    private var instruments: [FundInstrument]
+
     @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
     private var transfers: [AccountTransfer]
 

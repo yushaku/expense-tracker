@@ -71,30 +71,47 @@ final class CashAccount {
         }
     }
 
-    extension FundHolding {
+    extension FundInstrument {
         static func preview(
             name: String,
             symbol: String,
-            kind: FundHoldingKind,
+            kind: FundInstrumentKind,
+            currentPricePerUnit: Decimal,
+            priceOffset: TimeInterval = 0,
+            source: FundQuoteSource = .manual
+        ) -> FundInstrument {
+            let priceAsOf = Date(timeIntervalSince1970: 1_700_000_000 + priceOffset)
+
+            return FundInstrument(
+                id: UUID(),
+                symbol: symbol,
+                name: name,
+                kind: kind,
+                currentPricePerUnit: currentPricePerUnit,
+                priceAsOf: priceAsOf,
+                priceSource: source.rawValue,
+                priceFetchedAt: source == .manual ? nil : priceAsOf,
+                autoQuoteEnabled: true,
+                currencyCode: VNDCurrency.code,
+                createdAt: priceAsOf
+            )
+        }
+    }
+
+    extension FundHolding {
+        static func preview(
+            instrument: FundInstrument,
             units: Decimal,
             averageCostPerUnit: Decimal,
-            currentNAVPerUnit: Decimal,
-            navOffset: TimeInterval = 0,
+            createdOffset: TimeInterval = 0,
             sourceAccountID: UUID? = nil
         ) -> FundHolding {
-            let navAsOf = Date(timeIntervalSince1970: 1_700_000_000 + navOffset)
-
-            return FundHolding(
+            FundHolding(
                 id: UUID(),
-                name: name,
-                symbol: symbol,
-                kind: kind,
+                instrumentID: instrument.id,
                 units: units,
                 averageCostPerUnit: averageCostPerUnit,
-                currentNAVPerUnit: currentNAVPerUnit,
-                navAsOf: navAsOf,
-                currencyCode: VNDCurrency.code,
-                createdAt: navAsOf,
+                createdAt: Date(timeIntervalSince1970: 1_700_000_000 + createdOffset),
                 sourceAccountID: sourceAccountID
             )
         }
@@ -222,6 +239,7 @@ final class CashAccount {
         static let empty = makeContainer(
             accounts: [],
             deposits: [],
+            instruments: [],
             holdings: [],
             categories: [],
             transactions: [],
@@ -258,6 +276,21 @@ final class CashAccount {
                 symbolName: "briefcase.fill",
                 colorName: "green",
                 createdOffset: 60
+            )
+            let vesaf = FundInstrument.preview(
+                name: "VinaCapital VESAF",
+                symbol: "VESAF",
+                kind: .fund,
+                currentPricePerUnit: Decimal(string: "27431.28") ?? 0,
+                source: .fmarket
+            )
+            let diamond = FundInstrument.preview(
+                name: "Diamond ETF",
+                symbol: "FUEVFVND",
+                kind: .etf,
+                currentPricePerUnit: 29_850,
+                priceOffset: 86_400 * 20,
+                source: .vndirect
             )
 
             let borrowed = Debt.preview(
@@ -303,24 +336,19 @@ final class CashAccount {
                         openedOffset: 86_400 * 40
                     ),
                 ],
+                instruments: [vesaf, diamond],
                 holdings: [
                     .preview(
-                        name: "VinaCapital VESAF",
-                        symbol: "VESAF",
-                        kind: .fund,
+                        instrument: vesaf,
                         units: Decimal(string: "1234.5678") ?? 0,
                         averageCostPerUnit: 24_500,
-                        currentNAVPerUnit: Decimal(string: "27431.28") ?? 0,
                         sourceAccountID: techcombank.id
                     ),
                     .preview(
-                        name: "Diamond ETF",
-                        symbol: "FUEVFVND",
-                        kind: .etf,
+                        instrument: diamond,
                         units: 2_000,
                         averageCostPerUnit: 32_100,
-                        currentNAVPerUnit: 29_850,
-                        navOffset: 86_400 * 20
+                        createdOffset: 86_400 * 20
                     ),
                 ],
                 categories: [food, salary],
@@ -372,6 +400,7 @@ final class CashAccount {
         private static func makeContainer(
             accounts: [CashAccount],
             deposits: [SavingsDeposit],
+            instruments: [FundInstrument],
             holdings: [FundHolding],
             categories: [TransactionCategory],
             transactions: [MoneyTransaction],
@@ -382,9 +411,7 @@ final class CashAccount {
             let container: ModelContainer
             do {
                 container = try ModelContainer(
-                    for: CashAccount.self, SavingsDeposit.self, FundHolding.self,
-                    TransactionCategory.self, MoneyTransaction.self, AccountTransfer.self,
-                    Debt.self, DebtPayment.self,
+                    for: Schema(MonMonSchema.models),
                     configurations: ModelConfiguration(isStoredInMemoryOnly: true)
                 )
             } catch {
@@ -397,6 +424,10 @@ final class CashAccount {
 
             for deposit in deposits {
                 container.mainContext.insert(deposit)
+            }
+
+            for instrument in instruments {
+                container.mainContext.insert(instrument)
             }
 
             for holding in holdings {

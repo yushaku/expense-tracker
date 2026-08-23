@@ -21,3 +21,6 @@ xcuserdata/
 *.p12
 Config/Local.xcconfig
 
+
+# Coverage output from running the app or tests from the command line
+*.profraw

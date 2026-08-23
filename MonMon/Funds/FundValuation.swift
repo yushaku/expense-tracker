@@ -1,24 +1,28 @@
 import Foundation
 
-/// Valuation maths for a fund or ETF holding held at a hand-entered price:
-/// `cost basis = units × average cost`, `market value = units × NAV`, both
+/// Valuation maths for a fund or ETF position:
+/// `cost basis = units × average cost`, `market value = units × price`, both
 /// rounded to the đồng. Cost basis is rounded because it is the amount deducted
 /// from the funding account, so the cash side stays whole-đồng.
+///
+/// Every function takes prices as values. Nothing here reads a model, a
+/// network, a locale, or a clock, so a refreshed price changes what these
+/// return without changing how they work.
 enum FundValuation {
     static func costBasis(units: Decimal, averageCostPerUnit: Decimal) -> Decimal {
         amount(units: units, pricePerUnit: averageCostPerUnit)
     }
 
-    static func marketValue(units: Decimal, currentNAVPerUnit: Decimal) -> Decimal {
-        amount(units: units, pricePerUnit: currentNAVPerUnit)
+    static func marketValue(units: Decimal, pricePerUnit: Decimal) -> Decimal {
+        amount(units: units, pricePerUnit: pricePerUnit)
     }
 
     static func unrealizedProfitLoss(
         units: Decimal,
         averageCostPerUnit: Decimal,
-        currentNAVPerUnit: Decimal
+        pricePerUnit: Decimal
     ) -> Decimal {
-        marketValue(units: units, currentNAVPerUnit: currentNAVPerUnit)
+        marketValue(units: units, pricePerUnit: pricePerUnit)
             - costBasis(units: units, averageCostPerUnit: averageCostPerUnit)
     }
 
@@ -27,7 +31,7 @@ enum FundValuation {
     static func returnPercent(
         units: Decimal,
         averageCostPerUnit: Decimal,
-        currentNAVPerUnit: Decimal
+        pricePerUnit: Decimal
     ) -> Decimal {
         let basis = costBasis(units: units, averageCostPerUnit: averageCostPerUnit)
         guard basis > 0 else {
@@ -37,7 +41,7 @@ enum FundValuation {
         let profitLoss = unrealizedProfitLoss(
             units: units,
             averageCostPerUnit: averageCostPerUnit,
-            currentNAVPerUnit: currentNAVPerUnit
+            pricePerUnit: pricePerUnit
         )
 
         return profitLoss / basis * 100

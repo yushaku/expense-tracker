@@ -2,7 +2,15 @@ import SwiftUI
 
 struct FundHoldingCard: View {
     let holding: FundHolding
+    /// The instrument this position is held in, or `nil` when nothing in the
+    /// catalogue matches. Joins are resolved in Swift, so a dangling
+    /// `instrumentID` is representable and the card has to say so rather than
+    /// quietly rendering a zero.
+    let instrument: FundInstrument?
     let sourceAccountName: String?
+    /// Passed in rather than read from the clock, so a preview and a test both
+    /// get a stable answer for whether the price is stale.
+    var asOf: Date = .now
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -10,6 +18,7 @@ struct FundHoldingCard: View {
             Divider()
                 .overlay(MonMonTheme.border)
             position
+            priceRow
             profitLossRow
         }
         .padding(16)
@@ -27,7 +36,7 @@ struct FundHoldingCard: View {
 
     private var header: some View {
         HStack(spacing: 14) {
-            Text(holding.symbol.prefix(2))
+            Text((instrument?.symbol ?? "??").prefix(2))
                 .font(.system(size: 15, weight: .bold, design: .rounded))
                 .foregroundStyle(MonMonTheme.funds)
                 .frame(width: 44, height: 44)
@@ -38,7 +47,7 @@ struct FundHoldingCard: View {
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(holding.name)
+                Text(instrument?.name ?? "Unknown instrument")
                     .font(.headline)
                     .lineLimit(2)
 
@@ -50,7 +59,7 @@ struct FundHoldingCard: View {
             Spacer(minLength: 12)
 
             VStack(alignment: .trailing, spacing: 3) {
-                Text(VNDCurrency.format(holding.marketValue))
+                Text(VNDCurrency.format(marketValue))
                     .font(.headline)
                     .monospacedDigit()
                     .lineLimit(1)
@@ -84,10 +93,9 @@ struct FundHoldingCard: View {
             value: VNDCurrency.formatUnitPrice(holding.averageCostPerUnit)
         )
         detail(
-            title: "NAV",
-            value: VNDCurrency.formatUnitPrice(holding.currentNAVPerUnit)
+            title: priceTitle,
+            value: instrument.map { VNDCurrency.formatUnitPrice($0.currentPricePerUnit) } ?? "—"
         )
-        detail(title: "NAV AS OF", value: navDescription)
         detail(title: "COST BASIS", value: VNDCurrency.format(holding.costBasis))
     }
 
@@ -137,8 +145,73 @@ struct FundHoldingCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    /// Where the price came from and when it is from. A stale price says so in
+    /// words and carries a symbol; colour only reinforces it.
+    @ViewBuilder
+    private var priceRow: some View {
+        HStack(spacing: 7) {
+            Image(systemName: priceSymbol)
+                .font(.caption2.weight(.semibold))
+                .accessibilityHidden(true)
+
+            Text(priceDescription)
+                .font(.caption)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+
+            Spacer(minLength: 8)
+        }
+        .foregroundStyle(isStale ? MonMonTheme.danger : MonMonTheme.textSecondary)
+        .accessibilityIdentifier("quote-status")
+    }
+
+    private var pricePerUnit: Decimal {
+        instrument?.currentPricePerUnit ?? .zero
+    }
+
+    private var marketValue: Decimal {
+        holding.marketValue(pricePerUnit: pricePerUnit)
+    }
+
+    private var unrealizedProfitLoss: Decimal {
+        holding.unrealizedProfitLoss(pricePerUnit: pricePerUnit)
+    }
+
+    private var priceTitle: String {
+        instrument?.kind == .etf ? "PRICE" : "NAV"
+    }
+
+    private var isStale: Bool {
+        guard let instrument, instrument.autoQuoteEnabled else {
+            return false
+        }
+
+        return TradingCalendar.isStale(
+            priceAsOf: instrument.priceAsOf,
+            kind: instrument.kind,
+            asOf: asOf
+        )
+    }
+
+    private var priceSymbol: String {
+        if instrument == nil {
+            return "questionmark.circle"
+        }
+        return isStale ? "exclamationmark.circle.fill" : "clock"
+    }
+
+    private var priceDescription: String {
+        guard let instrument else {
+            return "Instrument missing — value cannot be worked out"
+        }
+
+        let day = instrument.priceAsOf.formatted(date: .abbreviated, time: .omitted)
+        let base = "\(instrument.priceLabel) \(day) · \(instrument.source.displayName)"
+        return isStale ? "\(base) · Stale" : base
+    }
+
     private var isGain: Bool {
-        holding.unrealizedProfitLoss >= 0
+        unrealizedProfitLoss >= 0
     }
 
     private var profitLossTitle: String {
@@ -147,53 +220,66 @@ struct FundHoldingCard: View {
 
     private var profitLossDescription: String {
         let sign = isGain ? "+" : "−"
-        let amount = VNDCurrency.format(abs(holding.unrealizedProfitLoss))
-        let percent = PercentInput.format(abs(holding.returnPercent))
+        let amount = VNDCurrency.format(abs(unrealizedProfitLoss))
+        let percent = PercentInput.format(abs(holding.returnPercent(pricePerUnit: pricePerUnit)))
         return "\(sign)\(amount) (\(sign)\(percent)%)"
     }
 
     private var subtitle: String {
-        if let sourceAccountName {
-            "\(holding.symbol) · \(holding.kind.displayName) · from \(sourceAccountName)"
-        } else {
-            "\(holding.symbol) · \(holding.kind.displayName)"
+        guard let instrument else {
+            return "Unknown instrument"
         }
-    }
 
-    private var navDescription: String {
-        holding.navAsOf.formatted(date: .abbreviated, time: .omitted)
+        if let sourceAccountName {
+            return
+                "\(instrument.symbol) · \(instrument.kind.displayName) · from \(sourceAccountName)"
+        }
+        return "\(instrument.symbol) · \(instrument.kind.displayName)"
     }
 }
 
 #if DEBUG
     #Preview("Holding cards") {
-        ZStack {
+        let vesaf = FundInstrument.preview(
+            name: "VinaCapital VESAF",
+            symbol: "VESAF",
+            kind: .fund,
+            currentPricePerUnit: Decimal(string: "27431.28") ?? 0,
+            source: .fmarket
+        )
+        let diamond = FundInstrument.preview(
+            name: "Diamond ETF",
+            symbol: "FUEVFVND",
+            kind: .etf,
+            currentPricePerUnit: 29_850,
+            source: .vndirect
+        )
+
+        return ZStack {
             MonMonTheme.canvas
                 .ignoresSafeArea()
 
             VStack(spacing: 16) {
                 FundHoldingCard(
                     holding: .preview(
-                        name: "VinaCapital VESAF",
-                        symbol: "VESAF",
-                        kind: .fund,
+                        instrument: vesaf,
                         units: Decimal(string: "1234.5678") ?? 0,
-                        averageCostPerUnit: 24_500,
-                        currentNAVPerUnit: Decimal(string: "27431.28") ?? 0
+                        averageCostPerUnit: 24_500
                     ),
-                    sourceAccountName: "Techcombank"
+                    instrument: vesaf,
+                    sourceAccountName: "Techcombank",
+                    asOf: vesaf.priceAsOf
                 )
 
                 FundHoldingCard(
                     holding: .preview(
-                        name: "Diamond ETF",
-                        symbol: "FUEVFVND",
-                        kind: .etf,
+                        instrument: diamond,
                         units: 2_000,
-                        averageCostPerUnit: 32_100,
-                        currentNAVPerUnit: 29_850
+                        averageCostPerUnit: 32_100
                     ),
-                    sourceAccountName: nil
+                    instrument: diamond,
+                    sourceAccountName: nil,
+                    asOf: Date(timeIntervalSince1970: 1_700_000_000 + 86_400 * 20)
                 )
             }
             .padding(20)

@@ -4,9 +4,13 @@ struct FundEditorForm: View {
     @Binding var draft: FundDraft
 
     let accounts: [CashAccount]
+    /// The catalogue to pick from. A position is held in something that already
+    /// exists, so the form selects rather than retypes.
+    let instruments: [FundInstrument]
     let isEditing: Bool
     let validationError: FundFormError?
     let saveErrorMessage: String?
+    let onAddInstrument: () -> Void
     let onDelete: () -> Void
 
     var body: some View {
@@ -50,7 +54,7 @@ struct FundEditorForm: View {
                 Text("What you hold, what it is worth")
                     .font(.title3.weight(.semibold))
 
-                Text("Enter the latest NAV by hand; nothing is fetched online.")
+                Text("Pick what you hold, then say how much of it you own.")
                     .font(.subheadline)
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
@@ -60,58 +64,58 @@ struct FundEditorForm: View {
     private var detailsCard: some View {
         card {
             VStack(alignment: .leading, spacing: 18) {
-                sectionHeader("Holding", systemImage: "briefcase.fill")
+                sectionHeader("Instrument", systemImage: "briefcase.fill")
 
-                VStack(alignment: .leading, spacing: 8) {
-                    fieldLabel("Name")
+                if instruments.isEmpty {
+                    Text("No fund or ETF in the catalogue yet. Add one to hold it.")
+                        .font(.caption)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                } else {
+                    Picker("Instrument", selection: $draft.instrumentID) {
+                        Text("Choose")
+                            .tag(UUID?.none)
 
-                    TextField("VinaCapital VESAF", text: $draft.name)
-                        .textFieldStyle(.plain)
-                        .padding(14)
-                        .background(
-                            MonMonTheme.field,
-                            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        )
-                        .accessibilityIdentifier("fund-name")
-
-                    if let nameErrorMessage {
-                        validationMessage(nameErrorMessage, id: "fund-name-error")
-                    }
-                }
-
-                VStack(alignment: .leading, spacing: 8) {
-                    fieldLabel("Symbol")
-
-                    TextField("VESAF", text: $draft.symbol)
-                        .textFieldStyle(.plain)
-                        .textCase(.uppercase)
-                        .padding(14)
-                        .background(
-                            MonMonTheme.field,
-                            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        )
-                        .accessibilityIdentifier("fund-symbol")
-
-                    if let symbolErrorMessage {
-                        validationMessage(symbolErrorMessage, id: "fund-symbol-error")
-                    }
-                }
-
-                VStack(alignment: .leading, spacing: 8) {
-                    fieldLabel("Type")
-
-                    Picker("Type", selection: $draft.kind) {
-                        ForEach(FundHoldingKind.allCases, id: \.rawValue) {
-                            Text($0.displayName)
-                                .tag($0)
+                        ForEach(instruments) { instrument in
+                            Text("\(instrument.symbol) · \(instrument.name)")
+                                .tag(UUID?.some(instrument.id))
                         }
                     }
-                    .pickerStyle(.segmented)
                     .labelsHidden()
-                    .accessibilityIdentifier("fund-kind")
+                    .accessibilityIdentifier("holding-instrument")
+                }
+
+                Button("Add instrument", systemImage: "plus.circle", action: onAddInstrument)
+                    .font(.subheadline.weight(.medium))
+                    .buttonStyle(.plain)
+                    .foregroundStyle(MonMonTheme.accent)
+                    .accessibilityIdentifier("add-instrument")
+
+                if let instrumentErrorMessage {
+                    validationMessage(instrumentErrorMessage, id: "holding-instrument-error")
+                }
+
+                if let selected {
+                    Text(instrumentExplanation(selected))
+                        .font(.caption)
+                        .foregroundStyle(MonMonTheme.textSecondary)
                 }
             }
         }
+    }
+
+    private var selected: FundInstrument? {
+        guard let id = draft.instrumentID else { return nil }
+        return instruments.first { $0.id == id }
+    }
+
+    /// The price is stated here but not editable: it belongs to the instrument,
+    /// and editing it from inside one position is exactly how two positions in
+    /// one ticker used to end up disagreeing.
+    private func instrumentExplanation(_ instrument: FundInstrument) -> String {
+        let price = VNDCurrency.formatUnitPrice(instrument.currentPricePerUnit)
+        let day = instrument.priceAsOf.formatted(date: .abbreviated, time: .omitted)
+        return "\(instrument.kind.displayName) · \(instrument.priceLabel) \(price) as of \(day). "
+            + "Edit the price under Instruments."
     }
 
     private var positionCard: some View {
@@ -165,39 +169,6 @@ struct FundEditorForm: View {
                     }
                 }
 
-                VStack(alignment: .leading, spacing: 8) {
-                    fieldLabel("Current NAV per unit")
-
-                    HStack(spacing: 12) {
-                        Text("₫")
-                            .font(.title3.weight(.bold))
-                            .foregroundStyle(MonMonTheme.funds)
-
-                        navTextField
-                            .textFieldStyle(.plain)
-                            .monospacedDigit()
-                            .multilineTextAlignment(.trailing)
-                            .accessibilityLabel("Current NAV per unit")
-                    }
-                    .padding(14)
-                    .background(
-                        MonMonTheme.field,
-                        in: RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    )
-
-                    if let navErrorMessage {
-                        validationMessage(navErrorMessage, id: "fund-nav-error")
-                    }
-                }
-
-                VStack(alignment: .leading, spacing: 8) {
-                    fieldLabel("NAV as of")
-
-                    DateField(
-                        selection: $draft.navAsOf,
-                        accessibilityIdentifier: "fund-nav-date"
-                    )
-                }
             }
         }
     }
@@ -274,18 +245,6 @@ struct FundEditorForm: View {
         #endif
     }
 
-    @ViewBuilder
-    private var navTextField: some View {
-        #if os(iOS)
-            TextField("0", text: $draft.navText)
-                .keyboardType(.decimalPad)
-                .accessibilityIdentifier("fund-nav")
-        #else
-            TextField("0", text: $draft.navText)
-                .accessibilityIdentifier("fund-nav")
-        #endif
-    }
-
     private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {
         content()
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -340,14 +299,9 @@ struct FundEditorForm: View {
         }
     }
 
-    private var nameErrorMessage: String? {
-        guard validationError == .emptyName else { return nil }
-        return "Enter a name for this holding."
-    }
-
-    private var symbolErrorMessage: String? {
-        guard validationError == .emptySymbol else { return nil }
-        return "Enter the fund or ETF symbol."
+    private var instrumentErrorMessage: String? {
+        guard validationError == .missingInstrument else { return nil }
+        return "Pick the fund or ETF this position is held in."
     }
 
     private var unitsErrorMessage: String? {
@@ -372,17 +326,6 @@ struct FundEditorForm: View {
         }
     }
 
-    private var navErrorMessage: String? {
-        switch validationError {
-        case .invalidNAV:
-            "Enter a valid NAV per unit."
-        case .nonPositiveNAV:
-            "NAV must be greater than zero."
-        default:
-            nil
-        }
-    }
-
     private var sourceErrorMessage: String? {
         guard validationError == .insufficientSourceBalance else { return nil }
         return "That account does not have enough available balance."
@@ -396,6 +339,23 @@ struct FundEditorForm: View {
         var validationError: FundFormError?
         var saveErrorMessage: String?
 
+        private let instruments: [FundInstrument] = [
+            .preview(
+                name: "VinaCapital VESAF",
+                symbol: "VESAF",
+                kind: .fund,
+                currentPricePerUnit: Decimal(string: "27431.28") ?? 0,
+                source: .fmarket
+            ),
+            .preview(
+                name: "Diamond ETF",
+                symbol: "FUEVFVND",
+                kind: .etf,
+                currentPricePerUnit: 29_850,
+                source: .vndirect
+            ),
+        ]
+
         var body: some View {
             NavigationStack {
                 FundEditorForm(
@@ -408,9 +368,11 @@ struct FundEditorForm: View {
                             openingBalance: 148_900_000
                         ),
                     ],
+                    instruments: instruments,
                     isEditing: isEditing,
                     validationError: validationError,
                     saveErrorMessage: saveErrorMessage,
+                    onAddInstrument: {},
                     onDelete: {}
                 )
                 .navigationTitle(isEditing ? "Edit holding" : "Add holding")
@@ -422,21 +384,14 @@ struct FundEditorForm: View {
     }
 
     #Preview("Fund form · empty") {
-        FundEditorFormPreview(
-            draft: FundDraft(navAsOf: Date(timeIntervalSince1970: 1_700_000_000))
-        )
+        FundEditorFormPreview(draft: FundDraft())
     }
 
     #Preview("Fund form · editing") {
         FundEditorFormPreview(
             draft: FundDraft(
-                name: "VinaCapital VESAF",
-                symbol: "VESAF",
-                kind: .fund,
                 unitsText: "1234,5678",
-                averageCostText: "24.500",
-                navText: "27.431",
-                navAsOf: Date(timeIntervalSince1970: 1_700_000_000)
+                averageCostText: "24.500"
             ),
             isEditing: true
         )
@@ -445,16 +400,11 @@ struct FundEditorForm: View {
     #Preview("Fund form · errors") {
         FundEditorFormPreview(
             draft: FundDraft(
-                name: "Diamond ETF",
-                symbol: "FUEVFVND",
-                kind: .etf,
                 unitsText: "100000",
-                averageCostText: "32.100",
-                navText: "29.850",
-                navAsOf: Date(timeIntervalSince1970: 1_700_000_000)
+                averageCostText: "32.100"
             ),
             validationError: .insufficientSourceBalance,
-            saveErrorMessage: "Couldn’t save this holding. Try again."
+            saveErrorMessage: "Couldn\u{2019}t save this holding. Try again."
         )
     }
 #endif

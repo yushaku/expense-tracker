@@ -27,10 +27,14 @@ struct InvestmentsView: View {
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
+    @Query(sort: \FundInstrument.symbol, order: .forward)
+    private var instruments: [FundInstrument]
+
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
 
     @State private var segment: InvestmentSegment = .savings
+    @State private var isManagingInstruments = false
     @State private var editor: InvestmentEditorMode?
 
     var body: some View {
@@ -68,6 +72,17 @@ struct InvestmentsView: View {
             }
             .navigationTitle("Investments")
             .accessibilityIdentifier("investments-list")
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Instruments", systemImage: "list.bullet.rectangle") {
+                        isManagingInstruments = true
+                    }
+                    .accessibilityIdentifier("manage-instruments")
+                }
+            }
+            .sheet(isPresented: $isManagingInstruments) {
+                FundInstrumentListView()
+            }
             .sheet(item: $editor) { mode in
                 switch mode {
                 case .savings(let savingsMode):
@@ -102,7 +117,7 @@ struct InvestmentsView: View {
                 .font(.subheadline.weight(.medium))
 
                 Label(
-                    "Funds \(VNDCurrency.format(FundSummary.totalMarketValue(of: holdings)))",
+                    "Funds \(VNDCurrency.format(FundSummary.totalMarketValue(of: holdings, instruments: instruments)))",
                     systemImage: "chart.line.uptrend.xyaxis"
                 )
                 .font(.subheadline.weight(.medium))
@@ -123,7 +138,11 @@ struct InvestmentsView: View {
     }
 
     private var total: Decimal {
-        InvestmentSummary.total(deposits: deposits, holdings: holdings)
+        InvestmentSummary.total(
+            deposits: deposits,
+            holdings: holdings,
+            instruments: instruments
+        )
     }
 
     private var segmentPicker: some View {
@@ -146,7 +165,7 @@ struct InvestmentsView: View {
                 editor = .savings(.edit(deposit))
             }
         case .funds:
-            FundSection(holdings: holdings, accounts: accounts) {
+            FundSection(holdings: holdings, instruments: instruments, accounts: accounts) {
                 add()
             } onEdit: { holding in
                 editor = .fund(.edit(holding))

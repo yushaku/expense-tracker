@@ -4,7 +4,10 @@ import Testing
 @testable import MonMon
 
 @Suite("Asset allocation")
-struct AssetAllocationTests {
+final class AssetAllocationTests {
+    /// Every instrument `makeHolding` minted, in the order it was asked for.
+    private var catalogue: [FundInstrument] = []
+
     private let fixedDate = Date(timeIntervalSince1970: 1_700_000_000)
 
     private func makeAccount(openingBalance: Decimal) -> CashAccount {
@@ -32,23 +35,25 @@ struct AssetAllocationTests {
         )
     }
 
+    /// A position and the catalogue entry that prices it, kept together because
+    /// one without the other cannot be valued since the split.
     private func makeHolding(
         units: Decimal,
         averageCostPerUnit: Decimal,
-        currentNAVPerUnit: Decimal,
+        pricePerUnit: Decimal,
+        symbol: String = "VESAF",
         sourceAccountID: UUID? = nil
     ) -> FundHolding {
-        FundHolding(
-            id: UUID(),
-            name: "VESAF",
-            symbol: "VESAF",
-            kind: .fund,
+        let instrument = FundTestFactory.instrument(
+            symbol: symbol,
+            pricePerUnit: pricePerUnit
+        )
+        catalogue.append(instrument)
+
+        return FundTestFactory.holding(
+            in: instrument,
             units: units,
             averageCostPerUnit: averageCostPerUnit,
-            currentNAVPerUnit: currentNAVPerUnit,
-            navAsOf: fixedDate,
-            currencyCode: VNDCurrency.code,
-            createdAt: fixedDate,
             sourceAccountID: sourceAccountID
         )
     }
@@ -77,6 +82,7 @@ struct AssetAllocationTests {
             accounts: [],
             deposits: [],
             holdings: [],
+            instruments: catalogue,
             transactions: [],
             transfers: [],
             debts: [],
@@ -94,7 +100,7 @@ struct AssetAllocationTests {
         let holding = makeHolding(
             units: 1_000,
             averageCostPerUnit: 20_000,
-            currentNAVPerUnit: 25_000,
+            pricePerUnit: 25_000,
             sourceAccountID: account.id
         )
 
@@ -102,6 +108,7 @@ struct AssetAllocationTests {
             accounts: [account],
             deposits: [deposit],
             holdings: [holding],
+            instruments: catalogue,
             transactions: [],
             transfers: [],
             debts: [],
@@ -121,6 +128,7 @@ struct AssetAllocationTests {
             accounts: [account],
             deposits: [],
             holdings: [],
+            instruments: catalogue,
             transactions: [],
             transfers: [],
             debts: [],
@@ -141,6 +149,7 @@ struct AssetAllocationTests {
             accounts: [account],
             deposits: [],
             holdings: [],
+            instruments: catalogue,
             transactions: transactions,
             transfers: [],
             debts: [],
@@ -159,6 +168,7 @@ struct AssetAllocationTests {
             accounts: [wallet, card],
             deposits: [],
             holdings: [],
+            instruments: catalogue,
             transactions: [],
             transfers: [],
             debts: [],
@@ -187,7 +197,7 @@ struct AssetAllocationTests {
         let holding = makeHolding(
             units: 100,
             averageCostPerUnit: 50_000,
-            currentNAVPerUnit: 60_000,
+            pricePerUnit: 60_000,
             sourceAccountID: wallet.id
         )
         let accounts = [wallet, card]
@@ -198,6 +208,7 @@ struct AssetAllocationTests {
             accounts: accounts,
             deposits: deposits,
             holdings: holdings,
+            instruments: catalogue,
             transactions: [],
             transfers: [],
             debts: [],
@@ -219,6 +230,7 @@ struct AssetAllocationTests {
                     accounts: accounts,
                     deposits: deposits,
                     holdings: holdings,
+                    instruments: catalogue,
                     transactions: [],
                     transfers: [],
                     debts: [],

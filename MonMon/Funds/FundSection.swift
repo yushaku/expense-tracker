@@ -5,6 +5,9 @@ import SwiftUI
 /// owns the scroll, the running total, and the editor sheet.
 struct FundSection: View {
     let holdings: [FundHolding]
+    /// The catalogue the holdings are priced from. Passed in rather than
+    /// queried here so the section stays a plain view over values.
+    let instruments: [FundInstrument]
     let accounts: [CashAccount]
     let onAdd: () -> Void
     let onEdit: (FundHolding) -> Void
@@ -59,7 +62,7 @@ struct FundSection: View {
     }
 
     private var profitLoss: Decimal {
-        FundSummary.totalUnrealizedProfitLoss(of: holdings)
+        FundSummary.totalUnrealizedProfitLoss(of: holdings, instruments: instruments)
     }
 
     private var isGain: Bool {
@@ -155,6 +158,7 @@ struct FundSection: View {
                 } label: {
                     FundHoldingCard(
                         holding: holding,
+                        instrument: instruments.matching(holding),
                         sourceAccountName: accountName(for: holding)
                     )
                 }

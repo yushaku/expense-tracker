@@ -14,6 +14,9 @@ struct AccountListView: View {
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
+    @Query(sort: \FundInstrument.symbol, order: .forward)
+    private var instruments: [FundInstrument]
+
     @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
     private var transfers: [AccountTransfer]
 
@@ -179,7 +182,7 @@ struct AccountListView: View {
     }
 
     private var fundsMarketValue: Decimal {
-        FundSummary.totalMarketValue(of: holdings)
+        FundSummary.totalMarketValue(of: holdings, instruments: instruments)
     }
 
     private var netWorth: Decimal {
@@ -187,6 +190,7 @@ struct AccountListView: View {
             accounts: accounts,
             deposits: deposits,
             holdings: holdings,
+            instruments: instruments,
             transactions: transactions,
             transfers: transfers,
             debts: debts,
@@ -199,6 +203,7 @@ struct AccountListView: View {
             accounts: accounts,
             deposits: deposits,
             holdings: holdings,
+            instruments: instruments,
             transactions: transactions,
             transfers: transfers,
             debts: debts,

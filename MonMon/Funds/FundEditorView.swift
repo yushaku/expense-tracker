@@ -40,6 +40,9 @@ struct FundEditorView: View {
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
+    @Query(sort: \FundInstrument.symbol, order: .forward)
+    private var instruments: [FundInstrument]
+
     @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
     private var transfers: [AccountTransfer]
 
@@ -55,13 +58,14 @@ struct FundEditorView: View {
     @State private var validationError: FundFormError?
     @State private var saveErrorMessage: String?
     @State private var isConfirmingDelete = false
+    @State private var isAddingInstrument = false
 
     init(mode: FundEditorMode) {
         self.mode = mode
 
         switch mode {
         case .add:
-            _draft = State(initialValue: FundDraft(navAsOf: .now))
+            _draft = State(initialValue: FundDraft())
         case .edit(let holding):
             _draft = State(initialValue: FundDraft(holding: holding))
         }
@@ -81,9 +85,11 @@ struct FundEditorView: View {
             FundEditorForm(
                 draft: $draft,
                 accounts: accounts,
+                instruments: instruments,
                 isEditing: mode.editedHolding != nil,
                 validationError: validationError,
                 saveErrorMessage: saveErrorMessage,
+                onAddInstrument: { isAddingInstrument = true },
                 onDelete: { isConfirmingDelete = true }
             )
             .navigationTitle(mode.editedHolding == nil ? "Add holding" : "Edit holding")
@@ -102,6 +108,9 @@ struct FundEditorView: View {
                     .fontWeight(.semibold)
                     .accessibilityIdentifier("save-fund")
                 }
+            }
+            .sheet(isPresented: $isAddingInstrument) {
+                FundInstrumentEditorView(mode: .add)
             }
             .confirmationDialog(
                 "Delete this holding?",

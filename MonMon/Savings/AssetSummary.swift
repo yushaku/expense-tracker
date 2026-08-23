@@ -43,6 +43,7 @@ enum AssetSummary {
         accounts: [CashAccount],
         deposits: [SavingsDeposit],
         holdings: [FundHolding],
+        instruments: [FundInstrument],
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
         debts: [Debt],
@@ -58,7 +59,7 @@ enum AssetSummary {
             payments: payments
         )
             + totalPrincipal(of: deposits)
-            + FundSummary.totalMarketValue(of: holdings)
+            + FundSummary.totalMarketValue(of: holdings, instruments: instruments)
             + DebtSummary.totalOutstanding(of: debts, payments: payments, direction: .lent)
             - DebtSummary.totalOutstanding(of: debts, payments: payments, direction: .borrowed)
     }

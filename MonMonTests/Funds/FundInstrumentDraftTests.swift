@@ -1,0 +1,174 @@
+import Foundation
+import Testing
+
+@testable import MonMon
+
+@Suite("Fund instrument draft")
+struct FundInstrumentDraftTests {
+    private let priceAsOf = FundTestFactory.referenceDate
+
+    private func makeDraft(
+        symbol: String = "VESAF",
+        name: String = "VinaCapital VESAF",
+        kind: FundHoldingKind = .fund,
+        priceText: String = "25.000",
+        autoQuoteEnabled: Bool = true
+    ) -> FundInstrumentDraft {
+        FundInstrumentDraft(
+            symbol: symbol,
+            name: name,
+            kind: kind,
+            priceText: priceText,
+            priceAsOf: priceAsOf,
+            autoQuoteEnabled: autoQuoteEnabled
+        )
+    }
+
+    @Test("A complete draft validates into exact decimal values")
+    func completeDraftValidates() throws {
+        let values = try makeDraft().validate(existing: [])
+
+        #expect(values.symbol == "VESAF")
+        #expect(values.name == "VinaCapital VESAF")
+        #expect(values.kind == .fund)
+        #expect(values.currentPricePerUnit == 25_000)
+        #expect(values.priceAsOf == priceAsOf)
+        #expect(values.autoQuoteEnabled)
+    }
+
+    @Test("The symbol is trimmed and uppercased, and the name is trimmed")
+    func symbolAndNameAreNormalized() throws {
+        let values = try makeDraft(symbol: " vesaf ", name: "  VESAF Fund  ")
+            .validate(existing: [])
+
+        #expect(values.symbol == "VESAF")
+        #expect(values.name == "VESAF Fund")
+    }
+
+    @Test("A blank symbol is rejected")
+    func blankSymbolIsRejected() {
+        #expect(throws: FundInstrumentFormError.emptySymbol) {
+            try makeDraft(symbol: "   ").validate(existing: [])
+        }
+    }
+
+    @Test("A blank name is rejected")
+    func blankNameIsRejected() {
+        #expect(throws: FundInstrumentFormError.emptyName) {
+            try makeDraft(name: "  ").validate(existing: [])
+        }
+    }
+
+    /// The constraint the store cannot express, so it lives here: one ticker,
+    /// one row, one price.
+    @Test("A duplicate ticker is rejected, compared case-insensitively")
+    func duplicateSymbolIsRejected() {
+        let existing = [FundTestFactory.instrument(symbol: "VESAF", pricePerUnit: 25_000)]
+
+        #expect(throws: FundInstrumentFormError.duplicateSymbol) {
+            try makeDraft(symbol: "vesaf").validate(existing: existing)
+        }
+        #expect(throws: FundInstrumentFormError.duplicateSymbol) {
+            try makeDraft(symbol: " VESAF ").validate(existing: existing)
+        }
+    }
+
+    @Test("Another ticker alongside an existing one is accepted")
+    func differentSymbolIsAccepted() throws {
+        let existing = [FundTestFactory.instrument(symbol: "VESAF", pricePerUnit: 25_000)]
+        let values = try makeDraft(symbol: "FUEVFVND").validate(existing: existing)
+
+        #expect(values.symbol == "FUEVFVND")
+    }
+
+    @Test("Re-saving an instrument under its own ticker is not a duplicate")
+    func editingKeepsItsOwnSymbol() throws {
+        let instrument = FundTestFactory.instrument(symbol: "VESAF", pricePerUnit: 25_000)
+        let values = try makeDraft(symbol: "VESAF")
+            .validate(existing: [instrument], editedID: instrument.id)
+
+        #expect(values.symbol == "VESAF")
+    }
+
+    @Test("An unparsable price is rejected")
+    func unparsablePriceIsRejected() {
+        #expect(throws: FundInstrumentFormError.invalidPrice) {
+            try makeDraft(priceText: "  ").validate(existing: [])
+        }
+    }
+
+    @Test("Zero and negative prices are rejected")
+    func nonPositivePriceIsRejected() {
+        #expect(throws: FundInstrumentFormError.nonPositivePrice) {
+            try makeDraft(priceText: "0").validate(existing: [])
+        }
+    }
+
+    @Test("A new instrument is stamped manual, VND, and never pre-fetched")
+    func makeInstrumentStampsItsOrigin() throws {
+        let createdAt = Date(timeIntervalSince1970: 1_700_086_400)
+        let instrument = try makeDraft(kind: .etf)
+            .makeInstrument(id: UUID(), createdAt: createdAt, existing: [])
+
+        #expect(instrument.kind == .etf)
+        #expect(instrument.currencyCode == "VND")
+        #expect(instrument.createdAt == createdAt)
+        #expect(instrument.source == .manual)
+        #expect(instrument.priceFetchedAt == nil)
+    }
+
+    @Test("An instrument round-trips through a draft unchanged")
+    func instrumentRoundTripsThroughDraft() throws {
+        let instrument = FundTestFactory.instrument(
+            symbol: "FUEVFVND",
+            name: "Diamond ETF",
+            kind: .etf,
+            pricePerUnit: 29_850,
+            autoQuoteEnabled: false
+        )
+
+        let values = try FundInstrumentDraft(instrument: instrument)
+            .validate(existing: [instrument], editedID: instrument.id)
+
+        #expect(values.symbol == "FUEVFVND")
+        #expect(values.name == "Diamond ETF")
+        #expect(values.kind == .etf)
+        #expect(values.currentPricePerUnit == 29_850)
+        #expect(values.autoQuoteEnabled == false)
+    }
+
+    /// Typing over a fetched price hands ownership back to the owner, so the row
+    /// stops claiming a provider stands behind a figure it did not supply.
+    @Test("Editing the price marks the instrument manual and forgets the fetch")
+    func editingThePriceMarksItManual() throws {
+        let fetchedAt = Date(timeIntervalSince1970: 1_700_086_400)
+        let instrument = FundTestFactory.instrument(
+            pricePerUnit: 25_000,
+            source: .fmarket,
+            priceFetchedAt: fetchedAt
+        )
+
+        try makeDraft(priceText: "31.000").apply(to: instrument, existing: [instrument])
+
+        #expect(instrument.currentPricePerUnit == 31_000)
+        #expect(instrument.source == .manual)
+        #expect(instrument.priceFetchedAt == nil)
+    }
+
+    @Test("Editing only the name leaves a fetched price attributed to its source")
+    func editingTheNameKeepsTheSource() throws {
+        let fetchedAt = Date(timeIntervalSince1970: 1_700_086_400)
+        let instrument = FundTestFactory.instrument(
+            pricePerUnit: 25_000,
+            source: .fmarket,
+            priceFetchedAt: fetchedAt
+        )
+
+        try makeDraft(name: "Renamed", priceText: "25.000")
+            .apply(to: instrument, existing: [instrument])
+
+        #expect(instrument.name == "Renamed")
+        #expect(instrument.source == .fmarket)
+        #expect(instrument.priceFetchedAt == fetchedAt)
+    }
+}
