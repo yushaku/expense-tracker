@@ -86,10 +86,20 @@ extension URL {
 /// Reads values out of parsed JSON without ever routing a price through a
 /// binary floating-point type.
 ///
-/// `JSONSerialization` hands back an `NSNumber`, whose `stringValue` is the
-/// number as written. Building a `Decimal` from that text keeps `34.2` exact,
-/// where `Decimal(someDouble) * 1000` is how a fund tracker starts reporting
-/// 34199.999999996.
+/// `JSONSerialization` hands back an `NSNumber`. Getting a `Decimal` out of it
+/// without picking up the binary artefact takes some care:
+///
+/// - `NSNumber.decimalValue` goes through the `Double`, so it inherits the
+///   artefact outright.
+/// - `NSNumber.stringValue` formats with `%0.16g`, which *prints* the artefact:
+///   a NAV of `9348.31` comes back as `"9348.310000000001"`. `34.2` happens not
+///   to, which is why this looked fine until a fund whose price exposed it
+///   arrived.
+/// - Swift's own `Double.description` is the shortest text that round-trips, so
+///   `9348.31` prints as `9348.31` and `34.2` as `34.2`.
+///
+/// The last one is what this uses. Integer-valued numbers are read as integers
+/// so a count never picks up a decimal point.
 enum JSONReader {
     static func object(_ value: Any?) throws -> [String: Any] {
         guard let object = value as? [String: Any] else {
@@ -115,6 +125,15 @@ enum JSONReader {
         throw FundQuoteError.decoding
     }
 
+    /// The shortest text that round-trips back to the same number. See the note
+    /// on this type for why neither `stringValue` nor `decimalValue` will do.
+    static func exactText(_ number: NSNumber) -> String {
+        if CFNumberIsFloatType(number) {
+            return String(number.doubleValue)
+        }
+        return number.stringValue
+    }
+
     static func int(_ value: Any?) throws -> Int {
         guard let number = value as? NSNumber else {
             throw FundQuoteError.decoding
@@ -126,7 +145,7 @@ enum JSONReader {
     /// or negative figure is a malformed response, not a price.
     static func price(_ value: Any?) throws -> Decimal {
         guard let number = value as? NSNumber,
-            let decimal = Decimal(string: number.stringValue)
+            let decimal = Decimal(string: exactText(number))
         else {
             throw FundQuoteError.decoding
         }

@@ -13,13 +13,35 @@ struct FundQuote: Sendable, Equatable {
 }
 
 /// A catalogue entry a provider can offer, before the owner confirms it.
-struct FundInstrumentCandidate: Sendable, Equatable {
+struct FundInstrumentCandidate: Sendable, Equatable, Identifiable {
     let symbol: String
     let name: String
     /// Whichever provider produced the candidate decides this. A provider's own
     /// `type` field is not trusted: VNDIRECT returns VESAF as an ETF listed on
     /// HOSE, and it is neither.
     let kind: FundHoldingKind
+    /// The price the listing already carried, when it carried one. Fmarket's
+    /// catalogue call returns every fund's NAV alongside its name, so importing
+    /// the whole list costs one request rather than one per fund.
+    let pricePerUnit: Decimal?
+    /// The trading day that price belongs to.
+    let priceAsOf: Date?
+
+    var id: String { symbol }
+
+    init(
+        symbol: String,
+        name: String,
+        kind: FundHoldingKind,
+        pricePerUnit: Decimal? = nil,
+        priceAsOf: Date? = nil
+    ) {
+        self.symbol = symbol
+        self.name = name
+        self.kind = kind
+        self.pricePerUnit = pricePerUnit
+        self.priceAsOf = priceAsOf
+    }
 }
 
 enum FundQuoteError: Error, Equatable {

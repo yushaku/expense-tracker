@@ -18,6 +18,19 @@ enum FundQuoteFixtures {
         ]}}
         """
 
+    /// `POST /res/products/filter` with an empty `searchField` — the whole
+    /// catalogue. Trimmed to three of the 68 funds it returned on 2026-08-23,
+    /// keeping one that carries no `productNavChange` at all.
+    static let fmarketCatalogue = """
+        {"status":200,"data":{"total":3,"rows":[
+          {"id":70,"shortName":"UMMF","name":"QUY DAU TU TIEN TE UOB",
+           "nav":10000.0,"productNavChange":{"updateAt":1787420400000}},
+          {"id":23,"shortName":"vesaf","name":"QUY VESAF",
+           "nav":31581.76,"productNavChange":{"updateAt":1787420400000}},
+          {"id":91,"shortName":"AEIF","name":"QUY AE INNOVATION","nav":9348.31}
+        ]}}
+        """
+
     /// The same call for a ticker Fmarket does not list.
     static let fmarketFilterEmpty = """
         {"status":200,"data":{"total":0,"rows":[]}}

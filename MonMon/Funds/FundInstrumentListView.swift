@@ -20,6 +20,7 @@ struct FundInstrumentListView: View {
 
     @State private var editorMode: FundInstrumentEditorMode?
     @State private var refresher = FundPriceRefresher()
+    @State private var isImporting = false
 
     /// Passed in rather than read from the clock so a preview and a test both
     /// get a stable answer for whether a price is stale.
@@ -41,6 +42,8 @@ struct FundInstrumentListView: View {
 
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+                        actionBar
+
                         if instruments.isEmpty {
                             emptyState
                         } else {
@@ -70,28 +73,12 @@ struct FundInstrumentListView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") { dismiss() }
                 }
-
-                ToolbarItem(placement: .primaryAction) {
-                    Button("Add instrument", systemImage: "plus") {
-                        editorMode = .add
-                    }
-                    .accessibilityIdentifier("add-instrument")
-                }
-
-                ToolbarItem(placement: .primaryAction) {
-                    Button("Refresh", systemImage: "arrow.clockwise", action: refresh)
-                        .accessibilityIdentifier("refresh-quotes")
-                        .disabled(
-                            refresher.isRunning
-                                || !refresher.hasAnythingToRefresh(
-                                    instruments: instruments,
-                                    holdings: holdings
-                                )
-                        )
-                }
             }
             .sheet(item: $editorMode) { mode in
                 FundInstrumentEditorView(mode: mode)
+            }
+            .sheet(isPresented: $isImporting) {
+                FundCatalogueImportView()
             }
         }
         .tint(MonMonTheme.accent)
@@ -103,7 +90,8 @@ struct FundInstrumentListView: View {
                 .font(.headline)
 
             Text(
-                "Add the fund or ETF you own, then record how many units you hold of it."
+                "Add from Fmarket to pull every open-ended fund it lists, with its NAV, "
+                    + "or add one by hand. Then record how many units you hold."
             )
             .font(.subheadline)
             .foregroundStyle(MonMonTheme.textSecondary)
@@ -189,6 +177,70 @@ struct FundInstrumentListView: View {
                 .stroke(MonMonTheme.border, lineWidth: 1)
         }
         .accessibilityElement(children: .combine)
+    }
+
+    /// Refresh and the two ways of adding a fund, in the content rather than the
+    /// toolbar. macOS collapses a toolbar's extra primary actions into an
+    /// overflow, which is how Refresh managed to ship invisible.
+    private var actionBar: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 10) { actionButtons }
+            VStack(alignment: .leading, spacing: 10) { actionButtons }
+        }
+    }
+
+    @ViewBuilder
+    private var actionButtons: some View {
+        Button {
+            refresh()
+        } label: {
+            Label(
+                refresher.isRunning ? "Refreshing…" : "Refresh prices",
+                systemImage: "arrow.clockwise"
+            )
+            .font(.subheadline.weight(.semibold))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 11)
+            .background(MonMonTheme.accent.opacity(0.16), in: Capsule())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(MonMonTheme.accent)
+        .disabled(refresher.isRunning || !canRefresh)
+        .accessibilityIdentifier("refresh-quotes")
+
+        Button {
+            isImporting = true
+        } label: {
+            Label("Add from Fmarket", systemImage: "square.and.arrow.down")
+                .font(.subheadline.weight(.semibold))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 11)
+                .background(MonMonTheme.surface, in: Capsule())
+                .overlay(Capsule().stroke(MonMonTheme.border, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(MonMonTheme.textPrimary)
+        .accessibilityIdentifier("import-from-fmarket")
+
+        Button {
+            editorMode = .add
+        } label: {
+            Label("Add by hand", systemImage: "plus")
+                .font(.subheadline.weight(.semibold))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 11)
+                .background(MonMonTheme.surface, in: Capsule())
+                .overlay(Capsule().stroke(MonMonTheme.border, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(MonMonTheme.textPrimary)
+        .accessibilityIdentifier("add-instrument")
+    }
+
+    /// Refresh is offered only when a request could actually achieve something:
+    /// a held instrument, with automatic quotes left on.
+    private var canRefresh: Bool {
+        refresher.hasAnythingToRefresh(instruments: instruments, holdings: holdings)
     }
 
     /// Owner-triggered, and the only thing in the app that opens a connection.

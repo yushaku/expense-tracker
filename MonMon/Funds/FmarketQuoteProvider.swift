@@ -40,17 +40,48 @@ struct FmarketQuoteProvider: FundQuoteProvider {
     }
 
     func search(_ query: String) async throws -> [FundInstrumentCandidate] {
-        let rows = try await rows(searchField: query)
+        try await candidates(searchField: query)
+    }
+
+    /// Every open-ended fund Fmarket lists, with the NAV each one already
+    /// carries.
+    ///
+    /// One request for the whole catalogue — 68 funds on 2026-08-21 — so the
+    /// owner can import the list instead of typing a ticker, a name and a price
+    /// per fund. Nothing is written until they choose.
+    func catalogue() async throws -> [FundInstrumentCandidate] {
+        try await candidates(searchField: "")
+    }
+
+    private func candidates(searchField: String) async throws -> [FundInstrumentCandidate] {
+        let rows = try await rows(searchField: searchField)
 
         return try rows.map { row in
             let object = try JSONReader.object(row)
+            let change = (object["productNavChange"] as? [String: Any]) ?? [:]
+
             return FundInstrumentCandidate(
                 symbol: try JSONReader.string(object["shortName"]).uppercased(),
                 name: try JSONReader.string(object["name"]),
                 // Everything this endpoint lists is an open-ended fund.
-                kind: .fund
+                kind: .fund,
+                pricePerUnit: try? JSONReader.price(object["nav"]),
+                priceAsOf: Self.tradingDay(fromMilliseconds: change["updateAt"])
             )
         }
+    }
+
+    /// `updateAt` is epoch milliseconds. A listing with no usable stamp yields
+    /// no date rather than a guess, and the import falls back to asking.
+    private static func tradingDay(fromMilliseconds value: Any?) -> Date? {
+        guard let number = value as? NSNumber else {
+            return nil
+        }
+        let seconds = number.doubleValue / 1_000
+        guard seconds > 0 else {
+            return nil
+        }
+        return TradingCalendar.calendar.startOfDay(for: Date(timeIntervalSince1970: seconds))
     }
 
     // MARK: - Fmarket keys funds by an internal id, not by ticker

@@ -142,6 +142,23 @@ struct VNDirectQuoteProviderTests {
         #expect(quote.source == .vndirect)
     }
 
+    /// `NSNumber.stringValue` formats with `%0.16g` and prints the binary
+    /// artefact: this NAV came back as "9348.310000000001". `34.2` does not
+    /// expose it, which is how the bug survived the first round of tests.
+    @Test("A price whose double exposes its artefact still parses exactly")
+    func artefactExposingPriceParsesExactly() async throws {
+        let (vndirect, _) = provider([
+            "dchart/history": .init(
+                #"{"t":[1787270400],"c":[9.34831],"s":"ok"}"#
+            )
+        ])
+
+        let quote = try await vndirect.latestQuote(symbol: "AEIF", asOf: asOf)
+
+        #expect(quote.pricePerUnit == Decimal(string: "9348.31"))
+        #expect(quote.pricePerUnit != Decimal(9.34831) * 1_000)
+    }
+
     @Test("The bar's own stamp becomes the trading day")
     func stampBecomesTheTradingDay() async throws {
         let (vndirect, _) = provider([
