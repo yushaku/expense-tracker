@@ -2,12 +2,12 @@ import SwiftData
 import SwiftUI
 
 /// Identifies one wedge of the breakdown: a category, a direction, and the
-/// month being looked at. `categoryID` is optional so the transactions whose
-/// category was deleted are reachable too.
+/// stretch of time being looked at. `categoryID` is optional so the transactions
+/// whose category was deleted are reachable too.
 struct CategoryPeriod: Hashable {
     let categoryID: UUID?
     let kind: TransactionKind
-    let month: Date
+    let range: TransactionRange
 }
 
 /// The transactions behind one wedge of the spending doughnut.
@@ -74,7 +74,7 @@ struct CategoryTransactionsView: View {
         CategoryBreakdown.transactions(
             for: period.categoryID,
             of: period.kind,
-            in: TransactionSummary.inMonth(of: period.month, transactions: transactions)
+            in: TransactionSummary.inRange(period.range, transactions: transactions)
         )
     }
 
@@ -99,11 +99,13 @@ struct CategoryTransactionsView: View {
     private var summaryCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             Label(
-                TransactionPeriod.title(for: period.month).uppercased(),
+                period.range.title.uppercased(),
                 systemImage: period.kind.symbolName
             )
             .font(.caption.weight(.semibold))
             .tracking(0.8)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
             .foregroundStyle(MonMonTheme.textSecondary)
 
             Text("\(period.kind.signLabel)\(VNDCurrency.format(total))")
@@ -135,7 +137,7 @@ struct CategoryTransactionsView: View {
     }
 
     private var emptyState: some View {
-        Text("Nothing left under this category for this month.")
+        Text("Nothing left under this category \(period.range.phrase).")
             .font(.subheadline)
             .foregroundStyle(MonMonTheme.textSecondary)
             .frame(maxWidth: .infinity, alignment: .leading)

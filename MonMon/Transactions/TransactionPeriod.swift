@@ -1,9 +1,11 @@
 import Foundation
 
-/// Calendar-month maths for the spending list. Every function takes the dates it
-/// needs and nothing reads the clock, so tests stay deterministic. The calendar
-/// is shared with `SavingsInterest` rather than redefined, so no module depends
-/// on the machine's locale or time zone.
+/// Calendar-month maths, and the calendar every other date type in the app
+/// borrows. Every function takes the dates it needs and nothing reads the clock,
+/// so tests stay deterministic. The calendar is shared with `SavingsInterest`
+/// rather than redefined, so no module depends on the machine's locale or time
+/// zone. `TransactionRange` builds the wider periods the spending list offers on
+/// top of this.
 enum TransactionPeriod {
     static var calendar: Calendar {
         SavingsInterest.calendar
@@ -26,15 +28,6 @@ enum TransactionPeriod {
     static func endOfMonth(for date: Date) -> Date {
         let start = startOfMonth(for: date)
         return calendar.date(byAdding: .month, value: 1, to: start) ?? start
-    }
-
-    static func shift(_ date: Date, byMonths months: Int) -> Date {
-        let start = startOfMonth(for: date)
-        return calendar.date(byAdding: .month, value: months, to: start) ?? start
-    }
-
-    static func contains(_ date: Date, monthOf month: Date) -> Bool {
-        date >= startOfMonth(for: month) && date < endOfMonth(for: month)
     }
 
     static func title(for date: Date) -> String {

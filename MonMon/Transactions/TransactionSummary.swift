@@ -36,7 +36,10 @@ enum TransactionSummary {
         transactions.filter { $0.categoryID == category.id }.count
     }
 
-    static func inMonth(of month: Date, transactions: [MoneyTransaction]) -> [MoneyTransaction] {
-        transactions.filter { TransactionPeriod.contains($0.occurredAt, monthOf: month) }
+    static func inRange(
+        _ range: TransactionRange,
+        transactions: [MoneyTransaction]
+    ) -> [MoneyTransaction] {
+        transactions.filter { range.contains($0.occurredAt) }
     }
 }

@@ -11,7 +11,7 @@ struct TransactionListView: View {
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
 
-    @State private var visibleMonth = TransactionPeriod.startOfMonth(for: .now)
+    @State private var range = TransactionRange.month(containing: .now)
     @State private var editorMode: TransactionEditorMode?
     @State private var breakdownKind: TransactionKind = .expense
     @State private var isManagingCategories = false
@@ -24,17 +24,17 @@ struct TransactionListView: View {
 
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                        monthCard
+                        periodCard
 
                         if accounts.isEmpty {
                             noAccountState
-                        } else if monthTransactions.isEmpty {
+                        } else if visibleTransactions.isEmpty {
                             emptyState
                         } else {
                             CategoryBreakdownCard(
                                 kind: $breakdownKind,
                                 slices: breakdownSlices,
-                                month: visibleMonth
+                                range: range
                             )
 
                             transactionsSection
@@ -81,27 +81,39 @@ struct TransactionListView: View {
         }
     }
 
-    /// Adding from a month other than the current one starts on the first of the
-    /// month being looked at, so the new entry lands where the owner is looking.
+    /// Adding from a period that does not include today starts on its first
+    /// day, so the new entry lands where the owner is looking.
     private var defaultDate: Date {
-        TransactionPeriod.contains(.now, monthOf: visibleMonth) ? .now : visibleMonth
+        range.contains(.now) ? .now : range.start
     }
 
-    private var monthTransactions: [MoneyTransaction] {
-        TransactionSummary.inMonth(of: visibleMonth, transactions: transactions)
+    /// The anchor a scope change re-cuts around: today when it is on show, and
+    /// otherwise the start of what is, so the owner keeps their place.
+    private var anchor: Date {
+        range.contains(.now) ? .now : range.start
+    }
+
+    private var visibleTransactions: [MoneyTransaction] {
+        TransactionSummary.inRange(range, transactions: transactions)
     }
 
     private var breakdownSlices: [CategoryBreakdownSlice] {
         CategoryBreakdown.slices(
             of: breakdownKind,
-            transactions: monthTransactions,
+            transactions: visibleTransactions,
             categories: categories
         )
     }
 
-    private var monthCard: some View {
+    private var periodCard: some View {
         VStack(alignment: .leading, spacing: 18) {
-            monthHeader
+            scopePicker
+
+            periodHeader
+
+            if range.scope == .custom {
+                customRangeFields
+            }
 
             Text(signedNet)
                 .font(.system(.largeTitle, design: .rounded, weight: .bold))
@@ -140,50 +152,119 @@ struct TransactionListView: View {
         }
     }
 
-    private var monthHeader: some View {
-        HStack(spacing: 12) {
-            Button {
-                visibleMonth = TransactionPeriod.shift(visibleMonth, byMonths: -1)
-            } label: {
-                Image(systemName: "chevron.left")
-                    .font(.footnote.weight(.bold))
-                    .frame(width: 30, height: 30)
-            }
-            .buttonStyle(.plain)
-            .background(MonMonTheme.surface, in: Circle())
-            .accessibilityLabel("Previous month")
-            .accessibilityIdentifier("previous-month")
+    /// Switching scope keeps the owner near what they were looking at, so a
+    /// month spent browsing last March narrows to a day in last March rather
+    /// than jumping to today.
+    private var scopeSelection: Binding<TransactionRangeScope> {
+        Binding(
+            get: { range.scope },
+            set: { range = range.scoped(to: $0, anchoredOn: anchor) }
+        )
+    }
 
-            Text(TransactionPeriod.title(for: visibleMonth).uppercased())
+    private var scopePicker: some View {
+        Picker("Period", selection: scopeSelection) {
+            ForEach(TransactionRangeScope.allCases) {
+                Text($0.displayName)
+                    .tag($0)
+            }
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .accessibilityIdentifier("period-scope")
+    }
+
+    private var periodHeader: some View {
+        HStack(spacing: 12) {
+            if range.canStep {
+                stepButton(by: -1, symbolName: "chevron.left", identifier: "previous-period")
+            }
+
+            Text(range.title.uppercased())
                 .font(.caption.weight(.semibold))
                 .tracking(0.8)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
                 .foregroundStyle(MonMonTheme.textSecondary)
                 .frame(maxWidth: .infinity)
 
-            Button {
-                visibleMonth = TransactionPeriod.shift(visibleMonth, byMonths: 1)
-            } label: {
-                Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.bold))
-                    .frame(width: 30, height: 30)
+            if range.canStep {
+                stepButton(by: 1, symbolName: "chevron.right", identifier: "next-period")
             }
-            .buttonStyle(.plain)
-            .background(MonMonTheme.surface, in: Circle())
-            .accessibilityLabel("Next month")
-            .accessibilityIdentifier("next-month")
         }
     }
 
+    private func stepButton(by steps: Int, symbolName: String, identifier: String) -> some View {
+        Button {
+            range = range.stepped(by: steps)
+        } label: {
+            Image(systemName: symbolName)
+                .font(.footnote.weight(.bold))
+                .frame(width: 30, height: 30)
+        }
+        .buttonStyle(.plain)
+        .background(MonMonTheme.surface, in: Circle())
+        .accessibilityLabel(steps < 0 ? range.stepBackLabel : range.stepForwardLabel)
+        .accessibilityIdentifier(identifier)
+    }
+
+    /// The two ends of a hand-picked range. `TransactionRange.custom` orders the
+    /// pair, so picking an end before the start reads as the range the owner
+    /// drew rather than an empty one.
+    private var customRangeFields: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .bottom, spacing: 12) {
+                rangeEndField(title: "From", selection: rangeStart, identifier: "range-start")
+                rangeEndField(title: "To", selection: rangeEnd, identifier: "range-end")
+            }
+
+            VStack(alignment: .leading, spacing: 12) {
+                rangeEndField(title: "From", selection: rangeStart, identifier: "range-start")
+                rangeEndField(title: "To", selection: rangeEnd, identifier: "range-end")
+            }
+        }
+    }
+
+    private func rangeEndField(
+        title: String,
+        selection: Binding<Date>,
+        identifier: String
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title.uppercased())
+                .font(.caption2.weight(.semibold))
+                .tracking(0.6)
+                .foregroundStyle(MonMonTheme.textSecondary)
+
+            DateField(selection: selection, accessibilityIdentifier: identifier)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var rangeStart: Binding<Date> {
+        Binding(
+            get: { range.start },
+            set: { range = .custom(from: $0, to: range.lastDay) }
+        )
+    }
+
+    private var rangeEnd: Binding<Date> {
+        Binding(
+            get: { range.lastDay },
+            set: { range = .custom(from: range.start, to: $0) }
+        )
+    }
+
     private var income: Decimal {
-        TransactionSummary.totalIncome(of: monthTransactions)
+        TransactionSummary.totalIncome(of: visibleTransactions)
     }
 
     private var expense: Decimal {
-        TransactionSummary.totalExpense(of: monthTransactions)
+        TransactionSummary.totalExpense(of: visibleTransactions)
     }
 
     private var net: Decimal {
-        TransactionSummary.net(of: monthTransactions)
+        TransactionSummary.net(of: visibleTransactions)
     }
 
     /// The sign is written out rather than left to the minus the formatter would
@@ -196,13 +277,13 @@ struct TransactionListView: View {
     }
 
     private var countLabel: String {
-        switch monthTransactions.count {
+        switch visibleTransactions.count {
         case 0:
-            "Nothing recorded this month"
+            "Nothing recorded \(range.phrase)"
         case 1:
             "1 transaction"
         default:
-            "\(monthTransactions.count) transactions"
+            "\(visibleTransactions.count) transactions"
         }
     }
 
@@ -218,7 +299,7 @@ struct TransactionListView: View {
             Text("Transactions")
                 .font(.title3.weight(.semibold))
 
-            ForEach(monthTransactions) { transaction in
+            ForEach(visibleTransactions) { transaction in
                 Button {
                     editorMode = .edit(transaction)
                 } label: {
@@ -251,7 +332,7 @@ struct TransactionListView: View {
         placeholder(
             symbolName: "arrow.left.arrow.right",
             title: "Nothing here yet",
-            message: "Record what you spent or received and this month adds up."
+            message: "Record what you spent or received and this period adds up."
         ) {
             addTransactionButton
         }

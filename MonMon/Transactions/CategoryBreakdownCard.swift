@@ -1,14 +1,14 @@
 import Charts
 import SwiftUI
 
-/// The month's spending or earning split by category: a doughnut with a legend
+/// The period's spending or earning split by category: a doughnut with a legend
 /// beside it, and a row per category below that opens the transactions behind
 /// it.
 struct CategoryBreakdownCard: View {
     @Binding var kind: TransactionKind
 
     let slices: [CategoryBreakdownSlice]
-    let month: Date
+    let range: TransactionRange
 
     private var total: Decimal {
         CategoryBreakdown.total(of: slices)
@@ -136,7 +136,7 @@ struct CategoryBreakdownCard: View {
                     value: CategoryPeriod(
                         categoryID: slice.categoryID,
                         kind: kind,
-                        month: month
+                        range: range
                     )
                 ) {
                     row(slice)
@@ -204,7 +204,7 @@ struct CategoryBreakdownCard: View {
     }
 
     private var emptyState: some View {
-        Text("No \(kind.displayName.lowercased()) recorded this month.")
+        Text("No \(kind.displayName.lowercased()) recorded \(range.phrase).")
             .font(.subheadline)
             .foregroundStyle(MonMonTheme.textSecondary)
             .frame(maxWidth: .infinity, alignment: .leading)

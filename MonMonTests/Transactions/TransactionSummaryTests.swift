@@ -121,7 +121,10 @@ struct TransactionSummaryTests {
             ),
         ]
 
-        let august = TransactionSummary.inMonth(of: date(2026, 8, 15), transactions: transactions)
+        let august = TransactionSummary.inRange(
+            .month(containing: date(2026, 8, 15)),
+            transactions: transactions
+        )
 
         #expect(august.count == 2)
         #expect(TransactionSummary.net(of: august) == 700_000)
