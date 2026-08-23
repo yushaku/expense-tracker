@@ -14,7 +14,7 @@ struct SavingsDepositPersistenceTests {
     /// dangling, which traps inside SwiftData on the next insert.
     private func makeContainer() throws -> ModelContainer {
         try ModelContainer(
-            for: CashAccount.self, SavingsDeposit.self,
+            for: CashAccount.self, SavingsDeposit.self, FundHolding.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: true)
         )
     }
@@ -112,7 +112,8 @@ struct SavingsDepositPersistenceTests {
 
         var deposits = try context.fetch(FetchDescriptor<SavingsDeposit>())
         #expect(
-            CashBalanceSummary.available(for: account, deposits: deposits) == 48_900_000
+            CashBalanceSummary.available(for: account, deposits: deposits, holdings: [])
+                == 48_900_000
         )
 
         context.delete(deposit)
@@ -124,7 +125,8 @@ struct SavingsDepositPersistenceTests {
         #expect(accounts.count == 1)
         #expect(deposits.isEmpty)
         #expect(
-            CashBalanceSummary.available(for: account, deposits: deposits) == 148_900_000
+            CashBalanceSummary.available(for: account, deposits: deposits, holdings: [])
+                == 148_900_000
         )
     }
 

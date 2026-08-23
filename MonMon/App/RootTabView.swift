@@ -14,6 +14,12 @@ struct RootTabView: View {
                     Label("Savings", systemImage: "building.columns.fill")
                 }
                 .accessibilityIdentifier("savings-tab")
+
+            FundListView()
+                .tabItem {
+                    Label("Funds", systemImage: "chart.line.uptrend.xyaxis")
+                }
+                .accessibilityIdentifier("funds-tab")
         }
     }
 }

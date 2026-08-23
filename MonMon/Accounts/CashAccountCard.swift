@@ -3,6 +3,7 @@ import SwiftUI
 struct CashAccountCard: View {
     let account: CashAccount
     let deposits: [SavingsDeposit]
+    let holdings: [FundHolding]
 
     var body: some View {
         ViewThatFits(in: .horizontal) {
@@ -66,23 +67,40 @@ struct CashAccountCard: View {
                 .tracking(0.5)
                 .foregroundStyle(MonMonTheme.textSecondary)
 
-            if fundedAmount > 0 {
-                Text("In savings \(VNDCurrency.format(fundedAmount))")
+            if savingsAmount > 0 {
+                Text("In savings \(VNDCurrency.format(savingsAmount))")
                     .font(.caption)
                     .monospacedDigit()
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
                     .foregroundStyle(MonMonTheme.savings)
             }
+
+            if fundsAmount > 0 {
+                Text("In funds \(VNDCurrency.format(fundsAmount))")
+                    .font(.caption)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .foregroundStyle(MonMonTheme.funds)
+            }
         }
     }
 
     private var availableBalance: Decimal {
-        CashBalanceSummary.available(for: account, deposits: deposits)
+        CashBalanceSummary.available(for: account, deposits: deposits, holdings: holdings)
     }
 
-    private var fundedAmount: Decimal {
-        CashBalanceSummary.fundedAmount(for: account, deposits: deposits)
+    private var savingsAmount: Decimal {
+        deposits.reduce(Decimal.zero) { total, deposit in
+            deposit.sourceAccountID == account.id ? total + deposit.principal : total
+        }
+    }
+
+    private var fundsAmount: Decimal {
+        holdings.reduce(Decimal.zero) { total, holding in
+            holding.sourceAccountID == account.id ? total + holding.costBasis : total
+        }
     }
 }
 
@@ -119,12 +137,14 @@ private extension CashAccountKind {
             VStack(spacing: 16) {
                 CashAccountCard(
                     account: .preview(name: "Wallet", kind: .cash, openingBalance: 1_250_000),
-                    deposits: []
+                    deposits: [],
+                    holdings: []
                 )
 
                 CashAccountCard(
                     account: .preview(name: "Techcombank", kind: .bank, openingBalance: 48_900_000),
-                    deposits: []
+                    deposits: [],
+                    holdings: []
                 )
 
                 CashAccountCard(
@@ -133,7 +153,8 @@ private extension CashAccountKind {
                         kind: .credit,
                         openingBalance: -5_200_000
                     ),
-                    deposits: []
+                    deposits: [],
+                    holdings: []
                 )
 
                 CashAccountCard(
@@ -142,7 +163,8 @@ private extension CashAccountKind {
                         kind: .bank,
                         openingBalance: 987_654_321_000
                     ),
-                    deposits: []
+                    deposits: [],
+                    holdings: []
                 )
             }
             .padding(20)

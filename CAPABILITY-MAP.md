@@ -8,13 +8,14 @@ begins.
 | Module id | User-visible responsibility | Depends on |
 |---|---|---|
 | `app-bootstrap` | Build and run a configured native app showing “Hello, MonMon” on iPhone and Mac | — |
-| `cash-balance` | Create cash/bank accounts and view their balances | `app-bootstrap` |
+| `cash-balance` | Create, edit, and delete cash, bank, and credit card accounts and view their balances | `app-bootstrap` |
 | `savings-deposit` | Record term deposits with maturity dates, projected interest, and an optional funding account, and see total assets | `cash-balance` |
+| `fund-etf-holdings` | Record fund certificate and ETF holdings at a hand-entered NAV and see cost basis, market value, and unrealized profit or loss | `cash-balance`, `savings-deposit` |
 | `income-expense` | Record income and expenses and see account balances update | `cash-balance` |
 | `debt-tracking` | Track liabilities and liability payments | `cash-balance`, `income-expense` |
-| `investment-tracking` | Record gold, equity, and crypto trades and calculate positions and cost basis | `cash-balance`, `income-expense` |
+| `investment-tracking` | Record gold, equity, and crypto trades and calculate positions and cost basis | `cash-balance`, `income-expense`, `fund-etf-holdings` |
 | `market-valuation` | Refresh market prices and show portfolio value, allocation, and profit/loss | `investment-tracking` |
-| `icloud-sync` | Synchronize all financial records through the owner's private iCloud database | `cash-balance`, `income-expense`, `debt-tracking`, `investment-tracking`, `market-valuation` |
+| `icloud-sync` | Synchronize all financial records through the owner's private iCloud database | `cash-balance`, `income-expense`, `debt-tracking`, `fund-etf-holdings`, `investment-tracking`, `market-valuation` |
 | `mcp-readonly` | Expose synchronized financial data to AI clients from a read-only macOS MCP server | `icloud-sync` |
 
 Build order:
@@ -22,12 +23,13 @@ Build order:
 1. `app-bootstrap`
 2. `cash-balance`
 3. `savings-deposit`
-4. `income-expense`
-5. `debt-tracking`
-6. `investment-tracking`
-7. `market-valuation`
-8. `icloud-sync`
-9. `mcp-readonly`
+4. `fund-etf-holdings`
+5. `income-expense`
+6. `debt-tracking`
+7. `investment-tracking`
+8. `market-valuation`
+9. `icloud-sync`
+10. `mcp-readonly`
 
 ## Initiative-wide boundaries
 

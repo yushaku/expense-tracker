@@ -31,6 +31,9 @@ struct AccountEditorView: View {
     @Query(sort: \SavingsDeposit.createdAt, order: .forward)
     private var deposits: [SavingsDeposit]
 
+    @Query(sort: \FundHolding.createdAt, order: .forward)
+    private var holdings: [FundHolding]
+
     private let mode: AccountEditorMode
 
     @State private var draft: AccountDraft
@@ -107,14 +110,18 @@ struct AccountEditorView: View {
     }
 
     /// An account may only be removed once it holds nothing: a zero available
-    /// balance also guarantees no savings deposit still points at it, so
-    /// deleting can never orphan those records.
+    /// balance also guarantees no savings deposit or fund holding still points
+    /// at it, so deleting can never orphan those records.
     private var canDelete: Bool {
         guard let editedAccount = mode.editedAccount else {
             return false
         }
 
-        return CashBalanceSummary.available(for: editedAccount, deposits: deposits) == 0
+        return CashBalanceSummary.available(
+            for: editedAccount,
+            deposits: deposits,
+            holdings: holdings
+        ) == 0
     }
 
     private var deleteBlockedReason: String? {
@@ -124,11 +131,12 @@ struct AccountEditorView: View {
 
         let fundedAmount = CashBalanceSummary.fundedAmount(
             for: editedAccount,
-            deposits: deposits
+            deposits: deposits,
+            holdings: holdings
         )
 
         if fundedAmount > 0 {
-            return "This account still funds savings books. Move them first."
+            return "This account still funds savings books or funds. Move them first."
         }
 
         return "Set the balance to 0 before deleting this account."

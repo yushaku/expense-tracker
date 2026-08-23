@@ -1,17 +1,14 @@
 import SwiftData
 import SwiftUI
 
-struct AccountListView: View {
-    @Query(sort: \CashAccount.createdAt, order: .forward)
-    private var accounts: [CashAccount]
-
-    @Query(sort: \SavingsDeposit.createdAt, order: .forward)
-    private var deposits: [SavingsDeposit]
-
+struct FundListView: View {
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
-    @State private var editorMode: AccountEditorMode?
+    @Query(sort: \CashAccount.createdAt, order: .forward)
+    private var accounts: [CashAccount]
+
+    @State private var editorMode: FundEditorMode?
 
     var body: some View {
         NavigationStack {
@@ -21,12 +18,12 @@ struct AccountListView: View {
 
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                        totalCard
+                        summaryCard
 
-                        if accounts.isEmpty {
+                        if holdings.isEmpty {
                             emptyState
                         } else {
-                            accountsSection
+                            holdingsSection
                         }
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -35,30 +32,30 @@ struct AccountListView: View {
                     .frame(maxWidth: .infinity)
                 }
             }
-            .navigationTitle("Cash balances")
-            .accessibilityIdentifier("account-list")
+            .navigationTitle("Funds")
+            .accessibilityIdentifier("funds-list")
             .toolbar {
-                if !accounts.isEmpty {
+                if !holdings.isEmpty {
                     ToolbarItem(placement: .primaryAction) {
-                        addAccountButton
+                        addHoldingButton
                     }
                 }
             }
             .sheet(item: $editorMode) { mode in
-                AccountEditorView(mode: mode)
+                FundEditorView(mode: mode)
             }
             .tint(MonMonTheme.accent)
         }
     }
 
-    private var totalCard: some View {
+    private var summaryCard: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Label("TOTAL ASSETS", systemImage: "chart.pie.fill")
+            Label("TOTAL FUNDS", systemImage: "chart.line.uptrend.xyaxis")
                 .font(.caption.weight(.semibold))
                 .tracking(0.8)
                 .foregroundStyle(MonMonTheme.textSecondary)
 
-            Text(VNDCurrency.format(netWorth))
+            Text(VNDCurrency.format(marketValue))
                 .font(.system(.largeTitle, design: .rounded, weight: .bold))
                 .monospacedDigit()
                 .lineLimit(1)
@@ -67,27 +64,23 @@ struct AccountListView: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 Label(
-                    "Cash \(VNDCurrency.format(availableCash))",
-                    systemImage: "banknote.fill"
+                    "Cost basis \(VNDCurrency.format(costBasis))",
+                    systemImage: "cart.fill"
                 )
                 .font(.subheadline.weight(.medium))
+                .foregroundStyle(MonMonTheme.textSecondary)
 
                 Label(
-                    "Savings \(VNDCurrency.format(savingsPrincipal))",
-                    systemImage: "building.columns.fill"
+                    profitLossDescription,
+                    systemImage: isGain ? "arrow.up.right" : "arrow.down.right"
                 )
                 .font(.subheadline.weight(.medium))
+                .foregroundStyle(isGain ? MonMonTheme.gain : MonMonTheme.danger)
 
-                Label(
-                    "Funds \(VNDCurrency.format(fundsMarketValue))",
-                    systemImage: "chart.line.uptrend.xyaxis"
-                )
-                .font(.subheadline.weight(.medium))
-
-                Label(accountCountLabel, systemImage: "rectangle.stack.fill")
+                Label(holdingCountLabel, systemImage: "rectangle.stack.fill")
                     .font(.subheadline.weight(.medium))
+                    .foregroundStyle(MonMonTheme.textSecondary)
             }
-            .foregroundStyle(MonMonTheme.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(24)
@@ -102,62 +95,64 @@ struct AccountListView: View {
         .accessibilityElement(children: .combine)
     }
 
-    private var availableCash: Decimal {
-        CashBalanceSummary.totalAvailable(
-            of: accounts,
-            deposits: deposits,
-            holdings: holdings
-        )
-    }
-
-    private var savingsPrincipal: Decimal {
-        AssetSummary.totalPrincipal(of: deposits)
-    }
-
-    private var fundsMarketValue: Decimal {
+    private var marketValue: Decimal {
         FundSummary.totalMarketValue(of: holdings)
     }
 
-    private var netWorth: Decimal {
-        AssetSummary.netWorth(
-            accounts: accounts,
-            deposits: deposits,
-            holdings: holdings
-        )
+    private var costBasis: Decimal {
+        FundSummary.totalCostBasis(of: holdings)
     }
 
-    private var accountCountLabel: String {
-        switch accounts.count {
+    private var profitLoss: Decimal {
+        FundSummary.totalUnrealizedProfitLoss(of: holdings)
+    }
+
+    private var isGain: Bool {
+        profitLoss >= 0
+    }
+
+    /// The arrow symbol and the explicit sign carry the meaning; the tint only
+    /// reinforces it, so the figure still reads with colour ignored.
+    private var profitLossDescription: String {
+        let label = isGain ? "Unrealized gain" : "Unrealized loss"
+        let sign = isGain ? "+" : "−"
+        return "\(label) \(sign)\(VNDCurrency.format(abs(profitLoss)))"
+    }
+
+    private var holdingCountLabel: String {
+        switch holdings.count {
         case 0:
-            "Ready for your first account"
+            "Ready for your first holding"
         case 1:
-            "Across 1 account"
+            "Across 1 holding"
         default:
-            "Across \(accounts.count) accounts"
+            "Across \(holdings.count) holdings"
         }
     }
 
     private var emptyState: some View {
         VStack(spacing: 18) {
-            Image(systemName: "wallet.bifold.fill")
+            Image(systemName: "chart.line.uptrend.xyaxis")
                 .font(.system(size: 28, weight: .semibold))
-                .foregroundStyle(MonMonTheme.accent)
+                .foregroundStyle(MonMonTheme.funds)
                 .frame(width: 64, height: 64)
-                .background(MonMonTheme.accent.opacity(0.16), in: Circle())
+                .background(MonMonTheme.funds.opacity(0.16), in: Circle())
                 .accessibilityHidden(true)
 
             VStack(spacing: 6) {
-                Text("Build your cash picture")
+                Text("Track your funds and ETFs")
                     .font(.title3.weight(.semibold))
 
-                Text("Add cash and bank accounts to see everything in one calm overview.")
-                    .font(.subheadline)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: 360)
+                Text(
+                    "Add a holding to see what it cost, what it is worth today, and the gap between them."
+                )
+                .font(.subheadline)
+                .foregroundStyle(MonMonTheme.textSecondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 360)
             }
 
-            addAccountButton
+            addHoldingButton
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
         }
@@ -174,54 +169,65 @@ struct AccountListView: View {
         }
     }
 
-    private var addAccountButton: some View {
-        Button("Add Account", systemImage: "plus") {
-            editorMode = .add
+    private func accountName(for holding: FundHolding) -> String? {
+        guard let sourceAccountID = holding.sourceAccountID else {
+            return nil
         }
-        .accessibilityIdentifier("add-account")
+
+        return accounts.first { $0.id == sourceAccountID }?.name
     }
 
-    private var accountsSection: some View {
+    private var addHoldingButton: some View {
+        Button("Add Holding", systemImage: "plus") {
+            editorMode = .add
+        }
+        .accessibilityIdentifier("add-fund")
+    }
+
+    private var holdingsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Accounts")
+                Text("Holdings")
                     .font(.title3.weight(.semibold))
 
                 Spacer()
 
-                Text(accounts.count.formatted())
+                Text(holdings.count.formatted())
                     .font(.caption.weight(.bold))
-                    .foregroundStyle(MonMonTheme.accent)
+                    .foregroundStyle(MonMonTheme.funds)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
-                    .background(MonMonTheme.accent.opacity(0.16), in: Capsule())
+                    .background(MonMonTheme.funds.opacity(0.16), in: Capsule())
             }
 
-            ForEach(accounts) { account in
+            ForEach(holdings) { holding in
                 Button {
-                    editorMode = .edit(account)
+                    editorMode = .edit(holding)
                 } label: {
-                    CashAccountCard(account: account, deposits: deposits, holdings: holdings)
+                    FundHoldingCard(
+                        holding: holding,
+                        sourceAccountName: accountName(for: holding)
+                    )
                 }
                 .buttonStyle(.plain)
-                .accessibilityIdentifier("account-\(account.id.uuidString)")
-                .accessibilityHint("Opens the account editor.")
+                .accessibilityIdentifier("fund-\(holding.id.uuidString)")
+                .accessibilityHint("Opens this holding for editing")
             }
         }
     }
 }
 
 #if DEBUG
-    #Preview("List · accounts") {
-        AccountListView()
+    #Preview("Funds · holdings") {
+        FundListView()
             .modelContainer(PreviewData.populated)
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
             .preferredColorScheme(MonMonTheme.colorScheme)
     }
 
-    #Preview("List · empty state") {
-        AccountListView()
+    #Preview("Funds · empty state") {
+        FundListView()
             .modelContainer(PreviewData.empty)
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)

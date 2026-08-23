@@ -37,6 +37,8 @@ enum MonMonTheme {
     static let bank = Frappe.blue
     static let credit = Frappe.peach
     static let savings = Frappe.yellow
+    static let funds = Frappe.mauve
+    static let gain = Frappe.teal
     static let danger = Frappe.red
 
     static let canvas = Frappe.base

@@ -17,10 +17,21 @@ enum AssetSummary {
         totalPrincipal(of: deposits) + totalProjectedInterest(of: deposits)
     }
 
-    /// Spendable cash plus deposited principal. Money moved from an account into
-    /// a deposit is already removed from the spendable side, so it is counted once.
-    static func netWorth(accounts: [CashAccount], deposits: [SavingsDeposit]) -> Decimal {
-        CashBalanceSummary.totalAvailable(of: accounts, deposits: deposits)
+    /// Spendable cash, plus deposited principal, plus what the fund holdings are
+    /// worth today. Money moved from an account into a deposit or a holding is
+    /// already removed from the spendable side, so it is counted once; a holding
+    /// contributes its market value, so an unrealized gain shows up as growth.
+    static func netWorth(
+        accounts: [CashAccount],
+        deposits: [SavingsDeposit],
+        holdings: [FundHolding]
+    ) -> Decimal {
+        CashBalanceSummary.totalAvailable(
+            of: accounts,
+            deposits: deposits,
+            holdings: holdings
+        )
             + totalPrincipal(of: deposits)
+            + FundSummary.totalMarketValue(of: holdings)
     }
 }

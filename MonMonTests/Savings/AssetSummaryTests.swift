@@ -18,6 +18,27 @@ struct AssetSummaryTests {
         )
     }
 
+    private func makeHolding(
+        units: Decimal,
+        averageCostPerUnit: Decimal,
+        currentNAVPerUnit: Decimal,
+        sourceAccountID: UUID? = nil
+    ) -> FundHolding {
+        FundHolding(
+            id: UUID(),
+            name: "Holding",
+            symbol: "VESAF",
+            kind: .fund,
+            units: units,
+            averageCostPerUnit: averageCostPerUnit,
+            currentNAVPerUnit: currentNAVPerUnit,
+            navAsOf: openedAt,
+            currencyCode: VNDCurrency.code,
+            createdAt: openedAt,
+            sourceAccountID: sourceAccountID
+        )
+    }
+
     private func makeDeposit(
         principal: Decimal,
         rate: Decimal = 6,
@@ -72,9 +93,15 @@ struct AssetSummaryTests {
         let account = makeAccount(openingBalance: 148_900_000)
         let unrelated = makeDeposit(principal: 100_000_000, sourceAccountID: UUID())
 
-        #expect(CashBalanceSummary.fundedAmount(for: account, deposits: [unrelated]) == 0)
         #expect(
-            CashBalanceSummary.available(for: account, deposits: [unrelated])
+            CashBalanceSummary.fundedAmount(
+                for: account,
+                deposits: [unrelated],
+                holdings: []
+            ) == 0
+        )
+        #expect(
+            CashBalanceSummary.available(for: account, deposits: [unrelated], holdings: [])
                 == 148_900_000
         )
     }
@@ -85,11 +112,12 @@ struct AssetSummaryTests {
         let deposit = makeDeposit(principal: 100_000_000, sourceAccountID: account.id)
 
         #expect(
-            CashBalanceSummary.fundedAmount(for: account, deposits: [deposit])
+            CashBalanceSummary.fundedAmount(for: account, deposits: [deposit], holdings: [])
                 == 100_000_000
         )
         #expect(
-            CashBalanceSummary.available(for: account, deposits: [deposit]) == 48_900_000
+            CashBalanceSummary.available(for: account, deposits: [deposit], holdings: [])
+                == 48_900_000
         )
         #expect(CashBalanceSummary.total(of: [account]) == 148_900_000)
     }
@@ -103,11 +131,15 @@ struct AssetSummaryTests {
         ]
 
         #expect(
-            CashBalanceSummary.available(for: account, deposits: deposits) == 8_900_000
+            CashBalanceSummary.available(for: account, deposits: deposits, holdings: [])
+                == 8_900_000
         )
         #expect(
-            CashBalanceSummary.totalAvailable(of: [account], deposits: deposits)
-                == 8_900_000
+            CashBalanceSummary.totalAvailable(
+                of: [account],
+                deposits: deposits,
+                holdings: []
+            ) == 8_900_000
         )
     }
 
@@ -116,7 +148,10 @@ struct AssetSummaryTests {
         let account = makeAccount(openingBalance: 148_900_000)
         let funded = makeDeposit(principal: 100_000_000, sourceAccountID: account.id)
 
-        #expect(AssetSummary.netWorth(accounts: [account], deposits: [funded]) == 148_900_000)
+        #expect(
+            AssetSummary.netWorth(accounts: [account], deposits: [funded], holdings: [])
+                == 148_900_000
+        )
     }
 
     @Test("A deposit without a source account adds to net worth")
@@ -125,8 +160,95 @@ struct AssetSummaryTests {
         let external = makeDeposit(principal: 250_000_000)
 
         #expect(
-            AssetSummary.netWorth(accounts: [account], deposits: [external])
+            AssetSummary.netWorth(accounts: [account], deposits: [external], holdings: [])
                 == 398_900_000
+        )
+    }
+
+    @Test("A funded holding removes its cost basis from the available balance")
+    func fundedHoldingReducesAvailableBalance() {
+        let account = makeAccount(openingBalance: 148_900_000)
+        let holding = makeHolding(
+            units: 1_000,
+            averageCostPerUnit: 20_000,
+            currentNAVPerUnit: 25_000,
+            sourceAccountID: account.id
+        )
+
+        #expect(
+            CashBalanceSummary.fundedAmount(for: account, deposits: [], holdings: [holding])
+                == 20_000_000
+        )
+        #expect(
+            CashBalanceSummary.available(for: account, deposits: [], holdings: [holding])
+                == 128_900_000
+        )
+    }
+
+    @Test("One account funding both a deposit and a holding loses both amounts")
+    func depositAndHoldingBothReduceAvailableBalance() {
+        let account = makeAccount(openingBalance: 148_900_000)
+        let deposit = makeDeposit(principal: 100_000_000, sourceAccountID: account.id)
+        let holding = makeHolding(
+            units: 1_000,
+            averageCostPerUnit: 20_000,
+            currentNAVPerUnit: 25_000,
+            sourceAccountID: account.id
+        )
+
+        #expect(
+            CashBalanceSummary.available(
+                for: account,
+                deposits: [deposit],
+                holdings: [holding]
+            ) == 28_900_000
+        )
+    }
+
+    @Test("Net worth counts a funded holding's cost exactly once and adds its gain")
+    func netWorthCountsHoldingCostOnceAndAddsGain() {
+        let account = makeAccount(openingBalance: 148_900_000)
+        let flat = makeHolding(
+            units: 1_000,
+            averageCostPerUnit: 20_000,
+            currentNAVPerUnit: 20_000,
+            sourceAccountID: account.id
+        )
+
+        // NAV still equals the average cost, so buying moved money without
+        // changing what it is all worth.
+        #expect(
+            AssetSummary.netWorth(accounts: [account], deposits: [], holdings: [flat])
+                == 148_900_000
+        )
+
+        let gaining = makeHolding(
+            units: 1_000,
+            averageCostPerUnit: 20_000,
+            currentNAVPerUnit: 25_000,
+            sourceAccountID: account.id
+        )
+
+        // The NAV is 5.000 ₫ higher on 1.000 units, so net worth grows by exactly
+        // the 5.000.000 ₫ unrealized gain.
+        #expect(
+            AssetSummary.netWorth(accounts: [account], deposits: [], holdings: [gaining])
+                == 153_900_000
+        )
+    }
+
+    @Test("An unfunded holding adds its whole market value to net worth")
+    func unfundedHoldingAddsMarketValue() {
+        let account = makeAccount(openingBalance: 148_900_000)
+        let external = makeHolding(
+            units: 1_000,
+            averageCostPerUnit: 20_000,
+            currentNAVPerUnit: 25_000
+        )
+
+        #expect(
+            AssetSummary.netWorth(accounts: [account], deposits: [], holdings: [external])
+                == 173_900_000
         )
     }
 }

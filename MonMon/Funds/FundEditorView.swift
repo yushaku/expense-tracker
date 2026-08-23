@@ -1,30 +1,30 @@
 import SwiftData
 import SwiftUI
 
-enum SavingsEditorMode: Identifiable {
+enum FundEditorMode: Identifiable {
     case add
-    case edit(SavingsDeposit)
+    case edit(FundHolding)
 
     var id: String {
         switch self {
         case .add:
             "add"
-        case .edit(let deposit):
-            deposit.id.uuidString
+        case .edit(let holding):
+            holding.id.uuidString
         }
     }
 
-    var editedDeposit: SavingsDeposit? {
+    var editedHolding: FundHolding? {
         switch self {
         case .add:
             nil
-        case .edit(let deposit):
-            deposit
+        case .edit(let holding):
+            holding
         }
     }
 }
 
-struct SavingsEditorView: View {
+struct FundEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
@@ -37,28 +37,28 @@ struct SavingsEditorView: View {
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
-    private let mode: SavingsEditorMode
+    private let mode: FundEditorMode
 
-    @State private var draft: SavingsDraft
-    @State private var validationError: SavingsFormError?
+    @State private var draft: FundDraft
+    @State private var validationError: FundFormError?
     @State private var saveErrorMessage: String?
     @State private var isConfirmingDelete = false
 
-    init(mode: SavingsEditorMode) {
+    init(mode: FundEditorMode) {
         self.mode = mode
 
         switch mode {
         case .add:
-            _draft = State(initialValue: SavingsDraft(openedAt: .now))
-        case .edit(let deposit):
-            _draft = State(initialValue: SavingsDraft(deposit: deposit))
+            _draft = State(initialValue: FundDraft(navAsOf: .now))
+        case .edit(let holding):
+            _draft = State(initialValue: FundDraft(holding: holding))
         }
     }
 
     var body: some View {
         #if os(macOS)
             form
-                .frame(minWidth: 460, minHeight: 620)
+                .frame(minWidth: 460, minHeight: 640)
         #else
             form
         #endif
@@ -66,21 +66,21 @@ struct SavingsEditorView: View {
 
     private var form: some View {
         NavigationStack {
-            SavingsEditorForm(
+            FundEditorForm(
                 draft: $draft,
                 accounts: accounts,
-                isEditing: mode.editedDeposit != nil,
+                isEditing: mode.editedHolding != nil,
                 validationError: validationError,
                 saveErrorMessage: saveErrorMessage,
                 onDelete: { isConfirmingDelete = true }
             )
-            .navigationTitle(mode.editedDeposit == nil ? "Add savings book" : "Edit savings book")
+            .navigationTitle(mode.editedHolding == nil ? "Add holding" : "Edit holding")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .accessibilityIdentifier("cancel-savings")
+                    .accessibilityIdentifier("cancel-fund")
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
@@ -88,22 +88,22 @@ struct SavingsEditorView: View {
                         save()
                     }
                     .fontWeight(.semibold)
-                    .accessibilityIdentifier("save-savings")
+                    .accessibilityIdentifier("save-fund")
                 }
             }
             .confirmationDialog(
-                "Delete this savings book?",
+                "Delete this holding?",
                 isPresented: $isConfirmingDelete,
                 titleVisibility: .visible
             ) {
                 Button("Delete", role: .destructive) {
                     delete()
                 }
-                .accessibilityIdentifier("confirm-delete-savings")
+                .accessibilityIdentifier("confirm-delete-fund")
 
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("Its principal returns to the linked account's available balance.")
+                Text("Its cost basis returns to the linked account's available balance.")
             }
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
@@ -119,9 +119,9 @@ struct SavingsEditorView: View {
         return accounts.first { $0.id == sourceAccountID }
     }
 
-    /// Spendable balance the draft may claim. When editing a deposit already
-    /// funded by this account, its own principal is added back so re-saving an
-    /// unchanged amount is not reported as an overdraft.
+    /// Spendable balance the draft may claim. When editing a holding already
+    /// funded by this account, its own cost basis is added back so re-saving
+    /// unchanged values is not reported as an overdraft.
     private func availableBalance(for account: CashAccount) -> Decimal {
         var available = CashBalanceSummary.available(
             for: account,
@@ -129,10 +129,10 @@ struct SavingsEditorView: View {
             holdings: holdings
         )
 
-        if let editedDeposit = mode.editedDeposit,
-            editedDeposit.sourceAccountID == account.id
+        if let editedHolding = mode.editedHolding,
+            editedHolding.sourceAccountID == account.id
         {
-            available += editedDeposit.principal
+            available += editedHolding.costBasis
         }
 
         return available
@@ -145,20 +145,20 @@ struct SavingsEditorView: View {
         let availableSourceBalance = selectedAccount.map(availableBalance(for:))
 
         do {
-            if let editedDeposit = mode.editedDeposit {
+            if let editedHolding = mode.editedHolding {
                 try draft.apply(
-                    to: editedDeposit,
+                    to: editedHolding,
                     availableSourceBalance: availableSourceBalance
                 )
             } else {
-                let deposit = try draft.makeDeposit(
+                let holding = try draft.makeHolding(
                     id: UUID(),
                     createdAt: .now,
                     availableSourceBalance: availableSourceBalance
                 )
-                modelContext.insert(deposit)
+                modelContext.insert(holding)
             }
-        } catch let error as SavingsFormError {
+        } catch let error as FundFormError {
             validationError = error
             return
         } catch {
@@ -171,31 +171,31 @@ struct SavingsEditorView: View {
             dismiss()
         } catch {
             modelContext.rollback()
-            saveErrorMessage = "Couldn’t save this savings book. Try again."
+            saveErrorMessage = "Couldn’t save this holding. Try again."
         }
     }
 
     private func delete() {
-        guard let editedDeposit = mode.editedDeposit else {
+        guard let editedHolding = mode.editedHolding else {
             return
         }
 
         saveErrorMessage = nil
-        modelContext.delete(editedDeposit)
+        modelContext.delete(editedHolding)
 
         do {
             try modelContext.save()
             dismiss()
         } catch {
             modelContext.rollback()
-            saveErrorMessage = "Couldn’t delete this savings book. Try again."
+            saveErrorMessage = "Couldn’t delete this holding. Try again."
         }
     }
 }
 
 #if DEBUG
-    #Preview("Editor · add") {
-        SavingsEditorView(mode: .add)
+    #Preview("Fund editor · add") {
+        FundEditorView(mode: .add)
             .modelContainer(PreviewData.populated)
     }
 #endif

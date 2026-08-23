@@ -71,9 +71,38 @@ final class CashAccount {
         }
     }
 
+    extension FundHolding {
+        static func preview(
+            name: String,
+            symbol: String,
+            kind: FundHoldingKind,
+            units: Decimal,
+            averageCostPerUnit: Decimal,
+            currentNAVPerUnit: Decimal,
+            navOffset: TimeInterval = 0,
+            sourceAccountID: UUID? = nil
+        ) -> FundHolding {
+            let navAsOf = Date(timeIntervalSince1970: 1_700_000_000 + navOffset)
+
+            return FundHolding(
+                id: UUID(),
+                name: name,
+                symbol: symbol,
+                kind: kind,
+                units: units,
+                averageCostPerUnit: averageCostPerUnit,
+                currentNAVPerUnit: currentNAVPerUnit,
+                navAsOf: navAsOf,
+                currencyCode: VNDCurrency.code,
+                createdAt: navAsOf,
+                sourceAccountID: sourceAccountID
+            )
+        }
+    }
+
     @MainActor
     enum PreviewData {
-        static let empty = makeContainer(accounts: [], deposits: [])
+        static let empty = makeContainer(accounts: [], deposits: [], holdings: [])
 
         static let populated: ModelContainer = {
             let wallet = CashAccount.preview(
@@ -111,18 +140,39 @@ final class CashAccount {
                         termMonths: 12,
                         openedOffset: 86_400 * 40
                     ),
+                ],
+                holdings: [
+                    .preview(
+                        name: "VinaCapital VESAF",
+                        symbol: "VESAF",
+                        kind: .fund,
+                        units: Decimal(string: "1234.5678") ?? 0,
+                        averageCostPerUnit: 24_500,
+                        currentNAVPerUnit: Decimal(string: "27431.28") ?? 0,
+                        sourceAccountID: techcombank.id
+                    ),
+                    .preview(
+                        name: "Diamond ETF",
+                        symbol: "FUEVFVND",
+                        kind: .etf,
+                        units: 2_000,
+                        averageCostPerUnit: 32_100,
+                        currentNAVPerUnit: 29_850,
+                        navOffset: 86_400 * 20
+                    ),
                 ]
             )
         }()
 
         private static func makeContainer(
             accounts: [CashAccount],
-            deposits: [SavingsDeposit]
+            deposits: [SavingsDeposit],
+            holdings: [FundHolding]
         ) -> ModelContainer {
             let container: ModelContainer
             do {
                 container = try ModelContainer(
-                    for: CashAccount.self, SavingsDeposit.self,
+                    for: CashAccount.self, SavingsDeposit.self, FundHolding.self,
                     configurations: ModelConfiguration(isStoredInMemoryOnly: true)
                 )
             } catch {
@@ -135,6 +185,10 @@ final class CashAccount {
 
             for deposit in deposits {
                 container.mainContext.insert(deposit)
+            }
+
+            for holding in holdings {
+                container.mainContext.insert(holding)
             }
 
             return container

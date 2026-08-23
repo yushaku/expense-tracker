@@ -11,6 +11,11 @@ enum VNDCurrency {
         locale: locale
     )
     .precision(.fractionLength(0))
+    private static let unitPriceFormat = Decimal.FormatStyle.Currency(
+        code: code,
+        locale: locale
+    )
+    .precision(.fractionLength(0...2))
 
     static func parse(_ text: String) -> Decimal? {
         let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -29,5 +34,11 @@ enum VNDCurrency {
     /// amount field with a value the same parser accepts back.
     static func formatPlain(_ amount: Decimal) -> String {
         numberFormat.format(amount)
+    }
+
+    /// A price for a single unit, which unlike a balance can carry fractions of
+    /// a đồng, so it keeps up to two decimals instead of rounding to a whole one.
+    static func formatUnitPrice(_ amount: Decimal) -> String {
+        unitPriceFormat.format(amount)
     }
 }
