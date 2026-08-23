@@ -13,7 +13,7 @@ begins.
 | `fund-etf-holdings` | Record fund certificate and ETF holdings at a hand-entered NAV and see cost basis, market value, and unrealized profit or loss | `cash-balance`, `savings-deposit` |
 | `income-expense` | Record income and expenses against one account each, under owner-managed categories, and see account balances update. Transfers between accounts are out of scope | `cash-balance` |
 | `account-transfer` | Move money between two of the owner's own accounts, so both balances follow and total assets stay put | `cash-balance`, `income-expense` |
-| `debt-tracking` | Track liabilities and liability payments | `cash-balance`, `income-expense` |
+| `debt-tracking` | Record money borrowed and money lent out, with the payments against them, so balances follow and total assets stay put | `cash-balance`, `income-expense`, `account-transfer` |
 | `investment-tracking` | Record gold, equity, and crypto trades and calculate positions and cost basis | `cash-balance`, `income-expense`, `fund-etf-holdings` |
 | `market-valuation` | Refresh market prices and show portfolio value, allocation, and profit/loss | `investment-tracking` |
 | `icloud-sync` | Synchronize all financial records through the owner's private iCloud database | `cash-balance`, `income-expense`, `debt-tracking`, `fund-etf-holdings`, `investment-tracking`, `market-valuation` |
