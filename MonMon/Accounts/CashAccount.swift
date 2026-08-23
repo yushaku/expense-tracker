@@ -260,6 +260,31 @@ final class CashAccount {
                 createdOffset: 60
             )
 
+            let borrowed = Debt.preview(
+                counterparty: "Anh Minh",
+                direction: .borrowed,
+                principal: 30_000_000,
+                accountID: wallet.id,
+                note: "Help with the deposit"
+            )
+            let lent = Debt.preview(
+                counterparty: "Chị Lan",
+                direction: .lent,
+                principal: 5_000_000,
+                accountID: techcombank.id,
+                createdOffset: 86_400 * 20
+            )
+            // A debt taken before tracking began: it names no account, because
+            // its money is already inside an opening balance.
+            let legacy = Debt.preview(
+                counterparty: "Techcombank",
+                direction: .borrowed,
+                principal: 250_000_000,
+                annualInterestRate: Decimal(string: "8.5") ?? 0,
+                dueDate: Date(timeIntervalSince1970: 1_800_000_000),
+                createdOffset: 86_400 * 200
+            )
+
             return makeContainer(
                 accounts: [wallet, techcombank, emergency],
                 deposits: [
@@ -324,6 +349,22 @@ final class CashAccount {
                         destinationAccountID: wallet.id,
                         occurredOffset: 86_400
                     )
+                ],
+                debts: [borrowed, lent, legacy],
+                payments: [
+                    .preview(
+                        debtID: borrowed.id,
+                        amount: 12_000_000,
+                        accountID: wallet.id,
+                        note: "First instalment",
+                        occurredOffset: 86_400 * 10
+                    ),
+                    .preview(
+                        debtID: lent.id,
+                        amount: 5_000_000,
+                        accountID: techcombank.id,
+                        occurredOffset: 86_400 * 3
+                    ),
                 ]
             )
         }()

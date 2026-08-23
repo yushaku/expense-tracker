@@ -33,6 +33,7 @@
       --e-txn: #c0526b;
       --e-category: #4a8438;
       --e-transfer: #2f7d9e;
+      --e-debt: #8a5cc4;
       --ok: #2f7a52;
       --warn: #9a6a12;
       --idle: #6d7a86;
@@ -61,6 +62,7 @@
         --e-txn: #ee8399;
         --e-category: #86c46b;
         --e-transfer: #62b4d6;
+        --e-debt: #b79be8;
         --ok: #5fbd85;
         --warn: #d5a544;
         --idle: #8b98a4;
@@ -87,6 +89,7 @@
       --e-txn: #ee8399;
       --e-category: #86c46b;
       --e-transfer: #62b4d6;
+        --e-debt: #b79be8;
       --ok: #5fbd85;
       --warn: #d5a544;
       --idle: #8b98a4;
@@ -542,7 +545,7 @@
 
       <!-- ============ CashAccount (hub) ============ -->
       <article class="entity" id="CashAccount" tabindex="0"
-               style="--e: var(--e-account); grid-column: 1; grid-row: 1 / span 4; align-self: center;">
+               style="--e: var(--e-account); grid-column: 1; grid-row: 1 / span 5; align-self: center;">
         <div class="e-head">
           <div class="e-name">CashAccount</div>
           <div class="e-role">Cash, bank &amp; credit-card accounts &mdash; the hub every other record points at</div>
@@ -754,6 +757,80 @@
         </div>
       </article>
 
+      <!-- ============ Debt ============ -->
+      <article class="entity" id="Debt" tabindex="0"
+               style="--e: var(--e-debt); grid-column: 2; grid-row: 5;">
+        <div class="e-head">
+          <div class="e-name">Debt</div>
+          <div class="e-role">Money borrowed or lent out &mdash; no category, never spending</div>
+          <div class="e-file">MonMon/Debts/Debt.swift</div>
+        </div>
+        <ul class="fields">
+          <li class="field key"><span class="fname">id</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge pk">PK</span></span></li>
+          <li class="field"><span class="fname">counterparty</span><span class="ftype">String</span></li>
+          <li class="field">
+            <span class="fname">direction</span><span class="ftype">DebtDirection</span>
+            <span class="badges"><span class="badge null">borrowed / lent &mdash; carries the sign</span></span>
+          </li>
+          <li class="field">
+            <span class="fname">principal</span><span class="ftype">Decimal</span>
+            <span class="badges"><span class="badge null">always positive</span></span>
+          </li>
+          <li class="field"><span class="fname">annualInterestRate</span><span class="ftype">Decimal</span></li>
+          <li class="field"><span class="fname">openedAt</span><span class="ftype">Date</span></li>
+          <li class="field">
+            <span class="fname">dueDate</span><span class="ftype">Date?</span>
+            <span class="badges"><span class="badge null">nil = open-ended</span></span>
+          </li>
+          <li class="field key" data-anchor="Debt.accountID">
+            <span class="fname">accountID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">nil = already in an opening balance</span></span>
+          </li>
+          <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
+        </ul>
+        <div class="derived">
+          <div class="derived-label">Derived &mdash; computed, not stored</div>
+          <div class="derived-list">signedPrincipal &nbsp;<span style="color:var(--muted)">(+ borrowed / &minus; lent)</span> · outstanding · projectedInterest(asOf:) <span style="color:var(--muted)">(shown, never counted)</span></div>
+        </div>
+      </article>
+
+      <!-- ============ DebtPayment ============ -->
+      <article class="entity" id="DebtPayment" tabindex="0"
+               style="--e: var(--e-debt); grid-column: 3; grid-row: 5; align-self: center;">
+        <div class="e-head">
+          <div class="e-name">DebtPayment</div>
+          <div class="e-role">One payment against a debt &mdash; reads its direction from the parent</div>
+          <div class="e-file">MonMon/Debts/DebtPayment.swift</div>
+        </div>
+        <ul class="fields">
+          <li class="field key"><span class="fname">id</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge pk">PK</span></span></li>
+          <li class="field key" data-anchor="DebtPayment.debtID">
+            <span class="fname">debtID</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge req">NOT NULL</span><span class="badge null">deleted with its debt</span></span>
+          </li>
+          <li class="field">
+            <span class="fname">amount</span><span class="ftype">Decimal</span>
+            <span class="badges"><span class="badge null">always positive</span></span>
+          </li>
+          <li class="field"><span class="fname">occurredAt</span><span class="ftype">Date</span></li>
+          <li class="field key" data-anchor="DebtPayment.accountID">
+            <span class="fname">accountID</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+          </li>
+          <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
+        </ul>
+        <div class="derived">
+          <div class="derived-label">Derived &mdash; computed, not stored</div>
+          <div class="derived-list">signedAmount(for:) &nbsp;<span style="color:var(--muted)">(reverses its debt's direction)</span></div>
+        </div>
+      </article>
+
       <!-- ============ TransactionCategory ============ -->
       <article class="entity" id="TransactionCategory" tabindex="0"
                style="--e: var(--e-category); grid-column: 3; grid-row: 3; align-self: center;">
@@ -862,7 +939,7 @@
             <span class="chip built">Built</span>
           </div>
           <p class="n-desc">
-            One <code>ModelContainer</code> holding all six models. No CloudKit configuration,
+            One <code>ModelContainer</code> holding all eight models. No CloudKit configuration,
             so the file never leaves the device. Protected by the operating system's file
             protection and an optional Face&nbsp;ID / Touch&nbsp;ID gate &mdash; not by encryption
             the app performs itself.
@@ -958,6 +1035,36 @@
       </p>
     </div>
     <div class="note">
+      <h3>Debts do not sum to zero</h3>
+      <p>
+        A transfer's counterparty is another of the owner's accounts; a debt's lives
+        outside the app, so <code>DebtSummary.netFlow</code> does <em>not</em> cancel out.
+        Borrowing genuinely adds cash. Net worth therefore adds what is still owed to
+        the owner and subtracts what the owner still owes, which is what keeps borrowing,
+        lending and repaying from moving it at all. Only a debt naming no account moves
+        it &mdash; correctly, because that money was spent before tracking began.
+      </p>
+    </div>
+    <div class="note">
+      <h3>Projected interest is never counted</h3>
+      <p>
+        <code>Debt.projectedInterest(asOf:)</code> is shown on a card and reaches no total,
+        exactly as <code>SavingsDeposit.projectedInterest</code> stays out of
+        <code>AssetSummary.netWorth</code>. It is an estimate of what a rate implies, not a
+        đồng anyone has handed over. Interest actually paid is an ordinary expense, because
+        unlike the principal it really does leave the owner's money.
+      </p>
+    </div>
+    <div class="note">
+      <h3>Why <code>debtID</code> is <em>not</em> nullable</h3>
+      <p>
+        The opposite call to <code>categoryID</code>, and for a concrete reason: the direction
+        that signs a payment lives on its parent debt, so an orphan is not untidy, it is
+        uncomputable. There is no <em>Unattached</em> to render, so the state is made
+        inexpressible and deleting a debt deletes its payments in the same save.
+      </p>
+    </div>
+    <div class="note">
       <h3>Why <code>FundInstrument</code> splits out</h3>
       <p>
         A price belongs to the instrument, not to the position. Today nothing stops two
@@ -970,8 +1077,8 @@
     <div class="note">
       <h3>Enums stored as String</h3>
       <p>
-        <code>CashAccountKind</code>, <code>TransactionKind</code> and <code>FundHoldingKind</code>
-        are all <code>String, Codable</code>. Raw values are stable across migrations
+        <code>CashAccountKind</code>, <code>TransactionKind</code>, <code>FundHoldingKind</code>
+        and <code>DebtDirection</code> are all <code>String, Codable</code>. Raw values are stable across migrations
         and safe for CloudKit later.
       </p>
     </div>

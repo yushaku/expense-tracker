@@ -1,7 +1,7 @@
 # MonMon
 
 MonMon is a private personal-finance app for iPhone and Mac, themed with
-Catppuccin — Latte in light, Frappé in dark. It has five slices today.
+Catppuccin — Latte in light, Frappé in dark. It has seven slices today.
 `cash-balance` lets one owner add, edit, and delete local cash, bank, and credit
 card accounts with a VND opening balance. `savings-deposit` adds term
 deposits (sổ tiết kiệm) with maturity dates, projected interest, and an optional
@@ -10,7 +10,11 @@ once. `fund-etf-holdings` adds fund certificates (chứng chỉ quỹ) and ETFs 
 units, valued at a hand-entered NAV, showing cost basis, market value, and
 unrealized profit or loss. `income-expense` records money in and out against one
 account each, grouped by categories the owner manages, so every balance follows
-what was recorded rather than a hand-edited number.
+what was recorded rather than a hand-edited number. `account-transfer` moves
+money between two of the owner's own accounts, so both balances follow and total
+assets stay put. `debt-tracking` records money borrowed and money lent out, with
+the payments against them: the account moves by exactly the principal, what is
+outstanding follows the payments, and total assets stay put through all of it.
 
 ## Requirements
 
@@ -96,8 +100,11 @@ and are excluded by `.gitignore`.
   browsed a day, a month, a year, or a hand-picked range at a time; add, edit,
   and delete transfers between two accounts, opened from the Home toolbar; an
   optional funding link that lowers an account's available balance without
-  touching its opening balance; VND validation and formatting, exact `Decimal`
-  totals, on-device SwiftData persistence, and shared SwiftUI UI.
+  touching its opening balance; add, edit, and delete debts in both directions
+  with their payments, opened from the Home toolbar, with an optional cash
+  account, an optional rate and due date, and projected interest that is shown
+  but never counted; VND validation and formatting, exact `Decimal` totals,
+  on-device SwiftData persistence, and shared SwiftUI UI.
 - Owner validation: form behavior, interest and valuation against a hand
   calculation, relaunch persistence, iPhone Dynamic Type and keyboard, and Mac
   window resizing.
@@ -106,8 +113,9 @@ and are excluded by `.gitignore`.
   lock is a gate on the screen, not encryption; the records on disk are
   protected by the operating system's file protection and nothing more.
 - Not included yet: budgets, recurring transactions, interest paid on a
-  schedule, rollover or early withdrawal, individual buy/sell trades or realized
-  profit and loss, automatic price refresh, iCloud, network access, AI, or MCP.
+  schedule, rollover or early withdrawal, compound interest or amortisation
+  schedules on a debt, individual buy/sell trades or realized profit and loss,
+  automatic price refresh, iCloud, network access, AI, or MCP.
 
 ## Architecture
 
@@ -117,11 +125,13 @@ and are excluded by `.gitignore`.
   both platforms and touches nothing but the view it is asked to draw. The
   resolved version is pinned in `Package.resolved`.
 - SwiftData stores `CashAccount`, `SavingsDeposit`, `FundHolding`,
-  `TransactionCategory`, `MoneyTransaction`, and `AccountTransfer` records
+  `TransactionCategory`, `MoneyTransaction`, `AccountTransfer`, `Debt`, and
+  `DebtPayment` records
   locally; `@Query` drives every visible list and combined total.
 - `AccountDraft`, `SavingsDraft`, `FundDraft`, `TransactionDraft`,
-  `CategoryDraft`, and `TransferDraft` validate external text before any model is
-  inserted or mutated, and money uses `Decimal` throughout.
+  `CategoryDraft`, `TransferDraft`, `DebtDraft`, and `DebtPaymentDraft` validate
+  external text before any model is inserted or mutated, and money uses
+  `Decimal` throughout.
 - A savings deposit and a fund holding each store their funding account's `id`;
   available balances and total assets are derived, so deleting one needs no
   compensating write.
@@ -135,10 +145,19 @@ and are excluded by `.gitignore`.
   carries the direction. It is neither income nor an expense, so it never
   reaches the Spending totals, and because one account's outflow is another's
   inflow it leaves total assets untouched.
+- A debt stores a positive principal and carries its direction in an enum, and
+  its payments read that direction from the debt rather than repeating it. Debt
+  flow does not cancel out the way transfer flow does, because the counterparty
+  lives outside the app — so net worth adds what is still owed to the owner and
+  subtracts what the owner still owes, and borrowing, lending, and repaying all
+  leave it exactly where it was. Money lent out is drawn as its own wedge;
+  money borrowed joins the overdrawn accounts in the figure beneath the ring.
+  Projected interest is shown and never counted: interest actually paid is an
+  ordinary expense.
 - The approved boundaries and verification contracts live under `docs/`:
   `SPEC-cash-balance.md`, `SPEC-savings-deposit.md`,
-  `SPEC-fund-etf-holdings.md`, `SPEC-income-expense.md`, and
-  `SPEC-account-transfer.md`. `SPEC-market-valuation.md` is drafted but not
+  `SPEC-fund-etf-holdings.md`, `SPEC-income-expense.md`,
+  `SPEC-account-transfer.md`, and `SPEC-debt-tracking.md`. `SPEC-market-valuation.md` is drafted but not
   approved.
   `SPEC-market-valuation.md` amends the fund data contract: it splits
   `FundHolding` into a `FundInstrument` catalogue that owns the price and a
