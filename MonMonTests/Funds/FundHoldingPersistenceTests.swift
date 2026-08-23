@@ -122,7 +122,8 @@ struct FundHoldingPersistenceTests {
                 for: account,
                 deposits: [],
                 holdings: holdings,
-                transactions: []
+                transactions: [],
+                transfers: []
             )
                 == 128_900_000
         )
@@ -140,7 +141,8 @@ struct FundHoldingPersistenceTests {
                 for: account,
                 deposits: [],
                 holdings: holdings,
-                transactions: []
+                transactions: [],
+                transfers: []
             )
                 == 148_900_000
         )

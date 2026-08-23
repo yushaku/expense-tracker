@@ -40,7 +40,8 @@ enum AssetAllocation {
         accounts: [CashAccount],
         deposits: [SavingsDeposit],
         holdings: [FundHolding],
-        transactions: [MoneyTransaction]
+        transactions: [MoneyTransaction],
+        transfers: [AccountTransfer]
     ) -> [AssetAllocationSlice] {
         let candidates = [
             AssetAllocationSlice(
@@ -49,7 +50,8 @@ enum AssetAllocation {
                     accounts: accounts,
                     deposits: deposits,
                     holdings: holdings,
-                    transactions: transactions
+                    transactions: transactions,
+                    transfers: transfers
                 )
             ),
             AssetAllocationSlice(
@@ -73,14 +75,16 @@ enum AssetAllocation {
         accounts: [CashAccount],
         deposits: [SavingsDeposit],
         holdings: [FundHolding],
-        transactions: [MoneyTransaction]
+        transactions: [MoneyTransaction],
+        transfers: [AccountTransfer]
     ) -> Decimal {
         accounts.reduce(Decimal.zero) { total, account in
             let available = CashBalanceSummary.available(
                 for: account,
                 deposits: deposits,
                 holdings: holdings,
-                transactions: transactions
+                transactions: transactions,
+                transfers: transfers
             )
 
             return available > 0 ? total + available : total
@@ -93,14 +97,16 @@ enum AssetAllocation {
         accounts: [CashAccount],
         deposits: [SavingsDeposit],
         holdings: [FundHolding],
-        transactions: [MoneyTransaction]
+        transactions: [MoneyTransaction],
+        transfers: [AccountTransfer]
     ) -> Decimal {
         accounts.reduce(Decimal.zero) { total, account in
             let available = CashBalanceSummary.available(
                 for: account,
                 deposits: deposits,
                 holdings: holdings,
-                transactions: transactions
+                transactions: transactions,
+                transfers: transfers
             )
 
             return available < 0 ? total - available : total

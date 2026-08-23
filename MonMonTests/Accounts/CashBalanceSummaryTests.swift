@@ -39,7 +39,8 @@ struct CashBalanceSummaryTests {
                 for: account,
                 deposits: [],
                 holdings: [],
-                transactions: transactions
+                transactions: transactions,
+                transfers: []
             ) == 14_800_000
         )
     }
@@ -57,7 +58,8 @@ struct CashBalanceSummaryTests {
                 for: wallet,
                 deposits: [],
                 holdings: [],
-                transactions: transactions
+                transactions: transactions,
+                transfers: []
             ) == 1_000_000
         )
         #expect(
@@ -65,7 +67,8 @@ struct CashBalanceSummaryTests {
                 of: [wallet, bank],
                 deposits: [],
                 holdings: [],
-                transactions: transactions
+                transactions: transactions,
+                transfers: []
             ) == 9_600_000
         )
     }
@@ -82,7 +85,8 @@ struct CashBalanceSummaryTests {
                 for: account,
                 deposits: [],
                 holdings: [],
-                transactions: transactions
+                transactions: transactions,
+                transfers: []
             ) == -250_000
         )
     }
@@ -124,7 +128,8 @@ struct CashBalanceSummaryTests {
                 for: account,
                 deposits: [deposit],
                 holdings: [holding],
-                transactions: transactions
+                transactions: transactions,
+                transfers: []
             ) == 24_000_000
         )
     }

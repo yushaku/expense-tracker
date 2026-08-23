@@ -40,6 +40,9 @@ struct SavingsEditorView: View {
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
+    @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
+    private var transfers: [AccountTransfer]
+
     private let mode: SavingsEditorMode
 
     @State private var draft: SavingsDraft
@@ -130,7 +133,8 @@ struct SavingsEditorView: View {
             for: account,
             deposits: deposits,
             holdings: holdings,
-            transactions: transactions
+            transactions: transactions,
+            transfers: transfers
         )
 
         if let editedDeposit = mode.editedDeposit,

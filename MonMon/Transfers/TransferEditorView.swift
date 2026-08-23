@@ -1,30 +1,30 @@
 import SwiftData
 import SwiftUI
 
-enum FundEditorMode: Identifiable {
+enum TransferEditorMode: Identifiable {
     case add
-    case edit(FundHolding)
+    case edit(AccountTransfer)
 
     var id: String {
         switch self {
         case .add:
             "add"
-        case .edit(let holding):
-            holding.id.uuidString
+        case .edit(let transfer):
+            transfer.id.uuidString
         }
     }
 
-    var editedHolding: FundHolding? {
+    var editedTransfer: AccountTransfer? {
         switch self {
         case .add:
             nil
-        case .edit(let holding):
-            holding
+        case .edit(let transfer):
+            transfer
         }
     }
 }
 
-struct FundEditorView: View {
+struct TransferEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
@@ -34,37 +34,37 @@ struct FundEditorView: View {
     @Query(sort: \SavingsDeposit.createdAt, order: .forward)
     private var deposits: [SavingsDeposit]
 
-    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
-    private var transactions: [MoneyTransaction]
-
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
+
+    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
+    private var transactions: [MoneyTransaction]
 
     @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
     private var transfers: [AccountTransfer]
 
-    private let mode: FundEditorMode
+    private let mode: TransferEditorMode
 
-    @State private var draft: FundDraft
-    @State private var validationError: FundFormError?
+    @State private var draft: TransferDraft
+    @State private var validationError: TransferFormError?
     @State private var saveErrorMessage: String?
     @State private var isConfirmingDelete = false
 
-    init(mode: FundEditorMode) {
+    init(mode: TransferEditorMode, defaultDate: Date = .now) {
         self.mode = mode
 
         switch mode {
         case .add:
-            _draft = State(initialValue: FundDraft(navAsOf: .now))
-        case .edit(let holding):
-            _draft = State(initialValue: FundDraft(holding: holding))
+            _draft = State(initialValue: TransferDraft(occurredAt: defaultDate))
+        case .edit(let transfer):
+            _draft = State(initialValue: TransferDraft(transfer: transfer))
         }
     }
 
     var body: some View {
         #if os(macOS)
             form
-                .frame(minWidth: 460, minHeight: 640)
+                .frame(minWidth: 460, minHeight: 620)
         #else
             form
         #endif
@@ -72,21 +72,22 @@ struct FundEditorView: View {
 
     private var form: some View {
         NavigationStack {
-            FundEditorForm(
+            TransferEditorForm(
                 draft: $draft,
                 accounts: accounts,
-                isEditing: mode.editedHolding != nil,
+                isEditing: mode.editedTransfer != nil,
                 validationError: validationError,
                 saveErrorMessage: saveErrorMessage,
+                onSwap: { draft.swapEnds() },
                 onDelete: { isConfirmingDelete = true }
             )
-            .navigationTitle(mode.editedHolding == nil ? "Add holding" : "Edit holding")
+            .navigationTitle(mode.editedTransfer == nil ? "Add transfer" : "Edit transfer")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .accessibilityIdentifier("cancel-fund")
+                    .accessibilityIdentifier("cancel-transfer")
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
@@ -94,22 +95,22 @@ struct FundEditorView: View {
                         save()
                     }
                     .fontWeight(.semibold)
-                    .accessibilityIdentifier("save-fund")
+                    .accessibilityIdentifier("save-transfer")
                 }
             }
             .confirmationDialog(
-                "Delete this holding?",
+                "Delete this transfer?",
                 isPresented: $isConfirmingDelete,
                 titleVisibility: .visible
             ) {
                 Button("Delete", role: .destructive) {
                     delete()
                 }
-                .accessibilityIdentifier("confirm-delete-fund")
+                .accessibilityIdentifier("confirm-delete-transfer")
 
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("Its cost basis returns to the linked account's available balance.")
+                Text("Both account balances return to what they were.")
             }
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
@@ -117,7 +118,7 @@ struct FundEditorView: View {
         }
     }
 
-    private var selectedAccount: CashAccount? {
+    private var sourceAccount: CashAccount? {
         guard let sourceAccountID = draft.sourceAccountID else {
             return nil
         }
@@ -125,22 +126,27 @@ struct FundEditorView: View {
         return accounts.first { $0.id == sourceAccountID }
     }
 
-    /// Spendable balance the draft may claim. When editing a holding already
-    /// funded by this account, its own cost basis is added back so re-saving
-    /// unchanged values is not reported as an overdraft.
-    private func availableBalance(for account: CashAccount) -> Decimal {
+    /// What the source account may hand over. A credit card is allowed to go
+    /// below zero, so nothing caps it; every other account is capped at its
+    /// spendable balance. When editing, this transfer's own amount is added
+    /// back so re-saving an unchanged amount is not reported as an overdraft.
+    private var availableSourceBalance: Decimal? {
+        guard let sourceAccount, !sourceAccount.kind.allowsNegativeBalance else {
+            return nil
+        }
+
         var available = CashBalanceSummary.available(
-            for: account,
+            for: sourceAccount,
             deposits: deposits,
             holdings: holdings,
             transactions: transactions,
             transfers: transfers
         )
 
-        if let editedHolding = mode.editedHolding,
-            editedHolding.sourceAccountID == account.id
+        if let editedTransfer = mode.editedTransfer,
+            editedTransfer.sourceAccountID == sourceAccount.id
         {
-            available += editedHolding.costBasis
+            available += editedTransfer.amount
         }
 
         return available
@@ -150,23 +156,20 @@ struct FundEditorView: View {
         validationError = nil
         saveErrorMessage = nil
 
-        let availableSourceBalance = selectedAccount.map(availableBalance(for:))
+        let sourceBalance = availableSourceBalance
 
         do {
-            if let editedHolding = mode.editedHolding {
-                try draft.apply(
-                    to: editedHolding,
-                    availableSourceBalance: availableSourceBalance
-                )
+            if let editedTransfer = mode.editedTransfer {
+                try draft.apply(to: editedTransfer, availableSourceBalance: sourceBalance)
             } else {
-                let holding = try draft.makeHolding(
+                let transfer = try draft.makeTransfer(
                     id: UUID(),
                     createdAt: .now,
-                    availableSourceBalance: availableSourceBalance
+                    availableSourceBalance: sourceBalance
                 )
-                modelContext.insert(holding)
+                modelContext.insert(transfer)
             }
-        } catch let error as FundFormError {
+        } catch let error as TransferFormError {
             validationError = error
             return
         } catch {
@@ -179,31 +182,31 @@ struct FundEditorView: View {
             dismiss()
         } catch {
             modelContext.rollback()
-            saveErrorMessage = "Couldn’t save this holding. Try again."
+            saveErrorMessage = "Couldn’t save this transfer. Try again."
         }
     }
 
     private func delete() {
-        guard let editedHolding = mode.editedHolding else {
+        guard let editedTransfer = mode.editedTransfer else {
             return
         }
 
         saveErrorMessage = nil
-        modelContext.delete(editedHolding)
+        modelContext.delete(editedTransfer)
 
         do {
             try modelContext.save()
             dismiss()
         } catch {
             modelContext.rollback()
-            saveErrorMessage = "Couldn’t delete this holding. Try again."
+            saveErrorMessage = "Couldn’t delete this transfer. Try again."
         }
     }
 }
 
 #if DEBUG
-    #Preview("Fund editor · add") {
-        FundEditorView(mode: .add)
+    #Preview("Transfer editor · add") {
+        TransferEditorView(mode: .add)
             .modelContainer(PreviewData.populated)
     }
 #endif

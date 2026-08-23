@@ -116,7 +116,8 @@ struct SavingsDepositPersistenceTests {
                 for: account,
                 deposits: deposits,
                 holdings: [],
-                transactions: []
+                transactions: [],
+                transfers: []
             )
                 == 48_900_000
         )
@@ -134,7 +135,8 @@ struct SavingsDepositPersistenceTests {
                 for: account,
                 deposits: deposits,
                 holdings: [],
-                transactions: []
+                transactions: [],
+                transfers: []
             )
                 == 148_900_000
         )

@@ -144,6 +144,29 @@ final class CashAccount {
         }
     }
 
+    extension AccountTransfer {
+        static func preview(
+            amount: Decimal,
+            note: String = "",
+            sourceAccountID: UUID,
+            destinationAccountID: UUID,
+            occurredOffset: TimeInterval = 0
+        ) -> AccountTransfer {
+            let occurredAt = Date(timeIntervalSince1970: 1_700_000_000 + occurredOffset)
+
+            return AccountTransfer(
+                id: UUID(),
+                amount: amount,
+                occurredAt: occurredAt,
+                note: note,
+                sourceAccountID: sourceAccountID,
+                destinationAccountID: destinationAccountID,
+                currencyCode: VNDCurrency.code,
+                createdAt: occurredAt
+            )
+        }
+    }
+
     @MainActor
     enum PreviewData {
         static let empty = makeContainer(
@@ -151,7 +174,8 @@ final class CashAccount {
             deposits: [],
             holdings: [],
             categories: [],
-            transactions: []
+            transactions: [],
+            transfers: []
         )
 
         static let populated: ModelContainer = {
@@ -241,6 +265,15 @@ final class CashAccount {
                         categoryID: salary.id,
                         occurredOffset: 86_400 * 2
                     ),
+                ],
+                transfers: [
+                    .preview(
+                        amount: 2_000_000,
+                        note: "Cash for the week",
+                        sourceAccountID: techcombank.id,
+                        destinationAccountID: wallet.id,
+                        occurredOffset: 86_400
+                    )
                 ]
             )
         }()
@@ -250,13 +283,14 @@ final class CashAccount {
             deposits: [SavingsDeposit],
             holdings: [FundHolding],
             categories: [TransactionCategory],
-            transactions: [MoneyTransaction]
+            transactions: [MoneyTransaction],
+            transfers: [AccountTransfer]
         ) -> ModelContainer {
             let container: ModelContainer
             do {
                 container = try ModelContainer(
                     for: CashAccount.self, SavingsDeposit.self, FundHolding.self,
-                    TransactionCategory.self, MoneyTransaction.self,
+                    TransactionCategory.self, MoneyTransaction.self, AccountTransfer.self,
                     configurations: ModelConfiguration(isStoredInMemoryOnly: true)
                 )
             } catch {
@@ -281,6 +315,10 @@ final class CashAccount {
 
             for transaction in transactions {
                 container.mainContext.insert(transaction)
+            }
+
+            for transfer in transfers {
+                container.mainContext.insert(transfer)
             }
 
             return container

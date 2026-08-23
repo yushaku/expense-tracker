@@ -25,27 +25,33 @@ enum CashBalanceSummary {
         }
     }
 
-    /// Where tracking started, plus the recorded cash flow, minus the money
-    /// moved into savings deposits and funds. `openingBalance` is never
-    /// rewritten; every later change is derived. Like `holdings`, `transactions`
-    /// has no default value on purpose — a forgotten argument would silently
-    /// misreport the spendable balance.
+    /// Where tracking started, plus the recorded cash flow, plus what internal
+    /// transfers moved in or out, minus the money moved into savings deposits
+    /// and funds. `openingBalance` is never rewritten; every later change is
+    /// derived. Like `holdings`, `transactions` and `transfers` have no default
+    /// value on purpose — a forgotten argument would silently misreport the
+    /// spendable balance.
     static func available(
         for account: CashAccount,
         deposits: [SavingsDeposit],
         holdings: [FundHolding],
-        transactions: [MoneyTransaction]
+        transactions: [MoneyTransaction],
+        transfers: [AccountTransfer]
     ) -> Decimal {
         account.openingBalance
             + TransactionSummary.netFlow(for: account, transactions: transactions)
+            + TransferSummary.netFlow(for: account, transfers: transfers)
             - fundedAmount(for: account, deposits: deposits, holdings: holdings)
     }
 
+    /// Transfers cancel out here: one account's outflow is another's inflow, so
+    /// moving money between two of the owner's accounts leaves this total alone.
     static func totalAvailable(
         of accounts: [CashAccount],
         deposits: [SavingsDeposit],
         holdings: [FundHolding],
-        transactions: [MoneyTransaction]
+        transactions: [MoneyTransaction],
+        transfers: [AccountTransfer]
     ) -> Decimal {
         accounts.reduce(Decimal.zero) { total, account in
             total
@@ -53,7 +59,8 @@ enum CashBalanceSummary {
                     for: account,
                     deposits: deposits,
                     holdings: holdings,
-                    transactions: transactions
+                    transactions: transactions,
+                    transfers: transfers
                 )
         }
     }

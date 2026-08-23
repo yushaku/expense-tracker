@@ -14,7 +14,11 @@ struct AccountListView: View {
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
+    @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
+    private var transfers: [AccountTransfer]
+
     @State private var editorMode: AccountEditorMode?
+    @State private var isManagingTransfers = false
 
     var body: some View {
         NavigationStack {
@@ -55,8 +59,19 @@ struct AccountListView: View {
             }
             .navigationTitle("Home")
             .accessibilityIdentifier("account-list")
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Transfers", systemImage: "arrow.left.arrow.right") {
+                        isManagingTransfers = true
+                    }
+                    .accessibilityIdentifier("manage-transfers")
+                }
+            }
             .sheet(item: $editorMode) { mode in
                 AccountEditorView(mode: mode)
+            }
+            .sheet(isPresented: $isManagingTransfers) {
+                TransferListView()
             }
             .tint(MonMonTheme.accent)
         }
@@ -118,7 +133,8 @@ struct AccountListView: View {
             of: accounts,
             deposits: deposits,
             holdings: holdings,
-            transactions: transactions
+            transactions: transactions,
+            transfers: transfers
         )
     }
 
@@ -135,7 +151,8 @@ struct AccountListView: View {
             accounts: accounts,
             deposits: deposits,
             holdings: holdings,
-            transactions: transactions
+            transactions: transactions,
+            transfers: transfers
         )
     }
 
@@ -144,7 +161,8 @@ struct AccountListView: View {
             accounts: accounts,
             deposits: deposits,
             holdings: holdings,
-            transactions: transactions
+            transactions: transactions,
+            transfers: transfers
         )
     }
 
@@ -153,7 +171,8 @@ struct AccountListView: View {
             accounts: accounts,
             deposits: deposits,
             holdings: holdings,
-            transactions: transactions
+            transactions: transactions,
+            transfers: transfers
         )
     }
 
@@ -236,7 +255,8 @@ struct AccountListView: View {
                         account: account,
                         deposits: deposits,
                         holdings: holdings,
-                        transactions: transactions
+                        transactions: transactions,
+                        transfers: transfers
                     )
                 }
                 .buttonStyle(.plain)

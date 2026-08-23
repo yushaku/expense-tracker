@@ -105,7 +105,8 @@ struct AssetSummaryTests {
                 for: account,
                 deposits: [unrelated],
                 holdings: [],
-                transactions: []
+                transactions: [],
+                transfers: []
             )
                 == 148_900_000
         )
@@ -125,7 +126,8 @@ struct AssetSummaryTests {
                 for: account,
                 deposits: [deposit],
                 holdings: [],
-                transactions: []
+                transactions: [],
+                transfers: []
             )
                 == 48_900_000
         )
@@ -145,7 +147,8 @@ struct AssetSummaryTests {
                 for: account,
                 deposits: deposits,
                 holdings: [],
-                transactions: []
+                transactions: [],
+                transfers: []
             )
                 == 8_900_000
         )
@@ -154,7 +157,8 @@ struct AssetSummaryTests {
                 of: [account],
                 deposits: deposits,
                 holdings: [],
-                transactions: []
+                transactions: [],
+                transfers: []
             ) == 8_900_000
         )
     }
@@ -169,7 +173,8 @@ struct AssetSummaryTests {
                 accounts: [account],
                 deposits: [funded],
                 holdings: [],
-                transactions: []
+                transactions: [],
+                transfers: []
             )
                 == 148_900_000
         )
@@ -185,7 +190,8 @@ struct AssetSummaryTests {
                 accounts: [account],
                 deposits: [external],
                 holdings: [],
-                transactions: []
+                transactions: [],
+                transfers: []
             )
                 == 398_900_000
         )
@@ -210,7 +216,8 @@ struct AssetSummaryTests {
                 for: account,
                 deposits: [],
                 holdings: [holding],
-                transactions: []
+                transactions: [],
+                transfers: []
             )
                 == 128_900_000
         )
@@ -232,7 +239,8 @@ struct AssetSummaryTests {
                 for: account,
                 deposits: [deposit],
                 holdings: [holding],
-                transactions: []
+                transactions: [],
+                transfers: []
             ) == 28_900_000
         )
     }
@@ -254,7 +262,8 @@ struct AssetSummaryTests {
                 accounts: [account],
                 deposits: [],
                 holdings: [flat],
-                transactions: []
+                transactions: [],
+                transfers: []
             )
                 == 148_900_000
         )
@@ -273,7 +282,8 @@ struct AssetSummaryTests {
                 accounts: [account],
                 deposits: [],
                 holdings: [gaining],
-                transactions: []
+                transactions: [],
+                transfers: []
             )
                 == 153_900_000
         )
@@ -293,7 +303,8 @@ struct AssetSummaryTests {
                 accounts: [account],
                 deposits: [],
                 holdings: [external],
-                transactions: []
+                transactions: [],
+                transfers: []
             )
                 == 173_900_000
         )

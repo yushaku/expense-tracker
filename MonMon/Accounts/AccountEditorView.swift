@@ -37,6 +37,9 @@ struct AccountEditorView: View {
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
+    @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
+    private var transfers: [AccountTransfer]
+
     private let mode: AccountEditorMode
 
     @State private var draft: AccountDraft
@@ -114,8 +117,10 @@ struct AccountEditorView: View {
 
     /// An account may only be removed once it holds nothing and nothing points
     /// at it. A zero available balance rules out a savings deposit or a fund
-    /// holding, but not a transaction: an account with 100 in and 100 out sits
-    /// at zero while still owning two records, so the count is checked too.
+    /// holding, but not a transaction or a transfer: an account with 100 in and
+    /// 100 out sits at zero while still owning two records, so both counts are
+    /// checked too. A transfer names two accounts, and deleting either end
+    /// would leave the other pointing at nothing.
     private var canDelete: Bool {
         guard let editedAccount = mode.editedAccount else {
             return false
@@ -126,10 +131,11 @@ struct AccountEditorView: View {
                 for: editedAccount,
                 deposits: deposits,
                 holdings: holdings,
-                transactions: transactions
+                transactions: transactions,
+                transfers: transfers
             ) == 0
 
-        return isEmpty && transactionCount == 0
+        return isEmpty && transactionCount == 0 && transferCount == 0
     }
 
     private var transactionCount: Int {
@@ -138,6 +144,14 @@ struct AccountEditorView: View {
         }
 
         return TransactionSummary.count(for: editedAccount, transactions: transactions)
+    }
+
+    private var transferCount: Int {
+        guard let editedAccount = mode.editedAccount else {
+            return 0
+        }
+
+        return TransferSummary.count(for: editedAccount, transfers: transfers)
     }
 
     private var deleteBlockedReason: String? {
@@ -158,6 +172,11 @@ struct AccountEditorView: View {
         if transactionCount > 0 {
             let noun = transactionCount == 1 ? "transaction" : "transactions"
             return "This account still has \(transactionCount) \(noun). Delete them first."
+        }
+
+        if transferCount > 0 {
+            let noun = transferCount == 1 ? "transfer" : "transfers"
+            return "This account still has \(transferCount) \(noun). Delete them first."
         }
 
         return "Set the balance to 0 before deleting this account."

@@ -94,7 +94,8 @@ struct MoneyTransactionPersistenceTests {
                 for: account,
                 deposits: [],
                 holdings: [],
-                transactions: transactions
+                transactions: transactions,
+                transfers: []
             ) == 14_800_000
         )
     }
@@ -130,7 +131,8 @@ struct MoneyTransactionPersistenceTests {
                 for: account,
                 deposits: [],
                 holdings: [],
-                transactions: transactions
+                transactions: transactions,
+                transfers: []
             ) == 9_650_000
         )
     }
@@ -164,7 +166,8 @@ struct MoneyTransactionPersistenceTests {
                 for: account,
                 deposits: [],
                 holdings: [],
-                transactions: transactions
+                transactions: transactions,
+                transfers: []
             ) == 10_000_000
         )
     }

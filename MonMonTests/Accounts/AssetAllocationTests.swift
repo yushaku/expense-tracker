@@ -77,7 +77,8 @@ struct AssetAllocationTests {
             accounts: [],
             deposits: [],
             holdings: [],
-            transactions: []
+            transactions: [],
+            transfers: []
         )
 
         #expect(slices.isEmpty)
@@ -99,7 +100,8 @@ struct AssetAllocationTests {
             accounts: [account],
             deposits: [deposit],
             holdings: [holding],
-            transactions: []
+            transactions: [],
+            transfers: []
         )
 
         // 200.000.000 − 100.000.000 deposited − 20.000.000 invested = 80.000.000
@@ -115,7 +117,8 @@ struct AssetAllocationTests {
             accounts: [account],
             deposits: [],
             holdings: [],
-            transactions: []
+            transactions: [],
+            transfers: []
         )
 
         #expect(slices.map(\.kind) == [.cash])
@@ -132,7 +135,8 @@ struct AssetAllocationTests {
             accounts: [account],
             deposits: [],
             holdings: [],
-            transactions: transactions
+            transactions: transactions,
+            transfers: []
         )
 
         #expect(slices.first?.amount == 9_800_000)
@@ -147,13 +151,15 @@ struct AssetAllocationTests {
             accounts: [wallet, card],
             deposits: [],
             holdings: [],
-            transactions: []
+            transactions: [],
+            transfers: []
         )
         let debt = AssetAllocation.debt(
             accounts: [wallet, card],
             deposits: [],
             holdings: [],
-            transactions: []
+            transactions: [],
+            transfers: []
         )
 
         // The ring shows only what is held; the card is not netted off it.
@@ -180,13 +186,15 @@ struct AssetAllocationTests {
             accounts: accounts,
             deposits: deposits,
             holdings: holdings,
-            transactions: []
+            transactions: [],
+            transfers: []
         )
         let debt = AssetAllocation.debt(
             accounts: accounts,
             deposits: deposits,
             holdings: holdings,
-            transactions: []
+            transactions: [],
+            transfers: []
         )
 
         #expect(
@@ -195,7 +203,8 @@ struct AssetAllocationTests {
                     accounts: accounts,
                     deposits: deposits,
                     holdings: holdings,
-                    transactions: []
+                    transactions: [],
+                    transfers: []
                 )
         )
     }
@@ -209,7 +218,8 @@ struct AssetAllocationTests {
                 accounts: [account],
                 deposits: [],
                 holdings: [],
-                transactions: []
+                transactions: [],
+                transfers: []
             ) == 0
         )
     }

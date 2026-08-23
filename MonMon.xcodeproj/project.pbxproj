@@ -58,6 +58,16 @@
 		A00000000000000000000251 /* MoneyTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000162 /* MoneyTransaction.swift */; };
 		A00000000000000000000252 /* CategoryPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000163 /* CategoryPalette.swift */; };
 		A00000000000000000000253 /* TransactionPeriod.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000164 /* TransactionPeriod.swift */; };
+		A00000000000000000000640 /* AccountTransfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000620 /* AccountTransfer.swift */; };
+		A00000000000000000000641 /* TransferSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000621 /* TransferSummary.swift */; };
+		A00000000000000000000642 /* TransferDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000622 /* TransferDraft.swift */; };
+		A00000000000000000000643 /* TransferCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000623 /* TransferCard.swift */; };
+		A00000000000000000000644 /* TransferEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000624 /* TransferEditorForm.swift */; };
+		A00000000000000000000645 /* TransferEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000625 /* TransferEditorView.swift */; };
+		A00000000000000000000646 /* TransferListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000626 /* TransferListView.swift */; };
+		A00000000000000000000650 /* TransferDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000630 /* TransferDraftTests.swift */; };
+		A00000000000000000000651 /* TransferSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000631 /* TransferSummaryTests.swift */; };
+		A00000000000000000000652 /* AccountTransferPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000632 /* AccountTransferPersistenceTests.swift */; };
 		A00000000000000000000612 /* TransactionRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000610 /* TransactionRange.swift */; };
 		A00000000000000000000613 /* TransactionRangeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000611 /* TransactionRangeTests.swift */; };
 		A00000000000000000000254 /* TransactionSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000165 /* TransactionSummary.swift */; };
@@ -164,6 +174,16 @@
 		A00000000000000000000162 /* MoneyTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoneyTransaction.swift; sourceTree = "<group>"; };
 		A00000000000000000000163 /* CategoryPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryPalette.swift; sourceTree = "<group>"; };
 		A00000000000000000000164 /* TransactionPeriod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionPeriod.swift; sourceTree = "<group>"; };
+		A00000000000000000000620 /* AccountTransfer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTransfer.swift; sourceTree = "<group>"; };
+		A00000000000000000000621 /* TransferSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferSummary.swift; sourceTree = "<group>"; };
+		A00000000000000000000622 /* TransferDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferDraft.swift; sourceTree = "<group>"; };
+		A00000000000000000000623 /* TransferCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferCard.swift; sourceTree = "<group>"; };
+		A00000000000000000000624 /* TransferEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferEditorForm.swift; sourceTree = "<group>"; };
+		A00000000000000000000625 /* TransferEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferEditorView.swift; sourceTree = "<group>"; };
+		A00000000000000000000626 /* TransferListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferListView.swift; sourceTree = "<group>"; };
+		A00000000000000000000630 /* TransferDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferDraftTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000631 /* TransferSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferSummaryTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000632 /* AccountTransferPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTransferPersistenceTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000610 /* TransactionRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionRange.swift; sourceTree = "<group>"; };
 		A00000000000000000000611 /* TransactionRangeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionRangeTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000165 /* TransactionSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionSummary.swift; sourceTree = "<group>"; };
@@ -251,6 +271,7 @@
 				A00000000000000000000019 /* Design */,
 				A00000000000000000000014 /* Resources */,
 				A00000000000000000000024 /* Transactions */,
+				A00000000000000000000028 /* Transfers */,
 				A00000000000000000000026 /* Settings */,
 			);
 			path = MonMon;
@@ -281,6 +302,7 @@
 				A00000000000000000000021 /* Savings */,
 				A00000000000000000000023 /* Funds */,
 				A00000000000000000000025 /* Transactions */,
+				A00000000000000000000029 /* Transfers */,
 				A00000000000000000000027 /* Settings */,
 			);
 			path = MonMonTests;
@@ -455,6 +477,30 @@
 			path = Settings;
 			sourceTree = "<group>";
 		};
+		A00000000000000000000028 /* Transfers */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000620 /* AccountTransfer.swift */,
+				A00000000000000000000621 /* TransferSummary.swift */,
+				A00000000000000000000622 /* TransferDraft.swift */,
+				A00000000000000000000623 /* TransferCard.swift */,
+				A00000000000000000000624 /* TransferEditorForm.swift */,
+				A00000000000000000000625 /* TransferEditorView.swift */,
+				A00000000000000000000626 /* TransferListView.swift */,
+			);
+			path = Transfers;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000029 /* Transfers */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000630 /* TransferDraftTests.swift */,
+				A00000000000000000000631 /* TransferSummaryTests.swift */,
+				A00000000000000000000632 /* AccountTransferPersistenceTests.swift */,
+			);
+			path = Transfers;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -587,6 +633,13 @@
 				A00000000000000000000254 /* TransactionSummary.swift in Sources */,
 				A00000000000000000000253 /* TransactionPeriod.swift in Sources */,
 				A00000000000000000000612 /* TransactionRange.swift in Sources */,
+				A00000000000000000000640 /* AccountTransfer.swift in Sources */,
+				A00000000000000000000641 /* TransferSummary.swift in Sources */,
+				A00000000000000000000642 /* TransferDraft.swift in Sources */,
+				A00000000000000000000643 /* TransferCard.swift in Sources */,
+				A00000000000000000000644 /* TransferEditorForm.swift in Sources */,
+				A00000000000000000000645 /* TransferEditorView.swift in Sources */,
+				A00000000000000000000646 /* TransferListView.swift in Sources */,
 				A00000000000000000000252 /* CategoryPalette.swift in Sources */,
 				A00000000000000000000251 /* MoneyTransaction.swift in Sources */,
 				A00000000000000000000250 /* TransactionCategory.swift in Sources */,
@@ -640,6 +693,9 @@
 				A00000000000000000000256 /* TransactionSummaryTests.swift in Sources */,
 				A00000000000000000000255 /* TransactionPeriodTests.swift in Sources */,
 				A00000000000000000000613 /* TransactionRangeTests.swift in Sources */,
+				A00000000000000000000650 /* TransferDraftTests.swift in Sources */,
+				A00000000000000000000651 /* TransferSummaryTests.swift in Sources */,
+				A00000000000000000000652 /* AccountTransferPersistenceTests.swift in Sources */,
 				A00000000000000000000209 /* AccountDraftTests.swift in Sources */,
 				A00000000000000000000212 /* CashBalanceSummaryTests.swift in Sources */,
 				A00000000000000000000206 /* CashAccountPersistenceTests.swift in Sources */,

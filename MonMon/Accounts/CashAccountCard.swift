@@ -5,6 +5,7 @@ struct CashAccountCard: View {
     let deposits: [SavingsDeposit]
     let holdings: [FundHolding]
     let transactions: [MoneyTransaction]
+    let transfers: [AccountTransfer]
 
     var body: some View {
         ViewThatFits(in: .horizontal) {
@@ -93,7 +94,8 @@ struct CashAccountCard: View {
             for: account,
             deposits: deposits,
             holdings: holdings,
-            transactions: transactions
+            transactions: transactions,
+            transfers: transfers
         )
     }
 
@@ -145,14 +147,16 @@ private extension CashAccountKind {
                     account: .preview(name: "Wallet", kind: .cash, openingBalance: 1_250_000),
                     deposits: [],
                     holdings: [],
-                    transactions: []
+                    transactions: [],
+                    transfers: []
                 )
 
                 CashAccountCard(
                     account: .preview(name: "Techcombank", kind: .bank, openingBalance: 48_900_000),
                     deposits: [],
                     holdings: [],
-                    transactions: []
+                    transactions: [],
+                    transfers: []
                 )
 
                 CashAccountCard(
@@ -163,7 +167,8 @@ private extension CashAccountKind {
                     ),
                     deposits: [],
                     holdings: [],
-                    transactions: []
+                    transactions: [],
+                    transfers: []
                 )
 
                 CashAccountCard(
@@ -174,7 +179,8 @@ private extension CashAccountKind {
                     ),
                     deposits: [],
                     holdings: [],
-                    transactions: []
+                    transactions: [],
+                    transfers: []
                 )
             }
             .padding(20)
