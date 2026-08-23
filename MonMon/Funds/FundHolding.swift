@@ -6,38 +6,25 @@ import SwiftData
 ///
 /// The instrument's identity and its price used to live here. They moved to
 /// `FundInstrument` so one ticker can only ever carry one price, and so several
-/// positions in the same thing stay consistent with each other.
+/// positions in the same thing stay consistent with each other. The columns they
+/// left behind stayed declared until every store had been through the backfill;
+/// they are gone now, so a position carries no second ticker and no second price
+/// for anything to disagree with.
 @Model
 final class FundHolding {
     var id: UUID
     /// Identifier of the `FundInstrument` this position is held in.
     ///
-    /// Optional only so the property could be added without a staged migration:
-    /// a store written before the split has rows with nothing here, and
-    /// `FundInstrumentBackfill` fills them in on the next launch. Every write
-    /// from `FundDraft` requires a choice, so `nil` means "not yet linked",
-    /// never "held in nothing".
+    /// Optional only so the property could be added without a staged migration,
+    /// and it stays optional for the same reason: making it required now would
+    /// be exactly the migration that could not be staged. Every write from
+    /// `FundDraft` requires a choice, so `nil` means "linked to nothing this
+    /// store can still name", and `FundSummary.unpriced` is how the app reports
+    /// it rather than valuing it at a price it does not have.
     var instrumentID: UUID?
     var units: Decimal
     var averageCostPerUnit: Decimal
 
-    // MARK: - Pre-split fields
-    //
-    // Identity and price moved to `FundInstrument`. These stay declared so the
-    // schema change is purely additive and an existing store opens without a
-    // migration, and so the backfill has something to read once.
-    //
-    // `FundInstrumentBackfill` empties them as soon as it has copied them onto
-    // an instrument, so no position carries a second ticker or a second price
-    // for anything to disagree with. Nothing else in the app reads or writes
-    // them, and a later change drops the columns outright once
-    // `FundInstrumentBackfill.isComplete(in:)` holds for every store.
-    var name: String = ""
-    var symbol: String = ""
-    var kind: FundHoldingKind = FundHoldingKind.fund
-    var currentNAVPerUnit: Decimal = Decimal.zero
-    var navAsOf: Date = Date(timeIntervalSince1970: 0)
-    var currencyCode: String = ""
     /// Identifier of the cash account this holding was bought from, if any.
     /// A stored id keeps the model flat; SwiftData relationships are not needed
     /// because an account cannot be deleted while it funds a holding.

@@ -8,24 +8,18 @@ struct MonMonApp: App {
 
     init() {
         do {
-            // Purely additive against every earlier schema, so this opens with
-            // no migration. See `FundInstrumentBackfill` for why the fund split
-            // is linked up afterwards rather than staged here.
+            // Every schema change so far has been additive, so this opens an
+            // existing store with no migration. The one subtraction — the
+            // pre-split columns the fund catalogue replaced — is a plain
+            // attribute removal, which lightweight migration handles; it is the
+            // *staged* kind that could not recognise a store this app had
+            // already written.
             container = try ModelContainer(for: Schema(MonMonSchema.models))
         } catch {
             fatalError("Model container failed: \(error)")
         }
 
         CategorySeed.seedIfEmpty(in: container.mainContext)
-
-        do {
-            try FundInstrumentBackfill.runIfNeeded(in: container.mainContext)
-        } catch {
-            // A store that opened is worth showing. Holdings the backfill could
-            // not link render as "instrument missing" rather than taking the app
-            // down, and the next launch tries again.
-            assertionFailure("Fund backfill failed: \(error)")
-        }
     }
 
     var body: some Scene {

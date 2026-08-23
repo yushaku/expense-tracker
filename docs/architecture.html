@@ -237,13 +237,6 @@
 
     .e-head .chip { display: inline-block; margin-top: 7px; }
 
-    .badge.moves {
-      color: var(--muted);
-      border-color: var(--border-strong);
-      border-style: dashed;
-      background: transparent;
-    }
-
     .stage.focused .entity.dim { opacity: .26; }
     .stage.focused .entity.live { border-color: var(--e); transform: translateY(-1px); }
 
@@ -605,32 +598,18 @@
                style="--e: var(--e-fund); grid-column: 2; grid-row: 2;">
         <div class="e-head">
           <div class="e-name">FundHolding</div>
-          <div class="e-role">Fund certificates &amp; ETFs at a hand-entered NAV</div>
+          <div class="e-role">A position in one catalogue instrument</div>
           <div class="e-file">MonMon/Funds/FundHolding.swift</div>
         </div>
         <ul class="fields">
           <li class="field key"><span class="fname">id</span><span class="ftype">UUID</span>
             <span class="badges"><span class="badge pk">PK</span></span></li>
-          <li class="field"><span class="fname">name</span><span class="ftype">String</span>
-            <span class="badges"><span class="badge moves">moves to FundInstrument</span></span></li>
-          <li class="field"><span class="fname">symbol</span><span class="ftype">String</span>
-            <span class="badges"><span class="badge moves">moves to FundInstrument</span></span></li>
-          <li class="field">
-            <span class="fname">kind</span><span class="ftype">FundHoldingKind</span>
-            <span class="badges"><span class="badge enum">enum: fund | etf</span><span class="badge moves">moves to FundInstrument</span></span>
-          </li>
           <li class="field"><span class="fname">units</span><span class="ftype">Decimal</span></li>
           <li class="field"><span class="fname">averageCostPerUnit</span><span class="ftype">Decimal</span></li>
-          <li class="field"><span class="fname">currentNAVPerUnit</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge moves">moves to FundInstrument</span></span></li>
-          <li class="field"><span class="fname">navAsOf</span><span class="ftype">Date</span>
-            <span class="badges"><span class="badge moves">moves to FundInstrument</span></span></li>
-          <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span>
-            <span class="badges"><span class="badge moves">moves to FundInstrument</span></span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
           <li class="field key" data-anchor="FundHolding.instrumentID" style="border-style: dashed;">
-            <span class="fname">instrumentID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge req">NOT NULL</span><span class="badge moves">planned</span></span>
+            <span class="fname">instrumentID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span></span>
           </li>
           <li class="field key" data-anchor="FundHolding.sourceAccountID">
             <span class="fname">sourceAccountID</span><span class="ftype">UUID?</span>
@@ -1067,11 +1046,12 @@
     <div class="note">
       <h3>Why <code>FundInstrument</code> splits out</h3>
       <p>
-        A price belongs to the instrument, not to the position. Today nothing stops two
-        <code>FundHolding</code> rows carrying the same ticker at two different prices &mdash;
-        <code>FundFormError</code> has no <code>duplicateSymbol</code> case and no call site
-        compares one. Net worth would be wrong with nothing to show for it, and automatic
-        refresh would make it worse by fetching the same ticker twice.
+        A price belongs to the instrument, not to the position. Before the split, nothing
+        stopped two <code>FundHolding</code> rows carrying the same ticker at two different
+        prices: net worth would have been wrong with nothing to show for it, and automatic
+        refresh would have made it worse by fetching the same ticker twice. The catalogue
+        now owns the price, and the columns the position used to carry it in are gone &mdash;
+        so there is no second copy left for anything to disagree with.
       </p>
     </div>
     <div class="note">
@@ -1086,8 +1066,8 @@
       <h3><code>currencyCode</code> repeated 5&times;</h3>
       <p>
         Denormalised onto every entity, always written from <code>VNDCurrency.code</code>.
-        Nothing enforces that related records share a currency. The drafted split removes one
-        copy: a holding drops it and reads the instrument's instead.
+        Nothing enforces that related records share a currency. The fund split removed one
+        copy: a holding no longer stores it and reads the instrument's instead.
       </p>
     </div>
     <div class="note">

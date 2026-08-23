@@ -67,7 +67,6 @@
 		A00000000000000000000245 /* FundValuationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000156 /* FundValuationTests.swift */; };
 		A00000000000000000000246 /* FundDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000157 /* FundDraftTests.swift */; };
 		A00000000000000000000901 /* FundTestFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000900 /* FundTestFactory.swift */; };
-		A00000000000000000000909 /* FundInstrumentBackfillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000908 /* FundInstrumentBackfillTests.swift */; };
 		A00000000000000000000911 /* TradingCalendarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000910 /* TradingCalendarTests.swift */; };
 		A00000000000000000000913 /* FundInstrumentDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000912 /* FundInstrumentDraftTests.swift */; };
 		A00000000000000000000949 /* FundQuoteFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000948 /* FundQuoteFixtures.swift */; };
@@ -233,7 +232,6 @@
 		A00000000000000000000156 /* FundValuationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundValuationTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000157 /* FundDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundDraftTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000900 /* FundTestFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundTestFactory.swift; sourceTree = "<group>"; };
-		A00000000000000000000908 /* FundInstrumentBackfillTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentBackfillTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000910 /* TradingCalendarTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradingCalendarTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000912 /* FundInstrumentDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentDraftTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000948 /* FundQuoteFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundQuoteFixtures.swift; sourceTree = "<group>"; };
@@ -531,7 +529,6 @@
 				A00000000000000000000156 /* FundValuationTests.swift */,
 				A00000000000000000000157 /* FundDraftTests.swift */,
 				A00000000000000000000900 /* FundTestFactory.swift */,
-				A00000000000000000000908 /* FundInstrumentBackfillTests.swift */,
 				A00000000000000000000910 /* TradingCalendarTests.swift */,
 				A00000000000000000000912 /* FundInstrumentDraftTests.swift */,
 				A00000000000000000000948 /* FundQuoteFixtures.swift */,
@@ -925,7 +922,6 @@
 				A00000000000000000000245 /* FundValuationTests.swift in Sources */,
 				A00000000000000000000246 /* FundDraftTests.swift in Sources */,
 				A00000000000000000000901 /* FundTestFactory.swift in Sources */,
-				A00000000000000000000909 /* FundInstrumentBackfillTests.swift in Sources */,
 				A00000000000000000000911 /* TradingCalendarTests.swift in Sources */,
 				A00000000000000000000913 /* FundInstrumentDraftTests.swift in Sources */,
 				A00000000000000000000949 /* FundQuoteFixtures.swift in Sources */,
