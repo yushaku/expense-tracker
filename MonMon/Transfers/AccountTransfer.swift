@@ -6,20 +6,20 @@ import SwiftData
 /// carries no category and never reaches the Spending totals.
 @Model
 final class AccountTransfer {
-    var id: UUID
+    var id: UUID = UUID()
     /// Always positive. The pair of accounts carries the direction, so no call
     /// site has to agree on a sign convention.
-    var amount: Decimal
-    var occurredAt: Date
-    var note: String
+    var amount: Decimal = Decimal.zero
+    var occurredAt: Date = Date(timeIntervalSince1970: 0)
+    var note: String = ""
     /// Identifier of the account the money left. Required: a transfer with no
     /// source moves nothing.
     var sourceAccountID: UUID
     /// Identifier of the account the money reached. Required, and validated to
     /// differ from the source.
     var destinationAccountID: UUID
-    var currencyCode: String
-    var createdAt: Date
+    var currencyCode: String = VNDCurrency.code
+    var createdAt: Date = Date(timeIntervalSince1970: 0)
 
     init(
         id: UUID,

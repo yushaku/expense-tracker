@@ -9,7 +9,7 @@ import SwiftData
 /// positions in the same thing stay consistent with each other.
 @Model
 final class FundHolding {
-    var id: UUID
+    var id: UUID = UUID()
     /// Identifier of the `FundInstrument` this position is held in.
     ///
     /// Required: a position with no instrument has no identity, no price, and
@@ -19,14 +19,14 @@ final class FundHolding {
     /// reports that, rather than valuing the position at a price it does not
     /// have.
     var instrumentID: UUID
-    var units: Decimal
-    var averageCostPerUnit: Decimal
+    var units: Decimal = Decimal.zero
+    var averageCostPerUnit: Decimal = Decimal.zero
 
     /// Identifier of the cash account this holding was bought from, if any.
     /// A stored id keeps the model flat; SwiftData relationships are not needed
     /// because an account cannot be deleted while it funds a holding.
     var sourceAccountID: UUID?
-    var createdAt: Date
+    var createdAt: Date = Date(timeIntervalSince1970: 0)
 
     init(
         id: UUID,

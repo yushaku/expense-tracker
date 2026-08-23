@@ -3,12 +3,12 @@ import SwiftData
 
 @Model
 final class MoneyTransaction {
-    var id: UUID
-    var kind: TransactionKind
+    var id: UUID = UUID()
+    var kind: TransactionKind = TransactionKind.expense
     /// Always positive. `kind` carries the direction.
-    var amount: Decimal
-    var occurredAt: Date
-    var note: String
+    var amount: Decimal = Decimal.zero
+    var occurredAt: Date = Date(timeIntervalSince1970: 0)
+    var note: String = ""
     /// Identifier of the cash account this money moved through. Required: a
     /// transaction with no account cannot move a balance, which is the only
     /// thing this module exists to do.
@@ -16,8 +16,8 @@ final class MoneyTransaction {
     /// Optional so a half-finished category deletion cannot destroy a
     /// transaction. The UI renders a missing category as "Uncategorized".
     var categoryID: UUID?
-    var currencyCode: String
-    var createdAt: Date
+    var currencyCode: String = VNDCurrency.code
+    var createdAt: Date = Date(timeIntervalSince1970: 0)
 
     init(
         id: UUID,

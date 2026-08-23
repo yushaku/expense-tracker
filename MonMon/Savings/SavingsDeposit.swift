@@ -3,14 +3,14 @@ import SwiftData
 
 @Model
 final class SavingsDeposit {
-    var id: UUID
-    var name: String
-    var principal: Decimal
-    var annualInterestRate: Decimal
-    var termMonths: Int
-    var openedAt: Date
-    var currencyCode: String
-    var createdAt: Date
+    var id: UUID = UUID()
+    var name: String = ""
+    var principal: Decimal = Decimal.zero
+    var annualInterestRate: Decimal = Decimal.zero
+    var termMonths: Int = 0
+    var openedAt: Date = Date(timeIntervalSince1970: 0)
+    var currencyCode: String = VNDCurrency.code
+    var createdAt: Date = Date(timeIntervalSince1970: 0)
     /// Identifier of the cash account this deposit was funded from, if any.
     /// A stored id keeps the model flat; SwiftData relationships are not needed
     /// because accounts are never deleted in this slice.

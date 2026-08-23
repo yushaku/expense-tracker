@@ -8,19 +8,19 @@ import SwiftData
 /// already follows.
 @Model
 final class Debt {
-    var id: UUID
+    var id: UUID = UUID()
     /// Who the money is owed to, or owed by. `direction` supplies the
     /// preposition, so one stored name serves both sides.
-    var counterparty: String
-    var direction: DebtDirection
+    var counterparty: String = ""
+    var direction: DebtDirection = DebtDirection.borrowed
     /// Always positive. `direction` carries the direction, the same way
     /// `MoneyTransaction.amount` leans on `kind`.
-    var principal: Decimal
+    var principal: Decimal = Decimal.zero
     /// Percent per year, e.g. 12 for 12%. Zero is the common case — an
     /// interest-free loan from a relative — so a blank field means zero rather
     /// than making the owner type it.
-    var annualInterestRate: Decimal
-    var openedAt: Date
+    var annualInterestRate: Decimal = Decimal.zero
+    var openedAt: Date = Date(timeIntervalSince1970: 0)
     /// When the balance falls due, if the two sides agreed on a date. `nil` for
     /// an open-ended loan, which most private ones are.
     var dueDate: Date?
@@ -30,9 +30,9 @@ final class Debt {
     /// the same money twice. `nil` means the obligation is real and the cash
     /// movement is not this app's to record.
     var accountID: UUID?
-    var note: String
-    var currencyCode: String
-    var createdAt: Date
+    var note: String = ""
+    var currencyCode: String = VNDCurrency.code
+    var createdAt: Date = Date(timeIntervalSince1970: 0)
 
     init(
         id: UUID,

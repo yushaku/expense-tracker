@@ -3,12 +3,12 @@ import SwiftData
 
 @Model
 final class CashAccount {
-    var id: UUID
-    var name: String
-    var kind: CashAccountKind
-    var openingBalance: Decimal
-    var currencyCode: String
-    var createdAt: Date
+    var id: UUID = UUID()
+    var name: String = ""
+    var kind: CashAccountKind = CashAccountKind.cash
+    var openingBalance: Decimal = Decimal.zero
+    var currencyCode: String = VNDCurrency.code
+    var createdAt: Date = Date(timeIntervalSince1970: 0)
 
     init(
         id: UUID,

@@ -9,27 +9,27 @@ import SwiftData
 /// wrong with nothing to show for it.
 @Model
 final class FundInstrument {
-    var id: UUID
+    var id: UUID = UUID()
     /// Uppercased ticker, e.g. `FUEVFVND`. Unique across the catalogue, enforced
     /// in `FundInstrumentDraft` rather than with `@Attribute(.unique)`: CloudKit
     /// forbids unique attributes, and `icloud-sync` should inherit no schema
     /// debt from here.
-    var symbol: String
-    var name: String
-    var kind: FundInstrumentKind
-    var currentPricePerUnit: Decimal
+    var symbol: String = ""
+    var name: String = ""
+    var kind: FundInstrumentKind = FundInstrumentKind.fund
+    var currentPricePerUnit: Decimal = Decimal.zero
     /// The trading day this price belongs to — not when it was fetched.
     /// Asking on a Sunday returns Friday's figure, and conflating the two would
     /// report a weekend price that never existed.
-    var priceAsOf: Date
+    var priceAsOf: Date = Date(timeIntervalSince1970: 0)
     /// `FundQuoteSource` raw value, stored as a `String` for the same reason
     /// `kind` is: a new source can arrive without a migration.
-    var priceSource: String
+    var priceSource: String = FundQuoteSource.manual.rawValue
     /// When the app last fetched successfully. `nil` while the price is typed.
     var priceFetchedAt: Date?
-    var autoQuoteEnabled: Bool
-    var currencyCode: String
-    var createdAt: Date
+    var autoQuoteEnabled: Bool = true
+    var currencyCode: String = VNDCurrency.code
+    var createdAt: Date = Date(timeIntervalSince1970: 0)
 
     init(
         id: UUID,
@@ -68,7 +68,7 @@ extension FundInstrument {
     /// How this instrument's price should be described in a sentence:
     /// "NAV 21 Aug 2026 · Fmarket", or "Entered by hand".
     var priceLabel: String {
-        kind == .fund ? "NAV" : "Close"
+        kind == FundInstrumentKind.fund ? "NAV" : "Close"
     }
 }
 
