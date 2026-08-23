@@ -63,22 +63,22 @@ struct RootTabView: View {
             }
         }
 
-        /// Every destination stays in the view tree and is merely hidden, so
-        /// switching tabs keeps each screen's state — the month being viewed on
-        /// Spending, a partly scrolled list — exactly as a `TabView` would.
+        /// Only the selected destination is built. Keeping all four alive and
+        /// merely hiding them looked cheaper, but every hidden `NavigationStack`
+        /// still handed its toolbar to the one window toolbar, so the header
+        /// collected all four add buttons at once. A screen's own state resets
+        /// on a tab switch, which is the price of each tab owning its header.
+        @ViewBuilder
         private var destinations: some View {
-            ZStack {
+            switch selection {
+            case .home:
                 AccountListView()
-                    .modifier(TabVisibility(isVisible: selection == .home))
-
+            case .savings:
                 SavingsListView()
-                    .modifier(TabVisibility(isVisible: selection == .savings))
-
+            case .funds:
                 FundListView()
-                    .modifier(TabVisibility(isVisible: selection == .funds))
-
+            case .spending:
                 TransactionListView()
-                    .modifier(TabVisibility(isVisible: selection == .spending))
             }
         }
 
@@ -160,21 +160,6 @@ struct RootTabView: View {
         }
     #endif
 }
-
-#if os(macOS)
-    /// Hides a destination without removing it, so its state survives a tab
-    /// switch, while keeping it out of hit testing and the accessibility tree.
-    private struct TabVisibility: ViewModifier {
-        let isVisible: Bool
-
-        func body(content: Content) -> some View {
-            content
-                .opacity(isVisible ? 1 : 0)
-                .allowsHitTesting(isVisible)
-                .accessibilityHidden(!isVisible)
-        }
-    }
-#endif
 
 #if DEBUG
     #Preview("Tabs · accounts") {
