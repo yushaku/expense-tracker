@@ -1,10 +1,13 @@
 import SwiftUI
 
+/// Declaration order is the order of the bar: the two screens touched daily
+/// sit together on the left, the two that hold longer-term money follow, and
+/// settings stays last.
 enum RootTab: String, CaseIterable, Identifiable {
     case home
+    case spending
     case savings
     case funds
-    case spending
     case settings
 
     var id: String { rawValue }
@@ -161,6 +164,13 @@ struct RootTabView: View {
                     .accessibilityIdentifier(RootTab.home.accessibilityIdentifier)
                     .tag(RootTab.home)
 
+                TransactionListView()
+                    .tabItem {
+                        Label(RootTab.spending.title, systemImage: RootTab.spending.symbolName)
+                    }
+                    .accessibilityIdentifier(RootTab.spending.accessibilityIdentifier)
+                    .tag(RootTab.spending)
+
                 SavingsListView()
                     .tabItem {
                         Label(RootTab.savings.title, systemImage: RootTab.savings.symbolName)
@@ -174,13 +184,6 @@ struct RootTabView: View {
                     }
                     .accessibilityIdentifier(RootTab.funds.accessibilityIdentifier)
                     .tag(RootTab.funds)
-
-                TransactionListView()
-                    .tabItem {
-                        Label(RootTab.spending.title, systemImage: RootTab.spending.symbolName)
-                    }
-                    .accessibilityIdentifier(RootTab.spending.accessibilityIdentifier)
-                    .tag(RootTab.spending)
 
                 SettingsView()
                     .tabItem {
