@@ -113,17 +113,9 @@ enum AssetAllocation {
         }
     }
 
-    /// Share of the ring, in percent, rounded to one decimal place. Zero when
-    /// there is nothing to divide by, so an empty portfolio never divides by
-    /// zero.
+    /// Share of the ring, in percent. Shared with every other chart through
+    /// `Percentage`, so they all round the same way.
     static func percent(of amount: Decimal, in total: Decimal) -> Decimal {
-        guard total > 0 else {
-            return .zero
-        }
-
-        var input = amount / total * 100
-        var result = Decimal.zero
-        NSDecimalRound(&result, &input, 1, .plain)
-        return result
+        Percentage.share(of: amount, in: total)
     }
 }

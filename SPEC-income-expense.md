@@ -208,7 +208,15 @@ nothing. A category with no transactions deletes behind a plain confirmation.
   **Spending** (`TransactionListView`).
 - The Spending tab shows a month header with previous and next buttons, then a
   hero card with net first, then income and expense and the transaction count,
-  then one card per transaction ordered by `occurredAt` descending.
+  then a by-category card, then one card per transaction ordered by `occurredAt`
+  descending.
+- The by-category card splits the visible month by category as a doughnut, with
+  a legend of shares beside it and a row per category below carrying the amount,
+  the share, and how many transactions make it up. A row opens a screen listing
+  just that category's transactions for that month, where each one can still be
+  edited. Transactions whose category was deleted gather under "Uncategorized"
+  rather than dropping out of the totals. An Expense/Income control switches
+  which direction the card describes; expense shows first.
 - Each transaction card shows the category icon and colour, the category name,
   the note when present, the account name, the date, and the amount.
 - Direction is **never encoded by colour alone**: an explicit `+` or `−` sign and
@@ -240,6 +248,7 @@ nothing. A category with no transactions deletes behind a plain confirmation.
   `transaction-amount`, `transaction-category`, `transaction-account`,
   `transaction-date`, `transaction-note`, `save-transaction`,
   `cancel-transaction`, `delete-transaction`, `confirm-delete-transaction`,
+  `breakdown-kind`, `category-transactions`,
   `manage-categories`, `category-list`, `add-category`, `category-name`,
   `category-kind`, `category-symbol`, `category-color`, `save-category`,
   `cancel-category`, `delete-category`, `confirm-delete-category`,

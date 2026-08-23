@@ -13,6 +13,7 @@ struct TransactionListView: View {
 
     @State private var visibleMonth = TransactionPeriod.startOfMonth(for: .now)
     @State private var editorMode: TransactionEditorMode?
+    @State private var breakdownKind: TransactionKind = .expense
     @State private var isManagingCategories = false
 
     var body: some View {
@@ -30,6 +31,12 @@ struct TransactionListView: View {
                         } else if monthTransactions.isEmpty {
                             emptyState
                         } else {
+                            CategoryBreakdownCard(
+                                kind: $breakdownKind,
+                                slices: breakdownSlices,
+                                month: visibleMonth
+                            )
+
                             transactionsSection
                         }
                     }
@@ -49,6 +56,9 @@ struct TransactionListView: View {
                         editorMode = .add
                     }
                 }
+            }
+            .navigationDestination(for: CategoryPeriod.self) { period in
+                CategoryTransactionsView(period: period)
             }
             .navigationTitle("Spending")
             .accessibilityIdentifier("spending-list")
@@ -79,6 +89,14 @@ struct TransactionListView: View {
 
     private var monthTransactions: [MoneyTransaction] {
         TransactionSummary.inMonth(of: visibleMonth, transactions: transactions)
+    }
+
+    private var breakdownSlices: [CategoryBreakdownSlice] {
+        CategoryBreakdown.slices(
+            of: breakdownKind,
+            transactions: monthTransactions,
+            categories: categories
+        )
     }
 
     private var monthCard: some View {

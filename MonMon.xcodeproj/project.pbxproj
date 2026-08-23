@@ -86,6 +86,11 @@
 		A00000000000000000000279 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000190 /* SettingsView.swift */; };
 		A00000000000000000000280 /* AppLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000191 /* AppLockTests.swift */; };
 		A00000000000000000000281 /* FloatingAddButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000192 /* FloatingAddButton.swift */; };
+		A00000000000000000000282 /* Percentage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000193 /* Percentage.swift */; };
+		A00000000000000000000283 /* CategoryBreakdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000194 /* CategoryBreakdown.swift */; };
+		A00000000000000000000284 /* CategoryBreakdownCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000195 /* CategoryBreakdownCard.swift */; };
+		A00000000000000000000285 /* CategoryTransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000196 /* CategoryTransactionsView.swift */; };
+		A00000000000000000000286 /* CategoryBreakdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000197 /* CategoryBreakdownTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -183,6 +188,11 @@
 		A00000000000000000000190 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A00000000000000000000191 /* AppLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000192 /* FloatingAddButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingAddButton.swift; sourceTree = "<group>"; };
+		A00000000000000000000193 /* Percentage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Percentage.swift; sourceTree = "<group>"; };
+		A00000000000000000000194 /* CategoryBreakdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBreakdown.swift; sourceTree = "<group>"; };
+		A00000000000000000000195 /* CategoryBreakdownCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBreakdownCard.swift; sourceTree = "<group>"; };
+		A00000000000000000000196 /* CategoryTransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryTransactionsView.swift; sourceTree = "<group>"; };
+		A00000000000000000000197 /* CategoryBreakdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBreakdownTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -243,6 +253,9 @@
 				A00000000000000000000178 /* TransactionEditorView.swift */,
 				A00000000000000000000179 /* TransactionCard.swift */,
 				A00000000000000000000180 /* TransactionListView.swift */,
+				A00000000000000000000194 /* CategoryBreakdown.swift */,
+				A00000000000000000000195 /* CategoryBreakdownCard.swift */,
+				A00000000000000000000196 /* CategoryTransactionsView.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
@@ -299,6 +312,7 @@
 				A00000000000000000000175 /* TransactionCategoryPersistenceTests.swift */,
 				A00000000000000000000181 /* TransactionDraftTests.swift */,
 				A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */,
+				A00000000000000000000197 /* CategoryBreakdownTests.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
@@ -359,6 +373,7 @@
 				A00000000000000000000186 /* DateField.swift */,
 				A00000000000000000000187 /* AppTheme.swift */,
 				A00000000000000000000192 /* FloatingAddButton.swift */,
+				A00000000000000000000193 /* Percentage.swift */,
 			);
 			path = Design;
 			sourceTree = "<group>";
@@ -528,6 +543,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A00000000000000000000285 /* CategoryTransactionsView.swift in Sources */,
+				A00000000000000000000284 /* CategoryBreakdownCard.swift in Sources */,
+				A00000000000000000000283 /* CategoryBreakdown.swift in Sources */,
+				A00000000000000000000282 /* Percentage.swift in Sources */,
 				A00000000000000000000281 /* FloatingAddButton.swift in Sources */,
 				A00000000000000000000279 /* SettingsView.swift in Sources */,
 				A00000000000000000000278 /* LockScreenView.swift in Sources */,
@@ -592,6 +611,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A00000000000000000000286 /* CategoryBreakdownTests.swift in Sources */,
 				A00000000000000000000280 /* AppLockTests.swift in Sources */,
 				A00000000000000000000274 /* AssetAllocationTests.swift in Sources */,
 				A00000000000000000000271 /* MoneyTransactionPersistenceTests.swift in Sources */,
