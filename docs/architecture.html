@@ -229,6 +229,18 @@
       box-shadow: var(--shadow), 0 0 0 3px color-mix(in srgb, var(--e) 34%, transparent);
     }
 
+    .entity.unbuilt { border-style: dashed; box-shadow: none; }
+    .entity.unbuilt .e-head { background: color-mix(in srgb, var(--e) 5%, var(--surface-2)); }
+
+    .e-head .chip { display: inline-block; margin-top: 7px; }
+
+    .badge.moves {
+      color: var(--muted);
+      border-color: var(--border-strong);
+      border-style: dashed;
+      background: transparent;
+    }
+
     .stage.focused .entity.dim { opacity: .26; }
     .stage.focused .entity.live { border-color: var(--e); transform: translateY(-1px); }
 
@@ -493,7 +505,8 @@
       Six <code>@Model</code> types backed by SwiftData (SQLite). Relationships are <strong>not</strong>
       declared with <code>@Relationship</code> &mdash; every association is a hand-stored
       <code>UUID</code> foreign key, resolved in Swift at read time
-      (<code>accounts.first { $0.id == someID }</code>). Below the schema, what the app talks to:
+      (<code>accounts.first { $0.id == someID }</code>). One seventh model is drawn dashed:
+      <code>FundInstrument</code> is specified, not built. Below the schema, what the app talks to:
       Apple frameworks, a single third-party package, and the services still on the roadmap.
     </p>
   </header>
@@ -510,6 +523,7 @@
     <span class="item"><span class="badge pk">PK</span> primary key</span>
     <span class="item"><span class="badge fk">FK</span> foreign key (app-enforced only)</span>
     <span class="item"><span class="badge null">?</span> nullable</span>
+    <span class="item"><span class="chip spec">Spec drafted</span> not built yet</span>
     <span class="hint">Hover or focus an entity to trace its links</span>
   </div>
 
@@ -594,18 +608,27 @@
         <ul class="fields">
           <li class="field key"><span class="fname">id</span><span class="ftype">UUID</span>
             <span class="badges"><span class="badge pk">PK</span></span></li>
-          <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
-          <li class="field"><span class="fname">symbol</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">name</span><span class="ftype">String</span>
+            <span class="badges"><span class="badge moves">moves to FundInstrument</span></span></li>
+          <li class="field"><span class="fname">symbol</span><span class="ftype">String</span>
+            <span class="badges"><span class="badge moves">moves to FundInstrument</span></span></li>
           <li class="field">
             <span class="fname">kind</span><span class="ftype">FundHoldingKind</span>
-            <span class="badges"><span class="badge enum">enum: fund | etf</span></span>
+            <span class="badges"><span class="badge enum">enum: fund | etf</span><span class="badge moves">moves to FundInstrument</span></span>
           </li>
           <li class="field"><span class="fname">units</span><span class="ftype">Decimal</span></li>
           <li class="field"><span class="fname">averageCostPerUnit</span><span class="ftype">Decimal</span></li>
-          <li class="field"><span class="fname">currentNAVPerUnit</span><span class="ftype">Decimal</span></li>
-          <li class="field"><span class="fname">navAsOf</span><span class="ftype">Date</span></li>
-          <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">currentNAVPerUnit</span><span class="ftype">Decimal</span>
+            <span class="badges"><span class="badge moves">moves to FundInstrument</span></span></li>
+          <li class="field"><span class="fname">navAsOf</span><span class="ftype">Date</span>
+            <span class="badges"><span class="badge moves">moves to FundInstrument</span></span></li>
+          <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span>
+            <span class="badges"><span class="badge moves">moves to FundInstrument</span></span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
+          <li class="field key" data-anchor="FundHolding.instrumentID" style="border-style: dashed;">
+            <span class="fname">instrumentID</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge req">NOT NULL</span><span class="badge moves">planned</span></span>
+          </li>
           <li class="field key" data-anchor="FundHolding.sourceAccountID">
             <span class="fname">sourceAccountID</span><span class="ftype">UUID?</span>
             <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span></span>
@@ -615,6 +638,48 @@
           <div class="derived-label">Derived &mdash; computed, not stored</div>
           <div class="derived-list">costBasis &middot; marketValue &middot; unrealizedProfitLoss &middot; returnPercent</div>
         </div>
+      </article>
+
+      <!-- ============ FundInstrument (drafted) ============ -->
+      <article class="entity unbuilt" id="FundInstrument" tabindex="0"
+               style="--e: var(--e-fund); grid-column: 3; grid-row: 2; align-self: center;">
+        <div class="e-head">
+          <div class="e-name">FundInstrument</div>
+          <div class="e-role">One row per tradable fund or ETF, owning the price a position is valued at</div>
+          <span class="chip spec">Spec drafted</span>
+          <div class="e-file">docs/SPEC-market-valuation.md</div>
+        </div>
+        <ul class="fields">
+          <li class="field key" data-anchor="FundInstrument.id">
+            <span class="fname">id</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge pk">PK</span></span>
+          </li>
+          <li class="field">
+            <span class="fname">symbol</span><span class="ftype">String</span>
+            <span class="badges"><span class="badge null">unique &mdash; enforced in the draft, not by @Attribute</span></span>
+          </li>
+          <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
+          <li class="field">
+            <span class="fname">kind</span><span class="ftype">FundInstrumentKind</span>
+            <span class="badges"><span class="badge enum">enum: fund | etf</span></span>
+          </li>
+          <li class="field"><span class="fname">currentPricePerUnit</span><span class="ftype">Decimal</span></li>
+          <li class="field">
+            <span class="fname">priceAsOf</span><span class="ftype">Date</span>
+            <span class="badges"><span class="badge null">trading day of the price</span></span>
+          </li>
+          <li class="field">
+            <span class="fname">priceFetchedAt</span><span class="ftype">Date?</span>
+            <span class="badges"><span class="badge null">when the app asked</span></span>
+          </li>
+          <li class="field">
+            <span class="fname">priceSource</span><span class="ftype">String</span>
+            <span class="badges"><span class="badge enum">manual | fmarket | vndirect</span></span>
+          </li>
+          <li class="field"><span class="fname">autoQuoteEnabled</span><span class="ftype">Bool</span></li>
+          <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
+        </ul>
       </article>
 
       <!-- ============ MoneyTransaction ============ -->
@@ -893,6 +958,16 @@
       </p>
     </div>
     <div class="note">
+      <h3>Why <code>FundInstrument</code> splits out</h3>
+      <p>
+        A price belongs to the instrument, not to the position. Today nothing stops two
+        <code>FundHolding</code> rows carrying the same ticker at two different prices &mdash;
+        <code>FundFormError</code> has no <code>duplicateSymbol</code> case and no call site
+        compares one. Net worth would be wrong with nothing to show for it, and automatic
+        refresh would make it worse by fetching the same ticker twice.
+      </p>
+    </div>
+    <div class="note">
       <h3>Enums stored as String</h3>
       <p>
         <code>CashAccountKind</code>, <code>TransactionKind</code> and <code>FundHoldingKind</code>
@@ -904,7 +979,8 @@
       <h3><code>currencyCode</code> repeated 5&times;</h3>
       <p>
         Denormalised onto every entity, always written from <code>VNDCurrency.code</code>.
-        Nothing enforces that related records share a currency.
+        Nothing enforces that related records share a currency. The drafted split removes one
+        copy: a holding drops it and reads the instrument's instead.
       </p>
     </div>
     <div class="note">
@@ -934,8 +1010,8 @@
   </section>
 
   <footer>
-    6 entities &middot; 6 foreign-key edges &middot; 0 declared SwiftData relationships &nbsp;|&nbsp;
-    1 third-party package &middot; 0 network calls today
+    6 entities built &middot; 1 drafted &middot; 7 foreign-key edges &middot; 0 declared SwiftData relationships
+    &nbsp;|&nbsp; 1 third-party package &middot; 0 network calls today
   </footer>
 </div>
 
@@ -1083,7 +1159,8 @@
       { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'MoneyTransaction', toAnchor: 'MoneyTransaction.accountID', label: '1 : 0..N', dashed: false },
       { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'AccountTransfer', toAnchor: 'AccountTransfer.sourceAccountID', label: 'from', dashed: false },
       { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'AccountTransfer', toAnchor: 'AccountTransfer.destinationAccountID', label: 'to', dashed: false },
-      { from: 'TransactionCategory', fromAnchor: 'TransactionCategory.id', to: 'MoneyTransaction', toAnchor: 'MoneyTransaction.categoryID', label: '1 : 0..N', dashed: true }
+      { from: 'TransactionCategory', fromAnchor: 'TransactionCategory.id', to: 'MoneyTransaction', toAnchor: 'MoneyTransaction.categoryID', label: '1 : 0..N', dashed: true },
+      { from: 'FundInstrument', fromAnchor: 'FundInstrument.id', to: 'FundHolding', toAnchor: 'FundHolding.instrumentID', label: '1 : 0..N', dashed: true }
     ]);
 
     wire('sysStage', 'sysEdges', '.node', [

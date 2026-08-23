@@ -2,6 +2,9 @@
 
 **Status:** Draft, pending owner approval (2026-08-23)
 **Depends on:** `fund-etf-holdings` for slice 1; `investment-tracking` for slice 2
+**Amends:** `SPEC-fund-etf-holdings.md` — splits `FundHolding` into an instrument
+and a position. That spec's data contract is superseded by the one below;
+everything else in it still stands.
 
 ## Objective
 
@@ -15,13 +18,29 @@ under Excluded. That was the right call for a first slice, and it is the reason
 a holding silently drifts: nothing in the app knows the number is stale, so an
 untouched portfolio quietly reports last month's value as today's.
 
-After this module the owner presses Refresh, the app fetches a price per symbol,
-writes it with the trading day it belongs to, and shows plainly how old every
-figure is. Hand entry stays — as an override, and as the fallback for the day a
-provider disappears.
+### Why the model splits
 
-This module adds the **first network access in the app**. That boundary gets its
-own contract below.
+Adding a refresh to the shipped shape would make an existing latent bug worse
+rather than better. `FundHolding` stores the price on the **position**, and
+nothing prevents two positions carrying the same ticker: `FundFormError` has no
+`duplicateSymbol` case, and no call site in the app compares a symbol against
+the ones already stored. Two rows for `FUEVFVND` can therefore hold two
+different prices at the same moment, and net worth is wrong with nothing to
+show for it.
+
+A price is a property of the **instrument**, not of the position. Refresh makes
+that concrete: fetching per holding would issue duplicate requests for one
+ticker and could leave two rows disagreeing forever if one had automatic quotes
+switched off.
+
+So this module splits the model. `FundInstrument` is the catalogue — one row per
+tradable thing, carrying its identity and its price. `FundHolding` keeps only
+what belongs to a position: how many units, at what average cost, funded from
+which account. Creating a holding becomes picking an instrument rather than
+retyping its name, its ticker, and its kind.
+
+This module also adds the **first network access in the app**. That boundary
+gets its own contract below.
 
 ## Scope
 
@@ -30,9 +49,10 @@ own contract below.
 `CAPABILITY-MAP.md` lists `market-valuation` as depending on
 `investment-tracking`. Only its second half does:
 
-- **Slice 1 — fund and ETF quotes.** Depends on `fund-etf-holdings` alone and is
-  buildable today. It owns the provider interface, the network boundary, the
-  refresh flow, and staleness reporting.
+- **Slice 1 — the fund catalogue and its quotes.** Depends on
+  `fund-etf-holdings` alone and is buildable today. It owns the model split, the
+  provider interface, the network boundary, the refresh flow, and staleness
+  reporting.
 - **Slice 2 — portfolio valuation.** Depends on `investment-tracking`, which does
   not exist yet. It extends the same provider interface to gold, equity, and
   crypto positions and adds portfolio-wide allocation and profit/loss.
@@ -40,55 +60,72 @@ own contract below.
 Slice 2 stays specified but unbuilt until `investment-tracking` lands. Slice 1
 must not be blocked behind it, and must not anticipate its data model.
 
+**The catalogue is deliberately not generalised.** Gold, equities, and crypto
+have the same duplication problem, but not the same shape — gold is priced by
+chỉ or lượng, crypto carries eight decimal places, equities trade in board lots.
+`FundInstrument` covers funds and ETFs and names the seam;
+`investment-tracking` decides whether a shared `Instrument` abstraction is worth
+having once its own units are known.
+
 ### User flow
 
-1. Open the **Funds** tab. Each holding card carries its market value and, below
-   it, when that price is from.
+1. Open the **Investments** tab. Each fund holding shows its market value and,
+   below it, when that price is from.
 2. A price older than the last completed trading day is marked stale in text and
    symbol, not by colour alone.
-3. Choose **Refresh**. Each holding shows that it is fetching.
+3. Choose **Refresh**. Each instrument shows that it is fetching.
 4. Prices land one by one. Market value, unrealized profit or loss, and total
    assets move with them.
-5. A symbol that fails keeps its previous price, and its card says why it did not
-   update.
-6. Open a holding and see the price source and its fetch time. The price field is
-   still editable; typing over a fetched price marks the holding manual again.
-7. Press **Fetch** beside the symbol inside the editor to pull one price without
-   leaving the form.
-8. Turn off automatic quotes for a holding whose symbol no provider covers, and
-   it stops being marked stale.
-9. Relaunch and see the same prices, the same sources, and the same dates.
+5. An instrument that fails keeps its previous price, and its row says why it did
+   not update.
+6. Choose **Add holding**. Pick an instrument from the catalogue, enter units and
+   average cost, and choose a funding account. The name, the ticker, and the kind
+   come from the instrument; there is nothing to retype.
+7. The instrument is not in the catalogue yet, so choose **Add instrument** from
+   the picker, search the provider by ticker, and confirm the name and kind it
+   returns.
+8. Open **Instruments** from the toolbar to edit a price by hand, see its source
+   and fetch time, or turn automatic quotes off for a ticker no provider covers.
+9. Relaunch and see the same holdings, the same prices, the same sources, and the
+   same dates.
 
 ### Included
 
+- A `FundInstrument` catalogue: one row per fund or ETF, unique by ticker,
+  owning the price, its trading day, its source, and its fetch time.
+- `FundHolding` reduced to a position pointing at an instrument.
+- A one-time migration that builds the catalogue from existing holdings.
+- Instrument selection when creating or editing a holding, replacing free-text
+  name, ticker, and kind entry.
 - A typed `FundQuoteProvider` interface with one implementation per instrument
-  type, selected by `FundHoldingKind`.
+  kind, selected from the instrument's own `kind`.
 - Open-ended fund NAV from the Fmarket public API.
 - Listed ETF closing price from the VNDIRECT chart API.
-- An owner-triggered refresh for all holdings, and for one holding from its
-  editor.
-- Recorded quote source and fetch time per holding, distinct from the trading
-  day the price belongs to.
+- Provider-backed instrument search when adding one to the catalogue.
+- An owner-triggered refresh for all instruments, and for one from its editor.
 - Staleness reporting against the last completed trading day.
-- A per-holding switch to opt out of automatic quotes.
+- A per-instrument switch to opt out of automatic quotes.
 - Manual price entry retained as an override and a fallback.
 - Failure handling that never destroys a known-good price.
-- Local caching and a per-symbol request floor, so a repeated Refresh does not
+- Local caching and a per-ticker request floor, so a repeated Refresh does not
   hammer a provider.
 - Fixture-driven tests with no network access in the default test run.
 
 ### Excluded
 
 - Background, scheduled, or launch-time refresh. Every fetch is owner-triggered.
-- Intraday or streaming prices. Slice 1 fetches one daily figure per symbol.
+- Intraday or streaming prices. Slice 1 fetches one daily figure per instrument.
 - Price history, charts, and performance over time.
 - A market-holiday calendar. Staleness is computed from weekdays alone, and Tết
   is reported as stale rather than modelled.
 - Currency conversion or any non-VND instrument.
+- A shared instrument abstraction across asset classes.
 - Gold, equity, and crypto quotes, portfolio allocation, and portfolio-wide
   profit and loss — all slice 2, blocked on `investment-tracking`.
 - Individual trades, lots, realized profit and loss, dividends, and splits;
-  `SPEC-fund-etf-holdings.md` still excludes these.
+  `SPEC-fund-etf-holdings.md` still excludes these. The split makes several
+  holdings per instrument *representable*, which is what a later lot model will
+  need, but nothing in this module computes across them.
 - Any write to a provider, any authenticated call, any brokerage integration.
 - iCloud, AI, or MCP access.
 - UI automation; the owner performs hands-on app testing.
@@ -96,17 +133,154 @@ must not be blocked behind it, and must not anticipate its data model.
 ## Domain and Data Contract
 
 ```swift
-enum FundQuoteSource: String, Codable, CaseIterable, Sendable {
-    case manual         // typed by the owner; the fund-etf-holdings default
-    case fmarket        // open-ended fund NAV
-    case vndirect       // listed ETF close
+enum FundInstrumentKind: String, Codable, CaseIterable, Sendable {
+    case fund       // open-ended fund certificate, priced by NAV
+    case etf        // listed on HOSE, priced by close
 }
 
+enum FundQuoteSource: String, Codable, CaseIterable, Sendable {
+    case manual     // typed by the owner
+    case fmarket    // open-ended fund NAV
+    case vndirect   // listed ETF close
+}
+
+@Model
+final class FundInstrument {
+    var id: UUID
+    var symbol: String                  // uppercased, unique across the catalogue
+    var name: String
+    var kind: FundInstrumentKind
+    var currentPricePerUnit: Decimal
+    var priceAsOf: Date                 // trading day the price belongs to
+    var priceSource: String             // FundQuoteSource raw value
+    var priceFetchedAt: Date?           // nil when the price was typed
+    var autoQuoteEnabled: Bool
+    var currencyCode: String
+    var createdAt: Date
+}
+
+@Model
+final class FundHolding {
+    var id: UUID
+    var instrumentID: UUID              // required
+    var units: Decimal                  // fractional
+    var averageCostPerUnit: Decimal
+    var sourceAccountID: UUID?
+    var createdAt: Date
+}
+```
+
+`FundHoldingKind` is renamed to `FundInstrumentKind`. This is a Swift-level
+rename only: the persisted raw values stay `"fund"` and `"etf"`, so no stored
+record changes and no raw value is ever renamed.
+
+Rules on the instrument:
+
+- `symbol` is trimmed, uppercased, and must contain at least one non-whitespace
+  character. It is **unique across the catalogue**, compared case-insensitively.
+  Uniqueness is enforced in `FundInstrumentDraft`, not by
+  `@Attribute(.unique)` — CloudKit forbids unique attributes, and the eventual
+  `icloud-sync` module should inherit no schema debt here.
+- `name` is trimmed and must contain at least one non-whitespace character.
+- `currentPricePerUnit` must be greater than zero.
+- `priceAsOf` is the **trading day the price belongs to**. `priceFetchedAt` is
+  when the app asked. They differ by design: fetching on a Sunday returns
+  Friday's figure, and conflating the two would report a weekend price that does
+  not exist.
+- `priceSource` is stored as a `String` raw value rather than the enum, matching
+  how `kind` is persisted, so a future source can be added without a migration.
+- `kind` decides which provider runs. Nothing a provider returns overrides it.
+
+Rules on the holding:
+
+- `instrumentID` is **not** optional. A position with no instrument has no
+  identity, no price, and no way to be valued, which is the whole point of the
+  record. It is the same reasoning that makes `MoneyTransaction.accountID`
+  required.
+- `units` must parse as a decimal greater than zero. Input accepts `1234,56`,
+  `1234.56`, and grouped digits; anything else is rejected.
+- `averageCostPerUnit` must parse as a decimal greater than zero.
+- `sourceAccountID` is the funding account's `id`, or `nil` when the holding is
+  not funded from a tracked account. Unchanged from `fund-etf-holdings`.
+- `currencyCode` is **removed** from the holding. Cost and price are both in the
+  instrument's currency, and storing it twice invites the two to disagree.
+- Money, units, and rates use `Decimal`; `Double` and `Float` are forbidden.
+
+### Valuation
+
+`FundValuation` keeps its four pure functions and its rounding. Only where the
+price comes from changes:
+
+```swift
+costBasis            = round(units × averageCostPerUnit)
+marketValue          = round(units × instrument.currentPricePerUnit)
+unrealizedProfitLoss = marketValue − costBasis
+returnPercent        = costBasis > 0 ? (unrealizedProfitLoss / costBasis) × 100 : 0
+```
+
+Call sites pass the instrument's price in as a value, exactly as they passed the
+holding's before. Nothing in `FundValuation` gains a `ModelContext`, a network,
+a locale, or a clock.
+
+`CashBalanceSummary.fundedAmount` still sums cost basis, which lives entirely on
+the holding, so **the cash side of the app is untouched by this module**. Only
+`AssetSummary.netWorth` and `AssetAllocation` need the instrument, and only to
+read a price.
+
+### Model split and migration
+
+Existing stores hold `FundHolding` rows carrying `name`, `symbol`, `kind`,
+`currentNAVPerUnit`, `navAsOf`, and `currencyCode`. Those six move or disappear.
+SwiftData cannot infer a split of one entity into two, so this needs a versioned
+schema with a custom migration stage rather than a lightweight one:
+
+- `SchemaV1` is today's five-model schema plus `AccountTransfer`.
+- `SchemaV2` adds `FundInstrument` and reshapes `FundHolding`.
+- The custom stage reads every V1 holding before the change and writes the
+  catalogue and the rewritten holdings after it.
+
+Migration rule, in order:
+
+1. Group V1 holdings by `symbol.uppercased()`.
+2. Create one `FundInstrument` per group. Take `name` and `kind` from the
+   group's **oldest** holding by `createdAt`, so the first thing the owner
+   entered wins over a later typo.
+3. Take `currentPricePerUnit` and `priceAsOf` from the group's holding with the
+   **newest** `navAsOf`. When two rows disagreed, the more recent price is the
+   better guess and the older one was already wrong.
+4. Set `priceSource = "manual"`, `priceFetchedAt = nil`,
+   `autoQuoteEnabled = true`, `currencyCode` from the same holding.
+5. Point every holding in the group at that instrument and drop the six moved
+   fields.
+
+No holding is deleted and no unit count or average cost is touched, so cost
+basis, funded amount, and every cash balance come out of the migration
+identical. Only a duplicated ticker's *price* can change, and only towards the
+more recent of the two figures it already held.
+
+A migration that throws leaves the store on V1 and surfaces the error rather
+than opening a half-built V2. The app must not silently start with an empty
+catalogue.
+
+### Providers
+
+Both endpoints are **undocumented internal APIs**. They are unauthenticated and
+serve public price data, and both were verified working on 2026-08-21. Neither
+carries a service level, a compatibility promise, or a licence to reuse the
+data. The design consequences are in Boundaries; the mechanics follow.
+
+```swift
 struct FundQuote: Sendable, Equatable {
-    let symbol: String          // uppercased, as stored on the holding
+    let symbol: String          // uppercased, as stored on the instrument
     let pricePerUnit: Decimal   // VND per unit, already normalised
     let asOf: Date              // start of the trading day the price belongs to
     let source: FundQuoteSource
+}
+
+struct FundInstrumentCandidate: Sendable, Equatable {
+    let symbol: String
+    let name: String
+    let kind: FundInstrumentKind
 }
 
 enum FundQuoteError: Error, Equatable {
@@ -120,15 +294,11 @@ enum FundQuoteError: Error, Equatable {
 protocol FundQuoteProvider: Sendable {
     var source: FundQuoteSource { get }
     func latestQuote(symbol: String) async throws -> FundQuote
+    func search(_ query: String) async throws -> [FundInstrumentCandidate]
 }
-```
 
-`FundQuoteRouter` owns provider selection and is the only thing that knows the
-mapping:
-
-```swift
 struct FundQuoteRouter: Sendable {
-    func provider(for kind: FundHoldingKind) -> FundQuoteProvider
+    func provider(for kind: FundInstrumentKind) -> FundQuoteProvider
     // .fund -> FmarketQuoteProvider
     // .etf  -> VNDirectQuoteProvider
 }
@@ -137,51 +307,6 @@ struct FundQuoteRouter: Sendable {
 `SWIFT_STRICT_CONCURRENCY = complete` is already set in `Config/Base.xcconfig`,
 so every type crossing the network boundary is `Sendable` and no provider holds
 mutable state that a caller can reach.
-
-### Schema change
-
-`FundHolding` gains three stored properties. This is the only schema change:
-
-```swift
-var navSource: String       // FundQuoteSource raw value; defaults to "manual"
-var navFetchedAt: Date?     // when the app last fetched successfully; nil when manual
-var autoQuoteEnabled: Bool  // defaults to true
-```
-
-- `currentNAVPerUnit` and `navAsOf` keep their names and meanings.
-  `currentNAVPerUnit` already held whatever the owner typed; it now holds
-  whatever was fetched, in the same units.
-- `navAsOf` is the **trading day the price belongs to**. `navFetchedAt` is when
-  the app asked. They differ by design: fetching on a Sunday returns Friday's
-  figure, and conflating the two would report a weekend price that does not
-  exist.
-- `navSource` is stored as a `String` raw value rather than the enum, matching
-  how `kind` is persisted, so a future source can be added without a migration.
-- All three are non-optional or optional with a stable default, so the eventual
-  `icloud-sync` module inherits no schema debt.
-- Adding properties is an additive SwiftData change; the existing local store
-  opens without migration work. Records written before this module read back as
-  `manual`, `nil`, and `true`.
-
-### Naming: NAV versus price
-
-For a `.fund` holding, `currentNAVPerUnit` is genuinely the NAV per unit. For a
-`.etf` holding it is the **closing market price**, which is not the ETF's NAV —
-a listed ETF trades at a premium or discount to its NAV, and the gap is real
-rather than error.
-
-The field is **not** renamed in this module. Renaming would touch
-`FundHolding`, `FundDraft`, `FundValuation`, both editor views, and every fund
-test, for no behavioural gain. Instead the UI labels the field by kind — "NAV per
-unit" for a fund, "Market price per unit" for an ETF — and this spec is the
-record of the dual meaning. A rename moves through spec approval on its own.
-
-### Providers
-
-Both endpoints are **undocumented internal APIs**. They are unauthenticated and
-serve public price data, and both were verified working on 2026-08-21. Neither
-carries a service level, a compatibility promise, or a licence to reuse the
-data. The design consequences are in Boundaries; the mechanics follow.
 
 **FmarketQuoteProvider — `.fund`**
 
@@ -193,9 +318,9 @@ POST https://api.fmarket.vn/res/products/filter
 -> data.rows[].id, data.rows[].shortName, data.rows[].nav
 ```
 
-`shortName` is matched case-insensitively against the holding's `symbol`. An
+`shortName` is matched case-insensitively against the instrument's `symbol`. An
 empty `searchField` with `pageSize: 100` returns the full catalogue — 68 funds
-on 2026-08-21 — which is how the editor offers a symbol picker.
+on 2026-08-21 — which is what `search(_:)` offers when adding an instrument.
 
 NAV for a day:
 
@@ -230,17 +355,17 @@ GET https://dchart-api.vndirect.com.vn/dchart/symbols?symbol=FUEVFVND
 `from` is set 30 days back so a symbol suspended for a fortnight still yields
 its last close.
 
-The `/symbols` call validates a symbol before it is saved and supplies the
-display name. Its `description` and `type` fields are **not trusted for
-classification**: VESAF comes back as `type: "IFC"`, `exchange-traded: "HOSE"`,
+The `/symbols` call backs `search(_:)` and supplies a candidate's display name.
+Its `description` and `type` fields are **not trusted for classification**:
+VESAF comes back as `type: "IFC"`, `exchange-traded: "HOSE"`,
 `description: "VINACAPITAL VN100 ETF"`, all three wrong for an unlisted
-open-ended fund. Only `FundHoldingKind`, which the owner sets, decides which
-provider runs.
+open-ended fund. A candidate's `kind` is therefore whichever provider produced
+it, and the owner confirms it before the instrument is saved.
 
 The same endpoint also serves open-ended fund NAV, and the numbers match Fmarket
 exactly — `31.51777` against Fmarket's `31517.77` for 2026-08-20. It is still not
-used for `.fund` holdings, because it lags Fmarket by a trading day and carries
-the wrong metadata.
+used for `.fund` instruments, because it lags Fmarket by a trading day and
+carries the wrong metadata.
 
 ### Decimal safety
 
@@ -262,7 +387,7 @@ Prices arrive as JSON numbers. Decoding one into `Double` and multiplying by
 ```swift
 enum TradingCalendar {
     static func lastCompletedTradingDay(asOf: Date) -> Date
-    static func isStale(navAsOf: Date, asOf: Date) -> Bool
+    static func isStale(priceAsOf: Date, kind: FundInstrumentKind, asOf: Date) -> Bool
 }
 ```
 
@@ -273,8 +398,9 @@ enum TradingCalendar {
 - Saturday and Sunday are not trading days. **Public holidays are not modelled.**
   A Tết week reports every price as stale, which is honest about what the app
   knows and better than a hardcoded holiday table going wrong in a later year.
-- `.fund` holdings get one extra day of grace: Fmarket publishes NAV at T+1, so a
-  fund whose `navAsOf` is the trading day before last is current, not stale.
+- `.fund` instruments get one extra day of grace: Fmarket publishes NAV at T+1,
+  so a fund whose `priceAsOf` is the trading day before last is current, not
+  stale.
 - Every function takes the date it needs. Nothing reads the clock, so tests are
   deterministic.
 
@@ -282,29 +408,34 @@ enum TradingCalendar {
 
 - Refresh is **owner-triggered only**. No timer, no background task, no fetch on
   launch or on tab appearance.
-- A per-symbol floor of 15 minutes: a second Refresh inside that window reuses
+- Refresh iterates the **catalogue**, not the holdings. Ten positions in one
+  ticker cost one request, and the duplicate-price failure mode the split
+  removed cannot come back through the network path.
+- An instrument no holding references is skipped. The catalogue may outlive a
+  sold position, but a row nobody holds is not worth a request.
+- A per-ticker floor of 15 minutes: a second Refresh inside that window reuses
   the stored price and returns `rateLimited` rather than calling out. The floor
   is in memory and resets on relaunch.
-- A holding whose `navAsOf` is already the last completed trading day is skipped
-  without a request.
-- Holdings are fetched **sequentially**, not concurrently. A portfolio holds a
-  handful of symbols; a parallel burst buys nothing and looks like abuse.
+- An instrument whose `priceAsOf` is already the last completed trading day is
+  skipped without a request.
+- Instruments are fetched **sequentially**, not concurrently. A catalogue holds a
+  handful of tickers; a parallel burst buys nothing and looks like abuse.
 - Request timeout is 10 seconds. One retry on `transport`, none on any other
   error.
-- `autoQuoteEnabled == false` excludes a holding from Refresh and from staleness
-  marking entirely.
+- `autoQuoteEnabled == false` excludes an instrument from Refresh and from
+  staleness marking entirely.
 
 ### Failure policy
 
-- A failed fetch **never** writes. The previous `currentNAVPerUnit`, `navAsOf`,
-  `navSource`, and `navFetchedAt` all stand.
+- A failed fetch **never** writes. The previous `currentPricePerUnit`,
+  `priceAsOf`, `priceSource`, and `priceFetchedAt` all stand.
 - A price is never replaced by zero, by nil, or by a placeholder.
-- One symbol failing does not abort the others. Refresh reports per holding.
+- One ticker failing does not abort the others. Refresh reports per instrument.
 - A successful fetch writes all four fields and calls `save()` once for the whole
   Refresh, rolling back and surfacing the error if the save fails.
-- Editing the price by hand sets `navSource = "manual"` and clears
-  `navFetchedAt`. A later Refresh overwrites it again unless `autoQuoteEnabled`
-  is off — the override is a value, not a lock.
+- Editing a price by hand sets `priceSource = "manual"` and clears
+  `priceFetchedAt`. A later Refresh overwrites it again unless
+  `autoQuoteEnabled` is off — the override is a value, not a lock.
 
 ## Network Boundary
 
@@ -313,7 +444,9 @@ This is the app's first outbound connection, and the contract is narrow:
 - **Only the ticker leaves the device.** No balance, no unit count, no cost
   basis, no account name, no identifier of the owner. A provider learns that
   somebody asked about `FUEVFVND` and nothing else. Never send a holding's
-  quantity or value in a query, a header, or a body.
+  quantity or value in a query, a header, or a body. The model split helps here
+  too: the provider layer only ever sees `FundInstrument`, which carries no
+  position data at all.
 - No credentials, tokens, cookies, or API keys are sent or stored. Both providers
   are unauthenticated, and the app must not gain a keychain entry for them.
 - HTTPS only. App Transport Security keeps its defaults; no exception domain is
@@ -329,12 +462,13 @@ This is the app's first outbound connection, and the contract is narrow:
 
 ## UI Contract
 
-- The **Funds** tab keeps its layout. Its toolbar gains a **Refresh** button
-  (`refresh-quotes`), disabled while a refresh runs and when no holding has
-  `autoQuoteEnabled`.
-- Each `FundHoldingCard` gains one line under the market value: the price date
-  and its source, worded per kind — "NAV 21 Aug 2026 · Fmarket" or
-  "Close 21 Aug 2026 · VNDIRECT" or "Entered by hand".
+- The **Investments** tab keeps its layout. Its toolbar gains a **Refresh**
+  button (`refresh-quotes`), disabled while a refresh runs and when no held
+  instrument has `autoQuoteEnabled`.
+- Each `FundHoldingCard` shows the instrument's name and ticker as before, and
+  gains one line under the market value: the price date and its source, worded
+  per kind — "NAV 21 Aug 2026 · Fmarket" or "Close 21 Aug 2026 · VNDIRECT" or
+  "Entered by hand".
 - A stale price is marked with a symbol **and** the word "Stale", never colour
   alone. This follows the same rule as transaction direction in
   `SPEC-income-expense.md`.
@@ -342,32 +476,66 @@ This is the app's first outbound connection, and the contract is narrow:
   failed shows the reason in text — "Symbol not found", "No connection",
   "Nothing new to fetch" — and keeps its old figure visible.
 - Refreshing changes market value, unrealized profit or loss, and total assets.
-  It changes **no** cash balance: cost basis is untouched, so the invested đồng
-  is still counted exactly once, as `SPEC-fund-etf-holdings.md` requires.
-- The fund editor gains, beside the symbol field, a **Fetch** button
-  (`fetch-fund-quote`) that pulls one price into the form without saving, and a
-  quote-source row showing the source and fetch time.
-- The editor gains an **Automatic quotes** toggle (`auto-quote`). Turning it off
-  greys nothing — the price field is always editable — it only removes the
-  holding from Refresh and from staleness marking.
-- The price field's label follows `kind`: "NAV per unit" for a fund, "Market
-  price per unit" for an ETF. Its accessibility identifier stays `fund-nav`, so
-  no identifier from `SPEC-fund-etf-holdings.md` changes.
+  It changes **no** cash balance: cost basis lives on the holding and is
+  untouched, so the invested đồng is still counted exactly once, as
+  `SPEC-fund-etf-holdings.md` requires.
+- The **holding editor** loses its name, ticker, and kind fields. In their place
+  sits one instrument picker (`holding-instrument`) listing the catalogue with
+  ticker, name, and kind, plus an **Add instrument** row at its foot. The editor
+  keeps units, average cost, funding account, and Delete.
+- The picker's Add row opens the **instrument editor** (`instrument-editor`),
+  which takes a ticker, searches the matching provider, and shows the candidate's
+  name and kind for the owner to confirm or correct before saving. A provider
+  that is unreachable does not block the flow: the owner may fill the name, the
+  kind, and an opening price by hand.
+- **Instruments** opens from the Investments toolbar (`manage-instruments`) as a
+  sheet listing the catalogue, mirroring how Spending reaches Categories. Each
+  row shows ticker, name, kind, price, price date, source, and whether anything
+  is held. A row opens the instrument editor.
+- The instrument editor carries an editable price field (`instrument-price`), a
+  price-date field, an **Automatic quotes** toggle (`auto-quote`), a **Fetch now**
+  button (`fetch-quote`), and a Delete button behind a confirmation.
+- Deleting an instrument is **blocked while any holding references it**, and the
+  reason names the count, matching how `cash-balance` and `account-transfer`
+  guard an account: "This instrument is held by N positions. Delete them first."
 - Errors appear inline with icon plus text, never colour alone.
-- New accessibility identifiers: `refresh-quotes`, `fetch-fund-quote`,
-  `auto-quote`, `quote-source`, `quote-status`, `quote-error`.
+- **Identifier changes.** `fund-name`, `fund-symbol`, `fund-kind`, `fund-nav`,
+  and `fund-nav-date` leave the holding editor, because those fields leave it.
+  `fund-name`, `fund-symbol`, and `fund-kind` are reused on the instrument
+  editor for the same controls; `fund-nav` and `fund-nav-date` are replaced by
+  `instrument-price` and `instrument-price-date`. `funds-list`, `add-fund`,
+  `fund-units`, `fund-average-cost`, `fund-source`, `save-fund`, `cancel-fund`,
+  and `delete-fund` are unchanged. This is the only identifier change since the
+  Cash-to-Home rename in `SPEC-income-expense.md`.
+- New accessibility identifiers: `refresh-quotes`, `manage-instruments`,
+  `instrument-list`, `instrument-editor`, `holding-instrument`,
+  `add-instrument`, `instrument-search`, `instrument-price`,
+  `instrument-price-date`, `auto-quote`, `fetch-quote`, `quote-source`,
+  `quote-status`, `quote-error`, `save-instrument`, `cancel-instrument`,
+  `delete-instrument`, `confirm-delete-instrument`.
 - Screen copy stays English, matching the existing screens.
 
 ## Persistence Contract
 
-- The `ModelContainer` registration is unchanged; no model is added.
-- `FundHolding` gains three stored properties as an additive schema change.
-- Refresh runs off a `ModelContext` taken from the environment, writes only
-  fetched values, and calls `save()` once, rolling back on failure.
+- `MonMonApp` installs one `ModelContainer` holding `CashAccount`,
+  `SavingsDeposit`, `FundInstrument`, `FundHolding`, `TransactionCategory`,
+  `MoneyTransaction`, and `AccountTransfer` — seven models.
+- The container is created with a `SchemaMigrationPlan` carrying the V1 to V2
+  stage described above. This is the first migration in the project; every
+  earlier schema change was additive.
+- Symbol uniqueness is enforced in the draft layer against a fetch of existing
+  instruments, never by `@Attribute(.unique)`.
+- Lists use SwiftData `@Query`; editors take `ModelContext` from the environment,
+  insert only after validation, and call `save()` explicitly, rolling back and
+  surfacing the error when it fails.
 - The symbol-to-`productId` map for Fmarket is an in-memory cache with the
-  lifetime of the app session. It is **not** persisted: a stale id would silently
-  fetch another fund's NAV, and re-fetching the catalogue costs one request.
+  lifetime of the app session. It is **not** persisted, and specifically not
+  stored on `FundInstrument`: a stale id would silently fetch another fund's NAV,
+  and re-fetching the catalogue costs one request.
 - No response body is written to disk. Nothing is cached in `URLCache`.
+- Every stored property stays non-optional or optional with a stable default, and
+  no `@Attribute(.unique)` is introduced, so the eventual `icloud-sync` module
+  inherits no schema debt from this module.
 - Automated tests use `ModelConfiguration(isStoredInMemoryOnly: true)` and never
   touch the owner's database.
 
@@ -379,29 +547,43 @@ plane, and a green run must mean the code is right, not that the internet is.
 
 Automated, fixture-driven:
 
-- `FmarketQuoteProviderTests` — decode a recorded `/filter` body to id and
-  symbol; decode a recorded `get-nav-history` body to the last point; VND needs
-  no scaling; a missing symbol raises `symbolNotFound`; an empty `data` array
-  raises `noQuoteAvailable`; a renamed field raises `decoding`; a non-2xx raises
-  `transport`.
+- `FundInstrumentPersistenceTests` — field round trip; edit through the draft;
+  delete; a duplicate ticker rejected case-insensitively; the same ticker
+  allowed after the original is deleted.
+- `FundHoldingPersistenceTests` — reshaped: a holding round trips with
+  `instrumentID`; two holdings share one instrument and both value from its
+  single price; deleting an instrument is blocked while a holding references it.
+- `FundMigrationTests` — a V1 store with two holdings of one ticker at different
+  prices migrates to one instrument at the newer `navAsOf`; name and kind come
+  from the older holding; unit counts, average costs, funding links, cost basis,
+  and every cash balance are identical before and after; a V1 store with no
+  holdings migrates to an empty catalogue; a throwing stage leaves V1 intact.
+- `FmarketQuoteProviderTests` — decode a recorded `/filter` body to id, symbol,
+  and search candidates; decode a recorded `get-nav-history` body to the last
+  point; VND needs no scaling; a missing symbol raises `symbolNotFound`; an
+  empty `data` array raises `noQuoteAvailable`; a renamed field raises
+  `decoding`; a non-2xx raises `transport`.
 - `VNDirectQuoteProviderTests` — `34.2` decodes to `Decimal(34200)` exactly;
   `"s":"no_data"` raises `noQuoteAvailable`; a unix stamp maps to the right
   trading day in `Asia/Ho_Chi_Minh`; empty `c` raises `noQuoteAvailable`; a
   zero or negative close raises `decoding`.
 - `FundQuoteRouterTests` — `.fund` routes to Fmarket, `.etf` to VNDIRECT, and
-  the router consults `kind` rather than anything in a provider response.
+  the router consults the instrument's `kind` rather than anything in a provider
+  response.
 - `TradingCalendarTests` — a weekday before and after 15:00; Saturday and
   Sunday; a year boundary; the T+1 grace applied to `.fund` and not to `.etf`;
   a holiday correctly reported as stale.
-- `FundRefreshTests` — a successful fetch writes all four fields; a failure
-  writes none of them; one symbol failing leaves the others updated; a holding
-  already on the last completed trading day is skipped without a request; the
-  15-minute floor returns `rateLimited`; `autoQuoteEnabled == false` is
-  excluded; a hand edit sets the source back to `manual`.
+- `FundRefreshTests` — a successful fetch writes all four instrument fields; a
+  failure writes none of them; one ticker failing leaves the others updated; ten
+  holdings of one ticker cost one request; an unheld instrument is skipped; an
+  instrument already on the last completed trading day is skipped without a
+  request; the 15-minute floor returns `rateLimited`; `autoQuoteEnabled == false`
+  is excluded; a hand edit sets the source back to `manual`.
 - `FundValuationTests` and `AssetSummaryTests` gain a case where a refreshed
-  price moves market value and net worth while every cash balance holds still.
-- Existing cash-balance, savings-deposit, fund, income-expense, and
-  account-transfer tests must keep passing.
+  price moves market value and net worth while every cash balance holds still,
+  and a case where two holdings of one instrument both move from one refresh.
+- Existing cash-balance, savings-deposit, income-expense, and account-transfer
+  tests must keep passing untouched.
 
 Fixtures are real responses captured on 2026-08-21 and committed as files —
 VESAF at 31,581.76 ₫ for 2026-08-21, FUEVFVND at 34.2 for the same day — so a
@@ -412,15 +594,20 @@ every command in Verification Commands, and never required for a green run.
 
 Hands-on, owned by the owner:
 
-- Refreshing a portfolio holding both a fund and an ETF and checking each figure
+- Creating a holding by picking an instrument, with nothing to retype.
+- Adding an instrument the catalogue does not have, by ticker.
+- Refreshing a catalogue holding both a fund and an ETF and checking each figure
   against Fmarket and a broker board by hand.
 - Watching total assets move and every cash balance hold still.
+- Holding the same ticker twice and confirming one refresh moves both.
 - Refreshing twice inside a minute and seeing the second do nothing.
 - Refreshing with the network off and confirming every price survives.
-- A deliberately misspelled symbol reporting not-found and keeping its price.
+- A deliberately misspelled ticker reporting not-found and keeping its price.
 - Typing over a fetched price, then refreshing, and seeing it fetched again.
-- Turning automatic quotes off and confirming the holding stops being marked
+- Turning automatic quotes off and confirming the instrument stops being marked
   stale.
+- Blocked instrument deletion while a holding remains, with the count named.
+- Upgrading a store that already holds funds, and checking every figure survived.
 - Relaunch persistence, iPhone Dynamic Type and keyboards, Mac window resizing.
 
 No automated test may depend on network access, iCloud, current locale,
@@ -445,13 +632,16 @@ rtk swift format lint --strict --recursive MonMon MonMonTests
 
 ### Always do
 
+- Keep the price on the instrument and the position on the holding.
+- Refresh over the catalogue, never over the holdings.
+- Reject a duplicate ticker in the draft layer, case-insensitively.
 - Send only the ticker over the network, and only when the owner asked.
 - Keep manual price entry working as an override and a fallback.
 - Keep a known-good price when a fetch fails.
 - Store the trading day a price belongs to separately from when it was fetched.
 - Build prices as `Decimal` from their textual form; never through `Double`.
 - Scale VNDIRECT closes by 1000 and leave Fmarket NAV unscaled.
-- Choose the provider from `FundHoldingKind`, never from provider metadata.
+- Choose the provider from the instrument's `kind`, never from provider metadata.
 - Report staleness in text and symbol as well as colour.
 - Keep `openingBalance` and cost basis untouched; only market value moves.
 - Keep both platform builds healthy after every increment.
@@ -461,20 +651,26 @@ rtk swift format lint --strict --recursive MonMon MonMonTests
 - Refresh on a timer, in the background, or at launch.
 - Add a third provider, or switch either existing one.
 - Fetch intraday prices, or store any price history.
-- Rename `currentNAVPerUnit`, or split it per `kind`.
+- Generalise `FundInstrument` across asset classes.
+- Add `@Attribute(.unique)` anywhere.
 - Add a market-holiday calendar.
 - Start slice 2 before `investment-tracking` exists.
-- Change persisted schema, user flow, copy language, or accessibility identifiers.
+- Change persisted schema, user flow, copy language, or accessibility
+  identifiers beyond the changes listed in the UI Contract.
 - Enable iCloud.
 
 ### Never do
 
+- Store a price on a holding, or let two records of one ticker carry two prices.
 - Send a balance, a unit count, a cost basis, an account name, or any owner
   identifier to a provider.
 - Store or transmit brokerage credentials, account numbers, API keys, or secrets.
+- Persist a provider's internal id on a model.
 - Add an App Transport Security exception, or accept an invalid certificate.
 - Use `Double` or `Float` for a price, in decoding or in arithmetic.
 - Overwrite a good price with zero, nil, or a placeholder on failure.
+- Open a V2 store with an empty catalogue after a migration that failed.
+- Delete an instrument a holding still references.
 - Let a network failure block the app, or a refresh run without the owner asking.
 - Treat a provider's `description` or `type` as authoritative about an
   instrument.
@@ -483,30 +679,44 @@ rtk swift format lint --strict --recursive MonMon MonMonTests
 
 ## Success Criteria
 
-- Refreshing a `.fund` holding writes the NAV Fmarket publishes for that symbol,
-  in đồng, dated to the trading day it belongs to.
-- Refreshing a `.etf` holding writes the VNDIRECT close × 1000, exactly, with no
-  floating-point residue.
+- A ticker exists exactly once in the catalogue, and a second attempt to add it
+  is refused with a clear inline error.
+- Creating a holding requires no typing of a name, a ticker, or a kind.
+- Two holdings of one instrument always show the same price, and one refresh
+  moves both.
+- Refreshing a `.fund` instrument writes the NAV Fmarket publishes for that
+  ticker, in đồng, dated to the trading day it belongs to.
+- Refreshing a `.etf` instrument writes the VNDIRECT close × 1000, exactly, with
+  no floating-point residue.
 - Market value, unrealized profit or loss, and total assets move with a refreshed
   price; every cash balance and every cost basis stays where it was.
+- Migrating a populated V1 store preserves every unit count, average cost,
+  funding link, cost basis, and cash balance exactly, and collapses a duplicated
+  ticker to its most recent price.
 - A failed fetch leaves all four price fields untouched and says why in text.
-- One symbol failing does not stop the rest of the refresh.
-- A second refresh inside 15 minutes makes no request.
-- A holding already priced at the last completed trading day makes no request.
+- One ticker failing does not stop the rest of the refresh.
+- A second refresh inside 15 minutes makes no request, and ten positions in one
+  ticker cost one request.
+- An instrument that no holding references makes no request.
 - Staleness is correct across a weekday before and after 15:00, a weekend, and a
   fund's T+1 grace.
-- Typing over a fetched price marks the holding manual; turning automatic quotes
-  off removes it from refresh and from staleness marking.
+- Typing over a fetched price marks the instrument manual; turning automatic
+  quotes off removes it from refresh and from staleness marking.
+- An instrument held by a position cannot be deleted, and the reason names the
+  count.
 - Only tickers appear in outbound requests, verified by inspection.
 - The full test suite passes with the network disabled.
 - Tests, strict formatting, and both platform builds pass without new warnings.
 
 ## Open Questions
 
-1. `CAPABILITY-MAP.md` lists `market-valuation` as depending on
+1. This spec amends the approved `SPEC-fund-etf-holdings.md` by reshaping
+   `FundHolding`. That spec needs a superseding note pointing here, added on
+   approval rather than now.
+2. `CAPABILITY-MAP.md` lists `market-valuation` as depending on
    `investment-tracking`. Slice 1 depends only on `fund-etf-holdings`. The map
    should either split the row or record that the dependency applies to slice 2
    alone. Left unedited pending owner direction.
-2. Both providers are undocumented endpoints with no licence to reuse their data.
+3. Both providers are undocumented endpoints with no licence to reuse their data.
    That is acceptable for a private local app and is a decision to revisit before
    any distribution beyond the owner's own devices.

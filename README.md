@@ -140,6 +140,10 @@ and are excluded by `.gitignore`.
   `SPEC-fund-etf-holdings.md`, `SPEC-income-expense.md`, and
   `SPEC-account-transfer.md`. `SPEC-market-valuation.md` is drafted but not
   approved.
+  `SPEC-market-valuation.md` amends the fund data contract: it splits
+  `FundHolding` into a `FundInstrument` catalogue that owns the price and a
+  position that points at it, so one ticker cannot carry two prices and a
+  holding is created by picking rather than retyping.
 - `docs/architecture.html` draws the same picture the specs describe in prose:
   every `@Model` with its fields and foreign keys, then the components around
   the app — Apple frameworks, the one third-party package, and the services
