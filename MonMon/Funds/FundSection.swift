@@ -19,6 +19,10 @@ struct FundSection: View {
             VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                 detailCard
 
+                if !unpriced.isEmpty {
+                    unpricedBanner
+                }
+
                 holdingsSection
             }
         }
@@ -55,6 +59,40 @@ struct FundSection: View {
                 .stroke(MonMonTheme.border, lineWidth: 1)
         }
         .accessibilityElement(children: .combine)
+    }
+
+    /// Positions the totals above cannot value. Market value counts them as
+    /// zero, which understates the figure, so the screen says so rather than
+    /// letting a quiet undercount pass for a number.
+    private var unpriced: [FundHolding] {
+        FundSummary.unpriced(holdings: holdings, instruments: instruments)
+    }
+
+    private var unpricedBanner: some View {
+        Label(unpricedDescription, systemImage: "exclamationmark.triangle.fill")
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(MonMonTheme.danger)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(16)
+            .background(
+                MonMonTheme.danger.opacity(0.14),
+                in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(MonMonTheme.danger.opacity(0.35), lineWidth: 1)
+            }
+            .accessibilityIdentifier("unpriced-holdings")
+    }
+
+    private var unpricedDescription: String {
+        let count = unpriced.count
+        let noun = count == 1 ? "position has" : "positions have"
+        let cost = VNDCurrency.format(
+            FundSummary.unpricedCostBasis(holdings: holdings, instruments: instruments)
+        )
+        return "\(count) \(noun) no instrument, so \(cost) of cost is counted as worth nothing. "
+            + "Open each one and pick what it is held in."
     }
 
     private var costBasis: Decimal {

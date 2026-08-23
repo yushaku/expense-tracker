@@ -30,6 +30,29 @@ enum FundSummary {
             - totalCostBasis(of: holdings)
     }
 
+    /// Positions whose instrument is missing from the catalogue.
+    ///
+    /// Joins are resolved in Swift, so a holding can point at nothing — a
+    /// deleted instrument, or a store part-way through the backfill. Such a
+    /// position is worth zero, which understates the portfolio. Valuing it any
+    /// other way would be inventing a price, so the number stands and this is
+    /// how a caller finds out to say so.
+    static func unpriced(
+        holdings: [FundHolding],
+        instruments: [FundInstrument]
+    ) -> [FundHolding] {
+        holdings.filter { instruments.matching($0) == nil }
+    }
+
+    /// What the unpriced positions cost. The one honest figure available for
+    /// them: it is the owner's own number and needs no market price.
+    static func unpricedCostBasis(
+        holdings: [FundHolding],
+        instruments: [FundInstrument]
+    ) -> Decimal {
+        totalCostBasis(of: unpriced(holdings: holdings, instruments: instruments))
+    }
+
     /// Every holding of one instrument. Used to block deleting an instrument
     /// that is still held, and to report how many positions would be orphaned.
     static func holdings(

@@ -84,6 +84,65 @@ struct FundSummaryTests {
         #expect(FundSummary.totalCostBasis(of: [orphan]) == 2_000_000)
     }
 
+    /// Valuing an orphan at zero is the only honest option — any other figure
+    /// would be invented — so the guarantee is that a caller can find out.
+    @Test("Unpriced positions are reported, not just silently worth nothing")
+    func unpricedPositionsAreReported() {
+        let instrument = FundTestFactory.instrument(pricePerUnit: 30_000)
+        let priced = FundTestFactory.holding(
+            in: instrument,
+            units: 100,
+            averageCostPerUnit: 20_000
+        )
+        let orphan = FundTestFactory.holding(
+            in: FundTestFactory.instrument(symbol: "GONE", pricePerUnit: 10_000),
+            units: 50,
+            averageCostPerUnit: 30_000
+        )
+        let holdings = [priced, orphan]
+        let catalogue = [instrument]
+
+        let unpriced = FundSummary.unpriced(holdings: holdings, instruments: catalogue)
+
+        #expect(unpriced.count == 1)
+        #expect(unpriced.first?.id == orphan.id)
+        #expect(
+            FundSummary.unpricedCostBasis(holdings: holdings, instruments: catalogue)
+                == 1_500_000
+        )
+        // The total still counts the orphan as nothing; it is now knowable that
+        // it did, and by how much cost.
+        #expect(FundSummary.totalMarketValue(of: holdings, instruments: catalogue) == 3_000_000)
+        #expect(FundSummary.totalCostBasis(of: holdings) == 3_500_000)
+    }
+
+    @Test("A holding that is not yet linked counts as unpriced")
+    func unlinkedHoldingCountsAsUnpriced() {
+        let instrument = FundTestFactory.instrument(pricePerUnit: 30_000)
+        let unlinked = FundHolding(
+            id: UUID(),
+            instrumentID: nil,
+            units: 10,
+            averageCostPerUnit: 1_000,
+            createdAt: FundTestFactory.referenceDate
+        )
+
+        #expect(
+            FundSummary.unpriced(holdings: [unlinked], instruments: [instrument]).count == 1
+        )
+    }
+
+    @Test("Nothing is reported when every position is priced")
+    func nothingReportedWhenAllPriced() {
+        let instrument = FundTestFactory.instrument(pricePerUnit: 30_000)
+        let holdings = [
+            FundTestFactory.holding(in: instrument, units: 100, averageCostPerUnit: 20_000)
+        ]
+
+        #expect(FundSummary.unpriced(holdings: holdings, instruments: [instrument]).isEmpty)
+        #expect(FundSummary.unpricedCostBasis(holdings: holdings, instruments: [instrument]) == 0)
+    }
+
     @Test("Cost basis ignores the catalogue entirely")
     func costBasisNeedsNoCatalogue() {
         let instrument = FundTestFactory.instrument(pricePerUnit: 30_000)
