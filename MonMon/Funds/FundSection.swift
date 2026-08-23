@@ -1,106 +1,57 @@
-import SwiftData
 import SwiftUI
 
-struct FundListView: View {
-    @Query(sort: \FundHolding.createdAt, order: .forward)
-    private var holdings: [FundHolding]
-
-    @Query(sort: \CashAccount.createdAt, order: .forward)
-    private var accounts: [CashAccount]
-
-    @State private var editorMode: FundEditorMode?
+/// The funds half of the Investments screen: what the holdings cost against
+/// what they are worth, followed by a card per holding. The screen around it
+/// owns the scroll, the running total, and the editor sheet.
+struct FundSection: View {
+    let holdings: [FundHolding]
+    let accounts: [CashAccount]
+    let onAdd: () -> Void
+    let onEdit: (FundHolding) -> Void
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                MonMonTheme.canvas
-                    .ignoresSafeArea()
+        if holdings.isEmpty {
+            emptyState
+        } else {
+            VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+                detailCard
 
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                        summaryCard
-
-                        if holdings.isEmpty {
-                            emptyState
-                        } else {
-                            holdingsSection
-                        }
-                    }
-                    .frame(maxWidth: MonMonTheme.maxContentWidth)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 16)
-                    .padding(.bottom, FloatingAddButton.contentInset)
-                    .frame(maxWidth: .infinity)
-                }
+                holdingsSection
             }
-            .overlay(alignment: .bottomTrailing) {
-                if !holdings.isEmpty {
-                    FloatingAddButton(
-                        title: "Add Holding",
-                        accessibilityIdentifier: "add-fund"
-                    ) {
-                        editorMode = .add
-                    }
-                }
-            }
-            .navigationTitle("Funds")
-            .accessibilityIdentifier("funds-list")
-            .sheet(item: $editorMode) { mode in
-                FundEditorView(mode: mode)
-            }
-            .tint(MonMonTheme.accent)
         }
     }
 
-    private var summaryCard: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            Label("TOTAL FUNDS", systemImage: "chart.line.uptrend.xyaxis")
-                .font(.caption.weight(.semibold))
-                .tracking(0.8)
-                .foregroundStyle(MonMonTheme.textSecondary)
+    private var detailCard: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Label(
+                "Cost basis \(VNDCurrency.format(costBasis))",
+                systemImage: "cart.fill"
+            )
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(MonMonTheme.textSecondary)
 
-            Text(VNDCurrency.format(marketValue))
-                .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.58)
-                .foregroundStyle(MonMonTheme.textPrimary)
+            Label(
+                profitLossDescription,
+                systemImage: isGain ? "arrow.up.right" : "arrow.down.right"
+            )
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(isGain ? MonMonTheme.gain : MonMonTheme.danger)
 
-            VStack(alignment: .leading, spacing: 6) {
-                Label(
-                    "Cost basis \(VNDCurrency.format(costBasis))",
-                    systemImage: "cart.fill"
-                )
+            Label(holdingCountLabel, systemImage: "rectangle.stack.fill")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(MonMonTheme.textSecondary)
-
-                Label(
-                    profitLossDescription,
-                    systemImage: isGain ? "arrow.up.right" : "arrow.down.right"
-                )
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(isGain ? MonMonTheme.gain : MonMonTheme.danger)
-
-                Label(holdingCountLabel, systemImage: "rectangle.stack.fill")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(MonMonTheme.textSecondary)
-            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(24)
         .background {
             RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .fill(MonMonTheme.hero)
+                .fill(MonMonTheme.surface)
         }
         .overlay {
             RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .stroke(MonMonTheme.heroBorder, lineWidth: 1)
+                .stroke(MonMonTheme.border, lineWidth: 1)
         }
         .accessibilityElement(children: .combine)
-    }
-
-    private var marketValue: Decimal {
-        FundSummary.totalMarketValue(of: holdings)
     }
 
     private var costBasis: Decimal {
@@ -156,7 +107,8 @@ struct FundListView: View {
                 .frame(maxWidth: 360)
             }
 
-            addHoldingButton
+            Button("Add Holding", systemImage: "plus", action: onAdd)
+                .accessibilityIdentifier(InvestmentSegment.funds.addIdentifier)
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
         }
@@ -181,13 +133,6 @@ struct FundListView: View {
         return accounts.first { $0.id == sourceAccountID }?.name
     }
 
-    private var addHoldingButton: some View {
-        Button("Add Holding", systemImage: "plus") {
-            editorMode = .add
-        }
-        .accessibilityIdentifier("add-fund")
-    }
-
     private var holdingsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -206,7 +151,7 @@ struct FundListView: View {
 
             ForEach(holdings) { holding in
                 Button {
-                    editorMode = .edit(holding)
+                    onEdit(holding)
                 } label: {
                     FundHoldingCard(
                         holding: holding,
@@ -220,21 +165,3 @@ struct FundListView: View {
         }
     }
 }
-
-#if DEBUG
-    #Preview("Funds · holdings") {
-        FundListView()
-            .modelContainer(PreviewData.populated)
-            .tint(MonMonTheme.accent)
-            .foregroundStyle(MonMonTheme.textPrimary)
-            .preferredColorScheme(MonMonTheme.colorScheme)
-    }
-
-    #Preview("Funds · empty state") {
-        FundListView()
-            .modelContainer(PreviewData.empty)
-            .tint(MonMonTheme.accent)
-            .foregroundStyle(MonMonTheme.textPrimary)
-            .preferredColorScheme(MonMonTheme.colorScheme)
-    }
-#endif

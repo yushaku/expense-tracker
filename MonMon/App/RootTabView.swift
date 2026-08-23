@@ -1,13 +1,12 @@
 import SwiftUI
 
 /// Declaration order is the order of the bar: the two screens touched daily
-/// sit together on the left, the two that hold longer-term money follow, and
+/// sit together on the left, the one that holds longer-term money follows, and
 /// settings stays last.
 enum RootTab: String, CaseIterable, Identifiable {
     case home
     case spending
-    case savings
-    case funds
+    case investments
     case settings
 
     var id: String { rawValue }
@@ -16,10 +15,8 @@ enum RootTab: String, CaseIterable, Identifiable {
         switch self {
         case .home:
             "Home"
-        case .savings:
-            "Savings"
-        case .funds:
-            "Funds"
+        case .investments:
+            "Investments"
         case .spending:
             "Spending"
         case .settings:
@@ -31,10 +28,8 @@ enum RootTab: String, CaseIterable, Identifiable {
         switch self {
         case .home:
             "house.fill"
-        case .savings:
-            "building.columns.fill"
-        case .funds:
-            "chart.line.uptrend.xyaxis"
+        case .investments:
+            "chart.pie.fill"
         case .spending:
             "arrow.left.arrow.right"
         case .settings:
@@ -58,7 +53,7 @@ struct RootTabView: View {
         #if os(macOS)
             // macOS renders a `TabView` as a segmented control pinned to the top
             // of the window, which reads as a header. The bar below puts the
-            // same four destinations where the iPhone keeps them.
+            // same destinations where the iPhone keeps them.
             bottomBarLayout
         #else
             nativeTabs
@@ -77,20 +72,18 @@ struct RootTabView: View {
             }
         }
 
-        /// Only the selected destination is built. Keeping all four alive and
+        /// Only the selected destination is built. Keeping them all alive and
         /// merely hiding them looked cheaper, but every hidden `NavigationStack`
         /// still handed its toolbar to the one window toolbar, so the header
-        /// collected all four add buttons at once. A screen's own state resets
-        /// on a tab switch, which is the price of each tab owning its header.
+        /// collected every add button at once. A screen's own state resets on a
+        /// tab switch, which is the price of each tab owning its header.
         @ViewBuilder
         private var destinations: some View {
             switch selection {
             case .home:
                 AccountListView()
-            case .savings:
-                SavingsListView()
-            case .funds:
-                FundListView()
+            case .investments:
+                InvestmentsView()
             case .spending:
                 TransactionListView()
             case .settings:
@@ -171,19 +164,15 @@ struct RootTabView: View {
                     .accessibilityIdentifier(RootTab.spending.accessibilityIdentifier)
                     .tag(RootTab.spending)
 
-                SavingsListView()
+                InvestmentsView()
                     .tabItem {
-                        Label(RootTab.savings.title, systemImage: RootTab.savings.symbolName)
+                        Label(
+                            RootTab.investments.title,
+                            systemImage: RootTab.investments.symbolName
+                        )
                     }
-                    .accessibilityIdentifier(RootTab.savings.accessibilityIdentifier)
-                    .tag(RootTab.savings)
-
-                FundListView()
-                    .tabItem {
-                        Label(RootTab.funds.title, systemImage: RootTab.funds.symbolName)
-                    }
-                    .accessibilityIdentifier(RootTab.funds.accessibilityIdentifier)
-                    .tag(RootTab.funds)
+                    .accessibilityIdentifier(RootTab.investments.accessibilityIdentifier)
+                    .tag(RootTab.investments)
 
                 SettingsView()
                     .tabItem {
