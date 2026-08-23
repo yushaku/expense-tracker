@@ -132,7 +132,7 @@ the required behavior.
 
 - Xcode 26.6 (17F113), Swift 6.3.3, and Swift language mode 6.
 - One multiplatform Xcode target producing native iOS and macOS apps.
-- SwiftUI and SwiftData only; no third-party dependencies.
+- SwiftUI and SwiftData for everything the app does itself.
 - Swift Testing for unit and persistence tests.
 - Minimum deployment versions: iOS 18 and macOS 15.
 - Bundle identifier remains `com.sonlv.monmon`; changing it requires approval.
@@ -229,7 +229,6 @@ rtk swift format lint --strict --recursive MonMon MonMonTests
 ### Ask first
 
 - Change minimum OS versions or bundle identifier.
-- Add a third-party dependency.
 - Add editing, deletion, multiple currencies, or account-number fields.
 - Enable iCloud or create a CloudKit schema.
 

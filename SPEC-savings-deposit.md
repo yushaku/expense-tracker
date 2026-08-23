@@ -222,7 +222,7 @@ rtk swift format lint --strict --recursive MonMon MonMonTests
 - Add interest schedules, rollover, early withdrawal, or maturity notifications.
 - Add editing or deletion of cash accounts.
 - Change persisted schema, user flow, copy language, or accessibility identifiers.
-- Enable iCloud or add a third-party dependency.
+- Enable iCloud.
 
 ### Never do
 

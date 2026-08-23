@@ -28,7 +28,7 @@ code.
 - SwiftUI app lifecycle and shared views.
 - Minimum deployment versions: iOS 18 and macOS 15.
 - Bundle identifier: `com.sonlv.monmon` until the owner requests a change.
-- No third-party dependencies or project generators.
+- No project generators.
 
 The configuration follows Apple's current guidance for a single multiplatform
 target, checked-in build configuration files, a scheme/run destination, and

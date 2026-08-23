@@ -252,7 +252,7 @@ rtk swift format lint --strict --recursive MonMon MonMonTests
 - Fetch prices over the network or add a market-data provider.
 - Add selling a holding back into a cash account.
 - Change persisted schema, user flow, copy language, or accessibility identifiers.
-- Enable iCloud or add a third-party dependency.
+- Enable iCloud.
 
 ### Never do
 

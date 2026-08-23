@@ -23,7 +23,6 @@ contracts. The same SwiftUI implementation must remain usable on iPhone and Mac.
 ## Tech Stack and Commands
 
 - Swift 6, SwiftUI, SwiftData; iOS 18 and macOS 15.
-- No third-party dependencies.
 
 ```sh
 rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon \

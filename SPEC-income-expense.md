@@ -343,7 +343,7 @@ rtk swift format lint --strict --recursive MonMon MonMonTests
 - Split one transaction across several categories.
 - Add charts or any period other than a calendar month.
 - Change persisted schema, user flow, copy language, or accessibility identifiers.
-- Enable iCloud or add a third-party dependency.
+- Enable iCloud.
 
 ### Never do
 
