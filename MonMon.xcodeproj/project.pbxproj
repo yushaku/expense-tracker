@@ -91,6 +91,7 @@
 		A00000000000000000000284 /* CategoryBreakdownCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000195 /* CategoryBreakdownCard.swift */; };
 		A00000000000000000000285 /* CategoryTransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000196 /* CategoryTransactionsView.swift */; };
 		A00000000000000000000286 /* CategoryBreakdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000197 /* CategoryBreakdownTests.swift */; };
+		33A69BFF303AE3A900432AF4 /* MijickCalendarView in Frameworks */ = {isa = PBXBuildFile; productRef = 33A69BFE303AE3A900432AF4 /* MijickCalendarView */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -115,6 +116,8 @@
 		A00000000000000000000117 /* CashAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashAccount.swift; sourceTree = "<group>"; };
 		A00000000000000000000118 /* AccountDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDraftTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000119 /* AccountDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDraft.swift; sourceTree = "<group>"; };
+		A00000000000000000000120 /* MonMon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MonMon.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A00000000000000000000121 /* MonMonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonMonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00000000000000000000122 /* VNDCurrency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VNDCurrency.swift; sourceTree = "<group>"; };
 		A00000000000000000000123 /* CashBalanceSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashBalanceSummaryTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000124 /* CashBalanceSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashBalanceSummary.swift; sourceTree = "<group>"; };
@@ -123,8 +126,6 @@
 		A00000000000000000000127 /* MonMonTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonMonTheme.swift; sourceTree = "<group>"; };
 		A00000000000000000000128 /* CashAccountCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashAccountCard.swift; sourceTree = "<group>"; };
 		A00000000000000000000129 /* AccountEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEditorForm.swift; sourceTree = "<group>"; };
-		A00000000000000000000120 /* MonMon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MonMon.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		A00000000000000000000121 /* MonMonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonMonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00000000000000000000130 /* SavingsDeposit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsDeposit.swift; sourceTree = "<group>"; };
 		A00000000000000000000131 /* SavingsInterest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsInterest.swift; sourceTree = "<group>"; };
 		A00000000000000000000132 /* PercentInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PercentInput.swift; sourceTree = "<group>"; };
@@ -200,6 +201,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				33A69BFF303AE3A900432AF4 /* MijickCalendarView in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -231,43 +233,6 @@
 				A00000000000000000000103 /* Release.xcconfig */,
 			);
 			path = Config;
-			sourceTree = "<group>";
-		};
-		A00000000000000000000024 /* Transactions */ = {
-			isa = PBXGroup;
-			children = (
-				A00000000000000000000160 /* TransactionKind.swift */,
-				A00000000000000000000161 /* TransactionCategory.swift */,
-				A00000000000000000000162 /* MoneyTransaction.swift */,
-				A00000000000000000000163 /* CategoryPalette.swift */,
-				A00000000000000000000164 /* TransactionPeriod.swift */,
-				A00000000000000000000165 /* TransactionSummary.swift */,
-				A00000000000000000000168 /* CategoryDraft.swift */,
-				A00000000000000000000169 /* CategorySeed.swift */,
-				A00000000000000000000170 /* CategoryEditorForm.swift */,
-				A00000000000000000000171 /* CategoryReassignView.swift */,
-				A00000000000000000000172 /* CategoryEditorView.swift */,
-				A00000000000000000000173 /* CategoryListView.swift */,
-				A00000000000000000000176 /* TransactionDraft.swift */,
-				A00000000000000000000177 /* TransactionEditorForm.swift */,
-				A00000000000000000000178 /* TransactionEditorView.swift */,
-				A00000000000000000000179 /* TransactionCard.swift */,
-				A00000000000000000000180 /* TransactionListView.swift */,
-				A00000000000000000000194 /* CategoryBreakdown.swift */,
-				A00000000000000000000195 /* CategoryBreakdownCard.swift */,
-				A00000000000000000000196 /* CategoryTransactionsView.swift */,
-			);
-			path = Transactions;
-			sourceTree = "<group>";
-		};
-		A00000000000000000000026 /* Settings */ = {
-			isa = PBXGroup;
-			children = (
-				A00000000000000000000188 /* AppLock.swift */,
-				A00000000000000000000189 /* LockScreenView.swift */,
-				A00000000000000000000190 /* SettingsView.swift */,
-			);
-			path = Settings;
 			sourceTree = "<group>";
 		};
 		A00000000000000000000012 /* MonMon */ = {
@@ -303,28 +268,6 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		A00000000000000000000025 /* Transactions */ = {
-			isa = PBXGroup;
-			children = (
-				A00000000000000000000166 /* TransactionPeriodTests.swift */,
-				A00000000000000000000167 /* TransactionSummaryTests.swift */,
-				A00000000000000000000174 /* CategoryDraftTests.swift */,
-				A00000000000000000000175 /* TransactionCategoryPersistenceTests.swift */,
-				A00000000000000000000181 /* TransactionDraftTests.swift */,
-				A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */,
-				A00000000000000000000197 /* CategoryBreakdownTests.swift */,
-			);
-			path = Transactions;
-			sourceTree = "<group>";
-		};
-		A00000000000000000000027 /* Settings */ = {
-			isa = PBXGroup;
-			children = (
-				A00000000000000000000191 /* AppLockTests.swift */,
-			);
-			path = Settings;
-			sourceTree = "<group>";
-		};
 		A00000000000000000000015 /* MonMonTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -335,6 +278,15 @@
 				A00000000000000000000027 /* Settings */,
 			);
 			path = MonMonTests;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000016 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000120 /* MonMon.app */,
+				A00000000000000000000121 /* MonMonTests.xctest */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		A00000000000000000000017 /* Accounts */ = {
@@ -378,13 +330,32 @@
 			path = Design;
 			sourceTree = "<group>";
 		};
-		A00000000000000000000016 /* Products */ = {
+		A00000000000000000000020 /* Savings */ = {
 			isa = PBXGroup;
 			children = (
-				A00000000000000000000120 /* MonMon.app */,
-				A00000000000000000000121 /* MonMonTests.xctest */,
+				A00000000000000000000130 /* SavingsDeposit.swift */,
+				A00000000000000000000131 /* SavingsInterest.swift */,
+				A00000000000000000000132 /* PercentInput.swift */,
+				A00000000000000000000133 /* SavingsDraft.swift */,
+				A00000000000000000000134 /* AssetSummary.swift */,
+				A00000000000000000000135 /* SavingsListView.swift */,
+				A00000000000000000000136 /* SavingsDepositCard.swift */,
+				A00000000000000000000137 /* SavingsEditorView.swift */,
+				A00000000000000000000138 /* SavingsEditorForm.swift */,
 			);
-			name = Products;
+			path = Savings;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000021 /* Savings */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000140 /* SavingsInterestTests.swift */,
+				A00000000000000000000141 /* PercentInputTests.swift */,
+				A00000000000000000000142 /* SavingsDraftTests.swift */,
+				A00000000000000000000143 /* AssetSummaryTests.swift */,
+				A00000000000000000000144 /* SavingsDepositPersistenceTests.swift */,
+			);
+			path = Savings;
 			sourceTree = "<group>";
 		};
 		A00000000000000000000022 /* Funds */ = {
@@ -416,32 +387,63 @@
 			path = Funds;
 			sourceTree = "<group>";
 		};
-		A00000000000000000000020 /* Savings */ = {
+		A00000000000000000000024 /* Transactions */ = {
 			isa = PBXGroup;
 			children = (
-				A00000000000000000000130 /* SavingsDeposit.swift */,
-				A00000000000000000000131 /* SavingsInterest.swift */,
-				A00000000000000000000132 /* PercentInput.swift */,
-				A00000000000000000000133 /* SavingsDraft.swift */,
-				A00000000000000000000134 /* AssetSummary.swift */,
-				A00000000000000000000135 /* SavingsListView.swift */,
-				A00000000000000000000136 /* SavingsDepositCard.swift */,
-				A00000000000000000000137 /* SavingsEditorView.swift */,
-				A00000000000000000000138 /* SavingsEditorForm.swift */,
+				A00000000000000000000160 /* TransactionKind.swift */,
+				A00000000000000000000161 /* TransactionCategory.swift */,
+				A00000000000000000000162 /* MoneyTransaction.swift */,
+				A00000000000000000000163 /* CategoryPalette.swift */,
+				A00000000000000000000164 /* TransactionPeriod.swift */,
+				A00000000000000000000165 /* TransactionSummary.swift */,
+				A00000000000000000000168 /* CategoryDraft.swift */,
+				A00000000000000000000169 /* CategorySeed.swift */,
+				A00000000000000000000170 /* CategoryEditorForm.swift */,
+				A00000000000000000000171 /* CategoryReassignView.swift */,
+				A00000000000000000000172 /* CategoryEditorView.swift */,
+				A00000000000000000000173 /* CategoryListView.swift */,
+				A00000000000000000000176 /* TransactionDraft.swift */,
+				A00000000000000000000177 /* TransactionEditorForm.swift */,
+				A00000000000000000000178 /* TransactionEditorView.swift */,
+				A00000000000000000000179 /* TransactionCard.swift */,
+				A00000000000000000000180 /* TransactionListView.swift */,
+				A00000000000000000000194 /* CategoryBreakdown.swift */,
+				A00000000000000000000195 /* CategoryBreakdownCard.swift */,
+				A00000000000000000000196 /* CategoryTransactionsView.swift */,
 			);
-			path = Savings;
+			path = Transactions;
 			sourceTree = "<group>";
 		};
-		A00000000000000000000021 /* Savings */ = {
+		A00000000000000000000025 /* Transactions */ = {
 			isa = PBXGroup;
 			children = (
-				A00000000000000000000140 /* SavingsInterestTests.swift */,
-				A00000000000000000000141 /* PercentInputTests.swift */,
-				A00000000000000000000142 /* SavingsDraftTests.swift */,
-				A00000000000000000000143 /* AssetSummaryTests.swift */,
-				A00000000000000000000144 /* SavingsDepositPersistenceTests.swift */,
+				A00000000000000000000166 /* TransactionPeriodTests.swift */,
+				A00000000000000000000167 /* TransactionSummaryTests.swift */,
+				A00000000000000000000174 /* CategoryDraftTests.swift */,
+				A00000000000000000000175 /* TransactionCategoryPersistenceTests.swift */,
+				A00000000000000000000181 /* TransactionDraftTests.swift */,
+				A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */,
+				A00000000000000000000197 /* CategoryBreakdownTests.swift */,
 			);
-			path = Savings;
+			path = Transactions;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000026 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000188 /* AppLock.swift */,
+				A00000000000000000000189 /* LockScreenView.swift */,
+				A00000000000000000000190 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000027 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000191 /* AppLockTests.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -460,6 +462,9 @@
 			dependencies = (
 			);
 			name = MonMon;
+			packageProductDependencies = (
+				33A69BFE303AE3A900432AF4 /* MijickCalendarView */,
+			);
 			productName = MonMon;
 			productReference = A00000000000000000000120 /* MonMon.app */;
 			productType = "com.apple.product-type.application";
@@ -510,6 +515,9 @@
 				Base,
 			);
 			mainGroup = A00000000000000000000010;
+			packageReferences = (
+				33A69BFD303AE3A900432AF4 /* XCRemoteSwiftPackageReference "CalendarView" */,
+			);
 			productRefGroup = A00000000000000000000016 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -746,6 +754,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		33A69BFD303AE3A900432AF4 /* XCRemoteSwiftPackageReference "CalendarView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Mijick/CalendarView.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		33A69BFE303AE3A900432AF4 /* MijickCalendarView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 33A69BFD303AE3A900432AF4 /* XCRemoteSwiftPackageReference "CalendarView" */;
+			productName = MijickCalendarView;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A00000000000000000000003 /* Project object */;
 }

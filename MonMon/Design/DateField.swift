@@ -1,3 +1,4 @@
+import MijickCalendarView
 import SwiftUI
 
 /// A date control shaped like the text fields beside it: a themed row showing
@@ -6,7 +7,8 @@ import SwiftUI
 /// A bare `DatePicker` renders as a stepper field on Mac and a grey inline row
 /// on iPhone, neither of which matches the surrounding cards. The popover keeps
 /// the full calendar available without spending the ~300pt an inline calendar
-/// would take in every form.
+/// would take in every form, and draws it with MijickCalendarView, which is
+/// plain SwiftUI on both platforms.
 struct DateField: View {
     @Binding var selection: Date
 
@@ -60,20 +62,32 @@ struct DateField: View {
     }
 
     private var calendar: some View {
-        DatePicker(
-            "",
-            selection: $selection,
-            displayedComponents: .date
+        MCalendarView(selectedDate: pickedDate, selectedRange: nil)
+            .padding(16)
+            .frame(minWidth: 320, minHeight: 380)
+            .background(MonMonTheme.surface)
+            .tint(MonMonTheme.accent)
+            .accessibilityIdentifier("\(accessibilityIdentifier)-calendar")
+            // Without this an iPhone would present a sheet instead of a
+            // popover, which reads as a heavier decision than picking a day.
+            .presentationCompactAdaptation(.popover)
+    }
+
+    /// The calendar hands back an optional date and expects to keep offering
+    /// one; this field always has a date, so a cleared selection keeps the
+    /// current one rather than leaving the form without a date at all.
+    private var pickedDate: Binding<Date?> {
+        Binding(
+            get: { selection },
+            set: { newValue in
+                guard let newValue else {
+                    return
+                }
+
+                selection = newValue
+                isPickingDate = false
+            }
         )
-        .datePickerStyle(.graphical)
-        .labelsHidden()
-        .padding(16)
-        .frame(minWidth: 300)
-        .tint(MonMonTheme.accent)
-        .accessibilityIdentifier("\(accessibilityIdentifier)-calendar")
-        // Without this an iPhone would present a sheet instead of a popover,
-        // which reads as a heavier decision than picking a day.
-        .presentationCompactAdaptation(.popover)
     }
 }
 

@@ -110,6 +110,10 @@ and are excluded by `.gitignore`.
 ## Architecture
 
 - One multiplatform app target shares SwiftUI source between iOS and macOS.
+- One dependency: [MijickCalendarView](https://github.com/Mijick/CalendarView)
+  (MIT), which draws the calendar inside `DateField`. It is plain SwiftUI on
+  both platforms and touches nothing but the view it is asked to draw. The
+  resolved version is pinned in `Package.resolved`.
 - SwiftData stores `CashAccount`, `SavingsDeposit`, `FundHolding`,
   `TransactionCategory`, and `MoneyTransaction` records locally; `@Query` drives
   every visible list and combined total.
