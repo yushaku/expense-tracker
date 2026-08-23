@@ -117,6 +117,7 @@
 		A00000000000000000000844 /* DebtSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000824 /* DebtSummary.swift */; };
 		A00000000000000000000850 /* DebtInterestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000830 /* DebtInterestTests.swift */; };
 		A00000000000000000000851 /* DebtSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000831 /* DebtSummaryTests.swift */; };
+		A00000000000000000000852 /* DebtNetWorthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000832 /* DebtNetWorthTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -244,6 +245,7 @@
 		A00000000000000000000824 /* DebtSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtSummary.swift; sourceTree = "<group>"; };
 		A00000000000000000000830 /* DebtInterestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtInterestTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000831 /* DebtSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtSummaryTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000832 /* DebtNetWorthTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtNetWorthTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -565,6 +567,7 @@
 			children = (
 				A00000000000000000000830 /* DebtInterestTests.swift */,
 				A00000000000000000000831 /* DebtSummaryTests.swift */,
+				A00000000000000000000832 /* DebtNetWorthTests.swift */,
 			);
 			path = Debts;
 			sourceTree = "<group>";
@@ -789,6 +792,7 @@
 				A00000000000000000000248 /* FundHoldingPersistenceTests.swift in Sources */,
 				A00000000000000000000850 /* DebtInterestTests.swift in Sources */,
 				A00000000000000000000851 /* DebtSummaryTests.swift in Sources */,
+				A00000000000000000000852 /* DebtNetWorthTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
