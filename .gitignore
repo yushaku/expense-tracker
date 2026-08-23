@@ -24,3 +24,8 @@ Config/Local.xcconfig
 
 # Coverage output from running the app or tests from the command line
 *.profraw
+
+# Agent worktrees. Each is a checkout of this repo, which git would otherwise
+# track as a gitlink pointing at whatever the worktree's branch happened to be.
+# The work belongs in a branch; the checkout is scratch.
+.claude/worktrees/
