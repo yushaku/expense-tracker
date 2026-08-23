@@ -146,7 +146,7 @@ struct TransactionEditorForm: View {
                     fieldLabel("Account")
 
                     if accounts.isEmpty {
-                        Text("No account yet. Add one on the Cash tab first.")
+                        Text("No account yet. Add one on the Home tab first.")
                             .font(.caption)
                             .foregroundStyle(MonMonTheme.textSecondary)
                     } else {

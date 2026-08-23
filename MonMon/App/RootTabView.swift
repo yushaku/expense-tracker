@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum RootTab: String, CaseIterable, Identifiable {
-    case cash
+    case home
     case savings
     case funds
     case spending
@@ -10,8 +10,8 @@ enum RootTab: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .cash:
-            "Cash"
+        case .home:
+            "Home"
         case .savings:
             "Savings"
         case .funds:
@@ -23,8 +23,8 @@ enum RootTab: String, CaseIterable, Identifiable {
 
     var symbolName: String {
         switch self {
-        case .cash:
-            "wallet.bifold.fill"
+        case .home:
+            "house.fill"
         case .savings:
             "building.columns.fill"
         case .funds:
@@ -40,7 +40,7 @@ enum RootTab: String, CaseIterable, Identifiable {
 }
 
 struct RootTabView: View {
-    @State private var selection: RootTab = .cash
+    @State private var selection: RootTab = .home
 
     var body: some View {
         #if os(macOS)
@@ -69,7 +69,7 @@ struct RootTabView: View {
         private var destinations: some View {
             ZStack {
                 AccountListView()
-                    .modifier(TabVisibility(isVisible: selection == .cash))
+                    .modifier(TabVisibility(isVisible: selection == .home))
 
                 SavingsListView()
                     .modifier(TabVisibility(isVisible: selection == .savings))
@@ -131,10 +131,10 @@ struct RootTabView: View {
             TabView(selection: $selection) {
                 AccountListView()
                     .tabItem {
-                        Label(RootTab.cash.title, systemImage: RootTab.cash.symbolName)
+                        Label(RootTab.home.title, systemImage: RootTab.home.symbolName)
                     }
-                    .accessibilityIdentifier(RootTab.cash.accessibilityIdentifier)
-                    .tag(RootTab.cash)
+                    .accessibilityIdentifier(RootTab.home.accessibilityIdentifier)
+                    .tag(RootTab.home)
 
                 SavingsListView()
                     .tabItem {

@@ -38,7 +38,7 @@ struct AccountListView: View {
                     .frame(maxWidth: .infinity)
                 }
             }
-            .navigationTitle("Cash balances")
+            .navigationTitle("Home")
             .accessibilityIdentifier("account-list")
             .toolbar {
                 if !accounts.isEmpty {

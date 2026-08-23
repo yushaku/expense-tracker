@@ -35,7 +35,7 @@ reporting beyond a monthly total stay in later modules.
 7. Open **Categories** from the toolbar to add, edit, or delete a category.
    Deleting a category that is in use first asks which category its transactions
    move to.
-8. On the **Cash** tab, see each account's available balance already reflect the
+8. On the **Home** tab, see each account's available balance already reflect the
    recorded flow, and total assets move with it.
 9. Relaunch on the same device and see the same transactions and categories.
 
@@ -105,7 +105,7 @@ Rules:
 - `accountID` is **not** optional, unlike `sourceAccountID` on `SavingsDeposit`
   and `FundHolding`. A transaction with no account cannot move a balance, which
   is this module's only purpose. The form therefore requires an account, and the
-  empty state points the owner at the Cash tab when none exists.
+  empty state points the owner at the Home tab when none exists.
 - `categoryID` is optional so a transaction survives a category deletion that
   went wrong halfway; the UI never writes `nil` on the happy path and renders a
   missing category as "Uncategorized".
@@ -204,7 +204,7 @@ nothing. A category with no transactions deletes behind a plain confirmation.
 
 ## UI Contract
 
-- `RootTabView` hosts four tabs: **Cash**, **Savings**, **Funds**, and
+- `RootTabView` hosts four tabs: **Home**, **Savings**, **Funds**, and
   **Spending** (`TransactionListView`).
 - The Spending tab shows a month header with previous and next buttons, then a
   hero card with net first, then income and expense and the transaction count,
@@ -222,7 +222,7 @@ nothing. A category with no transactions deletes behind a plain confirmation.
   deletion is a button rather than a swipe — identical on iPhone and Mac.
 - Validation errors appear inline beside the affected field, with icon plus text,
   never colour alone.
-- The Cash tab's account rows and hero card are unchanged in layout; their
+- The Home tab's account rows and hero card are unchanged in layout; their
   numbers now include recorded flow.
 - New accessibility identifiers: `spending-tab`, `spending-list`,
   `previous-month`, `next-month`, `add-transaction`, `transaction-kind`,
@@ -232,8 +232,11 @@ nothing. A category with no transactions deletes behind a plain confirmation.
   `manage-categories`, `category-list`, `add-category`, `category-name`,
   `category-kind`, `category-symbol`, `category-color`, `save-category`,
   `cancel-category`, `delete-category`, `confirm-delete-category`,
-  `reassign-category`, `confirm-reassign-category`. Every identifier from the
-  three earlier specs is unchanged.
+  `reassign-category`, `confirm-reassign-category`.
+- The accounts tab is renamed from Cash to **Home**, taking a house symbol and
+  the title "Home", and its identifier changes from `cash-tab` to `home-tab`.
+  This is the only identifier from the three earlier specs that changes; the
+  rest are unchanged. `SPEC-savings-deposit.md` still lists the old name.
 - Screen copy stays English, matching the existing screens.
 
 ## Persistence Contract
