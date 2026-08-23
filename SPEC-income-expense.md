@@ -224,6 +224,14 @@ nothing. A category with no transactions deletes behind a plain confirmation.
   never colour alone.
 - The Home tab's account rows and hero card are unchanged in layout; their
   numbers now include recorded flow.
+- Below the hero card, the Home tab shows an assets doughnut split into cash,
+  savings, and funds — the three groups `AssetSummary.netWorth` adds up — with a
+  legend naming each group, its amount, and its share. A doughnut cannot draw a
+  negative wedge and drawing one by magnitude would make debt look like an
+  asset, so overdrawn accounts stay out of the ring and are reported beneath it
+  as an amount owed. `ring total − owed == net worth`. The card is hidden when
+  there is nothing to show. Every wedge carries a symbol as well as a colour,
+  and the legend states each figure in text.
 - New accessibility identifiers: `spending-tab`, `spending-list`,
   `previous-month`, `next-month`, `add-transaction`, `transaction-kind`,
   `transaction-amount`, `transaction-category`, `transaction-account`,

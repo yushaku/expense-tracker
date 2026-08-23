@@ -76,6 +76,9 @@
 		A00000000000000000000269 /* TransactionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000180 /* TransactionListView.swift */; };
 		A00000000000000000000270 /* TransactionDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000181 /* TransactionDraftTests.swift */; };
 		A00000000000000000000271 /* MoneyTransactionPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */; };
+		A00000000000000000000272 /* AssetAllocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000183 /* AssetAllocation.swift */; };
+		A00000000000000000000273 /* AssetAllocationCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000184 /* AssetAllocationCard.swift */; };
+		A00000000000000000000274 /* AssetAllocationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000185 /* AssetAllocationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -163,6 +166,9 @@
 		A00000000000000000000180 /* TransactionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionListView.swift; sourceTree = "<group>"; };
 		A00000000000000000000181 /* TransactionDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDraftTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoneyTransactionPersistenceTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000183 /* AssetAllocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocation.swift; sourceTree = "<group>"; };
+		A00000000000000000000184 /* AssetAllocationCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocationCard.swift; sourceTree = "<group>"; };
+		A00000000000000000000185 /* AssetAllocationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -289,6 +295,7 @@
 				A00000000000000000000118 /* AccountDraftTests.swift */,
 				A00000000000000000000123 /* CashBalanceSummaryTests.swift */,
 				A00000000000000000000115 /* CashAccountPersistenceTests.swift */,
+				A00000000000000000000185 /* AssetAllocationTests.swift */,
 			);
 			path = Accounts;
 			sourceTree = "<group>";
@@ -305,6 +312,8 @@
 				A00000000000000000000117 /* CashAccount.swift */,
 				A00000000000000000000116 /* CashAccountKind.swift */,
 				A00000000000000000000122 /* VNDCurrency.swift */,
+				A00000000000000000000183 /* AssetAllocation.swift */,
+				A00000000000000000000184 /* AssetAllocationCard.swift */,
 			);
 			path = Accounts;
 			sourceTree = "<group>";
@@ -482,6 +491,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A00000000000000000000273 /* AssetAllocationCard.swift in Sources */,
+				A00000000000000000000272 /* AssetAllocation.swift in Sources */,
 				A00000000000000000000269 /* TransactionListView.swift in Sources */,
 				A00000000000000000000268 /* TransactionCard.swift in Sources */,
 				A00000000000000000000267 /* TransactionEditorView.swift in Sources */,
@@ -538,6 +549,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A00000000000000000000274 /* AssetAllocationTests.swift in Sources */,
 				A00000000000000000000271 /* MoneyTransactionPersistenceTests.swift in Sources */,
 				A00000000000000000000270 /* TransactionDraftTests.swift in Sources */,
 				A00000000000000000000264 /* TransactionCategoryPersistenceTests.swift in Sources */,

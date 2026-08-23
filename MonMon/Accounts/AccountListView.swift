@@ -26,6 +26,10 @@ struct AccountListView: View {
                     LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                         totalCard
 
+                        if !allocationSlices.isEmpty {
+                            AssetAllocationCard(slices: allocationSlices, debt: debt)
+                        }
+
                         if accounts.isEmpty {
                             emptyState
                         } else {
@@ -124,6 +128,24 @@ struct AccountListView: View {
 
     private var netWorth: Decimal {
         AssetSummary.netWorth(
+            accounts: accounts,
+            deposits: deposits,
+            holdings: holdings,
+            transactions: transactions
+        )
+    }
+
+    private var allocationSlices: [AssetAllocationSlice] {
+        AssetAllocation.slices(
+            accounts: accounts,
+            deposits: deposits,
+            holdings: holdings,
+            transactions: transactions
+        )
+    }
+
+    private var debt: Decimal {
+        AssetAllocation.debt(
             accounts: accounts,
             deposits: deposits,
             holdings: holdings,
