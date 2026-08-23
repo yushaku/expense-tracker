@@ -125,8 +125,10 @@ struct AccountEditorView: View {
     /// at it. A zero available balance rules out a savings deposit or a fund
     /// holding, but not a transaction or a transfer: an account with 100 in and
     /// 100 out sits at zero while still owning two records, so both counts are
-    /// checked too. A transfer names two accounts, and deleting either end
-    /// would leave the other pointing at nothing.
+    /// checked too. The same is true of a debt: borrowing a sum and repaying it
+    /// nets to zero while two records still name the account. A transfer names
+    /// two accounts, and deleting either end would leave the other pointing at
+    /// nothing.
     private var canDelete: Bool {
         guard let editedAccount = mode.editedAccount else {
             return false
@@ -143,7 +145,7 @@ struct AccountEditorView: View {
                 payments: payments
             ) == 0
 
-        return isEmpty && transactionCount == 0 && transferCount == 0
+        return isEmpty && transactionCount == 0 && transferCount == 0 && debtCount == 0
     }
 
     private var transactionCount: Int {
@@ -160,6 +162,16 @@ struct AccountEditorView: View {
         }
 
         return TransferSummary.count(for: editedAccount, transfers: transfers)
+    }
+
+    /// Debts and their payments together. A debt that names no account counts
+    /// for none, which is right: it points at nothing to orphan.
+    private var debtCount: Int {
+        guard let editedAccount = mode.editedAccount else {
+            return 0
+        }
+
+        return DebtSummary.count(for: editedAccount, debts: debts, payments: payments)
     }
 
     private var deleteBlockedReason: String? {
@@ -185,6 +197,11 @@ struct AccountEditorView: View {
         if transferCount > 0 {
             let noun = transferCount == 1 ? "transfer" : "transfers"
             return "This account still has \(transferCount) \(noun). Delete them first."
+        }
+
+        if debtCount > 0 {
+            let noun = debtCount == 1 ? "debt record" : "debt records"
+            return "This account still has \(debtCount) \(noun). Delete them first."
         }
 
         return "Set the balance to 0 before deleting this account."
