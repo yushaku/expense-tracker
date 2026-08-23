@@ -2,6 +2,12 @@
 
 **Status:** Approved through owner direction (2026-08-23)
 **Depends on:** `cash-balance`, `savings-deposit`
+**Superseded in part by:** `SPEC-market-valuation.md`, which splits
+`FundHolding` into a `FundInstrument` catalogue that owns the ticker, the kind
+and the price, and a position that points at it. The Domain and Data Contract
+below is therefore no longer current; everything else in this spec still
+stands, including that cost basis leaves the cash side and market value enters
+the asset side exactly once.
 
 ## Objective
 

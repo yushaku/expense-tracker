@@ -157,9 +157,9 @@ and are excluded by `.gitignore`.
 - The approved boundaries and verification contracts live under `docs/`:
   `SPEC-cash-balance.md`, `SPEC-savings-deposit.md`,
   `SPEC-fund-etf-holdings.md`, `SPEC-income-expense.md`,
-  `SPEC-account-transfer.md`, and `SPEC-debt-tracking.md`. `SPEC-market-valuation.md` is drafted but not
-  approved.
-  `SPEC-market-valuation.md` amends the fund data contract: it splits
+  `SPEC-account-transfer.md`, `SPEC-debt-tracking.md`, and
+  `SPEC-market-valuation.md`.
+- `SPEC-market-valuation.md` amends the fund data contract: it splits
   `FundHolding` into a `FundInstrument` catalogue that owns the price and a
   position that points at it, so one ticker cannot carry two prices and a
   holding is created by picking rather than retyping.

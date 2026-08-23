@@ -1,6 +1,6 @@
 # Spec: market-valuation
 
-**Status:** Draft, pending owner approval (2026-08-23)
+**Status:** Approved through owner direction (2026-08-23)
 **Depends on:** `fund-etf-holdings` for slice 1; `investment-tracking` for slice 2
 **Amends:** `SPEC-fund-etf-holdings.md` — splits `FundHolding` into an instrument
 and a position. That spec's data contract is superseded by the one below;
@@ -319,12 +319,16 @@ enum FundQuoteError: Error, Equatable {
 
 protocol FundQuoteProvider: Sendable {
     var source: FundQuoteSource { get }
-    func latestQuote(symbol: String) async throws -> FundQuote
+    /// `asOf` is passed rather than read from the clock, so a provider test
+    /// gets the same answer on any day it runs.
+    func latestQuote(symbol: String, asOf: Date) async throws -> FundQuote
     func search(_ query: String) async throws -> [FundInstrumentCandidate]
 }
 
 struct FundQuoteRouter: Sendable {
-    func provider(for kind: FundInstrumentKind) -> FundQuoteProvider
+    func provider(for kind: FundInstrumentKind) -> any FundQuoteProvider
+    func latestQuote(symbol: String, kind: FundInstrumentKind, asOf: Date) async throws
+        -> FundQuote
     // .fund -> FmarketQuoteProvider
     // .etf  -> VNDirectQuoteProvider
 }
@@ -488,8 +492,10 @@ This is the app's first outbound connection, and the contract is narrow:
 
 ## UI Contract
 
-- The **Investments** tab keeps its layout. Its toolbar gains a **Refresh**
-  button (`refresh-quotes`), disabled while a refresh runs and when no held
+- **Refresh** (`refresh-quotes`) sits on the **Instruments** sheet, not on the
+  Investments tab. Refresh walks the catalogue, and putting the control on the
+  screen that shows the catalogue keeps the thing being refreshed in view
+  while it happens. It is disabled while a refresh runs and when no held
   instrument has `autoQuoteEnabled`.
 - Each `FundHoldingCard` shows the instrument's name and ticker as before, and
   gains one line under the market value: the price date and its source, worded
@@ -519,8 +525,12 @@ This is the app's first outbound connection, and the contract is narrow:
   row shows ticker, name, kind, price, price date, source, and whether anything
   is held. A row opens the instrument editor.
 - The instrument editor carries an editable price field (`instrument-price`), a
-  price-date field, an **Automatic quotes** toggle (`auto-quote`), a **Fetch now**
-  button (`fetch-quote`), and a Delete button behind a confirmation.
+  price-date field, an **Automatic quotes** toggle (`auto-quote`), and a Delete
+  button behind a confirmation.
+- **Not built yet:** a per-instrument **Fetch now** button (`fetch-quote`) in the
+  instrument editor. Refresh already covers every held ticker, so this is only
+  worth having when adding an instrument and wanting its price without leaving
+  the form. Approved in principle, deliberately unbuilt.
 - Deleting an instrument is **blocked while any holding references it**, and the
   reason names the count, matching how `cash-balance` and `account-transfer`
   guard an account: "This instrument is held by N positions. Delete them first."
@@ -536,7 +546,7 @@ This is the app's first outbound connection, and the contract is narrow:
 - New accessibility identifiers: `refresh-quotes`, `manage-instruments`,
   `instrument-list`, `instrument-editor`, `holding-instrument`,
   `add-instrument`, `instrument-search`, `instrument-price`,
-  `instrument-price-date`, `auto-quote`, `fetch-quote`, `quote-source`,
+  `instrument-price-date`, `auto-quote`, `quote-source`,
   `quote-status`, `quote-error`, `save-instrument`, `cancel-instrument`,
   `delete-instrument`, `confirm-delete-instrument`.
 - Screen copy stays English, matching the existing screens.
@@ -607,7 +617,8 @@ Automated, fixture-driven:
 - `TradingCalendarTests` — a weekday before and after 15:00; Saturday and
   Sunday; a year boundary; the T+1 grace applied to `.fund` and not to `.etf`;
   a holiday correctly reported as stale.
-- `FundRefreshTests` — a successful fetch writes all four instrument fields; a
+- `FundPriceRefresherTests` — a successful fetch writes all four instrument
+  fields; a
   failure writes none of them; one ticker failing leaves the others updated; ten
   holdings of one ticker cost one request; an unheld instrument is skipped; an
   instrument already on the last completed trading day is skipped without a
@@ -619,7 +630,10 @@ Automated, fixture-driven:
 - Existing cash-balance, savings-deposit, income-expense, and account-transfer
   tests must keep passing untouched.
 
-Fixtures are real responses captured on 2026-08-21 and committed as files —
+Fixtures are real responses captured on 2026-08-21 and committed as string
+constants in `FundQuoteFixtures.swift`, rather than as bundled resources: the
+test target needs no resource phase, and the recorded body sits beside the
+test that reads it —
 VESAF at 31,581.76 ₫ for 2026-08-21, FUEVFVND at 34.2 for the same day — so a
 decoder change that breaks on real data is caught without a request.
 
@@ -746,16 +760,14 @@ rtk swift format lint --strict --recursive MonMon MonMonTests
 
 ## Open Questions
 
-1. This spec amends the approved `SPEC-fund-etf-holdings.md` by reshaping
-   `FundHolding`. That spec needs a superseding note pointing here, added on
-   approval rather than now.
-2. The six pre-split fields on `FundHolding` are dead weight once every store has
-   been backfilled. Dropping them needs its own change, and a way to know the
-   owner's store has run the backfill at least once.
-3. `CAPABILITY-MAP.md` lists `market-valuation` as depending on
+1. The six pre-split fields on `FundHolding` are dead weight once every store has
+   been backfilled. `FundInstrumentBackfill` empties them as it goes and
+   `isComplete(in:)` reports when nothing is left unlinked, so the condition for
+   dropping the columns is answerable. Dropping them is still its own change.
+2. `CAPABILITY-MAP.md` lists `market-valuation` as depending on
    `investment-tracking`. Slice 1 depends only on `fund-etf-holdings`. The map
    should either split the row or record that the dependency applies to slice 2
    alone. Left unedited pending owner direction.
-4. Both providers are undocumented endpoints with no licence to reuse their data.
+3. Both providers are undocumented endpoints with no licence to reuse their data.
    That is acceptable for a private local app and is a decision to revisit before
    any distribution beyond the owner's own devices.
