@@ -135,7 +135,13 @@ and are excluded by `.gitignore`.
   carries the direction. It is neither income nor an expense, so it never
   reaches the Spending totals, and because one account's outflow is another's
   inflow it leaves total assets untouched.
-- The approved boundaries and verification contracts live in
+- The approved boundaries and verification contracts live under `docs/`:
   `SPEC-cash-balance.md`, `SPEC-savings-deposit.md`,
   `SPEC-fund-etf-holdings.md`, `SPEC-income-expense.md`, and
-  `SPEC-account-transfer.md`.
+  `SPEC-account-transfer.md`. `SPEC-market-valuation.md` is drafted but not
+  approved.
+- `docs/architecture.html` draws the same picture the specs describe in prose:
+  every `@Model` with its fields and foreign keys, then the components around
+  the app — Apple frameworks, the one third-party package, and the services
+  still on the roadmap. Open it in any browser; it is one self-contained file
+  with no build step and no external requests.

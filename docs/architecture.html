@@ -1,0 +1,1102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="MonMon database schema and system components.">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    * { margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    img, svg, video { display: block; max-width: 100%; }
+    button, input, select, textarea { font: inherit; color: inherit; }
+  </style>
+  <title>MonMon Schema</title>
+  <style>
+    :root {
+      --bg: #f2f5f3;
+      --surface: #fbfcfb;
+      --surface-2: #e9efec;
+      --surface-3: #dfe7e3;
+      --border: #cdd8d3;
+      --border-strong: #adbcb5;
+      --text: #141a18;
+      --text-2: #454f4b;
+      --muted: #77837d;
+      --edge: #9daba5;
+      --edge-hi: #2f6f6a;
+      --accent: #2f6f6a;
+      --shadow: 0 1px 2px rgba(18, 26, 36, .06), 0 8px 24px -12px rgba(18, 26, 36, .18);
+      --e-account: #5b5bd6;
+      --e-savings: #2f8f7e;
+      --e-fund: #a9761f;
+      --e-txn: #c0526b;
+      --e-category: #4a8438;
+      --e-transfer: #2f7d9e;
+      --ok: #2f7a52;
+      --warn: #9a6a12;
+      --idle: #6d7a86;
+      --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0d1211;
+        --surface: #151b19;
+        --surface-2: #1c2320;
+        --surface-3: #242d29;
+        --border: #2a332f;
+        --border-strong: #3b4640;
+        --text: #e4eae7;
+        --text-2: #a6b1ab;
+        --muted: #78847e;
+        --edge: #47534d;
+        --edge-hi: #6fd3c4;
+        --accent: #6fd3c4;
+        --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px -14px rgba(0, 0, 0, .7);
+        --e-account: #9a9aff;
+        --e-savings: #57c6b0;
+        --e-fund: #d9a441;
+        --e-txn: #ee8399;
+        --e-category: #86c46b;
+        --e-transfer: #62b4d6;
+        --ok: #5fbd85;
+        --warn: #d5a544;
+        --idle: #8b98a4;
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #0d1211;
+      --surface: #151b19;
+      --surface-2: #1c2320;
+      --surface-3: #242d29;
+      --border: #2a332f;
+      --border-strong: #3b4640;
+      --text: #e4eae7;
+      --text-2: #a6b1ab;
+      --muted: #78847e;
+      --edge: #47534d;
+      --edge-hi: #6fd3c4;
+      --accent: #6fd3c4;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px -14px rgba(0, 0, 0, .7);
+      --e-account: #9a9aff;
+      --e-savings: #57c6b0;
+      --e-fund: #d9a441;
+      --e-txn: #ee8399;
+      --e-category: #86c46b;
+      --e-transfer: #62b4d6;
+      --ok: #5fbd85;
+      --warn: #d5a544;
+      --idle: #8b98a4;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      padding: 40px 24px 64px;
+    }
+
+    .wrap { max-width: 1180px; margin: 0 auto; }
+
+    header { margin-bottom: 28px; }
+
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: clamp(24px, 3.4vw, 34px);
+      line-height: 1.15;
+      letter-spacing: -.02em;
+      font-weight: 640;
+      text-wrap: balance;
+      margin-bottom: 10px;
+    }
+
+    .lede {
+      color: var(--text-2);
+      max-width: 68ch;
+      font-size: 15px;
+    }
+
+    .lede code, .zone-note code, .note code, .legend code {
+      font-family: var(--mono);
+      font-size: .88em;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 5px;
+    }
+
+    h2 {
+      font-size: clamp(18px, 2.2vw, 22px);
+      line-height: 1.25;
+      letter-spacing: -.015em;
+      font-weight: 640;
+      margin-bottom: 6px;
+    }
+
+    .section-head { margin: 52px 0 0; padding-top: 4px; }
+    .section-head .lede { font-size: 14.5px; }
+
+    /* ---- legend ---- */
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 20px;
+      align-items: center;
+      margin: 22px 0 18px;
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 12.5px;
+      color: var(--text-2);
+    }
+
+    .legend .item { display: flex; align-items: center; gap: 7px; }
+    .legend svg { display: block; flex: none; }
+
+    .hint { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+    /* ---- stage ---- */
+
+    .scroller {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 4px 2px 8px;
+      margin: 0 -2px;
+    }
+
+    .scroller::-webkit-scrollbar { height: 10px; }
+    .scroller::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 5px; }
+    .scroller::-webkit-scrollbar-track { background: transparent; }
+
+    .stage {
+      position: relative;
+      display: grid;
+      grid-auto-rows: min-content;
+      padding: 6px 0 2px;
+    }
+
+    .stage.erd {
+      grid-template-columns: minmax(250px, 300px) minmax(250px, 320px) minmax(250px, 300px);
+      gap: 30px 76px;
+      min-width: 940px;
+    }
+
+    .stage.sys {
+      grid-template-columns: minmax(230px, 1fr) minmax(250px, 1.05fr) minmax(230px, 1fr);
+      gap: 30px 84px;
+      min-width: 900px;
+    }
+
+    .edges {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: visible;
+      z-index: 0;
+    }
+
+    /* ---- entity card ---- */
+
+    .entity {
+      position: relative;
+      z-index: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: opacity .18s ease, border-color .18s ease, transform .18s ease;
+      outline: none;
+    }
+
+    .entity:focus-visible {
+      border-color: var(--e);
+      box-shadow: var(--shadow), 0 0 0 3px color-mix(in srgb, var(--e) 34%, transparent);
+    }
+
+    .stage.focused .entity.dim { opacity: .26; }
+    .stage.focused .entity.live { border-color: var(--e); transform: translateY(-1px); }
+
+    .e-head {
+      padding: 13px 15px 11px;
+      border-bottom: 1px solid color-mix(in srgb, var(--e) 30%, var(--border));
+      background: color-mix(in srgb, var(--e) 9%, var(--surface-2));
+    }
+
+    .e-name {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--mono);
+      font-size: 14.5px;
+      font-weight: 600;
+      letter-spacing: -.01em;
+      color: var(--e);
+    }
+
+    .e-name::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      flex: none;
+      background: var(--e);
+    }
+
+    .e-role { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+
+    .e-file {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      color: var(--muted);
+      margin-top: 5px;
+      word-break: break-all;
+    }
+
+    ul.fields { list-style: none; }
+
+    .field {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: baseline;
+      gap: 4px 10px;
+      padding: 6px 15px;
+      border-bottom: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    .field:last-child { border-bottom: 0; }
+    .field.key { background: color-mix(in srgb, var(--e) 7%, transparent); }
+
+    .fname { color: var(--text); }
+    .field.key .fname { font-weight: 600; }
+    .ftype { color: var(--muted); font-size: 11px; text-align: right; white-space: nowrap; }
+
+    .badges { grid-column: 1 / -1; display: flex; gap: 5px; flex-wrap: wrap; margin-top: 1px; }
+
+    .badge {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: .05em;
+      padding: 1px 5px;
+      border-radius: 3px;
+      border: 1px solid;
+      line-height: 1.5;
+    }
+
+    .badge.pk { color: var(--e); border-color: color-mix(in srgb, var(--e) 45%, transparent); background: color-mix(in srgb, var(--e) 10%, transparent); }
+    .badge.fk { color: var(--text-2); border-color: var(--border-strong); background: var(--surface-2); }
+    .badge.req { color: var(--e); border-color: color-mix(in srgb, var(--e) 45%, transparent); background: color-mix(in srgb, var(--e) 12%, transparent); }
+    .badge.null, .badge.enum { color: var(--muted); border-color: var(--border); background: transparent; }
+
+    .derived {
+      padding: 9px 15px 11px;
+      background: var(--surface-2);
+      border-top: 1px dashed var(--border-strong);
+    }
+
+    .derived-label {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .derived-list { font-family: var(--mono); font-size: 11px; color: var(--text-2); line-height: 1.75; }
+
+    /* ---- system zones ---- */
+
+    .zone {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding: 34px 16px 18px;
+      border: 1px dashed var(--border-strong);
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+    }
+
+    .zone-label {
+      position: absolute;
+      top: 10px;
+      left: 16px;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .node {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 13px 14px 14px;
+      box-shadow: var(--shadow);
+      transition: opacity .18s ease, border-color .18s ease, transform .18s ease;
+      outline: none;
+    }
+
+    .node.unbuilt { border-style: dashed; background: color-mix(in srgb, var(--surface) 55%, transparent); box-shadow: none; }
+
+    .node:focus-visible {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 32%, transparent);
+    }
+
+    .stage.focused .node.dim { opacity: .26; }
+    .stage.focused .node.live { border-color: var(--accent); transform: translateY(-1px); }
+
+    .n-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+
+    .n-name {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: -.01em;
+      color: var(--text);
+    }
+
+    .chip {
+      flex: none;
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 3px;
+      border: 1px solid;
+      line-height: 1.5;
+      white-space: nowrap;
+    }
+
+    .chip.built { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, transparent); background: color-mix(in srgb, var(--ok) 11%, transparent); }
+    .chip.spec { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); background: color-mix(in srgb, var(--warn) 11%, transparent); }
+    .chip.roadmap { color: var(--idle); border-color: var(--border-strong); background: transparent; }
+
+    .n-desc { font-size: 12px; color: var(--text-2); margin-top: 6px; }
+
+    .n-meta {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      color: var(--muted);
+      margin-top: 7px;
+      padding-top: 7px;
+      border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+      word-break: break-word;
+    }
+
+    /* ---- edges ---- */
+
+    .edge { transition: opacity .18s ease; }
+    .edge path { fill: none; stroke: var(--edge); stroke-width: 1.6; }
+    .edge.optional path { stroke-dasharray: 5 4; }
+    .edge .label {
+      font-family: var(--mono);
+      font-size: 10px;
+      fill: var(--muted);
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+    .edge .label-bg { fill: var(--bg); }
+
+    .stage.focused .edge { opacity: .16; }
+    .stage.focused .edge.live { opacity: 1; }
+    .stage.focused .edge.live path { stroke: var(--edge-hi); stroke-width: 2.1; }
+    .stage.focused .edge.live .label { fill: var(--edge-hi); font-weight: 600; }
+
+    /* ---- notes ---- */
+
+    .notes {
+      margin-top: 34px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(268px, 1fr));
+      gap: 14px;
+    }
+
+    .note {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 15px 16px 16px;
+    }
+
+    .note h3 {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      padding-bottom: 8px;
+      margin-bottom: 9px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .note h3 code { font-size: 1em; text-transform: none; letter-spacing: 0; background: none; border: 0; padding: 0; }
+    .note p { font-size: 13px; color: var(--text-2); }
+
+    footer {
+      margin-top: 34px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    @media (max-width: 900px) {
+      body { padding: 28px 16px 48px; }
+      .stage.erd, .stage.sys {
+        grid-template-columns: minmax(0, 1fr);
+        min-width: 0;
+        gap: 58px;
+      }
+      .entity, .zone { grid-column: 1 !important; grid-row: auto !important; align-self: start !important; }
+      .hint { margin-left: 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">MonMon &middot; SwiftData persistence</div>
+    <h1>Database schema &amp; system components</h1>
+    <p class="lede">
+      Six <code>@Model</code> types backed by SwiftData (SQLite). Relationships are <strong>not</strong>
+      declared with <code>@Relationship</code> &mdash; every association is a hand-stored
+      <code>UUID</code> foreign key, resolved in Swift at read time
+      (<code>accounts.first { $0.id == someID }</code>). Below the schema, what the app talks to:
+      Apple frameworks, a single third-party package, and the services still on the roadmap.
+    </p>
+  </header>
+
+  <div class="legend">
+    <span class="item">
+      <svg width="34" height="10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="var(--edge)" stroke-width="1.6"/></svg>
+      required FK (non-optional)
+    </span>
+    <span class="item">
+      <svg width="34" height="10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="var(--edge)" stroke-width="1.6" stroke-dasharray="5 4"/></svg>
+      optional FK (nullable)
+    </span>
+    <span class="item"><span class="badge pk">PK</span> primary key</span>
+    <span class="item"><span class="badge fk">FK</span> foreign key (app-enforced only)</span>
+    <span class="item"><span class="badge null">?</span> nullable</span>
+    <span class="hint">Hover or focus an entity to trace its links</span>
+  </div>
+
+  <div class="scroller">
+    <div class="stage erd" id="erdStage">
+      <svg class="edges" id="erdEdges" aria-hidden="true">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+            <path d="M0,1.2 L9.2,5 L0,8.8 z" fill="var(--edge)"/>
+          </marker>
+          <marker id="arrow-hi" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+            <path d="M0,1.2 L9.2,5 L0,8.8 z" fill="var(--edge-hi)"/>
+          </marker>
+        </defs>
+      </svg>
+
+      <!-- ============ CashAccount (hub) ============ -->
+      <article class="entity" id="CashAccount" tabindex="0"
+               style="--e: var(--e-account); grid-column: 1; grid-row: 1 / span 4; align-self: center;">
+        <div class="e-head">
+          <div class="e-name">CashAccount</div>
+          <div class="e-role">Cash, bank &amp; credit-card accounts &mdash; the hub every other record points at</div>
+          <div class="e-file">MonMon/Accounts/CashAccount.swift</div>
+        </div>
+        <ul class="fields">
+          <li class="field key" data-anchor="CashAccount.id">
+            <span class="fname">id</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge pk">PK</span></span>
+          </li>
+          <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
+          <li class="field">
+            <span class="fname">kind</span><span class="ftype">CashAccountKind</span>
+            <span class="badges"><span class="badge enum">enum: cash | bank | credit</span></span>
+          </li>
+          <li class="field"><span class="fname">openingBalance</span><span class="ftype">Decimal</span></li>
+          <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
+        </ul>
+        <div class="derived">
+          <div class="derived-label">Derived &mdash; computed, not stored</div>
+          <div class="derived-list">kind.allowsNegativeBalance <span style="color:var(--muted)">(credit only)</span></div>
+        </div>
+      </article>
+
+      <!-- ============ SavingsDeposit ============ -->
+      <article class="entity" id="SavingsDeposit" tabindex="0"
+               style="--e: var(--e-savings); grid-column: 2; grid-row: 1;">
+        <div class="e-head">
+          <div class="e-name">SavingsDeposit</div>
+          <div class="e-role">Term deposits with maturity &amp; projected interest</div>
+          <div class="e-file">MonMon/Savings/SavingsDeposit.swift</div>
+        </div>
+        <ul class="fields">
+          <li class="field key"><span class="fname">id</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge pk">PK</span></span></li>
+          <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">principal</span><span class="ftype">Decimal</span></li>
+          <li class="field"><span class="fname">annualInterestRate</span><span class="ftype">Decimal</span></li>
+          <li class="field"><span class="fname">termMonths</span><span class="ftype">Int</span></li>
+          <li class="field"><span class="fname">openedAt</span><span class="ftype">Date</span></li>
+          <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
+          <li class="field key" data-anchor="SavingsDeposit.sourceAccountID">
+            <span class="fname">sourceAccountID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span></span>
+          </li>
+        </ul>
+        <div class="derived">
+          <div class="derived-label">Derived &mdash; computed, not stored</div>
+          <div class="derived-list">maturityDate &middot; termDayCount &middot; projectedInterest &middot; maturityValue</div>
+        </div>
+      </article>
+
+      <!-- ============ FundHolding ============ -->
+      <article class="entity" id="FundHolding" tabindex="0"
+               style="--e: var(--e-fund); grid-column: 2; grid-row: 2;">
+        <div class="e-head">
+          <div class="e-name">FundHolding</div>
+          <div class="e-role">Fund certificates &amp; ETFs at a hand-entered NAV</div>
+          <div class="e-file">MonMon/Funds/FundHolding.swift</div>
+        </div>
+        <ul class="fields">
+          <li class="field key"><span class="fname">id</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge pk">PK</span></span></li>
+          <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">symbol</span><span class="ftype">String</span></li>
+          <li class="field">
+            <span class="fname">kind</span><span class="ftype">FundHoldingKind</span>
+            <span class="badges"><span class="badge enum">enum: fund | etf</span></span>
+          </li>
+          <li class="field"><span class="fname">units</span><span class="ftype">Decimal</span></li>
+          <li class="field"><span class="fname">averageCostPerUnit</span><span class="ftype">Decimal</span></li>
+          <li class="field"><span class="fname">currentNAVPerUnit</span><span class="ftype">Decimal</span></li>
+          <li class="field"><span class="fname">navAsOf</span><span class="ftype">Date</span></li>
+          <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
+          <li class="field key" data-anchor="FundHolding.sourceAccountID">
+            <span class="fname">sourceAccountID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span></span>
+          </li>
+        </ul>
+        <div class="derived">
+          <div class="derived-label">Derived &mdash; computed, not stored</div>
+          <div class="derived-list">costBasis &middot; marketValue &middot; unrealizedProfitLoss &middot; returnPercent</div>
+        </div>
+      </article>
+
+      <!-- ============ MoneyTransaction ============ -->
+      <article class="entity" id="MoneyTransaction" tabindex="0"
+               style="--e: var(--e-txn); grid-column: 2; grid-row: 3;">
+        <div class="e-head">
+          <div class="e-name">MoneyTransaction</div>
+          <div class="e-role">Income &amp; expense entries that move an account balance</div>
+          <div class="e-file">MonMon/Transactions/MoneyTransaction.swift</div>
+        </div>
+        <ul class="fields">
+          <li class="field key"><span class="fname">id</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge pk">PK</span></span></li>
+          <li class="field">
+            <span class="fname">kind</span><span class="ftype">TransactionKind</span>
+            <span class="badges"><span class="badge enum">enum: income | expense</span></span>
+          </li>
+          <li class="field">
+            <span class="fname">amount</span><span class="ftype">Decimal</span>
+            <span class="badges"><span class="badge null">always positive &mdash; kind carries sign</span></span>
+          </li>
+          <li class="field"><span class="fname">occurredAt</span><span class="ftype">Date</span></li>
+          <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
+          <li class="field key" data-anchor="MoneyTransaction.accountID">
+            <span class="fname">accountID</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+          </li>
+          <li class="field key" data-anchor="MoneyTransaction.categoryID">
+            <span class="fname">categoryID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span></span>
+          </li>
+          <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
+        </ul>
+        <div class="derived">
+          <div class="derived-label">Derived &mdash; computed, not stored</div>
+          <div class="derived-list">signedAmount &nbsp;<span style="color:var(--muted)">(+ income / &minus; expense)</span></div>
+        </div>
+      </article>
+
+      <!-- ============ AccountTransfer ============ -->
+      <article class="entity" id="AccountTransfer" tabindex="0"
+               style="--e: var(--e-transfer); grid-column: 2; grid-row: 4;">
+        <div class="e-head">
+          <div class="e-name">AccountTransfer</div>
+          <div class="e-role">Money moved between two of the owner's own accounts &mdash; no category, never spending</div>
+          <div class="e-file">MonMon/Transfers/AccountTransfer.swift</div>
+        </div>
+        <ul class="fields">
+          <li class="field key"><span class="fname">id</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge pk">PK</span></span></li>
+          <li class="field">
+            <span class="fname">amount</span><span class="ftype">Decimal</span>
+            <span class="badges"><span class="badge null">always positive &mdash; the pair carries direction</span></span>
+          </li>
+          <li class="field"><span class="fname">occurredAt</span><span class="ftype">Date</span></li>
+          <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
+          <li class="field key" data-anchor="AccountTransfer.sourceAccountID">
+            <span class="fname">sourceAccountID</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+          </li>
+          <li class="field key" data-anchor="AccountTransfer.destinationAccountID">
+            <span class="fname">destinationAccountID</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+          </li>
+          <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
+        </ul>
+        <div class="derived">
+          <div class="derived-label">Derived &mdash; computed, not stored</div>
+          <div class="derived-list">signedAmount(for:) &nbsp;<span style="color:var(--muted)">(&minus; at source / + at destination)</span></div>
+        </div>
+      </article>
+
+      <!-- ============ TransactionCategory ============ -->
+      <article class="entity" id="TransactionCategory" tabindex="0"
+               style="--e: var(--e-category); grid-column: 3; grid-row: 3; align-self: center;">
+        <div class="e-head">
+          <div class="e-name">TransactionCategory</div>
+          <div class="e-role">Owner-managed income / expense categories</div>
+          <div class="e-file">MonMon/Transactions/TransactionCategory.swift</div>
+        </div>
+        <ul class="fields">
+          <li class="field key" data-anchor="TransactionCategory.id">
+            <span class="fname">id</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge pk">PK</span></span>
+          </li>
+          <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
+          <li class="field">
+            <span class="fname">kind</span><span class="ftype">TransactionKind</span>
+            <span class="badges"><span class="badge enum">enum: income | expense</span></span>
+          </li>
+          <li class="field"><span class="fname">symbolName</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">colorName</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
+        </ul>
+      </article>
+    </div>
+  </div>
+
+  <!-- ==================== SYSTEM COMPONENTS ==================== -->
+
+  <div class="section-head">
+    <h2>System components</h2>
+    <p class="lede">
+      What the app is made of and what it talks to. The device column is the whole system
+      today: every record lives in one local SwiftData store, and the app opens no network
+      connection at all. Everything marked otherwise is roadmap, not running code.
+    </p>
+  </div>
+
+  <div class="legend">
+    <span class="item"><span class="chip built">Built</span> shipping today</span>
+    <span class="item"><span class="chip spec">Spec drafted</span> contract written, no code</span>
+    <span class="item"><span class="chip roadmap">Roadmap</span> named in the capability map only</span>
+    <span class="item">
+      <svg width="34" height="10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="var(--edge)" stroke-width="1.6"/></svg>
+      live link
+    </span>
+    <span class="item">
+      <svg width="34" height="10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="var(--edge)" stroke-width="1.6" stroke-dasharray="5 4"/></svg>
+      planned link
+    </span>
+    <span class="hint">Edge labels say what data crosses</span>
+  </div>
+
+  <div class="scroller">
+    <div class="stage sys" id="sysStage">
+      <svg class="edges" id="sysEdges" aria-hidden="true"></svg>
+
+      <!-- ---------- Apple ---------- -->
+      <section class="zone" style="grid-column: 1; grid-row: 1; align-self: center;">
+        <span class="zone-label">Apple platform</span>
+
+        <div class="node" id="sys-frameworks" tabindex="0">
+          <div class="n-top">
+            <span class="n-name">System frameworks</span>
+            <span class="chip built">Built</span>
+          </div>
+          <p class="n-desc">
+            SwiftUI for one shared UI across iPhone and Mac, SwiftData over SQLite,
+            Swift Charts for the assets doughnut, LocalAuthentication for the app lock.
+          </p>
+          <div class="n-meta">SwiftUI · SwiftData · Charts · LocalAuthentication · Observation</div>
+        </div>
+
+        <div class="node unbuilt" id="sys-cloudkit" tabindex="0">
+          <div class="n-top">
+            <span class="n-name">CloudKit private database</span>
+            <span class="chip roadmap">Roadmap</span>
+          </div>
+          <p class="n-desc">
+            The owner's own iCloud account, never a shared or public database.
+            Step 10 of 11 in the capability map; no entitlement file exists yet.
+          </p>
+          <div class="n-meta">module: icloud-sync</div>
+        </div>
+      </section>
+
+      <!-- ---------- Device ---------- -->
+      <section class="zone" style="grid-column: 2; grid-row: 1;">
+        <span class="zone-label">On this device &mdash; iPhone &amp; Mac</span>
+
+        <div class="node" id="sys-app" tabindex="0">
+          <div class="n-top">
+            <span class="n-name">MonMon app</span>
+            <span class="chip built">Built</span>
+          </div>
+          <p class="n-desc">
+            One multiplatform target. Shared SwiftUI screens, pure-Swift domain logic
+            (<code>FundValuation</code>, <code>SavingsInterest</code>, <code>CashBalanceSummary</code>),
+            and typed drafts that validate every input before a model is written.
+          </p>
+          <div class="n-meta">iOS 18+ · macOS 15+ · Swift 6, strict concurrency</div>
+        </div>
+
+        <div class="node" id="sys-store" tabindex="0">
+          <div class="n-top">
+            <span class="n-name">Local SwiftData store</span>
+            <span class="chip built">Built</span>
+          </div>
+          <p class="n-desc">
+            One <code>ModelContainer</code> holding all six models. No CloudKit configuration,
+            so the file never leaves the device. Protected by the operating system's file
+            protection and an optional Face&nbsp;ID / Touch&nbsp;ID gate &mdash; not by encryption
+            the app performs itself.
+          </p>
+          <div class="n-meta">MonMon/App/MonMonApp.swift</div>
+        </div>
+      </section>
+
+      <!-- ---------- Third party ---------- -->
+      <section class="zone" style="grid-column: 3; grid-row: 1;">
+        <span class="zone-label">Third party</span>
+
+        <div class="node" id="sys-calendar" tabindex="0">
+          <div class="n-top">
+            <span class="n-name">Mijick CalendarView</span>
+            <span class="chip built">Built</span>
+          </div>
+          <p class="n-desc">
+            The only third-party package in the project. Plain SwiftUI, drawn inside
+            <code>DateField</code>, touching nothing but the view it is handed.
+            It opens no connection of its own.
+          </p>
+          <div class="n-meta">SPM · MIT · pinned v1.1.1</div>
+        </div>
+
+        <div class="node unbuilt" id="sys-fmarket" tabindex="0">
+          <div class="n-top">
+            <span class="n-name">Fmarket API</span>
+            <span class="chip spec">Spec drafted</span>
+          </div>
+          <p class="n-desc">
+            Daily NAV for open-ended fund certificates. Undocumented public endpoint,
+            no authentication, no service level &mdash; hand entry stays as the fallback.
+          </p>
+          <div class="n-meta">api.fmarket.vn · module: market-valuation</div>
+        </div>
+
+        <div class="node unbuilt" id="sys-vndirect" tabindex="0">
+          <div class="n-top">
+            <span class="n-name">VNDIRECT chart API</span>
+            <span class="chip spec">Spec drafted</span>
+          </div>
+          <p class="n-desc">
+            Closing price for ETFs listed on HOSE, quoted in thousands of đồng.
+            Same caveats: undocumented, unauthenticated, replaceable behind the
+            provider interface.
+          </p>
+          <div class="n-meta">dchart-api.vndirect.com.vn · module: market-valuation</div>
+        </div>
+
+        <div class="node unbuilt" id="sys-mcp" tabindex="0">
+          <div class="n-top">
+            <span class="n-name">Read-only MCP server</span>
+            <span class="chip roadmap">Roadmap</span>
+          </div>
+          <p class="n-desc">
+            A macOS server exposing synchronised records to AI clients. Read operations
+            only &mdash; it can neither mutate a record nor execute a trade.
+          </p>
+          <div class="n-meta">module: mcp-readonly · step 11 of 11</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <section class="notes">
+    <div class="note">
+      <h3>No referential integrity</h3>
+      <p>
+        No <code>@Relationship</code>, no cascade rules, no <code>@Attribute(.unique)</code>.
+        The store will happily keep a <code>MoneyTransaction.accountID</code> pointing at a deleted
+        account. Deletion guards in the editors are what actually protect the data: an account
+        cannot go while it funds a deposit or holding, or while any transaction or transfer
+        still names it.
+      </p>
+    </div>
+    <div class="note">
+      <h3>Why <code>categoryID</code> is nullable</h3>
+      <p>
+        Deliberate: a half-finished category deletion must not destroy a transaction.
+        The UI renders a missing category as <em>Uncategorized</em>.
+        <code>accountID</code> gets the opposite treatment &mdash; a transaction with no account
+        cannot move a balance, which is the module's whole purpose. Both ends of a transfer
+        are required for the same reason.
+      </p>
+    </div>
+    <div class="note">
+      <h3>Transfers sum to zero</h3>
+      <p>
+        <code>AccountTransfer</code> carries no <code>kind</code> and no category: the ordered
+        pair of accounts is the direction. Across every account the net flow is zero, so
+        moving money changes two balances and leaves total assets exactly where they were.
+      </p>
+    </div>
+    <div class="note">
+      <h3>Enums stored as String</h3>
+      <p>
+        <code>CashAccountKind</code>, <code>TransactionKind</code> and <code>FundHoldingKind</code>
+        are all <code>String, Codable</code>. Raw values are stable across migrations
+        and safe for CloudKit later.
+      </p>
+    </div>
+    <div class="note">
+      <h3><code>currencyCode</code> repeated 5&times;</h3>
+      <p>
+        Denormalised onto every entity, always written from <code>VNDCurrency.code</code>.
+        Nothing enforces that related records share a currency.
+      </p>
+    </div>
+    <div class="note">
+      <h3>What flat FKs mean for iCloud</h3>
+      <p>
+        Helpful: CloudKit forbids unique attributes and requires optional relationships &mdash;
+        neither exists here. Risky: manual joins do not self-heal, so a transaction that syncs
+        before its account renders dangling until the account arrives.
+      </p>
+    </div>
+    <div class="note">
+      <h3>Only a ticker would leave</h3>
+      <p>
+        The drafted market-data contract sends the fund or ETF symbol and nothing else &mdash;
+        no balance, no unit count, no cost basis, no account name. A provider would learn
+        that somebody asked about <code>FUEVFVND</code> and no more.
+      </p>
+    </div>
+    <div class="note">
+      <h3>One dependency, on purpose</h3>
+      <p>
+        Everything else is Apple's. A single pinned SwiftUI calendar view is the entire
+        third-party surface today, which is why the app currently has no network code,
+        no SDK, and no analytics.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    6 entities &middot; 6 foreign-key edges &middot; 0 declared SwiftData relationships &nbsp;|&nbsp;
+    1 third-party package &middot; 0 network calls today
+  </footer>
+</div>
+
+<script>
+  (function () {
+    const NS = 'http://www.w3.org/2000/svg';
+
+    function wire(stageId, svgId, nodeSelector, defs) {
+      const stage = document.getElementById(stageId);
+      const svg = document.getElementById(svgId);
+      if (!stage || !svg) return;
+
+      const anchorOf = function (nodeId, key) {
+        return (key && stage.querySelector('[data-anchor="' + key + '"]')) || document.getElementById(nodeId);
+      };
+
+      const built = defs.map(function (e, i) {
+        const g = document.createElementNS(NS, 'g');
+        g.setAttribute('class', 'edge' + (e.dashed ? ' optional' : ''));
+        const path = document.createElementNS(NS, 'path');
+        path.setAttribute('marker-end', 'url(#arrow)');
+        const bg = document.createElementNS(NS, 'rect');
+        bg.setAttribute('class', 'label-bg');
+        bg.setAttribute('rx', '3');
+        const text = document.createElementNS(NS, 'text');
+        text.setAttribute('class', 'label');
+        text.textContent = e.label;
+        g.appendChild(path); g.appendChild(bg); g.appendChild(text);
+        svg.appendChild(g);
+        return {
+          g: g, path: path, bg: bg, text: text, index: i,
+          fromCard: document.getElementById(e.from),
+          toCard: document.getElementById(e.to),
+          fromRow: anchorOf(e.from, e.fromAnchor),
+          toRow: anchorOf(e.to, e.toAnchor)
+        };
+      }).filter(function (e) { return e.fromCard && e.toCard; });
+
+      function draw() {
+        svg.setAttribute('width', stage.offsetWidth);
+        svg.setAttribute('height', stage.offsetHeight);
+        const s = stage.getBoundingClientRect();
+
+        // Vertical routing is only needed when two cards share a column; fan those
+        // out among themselves so a collapsed layout does not stack every line.
+        const stacked = built.filter(function (e) {
+          const a = e.fromCard.getBoundingClientRect(), b = e.toCard.getBoundingClientRect();
+          return Math.abs((a.left + a.width / 2) - (b.left + b.width / 2)) < 60;
+        });
+
+        built.forEach(function (e) {
+          const fc = e.fromCard.getBoundingClientRect();
+          const tc = e.toCard.getBoundingClientRect();
+          const fr = e.fromRow.getBoundingClientRect();
+          const tr = e.toRow.getBoundingClientRect();
+          const fcx = fc.left + fc.width / 2, tcx = tc.left + tc.width / 2;
+          let x1, y1, x2, y2, c1x, c1y, c2x, c2y;
+
+          const sIndex = stacked.indexOf(e);
+          if (sIndex !== -1) {
+            const off = (sIndex - (stacked.length - 1) / 2) * 26;
+            const downward = tc.top >= fc.top;
+            x1 = fcx + off - s.left;
+            y1 = (downward ? fc.bottom : fc.top) - s.top;
+            x2 = tcx + off - s.left;
+            y2 = (downward ? tc.top : tc.bottom) - s.top;
+            const dy = Math.max(24, Math.abs(y2 - y1) * 0.45) * (downward ? 1 : -1);
+            c1x = x1; c1y = y1 + dy;
+            c2x = x2; c2y = y2 - dy;
+          } else {
+            const leftToRight = fcx < tcx;
+            x1 = (leftToRight ? fc.right : fc.left) - s.left;
+            y1 = fr.top + fr.height / 2 - s.top;
+            x2 = (leftToRight ? tc.left : tc.right) - s.left;
+            y2 = tr.top + tr.height / 2 - s.top;
+            const dx = Math.min(Math.max(Math.abs(x2 - x1) * 0.5, 34), 92) * (leftToRight ? 1 : -1);
+            c1x = x1 + dx; c1y = y1;
+            c2x = x2 - dx; c2y = y2;
+          }
+
+          e.path.setAttribute('d', 'M' + x1 + ',' + y1 + ' C' + c1x + ',' + c1y + ' ' + c2x + ',' + c2y + ' ' + x2 + ',' + y2);
+
+          const mid = e.path.getPointAtLength(e.path.getTotalLength() / 2);
+          e.text.setAttribute('x', mid.x);
+          e.text.setAttribute('y', mid.y);
+          const box = e.text.getBBox();
+          e.bg.setAttribute('x', box.x - 4);
+          e.bg.setAttribute('y', box.y - 2);
+          e.bg.setAttribute('width', box.width + 8);
+          e.bg.setAttribute('height', box.height + 4);
+        });
+      }
+
+      const cards = Array.prototype.slice.call(stage.querySelectorAll(nodeSelector));
+
+      function focusNode(id) {
+        const related = new Set([id]);
+        built.forEach(function (e) {
+          if (e.fromCard.id === id || e.toCard.id === id) {
+            related.add(e.fromCard.id);
+            related.add(e.toCard.id);
+          }
+        });
+        stage.classList.add('focused');
+        cards.forEach(function (c) {
+          const on = related.has(c.id);
+          c.classList.toggle('live', on);
+          c.classList.toggle('dim', !on);
+        });
+        built.forEach(function (e) {
+          const on = e.fromCard.id === id || e.toCard.id === id;
+          e.g.classList.toggle('live', on);
+          e.path.setAttribute('marker-end', on ? 'url(#arrow-hi)' : 'url(#arrow)');
+        });
+      }
+
+      function clearFocus() {
+        stage.classList.remove('focused');
+        cards.forEach(function (c) { c.classList.remove('live', 'dim'); });
+        built.forEach(function (e) {
+          e.g.classList.remove('live');
+          e.path.setAttribute('marker-end', 'url(#arrow)');
+        });
+      }
+
+      cards.forEach(function (c) {
+        c.addEventListener('mouseenter', function () { focusNode(c.id); });
+        c.addEventListener('mouseleave', clearFocus);
+        c.addEventListener('focus', function () { focusNode(c.id); });
+        c.addEventListener('blur', clearFocus);
+        c.addEventListener('keydown', function (ev) {
+          if (ev.key === 'Escape') { clearFocus(); c.blur(); }
+        });
+      });
+
+      draw();
+      if (window.ResizeObserver) new ResizeObserver(draw).observe(stage);
+      window.addEventListener('resize', draw);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+    }
+
+    wire('erdStage', 'erdEdges', '.entity', [
+      { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'SavingsDeposit', toAnchor: 'SavingsDeposit.sourceAccountID', label: '1 : 0..N', dashed: true },
+      { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'FundHolding', toAnchor: 'FundHolding.sourceAccountID', label: '1 : 0..N', dashed: true },
+      { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'MoneyTransaction', toAnchor: 'MoneyTransaction.accountID', label: '1 : 0..N', dashed: false },
+      { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'AccountTransfer', toAnchor: 'AccountTransfer.sourceAccountID', label: 'from', dashed: false },
+      { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'AccountTransfer', toAnchor: 'AccountTransfer.destinationAccountID', label: 'to', dashed: false },
+      { from: 'TransactionCategory', fromAnchor: 'TransactionCategory.id', to: 'MoneyTransaction', toAnchor: 'MoneyTransaction.categoryID', label: '1 : 0..N', dashed: true }
+    ]);
+
+    wire('sysStage', 'sysEdges', '.node', [
+      { from: 'sys-app', to: 'sys-frameworks', label: 'links', dashed: false },
+      { from: 'sys-app', to: 'sys-store', label: 'reads / writes', dashed: false },
+      { from: 'sys-app', to: 'sys-calendar', label: 'links · no network', dashed: false },
+      { from: 'sys-store', to: 'sys-cloudkit', label: 'all records', dashed: true },
+      { from: 'sys-app', to: 'sys-fmarket', label: 'ticker only', dashed: true },
+      { from: 'sys-app', to: 'sys-vndirect', label: 'ticker only', dashed: true },
+      { from: 'sys-mcp', to: 'sys-store', label: 'read-only', dashed: true }
+    ]);
+  })();
+</script>
+
+</body>
+</html>
