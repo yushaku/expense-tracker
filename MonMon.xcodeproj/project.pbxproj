@@ -130,6 +130,8 @@
 		A0000000000000000000084C /* DebtPaymentEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000082C /* DebtPaymentEditorForm.swift */; };
 		A0000000000000000000084D /* DebtPaymentEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000082D /* DebtPaymentEditorView.swift */; };
 		A0000000000000000000084E /* DebtDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000082E /* DebtDetailView.swift */; };
+		A00000000000000000000855 /* DebtPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000835 /* DebtPersistenceTests.swift */; };
+		A00000000000000000000856 /* DebtPaymentPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000836 /* DebtPaymentPersistenceTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -270,6 +272,8 @@
 		A0000000000000000000082C /* DebtPaymentEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPaymentEditorForm.swift; sourceTree = "<group>"; };
 		A0000000000000000000082D /* DebtPaymentEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPaymentEditorView.swift; sourceTree = "<group>"; };
 		A0000000000000000000082E /* DebtDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtDetailView.swift; sourceTree = "<group>"; };
+		A00000000000000000000835 /* DebtPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPersistenceTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000836 /* DebtPaymentPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPaymentPersistenceTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -604,6 +608,8 @@
 				A00000000000000000000832 /* DebtNetWorthTests.swift */,
 				A00000000000000000000833 /* DebtDraftTests.swift */,
 				A00000000000000000000834 /* DebtPaymentDraftTests.swift */,
+				A00000000000000000000835 /* DebtPersistenceTests.swift */,
+				A00000000000000000000836 /* DebtPaymentPersistenceTests.swift */,
 			);
 			path = Debts;
 			sourceTree = "<group>";
@@ -841,6 +847,8 @@
 				A00000000000000000000852 /* DebtNetWorthTests.swift in Sources */,
 				A00000000000000000000853 /* DebtDraftTests.swift in Sources */,
 				A00000000000000000000854 /* DebtPaymentDraftTests.swift in Sources */,
+				A00000000000000000000855 /* DebtPersistenceTests.swift in Sources */,
+				A00000000000000000000856 /* DebtPaymentPersistenceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
