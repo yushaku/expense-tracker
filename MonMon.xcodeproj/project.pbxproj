@@ -15,8 +15,10 @@
 		A00000000000000000000207 /* CashAccountKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000116 /* CashAccountKind.swift */; };
 		A00000000000000000000208 /* CashAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000117 /* CashAccount.swift */; };
 		A00000000000000000000209 /* AccountDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000118 /* AccountDraftTests.swift */; };
+		A00000000000000000000A04 /* AccountSeedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000A03 /* AccountSeedTests.swift */; };
 		A00000000000000000000210 /* AccountDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000119 /* AccountDraft.swift */; };
 		A00000000000000000000211 /* VNDCurrency.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000122 /* VNDCurrency.swift */; };
+		A00000000000000000000A02 /* AccountSeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000A01 /* AccountSeed.swift */; };
 		A00000000000000000000212 /* CashBalanceSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000123 /* CashBalanceSummaryTests.swift */; };
 		A00000000000000000000213 /* CashBalanceSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000124 /* CashBalanceSummary.swift */; };
 		A00000000000000000000214 /* AccountListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000125 /* AccountListView.swift */; };
@@ -178,10 +180,12 @@
 		A00000000000000000000116 /* CashAccountKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashAccountKind.swift; sourceTree = "<group>"; };
 		A00000000000000000000117 /* CashAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashAccount.swift; sourceTree = "<group>"; };
 		A00000000000000000000118 /* AccountDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDraftTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000A03 /* AccountSeedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSeedTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000119 /* AccountDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDraft.swift; sourceTree = "<group>"; };
 		A00000000000000000000120 /* MonMon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MonMon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00000000000000000000121 /* MonMonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonMonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00000000000000000000122 /* VNDCurrency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VNDCurrency.swift; sourceTree = "<group>"; };
+		A00000000000000000000A01 /* AccountSeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSeed.swift; sourceTree = "<group>"; };
 		A00000000000000000000123 /* CashBalanceSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashBalanceSummaryTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000124 /* CashBalanceSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashBalanceSummary.swift; sourceTree = "<group>"; };
 		A00000000000000000000125 /* AccountListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountListView.swift; sourceTree = "<group>"; };
@@ -424,6 +428,7 @@
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000118 /* AccountDraftTests.swift */,
+				A00000000000000000000A03 /* AccountSeedTests.swift */,
 				A00000000000000000000123 /* CashBalanceSummaryTests.swift */,
 				A00000000000000000000115 /* CashAccountPersistenceTests.swift */,
 				A00000000000000000000185 /* AssetAllocationTests.swift */,
@@ -443,6 +448,7 @@
 				A00000000000000000000117 /* CashAccount.swift */,
 				A00000000000000000000116 /* CashAccountKind.swift */,
 				A00000000000000000000122 /* VNDCurrency.swift */,
+				A00000000000000000000A01 /* AccountSeed.swift */,
 				A00000000000000000000183 /* AssetAllocation.swift */,
 				A00000000000000000000184 /* AssetAllocationCard.swift */,
 			);
@@ -840,6 +846,7 @@
 				A00000000000000000000201 /* MonMonApp.swift in Sources */,
 				A00000000000000000000216 /* MonMonTheme.swift in Sources */,
 				A00000000000000000000211 /* VNDCurrency.swift in Sources */,
+				A00000000000000000000A02 /* AccountSeed.swift in Sources */,
 				A00000000000000000000219 /* SavingsDeposit.swift in Sources */,
 				A00000000000000000000220 /* SavingsInterest.swift in Sources */,
 				A00000000000000000000221 /* PercentInput.swift in Sources */,
@@ -911,6 +918,7 @@
 				A00000000000000000000652 /* AccountTransferPersistenceTests.swift in Sources */,
 				A00000000000000000000750 /* InvestmentSummaryTests.swift in Sources */,
 				A00000000000000000000209 /* AccountDraftTests.swift in Sources */,
+				A00000000000000000000A04 /* AccountSeedTests.swift in Sources */,
 				A00000000000000000000212 /* CashBalanceSummaryTests.swift in Sources */,
 				A00000000000000000000206 /* CashAccountPersistenceTests.swift in Sources */,
 				A00000000000000000000229 /* SavingsInterestTests.swift in Sources */,

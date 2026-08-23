@@ -14,10 +14,10 @@ final class AccountTransfer {
     var note: String = ""
     /// Identifier of the account the money left. Required: a transfer with no
     /// source moves nothing.
-    var sourceAccountID: UUID
+    var sourceAccountID: UUID = AccountSeed.unassignedID
     /// Identifier of the account the money reached. Required, and validated to
     /// differ from the source.
-    var destinationAccountID: UUID
+    var destinationAccountID: UUID = AccountSeed.unassignedID
     var currencyCode: String = VNDCurrency.code
     var createdAt: Date = Date(timeIntervalSince1970: 0)
 

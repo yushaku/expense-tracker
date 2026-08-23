@@ -14,6 +14,7 @@ struct MonMonApp: App {
         }
 
         CategorySeed.seedIfEmpty(in: container.mainContext)
+        AccountSeed.ensureUnassignedExists(in: container.mainContext)
     }
 
     var body: some Scene {

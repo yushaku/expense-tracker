@@ -12,13 +12,19 @@ final class FundHolding {
     var id: UUID = UUID()
     /// Identifier of the `FundInstrument` this position is held in.
     ///
-    /// Required: a position with no instrument has no identity, no price, and
-    /// no way to be valued. The catalogue is still joined in Swift rather than
-    /// through a SwiftData relationship, so this can still name an instrument
-    /// that has since been deleted — `FundSummary.unpriced` is how the app
-    /// reports that, rather than valuing the position at a price it does not
-    /// have.
-    var instrumentID: UUID
+    /// Optional, and for a reason that has nothing to do with what a position
+    /// is: CloudKit needs every attribute optional or defaulted, and an
+    /// instrument has no sensible placeholder to default to. A seeded stand-in
+    /// would carry a made-up ticker and a zero price, and it would show up in
+    /// the picker every time a holding is added — the cure being worse than the
+    /// disease. `FundDraft` still requires a choice, so nothing the app writes
+    /// leaves this empty.
+    ///
+    /// The catalogue is joined in Swift rather than through a SwiftData
+    /// relationship, so this can also name an instrument that has since been
+    /// deleted. Either way `FundSummary.unpriced` reports the position rather
+    /// than valuing it at a price it does not have.
+    var instrumentID: UUID?
     var units: Decimal = Decimal.zero
     var averageCostPerUnit: Decimal = Decimal.zero
 
@@ -30,7 +36,7 @@ final class FundHolding {
 
     init(
         id: UUID,
-        instrumentID: UUID,
+        instrumentID: UUID?,
         units: Decimal,
         averageCostPerUnit: Decimal,
         createdAt: Date,

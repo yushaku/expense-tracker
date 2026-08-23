@@ -608,8 +608,8 @@
           <li class="field"><span class="fname">averageCostPerUnit</span><span class="ftype">Decimal</span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
           <li class="field key" data-anchor="FundHolding.instrumentID" style="border-style: dashed;">
-            <span class="fname">instrumentID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+            <span class="fname">instrumentID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span></span>
           </li>
           <li class="field key" data-anchor="FundHolding.sourceAccountID">
             <span class="fname">sourceAccountID</span><span class="ftype">UUID?</span>
@@ -687,7 +687,7 @@
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
           <li class="field key" data-anchor="MoneyTransaction.accountID">
             <span class="fname">accountID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
           </li>
           <li class="field key" data-anchor="MoneyTransaction.categoryID">
             <span class="fname">categoryID</span><span class="ftype">UUID?</span>
@@ -721,11 +721,11 @@
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
           <li class="field key" data-anchor="AccountTransfer.sourceAccountID">
             <span class="fname">sourceAccountID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
           </li>
           <li class="field key" data-anchor="AccountTransfer.destinationAccountID">
             <span class="fname">destinationAccountID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
           </li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
@@ -788,8 +788,8 @@
           <li class="field key"><span class="fname">id</span><span class="ftype">UUID</span>
             <span class="badges"><span class="badge pk">PK</span></span></li>
           <li class="field key" data-anchor="DebtPayment.debtID">
-            <span class="fname">debtID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge req">NOT NULL</span><span class="badge null">deleted with its debt</span></span>
+            <span class="fname">debtID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span><span class="badge null">deleted with its debt</span></span>
           </li>
           <li class="field">
             <span class="fname">amount</span><span class="ftype">Decimal</span>
@@ -798,7 +798,7 @@
           <li class="field"><span class="fname">occurredAt</span><span class="ftype">Date</span></li>
           <li class="field key" data-anchor="DebtPayment.accountID">
             <span class="fname">accountID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
           </li>
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>

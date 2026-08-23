@@ -137,6 +137,13 @@ struct AccountEditorView: View {
             return false
         }
 
+        // The anchor every account-shaped foreign key defaults to. Deleting it
+        // would leave those defaults naming nothing, which is the one state
+        // `AccountSeed` exists to prevent.
+        guard !AccountSeed.isUnassigned(editedAccount) else {
+            return false
+        }
+
         let isEmpty =
             CashBalanceSummary.available(
                 for: editedAccount,

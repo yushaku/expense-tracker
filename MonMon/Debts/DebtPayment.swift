@@ -14,21 +14,21 @@ final class DebtPayment {
     /// signs this amount lives on the debt, so an orphan payment is not merely
     /// untidy, it is uncomputable. Deleting a debt therefore deletes its
     /// payments with it.
-    var debtID: UUID
+    var debtID: UUID?
     /// Always positive. The debt's `direction` carries the direction.
     var amount: Decimal = Decimal.zero
     var occurredAt: Date = Date(timeIntervalSince1970: 0)
     /// Identifier of the cash account the money moved through. Required, unlike
     /// `Debt.accountID`: a payment that moves no cash is not a payment, it is a
     /// smaller principal, and that is an edit to the debt.
-    var accountID: UUID
+    var accountID: UUID = AccountSeed.unassignedID
     var note: String = ""
     var currencyCode: String = VNDCurrency.code
     var createdAt: Date = Date(timeIntervalSince1970: 0)
 
     init(
         id: UUID,
-        debtID: UUID,
+        debtID: UUID?,
         amount: Decimal,
         occurredAt: Date,
         accountID: UUID,

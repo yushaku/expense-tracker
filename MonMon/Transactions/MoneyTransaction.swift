@@ -12,7 +12,7 @@ final class MoneyTransaction {
     /// Identifier of the cash account this money moved through. Required: a
     /// transaction with no account cannot move a balance, which is the only
     /// thing this module exists to do.
-    var accountID: UUID
+    var accountID: UUID = AccountSeed.unassignedID
     /// Optional so a half-finished category deletion cannot destroy a
     /// transaction. The UI renders a missing category as "Uncategorized".
     var categoryID: UUID?

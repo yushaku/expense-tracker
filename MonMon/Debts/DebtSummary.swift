@@ -99,8 +99,13 @@ enum DebtSummary {
         }
 
         return payments.reduce(openings) { total, payment in
+            // A payment naming no debt carries no direction, so there is no
+            // sign to apply and it contributes nothing. `debtID` is optional
+            // only because CloudKit needs every attribute optional or
+            // defaulted, and a debt has no placeholder worth seeding.
             guard payment.accountID == account.id,
-                let direction = directions[payment.debtID]
+                let debtID = payment.debtID,
+                let direction = directions[debtID]
             else {
                 return total
             }
