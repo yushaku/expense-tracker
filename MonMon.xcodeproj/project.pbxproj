@@ -110,6 +110,13 @@
 		A00000000000000000000286 /* CategoryBreakdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000197 /* CategoryBreakdownTests.swift */; };
 		33A69BFF303AE3A900432AF4 /* MijickCalendarView in Frameworks */ = {isa = PBXBuildFile; productRef = 33A69BFE303AE3A900432AF4 /* MijickCalendarView */; };
 		A00000000000000000000287 /* CalendarTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000198 /* CalendarTheme.swift */; };
+		A00000000000000000000840 /* DebtDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000820 /* DebtDirection.swift */; };
+		A00000000000000000000841 /* Debt.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000821 /* Debt.swift */; };
+		A00000000000000000000842 /* DebtPayment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000822 /* DebtPayment.swift */; };
+		A00000000000000000000843 /* DebtInterest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000823 /* DebtInterest.swift */; };
+		A00000000000000000000844 /* DebtSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000824 /* DebtSummary.swift */; };
+		A00000000000000000000850 /* DebtInterestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000830 /* DebtInterestTests.swift */; };
+		A00000000000000000000851 /* DebtSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000831 /* DebtSummaryTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -230,6 +237,13 @@
 		A00000000000000000000196 /* CategoryTransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryTransactionsView.swift; sourceTree = "<group>"; };
 		A00000000000000000000197 /* CategoryBreakdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBreakdownTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000198 /* CalendarTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarTheme.swift; sourceTree = "<group>"; };
+		A00000000000000000000820 /* DebtDirection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtDirection.swift; sourceTree = "<group>"; };
+		A00000000000000000000821 /* Debt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debt.swift; sourceTree = "<group>"; };
+		A00000000000000000000822 /* DebtPayment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPayment.swift; sourceTree = "<group>"; };
+		A00000000000000000000823 /* DebtInterest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtInterest.swift; sourceTree = "<group>"; };
+		A00000000000000000000824 /* DebtSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtSummary.swift; sourceTree = "<group>"; };
+		A00000000000000000000830 /* DebtInterestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtInterestTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000831 /* DebtSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtSummaryTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -284,6 +298,7 @@
 				A00000000000000000000024 /* Transactions */,
 				A00000000000000000000028 /* Transfers */,
 				A00000000000000000000026 /* Settings */,
+				A00000000000000000000032 /* Debts */,
 			);
 			path = MonMon;
 			sourceTree = "<group>";
@@ -316,6 +331,7 @@
 				A00000000000000000000025 /* Transactions */,
 				A00000000000000000000029 /* Transfers */,
 				A00000000000000000000027 /* Settings */,
+				A00000000000000000000033 /* Debts */,
 			);
 			path = MonMonTests;
 			sourceTree = "<group>";
@@ -532,6 +548,27 @@
 			path = Investments;
 			sourceTree = "<group>";
 		};
+		A00000000000000000000032 /* Debts */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000820 /* DebtDirection.swift */,
+				A00000000000000000000821 /* Debt.swift */,
+				A00000000000000000000822 /* DebtPayment.swift */,
+				A00000000000000000000823 /* DebtInterest.swift */,
+				A00000000000000000000824 /* DebtSummary.swift */,
+			);
+			path = Debts;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000033 /* Debts */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000830 /* DebtInterestTests.swift */,
+				A00000000000000000000831 /* DebtSummaryTests.swift */,
+			);
+			path = Debts;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -711,6 +748,11 @@
 				A00000000000000000000241 /* FundHoldingCard.swift in Sources */,
 				A00000000000000000000242 /* FundEditorView.swift in Sources */,
 				A00000000000000000000243 /* FundEditorForm.swift in Sources */,
+				A00000000000000000000840 /* DebtDirection.swift in Sources */,
+				A00000000000000000000841 /* Debt.swift in Sources */,
+				A00000000000000000000842 /* DebtPayment.swift in Sources */,
+				A00000000000000000000843 /* DebtInterest.swift in Sources */,
+				A00000000000000000000844 /* DebtSummary.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -745,6 +787,8 @@
 				A00000000000000000000246 /* FundDraftTests.swift in Sources */,
 				A00000000000000000000247 /* FundSummaryTests.swift in Sources */,
 				A00000000000000000000248 /* FundHoldingPersistenceTests.swift in Sources */,
+				A00000000000000000000850 /* DebtInterestTests.swift in Sources */,
+				A00000000000000000000851 /* DebtSummaryTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

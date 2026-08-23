@@ -10,7 +10,8 @@ struct MonMonApp: App {
         do {
             container = try ModelContainer(
                 for: CashAccount.self, SavingsDeposit.self, FundHolding.self,
-                TransactionCategory.self, MoneyTransaction.self, AccountTransfer.self
+                TransactionCategory.self, MoneyTransaction.self, AccountTransfer.self,
+                Debt.self, DebtPayment.self
             )
         } catch {
             fatalError("Model container failed: \(error)")
