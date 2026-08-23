@@ -20,6 +20,12 @@ struct RootTabView: View {
                     Label("Funds", systemImage: "chart.line.uptrend.xyaxis")
                 }
                 .accessibilityIdentifier("funds-tab")
+
+            TransactionListView()
+                .tabItem {
+                    Label("Spending", systemImage: "arrow.left.arrow.right")
+                }
+                .accessibilityIdentifier("spending-tab")
         }
     }
 }

@@ -11,7 +11,7 @@ begins.
 | `cash-balance` | Create, edit, and delete cash, bank, and credit card accounts and view their balances | `app-bootstrap` |
 | `savings-deposit` | Record term deposits with maturity dates, projected interest, and an optional funding account, and see total assets | `cash-balance` |
 | `fund-etf-holdings` | Record fund certificate and ETF holdings at a hand-entered NAV and see cost basis, market value, and unrealized profit or loss | `cash-balance`, `savings-deposit` |
-| `income-expense` | Record income and expenses and see account balances update | `cash-balance` |
+| `income-expense` | Record income and expenses against one account each, under owner-managed categories, and see account balances update. Transfers between accounts are out of scope | `cash-balance` |
 | `debt-tracking` | Track liabilities and liability payments | `cash-balance`, `income-expense` |
 | `investment-tracking` | Record gold, equity, and crypto trades and calculate positions and cost basis | `cash-balance`, `income-expense`, `fund-etf-holdings` |
 | `market-valuation` | Refresh market prices and show portfolio value, allocation, and profit/loss | `investment-tracking` |

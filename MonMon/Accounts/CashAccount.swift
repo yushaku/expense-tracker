@@ -100,9 +100,59 @@ final class CashAccount {
         }
     }
 
+    extension TransactionCategory {
+        static func preview(
+            name: String,
+            kind: TransactionKind,
+            symbolName: String,
+            colorName: String,
+            createdOffset: TimeInterval = 0
+        ) -> TransactionCategory {
+            TransactionCategory(
+                id: UUID(),
+                name: name,
+                kind: kind,
+                symbolName: symbolName,
+                colorName: colorName,
+                createdAt: Date(timeIntervalSince1970: 1_700_000_000 + createdOffset)
+            )
+        }
+    }
+
+    extension MoneyTransaction {
+        static func preview(
+            kind: TransactionKind,
+            amount: Decimal,
+            note: String = "",
+            accountID: UUID,
+            categoryID: UUID?,
+            occurredOffset: TimeInterval = 0
+        ) -> MoneyTransaction {
+            let occurredAt = Date(timeIntervalSince1970: 1_700_000_000 + occurredOffset)
+
+            return MoneyTransaction(
+                id: UUID(),
+                kind: kind,
+                amount: amount,
+                occurredAt: occurredAt,
+                note: note,
+                accountID: accountID,
+                categoryID: categoryID,
+                currencyCode: VNDCurrency.code,
+                createdAt: occurredAt
+            )
+        }
+    }
+
     @MainActor
     enum PreviewData {
-        static let empty = makeContainer(accounts: [], deposits: [], holdings: [])
+        static let empty = makeContainer(
+            accounts: [],
+            deposits: [],
+            holdings: [],
+            categories: [],
+            transactions: []
+        )
 
         static let populated: ModelContainer = {
             let wallet = CashAccount.preview(
@@ -121,6 +171,19 @@ final class CashAccount {
                 kind: .bank,
                 openingBalance: 120_000_000,
                 createdOffset: 120
+            )
+            let food = TransactionCategory.preview(
+                name: "Food",
+                kind: .expense,
+                symbolName: "fork.knife",
+                colorName: "peach"
+            )
+            let salary = TransactionCategory.preview(
+                name: "Salary",
+                kind: .income,
+                symbolName: "briefcase.fill",
+                colorName: "green",
+                createdOffset: 60
             )
 
             return makeContainer(
@@ -160,6 +223,24 @@ final class CashAccount {
                         currentNAVPerUnit: 29_850,
                         navOffset: 86_400 * 20
                     ),
+                ],
+                categories: [food, salary],
+                transactions: [
+                    .preview(
+                        kind: .expense,
+                        amount: 185_000,
+                        note: "Lunch with the team",
+                        accountID: wallet.id,
+                        categoryID: food.id
+                    ),
+                    .preview(
+                        kind: .income,
+                        amount: 32_000_000,
+                        note: "August salary",
+                        accountID: techcombank.id,
+                        categoryID: salary.id,
+                        occurredOffset: 86_400 * 2
+                    ),
                 ]
             )
         }()
@@ -167,12 +248,15 @@ final class CashAccount {
         private static func makeContainer(
             accounts: [CashAccount],
             deposits: [SavingsDeposit],
-            holdings: [FundHolding]
+            holdings: [FundHolding],
+            categories: [TransactionCategory],
+            transactions: [MoneyTransaction]
         ) -> ModelContainer {
             let container: ModelContainer
             do {
                 container = try ModelContainer(
                     for: CashAccount.self, SavingsDeposit.self, FundHolding.self,
+                    TransactionCategory.self, MoneyTransaction.self,
                     configurations: ModelConfiguration(isStoredInMemoryOnly: true)
                 )
             } catch {
@@ -189,6 +273,14 @@ final class CashAccount {
 
             for holding in holdings {
                 container.mainContext.insert(holding)
+            }
+
+            for category in categories {
+                container.mainContext.insert(category)
+            }
+
+            for transaction in transactions {
+                container.mainContext.insert(transaction)
             }
 
             return container
