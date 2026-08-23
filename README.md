@@ -1,8 +1,9 @@
 # MonMon
 
 MonMon is a private personal-finance app for iPhone and Mac, themed with
-Catppuccin — Latte in light, Frappé in dark. It has four slices today. `cash-balance` lets one owner add, edit, and delete local cash, bank, and
-credit card accounts with a VND opening balance. `savings-deposit` adds term
+Catppuccin — Latte in light, Frappé in dark. It has five slices today.
+`cash-balance` lets one owner add, edit, and delete local cash, bank, and credit
+card accounts with a VND opening balance. `savings-deposit` adds term
 deposits (sổ tiết kiệm) with maturity dates, projected interest, and an optional
 funding account, plus a total-assets figure that counts transferred money only
 once. `fund-etf-holdings` adds fund certificates (chứng chỉ quỹ) and ETFs held in
@@ -89,12 +90,14 @@ and are excluded by `.gitignore`.
 
 - Included: add, edit, and delete cash, bank, and credit card accounts; add,
   edit, and delete savings deposits with simple interest paid at maturity; add,
-  edit, and delete fund and ETF holdings valued at a hand-entered NAV; record
+  edit, and delete fund and ETF holdings valued at a hand-entered NAV, both
+  under one Investments tab that totals them together; record
   income and expenses against one account each under owner-managed categories,
-  browsed a month at a time; an optional funding link that lowers an account's
-  available balance without touching its opening balance; VND validation and
-  formatting, exact `Decimal` totals, on-device SwiftData persistence, and shared
-  SwiftUI UI.
+  browsed a day, a month, a year, or a hand-picked range at a time; add, edit,
+  and delete transfers between two accounts, opened from the Home toolbar; an
+  optional funding link that lowers an account's available balance without
+  touching its opening balance; VND validation and formatting, exact `Decimal`
+  totals, on-device SwiftData persistence, and shared SwiftUI UI.
 - Owner validation: form behavior, interest and valuation against a hand
   calculation, relaunch persistence, iPhone Dynamic Type and keyboard, and Mac
   window resizing.
@@ -102,10 +105,9 @@ and are excluded by `.gitignore`.
   passcode lock that hides the screen on launch and after a minute away. The
   lock is a gate on the screen, not encryption; the records on disk are
   protected by the operating system's file protection and nothing more.
-- Not included yet: transfers between two accounts, budgets, recurring
-  transactions, interest paid on a schedule, rollover or early withdrawal,
-  individual buy/sell trades or realized profit and loss, automatic price
-  refresh, iCloud, network access, AI, or MCP.
+- Not included yet: budgets, recurring transactions, interest paid on a
+  schedule, rollover or early withdrawal, individual buy/sell trades or realized
+  profit and loss, automatic price refresh, iCloud, network access, AI, or MCP.
 
 ## Architecture
 
@@ -115,11 +117,11 @@ and are excluded by `.gitignore`.
   both platforms and touches nothing but the view it is asked to draw. The
   resolved version is pinned in `Package.resolved`.
 - SwiftData stores `CashAccount`, `SavingsDeposit`, `FundHolding`,
-  `TransactionCategory`, and `MoneyTransaction` records locally; `@Query` drives
-  every visible list and combined total.
-- `AccountDraft`, `SavingsDraft`, `FundDraft`, `TransactionDraft`, and
-  `CategoryDraft` validate external text before any model is inserted or
-  mutated, and money uses `Decimal` throughout.
+  `TransactionCategory`, `MoneyTransaction`, and `AccountTransfer` records
+  locally; `@Query` drives every visible list and combined total.
+- `AccountDraft`, `SavingsDraft`, `FundDraft`, `TransactionDraft`,
+  `CategoryDraft`, and `TransferDraft` validate external text before any model is
+  inserted or mutated, and money uses `Decimal` throughout.
 - A savings deposit and a fund holding each store their funding account's `id`;
   available balances and total assets are derived, so deleting one needs no
   compensating write.
@@ -129,6 +131,11 @@ and are excluded by `.gitignore`.
   no call site has to agree on a sign convention. An account's available balance
   is its opening balance plus recorded flow minus what it funds; the opening
   balance itself is never rewritten.
+- A transfer stores a positive amount too, and the pair of accounts it names
+  carries the direction. It is neither income nor an expense, so it never
+  reaches the Spending totals, and because one account's outflow is another's
+  inflow it leaves total assets untouched.
 - The approved boundaries and verification contracts live in
   `SPEC-cash-balance.md`, `SPEC-savings-deposit.md`,
-  `SPEC-fund-etf-holdings.md`, and `SPEC-income-expense.md`.
+  `SPEC-fund-etf-holdings.md`, `SPEC-income-expense.md`, and
+  `SPEC-account-transfer.md`.
