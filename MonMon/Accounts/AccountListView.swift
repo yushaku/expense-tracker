@@ -25,6 +25,7 @@ struct AccountListView: View {
 
     @State private var editorMode: AccountEditorMode?
     @State private var isManagingTransfers = false
+    @State private var isManagingDebts = false
 
     var body: some View {
         NavigationStack {
@@ -72,12 +73,22 @@ struct AccountListView: View {
                     }
                     .accessibilityIdentifier("manage-transfers")
                 }
+
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Debts", systemImage: "person.2.fill") {
+                        isManagingDebts = true
+                    }
+                    .accessibilityIdentifier("manage-debts")
+                }
             }
             .sheet(item: $editorMode) { mode in
                 AccountEditorView(mode: mode)
             }
             .sheet(isPresented: $isManagingTransfers) {
                 TransferListView()
+            }
+            .sheet(isPresented: $isManagingDebts) {
+                DebtListView()
             }
             .tint(MonMonTheme.accent)
         }
@@ -115,6 +126,23 @@ struct AccountListView: View {
                     systemImage: "chart.line.uptrend.xyaxis"
                 )
                 .font(.subheadline.weight(.medium))
+
+                if lentOut > 0 {
+                    Label(
+                        "Lent out \(VNDCurrency.format(lentOut))",
+                        systemImage: "tray.and.arrow.up.fill"
+                    )
+                    .font(.subheadline.weight(.medium))
+                }
+
+                if liabilities > 0 {
+                    Label(
+                        "Owed \(VNDCurrency.format(liabilities))",
+                        systemImage: "creditcard.fill"
+                    )
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(MonMonTheme.danger)
+                }
 
                 Label(accountCountLabel, systemImage: "rectangle.stack.fill")
                     .font(.subheadline.weight(.medium))
@@ -176,6 +204,10 @@ struct AccountListView: View {
             debts: debts,
             payments: payments
         )
+    }
+
+    private var lentOut: Decimal {
+        DebtSummary.totalOutstanding(of: debts, payments: payments, direction: .lent)
     }
 
     private var liabilities: Decimal {

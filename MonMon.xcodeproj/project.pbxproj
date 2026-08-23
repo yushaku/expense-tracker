@@ -122,6 +122,14 @@
 		A00000000000000000000846 /* DebtPaymentDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000826 /* DebtPaymentDraft.swift */; };
 		A00000000000000000000853 /* DebtDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000833 /* DebtDraftTests.swift */; };
 		A00000000000000000000854 /* DebtPaymentDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000834 /* DebtPaymentDraftTests.swift */; };
+		A00000000000000000000847 /* DebtCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000827 /* DebtCard.swift */; };
+		A00000000000000000000848 /* DebtEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000828 /* DebtEditorForm.swift */; };
+		A00000000000000000000849 /* DebtEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000829 /* DebtEditorView.swift */; };
+		A0000000000000000000084A /* DebtListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000082A /* DebtListView.swift */; };
+		A0000000000000000000084B /* DebtPaymentCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000082B /* DebtPaymentCard.swift */; };
+		A0000000000000000000084C /* DebtPaymentEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000082C /* DebtPaymentEditorForm.swift */; };
+		A0000000000000000000084D /* DebtPaymentEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000082D /* DebtPaymentEditorView.swift */; };
+		A0000000000000000000084E /* DebtDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000082E /* DebtDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -254,6 +262,14 @@
 		A00000000000000000000826 /* DebtPaymentDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPaymentDraft.swift; sourceTree = "<group>"; };
 		A00000000000000000000833 /* DebtDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtDraftTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000834 /* DebtPaymentDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPaymentDraftTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000827 /* DebtCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtCard.swift; sourceTree = "<group>"; };
+		A00000000000000000000828 /* DebtEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtEditorForm.swift; sourceTree = "<group>"; };
+		A00000000000000000000829 /* DebtEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtEditorView.swift; sourceTree = "<group>"; };
+		A0000000000000000000082A /* DebtListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtListView.swift; sourceTree = "<group>"; };
+		A0000000000000000000082B /* DebtPaymentCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPaymentCard.swift; sourceTree = "<group>"; };
+		A0000000000000000000082C /* DebtPaymentEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPaymentEditorForm.swift; sourceTree = "<group>"; };
+		A0000000000000000000082D /* DebtPaymentEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPaymentEditorView.swift; sourceTree = "<group>"; };
+		A0000000000000000000082E /* DebtDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -568,6 +584,14 @@
 				A00000000000000000000824 /* DebtSummary.swift */,
 				A00000000000000000000825 /* DebtDraft.swift */,
 				A00000000000000000000826 /* DebtPaymentDraft.swift */,
+				A00000000000000000000827 /* DebtCard.swift */,
+				A00000000000000000000828 /* DebtEditorForm.swift */,
+				A00000000000000000000829 /* DebtEditorView.swift */,
+				A0000000000000000000082A /* DebtListView.swift */,
+				A0000000000000000000082B /* DebtPaymentCard.swift */,
+				A0000000000000000000082C /* DebtPaymentEditorForm.swift */,
+				A0000000000000000000082D /* DebtPaymentEditorView.swift */,
+				A0000000000000000000082E /* DebtDetailView.swift */,
 			);
 			path = Debts;
 			sourceTree = "<group>";
@@ -770,6 +794,14 @@
 				A00000000000000000000844 /* DebtSummary.swift in Sources */,
 				A00000000000000000000845 /* DebtDraft.swift in Sources */,
 				A00000000000000000000846 /* DebtPaymentDraft.swift in Sources */,
+				A00000000000000000000847 /* DebtCard.swift in Sources */,
+				A00000000000000000000848 /* DebtEditorForm.swift in Sources */,
+				A00000000000000000000849 /* DebtEditorView.swift in Sources */,
+				A0000000000000000000084A /* DebtListView.swift in Sources */,
+				A0000000000000000000084B /* DebtPaymentCard.swift in Sources */,
+				A0000000000000000000084C /* DebtPaymentEditorForm.swift in Sources */,
+				A0000000000000000000084D /* DebtPaymentEditorView.swift in Sources */,
+				A0000000000000000000084E /* DebtDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
