@@ -10,7 +10,7 @@ struct FundInstrumentDraftTests {
     private func makeDraft(
         symbol: String = "VESAF",
         name: String = "VinaCapital VESAF",
-        kind: FundHoldingKind = .fund,
+        kind: FundInstrumentKind = .fund,
         priceText: String = "25.000",
         autoQuoteEnabled: Bool = true
     ) -> FundInstrumentDraft {

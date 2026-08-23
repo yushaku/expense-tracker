@@ -32,9 +32,9 @@ enum FundSummary {
 
     /// Positions whose instrument is missing from the catalogue.
     ///
-    /// Joins are resolved in Swift, so a holding can point at nothing — a
-    /// deleted instrument, or a store part-way through the backfill. Such a
-    /// position is worth zero, which understates the portfolio. Valuing it any
+    /// Joins are resolved in Swift, so a holding can still name an instrument
+    /// that has been deleted. Such a position is worth zero, which understates
+    /// the portfolio. Valuing it any
     /// other way would be inventing a price, so the number stands and this is
     /// how a caller finds out to say so.
     static func unpriced(

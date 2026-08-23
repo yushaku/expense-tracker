@@ -19,7 +19,7 @@ struct FundInstrumentCandidate: Sendable, Equatable, Identifiable {
     /// Whichever provider produced the candidate decides this. A provider's own
     /// `type` field is not trusted: VNDIRECT returns VESAF as an ETF listed on
     /// HOSE, and it is neither.
-    let kind: FundHoldingKind
+    let kind: FundInstrumentKind
     /// The price the listing already carried, when it carried one. Fmarket's
     /// catalogue call returns every fund's NAV alongside its name, so importing
     /// the whole list costs one request rather than one per fund.
@@ -35,7 +35,7 @@ struct FundInstrumentCandidate: Sendable, Equatable, Identifiable {
     init(
         symbol: String,
         name: String,
-        kind: FundHoldingKind,
+        kind: FundInstrumentKind,
         pricePerUnit: Decimal? = nil,
         priceAsOf: Date? = nil,
         owner: String = ""
@@ -104,7 +104,7 @@ protocol FundQuoteProvider: Sendable {
 
 /// Picks the provider for an instrument.
 ///
-/// The choice comes from `FundHoldingKind`, which the owner sets, and never from
+/// The choice comes from `FundInstrumentKind`, which the owner sets, and never from
 /// anything a provider says about the instrument. Both endpoints will happily
 /// answer for a symbol they describe incorrectly.
 struct FundQuoteRouter: Sendable {
@@ -119,7 +119,7 @@ struct FundQuoteRouter: Sendable {
         self.vndirect = vndirect
     }
 
-    func provider(for kind: FundHoldingKind) -> any FundQuoteProvider {
+    func provider(for kind: FundInstrumentKind) -> any FundQuoteProvider {
         switch kind {
         case .fund:
             fmarket
@@ -128,11 +128,18 @@ struct FundQuoteRouter: Sendable {
         }
     }
 
-    func latestQuote(symbol: String, kind: FundHoldingKind, asOf: Date) async throws -> FundQuote {
+    func latestQuote(
+        symbol: String,
+        kind: FundInstrumentKind,
+        asOf: Date
+    ) async throws -> FundQuote {
         try await provider(for: kind).latestQuote(symbol: symbol, asOf: asOf)
     }
 
-    func search(_ query: String, kind: FundHoldingKind) async throws -> [FundInstrumentCandidate] {
+    func search(
+        _ query: String,
+        kind: FundInstrumentKind
+    ) async throws -> [FundInstrumentCandidate] {
         try await provider(for: kind).search(query)
     }
 }

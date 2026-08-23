@@ -116,22 +116,6 @@ struct FundSummaryTests {
         #expect(FundSummary.totalCostBasis(of: holdings) == 3_500_000)
     }
 
-    @Test("A holding that is not yet linked counts as unpriced")
-    func unlinkedHoldingCountsAsUnpriced() {
-        let instrument = FundTestFactory.instrument(pricePerUnit: 30_000)
-        let unlinked = FundHolding(
-            id: UUID(),
-            instrumentID: nil,
-            units: 10,
-            averageCostPerUnit: 1_000,
-            createdAt: FundTestFactory.referenceDate
-        )
-
-        #expect(
-            FundSummary.unpriced(holdings: [unlinked], instruments: [instrument]).count == 1
-        )
-    }
-
     @Test("Nothing is reported when every position is priced")
     func nothingReportedWhenAllPriced() {
         let instrument = FundTestFactory.instrument(pricePerUnit: 30_000)

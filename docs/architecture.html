@@ -608,8 +608,8 @@
           <li class="field"><span class="fname">averageCostPerUnit</span><span class="ftype">Decimal</span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
           <li class="field key" data-anchor="FundHolding.instrumentID" style="border-style: dashed;">
-            <span class="fname">instrumentID</span><span class="ftype">UUID?</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span></span>
+            <span class="fname">instrumentID</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
           </li>
           <li class="field key" data-anchor="FundHolding.sourceAccountID">
             <span class="fname">sourceAccountID</span><span class="ftype">UUID?</span>
@@ -1057,7 +1057,7 @@
     <div class="note">
       <h3>Enums stored as String</h3>
       <p>
-        <code>CashAccountKind</code>, <code>TransactionKind</code>, <code>FundHoldingKind</code>
+        <code>CashAccountKind</code>, <code>TransactionKind</code>, <code>FundInstrumentKind</code>
         and <code>DebtDirection</code> are all <code>String, Codable</code>. Raw values are stable across migrations
         and safe for CloudKit later.
       </p>

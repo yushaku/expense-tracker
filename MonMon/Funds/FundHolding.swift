@@ -6,22 +6,19 @@ import SwiftData
 ///
 /// The instrument's identity and its price used to live here. They moved to
 /// `FundInstrument` so one ticker can only ever carry one price, and so several
-/// positions in the same thing stay consistent with each other. The columns they
-/// left behind stayed declared until every store had been through the backfill;
-/// they are gone now, so a position carries no second ticker and no second price
-/// for anything to disagree with.
+/// positions in the same thing stay consistent with each other.
 @Model
 final class FundHolding {
     var id: UUID
     /// Identifier of the `FundInstrument` this position is held in.
     ///
-    /// Optional only so the property could be added without a staged migration,
-    /// and it stays optional for the same reason: making it required now would
-    /// be exactly the migration that could not be staged. Every write from
-    /// `FundDraft` requires a choice, so `nil` means "linked to nothing this
-    /// store can still name", and `FundSummary.unpriced` is how the app reports
-    /// it rather than valuing it at a price it does not have.
-    var instrumentID: UUID?
+    /// Required: a position with no instrument has no identity, no price, and
+    /// no way to be valued. The catalogue is still joined in Swift rather than
+    /// through a SwiftData relationship, so this can still name an instrument
+    /// that has since been deleted — `FundSummary.unpriced` is how the app
+    /// reports that, rather than valuing the position at a price it does not
+    /// have.
+    var instrumentID: UUID
     var units: Decimal
     var averageCostPerUnit: Decimal
 
@@ -33,7 +30,7 @@ final class FundHolding {
 
     init(
         id: UUID,
-        instrumentID: UUID?,
+        instrumentID: UUID,
         units: Decimal,
         averageCostPerUnit: Decimal,
         createdAt: Date,

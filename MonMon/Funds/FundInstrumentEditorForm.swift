@@ -102,7 +102,7 @@ struct FundInstrumentEditorForm: View {
                     fieldLabel("Type")
 
                     Picker("Type", selection: $draft.kind) {
-                        ForEach(FundHoldingKind.allCases, id: \.rawValue) {
+                        ForEach(FundInstrumentKind.allCases, id: \.rawValue) {
                             Text($0.displayName)
                                 .tag($0)
                         }

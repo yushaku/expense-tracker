@@ -78,10 +78,7 @@ extension Array where Element == FundInstrument {
     /// a dangling `instrumentID` is therefore representable and every caller has
     /// to decide what to show for it.
     func matching(_ holding: FundHolding) -> FundInstrument? {
-        guard let instrumentID = holding.instrumentID else {
-            return nil
-        }
-        return first { $0.id == instrumentID }
+        first { $0.id == holding.instrumentID }
     }
 
     func matching(symbol: String) -> FundInstrument? {

@@ -1,13 +1,7 @@
 /// What kind of tradable thing an instrument is. The two cases price
 /// differently — an open-ended fund by its published NAV, a listed ETF by its
 /// closing price — so this is what decides which market-data provider runs.
-///
-/// The type keeps its original name. Renaming it looked free — the raw values
-/// never change — but SwiftData hashes the attribute's Swift type name into the
-/// schema, and a renamed enum makes an existing store unrecognisable to staged
-/// migration ("Cannot use staged migration with an unknown model version").
-/// `FundInstrumentKind` is an alias so new code can read the way the model does.
-enum FundHoldingKind: String, Codable, CaseIterable, Sendable {
+enum FundInstrumentKind: String, Codable, CaseIterable, Sendable {
     case fund
     case etf
 
@@ -33,5 +27,3 @@ enum FundHoldingKind: String, Codable, CaseIterable, Sendable {
         }
     }
 }
-
-typealias FundInstrumentKind = FundHoldingKind
