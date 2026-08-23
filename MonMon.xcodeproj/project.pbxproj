@@ -61,6 +61,14 @@
 		A00000000000000000000254 /* TransactionSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000165 /* TransactionSummary.swift */; };
 		A00000000000000000000255 /* TransactionPeriodTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000166 /* TransactionPeriodTests.swift */; };
 		A00000000000000000000256 /* TransactionSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000167 /* TransactionSummaryTests.swift */; };
+		A00000000000000000000257 /* CategoryDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000168 /* CategoryDraft.swift */; };
+		A00000000000000000000258 /* CategorySeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000169 /* CategorySeed.swift */; };
+		A00000000000000000000259 /* CategoryEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000170 /* CategoryEditorForm.swift */; };
+		A00000000000000000000260 /* CategoryReassignView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000171 /* CategoryReassignView.swift */; };
+		A00000000000000000000261 /* CategoryEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000172 /* CategoryEditorView.swift */; };
+		A00000000000000000000262 /* CategoryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000173 /* CategoryListView.swift */; };
+		A00000000000000000000263 /* CategoryDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000174 /* CategoryDraftTests.swift */; };
+		A00000000000000000000264 /* TransactionCategoryPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000175 /* TransactionCategoryPersistenceTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -133,6 +141,14 @@
 		A00000000000000000000165 /* TransactionSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionSummary.swift; sourceTree = "<group>"; };
 		A00000000000000000000166 /* TransactionPeriodTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionPeriodTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000167 /* TransactionSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionSummaryTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000168 /* CategoryDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryDraft.swift; sourceTree = "<group>"; };
+		A00000000000000000000169 /* CategorySeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySeed.swift; sourceTree = "<group>"; };
+		A00000000000000000000170 /* CategoryEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryEditorForm.swift; sourceTree = "<group>"; };
+		A00000000000000000000171 /* CategoryReassignView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryReassignView.swift; sourceTree = "<group>"; };
+		A00000000000000000000172 /* CategoryEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryEditorView.swift; sourceTree = "<group>"; };
+		A00000000000000000000173 /* CategoryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryListView.swift; sourceTree = "<group>"; };
+		A00000000000000000000174 /* CategoryDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryDraftTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000175 /* TransactionCategoryPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCategoryPersistenceTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -182,6 +198,12 @@
 				A00000000000000000000163 /* CategoryPalette.swift */,
 				A00000000000000000000164 /* TransactionPeriod.swift */,
 				A00000000000000000000165 /* TransactionSummary.swift */,
+				A00000000000000000000168 /* CategoryDraft.swift */,
+				A00000000000000000000169 /* CategorySeed.swift */,
+				A00000000000000000000170 /* CategoryEditorForm.swift */,
+				A00000000000000000000171 /* CategoryReassignView.swift */,
+				A00000000000000000000172 /* CategoryEditorView.swift */,
+				A00000000000000000000173 /* CategoryListView.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
@@ -223,6 +245,8 @@
 			children = (
 				A00000000000000000000166 /* TransactionPeriodTests.swift */,
 				A00000000000000000000167 /* TransactionSummaryTests.swift */,
+				A00000000000000000000174 /* CategoryDraftTests.swift */,
+				A00000000000000000000175 /* TransactionCategoryPersistenceTests.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
@@ -437,6 +461,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A00000000000000000000262 /* CategoryListView.swift in Sources */,
+				A00000000000000000000261 /* CategoryEditorView.swift in Sources */,
+				A00000000000000000000260 /* CategoryReassignView.swift in Sources */,
+				A00000000000000000000259 /* CategoryEditorForm.swift in Sources */,
+				A00000000000000000000258 /* CategorySeed.swift in Sources */,
+				A00000000000000000000257 /* CategoryDraft.swift in Sources */,
 				A00000000000000000000254 /* TransactionSummary.swift in Sources */,
 				A00000000000000000000253 /* TransactionPeriod.swift in Sources */,
 				A00000000000000000000252 /* CategoryPalette.swift in Sources */,
@@ -482,6 +512,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A00000000000000000000264 /* TransactionCategoryPersistenceTests.swift in Sources */,
+				A00000000000000000000263 /* CategoryDraftTests.swift in Sources */,
 				A00000000000000000000256 /* TransactionSummaryTests.swift in Sources */,
 				A00000000000000000000255 /* TransactionPeriodTests.swift in Sources */,
 				A00000000000000000000209 /* AccountDraftTests.swift in Sources */,
