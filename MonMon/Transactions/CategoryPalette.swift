@@ -53,25 +53,25 @@ enum CategoryPalette {
     static func color(named name: String) -> Color {
         switch colorName(name) {
         case "blue":
-            MonMonTheme.Frappe.blue
+            MonMonTheme.Hue.blue
         case "peach":
-            MonMonTheme.Frappe.peach
+            MonMonTheme.Hue.peach
         case "yellow":
-            MonMonTheme.Frappe.yellow
+            MonMonTheme.Hue.yellow
         case "mauve":
-            MonMonTheme.Frappe.mauve
+            MonMonTheme.Hue.mauve
         case "teal":
-            MonMonTheme.Frappe.teal
+            MonMonTheme.Hue.teal
         case "sky":
-            MonMonTheme.Frappe.sky
+            MonMonTheme.Hue.sky
         case "pink":
-            MonMonTheme.Frappe.pink
+            MonMonTheme.Hue.pink
         case "lavender":
-            MonMonTheme.Frappe.lavender
+            MonMonTheme.Hue.lavender
         case "red":
-            MonMonTheme.Frappe.red
+            MonMonTheme.Hue.red
         default:
-            MonMonTheme.Frappe.green
+            MonMonTheme.Hue.green
         }
     }
 }

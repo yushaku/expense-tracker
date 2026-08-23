@@ -7,7 +7,7 @@ begins.
 
 | Module id | User-visible responsibility | Depends on |
 |---|---|---|
-| `app-bootstrap` | Build and run a configured native app showing “Hello, MonMon” on iPhone and Mac | — |
+| `app-bootstrap` | Build and run a configured native app on iPhone and Mac, with a Settings tab for the theme and an optional biometric lock | — |
 | `cash-balance` | Create, edit, and delete cash, bank, and credit card accounts and view their balances | `app-bootstrap` |
 | `savings-deposit` | Record term deposits with maturity dates, projected interest, and an optional funding account, and see total assets | `cash-balance` |
 | `fund-etf-holdings` | Record fund certificate and ETF holdings at a hand-entered NAV and see cost basis, market value, and unrealized profit or loss | `cash-balance`, `savings-deposit` |

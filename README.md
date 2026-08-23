@@ -1,7 +1,7 @@
 # MonMon
 
-MonMon is a private personal-finance app for iPhone and Mac. It has four slices
-today. `cash-balance` lets one owner add, edit, and delete local cash, bank, and
+MonMon is a private personal-finance app for iPhone and Mac, themed with
+Catppuccin — Latte in light, Frappé in dark. It has four slices today. `cash-balance` lets one owner add, edit, and delete local cash, bank, and
 credit card accounts with a VND opening balance. `savings-deposit` adds term
 deposits (sổ tiết kiệm) with maturity dates, projected interest, and an optional
 funding account, plus a total-assets figure that counts transferred money only
@@ -98,6 +98,10 @@ and are excluded by `.gitignore`.
 - Owner validation: form behavior, interest and valuation against a hand
   calculation, relaunch persistence, iPhone Dynamic Type and keyboard, and Mac
   window resizing.
+- Settings: a light/dark/system theme, and an optional Face ID, Touch ID, or
+  passcode lock that hides the screen on launch and after a minute away. The
+  lock is a gate on the screen, not encryption; the records on disk are
+  protected by the operating system's file protection and nothing more.
 - Not included yet: transfers between two accounts, budgets, recurring
   transactions, interest paid on a schedule, rollover or early withdrawal,
   individual buy/sell trades or realized profit and loss, automatic price

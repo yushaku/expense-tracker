@@ -80,6 +80,11 @@
 		A00000000000000000000273 /* AssetAllocationCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000184 /* AssetAllocationCard.swift */; };
 		A00000000000000000000274 /* AssetAllocationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000185 /* AssetAllocationTests.swift */; };
 		A00000000000000000000275 /* DateField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000186 /* DateField.swift */; };
+		A00000000000000000000276 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000187 /* AppTheme.swift */; };
+		A00000000000000000000277 /* AppLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000188 /* AppLock.swift */; };
+		A00000000000000000000278 /* LockScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000189 /* LockScreenView.swift */; };
+		A00000000000000000000279 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000190 /* SettingsView.swift */; };
+		A00000000000000000000280 /* AppLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000191 /* AppLockTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -171,6 +176,11 @@
 		A00000000000000000000184 /* AssetAllocationCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocationCard.swift; sourceTree = "<group>"; };
 		A00000000000000000000185 /* AssetAllocationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocationTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000186 /* DateField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateField.swift; sourceTree = "<group>"; };
+		A00000000000000000000187 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+		A00000000000000000000188 /* AppLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLock.swift; sourceTree = "<group>"; };
+		A00000000000000000000189 /* LockScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenView.swift; sourceTree = "<group>"; };
+		A00000000000000000000190 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A00000000000000000000191 /* AppLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -235,6 +245,16 @@
 			path = Transactions;
 			sourceTree = "<group>";
 		};
+		A00000000000000000000026 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000188 /* AppLock.swift */,
+				A00000000000000000000189 /* LockScreenView.swift */,
+				A00000000000000000000190 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 		A00000000000000000000012 /* MonMon */ = {
 			isa = PBXGroup;
 			children = (
@@ -245,6 +265,7 @@
 				A00000000000000000000019 /* Design */,
 				A00000000000000000000014 /* Resources */,
 				A00000000000000000000024 /* Transactions */,
+				A00000000000000000000026 /* Settings */,
 			);
 			path = MonMon;
 			sourceTree = "<group>";
@@ -280,6 +301,14 @@
 			path = Transactions;
 			sourceTree = "<group>";
 		};
+		A00000000000000000000027 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000191 /* AppLockTests.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 		A00000000000000000000015 /* MonMonTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -287,6 +316,7 @@
 				A00000000000000000000021 /* Savings */,
 				A00000000000000000000023 /* Funds */,
 				A00000000000000000000025 /* Transactions */,
+				A00000000000000000000027 /* Settings */,
 			);
 			path = MonMonTests;
 			sourceTree = "<group>";
@@ -325,6 +355,7 @@
 			children = (
 				A00000000000000000000127 /* MonMonTheme.swift */,
 				A00000000000000000000186 /* DateField.swift */,
+				A00000000000000000000187 /* AppTheme.swift */,
 			);
 			path = Design;
 			sourceTree = "<group>";
@@ -494,6 +525,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A00000000000000000000279 /* SettingsView.swift in Sources */,
+				A00000000000000000000278 /* LockScreenView.swift in Sources */,
+				A00000000000000000000277 /* AppLock.swift in Sources */,
+				A00000000000000000000276 /* AppTheme.swift in Sources */,
 				A00000000000000000000275 /* DateField.swift in Sources */,
 				A00000000000000000000273 /* AssetAllocationCard.swift in Sources */,
 				A00000000000000000000272 /* AssetAllocation.swift in Sources */,
@@ -553,6 +588,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A00000000000000000000280 /* AppLockTests.swift in Sources */,
 				A00000000000000000000274 /* AssetAllocationTests.swift in Sources */,
 				A00000000000000000000271 /* MoneyTransactionPersistenceTests.swift in Sources */,
 				A00000000000000000000270 /* TransactionDraftTests.swift in Sources */,

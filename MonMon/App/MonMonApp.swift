@@ -4,6 +4,7 @@ import SwiftUI
 @main
 struct MonMonApp: App {
     private let container: ModelContainer
+    @State private var appLock = AppLock()
 
     init() {
         do {
@@ -21,6 +22,7 @@ struct MonMonApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(appLock)
         }
         .modelContainer(container)
     }

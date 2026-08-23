@@ -5,6 +5,7 @@ enum RootTab: String, CaseIterable, Identifiable {
     case savings
     case funds
     case spending
+    case settings
 
     var id: String { rawValue }
 
@@ -18,6 +19,8 @@ enum RootTab: String, CaseIterable, Identifiable {
             "Funds"
         case .spending:
             "Spending"
+        case .settings:
+            "Settings"
         }
     }
 
@@ -31,6 +34,8 @@ enum RootTab: String, CaseIterable, Identifiable {
             "chart.line.uptrend.xyaxis"
         case .spending:
             "arrow.left.arrow.right"
+        case .settings:
+            "gearshape.fill"
         }
     }
 
@@ -79,6 +84,8 @@ struct RootTabView: View {
                 FundListView()
             case .spending:
                 TransactionListView()
+            case .settings:
+                SettingsView()
             }
         }
 
@@ -156,6 +163,13 @@ struct RootTabView: View {
                     }
                     .accessibilityIdentifier(RootTab.spending.accessibilityIdentifier)
                     .tag(RootTab.spending)
+
+                SettingsView()
+                    .tabItem {
+                        Label(RootTab.settings.title, systemImage: RootTab.settings.symbolName)
+                    }
+                    .accessibilityIdentifier(RootTab.settings.accessibilityIdentifier)
+                    .tag(RootTab.settings)
             }
         }
     #endif
