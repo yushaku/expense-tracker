@@ -59,14 +59,12 @@ struct CategoryBreakdownCard: View {
                 .tracking(0.8)
                 .foregroundStyle(MonMonTheme.textSecondary)
 
-            Picker("Direction", selection: $kind) {
-                ForEach(TransactionKind.allCases, id: \.rawValue) {
-                    Text($0.displayName)
-                        .tag($0)
-                }
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
+            SegmentedTabs(
+                label: "Direction",
+                selection: $kind,
+                options: TransactionKind.allCases,
+                title: \.displayName
+            )
             .accessibilityIdentifier("breakdown-kind")
         }
     }

@@ -163,14 +163,12 @@ struct TransactionListView: View {
     }
 
     private var scopePicker: some View {
-        Picker("Period", selection: scopeSelection) {
-            ForEach(TransactionRangeScope.allCases) {
-                Text($0.displayName)
-                    .tag($0)
-            }
-        }
-        .pickerStyle(.segmented)
-        .labelsHidden()
+        SegmentedTabs(
+            label: "Period",
+            selection: scopeSelection,
+            options: TransactionRangeScope.allCases,
+            title: \.displayName
+        )
         .accessibilityIdentifier("period-scope")
     }
 

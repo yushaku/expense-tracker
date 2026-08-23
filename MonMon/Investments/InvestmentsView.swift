@@ -127,17 +127,12 @@ struct InvestmentsView: View {
     }
 
     private var segmentPicker: some View {
-        Picker("Investment kind", selection: $segment) {
-            ForEach(InvestmentSegment.allCases) { segment in
-                Text(segment.displayName)
-                    .tag(segment)
-            }
-        }
-        .pickerStyle(.segmented)
-        .labelsHidden()
-        // A segmented picker sizes to its labels, which left it stranded beside
-        // cards that run the full width. Stretching it lines the two up.
-        .frame(maxWidth: .infinity)
+        SegmentedTabs(
+            label: "Investment kind",
+            selection: $segment,
+            options: InvestmentSegment.allCases,
+            title: \.displayName
+        )
         .accessibilityIdentifier("investment-segment")
     }
 
