@@ -46,6 +46,10 @@
 		A00000000000000000000903 /* FundInstrumentEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000902 /* FundInstrumentEditorView.swift */; };
 		A00000000000000000000905 /* FundInstrumentEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000904 /* FundInstrumentEditorForm.swift */; };
 		A00000000000000000000907 /* FundInstrumentListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000906 /* FundInstrumentListView.swift */; };
+		A00000000000000000000941 /* FundQuote.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000940 /* FundQuote.swift */; };
+		A00000000000000000000943 /* FundQuoteTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000942 /* FundQuoteTransport.swift */; };
+		A00000000000000000000945 /* FmarketQuoteProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000944 /* FmarketQuoteProvider.swift */; };
+		A00000000000000000000947 /* VNDirectQuoteProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000946 /* VNDirectQuoteProvider.swift */; };
 		A00000000000000000000234 /* FundInstrumentKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000145 /* FundInstrumentKind.swift */; };
 		A00000000000000000000235 /* FundHolding.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000146 /* FundHolding.swift */; };
 		A00000000000000000000236 /* FundValuation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000147 /* FundValuation.swift */; };
@@ -63,6 +67,8 @@
 		A00000000000000000000909 /* FundInstrumentBackfillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000908 /* FundInstrumentBackfillTests.swift */; };
 		A00000000000000000000911 /* TradingCalendarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000910 /* TradingCalendarTests.swift */; };
 		A00000000000000000000913 /* FundInstrumentDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000912 /* FundInstrumentDraftTests.swift */; };
+		A00000000000000000000949 /* FundQuoteFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000948 /* FundQuoteFixtures.swift */; };
+		A00000000000000000000951 /* FundQuoteProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000950 /* FundQuoteProviderTests.swift */; };
 		A00000000000000000000247 /* FundSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000158 /* FundSummaryTests.swift */; };
 		A00000000000000000000248 /* FundHoldingPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000159 /* FundHoldingPersistenceTests.swift */; };
 		A00000000000000000000249 /* TransactionKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000160 /* TransactionKind.swift */; };
@@ -201,6 +207,10 @@
 		A00000000000000000000902 /* FundInstrumentEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentEditorView.swift; sourceTree = "<group>"; };
 		A00000000000000000000904 /* FundInstrumentEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentEditorForm.swift; sourceTree = "<group>"; };
 		A00000000000000000000906 /* FundInstrumentListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentListView.swift; sourceTree = "<group>"; };
+		A00000000000000000000940 /* FundQuote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundQuote.swift; sourceTree = "<group>"; };
+		A00000000000000000000942 /* FundQuoteTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundQuoteTransport.swift; sourceTree = "<group>"; };
+		A00000000000000000000944 /* FmarketQuoteProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FmarketQuoteProvider.swift; sourceTree = "<group>"; };
+		A00000000000000000000946 /* VNDirectQuoteProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VNDirectQuoteProvider.swift; sourceTree = "<group>"; };
 		A00000000000000000000145 /* FundInstrumentKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentKind.swift; sourceTree = "<group>"; };
 		A00000000000000000000146 /* FundHolding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundHolding.swift; sourceTree = "<group>"; };
 		A00000000000000000000147 /* FundValuation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundValuation.swift; sourceTree = "<group>"; };
@@ -218,6 +228,8 @@
 		A00000000000000000000908 /* FundInstrumentBackfillTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentBackfillTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000910 /* TradingCalendarTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradingCalendarTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000912 /* FundInstrumentDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentDraftTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000948 /* FundQuoteFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundQuoteFixtures.swift; sourceTree = "<group>"; };
+		A00000000000000000000950 /* FundQuoteProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundQuoteProviderTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000158 /* FundSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSummaryTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000159 /* FundHoldingPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundHoldingPersistenceTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000160 /* TransactionKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionKind.swift; sourceTree = "<group>"; };
@@ -481,6 +493,10 @@
 				A00000000000000000000902 /* FundInstrumentEditorView.swift */,
 				A00000000000000000000904 /* FundInstrumentEditorForm.swift */,
 				A00000000000000000000906 /* FundInstrumentListView.swift */,
+				A00000000000000000000940 /* FundQuote.swift */,
+				A00000000000000000000942 /* FundQuoteTransport.swift */,
+				A00000000000000000000944 /* FmarketQuoteProvider.swift */,
+				A00000000000000000000946 /* VNDirectQuoteProvider.swift */,
 				A00000000000000000000145 /* FundInstrumentKind.swift */,
 				A00000000000000000000146 /* FundHolding.swift */,
 				A00000000000000000000147 /* FundValuation.swift */,
@@ -505,6 +521,8 @@
 				A00000000000000000000908 /* FundInstrumentBackfillTests.swift */,
 				A00000000000000000000910 /* TradingCalendarTests.swift */,
 				A00000000000000000000912 /* FundInstrumentDraftTests.swift */,
+				A00000000000000000000948 /* FundQuoteFixtures.swift */,
+				A00000000000000000000950 /* FundQuoteProviderTests.swift */,
 				A00000000000000000000158 /* FundSummaryTests.swift */,
 				A00000000000000000000159 /* FundHoldingPersistenceTests.swift */,
 			);
@@ -827,6 +845,10 @@
 				A00000000000000000000903 /* FundInstrumentEditorView.swift in Sources */,
 				A00000000000000000000905 /* FundInstrumentEditorForm.swift in Sources */,
 				A00000000000000000000907 /* FundInstrumentListView.swift in Sources */,
+				A00000000000000000000941 /* FundQuote.swift in Sources */,
+				A00000000000000000000943 /* FundQuoteTransport.swift in Sources */,
+				A00000000000000000000945 /* FmarketQuoteProvider.swift in Sources */,
+				A00000000000000000000947 /* VNDirectQuoteProvider.swift in Sources */,
 				A00000000000000000000234 /* FundInstrumentKind.swift in Sources */,
 				A00000000000000000000235 /* FundHolding.swift in Sources */,
 				A00000000000000000000236 /* FundValuation.swift in Sources */,
@@ -888,6 +910,8 @@
 				A00000000000000000000909 /* FundInstrumentBackfillTests.swift in Sources */,
 				A00000000000000000000911 /* TradingCalendarTests.swift in Sources */,
 				A00000000000000000000913 /* FundInstrumentDraftTests.swift in Sources */,
+				A00000000000000000000949 /* FundQuoteFixtures.swift in Sources */,
+				A00000000000000000000951 /* FundQuoteProviderTests.swift in Sources */,
 				A00000000000000000000247 /* FundSummaryTests.swift in Sources */,
 				A00000000000000000000248 /* FundHoldingPersistenceTests.swift in Sources */,
 				A00000000000000000000850 /* DebtInterestTests.swift in Sources */,
