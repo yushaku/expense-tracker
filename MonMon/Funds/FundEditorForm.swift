@@ -193,13 +193,10 @@ struct FundEditorForm: View {
                 VStack(alignment: .leading, spacing: 8) {
                     fieldLabel("NAV as of")
 
-                    DatePicker(
-                        "NAV as of",
+                    DateField(
                         selection: $draft.navAsOf,
-                        displayedComponents: .date
+                        accessibilityIdentifier: "fund-nav-date"
                     )
-                    .labelsHidden()
-                    .accessibilityIdentifier("fund-nav-date")
                 }
             }
         }

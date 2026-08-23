@@ -82,13 +82,10 @@ struct SavingsEditorForm: View {
                 VStack(alignment: .leading, spacing: 8) {
                     fieldLabel("Opened on")
 
-                    DatePicker(
-                        "Opened on",
+                    DateField(
                         selection: $draft.openedAt,
-                        displayedComponents: .date
+                        accessibilityIdentifier: "savings-opened-at"
                     )
-                    .labelsHidden()
-                    .accessibilityIdentifier("savings-opened-at")
                 }
             }
         }

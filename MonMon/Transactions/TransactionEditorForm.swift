@@ -171,13 +171,10 @@ struct TransactionEditorForm: View {
                 VStack(alignment: .leading, spacing: 8) {
                     fieldLabel("Date")
 
-                    DatePicker(
-                        "Date",
+                    DateField(
                         selection: $draft.occurredAt,
-                        displayedComponents: .date
+                        accessibilityIdentifier: "transaction-date"
                     )
-                    .labelsHidden()
-                    .accessibilityIdentifier("transaction-date")
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
