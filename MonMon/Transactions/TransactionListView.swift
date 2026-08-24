@@ -28,16 +28,19 @@ struct TransactionListView: View {
 
                         if accounts.isEmpty {
                             noAccountState
-                        } else if visibleTransactions.isEmpty {
-                            emptyState
                         } else {
                             CategoryBreakdownCard(
                                 kind: $breakdownKind,
                                 slices: breakdownSlices,
-                                range: range
+                                range: range,
+                                onManageCategories: {
+                                    isManagingCategories = true
+                                }
                             )
 
-                            transactionsSection
+                            if !visibleTransactions.isEmpty {
+                                transactionsSection
+                            }
                         }
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -62,15 +65,6 @@ struct TransactionListView: View {
             }
             .navigationTitle("Spending")
             .accessibilityIdentifier("spending-list")
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button("Categories", systemImage: "tag.fill") {
-                        isManagingCategories = true
-                    }
-                    .accessibilityIdentifier("manage-categories")
-                }
-
-            }
             .sheet(item: $editorMode) { mode in
                 TransactionEditorView(mode: mode, defaultDate: defaultDate)
             }
@@ -189,13 +183,6 @@ struct TransactionListView: View {
         }
     }
 
-    private var addTransactionButton: some View {
-        Button("Add Transaction", systemImage: "plus") {
-            editorMode = .add
-        }
-        .accessibilityIdentifier("add-transaction")
-    }
-
     private var transactionsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Transactions")
@@ -228,16 +215,6 @@ struct TransactionListView: View {
 
     private func account(for transaction: MoneyTransaction) -> CashAccount? {
         accounts.first { $0.id == transaction.accountID }
-    }
-
-    private var emptyState: some View {
-        placeholder(
-            symbolName: "arrow.left.arrow.right",
-            title: "Nothing here yet",
-            message: "Record what you spent or received and this period adds up."
-        ) {
-            addTransactionButton
-        }
     }
 
     private var noAccountState: some View {
