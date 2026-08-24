@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct TransactionCard: View {
+    @Environment(\.locale) private var locale
+
     let transaction: MoneyTransaction
     let category: TransactionCategory?
     let account: CashAccount?
@@ -8,13 +10,7 @@ struct TransactionCard: View {
     /// drops its own copy there and keeps it everywhere else.
     var showsDate = true
 
-    private static let dateFormat: Date.FormatStyle = {
-        var style = Date.FormatStyle().day().month(.abbreviated)
-        style.calendar = TransactionPeriod.calendar
-        style.timeZone = TransactionPeriod.calendar.timeZone
-        style.locale = Locale(identifier: "en_US")
-        return style
-    }()
+    private static let dateTemplate = Date.FormatStyle().day().month(.abbreviated)
 
     var body: some View {
         HStack(spacing: 14) {
@@ -78,7 +74,10 @@ struct TransactionCard: View {
                 .foregroundStyle(directionTint)
 
             Label(
-                showsDate ? Self.dateFormat.format(transaction.occurredAt) : transaction.kind.displayName,
+                showsDate
+                    ? TransactionPeriod.format(Self.dateTemplate, in: locale)
+                        .format(transaction.occurredAt)
+                    : transaction.kind.displayName,
                 systemImage: transaction.kind.symbolName
             )
             .font(.caption2.weight(.semibold))

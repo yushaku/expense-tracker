@@ -14,6 +14,8 @@ struct DayPeriod: Hashable {
 /// What one day of the month calendar was made of: what came in, what went out,
 /// and every transaction behind those two figures.
 struct DayTransactionsView: View {
+    @Environment(\.locale) private var locale
+
     @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
     private var transactions: [MoneyTransaction]
 
@@ -35,7 +37,8 @@ struct DayTransactionsView: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                     SpendingOverviewCard(
-                        title: Self.headerFormat.format(period.day),
+                        title: TransactionPeriod.format(Self.headerTemplate, in: locale)
+                            .format(period.day),
                         income: income,
                         expense: expense,
                         count: matching.count
@@ -78,7 +81,9 @@ struct DayTransactionsView: View {
                 }
             }
         }
-        .navigationTitle(Self.titleFormat.format(period.day))
+        .navigationTitle(
+            TransactionPeriod.format(Self.titleTemplate, in: locale).format(period.day)
+        )
         .accessibilityIdentifier("day-transactions")
         .sheet(item: $editorMode) { mode in
             // A transaction added from a day lands on that day, which is the
@@ -127,19 +132,6 @@ struct DayTransactionsView: View {
     }
 
     /// The bar has room for a short date; the card below it spells the day out.
-    private static let titleFormat: Date.FormatStyle = {
-        var style = Date.FormatStyle().day().month(.abbreviated).year()
-        style.calendar = TransactionPeriod.calendar
-        style.timeZone = TransactionPeriod.calendar.timeZone
-        style.locale = Locale(identifier: "en_US")
-        return style
-    }()
-
-    private static let headerFormat: Date.FormatStyle = {
-        var style = Date.FormatStyle().weekday(.wide).day().month(.wide).year()
-        style.calendar = TransactionPeriod.calendar
-        style.timeZone = TransactionPeriod.calendar.timeZone
-        style.locale = Locale(identifier: "en_US")
-        return style
-    }()
+    private static let titleTemplate = Date.FormatStyle().day().month(.abbreviated).year()
+    private static let headerTemplate = Date.FormatStyle().weekday(.wide).day().month(.wide).year()
 }

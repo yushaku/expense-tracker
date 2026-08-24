@@ -15,6 +15,8 @@ import SwiftUI
 struct DateRangeFilter: View {
     @Binding var range: TransactionRange
 
+    @Environment(\.locale) private var locale
+
     /// Prefixes the accessibility identifiers, so two filters on one screen stay
     /// tellable apart. Empty leaves the plain names the Spending screen has
     /// always used.
@@ -83,7 +85,7 @@ struct DateRangeFilter: View {
                 endLabel("To", date: range.lastDay)
             }
         } else {
-            Text(range.title.uppercased())
+            Text(range.title(in: locale).uppercased())
                 .font(.caption.weight(.semibold))
                 .tracking(0.8)
                 .lineLimit(1)
@@ -100,7 +102,7 @@ struct DateRangeFilter: View {
                 .tracking(0.6)
                 .foregroundStyle(MonMonTheme.textSecondary)
 
-            Text(Self.dayFormat.format(date))
+            Text(TransactionPeriod.format(Self.dayTemplate, in: locale).format(date))
                 .font(.subheadline.weight(.semibold))
                 .monospacedDigit()
                 .lineLimit(1)
@@ -237,13 +239,7 @@ struct DateRangeFilter: View {
         identifierPrefix.isEmpty ? name : "\(identifierPrefix)-\(name)"
     }
 
-    private static let dayFormat: Date.FormatStyle = {
-        var style = Date.FormatStyle().day().month(.abbreviated).year()
-        style.calendar = TransactionPeriod.calendar
-        style.timeZone = TransactionPeriod.calendar.timeZone
-        style.locale = Locale(identifier: "en_US")
-        return style
-    }()
+    private static let dayTemplate = Date.FormatStyle().day().month(.abbreviated).year()
 }
 
 /// The small button a section title carries to change what slice of time it is
@@ -255,6 +251,8 @@ struct DateRangeFilter: View {
 /// they picked stays legible because the screen writes its name beside them.
 struct DateRangeFilterButton: View {
     @Binding var range: TransactionRange
+
+    @Environment(\.locale) private var locale
 
     /// Prefixes the accessibility identifiers, so two filters on one screen stay
     /// tellable apart. Empty leaves the plain names the Spending screen has
@@ -281,7 +279,7 @@ struct DateRangeFilterButton: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Filter by date")
-        .accessibilityValue(range.title)
+        .accessibilityValue(range.title(in: locale))
         .accessibilityIdentifier(identifier("period-filter"))
         .sheet(isPresented: $isFiltering) {
             sheet
@@ -333,12 +331,14 @@ struct DateRangeFilterButton: View {
 
 #if DEBUG
     private struct DateRangeFilterPreview: View {
+        @Environment(\.locale) private var locale
+
         @State private var range = TransactionRange.month(containing: .now)
 
         var body: some View {
             VStack(spacing: 24) {
                 HStack(spacing: 12) {
-                    Text(range.title.uppercased())
+                    Text(range.title(in: locale).uppercased())
                         .font(.caption.weight(.semibold))
                         .tracking(0.8)
                         .foregroundStyle(MonMonTheme.textSecondary)

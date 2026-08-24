@@ -7,6 +7,8 @@ import SwiftUI
 /// It owns no period of its own. The screen keeps the range, hands down the
 /// month it is showing, and is told which month was tapped.
 struct MonthRail: View {
+    @Environment(\.locale) private var locale
+
     let months: [Date]
     /// The month on show. A period narrowed to one day inside a month still
     /// marks that month, because the screen hands down the month it falls in.
@@ -18,23 +20,11 @@ struct MonthRail: View {
     /// with the text size so a larger type setting is not clipped.
     @ScaledMetric(relativeTo: .subheadline) private var railHeight: CGFloat = 46
 
-    private static let monthFormat: Date.FormatStyle = {
-        var style = Date.FormatStyle().month(.wide)
-        style.calendar = TransactionPeriod.calendar
-        style.timeZone = TransactionPeriod.calendar.timeZone
-        style.locale = Locale(identifier: "en_US")
-        return style
-    }()
+    private static let monthTemplate = Date.FormatStyle().month(.wide)
 
     /// Months outside this year carry it, so scrolling back never leaves the
     /// owner reading "March" without knowing which March.
-    private static let monthYearFormat: Date.FormatStyle = {
-        var style = Date.FormatStyle().month(.abbreviated).year()
-        style.calendar = TransactionPeriod.calendar
-        style.timeZone = TransactionPeriod.calendar.timeZone
-        style.locale = Locale(identifier: "en_US")
-        return style
-    }()
+    private static let monthYearTemplate = Date.FormatStyle().month(.abbreviated).year()
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -86,7 +76,7 @@ struct MonthRail: View {
         .buttonStyle(.plain)
         .id(month)
         .animation(.snappy(duration: 0.22), value: isSelected)
-        .accessibilityLabel(TransactionPeriod.title(for: month))
+        .accessibilityLabel(TransactionPeriod.title(for: month, in: locale))
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
         .accessibilityIdentifier("month-rail-\(identifier(month))")
     }
@@ -96,7 +86,9 @@ struct MonthRail: View {
         let isThisYear =
             calendar.component(.year, from: month) == calendar.component(.year, from: .now)
 
-        return isThisYear ? Self.monthFormat.format(month) : Self.monthYearFormat.format(month)
+        let template = isThisYear ? Self.monthTemplate : Self.monthYearTemplate
+
+        return TransactionPeriod.format(template, in: locale).format(month)
     }
 
     /// Keeps the month on show in the middle, so the months either side of it

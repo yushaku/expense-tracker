@@ -13,33 +13,24 @@ struct TransactionCalendarCard: View {
     /// range and this grid can never disagree about which month is on show.
     let onStepMonth: (Int) -> Void
 
-    private static let dayNumberFormat: Date.FormatStyle = {
-        var style = Date.FormatStyle().day()
-        style.calendar = TransactionPeriod.calendar
-        style.timeZone = TransactionPeriod.calendar.timeZone
-        style.locale = Locale(identifier: "en_US")
-        return style
-    }()
+    @Environment(\.locale) private var locale
 
-    private static let dayLabelFormat: Date.FormatStyle = {
-        var style = Date.FormatStyle().weekday(.abbreviated).day().month(.abbreviated)
-        style.calendar = TransactionPeriod.calendar
-        style.timeZone = TransactionPeriod.calendar.timeZone
-        style.locale = Locale(identifier: "en_US")
-        return style
-    }()
+    private static let dayNumberTemplate = Date.FormatStyle().day()
+    private static let dayLabelTemplate = Date.FormatStyle().weekday(.abbreviated).day()
+        .month(.abbreviated)
 
-    /// Column headings, rotated to start on the calendar's own first weekday and
-    /// pinned to one locale so the grid reads the same wherever the phone is set.
-    private static let weekdaySymbols: [String] = {
+    /// Column headings in the language on show, rotated to start on the
+    /// calendar's own first weekday. The weekday a week starts on is the app's
+    /// own, not the language's, so the columns never shift under the grid.
+    private static func weekdaySymbols(in locale: Locale) -> [String] {
         var calendar = TransactionPeriod.calendar
-        calendar.locale = Locale(identifier: "en_US")
+        calendar.locale = locale
 
         let symbols = calendar.veryShortWeekdaySymbols
-        let first = min(max(calendar.firstWeekday - 1, 0), symbols.count - 1)
+        let first = min(max(TransactionPeriod.calendar.firstWeekday - 1, 0), symbols.count - 1)
 
         return Array(symbols[first...] + symbols[..<first])
-    }()
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -72,7 +63,7 @@ struct TransactionCalendarCard: View {
     private var header: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(TransactionPeriod.title(for: month).uppercased())
+                Text(TransactionPeriod.title(for: month, in: locale).uppercased())
                     .font(.caption.weight(.semibold))
                     .tracking(0.8)
                     .lineLimit(1)
@@ -126,7 +117,7 @@ struct TransactionCalendarCard: View {
 
     private var weekdayHeader: some View {
         HStack(spacing: 4) {
-            ForEach(Self.weekdaySymbols, id: \.self) { symbol in
+            ForEach(Self.weekdaySymbols(in: locale), id: \.self) { symbol in
                 Text(symbol)
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(MonMonTheme.textSecondary)
@@ -142,7 +133,7 @@ struct TransactionCalendarCard: View {
     private func dayCell(_ day: TransactionCalendarDay) -> some View {
         NavigationLink(value: DayPeriod(day: day.date)) {
             VStack(spacing: 2) {
-                Text(Self.dayNumberFormat.format(day.date))
+                Text(TransactionPeriod.format(Self.dayNumberTemplate, in: locale).format(day.date))
                     .font(.caption2.weight(isToday(day) ? .bold : .medium))
                     .monospacedDigit()
                     .foregroundStyle(numberColor(day))
@@ -205,7 +196,7 @@ struct TransactionCalendarCard: View {
     }
 
     private func accessibilityLabel(_ day: TransactionCalendarDay) -> String {
-        let date = Self.dayLabelFormat.format(day.date)
+        let date = TransactionPeriod.format(Self.dayLabelTemplate, in: locale).format(day.date)
 
         guard !day.isEmpty else {
             return "\(date), nothing recorded"

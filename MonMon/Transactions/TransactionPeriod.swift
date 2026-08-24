@@ -11,13 +11,22 @@ enum TransactionPeriod {
         SavingsInterest.calendar
     }
 
-    private static let titleFormat: Date.FormatStyle = {
-        var style = Date.FormatStyle().year().month(.wide)
-        style.calendar = SavingsInterest.calendar
-        style.timeZone = SavingsInterest.calendar.timeZone
-        style.locale = Locale(identifier: "en_US")
+    /// A date style that writes dates in `locale` but measures them with the
+    /// app's own calendar and time zone. What a date *says* follows the language
+    /// the owner picked; which day it names never depends on where the phone is.
+    ///
+    /// The locale is handed in at every call rather than baked into a stored
+    /// style, because a stored one is built once and would keep writing the
+    /// language that happened to be current at launch.
+    static func format(_ template: Date.FormatStyle, in locale: Locale) -> Date.FormatStyle {
+        var style = template
+        style.calendar = calendar
+        style.timeZone = calendar.timeZone
+        style.locale = locale
         return style
-    }()
+    }
+
+    private static let titleTemplate = Date.FormatStyle().year().month(.wide)
 
     static func startOfMonth(for date: Date) -> Date {
         let components = calendar.dateComponents([.year, .month], from: date)
@@ -57,7 +66,7 @@ enum TransactionPeriod {
         return months
     }
 
-    static func title(for date: Date) -> String {
-        titleFormat.format(date)
+    static func title(for date: Date, in locale: Locale) -> String {
+        format(titleTemplate, in: locale).format(date)
     }
 }

@@ -8,6 +8,8 @@ import SwiftUI
 /// already in the rows below, and tapping a wedge names it in the middle of the
 /// ring, so a third copy only cost the chart its width.
 struct CategoryBreakdownCard: View {
+    @Environment(\.locale) private var locale
+
     @Binding var kind: TransactionKind
 
     let slices: [CategoryBreakdownSlice]
@@ -279,7 +281,7 @@ struct CategoryBreakdownCard: View {
     }
 
     private var emptyState: some View {
-        Text("No \(kind.displayName.lowercased()) recorded \(range.phrase).")
+        Text("No \(kind.displayName.lowercased()) recorded \(range.phrase(in: locale)).")
             .font(.subheadline)
             .foregroundStyle(MonMonTheme.textSecondary)
             .frame(maxWidth: .infinity, alignment: .leading)

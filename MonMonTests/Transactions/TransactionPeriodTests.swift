@@ -64,8 +64,13 @@ struct TransactionPeriodTests {
         #expect(months.isEmpty)
     }
 
-    @Test("The title names the month and the year in English")
-    func titleIsEnglish() {
-        #expect(TransactionPeriod.title(for: date(2026, 8, 15)) == "August 2026")
+    @Test("The title names the month and the year in the language it is asked for")
+    func titleFollowsTheLocale() {
+        let august = date(2026, 8, 15)
+
+        #expect(TransactionPeriod.title(for: august, in: Locale(identifier: "en")) == "August 2026")
+        #expect(
+            TransactionPeriod.title(for: august, in: Locale(identifier: "vi")) == "tháng 8 năm 2026"
+        )
     }
 }

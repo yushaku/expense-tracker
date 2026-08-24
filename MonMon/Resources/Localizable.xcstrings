@@ -40,6 +40,36 @@
           }
         }
       }
+    },
+    "between %@ and %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "từ %@ đến %@"
+          }
+        }
+      }
+    },
+    "in %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "trong %@"
+          }
+        }
+      }
+    },
+    "on %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vào %@"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

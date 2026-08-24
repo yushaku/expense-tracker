@@ -2,6 +2,8 @@ import SwiftData
 import SwiftUI
 
 struct TransactionListView: View {
+    @Environment(\.locale) private var locale
+
     @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
     private var transactions: [MoneyTransaction]
 
@@ -21,13 +23,8 @@ struct TransactionListView: View {
 
     /// Weekday first: over a run of days the name is what the eye picks out,
     /// and the year is left to the period title above the list.
-    private static let dayFormat: Date.FormatStyle = {
-        var style = Date.FormatStyle().weekday(.abbreviated).day().month(.abbreviated)
-        style.calendar = TransactionPeriod.calendar
-        style.timeZone = TransactionPeriod.calendar.timeZone
-        style.locale = Locale(identifier: "en_US")
-        return style
-    }()
+    private static let dayTemplate = Date.FormatStyle().weekday(.abbreviated).day().month(
+        .abbreviated)
 
     var body: some View {
         NavigationStack {
@@ -38,7 +35,7 @@ struct TransactionListView: View {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                         SpendingOverviewCard(
-                            title: range.title,
+                            title: range.title(in: locale),
                             income: income,
                             expense: expense,
                             count: visibleTransactions.count
@@ -358,19 +355,22 @@ struct TransactionListView: View {
 
     private var emptyFilterNotice: String {
         guard let kind = listFilter.kind else {
-            return "Nothing recorded \(range.phrase)."
+            return "Nothing recorded \(range.phrase(in: locale))."
         }
 
-        return "No \(kind.displayName.lowercased()) recorded \(range.phrase)."
+        return "No \(kind.displayName.lowercased()) recorded \(range.phrase(in: locale))."
     }
 
     private func dayHeader(for group: TransactionDayGroup) -> some View {
         HStack(spacing: 12) {
-            Text(Self.dayFormat.format(group.day).uppercased())
-                .font(.caption.weight(.semibold))
-                .tracking(0.8)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+            Text(
+                TransactionPeriod.format(Self.dayTemplate, in: locale).format(group.day)
+                    .uppercased()
+            )
+            .font(.caption.weight(.semibold))
+            .tracking(0.8)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
 
             Spacer(minLength: 8)
 

@@ -56,16 +56,12 @@ struct TransactionRange: Hashable {
         TransactionPeriod.calendar
     }
 
-    private static func format(_ template: Date.FormatStyle) -> Date.FormatStyle {
-        var style = template
-        style.calendar = calendar
-        style.timeZone = calendar.timeZone
-        style.locale = Locale(identifier: "en_US")
-        return style
-    }
+    private static let dayTemplate = Date.FormatStyle().day().month(.abbreviated).year()
+    private static let yearTemplate = Date.FormatStyle().year()
 
-    private static let dayFormat = format(Date.FormatStyle().day().month(.abbreviated).year())
-    private static let yearFormat = format(Date.FormatStyle().year())
+    private static func day(_ date: Date, in locale: Locale) -> String {
+        TransactionPeriod.format(dayTemplate, in: locale).format(date)
+    }
 
     // MARK: - Building
 
@@ -151,31 +147,37 @@ struct TransactionRange: Hashable {
         }
     }
 
-    var title: String {
+    func title(in locale: Locale) -> String {
         switch scope {
         case .day:
-            Self.dayFormat.format(start)
+            Self.day(start, in: locale)
         case .month:
-            TransactionPeriod.title(for: start)
+            TransactionPeriod.title(for: start, in: locale)
         case .year:
-            Self.yearFormat.format(start)
+            TransactionPeriod.format(Self.yearTemplate, in: locale).format(start)
         case .custom:
             start == lastDay
-                ? Self.dayFormat.format(start)
-                : "\(Self.dayFormat.format(start)) – \(Self.dayFormat.format(lastDay))"
+                ? Self.day(start, in: locale)
+                : "\(Self.day(start, in: locale)) – \(Self.day(lastDay, in: locale))"
         }
     }
 
     /// Reads inside a sentence, where the title alone would be ambiguous about
     /// whether it names a point or a span.
-    var phrase: String {
+    /// Whole phrases rather than a preposition glued to a title: a language
+    /// puts the two together its own way, and some put nothing between them.
+    func phrase(in locale: Locale) -> String {
         switch scope {
         case .day:
-            "on \(title)"
+            String(localized: "on \(title(in: locale))", locale: locale)
         case .month, .year:
-            "in \(title)"
+            String(localized: "in \(title(in: locale))", locale: locale)
         case .custom:
-            "between \(Self.dayFormat.format(start)) and \(Self.dayFormat.format(lastDay))"
+            String(
+                localized:
+                    "between \(Self.day(start, in: locale)) and \(Self.day(lastDay, in: locale))",
+                locale: locale
+            )
         }
     }
 
