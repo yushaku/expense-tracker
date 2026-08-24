@@ -145,7 +145,7 @@ struct DateRangeFilter: View {
 
     private var dayCalendar: some View {
         MCalendarView(selectedDate: daySelection, selectedRange: nil) {
-            calendar($0, scrollingTo: range.start)
+            calendar($0, scrollingTo: range.start, dayView: ThemedDayView.day)
         }
         .frame(minHeight: 320)
         .padding(12)
@@ -158,7 +158,7 @@ struct DateRangeFilter: View {
     /// tap on an already-finished range.
     private var rangeCalendar: some View {
         MCalendarView(selectedDate: nil, selectedRange: $pickedRange) {
-            calendar($0, scrollingTo: range.start)
+            calendar($0, scrollingTo: range.start, dayView: ThemedDayView.range)
         }
         .frame(minHeight: 320)
         .padding(12)
@@ -166,11 +166,15 @@ struct DateRangeFilter: View {
         .accessibilityIdentifier(identifier("range-calendar"))
     }
 
-    private func calendar(_ config: CalendarConfig, scrollingTo date: Date) -> CalendarConfig {
+    private func calendar(
+        _ config: CalendarConfig,
+        scrollingTo date: Date,
+        dayView: @escaping (Date, Bool, Binding<Date?>?, Binding<MDateRange?>?) -> any DayView
+    ) -> CalendarConfig {
         config
             .startMonth(CalendarTheme.startMonth())
             .endMonth(CalendarTheme.endMonth())
-            .dayView(ThemedDayView.init)
+            .dayView(dayView)
             .monthLabel(ThemedMonthLabel.init)
             .weekdaysView(ThemedWeekdaysView.init)
             .monthLabelToDaysDistance(14)

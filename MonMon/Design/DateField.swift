@@ -66,7 +66,7 @@ struct DateField: View {
             $0
                 .startMonth(CalendarTheme.startMonth())
                 .endMonth(CalendarTheme.endMonth())
-                .dayView(ThemedDayView.init)
+                .dayView(ThemedDayView.day)
                 .monthLabel(ThemedMonthLabel.init)
                 .weekdaysView(ThemedWeekdaysView.init)
                 .monthLabelToDaysDistance(14)
