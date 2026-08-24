@@ -1,16 +1,13 @@
 import SwiftData
 import SwiftUI
 
-/// Which editor the screen has open. Both halves share one `.sheet` rather than
-/// hanging a second one off the same view, which SwiftUI does not reliably
-/// honour, so the two modes travel together under one item.
+/// Which editor the screen has open. Every mode shares one `.sheet` rather than
+/// hanging multiple sheets off the same view, which SwiftUI does not reliably
+/// honour.
 enum InvestmentEditorMode: Identifiable {
     case savings(SavingsEditorMode)
     case fund(FundEditorMode)
     case gold(FundEditorMode)
-    /// The instrument catalogue. It travels here for the same reason the other
-    /// two do, not because it is an editor.
-    case instruments
 
     var id: String {
         switch self {
@@ -20,8 +17,6 @@ enum InvestmentEditorMode: Identifiable {
             "fund-\(mode.id)"
         case .gold(let mode):
             "gold-\(mode.id)"
-        case .instruments:
-            "instruments"
         }
     }
 }
@@ -82,14 +77,6 @@ struct InvestmentsView: View {
             }
             .navigationTitle("Investments")
             .accessibilityIdentifier("investments-list")
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button("Instruments", systemImage: "list.bullet.rectangle") {
-                        editor = .instruments
-                    }
-                    .accessibilityIdentifier("manage-instruments")
-                }
-            }
             .sheet(item: $editor) { mode in
                 switch mode {
                 case .savings(let savingsMode):
@@ -98,8 +85,6 @@ struct InvestmentsView: View {
                     FundEditorView(mode: fundMode, kinds: [.fund, .etf])
                 case .gold(let goldMode):
                     FundEditorView(mode: goldMode, kinds: [.gold])
-                case .instruments:
-                    FundInstrumentListView()
                 }
             }
             .tint(MonMonTheme.accent)
