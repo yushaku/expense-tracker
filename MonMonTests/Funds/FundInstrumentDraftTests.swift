@@ -36,6 +36,24 @@ struct FundInstrumentDraftTests {
         #expect(values.autoQuoteEnabled)
     }
 
+    @Test("Appending a digit to a grouped price preserves every digit")
+    func appendingDigitToGroupedPricePreservesEveryDigit() throws {
+        let values = try makeDraft(priceText: "1.000.0000").validate(existing: [])
+
+        #expect(values.currentPricePerUnit == 10_000_000)
+    }
+
+    @Test("Price input groups thousands while preserving typed decimal digits")
+    func priceInputGroupsThousandsWhilePreservingDecimalDigits() {
+        #expect(VNDCurrency.formatInput("1000000,500") == "1.000.000,500")
+    }
+
+    @Test("Price input groups whole amounts while digits are entered")
+    func priceInputGroupsWholeAmounts() {
+        #expect(VNDCurrency.formatInput("1000") == "1.000")
+        #expect(VNDCurrency.formatInput("1000000") == "1.000.000")
+    }
+
     @Test("The symbol is trimmed and uppercased, and the name is trimmed")
     func symbolAndNameAreNormalized() throws {
         let values = try makeDraft(symbol: " vesaf ", name: "  VESAF Fund  ")

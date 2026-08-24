@@ -141,15 +141,15 @@ struct FundInstrumentEditorForm: View {
                     fieldLabel(draft.kind.priceLabel)
 
                     HStack(spacing: 12) {
-                        Text("₫")
-                            .font(.title3.weight(.bold))
-                            .foregroundStyle(MonMonTheme.funds)
-
                         priceTextField
                             .textFieldStyle(.plain)
                             .monospacedDigit()
                             .multilineTextAlignment(.trailing)
                             .accessibilityLabel(draft.kind.priceLabel)
+
+                        Text("₫")
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(MonMonTheme.funds)
                     }
                     .padding(14)
                     .background(
@@ -217,13 +217,20 @@ struct FundInstrumentEditorForm: View {
     @ViewBuilder
     private var priceTextField: some View {
         #if os(iOS)
-            TextField("0", text: $draft.priceText)
+            TextField("0", text: priceTextBinding)
                 .keyboardType(.decimalPad)
                 .accessibilityIdentifier("instrument-price")
         #else
-            TextField("0", text: $draft.priceText)
+            TextField("0", text: priceTextBinding)
                 .accessibilityIdentifier("instrument-price")
         #endif
+    }
+
+    private var priceTextBinding: Binding<String> {
+        Binding(
+            get: { draft.priceText },
+            set: { draft.priceText = VNDCurrency.formatInput($0) }
+        )
     }
 
     private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {

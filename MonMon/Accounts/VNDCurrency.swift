@@ -19,11 +19,18 @@ enum VNDCurrency {
 
     static func parse(_ text: String) -> Decimal? {
         let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedText.isEmpty else {
+        guard !trimmedText.isEmpty, let normalizedText = normalizedInput(trimmedText) else {
             return nil
         }
 
-        return try? Decimal(trimmedText, format: numberFormat, lenient: false)
+        return try? Decimal(normalizedText, format: numberFormat, lenient: false)
+    }
+
+    /// Groups the integer digits while preserving the fractional digits the
+    /// owner is still typing. Invalid text is left untouched so validation can
+    /// report it instead of silently deleting input.
+    static func formatInput(_ text: String) -> String {
+        normalizedInput(text) ?? text
     }
 
     static func format(_ amount: Decimal) -> String {
@@ -40,5 +47,43 @@ enum VNDCurrency {
     /// a đồng, so it keeps up to two decimals instead of rounding to a whole one.
     static func formatUnitPrice(_ amount: Decimal) -> String {
         unitPriceFormat.format(amount)
+    }
+
+    private static func normalizedInput(_ text: String) -> String? {
+        let parts = text.split(separator: ",", omittingEmptySubsequences: false)
+        guard parts.count <= 2 else {
+            return nil
+        }
+
+        var integerDigits = String(parts[0])
+        var sign = ""
+        if let first = integerDigits.first, first == "-" || first == "+" {
+            sign = String(first)
+            integerDigits.removeFirst()
+        }
+
+        integerDigits.removeAll { $0 == "." }
+        guard !integerDigits.isEmpty, integerDigits.allSatisfy(\.isNumber) else {
+            return nil
+        }
+
+        var reversedGroupedDigits: [Character] = []
+        for (index, digit) in integerDigits.reversed().enumerated() {
+            if index > 0, index.isMultiple(of: 3) {
+                reversedGroupedDigits.append(".")
+            }
+            reversedGroupedDigits.append(digit)
+        }
+
+        let groupedInteger = sign + String(reversedGroupedDigits.reversed())
+        guard parts.count == 2 else {
+            return groupedInteger
+        }
+
+        let fractionDigits = String(parts[1])
+        guard fractionDigits.allSatisfy(\.isNumber) else {
+            return nil
+        }
+        return groupedInteger + "," + fractionDigits
     }
 }
