@@ -77,6 +77,7 @@ final class CashAccount {
             symbol: String,
             kind: FundInstrumentKind,
             currentPricePerUnit: Decimal,
+            askPricePerUnit: Decimal = .zero,
             priceOffset: TimeInterval = 0,
             source: FundQuoteSource = .manual
         ) -> FundInstrument {
@@ -88,6 +89,7 @@ final class CashAccount {
                 name: name,
                 kind: kind,
                 currentPricePerUnit: currentPricePerUnit,
+                askPricePerUnit: askPricePerUnit,
                 priceAsOf: priceAsOf,
                 priceSource: source.rawValue,
                 priceFetchedAt: source == .manual ? nil : priceAsOf,
@@ -292,6 +294,14 @@ final class CashAccount {
                 priceOffset: 86_400 * 20,
                 source: .vndirect
             )
+            let sjc = FundInstrument.preview(
+                name: "SJC 9999",
+                symbol: "SJL1L10",
+                kind: .gold,
+                currentPricePerUnit: 147_000_000,
+                askPricePerUnit: 150_000_000,
+                source: .vangToday
+            )
 
             let borrowed = Debt.preview(
                 counterparty: "Anh Minh",
@@ -336,7 +346,7 @@ final class CashAccount {
                         openedOffset: 86_400 * 40
                     ),
                 ],
-                instruments: [vesaf, diamond],
+                instruments: [vesaf, diamond, sjc],
                 holdings: [
                     .preview(
                         instrument: vesaf,
@@ -349,6 +359,12 @@ final class CashAccount {
                         units: 2_000,
                         averageCostPerUnit: 32_100,
                         createdOffset: 86_400 * 20
+                    ),
+                    .preview(
+                        instrument: sjc,
+                        units: Decimal(string: "0.55") ?? 0,
+                        averageCostPerUnit: 140_000_000,
+                        sourceAccountID: emergency.id
                     ),
                 ],
                 categories: [food, salary],

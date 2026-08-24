@@ -16,9 +16,10 @@ assets stay put. `debt-tracking` records money borrowed and money lent out, with
 the payments against them: the account moves by exactly the principal, what is
 outstanding follows the payments, and total assets stay put through all of it.
 `market-valuation` replaces the hand-typed NAV with one fetched from Fmarket for
-open-ended funds and VNDIRECT for listed ETFs, moving the price off the position
-and onto a `FundInstrument` catalogue so one ticker can only ever carry one
-price. Every fetch is owner-triggered.
+open-ended funds and VNDIRECT for listed ETFs, and values physical gold from the
+shop-buy side of a vang.today quote. The price lives on a `FundInstrument`
+catalogue so one catalogue code can only ever carry one price. Every fetch is
+owner-triggered.
 
 ## Requirements
 
@@ -98,9 +99,10 @@ and are excluded by `.gitignore`.
 
 - Included: add, edit, and delete cash, bank, and credit card accounts; add,
   edit, and delete savings deposits with simple interest paid at maturity; add,
-  edit, and delete fund and ETF holdings, each held in a catalogue instrument
-  that owns its price, both under one Investments tab that totals them
-  together; record
+  edit, and delete fund, ETF, and physical-gold holdings, each held in a
+  catalogue instrument that owns its price, under one Investments tab that
+  totals them together; enter gold weight in chỉ while storing lượng; value
+  gold at the shop's buy price while showing its buy/sell spread; record
   income and expenses against one account each under owner-managed categories,
   browsed a day, a month, a year, or a hand-picked range at a time; add, edit,
   and delete transfers between two accounts, opened from the Home toolbar; an
@@ -124,21 +126,23 @@ and are excluded by `.gitignore`.
   launch and says so on screen. No call forces a push, so the button never
   claims one happened; when nothing is reported back it says the changes stay
   queued.
-- Market data: a fund and ETF catalogue with one price per ticker, refreshed
-  when the owner asks and never on a timer, on launch, or in the background.
-  Fmarket supplies open-ended fund NAV and VNDIRECT supplies listed ETF closes;
-  the whole Fmarket list can be imported and searched, grouped by fund manager.
-  A price older than the last completed trading day is marked stale in words,
-  not by colour alone. A fetch that fails leaves the previous price standing and
-  says why. Only a ticker ever leaves the device — never a balance, a unit
-  count, an account name, or anything identifying the owner.
+- Market data: a fund, ETF, and gold catalogue with one price per code,
+  refreshed when the owner asks and never on a timer, on launch, or in the
+  background.
+  Fmarket supplies open-ended fund NAV, VNDIRECT supplies listed ETF closes, and
+  vang.today supplies VND gold shop-buy and shop-sell quotes per lượng. The
+  Fmarket and vang.today catalogues can be imported and searched, grouped by
+  provider owner or brand. A stale price is marked in words, not by colour
+  alone. A fetch that fails leaves the previous price standing and says why.
+  Only a ticker or gold type code ever leaves the device — never a balance, a
+  unit count, an account name, or anything identifying the owner.
 - Not included yet: budgets, recurring transactions, interest paid on a
   schedule, rollover or early withdrawal, compound interest or amortisation
   schedules on a debt, price history or charts, a market-holiday calendar,
   AI, or MCP.
 - Not included, and not planned: individual buy/sell trades, realized profit and
-  loss, and gold, equity, or crypto positions. `CAPABILITY-MAP.md` records why
-  `investment-tracking` was dropped rather than deferred.
+  loss, and equity or crypto positions. Gold tracking records current holdings
+  and unrealized value only; it does not add a trade ledger.
 
 ## Architecture
 

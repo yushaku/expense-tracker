@@ -969,6 +969,19 @@
           <div class="n-meta">dchart-api.vndirect.com.vn · module: market-valuation</div>
         </div>
 
+        <div class="node" id="sys-vang-today" tabindex="0">
+          <div class="n-top">
+            <span class="n-name">vang.today API</span>
+            <span class="chip built">Built</span>
+          </div>
+          <p class="n-desc">
+            Shop-buy and shop-sell quotes for physical gold in VND per lượng.
+            Undocumented and unauthenticated, so hand entry stays available and
+            failed refreshes preserve the last known-good price.
+          </p>
+          <div class="n-meta">www.vang.today · module: market-valuation</div>
+        </div>
+
         <div class="node unbuilt" id="sys-mcp" tabindex="0">
           <div class="n-top">
             <span class="n-name">Read-only MCP server</span>
@@ -1257,6 +1270,7 @@
       { from: 'sys-store', to: 'sys-cloudkit', label: 'all records', dashed: true },
       { from: 'sys-app', to: 'sys-fmarket', label: 'ticker only', dashed: true },
       { from: 'sys-app', to: 'sys-vndirect', label: 'ticker only', dashed: true },
+      { from: 'sys-app', to: 'sys-vang-today', label: 'type code only', dashed: false },
       { from: 'sys-mcp', to: 'sys-store', label: 'read-only', dashed: true }
     ]);
   })();

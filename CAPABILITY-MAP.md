@@ -11,12 +11,12 @@ begins.
 | `app-bootstrap`           | Build and run a configured native app on iPhone and Mac, with a Settings tab for the theme and an optional biometric lock                                              | —                                                                                          |
 | `cash-balance`            | Create, edit, and delete cash, bank, and credit card accounts and view their balances                                                                                  | `app-bootstrap`                                                                            |
 | `savings-deposit`         | Record term deposits with maturity dates, projected interest, and an optional funding account, and see total assets                                                    | `cash-balance`                                                                             |
-| `fund-etf-holdings`       | Record fund certificate and ETF holdings at a hand-entered NAV and see cost basis, market value, and unrealized profit or loss                                         | `cash-balance`, `savings-deposit`                                                          |
+| `fund-etf-holdings`       | Record fund, ETF, and physical-gold holdings and see cost basis, market value, and unrealized profit or loss                                                           | `cash-balance`, `savings-deposit`                                                          |
 | `income-expense`          | Record income and expenses against one account each, under owner-managed categories, and see account balances update. Transfers between accounts are out of scope      | `cash-balance`                                                                             |
 | `account-transfer`        | Move money between two of the owner's own accounts, so both balances follow and total assets stay put                                                                  | `cash-balance`, `income-expense`                                                           |
 | `debt-tracking`           | Record money borrowed and money lent out, with the payments against them, so balances follow and total assets stay put                                                 | `cash-balance`, `income-expense`, `account-transfer`                                       |
-| `~~investment-tracking~~` | **Dropped.** Would have recorded gold, equity, and crypto trades and calculated positions and cost basis. The owner does not trade, so the module has no user          | —                                                                                          |
-| `market-valuation`        | Refresh market prices for the fund catalogue and show what a holding is worth. Slice 1 shipped; slice 2 is dropped with `investment-tracking`                          | `fund-etf-holdings`                                                                        |
+| `~~investment-tracking~~` | **Dropped as a trade ledger.** Individual buy/sell trades, realized profit and loss, equity, and crypto remain out of scope                                             | —                                                                                          |
+| `market-valuation`        | Import fund and gold catalogues, refresh fund, ETF, and gold prices on demand, and show what each holding is worth                                                       | `fund-etf-holdings`                                                                        |
 | `icloud-sync`             | Synchronize all financial records through the owner's private iCloud database                                                                                          | `cash-balance`, `income-expense`, `debt-tracking`, `fund-etf-holdings`, `market-valuation` |
 | `mcp-readonly`            | Expose synchronized financial data to AI clients from a read-only macOS MCP server                                                                                     | `icloud-sync`                                                                              |
 
@@ -30,7 +30,7 @@ Build order:
 5. `income-expense`
 6. `account-transfer`
 7. `debt-tracking`
-8. `market-valuation` — slice 1 only
+8. `market-valuation`
 9. `icloud-sync`
 10. `mcp-readonly`
 
@@ -46,11 +46,14 @@ is a screen, not a module.
 
 ## Dropped
 
-`investment-tracking` is dropped, not deferred. 
+`investment-tracking` is dropped as a trade ledger, not deferred.
 
-- The owner does not trade gold, equities, or crypto, so a module for recording those trades has nobody to serve.
-- Two things followed from it and are dropped with it: slice 2 of
-  `market-valuation` — portfolio-wide allocation and profit and loss across
-  asset classes — and any shared `Instrument` abstraction, which had been left
-  for `investment-tracking` to decide. `FundInstrument` covers funds and ETFs
-  and now covers everything the app values.
+- The owner does not record individual buy/sell trades, so trade execution,
+  trade history, realized profit and loss, equities, and crypto have nobody to
+  serve.
+- Physical gold holdings are shipped through the existing catalogue-and-position
+  shape: quantity and cost basis live on `FundHolding`, current shop-buy value
+  lives on `FundInstrument`, and the Home allocation gives gold its own wedge.
+- A shared `Instrument` abstraction remains dropped. `FundInstrument` now covers
+  funds, ETFs, and gold; renaming that established model would add migration and
+  code churn without changing behavior.
