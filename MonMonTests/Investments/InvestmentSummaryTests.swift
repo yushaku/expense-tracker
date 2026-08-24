@@ -93,6 +93,25 @@ struct InvestmentSummaryTests {
         )
     }
 
+    @Test("Gold holdings are included in total investments")
+    func goldIsIncluded() {
+        let gold = FundTestFactory.pair(
+            symbol: "SJL1L10",
+            kind: .gold,
+            units: Decimal(string: "0.55") ?? 0,
+            averageCostPerUnit: 140_000_000,
+            pricePerUnit: 147_000_000
+        )
+
+        #expect(
+            InvestmentSummary.total(
+                deposits: [],
+                holdings: [gold.holding],
+                instruments: [gold.instrument]
+            ) == 80_850_000
+        )
+    }
+
     /// The screen's total and Home's net worth read the same records, so the
     /// gap between them must be exactly the spendable cash and nothing else.
     @Test("The total is net worth less spendable cash")

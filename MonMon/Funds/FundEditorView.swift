@@ -53,6 +53,8 @@ struct FundEditorView: View {
     private var payments: [DebtPayment]
 
     private let mode: FundEditorMode
+    private let kinds: [FundInstrumentKind]
+    private let isGold: Bool
 
     @State private var draft: FundDraft
     @State private var validationError: FundFormError?
@@ -60,14 +62,20 @@ struct FundEditorView: View {
     @State private var isConfirmingDelete = false
     @State private var isAddingInstrument = false
 
-    init(mode: FundEditorMode) {
+    init(mode: FundEditorMode, kinds: [FundInstrumentKind]) {
         self.mode = mode
+        self.kinds = kinds
+        isGold = kinds == [.gold]
 
         switch mode {
         case .add:
             _draft = State(initialValue: FundDraft())
         case .edit(let holding):
-            _draft = State(initialValue: FundDraft(holding: holding))
+            var initial = FundDraft(holding: holding)
+            if kinds == [.gold] {
+                initial.unitsText = GoldWeight.formatChi(luong: holding.units)
+            }
+            _draft = State(initialValue: initial)
         }
     }
 
@@ -85,14 +93,15 @@ struct FundEditorView: View {
             FundEditorForm(
                 draft: $draft,
                 accounts: accounts,
-                instruments: instruments,
+                instruments: selectableInstruments,
+                isGold: isGold,
                 isEditing: mode.editedHolding != nil,
                 validationError: validationError,
                 saveErrorMessage: saveErrorMessage,
                 onAddInstrument: { isAddingInstrument = true },
                 onDelete: { isConfirmingDelete = true }
             )
-            .navigationTitle(mode.editedHolding == nil ? "Add holding" : "Edit holding")
+            .navigationTitle(navigationTitle)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -110,7 +119,14 @@ struct FundEditorView: View {
                 }
             }
             .sheet(isPresented: $isAddingInstrument) {
-                FundInstrumentEditorView(mode: .add)
+                if isGold {
+                    FundCatalogueImportView(
+                        title: "Add Gold from vang.today",
+                        importer: FundCatalogueImport(provider: VangTodayQuoteProvider())
+                    )
+                } else {
+                    FundInstrumentEditorView(mode: .add)
+                }
             }
             .confirmationDialog(
                 "Delete this holding?",
@@ -168,15 +184,16 @@ struct FundEditorView: View {
         saveErrorMessage = nil
 
         let availableSourceBalance = selectedAccount.map(availableBalance(for:))
+        let savingDraft = draftForSaving
 
         do {
             if let editedHolding = mode.editedHolding {
-                try draft.apply(
+                try savingDraft.apply(
                     to: editedHolding,
                     availableSourceBalance: availableSourceBalance
                 )
             } else {
-                let holding = try draft.makeHolding(
+                let holding = try savingDraft.makeHolding(
                     id: UUID(),
                     createdAt: .now,
                     availableSourceBalance: availableSourceBalance
@@ -200,6 +217,26 @@ struct FundEditorView: View {
         }
     }
 
+    private var selectableInstruments: [FundInstrument] {
+        instruments.filter { kinds.contains($0.kind) }
+    }
+
+    private var navigationTitle: String {
+        if isGold {
+            return mode.editedHolding == nil ? "Add gold" : "Edit gold"
+        }
+        return mode.editedHolding == nil ? "Add holding" : "Edit holding"
+    }
+
+    private var draftForSaving: FundDraft {
+        guard isGold, let luong = GoldWeight.parseChi(draft.unitsText) else {
+            return draft
+        }
+        var converted = draft
+        converted.unitsText = NSDecimalNumber(decimal: luong).stringValue
+        return converted
+    }
+
     private func delete() {
         guard let editedHolding = mode.editedHolding else {
             return
@@ -220,7 +257,7 @@ struct FundEditorView: View {
 
 #if DEBUG
     #Preview("Fund editor · add") {
-        FundEditorView(mode: .add)
+        FundEditorView(mode: .add, kinds: [.fund, .etf])
             .modelContainer(PreviewData.populated)
     }
 #endif

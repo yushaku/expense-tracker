@@ -8,10 +8,18 @@ struct FundSection: View {
     /// The catalogue the holdings are priced from. Passed in rather than
     /// queried here so the section stays a plain view over values.
     let instruments: [FundInstrument]
+    let kinds: [FundInstrumentKind]
+    let sectionTitle: String
+    let itemName: String
+    let emptyTitle: String
+    let emptyDescription: String
+    let emptySystemImage: String
+    let addTitle: String
+    let addIdentifier: String
     let onAdd: () -> Void
 
     var body: some View {
-        if holdings.isEmpty {
+        if displayedHoldings.isEmpty {
             emptyState
         } else {
             VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
@@ -63,7 +71,7 @@ struct FundSection: View {
     /// zero, which understates the figure, so the screen says so rather than
     /// letting a quiet undercount pass for a number.
     private var unpriced: [FundHolding] {
-        FundSummary.unpriced(holdings: holdings, instruments: instruments)
+        FundSummary.unpriced(holdings: displayedHoldings, instruments: instruments)
     }
 
     private var unpricedBanner: some View {
@@ -87,18 +95,21 @@ struct FundSection: View {
         let count = unpriced.count
         let noun = count == 1 ? "position has" : "positions have"
         let cost = VNDCurrency.format(
-            FundSummary.unpricedCostBasis(holdings: holdings, instruments: instruments)
+            FundSummary.unpricedCostBasis(holdings: displayedHoldings, instruments: instruments)
         )
         return "\(count) \(noun) no instrument, so \(cost) of cost is counted as worth nothing. "
             + "Open each one and pick what it is held in."
     }
 
     private var costBasis: Decimal {
-        FundSummary.totalCostBasis(of: holdings)
+        FundSummary.totalCostBasis(of: displayedHoldings)
     }
 
     private var profitLoss: Decimal {
-        FundSummary.totalUnrealizedProfitLoss(of: holdings, instruments: instruments)
+        FundSummary.totalUnrealizedProfitLoss(
+            of: displayedHoldings,
+            instruments: instruments
+        )
     }
 
     private var isGain: Bool {
@@ -114,26 +125,26 @@ struct FundSection: View {
     }
 
     private var groups: [FundPositionGroup] {
-        FundSummary.groups(holdings: holdings, instruments: instruments)
+        FundSummary.groups(holdings: displayedHoldings, instruments: instruments)
     }
 
     /// Counts both, because they answer different questions: how many funds are
     /// held, and how many purchases went into them.
     private var holdingCountLabel: String {
-        switch holdings.count {
+        switch displayedHoldings.count {
         case 0:
             return "Ready for your first holding"
         case 1:
-            return "Across 1 fund · 1 position"
+            return "Across 1 \(itemName) · 1 position"
         default:
-            let funds = groups.count == 1 ? "1 fund" : "\(groups.count) funds"
-            return "Across \(funds) · \(holdings.count) positions"
+            let items = groups.count == 1 ? "1 \(itemName)" : "\(groups.count) \(itemName)s"
+            return "Across \(items) · \(displayedHoldings.count) positions"
         }
     }
 
     private var emptyState: some View {
         VStack(spacing: 18) {
-            Image(systemName: "chart.line.uptrend.xyaxis")
+            Image(systemName: emptySystemImage)
                 .font(.system(size: 28, weight: .semibold))
                 .foregroundStyle(MonMonTheme.funds)
                 .frame(width: 64, height: 64)
@@ -141,20 +152,18 @@ struct FundSection: View {
                 .accessibilityHidden(true)
 
             VStack(spacing: 6) {
-                Text("Track your funds and ETFs")
+                Text(emptyTitle)
                     .font(.title3.weight(.semibold))
 
-                Text(
-                    "Add a holding to see what it cost, what it is worth today, and the gap between them."
-                )
-                .font(.subheadline)
-                .foregroundStyle(MonMonTheme.textSecondary)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: 360)
+                Text(emptyDescription)
+                    .font(.subheadline)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 360)
             }
 
-            Button("Add Holding", systemImage: "plus", action: onAdd)
-                .accessibilityIdentifier(InvestmentSegment.funds.addIdentifier)
+            Button(addTitle, systemImage: "plus", action: onAdd)
+                .accessibilityIdentifier(addIdentifier)
                 .buttonStyle(.prominentAction)
         }
         .frame(maxWidth: .infinity)
@@ -176,7 +185,7 @@ struct FundSection: View {
     private var holdingsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Funds")
+                Text(sectionTitle)
                     .font(.title3.weight(.semibold))
 
                 Spacer()
@@ -195,8 +204,16 @@ struct FundSection: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("fund-group-\(group.id)")
-                .accessibilityHint("Opens every position in this fund")
+                .accessibilityHint("Opens every position in this \(itemName)")
             }
         }
+    }
+
+    private var displayedHoldings: [FundHolding] {
+        var matching = FundSummary.holdings(holdings, in: instruments, matching: kinds)
+        if kinds.contains(.fund) {
+            matching += FundSummary.unpriced(holdings: holdings, instruments: instruments)
+        }
+        return matching
     }
 }

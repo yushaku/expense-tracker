@@ -6,6 +6,7 @@ import Foundation
 enum InvestmentSegment: String, CaseIterable, Identifiable, Hashable {
     case savings
     case funds
+    case gold
 
     var id: String {
         rawValue
@@ -17,6 +18,8 @@ enum InvestmentSegment: String, CaseIterable, Identifiable, Hashable {
             "Savings"
         case .funds:
             "Funds"
+        case .gold:
+            "Gold"
         }
     }
 
@@ -28,6 +31,8 @@ enum InvestmentSegment: String, CaseIterable, Identifiable, Hashable {
             "Add Savings Book"
         case .funds:
             "Add Holding"
+        case .gold:
+            "Add Gold"
         }
     }
 
@@ -39,6 +44,8 @@ enum InvestmentSegment: String, CaseIterable, Identifiable, Hashable {
             "add-savings"
         case .funds:
             "add-fund"
+        case .gold:
+            "add-gold"
         }
     }
 }

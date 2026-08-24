@@ -55,7 +55,10 @@ struct FundGroupDetailView: View {
         .navigationTitle(group.symbol)
         .accessibilityIdentifier("fund-group-\(group.id)")
         .sheet(item: $editorMode) { mode in
-            FundEditorView(mode: mode)
+            FundEditorView(
+                mode: mode,
+                kinds: group.instrument?.kind == .gold ? [.gold] : [.fund, .etf]
+            )
         }
         .tint(MonMonTheme.accent)
     }

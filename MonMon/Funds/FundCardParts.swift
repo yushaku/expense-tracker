@@ -112,17 +112,25 @@ struct FundPriceStatusRow: View {
     let asOf: Date
 
     var body: some View {
-        HStack(spacing: 7) {
-            Image(systemName: symbolName)
-                .font(.caption2.weight(.semibold))
-                .accessibilityHidden(true)
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 7) {
+                Image(systemName: symbolName)
+                    .font(.caption2.weight(.semibold))
+                    .accessibilityHidden(true)
 
-            Text(description)
-                .font(.caption)
-                .lineLimit(1)
-                .minimumScaleFactor(0.75)
+                Text(description)
+                    .font(.caption)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
 
-            Spacer(minLength: 8)
+                Spacer(minLength: 8)
+            }
+
+            if let spreadDescription {
+                Text(spreadDescription)
+                    .font(.caption.weight(.medium))
+                    .monospacedDigit()
+            }
         }
         .foregroundStyle(isStale ? MonMonTheme.danger : MonMonTheme.textSecondary)
         .accessibilityIdentifier("quote-status")
@@ -156,6 +164,17 @@ struct FundPriceStatusRow: View {
         let day = instrument.priceAsOf.formatted(date: .abbreviated, time: .omitted)
         let base = "\(instrument.priceLabel) \(day) · \(instrument.source.displayName)"
         return isStale ? "\(base) · Stale" : base
+    }
+
+    private var spreadDescription: String? {
+        guard let instrument, instrument.kind == .gold else {
+            return nil
+        }
+        let buy = VNDCurrency.formatUnitPrice(instrument.currentPricePerUnit)
+        let sell =
+            instrument.askPricePerUnit > 0
+            ? VNDCurrency.formatUnitPrice(instrument.askPricePerUnit) : "—"
+        return "Shop buys \(buy) · sells \(sell) per lượng"
     }
 }
 

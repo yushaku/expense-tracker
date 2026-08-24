@@ -7,6 +7,7 @@ struct FundEditorForm: View {
     /// The catalogue to pick from. A position is held in something that already
     /// exists, so the form selects rather than retypes.
     let instruments: [FundInstrument]
+    let isGold: Bool
     let isEditing: Bool
     let validationError: FundFormError?
     let saveErrorMessage: String?
@@ -43,7 +44,7 @@ struct FundEditorForm: View {
 
     private var introduction: some View {
         HStack(spacing: 16) {
-            Image(systemName: "chart.line.uptrend.xyaxis")
+            Image(systemName: isGold ? "seal.fill" : "chart.line.uptrend.xyaxis")
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(MonMonTheme.onAccent)
                 .frame(width: 46, height: 46)
@@ -51,12 +52,16 @@ struct FundEditorForm: View {
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("What you hold, what it is worth")
+                Text(isGold ? "The gold you hold" : "What you hold, what it is worth")
                     .font(.title3.weight(.semibold))
 
-                Text("Pick what you hold, then say how much of it you own.")
-                    .font(.subheadline)
-                    .foregroundStyle(MonMonTheme.textSecondary)
+                Text(
+                    isGold
+                        ? "Pick a gold product, then enter its weight in chỉ."
+                        : "Pick what you hold, then say how much of it you own."
+                )
+                .font(.subheadline)
+                .foregroundStyle(MonMonTheme.textSecondary)
             }
         }
     }
@@ -67,7 +72,7 @@ struct FundEditorForm: View {
                 sectionHeader("Instrument", systemImage: "briefcase.fill")
 
                 if instruments.isEmpty {
-                    Text("No fund or ETF in the catalogue yet. Add one to hold it.")
+                    Text(emptyInstrumentText)
                         .font(.caption)
                         .foregroundStyle(MonMonTheme.textSecondary)
                 } else {
@@ -84,7 +89,7 @@ struct FundEditorForm: View {
                     .accessibilityIdentifier("holding-instrument")
                 }
 
-                Button("Add instrument", systemImage: "plus.circle", action: onAddInstrument)
+                Button(addInstrumentTitle, systemImage: "plus.circle", action: onAddInstrument)
                     .font(.subheadline.weight(.medium))
                     .buttonStyle(.plain)
                     .foregroundStyle(MonMonTheme.accent)
@@ -124,7 +129,7 @@ struct FundEditorForm: View {
                 sectionHeader("Position", systemImage: "chart.bar.fill")
 
                 VStack(alignment: .leading, spacing: 8) {
-                    fieldLabel("Units")
+                    fieldLabel(isGold ? "Weight (chỉ)" : "Units")
 
                     unitsTextField
                         .textFieldStyle(.plain)
@@ -139,10 +144,16 @@ struct FundEditorForm: View {
                     if let unitsErrorMessage {
                         validationMessage(unitsErrorMessage, id: "fund-units-error")
                     }
+
+                    if isGold, let luong = GoldWeight.parseChi(draft.unitsText) {
+                        Text("Stored as \(UnitQuantity.format(luong)) lượng")
+                            .font(.caption)
+                            .foregroundStyle(MonMonTheme.textSecondary)
+                    }
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
-                    fieldLabel("Average cost per unit")
+                    fieldLabel(isGold ? "Average cost per lượng" : "Average cost per unit")
 
                     HStack(spacing: 12) {
                         Text("₫")
@@ -153,7 +164,9 @@ struct FundEditorForm: View {
                             .textFieldStyle(.plain)
                             .monospacedDigit()
                             .multilineTextAlignment(.trailing)
-                            .accessibilityLabel("Average cost per unit")
+                            .accessibilityLabel(
+                                isGold ? "Average cost per lượng" : "Average cost per unit"
+                            )
                     }
                     .padding(14)
                     .background(
@@ -315,15 +328,17 @@ struct FundEditorForm: View {
 
     private var instrumentErrorMessage: String? {
         guard validationError == .missingInstrument else { return nil }
-        return "Pick the fund or ETF this position is held in."
+        return isGold
+            ? "Pick the gold product this position is held in."
+            : "Pick the fund or ETF this position is held in."
     }
 
     private var unitsErrorMessage: String? {
         switch validationError {
         case .invalidUnits:
-            "Enter a valid number of units."
+            isGold ? "Enter a valid weight in chỉ." : "Enter a valid number of units."
         case .nonPositiveUnits:
-            "Units must be greater than zero."
+            isGold ? "Weight must be greater than zero." : "Units must be greater than zero."
         default:
             nil
         }
@@ -343,6 +358,16 @@ struct FundEditorForm: View {
     private var sourceErrorMessage: String? {
         guard validationError == .insufficientSourceBalance else { return nil }
         return "That account does not have enough available balance."
+    }
+
+    private var emptyInstrumentText: String {
+        isGold
+            ? "No gold product in the catalogue yet. Add one from vang.today."
+            : "No fund or ETF in the catalogue yet. Add one to hold it."
+    }
+
+    private var addInstrumentTitle: String {
+        isGold ? "Add from vang.today" : "Add instrument"
     }
 }
 
@@ -383,6 +408,7 @@ struct FundEditorForm: View {
                         ),
                     ],
                     instruments: instruments,
+                    isGold: false,
                     isEditing: isEditing,
                     validationError: validationError,
                     saveErrorMessage: saveErrorMessage,

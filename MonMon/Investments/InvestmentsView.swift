@@ -7,6 +7,7 @@ import SwiftUI
 enum InvestmentEditorMode: Identifiable {
     case savings(SavingsEditorMode)
     case fund(FundEditorMode)
+    case gold(FundEditorMode)
     /// The instrument catalogue. It travels here for the same reason the other
     /// two do, not because it is an editor.
     case instruments
@@ -17,6 +18,8 @@ enum InvestmentEditorMode: Identifiable {
             "savings-\(mode.id)"
         case .fund(let mode):
             "fund-\(mode.id)"
+        case .gold(let mode):
+            "gold-\(mode.id)"
         case .instruments:
             "instruments"
         }
@@ -92,7 +95,9 @@ struct InvestmentsView: View {
                 case .savings(let savingsMode):
                     SavingsEditorView(mode: savingsMode)
                 case .fund(let fundMode):
-                    FundEditorView(mode: fundMode)
+                    FundEditorView(mode: fundMode, kinds: [.fund, .etf])
+                case .gold(let goldMode):
+                    FundEditorView(mode: goldMode, kinds: [.gold])
                 case .instruments:
                     FundInstrumentListView()
                 }
@@ -123,8 +128,14 @@ struct InvestmentsView: View {
                 .font(.subheadline.weight(.medium))
 
                 Label(
-                    "Funds \(VNDCurrency.format(FundSummary.totalMarketValue(of: holdings, instruments: instruments)))",
+                    "Funds \(VNDCurrency.format(FundSummary.totalMarketValue(of: holdings, instruments: instruments, kinds: [.fund, .etf])))",
                     systemImage: "chart.line.uptrend.xyaxis"
+                )
+                .font(.subheadline.weight(.medium))
+
+                Label(
+                    "Gold \(VNDCurrency.format(FundSummary.totalMarketValue(of: holdings, instruments: instruments, kinds: [.gold])))",
+                    systemImage: "seal.fill"
                 )
                 .font(.subheadline.weight(.medium))
             }
@@ -171,7 +182,35 @@ struct InvestmentsView: View {
                 editor = .savings(.edit(deposit))
             }
         case .funds:
-            FundSection(holdings: holdings, instruments: instruments) {
+            FundSection(
+                holdings: holdings,
+                instruments: instruments,
+                kinds: [.fund, .etf],
+                sectionTitle: "Funds",
+                itemName: "fund",
+                emptyTitle: "Track your funds and ETFs",
+                emptyDescription: "Add a holding to see what it cost, what it is worth "
+                    + "today, and the gap between them.",
+                emptySystemImage: "chart.line.uptrend.xyaxis",
+                addTitle: InvestmentSegment.funds.addTitle,
+                addIdentifier: InvestmentSegment.funds.addIdentifier
+            ) {
+                add()
+            }
+        case .gold:
+            FundSection(
+                holdings: holdings,
+                instruments: instruments,
+                kinds: [.gold],
+                sectionTitle: "Gold",
+                itemName: "gold product",
+                emptyTitle: "Track your physical gold",
+                emptyDescription: "Add gold to see its cost, shop buy valuation, "
+                    + "and the visible buy/sell spread.",
+                emptySystemImage: "seal.fill",
+                addTitle: InvestmentSegment.gold.addTitle,
+                addIdentifier: InvestmentSegment.gold.addIdentifier
+            ) {
                 add()
             }
         }
@@ -182,7 +221,9 @@ struct InvestmentsView: View {
         case .savings:
             deposits.isEmpty
         case .funds:
-            holdings.isEmpty
+            FundSummary.holdings(holdings, in: instruments, matching: [.fund, .etf]).isEmpty
+        case .gold:
+            FundSummary.holdings(holdings, in: instruments, matching: [.gold]).isEmpty
         }
     }
 
@@ -192,6 +233,8 @@ struct InvestmentsView: View {
             editor = .savings(.add)
         case .funds:
             editor = .fund(.add)
+        case .gold:
+            editor = .gold(.add)
         }
     }
 }

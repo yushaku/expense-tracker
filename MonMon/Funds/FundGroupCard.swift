@@ -75,7 +75,7 @@ struct FundGroupCard: View {
 
     private var metrics: [FundMetric] {
         [
-            FundMetric(title: "UNITS", value: UnitQuantity.format(group.units)),
+            FundMetric(title: quantityTitle, value: quantityValue),
             FundMetric(
                 title: "AVG COST",
                 value: VNDCurrency.formatUnitPrice(group.averageCostPerUnit)
@@ -90,7 +90,23 @@ struct FundGroupCard: View {
     }
 
     private var priceTitle: String {
-        group.instrument?.kind == .etf ? "PRICE" : "NAV"
+        switch group.instrument?.kind {
+        case .etf:
+            "PRICE"
+        case .gold:
+            "BUY"
+        default:
+            "NAV"
+        }
+    }
+
+    private var quantityTitle: String {
+        group.instrument?.kind == .gold ? "WEIGHT" : "UNITS"
+    }
+
+    private var quantityValue: String {
+        group.instrument?.kind == .gold
+            ? GoldWeight.label(luong: group.units) : UnitQuantity.format(group.units)
     }
 
     /// How many purchases went into the position, and nothing else. The kind

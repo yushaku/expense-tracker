@@ -80,7 +80,7 @@ struct FundHoldingCard: View {
 
     private var metrics: [FundMetric] {
         [
-            FundMetric(title: "UNITS", value: UnitQuantity.format(holding.units)),
+            FundMetric(title: quantityTitle, value: quantityValue),
             FundMetric(
                 title: "AVG COST",
                 value: VNDCurrency.formatUnitPrice(holding.averageCostPerUnit)
@@ -106,7 +106,23 @@ struct FundHoldingCard: View {
     }
 
     private var priceTitle: String {
-        instrument?.kind == .etf ? "PRICE" : "NAV"
+        switch instrument?.kind {
+        case .etf:
+            "PRICE"
+        case .gold:
+            "BUY"
+        default:
+            "NAV"
+        }
+    }
+
+    private var quantityTitle: String {
+        instrument?.kind == .gold ? "WEIGHT" : "UNITS"
+    }
+
+    private var quantityValue: String {
+        instrument?.kind == .gold
+            ? GoldWeight.label(luong: holding.units) : UnitQuantity.format(holding.units)
     }
 
     private var subtitle: String {

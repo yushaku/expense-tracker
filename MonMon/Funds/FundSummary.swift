@@ -22,6 +22,27 @@ enum FundSummary {
         }
     }
 
+    static func totalMarketValue(
+        of holdings: [FundHolding],
+        instruments: [FundInstrument],
+        kinds: [FundInstrumentKind]
+    ) -> Decimal {
+        totalMarketValue(
+            of: self.holdings(holdings, in: instruments, matching: kinds),
+            instruments: instruments
+        )
+    }
+
+    static func holdings(
+        _ holdings: [FundHolding],
+        in instruments: [FundInstrument],
+        matching kinds: [FundInstrumentKind]
+    ) -> [FundHolding] {
+        holdings.filter { holding in
+            instruments.matching(holding).map { kinds.contains($0.kind) } ?? false
+        }
+    }
+
     static func totalUnrealizedProfitLoss(
         of holdings: [FundHolding],
         instruments: [FundInstrument]

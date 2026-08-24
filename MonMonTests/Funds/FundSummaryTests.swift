@@ -141,4 +141,41 @@ struct FundSummaryTests {
 
         #expect(FundSummary.totalCostBasis(of: [holding]) == 20_000_000)
     }
+
+    @Test("Kind filters keep gold separate from funds and ETFs")
+    func kindFiltersSeparateGold() {
+        let fund = FundTestFactory.instrument(symbol: "VESAF", pricePerUnit: 25_000)
+        let etf = FundTestFactory.instrument(
+            symbol: "FUEVFVND", kind: .etf, pricePerUnit: 30_000)
+        let gold = FundTestFactory.instrument(
+            symbol: "SJL1L10", kind: .gold, pricePerUnit: 147_000_000)
+        let holdings = [
+            FundTestFactory.holding(in: fund, units: 100, averageCostPerUnit: 20_000),
+            FundTestFactory.holding(in: etf, units: 100, averageCostPerUnit: 25_000),
+            FundTestFactory.holding(in: gold, units: 1, averageCostPerUnit: 140_000_000),
+        ]
+        let instruments = [fund, etf, gold]
+
+        #expect(
+            FundSummary.holdings(holdings, in: instruments, matching: [.fund, .etf]).count == 2
+        )
+        #expect(
+            FundSummary.holdings(holdings, in: instruments, matching: [.gold])
+                .map(\.instrumentID) == [gold.id]
+        )
+        #expect(
+            FundSummary.totalMarketValue(
+                of: holdings,
+                instruments: instruments,
+                kinds: [.fund, .etf]
+            ) == 5_500_000
+        )
+        #expect(
+            FundSummary.totalMarketValue(
+                of: holdings,
+                instruments: instruments,
+                kinds: [.gold]
+            ) == 147_000_000
+        )
+    }
 }
