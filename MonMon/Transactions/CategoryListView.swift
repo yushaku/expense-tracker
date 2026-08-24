@@ -178,8 +178,7 @@ struct CategoryListView: View {
             Button("Add Category", systemImage: "plus") {
                 editorMode = .add
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            .buttonStyle(.prominentAction)
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 24)

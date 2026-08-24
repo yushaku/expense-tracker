@@ -183,8 +183,7 @@ struct TransferListView: View {
             }
 
             action()
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+                .buttonStyle(.prominentAction)
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 24)

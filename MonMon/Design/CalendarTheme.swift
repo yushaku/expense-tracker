@@ -49,9 +49,21 @@ struct ThemedDayView: DayView {
         )
     }
 
+    /// The days between the two ends of a picked span. Drawn as a plain band so
+    /// the ends keep their circles and the span still reads as one block.
+    func createRangeSelectionView() -> AnyView {
+        AnyView(
+            Rectangle()
+                .fill(MonMonTheme.accent.opacity(0.16))
+                .opacity(isWithinRange() ? 1 : 0)
+        )
+    }
+
     func createContent() -> AnyView {
         AnyView(
             ZStack {
+                createRangeSelectionView()
+
                 createSelectionView()
 
                 // Today keeps a ring when it is not the selection, so the day
@@ -64,6 +76,21 @@ struct ThemedDayView: DayView {
                 createDayLabel()
             }
         )
+    }
+
+    /// The library's own tap handler only ever writes a single date, so a
+    /// calendar handed a range binding would look selectable and do nothing.
+    /// This adds the tapped day to the span instead: first tap opens it, second
+    /// closes it, third starts a new one.
+    func onSelection() {
+        guard let selectedRange else {
+            selectedDate?.wrappedValue = date
+            return
+        }
+
+        var updated = selectedRange.wrappedValue ?? MDateRange()
+        updated.addToRange(date)
+        selectedRange.wrappedValue = updated
     }
 
     private var labelColor: Color {

@@ -167,8 +167,7 @@ struct DebtDetailView: View {
             Button("Record Payment", systemImage: "plus") {
                 paymentEditorMode = .add(debt)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            .buttonStyle(.prominentAction)
             .accessibilityIdentifier("add-debt-payment")
         }
         .frame(maxWidth: .infinity)

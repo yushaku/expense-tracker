@@ -85,8 +85,7 @@ struct SavingsSection: View {
 
             Button("Add Savings Book", systemImage: "plus", action: onAdd)
                 .accessibilityIdentifier(InvestmentSegment.savings.addIdentifier)
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+                .buttonStyle(.prominentAction)
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 24)

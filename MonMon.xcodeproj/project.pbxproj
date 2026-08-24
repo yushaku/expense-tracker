@@ -78,6 +78,9 @@
 		A00000000000000000000270 /* TransactionDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000181 /* TransactionDraftTests.swift */; };
 		A00000000000000000000271 /* MoneyTransactionPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */; };
 		A00000000000000000000272 /* AssetAllocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000183 /* AssetAllocation.swift */; };
+		A0000000000000000000080A /* AccountsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000809 /* AccountsScreen.swift */; };
+		A00000000000000000000808 /* AccountBalanceCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000807 /* AccountBalanceCard.swift */; };
+		A00000000000000000000806 /* AccountBalanceAllocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000805 /* AccountBalanceAllocation.swift */; };
 		A00000000000000000000273 /* AssetAllocationCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000184 /* AssetAllocationCard.swift */; };
 		A00000000000000000000274 /* AssetAllocationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000185 /* AssetAllocationTests.swift */; };
 		A00000000000000000000275 /* DateField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000186 /* DateField.swift */; };
@@ -112,6 +115,9 @@
 		A00000000000000000000742 /* InvestmentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000722 /* InvestmentsView.swift */; };
 		A00000000000000000000750 /* InvestmentSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000730 /* InvestmentSummaryTests.swift */; };
 		A00000000000000000000802 /* SegmentedTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000801 /* SegmentedTabs.swift */; };
+		A0000000000000000000080C /* DateRangeFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000080B /* DateRangeFilter.swift */; };
+		A0000000000000000000080E /* PeriodGridPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000080D /* PeriodGridPicker.swift */; };
+		A00000000000000000000804 /* ProminentActionButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000803 /* ProminentActionButtonStyle.swift */; };
 		A00000000000000000000811 /* FundInstrument.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000810 /* FundInstrument.swift */; };
 		A00000000000000000000813 /* FundQuoteSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000812 /* FundQuoteSource.swift */; };
 		A00000000000000000000815 /* FundInstrumentDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000814 /* FundInstrumentDraft.swift */; };
@@ -250,6 +256,9 @@
 		A00000000000000000000181 /* TransactionDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDraftTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoneyTransactionPersistenceTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000183 /* AssetAllocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocation.swift; sourceTree = "<group>"; };
+		A00000000000000000000809 /* AccountsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsScreen.swift; sourceTree = "<group>"; };
+		A00000000000000000000807 /* AccountBalanceCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceCard.swift; sourceTree = "<group>"; };
+		A00000000000000000000805 /* AccountBalanceAllocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceAllocation.swift; sourceTree = "<group>"; };
 		A00000000000000000000184 /* AssetAllocationCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocationCard.swift; sourceTree = "<group>"; };
 		A00000000000000000000185 /* AssetAllocationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocationTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000186 /* DateField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateField.swift; sourceTree = "<group>"; };
@@ -284,6 +293,9 @@
 		A00000000000000000000722 /* InvestmentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvestmentsView.swift; sourceTree = "<group>"; };
 		A00000000000000000000730 /* InvestmentSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvestmentSummaryTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000801 /* SegmentedTabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentedTabs.swift; sourceTree = "<group>"; };
+		A0000000000000000000080B /* DateRangeFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateRangeFilter.swift; sourceTree = "<group>"; };
+		A0000000000000000000080D /* PeriodGridPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodGridPicker.swift; sourceTree = "<group>"; };
+		A00000000000000000000803 /* ProminentActionButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProminentActionButtonStyle.swift; sourceTree = "<group>"; };
 		A00000000000000000000810 /* FundInstrument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrument.swift; sourceTree = "<group>"; };
 		A00000000000000000000812 /* FundQuoteSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundQuoteSource.swift; sourceTree = "<group>"; };
 		A00000000000000000000814 /* FundInstrumentDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentDraft.swift; sourceTree = "<group>"; };
@@ -464,6 +476,9 @@
 				A00000000000000000000116 /* CashAccountKind.swift */,
 				A00000000000000000000122 /* VNDCurrency.swift */,
 				A00000000000000000000A01 /* AccountSeed.swift */,
+				A00000000000000000000805 /* AccountBalanceAllocation.swift */,
+				A00000000000000000000807 /* AccountBalanceCard.swift */,
+				A00000000000000000000809 /* AccountsScreen.swift */,
 				A00000000000000000000183 /* AssetAllocation.swift */,
 				A00000000000000000000184 /* AssetAllocationCard.swift */,
 			);
@@ -477,6 +492,9 @@
 				A00000000000000000000186 /* DateField.swift */,
 				A00000000000000000000187 /* AppTheme.swift */,
 				A00000000000000000000192 /* FloatingAddButton.swift */,
+				A00000000000000000000803 /* ProminentActionButtonStyle.swift */,
+				A0000000000000000000080B /* DateRangeFilter.swift */,
+				A0000000000000000000080D /* PeriodGridPicker.swift */,
 				A00000000000000000000801 /* SegmentedTabs.swift */,
 				A00000000000000000000193 /* Percentage.swift */,
 				A00000000000000000000198 /* CalendarTheme.swift */,
@@ -822,6 +840,9 @@
 				A00000000000000000000283 /* CategoryBreakdown.swift in Sources */,
 				A00000000000000000000282 /* Percentage.swift in Sources */,
 				A00000000000000000000281 /* FloatingAddButton.swift in Sources */,
+				A00000000000000000000804 /* ProminentActionButtonStyle.swift in Sources */,
+				A0000000000000000000080C /* DateRangeFilter.swift in Sources */,
+				A0000000000000000000080E /* PeriodGridPicker.swift in Sources */,
 				A00000000000000000000802 /* SegmentedTabs.swift in Sources */,
 				A00000000000000000000279 /* SettingsView.swift in Sources */,
 				A00000000000000000000278 /* LockScreenView.swift in Sources */,
@@ -830,6 +851,9 @@
 				A00000000000000000000276 /* AppTheme.swift in Sources */,
 				A00000000000000000000275 /* DateField.swift in Sources */,
 				A00000000000000000000273 /* AssetAllocationCard.swift in Sources */,
+				A00000000000000000000806 /* AccountBalanceAllocation.swift in Sources */,
+				A00000000000000000000808 /* AccountBalanceCard.swift in Sources */,
+				A0000000000000000000080A /* AccountsScreen.swift in Sources */,
 				A00000000000000000000272 /* AssetAllocation.swift in Sources */,
 				A00000000000000000000269 /* TransactionListView.swift in Sources */,
 				A00000000000000000000268 /* TransactionCard.swift in Sources */,

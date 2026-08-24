@@ -43,8 +43,7 @@ struct LockScreenView: View {
                 }
 
                 Button("Unlock", systemImage: "faceid", action: onUnlock)
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
+                    .buttonStyle(.prominentAction)
                     .accessibilityIdentifier("unlock")
 
                 // Without a sensor or a passcode there is nothing to

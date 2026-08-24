@@ -149,10 +149,8 @@ struct SettingsView: View {
                 Task { await cloudSync.syncNow(context: modelContext) }
             } label: {
                 Label("Sync now", systemImage: "arrow.triangle.2.circlepath")
-                    .font(.subheadline.weight(.medium))
             }
-            .buttonStyle(.borderedProminent)
-            .tint(MonMonTheme.accent)
+            .buttonStyle(.prominentAction)
             .disabled(cloudSync.isSyncing || cloudSync.needsRelaunch)
             .accessibilityIdentifier("icloud-sync-now")
 

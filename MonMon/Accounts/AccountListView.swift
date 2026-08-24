@@ -38,8 +38,6 @@ struct AccountListView: View {
 
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                        totalCard
-
                         if !allocationSlices.isEmpty {
                             AssetAllocationCard(slices: allocationSlices, liabilities: liabilities)
                         }
@@ -97,107 +95,6 @@ struct AccountListView: View {
         }
     }
 
-    private var totalCard: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            Label("TOTAL ASSETS", systemImage: "chart.pie.fill")
-                .font(.caption.weight(.semibold))
-                .tracking(0.8)
-                .foregroundStyle(MonMonTheme.textSecondary)
-
-            Text(VNDCurrency.format(netWorth))
-                .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.58)
-                .foregroundStyle(MonMonTheme.textPrimary)
-
-            VStack(alignment: .leading, spacing: 6) {
-                Label(
-                    "Cash \(VNDCurrency.format(availableCash))",
-                    systemImage: "banknote.fill"
-                )
-                .font(.subheadline.weight(.medium))
-
-                Label(
-                    "Savings \(VNDCurrency.format(savingsPrincipal))",
-                    systemImage: "building.columns.fill"
-                )
-                .font(.subheadline.weight(.medium))
-
-                Label(
-                    "Funds \(VNDCurrency.format(fundsMarketValue))",
-                    systemImage: "chart.line.uptrend.xyaxis"
-                )
-                .font(.subheadline.weight(.medium))
-
-                if lentOut > 0 {
-                    Label(
-                        "Lent out \(VNDCurrency.format(lentOut))",
-                        systemImage: "tray.and.arrow.up.fill"
-                    )
-                    .font(.subheadline.weight(.medium))
-                }
-
-                if liabilities > 0 {
-                    Label(
-                        "Owed \(VNDCurrency.format(liabilities))",
-                        systemImage: "creditcard.fill"
-                    )
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(MonMonTheme.danger)
-                }
-
-                Label(accountCountLabel, systemImage: "rectangle.stack.fill")
-                    .font(.subheadline.weight(.medium))
-            }
-            .foregroundStyle(MonMonTheme.textSecondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(24)
-        .background {
-            RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .fill(MonMonTheme.hero)
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .stroke(MonMonTheme.heroBorder, lineWidth: 1)
-        }
-        .accessibilityElement(children: .combine)
-    }
-
-    private var availableCash: Decimal {
-        CashBalanceSummary.totalAvailable(
-            of: accounts,
-            deposits: deposits,
-            holdings: holdings,
-            transactions: transactions,
-            transfers: transfers,
-            debts: debts,
-            payments: payments
-        )
-    }
-
-    private var savingsPrincipal: Decimal {
-        AssetSummary.totalPrincipal(of: deposits)
-    }
-
-    private var fundsMarketValue: Decimal {
-        FundSummary.totalMarketValue(of: holdings, instruments: instruments)
-    }
-
-    private var netWorth: Decimal {
-        AssetSummary.netWorth(
-            accounts: accounts,
-            deposits: deposits,
-            holdings: holdings,
-            instruments: instruments,
-            transactions: transactions,
-            transfers: transfers,
-            debts: debts,
-            payments: payments
-        )
-    }
-
     private var allocationSlices: [AssetAllocationSlice] {
         AssetAllocation.slices(
             accounts: accounts,
@@ -211,10 +108,6 @@ struct AccountListView: View {
         )
     }
 
-    private var lentOut: Decimal {
-        DebtSummary.totalOutstanding(of: debts, payments: payments, direction: .lent)
-    }
-
     private var liabilities: Decimal {
         AssetAllocation.liabilities(
             accounts: accounts,
@@ -225,17 +118,6 @@ struct AccountListView: View {
             debts: debts,
             payments: payments
         )
-    }
-
-    private var accountCountLabel: String {
-        switch accounts.count {
-        case 0:
-            "Ready for your first account"
-        case 1:
-            "Across 1 account"
-        default:
-            "Across \(accounts.count) accounts"
-        }
     }
 
     private var emptyState: some View {
@@ -259,8 +141,7 @@ struct AccountListView: View {
             }
 
             addAccountButton
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+                .buttonStyle(.prominentAction)
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 24)
@@ -275,6 +156,37 @@ struct AccountListView: View {
         }
     }
 
+    /// The header doubles as the way in to the Accounts screen, so the section
+    /// the owner is already reading is also the door to the detail behind it.
+    private var accountsSectionHeader: some View {
+        NavigationLink {
+            AccountsScreen()
+        } label: {
+            HStack(spacing: 8) {
+                Text("Accounts")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textPrimary)
+
+                Text(accounts.count.formatted())
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(MonMonTheme.accent)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(MonMonTheme.accent.opacity(0.16), in: Capsule())
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("open-accounts-screen")
+        .accessibilityHint("Opens the Accounts screen.")
+    }
+
     private var addAccountButton: some View {
         Button("Add Account", systemImage: "plus") {
             editorMode = .add
@@ -284,19 +196,7 @@ struct AccountListView: View {
 
     private var accountsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Accounts")
-                    .font(.title3.weight(.semibold))
-
-                Spacer()
-
-                Text(accounts.count.formatted())
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(MonMonTheme.accent)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(MonMonTheme.accent.opacity(0.16), in: Capsule())
-            }
+            accountsSectionHeader
 
             ForEach(accounts) { account in
                 Button {

@@ -87,12 +87,6 @@ struct TransactionListView: View {
         range.contains(.now) ? .now : range.start
     }
 
-    /// The anchor a scope change re-cuts around: today when it is on show, and
-    /// otherwise the start of what is, so the owner keeps their place.
-    private var anchor: Date {
-        range.contains(.now) ? .now : range.start
-    }
-
     private var visibleTransactions: [MoneyTransaction] {
         TransactionSummary.inRange(range, transactions: transactions)
     }
@@ -107,13 +101,7 @@ struct TransactionListView: View {
 
     private var periodCard: some View {
         VStack(alignment: .leading, spacing: 18) {
-            scopePicker
-
             periodHeader
-
-            if range.scope == .custom {
-                customRangeFields
-            }
 
             Text(signedNet)
                 .font(.system(.largeTitle, design: .rounded, weight: .bold))
@@ -152,105 +140,21 @@ struct TransactionListView: View {
         }
     }
 
-    /// Switching scope keeps the owner near what they were looking at, so a
-    /// month spent browsing last March narrows to a day in last March rather
-    /// than jumping to today.
-    private var scopeSelection: Binding<TransactionRangeScope> {
-        Binding(
-            get: { range.scope },
-            set: { range = range.scoped(to: $0, anchoredOn: anchor) }
-        )
-    }
-
-    private var scopePicker: some View {
-        SegmentedTabs(
-            label: "Period",
-            selection: scopeSelection,
-            options: TransactionRangeScope.allCases,
-            title: \.displayName
-        )
-        .accessibilityIdentifier("period-scope")
-    }
-
+    /// What the screen is showing, and the button that changes it. The scope
+    /// tabs and the calendars live in the sheet behind that button, so the card
+    /// keeps one line for the period rather than three.
     private var periodHeader: some View {
         HStack(spacing: 12) {
-            if range.canStep {
-                stepButton(by: -1, symbolName: "chevron.left", identifier: "previous-period")
-            }
-
             Text(range.title.uppercased())
                 .font(.caption.weight(.semibold))
                 .tracking(0.8)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .foregroundStyle(MonMonTheme.textSecondary)
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            if range.canStep {
-                stepButton(by: 1, symbolName: "chevron.right", identifier: "next-period")
-            }
+            DateRangeFilterButton(range: $range)
         }
-    }
-
-    private func stepButton(by steps: Int, symbolName: String, identifier: String) -> some View {
-        Button {
-            range = range.stepped(by: steps)
-        } label: {
-            Image(systemName: symbolName)
-                .font(.footnote.weight(.bold))
-                .frame(width: 30, height: 30)
-        }
-        .buttonStyle(.plain)
-        .background(MonMonTheme.surface, in: Circle())
-        .accessibilityLabel(steps < 0 ? range.stepBackLabel : range.stepForwardLabel)
-        .accessibilityIdentifier(identifier)
-    }
-
-    /// The two ends of a hand-picked range. `TransactionRange.custom` orders the
-    /// pair, so picking an end before the start reads as the range the owner
-    /// drew rather than an empty one.
-    private var customRangeFields: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(alignment: .bottom, spacing: 12) {
-                rangeEndField(title: "From", selection: rangeStart, identifier: "range-start")
-                rangeEndField(title: "To", selection: rangeEnd, identifier: "range-end")
-            }
-
-            VStack(alignment: .leading, spacing: 12) {
-                rangeEndField(title: "From", selection: rangeStart, identifier: "range-start")
-                rangeEndField(title: "To", selection: rangeEnd, identifier: "range-end")
-            }
-        }
-    }
-
-    private func rangeEndField(
-        title: String,
-        selection: Binding<Date>,
-        identifier: String
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title.uppercased())
-                .font(.caption2.weight(.semibold))
-                .tracking(0.6)
-                .foregroundStyle(MonMonTheme.textSecondary)
-
-            DateField(selection: selection, accessibilityIdentifier: identifier)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private var rangeStart: Binding<Date> {
-        Binding(
-            get: { range.start },
-            set: { range = .custom(from: $0, to: range.lastDay) }
-        )
-    }
-
-    private var rangeEnd: Binding<Date> {
-        Binding(
-            get: { range.lastDay },
-            set: { range = .custom(from: range.start, to: $0) }
-        )
     }
 
     private var income: Decimal {
@@ -372,8 +276,7 @@ struct TransactionListView: View {
             }
 
             action()
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+                .buttonStyle(.prominentAction)
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 24)

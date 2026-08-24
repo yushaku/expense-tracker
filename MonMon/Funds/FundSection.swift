@@ -150,8 +150,7 @@ struct FundSection: View {
 
             Button("Add Holding", systemImage: "plus", action: onAdd)
                 .accessibilityIdentifier(InvestmentSegment.funds.addIdentifier)
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+                .buttonStyle(.prominentAction)
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 24)
