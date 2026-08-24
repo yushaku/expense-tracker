@@ -32,6 +32,38 @@ struct TransactionPeriodTests {
         #expect(TransactionPeriod.endOfMonth(for: date(2026, 8, 15)) == date(2026, 9, 1))
     }
 
+    @Test("A span of dates lists every month it touches, oldest first")
+    func monthsCoverBothEnds() {
+        let months = TransactionPeriod.months(
+            from: date(2025, 11, 20),
+            through: date(2026, 2, 3)
+        )
+
+        #expect(
+            months == [
+                date(2025, 11, 1),
+                date(2025, 12, 1),
+                date(2026, 1, 1),
+                date(2026, 2, 1),
+            ]
+        )
+    }
+
+    @Test("A span inside one month lists that month once")
+    func monthsWithinOneMonthCollapse() {
+        #expect(
+            TransactionPeriod.months(from: date(2026, 8, 2), through: date(2026, 8, 30))
+                == [date(2026, 8, 1)]
+        )
+    }
+
+    @Test("A span that ends before it starts lists nothing")
+    func backwardsSpanIsEmpty() {
+        let months = TransactionPeriod.months(from: date(2026, 8, 2), through: date(2026, 7, 30))
+
+        #expect(months.isEmpty)
+    }
+
     @Test("The title names the month and the year in English")
     func titleIsEnglish() {
         #expect(TransactionPeriod.title(for: date(2026, 8, 15)) == "August 2026")

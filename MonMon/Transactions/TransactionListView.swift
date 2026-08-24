@@ -37,7 +37,12 @@ struct TransactionListView: View {
 
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                        periodCard
+                        SpendingOverviewCard(
+                            title: range.title,
+                            income: income,
+                            expense: expense,
+                            count: visibleTransactions.count
+                        )
 
                         if accounts.isEmpty {
                             noAccountState
@@ -76,6 +81,14 @@ struct TransactionListView: View {
                     ) {
                         editorMode = .add
                     }
+                }
+            }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                monthRail
+            }
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    DateRangeFilterButton(range: $range, systemImage: "calendar")
                 }
             }
             .navigationDestination(for: CategoryPeriod.self) { period in
@@ -240,62 +253,27 @@ struct TransactionListView: View {
         .accessibilityIdentifier(accessibilityIdentifier)
     }
 
-    private var periodCard: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            periodHeader
-
-            Text(signedNet)
-                .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.58)
-                .foregroundStyle(MonMonTheme.textPrimary)
-
-            VStack(alignment: .leading, spacing: 6) {
-                Label(
-                    "Income \(VNDCurrency.format(income))",
-                    systemImage: TransactionKind.income.symbolName
-                )
-                .font(.subheadline.weight(.medium))
-
-                Label(
-                    "Expense \(VNDCurrency.format(expense))",
-                    systemImage: TransactionKind.expense.symbolName
-                )
-                .font(.subheadline.weight(.medium))
-
-                Label(countLabel, systemImage: "rectangle.stack.fill")
-                    .font(.subheadline.weight(.medium))
-            }
-            .foregroundStyle(MonMonTheme.textSecondary)
+    /// The months either side of the one on show, pinned under the navigation
+    /// bar so a month is one tap away wherever the screen is scrolled to.
+    private var monthRail: some View {
+        MonthRail(months: railMonths, selection: calendarMonth) { month in
+            range = .month(containing: month)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(24)
-        .background {
-            RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .fill(MonMonTheme.surface)
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .stroke(MonMonTheme.border, lineWidth: 1)
+        .background(MonMonTheme.canvas)
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(MonMonTheme.border)
+                .frame(height: 1)
         }
     }
 
-    /// What the screen is showing, and the button that changes it. The scope
-    /// tabs and the calendars live in the sheet behind that button, so the card
-    /// keeps one line for the period rather than three.
-    private var periodHeader: some View {
-        HStack(spacing: 12) {
-            Text(range.title.uppercased())
-                .font(.caption.weight(.semibold))
-                .tracking(0.8)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .foregroundStyle(MonMonTheme.textSecondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            DateRangeFilterButton(range: $range)
-        }
+    /// The rail spans the years the calendars offer, widened when the period on
+    /// show sits outside them, so the month being looked at is always on it.
+    private var railMonths: [Date] {
+        TransactionPeriod.months(
+            from: min(CalendarTheme.startMonth(), calendarMonth),
+            through: max(CalendarTheme.endMonth(), calendarMonth)
+        )
     }
 
     private var income: Decimal {
@@ -306,32 +284,11 @@ struct TransactionListView: View {
         TransactionSummary.totalExpense(of: visibleTransactions)
     }
 
-    private var net: Decimal {
-        TransactionSummary.net(of: visibleTransactions)
-    }
-
-    /// The sign is written out rather than left to the minus the formatter would
-    /// place, so a surplus reads as clearly as a shortfall.
-    private var signedNet: String {
-        signed(net)
-    }
-
     private func signed(_ amount: Decimal) -> String {
         let magnitude = amount < 0 ? -amount : amount
         let sign = amount < 0 ? "−" : "+"
 
         return "\(sign)\(VNDCurrency.format(magnitude))"
-    }
-
-    private var countLabel: String {
-        switch visibleTransactions.count {
-        case 0:
-            "Nothing recorded \(range.phrase)"
-        case 1:
-            "1 transaction"
-        default:
-            "\(visibleTransactions.count) transactions"
-        }
     }
 
     /// Transactions run in date order, so the list breaks them at each day and

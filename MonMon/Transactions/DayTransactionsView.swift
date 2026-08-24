@@ -34,7 +34,12 @@ struct DayTransactionsView: View {
 
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                    summaryCard
+                    SpendingOverviewCard(
+                        title: Self.headerFormat.format(period.day),
+                        income: income,
+                        expense: expense,
+                        count: matching.count
+                    )
 
                     if matching.isEmpty {
                         emptyState
@@ -95,70 +100,6 @@ struct DayTransactionsView: View {
 
     private var expense: Decimal {
         TransactionSummary.totalExpense(of: matching)
-    }
-
-    private var net: Decimal {
-        TransactionSummary.net(of: matching)
-    }
-
-    private var summaryCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text(Self.headerFormat.format(period.day).uppercased())
-                .font(.caption.weight(.semibold))
-                .tracking(0.8)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .foregroundStyle(MonMonTheme.textSecondary)
-
-            Text(signed(net))
-                .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.58)
-                .foregroundStyle(MonMonTheme.textPrimary)
-
-            VStack(alignment: .leading, spacing: 6) {
-                Label(
-                    "Income \(VNDCurrency.format(income))",
-                    systemImage: TransactionKind.income.symbolName
-                )
-                .font(.subheadline.weight(.medium))
-
-                Label(
-                    "Expense \(VNDCurrency.format(expense))",
-                    systemImage: TransactionKind.expense.symbolName
-                )
-                .font(.subheadline.weight(.medium))
-
-                Label(countLabel, systemImage: "rectangle.stack.fill")
-                    .font(.subheadline.weight(.medium))
-            }
-            .foregroundStyle(MonMonTheme.textSecondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(24)
-        .background {
-            RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .fill(MonMonTheme.hero)
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .stroke(MonMonTheme.heroBorder, lineWidth: 1)
-        }
-        .accessibilityElement(children: .combine)
-    }
-
-    /// The sign is written out rather than left to the minus the formatter would
-    /// place, so a day that gained reads as clearly as one that lost.
-    private func signed(_ amount: Decimal) -> String {
-        let magnitude = amount < 0 ? -amount : amount
-        let sign = amount < 0 ? "−" : "+"
-
-        return "\(sign)\(VNDCurrency.format(magnitude))"
-    }
-
-    private var countLabel: String {
-        matching.count == 1 ? "1 transaction" : "\(matching.count) transactions"
     }
 
     private var emptyState: some View {

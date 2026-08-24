@@ -128,6 +128,10 @@ and are excluded by `.gitignore`.
   before the write and folded afterwards, so two devices cannot record the same
   month's rent twice. Editing a rule changes only what it records next, and
   deleting one keeps everything it already recorded.
+- Month rail: the run of months pinned under the Spending navigation bar, the
+  one on show marked and scrolled to the middle, so stepping a month is one tap
+  from anywhere on the screen. The bar's calendar button still opens the fuller
+  picker behind it — a day, a month, a year, or a hand-picked span.
 - Spending calendar: a month grid below the category breakdown, each day
   carrying what it took in and what it paid out, so a heavy day is visible
   without opening anything. Days either side of the month are drawn faintly

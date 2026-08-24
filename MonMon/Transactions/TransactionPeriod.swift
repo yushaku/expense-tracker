@@ -30,6 +30,33 @@ enum TransactionPeriod {
         return calendar.date(byAdding: .month, value: 1, to: start) ?? start
     }
 
+    /// Every month from the one `start` falls in through the one `end` falls
+    /// in, oldest first. Both ends are included, so a strip built from a pair of
+    /// dates can show the month either of them sits in.
+    static func months(from start: Date, through end: Date) -> [Date] {
+        let first = startOfMonth(for: start)
+        let last = startOfMonth(for: end)
+
+        guard first <= last else {
+            return []
+        }
+
+        var months: [Date] = []
+        var cursor = first
+
+        while cursor <= last {
+            months.append(cursor)
+
+            guard let next = calendar.date(byAdding: .month, value: 1, to: cursor) else {
+                break
+            }
+
+            cursor = next
+        }
+
+        return months
+    }
+
     static func title(for date: Date) -> String {
         titleFormat.format(date)
     }

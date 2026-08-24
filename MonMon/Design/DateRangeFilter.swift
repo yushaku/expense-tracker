@@ -261,13 +261,18 @@ struct DateRangeFilterButton: View {
     /// always used.
     var identifierPrefix: String = ""
 
+    /// The glyph the button wears. A screen that already steps its own months
+    /// asks for a calendar, which names what the sheet holds; a screen that only
+    /// narrows a list keeps the filter lines.
+    var systemImage: String = "line.3.horizontal.decrease"
+
     @State private var isFiltering = false
 
     var body: some View {
         Button {
             isFiltering = true
         } label: {
-            Image(systemName: "line.3.horizontal.decrease")
+            Image(systemName: systemImage)
                 .font(.footnote.weight(.bold))
                 .foregroundStyle(MonMonTheme.accent)
                 .frame(width: 30, height: 30)
