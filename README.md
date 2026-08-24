@@ -128,6 +128,14 @@ and are excluded by `.gitignore`.
   before the write and folded afterwards, so two devices cannot record the same
   month's rent twice. Editing a rule changes only what it records next, and
   deleting one keeps everything it already recorded.
+- Spending calendar: a month grid below the category breakdown, each day
+  carrying what it took in and what it paid out, so a heavy day is visible
+  without opening anything. Days either side of the month are drawn faintly
+  rather than blanked, so every row is a whole week. Its arrows re-cut the
+  period the whole screen is showing, so the totals above it never describe a
+  month the grid is not. Tapping a day opens that day on its own, with its
+  income, expense, and net, the entries behind them, and an add button that
+  starts a new entry on that day.
 - Spending setup: one row of buttons above the category breakdown opens the
   categories, the recurring rules, and the defaults a new entry starts on — the
   account, the expense category, and the income category. Switching an entry

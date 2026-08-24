@@ -18,7 +18,6 @@
 		A00000000000000000000210 /* AccountDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000119 /* AccountDraft.swift */; };
 		A00000000000000000000211 /* VNDCurrency.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000122 /* VNDCurrency.swift */; };
 		A00000000000000000000212 /* CashBalanceSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000123 /* CashBalanceSummaryTests.swift */; };
-		A00000000000000000000288 /* VNDCurrencyFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000199 /* VNDCurrencyFormatTests.swift */; };
 		A00000000000000000000213 /* CashBalanceSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000124 /* CashBalanceSummary.swift */; };
 		A00000000000000000000214 /* AccountListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000125 /* AccountListView.swift */; };
 		A00000000000000000000215 /* AccountEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000126 /* AccountEditorView.swift */; };
@@ -46,10 +45,6 @@
 		A00000000000000000000237 /* UnitQuantity.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000148 /* UnitQuantity.swift */; };
 		A00000000000000000000238 /* FundDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000149 /* FundDraft.swift */; };
 		A00000000000000000000239 /* FundSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000150 /* FundSummary.swift */; };
-		A00000000000000000000F17 /* FundGroupDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F16 /* FundGroupDetailView.swift */; };
-		A00000000000000000000F15 /* FundGroupCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F14 /* FundGroupCard.swift */; };
-		A00000000000000000000F13 /* FundCardParts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F12 /* FundCardParts.swift */; };
-		A00000000000000000000F11 /* FundPositionGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F10 /* FundPositionGroup.swift */; };
 		A00000000000000000000240 /* FundSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000151 /* FundSection.swift */; };
 		A00000000000000000000241 /* FundHoldingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000152 /* FundHoldingCard.swift */; };
 		A00000000000000000000242 /* FundEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000153 /* FundEditorView.swift */; };
@@ -58,7 +53,6 @@
 		A00000000000000000000245 /* FundValuationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000156 /* FundValuationTests.swift */; };
 		A00000000000000000000246 /* FundDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000157 /* FundDraftTests.swift */; };
 		A00000000000000000000247 /* FundSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000158 /* FundSummaryTests.swift */; };
-		A00000000000000000000F21 /* FundPositionGroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F20 /* FundPositionGroupTests.swift */; };
 		A00000000000000000000248 /* FundHoldingPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000159 /* FundHoldingPersistenceTests.swift */; };
 		A00000000000000000000249 /* TransactionKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000160 /* TransactionKind.swift */; };
 		A00000000000000000000250 /* TransactionCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000161 /* TransactionCategory.swift */; };
@@ -84,17 +78,11 @@
 		A00000000000000000000270 /* TransactionDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000181 /* TransactionDraftTests.swift */; };
 		A00000000000000000000271 /* MoneyTransactionPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */; };
 		A00000000000000000000272 /* AssetAllocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000183 /* AssetAllocation.swift */; };
-		A0000000000000000000080A /* AccountsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000809 /* AccountsScreen.swift */; };
-		A00000000000000000000808 /* AccountBalanceCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000807 /* AccountBalanceCard.swift */; };
-		A00000000000000000000806 /* AccountBalanceAllocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000805 /* AccountBalanceAllocation.swift */; };
 		A00000000000000000000273 /* AssetAllocationCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000184 /* AssetAllocationCard.swift */; };
-		B12345678901234567890101 /* AssetGrowthCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B12345678901234567890201 /* AssetGrowthCard.swift */; };
 		A00000000000000000000274 /* AssetAllocationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000185 /* AssetAllocationTests.swift */; };
 		A00000000000000000000275 /* DateField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000186 /* DateField.swift */; };
 		A00000000000000000000276 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000187 /* AppTheme.swift */; };
 		A00000000000000000000277 /* AppLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000188 /* AppLock.swift */; };
-		A00000000000000000000972 /* CloudSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000970 /* CloudSync.swift */; };
-		A00000000000000000000973 /* CloudSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000971 /* CloudSyncTests.swift */; };
 		A00000000000000000000278 /* LockScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000189 /* LockScreenView.swift */; };
 		A00000000000000000000279 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000190 /* SettingsView.swift */; };
 		A00000000000000000000280 /* AppLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000191 /* AppLockTests.swift */; };
@@ -103,8 +91,13 @@
 		A00000000000000000000283 /* CategoryBreakdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000194 /* CategoryBreakdown.swift */; };
 		A00000000000000000000284 /* CategoryBreakdownCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000195 /* CategoryBreakdownCard.swift */; };
 		A00000000000000000000285 /* CategoryTransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000196 /* CategoryTransactionsView.swift */; };
+		C10000000000000000000101 /* TransactionCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000001 /* TransactionCalendar.swift */; };
+		C10000000000000000000102 /* TransactionCalendarCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000002 /* TransactionCalendarCard.swift */; };
+		C10000000000000000000103 /* DayTransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000003 /* DayTransactionsView.swift */; };
+		C10000000000000000000104 /* TransactionCalendarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000004 /* TransactionCalendarTests.swift */; };
 		A00000000000000000000286 /* CategoryBreakdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000197 /* CategoryBreakdownTests.swift */; };
 		A00000000000000000000287 /* CalendarTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000198 /* CalendarTheme.swift */; };
+		A00000000000000000000288 /* VNDCurrencyFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000199 /* VNDCurrencyFormatTests.swift */; };
 		A00000000000000000000612 /* TransactionRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000610 /* TransactionRange.swift */; };
 		A00000000000000000000613 /* TransactionRangeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000611 /* TransactionRangeTests.swift */; };
 		A00000000000000000000640 /* AccountTransfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000620 /* AccountTransfer.swift */; };
@@ -122,13 +115,14 @@
 		A00000000000000000000742 /* InvestmentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000722 /* InvestmentsView.swift */; };
 		A00000000000000000000750 /* InvestmentSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000730 /* InvestmentSummaryTests.swift */; };
 		A00000000000000000000802 /* SegmentedTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000801 /* SegmentedTabs.swift */; };
-		A0000000000000000000080C /* DateRangeFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000080B /* DateRangeFilter.swift */; };
-		A00000000000000000000F02 /* WebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F01 /* WebPage.swift */; };
-		A0000000000000000000080E /* PeriodGridPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000080D /* PeriodGridPicker.swift */; };
 		A00000000000000000000804 /* ProminentActionButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000803 /* ProminentActionButtonStyle.swift */; };
+		A00000000000000000000806 /* AccountBalanceAllocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000805 /* AccountBalanceAllocation.swift */; };
+		A00000000000000000000808 /* AccountBalanceCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000807 /* AccountBalanceCard.swift */; };
+		A0000000000000000000080A /* AccountsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000809 /* AccountsScreen.swift */; };
+		A0000000000000000000080C /* DateRangeFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000080B /* DateRangeFilter.swift */; };
+		A0000000000000000000080E /* PeriodGridPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000080D /* PeriodGridPicker.swift */; };
 		A00000000000000000000811 /* FundInstrument.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000810 /* FundInstrument.swift */; };
 		A00000000000000000000813 /* FundQuoteSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000812 /* FundQuoteSource.swift */; };
-		A00000000000000000000F04 /* FmarketLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F03 /* FmarketLink.swift */; };
 		A00000000000000000000815 /* FundInstrumentDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000814 /* FundInstrumentDraft.swift */; };
 		A00000000000000000000817 /* MonMonSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000816 /* MonMonSchema.swift */; };
 		A00000000000000000000819 /* TradingCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000818 /* TradingCalendar.swift */; };
@@ -171,10 +165,12 @@
 		A00000000000000000000957 /* FundCatalogueImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000956 /* FundCatalogueImport.swift */; };
 		A00000000000000000000959 /* FundCatalogueImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000958 /* FundCatalogueImportView.swift */; };
 		A00000000000000000000961 /* FundCatalogueImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000960 /* FundCatalogueImportTests.swift */; };
-		A00000000000000000000983 /* VangTodayQuoteProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000982 /* VangTodayQuoteProviderTests.swift */; };
-		A00000000000000000000987 /* GoldWeightTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000986 /* GoldWeightTests.swift */; };
-		A00000000000000000000985 /* GoldWeight.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000984 /* GoldWeight.swift */; };
+		A00000000000000000000972 /* CloudSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000970 /* CloudSync.swift */; };
+		A00000000000000000000973 /* CloudSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000971 /* CloudSyncTests.swift */; };
 		A00000000000000000000981 /* VangTodayQuoteProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000980 /* VangTodayQuoteProvider.swift */; };
+		A00000000000000000000983 /* VangTodayQuoteProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000982 /* VangTodayQuoteProviderTests.swift */; };
+		A00000000000000000000985 /* GoldWeight.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000984 /* GoldWeight.swift */; };
+		A00000000000000000000987 /* GoldWeightTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000986 /* GoldWeightTests.swift */; };
 		A00000000000000000000A02 /* AccountSeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000A01 /* AccountSeed.swift */; };
 		A00000000000000000000A04 /* AccountSeedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000A03 /* AccountSeedTests.swift */; };
 		A00000000000000000000A06 /* DuplicateReconciler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000A05 /* DuplicateReconciler.swift */; };
@@ -197,6 +193,14 @@
 		A00000000000000000000E0E /* RecurringListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D10 /* RecurringListView.swift */; };
 		A00000000000000000000E0F /* TransactionDefaultsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D11 /* TransactionDefaultsCard.swift */; };
 		A00000000000000000000E10 /* TransactionDefaultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D12 /* TransactionDefaultsView.swift */; };
+		A00000000000000000000F02 /* WebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F01 /* WebPage.swift */; };
+		A00000000000000000000F04 /* FmarketLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F03 /* FmarketLink.swift */; };
+		A00000000000000000000F11 /* FundPositionGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F10 /* FundPositionGroup.swift */; };
+		A00000000000000000000F13 /* FundCardParts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F12 /* FundCardParts.swift */; };
+		A00000000000000000000F15 /* FundGroupCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F14 /* FundGroupCard.swift */; };
+		A00000000000000000000F17 /* FundGroupDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F16 /* FundGroupDetailView.swift */; };
+		A00000000000000000000F21 /* FundPositionGroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F20 /* FundPositionGroupTests.swift */; };
+		B12345678901234567890101 /* AssetGrowthCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B12345678901234567890201 /* AssetGrowthCard.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -226,7 +230,6 @@
 		A00000000000000000000121 /* MonMonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonMonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00000000000000000000122 /* VNDCurrency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VNDCurrency.swift; sourceTree = "<group>"; };
 		A00000000000000000000123 /* CashBalanceSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashBalanceSummaryTests.swift; sourceTree = "<group>"; };
-		A00000000000000000000199 /* VNDCurrencyFormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VNDCurrencyFormatTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000124 /* CashBalanceSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashBalanceSummary.swift; sourceTree = "<group>"; };
 		A00000000000000000000125 /* AccountListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountListView.swift; sourceTree = "<group>"; };
 		A00000000000000000000126 /* AccountEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEditorView.swift; sourceTree = "<group>"; };
@@ -254,10 +257,6 @@
 		A00000000000000000000148 /* UnitQuantity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitQuantity.swift; sourceTree = "<group>"; };
 		A00000000000000000000149 /* FundDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundDraft.swift; sourceTree = "<group>"; };
 		A00000000000000000000150 /* FundSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSummary.swift; sourceTree = "<group>"; };
-		A00000000000000000000F16 /* FundGroupDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundGroupDetailView.swift; sourceTree = "<group>"; };
-		A00000000000000000000F14 /* FundGroupCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundGroupCard.swift; sourceTree = "<group>"; };
-		A00000000000000000000F12 /* FundCardParts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundCardParts.swift; sourceTree = "<group>"; };
-		A00000000000000000000F10 /* FundPositionGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundPositionGroup.swift; sourceTree = "<group>"; };
 		A00000000000000000000151 /* FundSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSection.swift; sourceTree = "<group>"; };
 		A00000000000000000000152 /* FundHoldingCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundHoldingCard.swift; sourceTree = "<group>"; };
 		A00000000000000000000153 /* FundEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundEditorView.swift; sourceTree = "<group>"; };
@@ -266,7 +265,6 @@
 		A00000000000000000000156 /* FundValuationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundValuationTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000157 /* FundDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundDraftTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000158 /* FundSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSummaryTests.swift; sourceTree = "<group>"; };
-		A00000000000000000000F20 /* FundPositionGroupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundPositionGroupTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000159 /* FundHoldingPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundHoldingPersistenceTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000160 /* TransactionKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionKind.swift; sourceTree = "<group>"; };
 		A00000000000000000000161 /* TransactionCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCategory.swift; sourceTree = "<group>"; };
@@ -292,17 +290,11 @@
 		A00000000000000000000181 /* TransactionDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDraftTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoneyTransactionPersistenceTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000183 /* AssetAllocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocation.swift; sourceTree = "<group>"; };
-		A00000000000000000000809 /* AccountsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsScreen.swift; sourceTree = "<group>"; };
-		A00000000000000000000807 /* AccountBalanceCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceCard.swift; sourceTree = "<group>"; };
-		A00000000000000000000805 /* AccountBalanceAllocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceAllocation.swift; sourceTree = "<group>"; };
 		A00000000000000000000184 /* AssetAllocationCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocationCard.swift; sourceTree = "<group>"; };
-		B12345678901234567890201 /* AssetGrowthCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetGrowthCard.swift; sourceTree = "<group>"; };
 		A00000000000000000000185 /* AssetAllocationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocationTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000186 /* DateField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateField.swift; sourceTree = "<group>"; };
 		A00000000000000000000187 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		A00000000000000000000188 /* AppLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLock.swift; sourceTree = "<group>"; };
-		A00000000000000000000970 /* CloudSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSync.swift; sourceTree = "<group>"; };
-		A00000000000000000000971 /* CloudSyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000189 /* LockScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenView.swift; sourceTree = "<group>"; };
 		A00000000000000000000190 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A00000000000000000000191 /* AppLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockTests.swift; sourceTree = "<group>"; };
@@ -311,8 +303,13 @@
 		A00000000000000000000194 /* CategoryBreakdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBreakdown.swift; sourceTree = "<group>"; };
 		A00000000000000000000195 /* CategoryBreakdownCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBreakdownCard.swift; sourceTree = "<group>"; };
 		A00000000000000000000196 /* CategoryTransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryTransactionsView.swift; sourceTree = "<group>"; };
+		C10000000000000000000001 /* TransactionCalendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCalendar.swift; sourceTree = "<group>"; };
+		C10000000000000000000002 /* TransactionCalendarCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCalendarCard.swift; sourceTree = "<group>"; };
+		C10000000000000000000003 /* DayTransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayTransactionsView.swift; sourceTree = "<group>"; };
+		C10000000000000000000004 /* TransactionCalendarTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCalendarTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000197 /* CategoryBreakdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBreakdownTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000198 /* CalendarTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarTheme.swift; sourceTree = "<group>"; };
+		A00000000000000000000199 /* VNDCurrencyFormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VNDCurrencyFormatTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000610 /* TransactionRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionRange.swift; sourceTree = "<group>"; };
 		A00000000000000000000611 /* TransactionRangeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionRangeTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000620 /* AccountTransfer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTransfer.swift; sourceTree = "<group>"; };
@@ -330,13 +327,14 @@
 		A00000000000000000000722 /* InvestmentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvestmentsView.swift; sourceTree = "<group>"; };
 		A00000000000000000000730 /* InvestmentSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvestmentSummaryTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000801 /* SegmentedTabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentedTabs.swift; sourceTree = "<group>"; };
-		A0000000000000000000080B /* DateRangeFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateRangeFilter.swift; sourceTree = "<group>"; };
-		A00000000000000000000F01 /* WebPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPage.swift; sourceTree = "<group>"; };
-		A0000000000000000000080D /* PeriodGridPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodGridPicker.swift; sourceTree = "<group>"; };
 		A00000000000000000000803 /* ProminentActionButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProminentActionButtonStyle.swift; sourceTree = "<group>"; };
+		A00000000000000000000805 /* AccountBalanceAllocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceAllocation.swift; sourceTree = "<group>"; };
+		A00000000000000000000807 /* AccountBalanceCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceCard.swift; sourceTree = "<group>"; };
+		A00000000000000000000809 /* AccountsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsScreen.swift; sourceTree = "<group>"; };
+		A0000000000000000000080B /* DateRangeFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateRangeFilter.swift; sourceTree = "<group>"; };
+		A0000000000000000000080D /* PeriodGridPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodGridPicker.swift; sourceTree = "<group>"; };
 		A00000000000000000000810 /* FundInstrument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrument.swift; sourceTree = "<group>"; };
 		A00000000000000000000812 /* FundQuoteSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundQuoteSource.swift; sourceTree = "<group>"; };
-		A00000000000000000000F03 /* FmarketLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FmarketLink.swift; sourceTree = "<group>"; };
 		A00000000000000000000814 /* FundInstrumentDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentDraft.swift; sourceTree = "<group>"; };
 		A00000000000000000000816 /* MonMonSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonMonSchema.swift; sourceTree = "<group>"; };
 		A00000000000000000000818 /* TradingCalendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradingCalendar.swift; sourceTree = "<group>"; };
@@ -379,10 +377,12 @@
 		A00000000000000000000956 /* FundCatalogueImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundCatalogueImport.swift; sourceTree = "<group>"; };
 		A00000000000000000000958 /* FundCatalogueImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundCatalogueImportView.swift; sourceTree = "<group>"; };
 		A00000000000000000000960 /* FundCatalogueImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundCatalogueImportTests.swift; sourceTree = "<group>"; };
-		A00000000000000000000982 /* VangTodayQuoteProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VangTodayQuoteProviderTests.swift; sourceTree = "<group>"; };
-		A00000000000000000000986 /* GoldWeightTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoldWeightTests.swift; sourceTree = "<group>"; };
-		A00000000000000000000984 /* GoldWeight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoldWeight.swift; sourceTree = "<group>"; };
+		A00000000000000000000970 /* CloudSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSync.swift; sourceTree = "<group>"; };
+		A00000000000000000000971 /* CloudSyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000980 /* VangTodayQuoteProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VangTodayQuoteProvider.swift; sourceTree = "<group>"; };
+		A00000000000000000000982 /* VangTodayQuoteProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VangTodayQuoteProviderTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000984 /* GoldWeight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoldWeight.swift; sourceTree = "<group>"; };
+		A00000000000000000000986 /* GoldWeightTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoldWeightTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000A01 /* AccountSeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSeed.swift; sourceTree = "<group>"; };
 		A00000000000000000000A03 /* AccountSeedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSeedTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000A05 /* DuplicateReconciler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateReconciler.swift; sourceTree = "<group>"; };
@@ -405,6 +405,14 @@
 		A00000000000000000000D10 /* RecurringListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringListView.swift; sourceTree = "<group>"; };
 		A00000000000000000000D11 /* TransactionDefaultsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDefaultsCard.swift; sourceTree = "<group>"; };
 		A00000000000000000000D12 /* TransactionDefaultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDefaultsView.swift; sourceTree = "<group>"; };
+		A00000000000000000000F01 /* WebPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPage.swift; sourceTree = "<group>"; };
+		A00000000000000000000F03 /* FmarketLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FmarketLink.swift; sourceTree = "<group>"; };
+		A00000000000000000000F10 /* FundPositionGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundPositionGroup.swift; sourceTree = "<group>"; };
+		A00000000000000000000F12 /* FundCardParts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundCardParts.swift; sourceTree = "<group>"; };
+		A00000000000000000000F14 /* FundGroupCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundGroupCard.swift; sourceTree = "<group>"; };
+		A00000000000000000000F16 /* FundGroupDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundGroupDetailView.swift; sourceTree = "<group>"; };
+		A00000000000000000000F20 /* FundPositionGroupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundPositionGroupTests.swift; sourceTree = "<group>"; };
+		B12345678901234567890201 /* AssetGrowthCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetGrowthCard.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -681,6 +689,9 @@
 				A00000000000000000000194 /* CategoryBreakdown.swift */,
 				A00000000000000000000195 /* CategoryBreakdownCard.swift */,
 				A00000000000000000000196 /* CategoryTransactionsView.swift */,
+				C10000000000000000000001 /* TransactionCalendar.swift */,
+				C10000000000000000000002 /* TransactionCalendarCard.swift */,
+				C10000000000000000000003 /* DayTransactionsView.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
@@ -691,6 +702,7 @@
 				A00000000000000000000166 /* TransactionPeriodTests.swift */,
 				A00000000000000000000611 /* TransactionRangeTests.swift */,
 				A00000000000000000000167 /* TransactionSummaryTests.swift */,
+				C10000000000000000000004 /* TransactionCalendarTests.swift */,
 				A00000000000000000000174 /* CategoryDraftTests.swift */,
 				A00000000000000000000175 /* TransactionCategoryPersistenceTests.swift */,
 				A00000000000000000000181 /* TransactionDraftTests.swift */,
@@ -954,6 +966,9 @@
 				A00000000000000000000E00 /* RecurrenceFrequency.swift in Sources */,
 				A00000000000000000000287 /* CalendarTheme.swift in Sources */,
 				A00000000000000000000285 /* CategoryTransactionsView.swift in Sources */,
+				C10000000000000000000101 /* TransactionCalendar.swift in Sources */,
+				C10000000000000000000102 /* TransactionCalendarCard.swift in Sources */,
+				C10000000000000000000103 /* DayTransactionsView.swift in Sources */,
 				A00000000000000000000284 /* CategoryBreakdownCard.swift in Sources */,
 				A00000000000000000000283 /* CategoryBreakdown.swift in Sources */,
 				A00000000000000000000282 /* Percentage.swift in Sources */,
@@ -1096,6 +1111,7 @@
 				A00000000000000000000264 /* TransactionCategoryPersistenceTests.swift in Sources */,
 				A00000000000000000000263 /* CategoryDraftTests.swift in Sources */,
 				A00000000000000000000256 /* TransactionSummaryTests.swift in Sources */,
+				C10000000000000000000104 /* TransactionCalendarTests.swift in Sources */,
 				A00000000000000000000255 /* TransactionPeriodTests.swift in Sources */,
 				A00000000000000000000613 /* TransactionRangeTests.swift in Sources */,
 				A00000000000000000000650 /* TransferDraftTests.swift in Sources */,

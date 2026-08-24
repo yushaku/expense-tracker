@@ -50,6 +50,12 @@ struct TransactionListView: View {
                                 range: range
                             )
 
+                            TransactionCalendarCard(
+                                month: calendarMonth,
+                                weeks: calendarWeeks,
+                                onStepMonth: stepCalendarMonth
+                            )
+
                             if !visibleTransactions.isEmpty {
                                 transactionsSection
                             }
@@ -75,6 +81,9 @@ struct TransactionListView: View {
             .navigationDestination(for: CategoryPeriod.self) { period in
                 CategoryTransactionsView(period: period)
             }
+            .navigationDestination(for: DayPeriod.self) { period in
+                DayTransactionsView(period: period)
+            }
             .compactRootNavigationTitle("Spending")
             .accessibilityIdentifier("spending-list")
             .sheet(item: $editorMode) { mode in
@@ -97,6 +106,32 @@ struct TransactionListView: View {
     /// day, so the new entry lands where the owner is looking.
     private var defaultDate: Date {
         range.contains(.now) ? .now : range.start
+    }
+
+    /// The month the calendar draws. It follows the period on show rather than
+    /// keeping a month of its own, so the grid and the totals above it can never
+    /// disagree about where the owner is looking.
+    private var calendarMonth: Date {
+        TransactionPeriod.startOfMonth(for: range.start)
+    }
+
+    /// Built from every transaction, not the ones in range: the grid covers a
+    /// whole month even when the period narrows to a single day inside it.
+    private var calendarWeeks: [TransactionCalendarWeek] {
+        TransactionCalendar.weeks(of: calendarMonth, transactions: transactions)
+    }
+
+    /// Stepping the calendar is how an owner says "show me that month", so it
+    /// re-cuts the period to the month it lands on rather than leaving the
+    /// figures above describing the month they stepped away from.
+    private func stepCalendarMonth(_ steps: Int) {
+        let calendar = TransactionPeriod.calendar
+
+        guard let moved = calendar.date(byAdding: .month, value: steps, to: calendarMonth) else {
+            return
+        }
+
+        range = .month(containing: moved)
     }
 
     private var visibleTransactions: [MoneyTransaction] {
