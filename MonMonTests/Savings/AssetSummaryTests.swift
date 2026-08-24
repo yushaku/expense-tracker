@@ -64,6 +64,18 @@ final class AssetSummaryTests {
         )
     }
 
+    private var utcCalendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = .gmt
+        return calendar
+    }
+
+    private func date(_ year: Int, _ month: Int, _ day: Int, hour: Int = 12) -> Date {
+        utcCalendar.date(
+            from: DateComponents(year: year, month: month, day: day, hour: hour)
+        ) ?? Date(timeIntervalSince1970: 0)
+    }
+
     @Test("No deposits total to zero")
     func emptyDepositsTotalZero() {
         #expect(AssetSummary.totalPrincipal(of: []) == 0)
@@ -341,5 +353,122 @@ final class AssetSummaryTests {
             )
                 == 173_900_000
         )
+    }
+
+    @Test("Asset history samples the start, month ends, and current value")
+    func assetHistorySamplesMonthlyValues() {
+        let account = CashAccount(
+            id: UUID(),
+            name: "Wallet",
+            kind: .cash,
+            openingBalance: 100,
+            currencyCode: VNDCurrency.code,
+            createdAt: date(2024, 1, 10)
+        )
+        let income = MoneyTransaction(
+            id: UUID(),
+            kind: .income,
+            amount: 25,
+            occurredAt: date(2024, 2, 10),
+            note: "",
+            accountID: account.id,
+            categoryID: nil,
+            currencyCode: VNDCurrency.code,
+            createdAt: date(2024, 2, 10)
+        )
+        let expense = MoneyTransaction(
+            id: UUID(),
+            kind: .expense,
+            amount: 5,
+            occurredAt: date(2024, 3, 1),
+            note: "",
+            accountID: account.id,
+            categoryID: nil,
+            currencyCode: VNDCurrency.code,
+            createdAt: date(2024, 3, 1)
+        )
+        let asOf = date(2024, 3, 15)
+
+        let points = AssetHistory.points(
+            accounts: [account],
+            deposits: [],
+            holdings: [],
+            instruments: [],
+            transactions: [income, expense],
+            transfers: [],
+            debts: [],
+            payments: [],
+            asOf: asOf,
+            calendar: utcCalendar
+        )
+
+        #expect(points.map(\.netWorth) == [100, 100, 125, 120])
+        #expect(points.first?.date == account.createdAt)
+        #expect(points.last?.date == asOf)
+    }
+
+    @Test("Moving cash into savings does not create artificial growth")
+    func assetHistoryKeepsFundedSavingsNeutral() {
+        let account = CashAccount(
+            id: UUID(),
+            name: "Bank",
+            kind: .bank,
+            openingBalance: 100,
+            currencyCode: VNDCurrency.code,
+            createdAt: date(2024, 1, 10)
+        )
+        let deposit = SavingsDeposit(
+            id: UUID(),
+            name: "Deposit",
+            principal: 40,
+            annualInterestRate: 5,
+            termMonths: 12,
+            openedAt: date(2024, 2, 10),
+            currencyCode: VNDCurrency.code,
+            createdAt: date(2024, 2, 10),
+            sourceAccountID: account.id
+        )
+
+        let points = AssetHistory.points(
+            accounts: [account],
+            deposits: [deposit],
+            holdings: [],
+            instruments: [],
+            transactions: [],
+            transfers: [],
+            debts: [],
+            payments: [],
+            asOf: date(2024, 3, 15),
+            calendar: utcCalendar
+        )
+
+        #expect(points.map(\.netWorth) == [100, 100, 100, 100])
+    }
+
+    @Test("Asset history ignores records after the requested date")
+    func assetHistoryIgnoresFutureRecords() {
+        let futureAccount = CashAccount(
+            id: UUID(),
+            name: "Future",
+            kind: .bank,
+            openingBalance: 100,
+            currencyCode: VNDCurrency.code,
+            createdAt: date(2024, 4, 1)
+        )
+
+        let points = AssetHistory.points(
+            accounts: [futureAccount],
+            deposits: [],
+            holdings: [],
+            instruments: [],
+            transactions: [],
+            transfers: [],
+            debts: [],
+            payments: [],
+            asOf: date(2024, 3, 15),
+            calendar: utcCalendar
+        )
+
+        #expect(points.isEmpty)
     }
 }

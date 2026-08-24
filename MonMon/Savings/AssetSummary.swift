@@ -64,3 +64,121 @@ enum AssetSummary {
             - DebtSummary.totalOutstanding(of: debts, payments: payments, direction: .borrowed)
     }
 }
+
+struct AssetHistoryPoint: Identifiable, Equatable {
+    let date: Date
+    let netWorth: Decimal
+
+    var id: Date { date }
+}
+
+/// Reconstructs month-end net worth from the dated records the app already
+/// owns. Fund and gold positions use the catalogue's current price because the
+/// store does not retain historical quotes.
+enum AssetHistory {
+    private static let maximumMonthCount = 12
+
+    static func points(
+        accounts: [CashAccount],
+        deposits: [SavingsDeposit],
+        holdings: [FundHolding],
+        instruments: [FundInstrument],
+        transactions: [MoneyTransaction],
+        transfers: [AccountTransfer],
+        debts: [Debt],
+        payments: [DebtPayment],
+        asOf: Date,
+        calendar: Calendar = .current
+    ) -> [AssetHistoryPoint] {
+        guard
+            let earliestDate = earliestDate(
+                accounts: accounts,
+                deposits: deposits,
+                holdings: holdings,
+                transactions: transactions,
+                transfers: transfers,
+                debts: debts,
+                payments: payments
+            ),
+            earliestDate <= asOf,
+            let currentMonthStart = calendar.dateInterval(of: .month, for: asOf)?.start,
+            let windowStart = calendar.date(
+                byAdding: .month,
+                value: -(maximumMonthCount - 1),
+                to: currentMonthStart
+            )
+        else {
+            return []
+        }
+
+        return sampleDates(
+            from: max(earliestDate, windowStart),
+            through: asOf,
+            calendar: calendar
+        ).map { date in
+            AssetHistoryPoint(
+                date: date,
+                netWorth: AssetSummary.netWorth(
+                    accounts: accounts.filter { $0.createdAt <= date },
+                    deposits: deposits.filter { $0.openedAt <= date },
+                    holdings: holdings.filter { $0.boughtOn <= date },
+                    instruments: instruments,
+                    transactions: transactions.filter { $0.occurredAt <= date },
+                    transfers: transfers.filter { $0.occurredAt <= date },
+                    debts: debts.filter { $0.openedAt <= date },
+                    payments: payments.filter { $0.occurredAt <= date }
+                )
+            )
+        }
+    }
+
+    private static func earliestDate(
+        accounts: [CashAccount],
+        deposits: [SavingsDeposit],
+        holdings: [FundHolding],
+        transactions: [MoneyTransaction],
+        transfers: [AccountTransfer],
+        debts: [Debt],
+        payments: [DebtPayment]
+    ) -> Date? {
+        var dates = accounts.map(\.createdAt)
+        dates.append(contentsOf: deposits.map(\.openedAt))
+        dates.append(contentsOf: holdings.map(\.boughtOn))
+        dates.append(contentsOf: transactions.map(\.occurredAt))
+        dates.append(contentsOf: transfers.map(\.occurredAt))
+        dates.append(contentsOf: debts.map(\.openedAt))
+        dates.append(contentsOf: payments.map(\.occurredAt))
+        return dates.min()
+    }
+
+    private static func sampleDates(
+        from firstDate: Date,
+        through asOf: Date,
+        calendar: Calendar
+    ) -> [Date] {
+        var dates = [firstDate]
+        guard var monthStart = calendar.dateInterval(of: .month, for: firstDate)?.start,
+            let currentMonthStart = calendar.dateInterval(of: .month, for: asOf)?.start
+        else {
+            return dates
+        }
+
+        while monthStart < currentMonthStart {
+            guard let nextMonth = calendar.date(byAdding: .month, value: 1, to: monthStart),
+                let monthEnd = calendar.date(byAdding: .second, value: -1, to: nextMonth)
+            else {
+                break
+            }
+
+            if monthEnd > firstDate {
+                dates.append(monthEnd)
+            }
+            monthStart = nextMonth
+        }
+
+        if dates.last != asOf {
+            dates.append(asOf)
+        }
+        return dates
+    }
+}

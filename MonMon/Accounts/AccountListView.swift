@@ -37,6 +37,10 @@ struct AccountListView: View {
 
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+                        if !historyPoints.isEmpty {
+                            AssetGrowthCard(points: historyPoints)
+                        }
+
                         if !allocationSlices.isEmpty || !liabilitySlices.isEmpty {
                             AssetAllocationCard(
                                 slices: allocationSlices,
@@ -94,6 +98,20 @@ struct AccountListView: View {
             transfers: transfers,
             debts: debts,
             payments: payments
+        )
+    }
+
+    private var historyPoints: [AssetHistoryPoint] {
+        AssetHistory.points(
+            accounts: accounts,
+            deposits: deposits,
+            holdings: holdings,
+            instruments: instruments,
+            transactions: transactions,
+            transfers: transfers,
+            debts: debts,
+            payments: payments,
+            asOf: .now
         )
     }
 
