@@ -1,7 +1,7 @@
 // Shared MonMon build settings.
 
 PRODUCT_NAME = MonMon
-PRODUCT_BUNDLE_IDENTIFIER = com.sonlv.monmon
+PRODUCT_BUNDLE_IDENTIFIER = com.sonlv.monmon.local.yushaku
 MARKETING_VERSION = 0.1.0
 CURRENT_PROJECT_VERSION = 1
 
@@ -23,6 +23,7 @@ INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES
 INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES
 INFOPLIST_KEY_UILaunchScreen_Generation = YES
 INFOPLIST_KEY_NSFaceIDUsageDescription = MonMon uses Face ID to keep your balances private.
+INFOPLIST_FILE = MonMon/Info.plist
 
 ENABLE_USER_SCRIPT_SANDBOXING = YES
 ALWAYS_SEARCH_USER_PATHS = NO

@@ -109,7 +109,7 @@ and are excluded by `.gitignore`.
   with their payments, opened from the Home toolbar, with an optional cash
   account, an optional rate and due date, and projected interest that is shown
   but never counted; VND validation and formatting, exact `Decimal` totals,
-  on-device SwiftData persistence, and shared SwiftUI UI.
+  private iCloud-backed SwiftData persistence, and shared SwiftUI UI.
 - Owner validation: form behavior, interest and valuation against a hand
   calculation, relaunch persistence, iPhone Dynamic Type and keyboard, and Mac
   window resizing.
@@ -117,6 +117,13 @@ and are excluded by `.gitignore`.
   passcode lock that hides the screen on launch and after a minute away. The
   lock is a gate on the screen, not encryption; the records on disk are
   protected by the operating system's file protection and nothing more.
+- Backup: a switch for mirroring every record through the owner's own private
+  iCloud database, and a "Sync now" button that flushes pending edits, checks
+  the account, and reports what the store says next. SwiftData fixes a store's
+  mirroring when the container is built, so the switch takes effect on the next
+  launch and says so on screen. No call forces a push, so the button never
+  claims one happened; when nothing is reported back it says the changes stay
+  queued.
 - Market data: a fund and ETF catalogue with one price per ticker, refreshed
   when the owner asks and never on a timer, on launch, or in the background.
   Fmarket supplies open-ended fund NAV and VNDIRECT supplies listed ETF closes;
@@ -128,7 +135,7 @@ and are excluded by `.gitignore`.
 - Not included yet: budgets, recurring transactions, interest paid on a
   schedule, rollover or early withdrawal, compound interest or amortisation
   schedules on a debt, price history or charts, a market-holiday calendar,
-  iCloud, AI, or MCP.
+  AI, or MCP.
 - Not included, and not planned: individual buy/sell trades, realized profit and
   loss, and gold, equity, or crypto positions. `CAPABILITY-MAP.md` records why
   `investment-tracking` was dropped rather than deferred.
@@ -143,7 +150,8 @@ and are excluded by `.gitignore`.
 - SwiftData stores `CashAccount`, `SavingsDeposit`, `FundInstrument`,
   `FundHolding`, `TransactionCategory`, `MoneyTransaction`, `AccountTransfer`,
   `Debt`, and `DebtPayment` records
-  locally; `@Query` drives every visible list and combined total.
+  in the owner's private iCloud database; `@Query` drives every visible list
+  and combined total.
 - Nothing stores a balance. Every account balance, every total, and net worth
   itself is computed from the records each time, and `openingBalance` is never
   rewritten. That is what lets a record be deleted with no compensating write.
@@ -173,19 +181,6 @@ and are excluded by `.gitignore`.
   money borrowed joins the overdrawn accounts in the figure beneath the ring.
   Projected interest is shown and never counted: interest actually paid is an
   ordinary expense.
-- The approved boundaries and verification contracts live under `docs/`:
-  `SPEC-cash-balance.md`, `SPEC-savings-deposit.md`,
-  `SPEC-fund-etf-holdings.md`, `SPEC-income-expense.md`,
-  `SPEC-account-transfer.md`, `SPEC-debt-tracking.md`, and
-  `SPEC-market-valuation.md`.
-- `SPEC-market-valuation.md` amends the fund data contract: it splits
-  `FundHolding` into a `FundInstrument` catalogue that owns the price and a
-  position that points at it, so one ticker cannot carry two prices and a
-  holding is created by picking rather than retyping. The columns the position
-  used to carry its own ticker and price in are gone, along with the backfill
-  that copied them onto the catalogue, so there is no second copy left to
-  disagree with. A position whose instrument is missing is reported as unpriced
-  rather than valued at a price it does not have.
 - The one network boundary is `FundQuoteTransport`, behind which every provider
   is tested against a recorded reply. The default test run makes no connection.
 - Three identities are unique by a rule rather than by a database constraint: a
@@ -197,8 +192,8 @@ and are excluded by `.gitignore`.
   foreign key that names an account defaults to the `Unassigned` one, so a
   record can always be counted somewhere rather than counted in a spending
   total and in no balance at all.
-- `docs/architecture.html` draws the same picture the specs describe in prose:
-  every `@Model` with its fields and foreign keys, then the components around
-  the app — Apple frameworks, the one third-party package, and the services
-  still on the roadmap. Open it in any browser; it is one self-contained file
-  with no build step and no external requests.
+- `docs/architecture.html` draws every `@Model` with its fields and foreign
+  keys, then the components around the app — Apple frameworks, the one
+  third-party package, and the services still on the roadmap. Open it in any
+  browser; it is one self-contained file with no build step and no external
+  requests.
