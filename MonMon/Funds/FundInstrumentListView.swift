@@ -1,6 +1,66 @@
 import SwiftData
 import SwiftUI
 
+enum FundInstrumentListScope: String, Identifiable {
+    case all
+    case funds
+    case gold
+
+    var id: String { rawValue }
+
+    var kinds: [FundInstrumentKind] {
+        switch self {
+        case .all:
+            FundInstrumentKind.allCases
+        case .funds:
+            [.fund, .etf]
+        case .gold:
+            [.gold]
+        }
+    }
+
+    var defaultKind: FundInstrumentKind { kinds[0] }
+
+    var importSource: FundQuoteSource {
+        switch self {
+        case .all, .funds:
+            .fmarket
+        case .gold:
+            .vangToday
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .all:
+            "Instruments"
+        case .funds:
+            "Fund instruments"
+        case .gold:
+            "Gold instruments"
+        }
+    }
+
+    var emptyDescription: String {
+        switch self {
+        case .all, .funds:
+            "Add from Fmarket to import open-ended funds with their NAV, or add one by hand."
+        case .gold:
+            "Add from vang.today to import gold products with shop prices, or add one by hand."
+        }
+    }
+
+    @MainActor
+    func makeImporter() -> FundCatalogueImport {
+        switch importSource {
+        case .vangToday:
+            FundCatalogueImport(provider: VangTodayQuoteProvider())
+        case .manual, .fmarket, .vndirect:
+            FundCatalogueImport()
+        }
+    }
+}
+
 /// The fund catalogue: one row per tradable thing, with the price every
 /// position in it is valued from.
 ///
@@ -23,9 +83,16 @@ struct FundInstrumentListView: View {
     @State private var isImporting = false
     @State private var fmarketPage: WebPage?
 
+    let scope: FundInstrumentListScope
+
     /// Passed in rather than read from the clock so a preview and a test both
     /// get a stable answer for whether a price is stale.
-    var asOf: Date = .now
+    var asOf: Date
+
+    init(scope: FundInstrumentListScope = .all, asOf: Date = .now) {
+        self.scope = scope
+        self.asOf = asOf
+    }
 
     var body: some View {
         #if os(macOS)
@@ -45,10 +112,10 @@ struct FundInstrumentListView: View {
                     LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                         actionBar
 
-                        if instruments.isEmpty {
+                        if filteredInstruments.isEmpty {
                             emptyState
                         } else {
-                            ForEach(instruments) { instrument in
+                            ForEach(filteredInstruments) { instrument in
                                 row(instrument)
                             }
                         }
@@ -59,7 +126,7 @@ struct FundInstrumentListView: View {
                     .frame(maxWidth: .infinity)
                 }
             }
-            .navigationTitle("Instruments")
+            .navigationTitle(scope.title)
             .accessibilityIdentifier("instrument-list")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -67,12 +134,12 @@ struct FundInstrumentListView: View {
                 }
             }
             .sheet(item: $editorMode) { mode in
-                FundInstrumentEditorView(mode: mode)
+                FundInstrumentEditorView(mode: mode, kinds: scope.kinds)
             }
             .sheet(isPresented: $isImporting) {
                 FundCatalogueImportView(
-                    title: "Add from Fmarket",
-                    importer: FundCatalogueImport()
+                    title: "Add from \(scope.importSource.displayName)",
+                    importer: scope.makeImporter()
                 )
             }
             .webPage($fmarketPage)
@@ -85,12 +152,9 @@ struct FundInstrumentListView: View {
             Text("Nothing in the catalogue yet")
                 .font(.headline)
 
-            Text(
-                "Add from Fmarket to pull every open-ended fund it lists, with its NAV, "
-                    + "or add one by hand. Then record how many units you hold."
-            )
-            .font(.subheadline)
-            .foregroundStyle(MonMonTheme.textSecondary)
+            Text(scope.emptyDescription)
+                .font(.subheadline)
+                .foregroundStyle(MonMonTheme.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
@@ -224,7 +288,7 @@ struct FundInstrumentListView: View {
         .accessibilityIdentifier("open-fmarket-\(symbol.lowercased())")
     }
 
-    /// Refresh and the two ways of adding a fund, in the content rather than the
+    /// Refresh and the two ways of adding an instrument, in the content rather than the
     /// toolbar. macOS collapses a toolbar's extra primary actions into an
     /// overflow, which is how Refresh managed to ship invisible.
     ///
@@ -245,10 +309,10 @@ struct FundInstrumentListView: View {
             .disabled(refresher.isRunning || !canRefresh)
 
             actionButton(
-                title: "Fmarket",
+                title: scope.importSource.displayName,
                 systemImage: "square.and.arrow.down",
-                accessibilityLabel: "Add from Fmarket",
-                identifier: "import-from-fmarket"
+                accessibilityLabel: "Add from \(scope.importSource.displayName)",
+                identifier: scope == .gold ? "import-from-vang-today" : "import-from-fmarket"
             ) {
                 isImporting = true
             }
@@ -300,18 +364,22 @@ struct FundInstrumentListView: View {
     /// Refresh is offered only when a request could actually achieve something:
     /// a held instrument, with automatic quotes left on.
     private var canRefresh: Bool {
-        refresher.hasAnythingToRefresh(instruments: instruments, holdings: holdings)
+        refresher.hasAnythingToRefresh(instruments: filteredInstruments, holdings: holdings)
     }
 
     /// Owner-triggered, and the only thing in the app that opens a connection.
     private func refresh() {
         Task {
             await refresher.refresh(
-                instruments: instruments,
+                instruments: filteredInstruments,
                 holdings: holdings,
                 in: modelContext
             )
         }
+    }
+
+    private var filteredInstruments: [FundInstrument] {
+        instruments.filter { scope.kinds.contains($0.kind) }
     }
 
     private func isStale(_ instrument: FundInstrument) -> Bool {

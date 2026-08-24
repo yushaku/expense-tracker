@@ -125,6 +125,22 @@ struct FundInstrumentDraftTests {
         #expect(FundQuoteSource.vangToday.displayName == "vang.today")
     }
 
+    @Test("Instrument list scopes keep funds and gold separate")
+    func instrumentListScopesSeparateKinds() {
+        #expect(FundInstrumentListScope.funds.kinds == [.fund, .etf])
+        #expect(FundInstrumentListScope.funds.defaultKind == .fund)
+        #expect(FundInstrumentListScope.funds.importSource == .fmarket)
+
+        #expect(FundInstrumentListScope.gold.kinds == [.gold])
+        #expect(FundInstrumentListScope.gold.defaultKind == .gold)
+        #expect(FundInstrumentListScope.gold.importSource == .vangToday)
+    }
+
+    @Test("The combined instrument list continues to include every kind")
+    func combinedInstrumentListIncludesEveryKind() {
+        #expect(FundInstrumentListScope.all.kinds == FundInstrumentKind.allCases)
+    }
+
     @Test("An instrument round-trips through a draft unchanged")
     func instrumentRoundTripsThroughDraft() throws {
         let instrument = FundTestFactory.instrument(

@@ -3,6 +3,7 @@ import SwiftUI
 struct FundInstrumentEditorForm: View {
     @Binding var draft: FundInstrumentDraft
 
+    let kinds: [FundInstrumentKind]
     let isEditing: Bool
     /// How many positions are held in this instrument. Above zero, deleting is
     /// refused and the reason names the count.
@@ -101,15 +102,27 @@ struct FundInstrumentEditorForm: View {
                 VStack(alignment: .leading, spacing: 8) {
                     fieldLabel("Type")
 
-                    Picker("Type", selection: $draft.kind) {
-                        ForEach(FundInstrumentKind.allCases, id: \.rawValue) {
-                            Text($0.displayName)
-                                .tag($0)
+                    if kinds.count == 1 {
+                        Text(draft.kind.displayName)
+                            .font(.subheadline.weight(.medium))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(14)
+                            .background(
+                                MonMonTheme.field,
+                                in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            )
+                            .accessibilityIdentifier("fund-kind")
+                    } else {
+                        Picker("Type", selection: $draft.kind) {
+                            ForEach(kinds, id: \.rawValue) {
+                                Text($0.displayName)
+                                    .tag($0)
+                            }
                         }
+                        .pickerStyle(.segmented)
+                        .labelsHidden()
+                        .accessibilityIdentifier("fund-kind")
                     }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
-                    .accessibilityIdentifier("fund-kind")
 
                     Text(kindExplanation)
                         .font(.caption)

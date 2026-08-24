@@ -28,6 +28,7 @@ enum FundInstrumentEditorMode: Identifiable {
 /// else: a position must not be able to change what its instrument is worth.
 struct FundInstrumentEditorView: View {
     let mode: FundInstrumentEditorMode
+    let kinds: [FundInstrumentKind]
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -43,12 +44,18 @@ struct FundInstrumentEditorView: View {
     @State private var saveErrorMessage: String?
     @State private var isConfirmingDelete = false
 
-    init(mode: FundInstrumentEditorMode) {
+    init(
+        mode: FundInstrumentEditorMode,
+        kinds: [FundInstrumentKind] = FundInstrumentKind.allCases
+    ) {
         self.mode = mode
+        self.kinds = kinds.isEmpty ? FundInstrumentKind.allCases : kinds
 
         switch mode {
         case .add:
-            _draft = State(initialValue: FundInstrumentDraft(priceAsOf: .now))
+            _draft = State(
+                initialValue: FundInstrumentDraft(kind: self.kinds[0], priceAsOf: .now)
+            )
         case .edit(let instrument):
             _draft = State(initialValue: FundInstrumentDraft(instrument: instrument))
         }
@@ -66,6 +73,7 @@ struct FundInstrumentEditorView: View {
         NavigationStack {
             FundInstrumentEditorForm(
                 draft: $draft,
+                kinds: kinds,
                 isEditing: mode.editedInstrument != nil,
                 heldCount: heldCount,
                 validationError: validationError,

@@ -8,6 +8,7 @@ struct SettingsView: View {
 
     @AppStorage(AppTheme.storageKey) private var theme = AppTheme.system
     @AppStorage(AppLock.enabledKey) private var isLockEnabled = false
+    @State private var instrumentScope: FundInstrumentListScope?
 
     var body: some View {
         NavigationStack {
@@ -18,6 +19,7 @@ struct SettingsView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                         appearanceCard
+                        instrumentsCard
                         securityCard
                         backupCard
                         aboutCard
@@ -31,6 +33,9 @@ struct SettingsView: View {
             .navigationTitle("Settings")
             .accessibilityIdentifier("settings")
             .tint(MonMonTheme.accent)
+            .sheet(item: $instrumentScope) { scope in
+                FundInstrumentListView(scope: scope)
+            }
         }
     }
 
@@ -81,6 +86,78 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+
+    private var instrumentsCard: some View {
+        card {
+            VStack(alignment: .leading, spacing: 14) {
+                sectionHeader("Instruments", systemImage: "list.bullet.rectangle.fill")
+
+                instrumentButton(
+                    title: "Funds & ETFs",
+                    subtitle: "Manage catalogue prices and Fmarket imports",
+                    systemImage: "chart.line.uptrend.xyaxis",
+                    tint: MonMonTheme.funds,
+                    scope: .funds
+                )
+
+                Divider()
+                    .overlay(MonMonTheme.border)
+
+                instrumentButton(
+                    title: "Gold",
+                    subtitle: "Manage products and shop buy/sell prices",
+                    systemImage: "seal.fill",
+                    tint: MonMonTheme.Hue.peach,
+                    scope: .gold
+                )
+            }
+        }
+    }
+
+    private func instrumentButton(
+        title: String,
+        subtitle: String,
+        systemImage: String,
+        tint: Color,
+        scope: FundInstrumentListScope
+    ) -> some View {
+        Button {
+            instrumentScope = scope
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: systemImage)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(tint)
+                    .frame(width: 36, height: 36)
+                    .background(tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 10))
+                    .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(MonMonTheme.textPrimary)
+
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                        .multilineTextAlignment(.leading)
+                }
+
+                Spacer(minLength: 8)
+
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textMuted)
+                    .accessibilityHidden(true)
+            }
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(title). \(subtitle)")
+        .accessibilityHint("Opens instrument management")
+        .accessibilityIdentifier("settings-\(scope.rawValue)-instruments")
     }
 
     /// Turning the lock on runs an authentication first, so a sensor that does
