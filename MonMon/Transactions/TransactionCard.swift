@@ -4,6 +4,9 @@ struct TransactionCard: View {
     let transaction: MoneyTransaction
     let category: TransactionCategory?
     let account: CashAccount?
+    /// The spending list puts one date over each day of cards, so the card
+    /// drops its own copy there and keeps it everywhere else.
+    var showsDate = true
 
     private static let dateFormat: Date.FormatStyle = {
         var style = Date.FormatStyle().day().month(.abbreviated)
@@ -75,7 +78,7 @@ struct TransactionCard: View {
                 .foregroundStyle(directionTint)
 
             Label(
-                Self.dateFormat.format(transaction.occurredAt),
+                showsDate ? Self.dateFormat.format(transaction.occurredAt) : transaction.kind.displayName,
                 systemImage: transaction.kind.symbolName
             )
             .font(.caption2.weight(.semibold))

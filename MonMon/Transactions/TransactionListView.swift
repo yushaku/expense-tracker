@@ -18,6 +18,16 @@ struct TransactionListView: View {
     @State private var isManagingRecurring = false
     @State private var isEditingDefaults = false
 
+    /// Weekday first: over a run of days the name is what the eye picks out,
+    /// and the year is left to the period title above the list.
+    private static let dayFormat: Date.FormatStyle = {
+        var style = Date.FormatStyle().weekday(.abbreviated).day().month(.abbreviated)
+        style.calendar = TransactionPeriod.calendar
+        style.timeZone = TransactionPeriod.calendar.timeZone
+        style.locale = Locale(identifier: "en_US")
+        return style
+    }()
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -267,8 +277,12 @@ struct TransactionListView: View {
     /// The sign is written out rather than left to the minus the formatter would
     /// place, so a surplus reads as clearly as a shortfall.
     private var signedNet: String {
-        let magnitude = net < 0 ? -net : net
-        let sign = net < 0 ? "−" : "+"
+        signed(net)
+    }
+
+    private func signed(_ amount: Decimal) -> String {
+        let magnitude = amount < 0 ? -amount : amount
+        let sign = amount < 0 ? "−" : "+"
 
         return "\(sign)\(VNDCurrency.format(magnitude))"
     }
@@ -284,26 +298,60 @@ struct TransactionListView: View {
         }
     }
 
+    /// Transactions run in date order, so the list breaks them at each day and
+    /// heads the run with that date and what the day came to. The cards below a
+    /// header drop their own date, which the header now carries.
     private var transactionsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 20) {
             Text("Transactions")
                 .font(.title3.weight(.semibold))
 
-            ForEach(visibleTransactions) { transaction in
-                Button {
-                    editorMode = .edit(transaction)
-                } label: {
-                    TransactionCard(
-                        transaction: transaction,
-                        category: category(for: transaction),
-                        account: account(for: transaction)
-                    )
+            ForEach(dayGroups) { group in
+                VStack(alignment: .leading, spacing: 12) {
+                    dayHeader(for: group)
+
+                    ForEach(group.transactions) { transaction in
+                        Button {
+                            editorMode = .edit(transaction)
+                        } label: {
+                            TransactionCard(
+                                transaction: transaction,
+                                category: category(for: transaction),
+                                account: account(for: transaction),
+                                showsDate: false
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("transaction-\(transaction.id.uuidString)")
+                        .accessibilityHint("Opens the transaction editor.")
+                    }
                 }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("transaction-\(transaction.id.uuidString)")
-                .accessibilityHint("Opens the transaction editor.")
             }
         }
+    }
+
+    private var dayGroups: [TransactionDayGroup] {
+        TransactionSummary.byDay(visibleTransactions)
+    }
+
+    private func dayHeader(for group: TransactionDayGroup) -> some View {
+        HStack(spacing: 12) {
+            Text(Self.dayFormat.format(group.day).uppercased())
+                .font(.caption.weight(.semibold))
+                .tracking(0.8)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+
+            Spacer(minLength: 8)
+
+            Text(signed(group.net))
+                .font(.caption.weight(.semibold))
+                .monospacedDigit()
+                .lineLimit(1)
+        }
+        .foregroundStyle(MonMonTheme.textSecondary)
+        .padding(.horizontal, 4)
+        .accessibilityElement(children: .combine)
     }
 
     private func category(for transaction: MoneyTransaction) -> TransactionCategory? {
