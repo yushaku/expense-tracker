@@ -17,6 +17,7 @@ struct TransactionListView: View {
     @State private var isManagingCategories = false
     @State private var isManagingRecurring = false
     @State private var isEditingDefaults = false
+    @State private var listFilter = TransactionListFilter.all
 
     /// Weekday first: over a run of days the name is what the eye picks out,
     /// and the year is left to the period title above the list.
@@ -303,8 +304,33 @@ struct TransactionListView: View {
     /// header drop their own date, which the header now carries.
     private var transactionsSection: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("Transactions")
-                .font(.title3.weight(.semibold))
+            HStack(spacing: 12) {
+                Text("Transactions")
+                    .font(.title3.weight(.semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+
+                Spacer(minLength: 8)
+
+                // Narrows the list only. The card above still counts both
+                // directions, which is what the period is judged on.
+                Picker("Show", selection: $listFilter) {
+                    ForEach(TransactionListFilter.allCases) { filter in
+                        Text(filter.displayName)
+                            .tag(filter)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .frame(maxWidth: 210)
+                .accessibilityIdentifier("transaction-filter")
+            }
+
+            if filteredTransactions.isEmpty {
+                Text(emptyFilterNotice)
+                    .font(.subheadline)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            }
 
             ForEach(dayGroups) { group in
                 VStack(alignment: .leading, spacing: 12) {
@@ -330,8 +356,20 @@ struct TransactionListView: View {
         }
     }
 
+    private var filteredTransactions: [MoneyTransaction] {
+        TransactionSummary.matching(listFilter, transactions: visibleTransactions)
+    }
+
     private var dayGroups: [TransactionDayGroup] {
-        TransactionSummary.byDay(visibleTransactions)
+        TransactionSummary.byDay(filteredTransactions)
+    }
+
+    private var emptyFilterNotice: String {
+        guard let kind = listFilter.kind else {
+            return "Nothing recorded \(range.phrase)."
+        }
+
+        return "No \(kind.displayName.lowercased()) recorded \(range.phrase)."
     }
 
     private func dayHeader(for group: TransactionDayGroup) -> some View {

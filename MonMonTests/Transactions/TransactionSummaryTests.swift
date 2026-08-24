@@ -240,4 +240,34 @@ struct TransactionSummaryTests {
         #expect(groups[0].net == 300_000)
         #expect(groups[1].net == -900_000)
     }
+
+    @Test("The all filter keeps every transaction")
+    func allFilterKeepsEverything() {
+        let account = makeAccount()
+        let transactions = [
+            makeTransaction(kind: .income, amount: 500_000, accountID: account.id),
+            makeTransaction(kind: .expense, amount: 200_000, accountID: account.id),
+        ]
+
+        #expect(
+            TransactionSummary.matching(.all, transactions: transactions).count == 2
+        )
+    }
+
+    @Test("A direction filter keeps only that direction")
+    func directionFilterKeepsOneKind() {
+        let account = makeAccount()
+        let salary = makeTransaction(kind: .income, amount: 500_000, accountID: account.id)
+        let transactions = [
+            salary,
+            makeTransaction(kind: .expense, amount: 200_000, accountID: account.id),
+        ]
+
+        let income = TransactionSummary.matching(.income, transactions: transactions)
+        let expense = TransactionSummary.matching(.expense, transactions: transactions)
+
+        #expect(income.map(\.id) == [salary.id])
+        #expect(expense.count == 1)
+        #expect(expense.first?.kind == .expense)
+    }
 }

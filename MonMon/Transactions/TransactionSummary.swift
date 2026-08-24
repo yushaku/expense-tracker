@@ -43,6 +43,17 @@ enum TransactionSummary {
         transactions.filter { range.contains($0.occurredAt) }
     }
 
+    static func matching(
+        _ filter: TransactionListFilter,
+        transactions: [MoneyTransaction]
+    ) -> [MoneyTransaction] {
+        guard let kind = filter.kind else {
+            return transactions
+        }
+
+        return transactions.filter { $0.kind == kind }
+    }
+
     /// Splits transactions into calendar days, newest day first. The order
     /// inside a day is the order handed in, so a list already sorted by
     /// `occurredAt` keeps that sorting instead of being shuffled by a second
@@ -69,5 +80,35 @@ struct TransactionDayGroup: Identifiable {
 
     var net: Decimal {
         TransactionSummary.net(of: transactions)
+    }
+}
+
+/// Which direction the spending list is showing. The totals above it always
+/// count both, so this narrows the list alone.
+enum TransactionListFilter: String, CaseIterable, Identifiable {
+    case all
+    case income
+    case expense
+
+    var id: String { rawValue }
+
+    var kind: TransactionKind? {
+        switch self {
+        case .all:
+            nil
+        case .income:
+            .income
+        case .expense:
+            .expense
+        }
+    }
+
+    var displayName: String {
+        switch self {
+        case .all:
+            "All"
+        case .income, .expense:
+            kind?.displayName ?? ""
+        }
     }
 }
