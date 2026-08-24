@@ -5,12 +5,14 @@ import SwiftUI
 /// deleted. The caller performs the move and the deletion together, so
 /// cancelling here leaves both the category and its records untouched.
 struct CategoryReassignView: View {
+    @Environment(\.locale) private var locale
+
     @Environment(\.dismiss) private var dismiss
 
     let category: TransactionCategory
     let usageCount: Int
     let replacements: [TransactionCategory]
-    let errorMessage: String?
+    let errorMessage: LocalizedStringKey?
     let onConfirm: (TransactionCategory) -> Void
 
     @State private var replacementID: UUID?
@@ -113,9 +115,11 @@ struct CategoryReassignView: View {
             .labelsHidden()
             .accessibilityIdentifier("reassign-target")
 
-            Text("Only \(category.kind.displayName.lowercased()) categories are offered.")
-                .font(.caption)
-                .foregroundStyle(MonMonTheme.textSecondary)
+            Text(
+                "Only \(category.kind.displayName(in: locale).lowercased()) categories are offered."
+            )
+            .font(.caption)
+            .foregroundStyle(MonMonTheme.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
@@ -129,7 +133,7 @@ struct CategoryReassignView: View {
         }
     }
 
-    private func errorBanner(_ message: String) -> some View {
+    private func errorBanner(_ message: LocalizedStringKey) -> some View {
         Label(message, systemImage: "exclamationmark.circle.fill")
             .font(.caption)
             .foregroundStyle(MonMonTheme.danger)

@@ -208,8 +208,10 @@ final class CloudSync {
         }
 
         return Message(
-            text: "iCloud hasn't reported back yet. Anything unsent stays queued and "
-                + "uploads on its own.",
+            text: """
+                iCloud hasn't reported back yet. Anything unsent stays queued and uploads on its \
+                own.
+                """,
             isFailure: false
         )
     }

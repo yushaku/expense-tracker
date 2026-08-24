@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct DebtPaymentCard: View {
+    @Environment(\.locale) private var locale
+
     let payment: DebtPayment
     let direction: DebtDirection
     let accountName: String?
@@ -18,7 +20,7 @@ struct DebtPaymentCard: View {
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(payment.occurredAt.formatted(date: .abbreviated, time: .omitted))
+                Text(TransactionPeriod.day(payment.occurredAt, in: locale))
                     .font(.subheadline.weight(.semibold))
 
                 Text(subtitle)

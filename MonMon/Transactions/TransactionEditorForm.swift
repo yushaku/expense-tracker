@@ -1,13 +1,15 @@
 import SwiftUI
 
 struct TransactionEditorForm: View {
+    @Environment(\.locale) private var locale
+
     @Binding var draft: TransactionDraft
 
     let accounts: [CashAccount]
     let categories: [TransactionCategory]
     let isEditing: Bool
     let validationError: TransactionFormError?
-    let saveErrorMessage: String?
+    let saveErrorMessage: LocalizedStringKey?
     let onDelete: () -> Void
 
     var body: some View {
@@ -201,9 +203,11 @@ struct TransactionEditorForm: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private var missingCategoryNotice: String {
-        "No \(draft.kind.displayName.lowercased()) category yet. "
-            + "Add one from the Categories button."
+    private var missingCategoryNotice: LocalizedStringKey {
+        """
+        No \(draft.kind.displayName(in: locale).lowercased()) category yet. Add one from the \
+        Categories button.
+        """
     }
 
     /// A category only appears for the direction it was created for, so an
@@ -258,18 +262,18 @@ struct TransactionEditorForm: View {
             }
     }
 
-    private func sectionHeader(_ title: String, systemImage: String) -> some View {
+    private func sectionHeader(_ title: LocalizedStringKey, systemImage: String) -> some View {
         Label(title, systemImage: systemImage)
             .font(.headline)
             .foregroundStyle(MonMonTheme.textPrimary)
     }
 
-    private func fieldLabel(_ title: String) -> some View {
+    private func fieldLabel(_ title: LocalizedStringKey) -> some View {
         Text(title)
             .font(.subheadline.weight(.medium))
     }
 
-    private func errorBanner(_ message: String) -> some View {
+    private func errorBanner(_ message: LocalizedStringKey) -> some View {
         validationMessage(message, id: "save-transaction-error")
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
@@ -283,14 +287,14 @@ struct TransactionEditorForm: View {
             }
     }
 
-    private func validationMessage(_ message: String, id: String) -> some View {
+    private func validationMessage(_ message: LocalizedStringKey, id: String) -> some View {
         Label(message, systemImage: "exclamationmark.circle.fill")
             .font(.caption)
             .foregroundStyle(MonMonTheme.danger)
             .accessibilityIdentifier(id)
     }
 
-    private var amountErrorMessage: String? {
+    private var amountErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidAmount:
             "Enter a valid amount."
@@ -301,11 +305,11 @@ struct TransactionEditorForm: View {
         }
     }
 
-    private var accountErrorMessage: String? {
+    private var accountErrorMessage: LocalizedStringKey? {
         validationError == .missingAccount ? "Pick the account this money moved through." : nil
     }
 
-    private var categoryErrorMessage: String? {
+    private var categoryErrorMessage: LocalizedStringKey? {
         validationError == .missingCategory ? "Pick a category." : nil
     }
 }

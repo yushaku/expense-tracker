@@ -56,7 +56,7 @@ struct AccountEditorView: View {
 
     @State private var draft: AccountDraft
     @State private var validationError: AccountFormError?
-    @State private var saveErrorMessage: String?
+    @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
 
     init(mode: AccountEditorMode) {

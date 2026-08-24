@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SwiftUI
 
 /// The account that always exists, so a foreign key naming an account always
 /// resolves to one.
@@ -35,6 +36,8 @@ enum AccountSeed {
         uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2)
     )
 
+    /// The key the starter account is named from. Its id is what identifies it,
+    /// so the name is free to be written in the owner's own language.
     static let defaultBankName = "Bank"
     private static let defaultBankSeedKey = "didSeedDefaultBankAccount"
 
@@ -59,7 +62,8 @@ enum AccountSeed {
     static func seedDefaultBankIfNeeded(
         in context: ModelContext,
         defaults: UserDefaults = .standard,
-        createdAt: Date = .now
+        createdAt: Date = .now,
+        locale: Locale = AppLanguage.stored.locale
     ) {
         guard !defaults.bool(forKey: defaultBankSeedKey) else {
             return
@@ -76,7 +80,7 @@ enum AccountSeed {
 
         let account = CashAccount(
             id: defaultBankID,
-            name: defaultBankName,
+            name: AppText.string(key: defaultBankName, in: locale),
             kind: .bank,
             openingBalance: .zero,
             currencyCode: VNDCurrency.code,
@@ -104,7 +108,8 @@ enum AccountSeed {
     @discardableResult
     static func ensureUnassignedExists(
         in context: ModelContext,
-        createdAt: Date = .now
+        createdAt: Date = .now,
+        locale: Locale = AppLanguage.stored.locale
     ) -> CashAccount {
         // Filtered in Swift rather than through a `#Predicate`. A predicate
         // capturing a `UUID` and comparing it to a non-optional `UUID` property
@@ -119,7 +124,7 @@ enum AccountSeed {
 
         let account = CashAccount(
             id: unassignedID,
-            name: unassignedName,
+            name: AppText.string(key: unassignedName, in: locale),
             kind: .cash,
             openingBalance: .zero,
             currencyCode: VNDCurrency.code,

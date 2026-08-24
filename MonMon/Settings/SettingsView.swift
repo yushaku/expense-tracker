@@ -6,6 +6,8 @@ struct SettingsView: View {
     @Environment(CloudSync.self) private var cloudSync
     @Environment(\.modelContext) private var modelContext
 
+    @Environment(\.locale) private var locale
+
     @AppStorage(AppTheme.storageKey) private var theme = AppTheme.system
     @AppStorage(AppLanguage.storageKey) private var language = AppLanguage.system
     @AppStorage(AppLock.enabledKey) private var isLockEnabled = false
@@ -39,6 +41,9 @@ struct SettingsView: View {
             }
         }
     }
+
+    private static let syncedTemplate = Date.FormatStyle().day().month(.abbreviated).year()
+        .hour().minute()
 
     private var appearanceCard: some View {
         card {
@@ -192,10 +197,11 @@ struct SettingsView: View {
         )
     }
 
-    private var lockExplanation: String {
-        "Asks for \(appLock.biometryName) when the app opens, and again after a "
-            + "minute away. This hides the screen; it does not encrypt the file "
-            + "your records are stored in."
+    private var lockExplanation: LocalizedStringKey {
+        """
+        Asks for \(appLock.biometryName) when the app opens, and again after a minute away. \
+        This hides the screen; it does not encrypt the file your records are stored in.
+        """
     }
 
     private var backupCard: some View {
@@ -212,9 +218,10 @@ struct SettingsView: View {
                 .accessibilityIdentifier("icloud-sync")
 
                 Text(
-                    "Keeps every record in your own private iCloud database, so your "
-                        + "iPhone and Mac show the same books. Nobody else can read it, "
-                        + "MonMon included."
+                    """
+                    Keeps every record in your own private iCloud database, so your iPhone and\
+                     Mac show the same books. Nobody else can read it, MonMon included.
+                    """
                 )
                 .font(.caption)
                 .foregroundStyle(MonMonTheme.textSecondary)
@@ -290,7 +297,9 @@ struct SettingsView: View {
             return "No sync recorded yet on this device."
         }
 
-        return "Last synced \(lastSyncedAt.formatted(date: .abbreviated, time: .shortened))."
+        let day = TransactionPeriod.format(Self.syncedTemplate, in: locale).format(lastSyncedAt)
+
+        return AppText.string("Last synced \(day).", in: locale)
     }
 
     private var aboutCard: some View {
@@ -305,10 +314,12 @@ struct SettingsView: View {
         }
     }
 
-    private var storageExplanation: String {
+    private var storageExplanation: LocalizedStringKey {
         cloudSync.isEnabled
-            ? "MonMon keeps everything on this device and in your own iCloud account. "
-                + "No MonMon account, no server of ours."
+            ? """
+            MonMon keeps everything on this device and in your own iCloud account. No MonMon \
+            account, no server of ours.
+            """
             : "MonMon keeps everything on this device. No account, no network."
     }
 
@@ -326,7 +337,7 @@ struct SettingsView: View {
             }
     }
 
-    private func sectionHeader(_ title: String, systemImage: String) -> some View {
+    private func sectionHeader(_ title: LocalizedStringKey, systemImage: String) -> some View {
         Label(title, systemImage: systemImage)
             .font(.headline)
             .foregroundStyle(MonMonTheme.textPrimary)

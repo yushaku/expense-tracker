@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct FundEditorForm: View {
+    @Environment(\.locale) private var locale
+
     @Binding var draft: FundDraft
 
     let accounts: [CashAccount]
@@ -10,7 +12,7 @@ struct FundEditorForm: View {
     let isGold: Bool
     let isEditing: Bool
     let validationError: FundFormError?
-    let saveErrorMessage: String?
+    let saveErrorMessage: LocalizedStringKey?
     let onAddInstrument: () -> Void
     let onDelete: () -> Void
 
@@ -118,9 +120,15 @@ struct FundEditorForm: View {
     /// one ticker used to end up disagreeing.
     private func instrumentExplanation(_ instrument: FundInstrument) -> String {
         let price = VNDCurrency.formatUnitPrice(instrument.currentPricePerUnit)
-        let day = instrument.priceAsOf.formatted(date: .abbreviated, time: .omitted)
-        return "\(instrument.kind.displayName) · \(instrument.priceLabel) \(price) as of \(day). "
-            + "Edit the price under Instruments."
+        let day = TransactionPeriod.day(instrument.priceAsOf, in: locale)
+        return AppText.string(
+            """
+            \(instrument.kind.displayName(in: locale)) · \
+            \(instrument.priceLabel(in: locale)) \(price) as of \(day). \
+            Edit the price under Instruments.
+            """,
+            in: locale
+        )
     }
 
     private var positionCard: some View {
@@ -286,18 +294,18 @@ struct FundEditorForm: View {
             }
     }
 
-    private func sectionHeader(_ title: String, systemImage: String) -> some View {
+    private func sectionHeader(_ title: LocalizedStringKey, systemImage: String) -> some View {
         Label(title, systemImage: systemImage)
             .font(.headline)
             .foregroundStyle(MonMonTheme.textPrimary)
     }
 
-    private func fieldLabel(_ title: String) -> some View {
+    private func fieldLabel(_ title: LocalizedStringKey) -> some View {
         Text(title)
             .font(.subheadline.weight(.medium))
     }
 
-    private func errorBanner(_ message: String) -> some View {
+    private func errorBanner(_ message: LocalizedStringKey) -> some View {
         validationMessage(message, id: "save-fund-error")
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
@@ -311,14 +319,14 @@ struct FundEditorForm: View {
             }
     }
 
-    private func validationMessage(_ message: String, id: String) -> some View {
+    private func validationMessage(_ message: LocalizedStringKey, id: String) -> some View {
         Label(message, systemImage: "exclamationmark.circle.fill")
             .font(.caption)
             .foregroundStyle(MonMonTheme.danger)
             .accessibilityIdentifier(id)
     }
 
-    private var fundingExplanation: String {
+    private var fundingExplanation: LocalizedStringKey {
         if draft.sourceAccountID == nil {
             "Not linked: this holding adds to your total on its own."
         } else {
@@ -326,14 +334,14 @@ struct FundEditorForm: View {
         }
     }
 
-    private var instrumentErrorMessage: String? {
+    private var instrumentErrorMessage: LocalizedStringKey? {
         guard validationError == .missingInstrument else { return nil }
         return isGold
             ? "Pick the gold product this position is held in."
             : "Pick the fund or ETF this position is held in."
     }
 
-    private var unitsErrorMessage: String? {
+    private var unitsErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidUnits:
             isGold ? "Enter a valid weight in chỉ." : "Enter a valid number of units."
@@ -344,7 +352,7 @@ struct FundEditorForm: View {
         }
     }
 
-    private var averageCostErrorMessage: String? {
+    private var averageCostErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidAverageCost:
             "Enter a valid average cost per unit."
@@ -355,7 +363,7 @@ struct FundEditorForm: View {
         }
     }
 
-    private var sourceErrorMessage: String? {
+    private var sourceErrorMessage: LocalizedStringKey? {
         guard validationError == .insufficientSourceBalance else { return nil }
         return "That account does not have enough available balance."
     }
@@ -376,7 +384,7 @@ struct FundEditorForm: View {
         @State var draft: FundDraft
         var isEditing = false
         var validationError: FundFormError?
-        var saveErrorMessage: String?
+        var saveErrorMessage: LocalizedStringKey?
 
         private let instruments: [FundInstrument] = [
             .preview(

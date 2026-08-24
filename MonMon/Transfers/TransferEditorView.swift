@@ -53,7 +53,7 @@ struct TransferEditorView: View {
 
     @State private var draft: TransferDraft
     @State private var validationError: TransferFormError?
-    @State private var saveErrorMessage: String?
+    @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
 
     init(mode: TransferEditorMode, defaultDate: Date = .now) {

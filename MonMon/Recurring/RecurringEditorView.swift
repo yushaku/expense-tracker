@@ -48,7 +48,7 @@ struct RecurringEditorView: View {
 
     @State private var draft: RecurringRuleDraft
     @State private var validationError: RecurringFormError?
-    @State private var saveErrorMessage: String?
+    @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
     @State private var didApplyDefaults = false
 

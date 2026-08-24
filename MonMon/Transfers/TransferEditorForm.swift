@@ -6,7 +6,7 @@ struct TransferEditorForm: View {
     let accounts: [CashAccount]
     let isEditing: Bool
     let validationError: TransferFormError?
-    let saveErrorMessage: String?
+    let saveErrorMessage: LocalizedStringKey?
     let onSwap: () -> Void
     let onDelete: () -> Void
 
@@ -131,7 +131,7 @@ struct TransferEditorForm: View {
     }
 
     private func accountPicker(
-        title: String,
+        title: LocalizedStringKey,
         selection: Binding<UUID?>,
         identifier: String
     ) -> some View {
@@ -228,18 +228,18 @@ struct TransferEditorForm: View {
             }
     }
 
-    private func sectionHeader(_ title: String, systemImage: String) -> some View {
+    private func sectionHeader(_ title: LocalizedStringKey, systemImage: String) -> some View {
         Label(title, systemImage: systemImage)
             .font(.headline)
             .foregroundStyle(MonMonTheme.textPrimary)
     }
 
-    private func fieldLabel(_ title: String) -> some View {
+    private func fieldLabel(_ title: LocalizedStringKey) -> some View {
         Text(title)
             .font(.subheadline.weight(.medium))
     }
 
-    private func errorBanner(_ message: String) -> some View {
+    private func errorBanner(_ message: LocalizedStringKey) -> some View {
         validationMessage(message, id: "save-transfer-error")
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
@@ -253,14 +253,14 @@ struct TransferEditorForm: View {
             }
     }
 
-    private func validationMessage(_ message: String, id: String) -> some View {
+    private func validationMessage(_ message: LocalizedStringKey, id: String) -> some View {
         Label(message, systemImage: "exclamationmark.circle.fill")
             .font(.caption)
             .foregroundStyle(MonMonTheme.danger)
             .accessibilityIdentifier(id)
     }
 
-    private var amountErrorMessage: String? {
+    private var amountErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidAmount:
             "Enter a valid amount."
@@ -273,7 +273,7 @@ struct TransferEditorForm: View {
         }
     }
 
-    private var routeErrorMessage: String? {
+    private var routeErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .missingSourceAccount:
             "Pick the account the money left."

@@ -58,7 +58,7 @@ struct FundEditorView: View {
 
     @State private var draft: FundDraft
     @State private var validationError: FundFormError?
-    @State private var saveErrorMessage: String?
+    @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
     @State private var isAddingInstrument = false
 

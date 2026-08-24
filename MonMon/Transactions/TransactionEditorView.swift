@@ -45,7 +45,7 @@ struct TransactionEditorView: View {
 
     @State private var draft: TransactionDraft
     @State private var validationError: TransactionFormError?
-    @State private var saveErrorMessage: String?
+    @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
     @State private var didApplyDefaults = false
 

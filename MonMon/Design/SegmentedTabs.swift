@@ -12,20 +12,20 @@ import SwiftUI
 struct SegmentedTabs<Value: Hashable>: View {
     /// Read by VoiceOver as the control's name, since the tabs carry no visible
     /// label of their own.
-    let label: String
+    let label: LocalizedStringKey
 
     let options: [Value]
-    let title: (Value) -> String
+    let title: (Value) -> LocalizedStringKey
 
     @Binding var selection: Value
 
     @Namespace private var indicator
 
     init(
-        label: String,
+        label: LocalizedStringKey,
         selection: Binding<Value>,
         options: [Value],
-        title: @escaping (Value) -> String
+        title: @escaping (Value) -> LocalizedStringKey
     ) {
         self.label = label
         _selection = selection

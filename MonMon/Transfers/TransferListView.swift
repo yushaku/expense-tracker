@@ -109,7 +109,7 @@ struct TransferListView: View {
         .accessibilityElement(children: .combine)
     }
 
-    private var countLabel: String {
+    private var countLabel: LocalizedStringKey {
         transfers.count == 1 ? "1 transfer" : "\(transfers.count) transfers"
     }
 
@@ -142,8 +142,10 @@ struct TransferListView: View {
     private var emptyState: some View {
         placeholder(
             title: "Nothing moved yet",
-            message: "Record money you shifted between your own accounts. "
-                + "Your total assets stay the same."
+            message: """
+                Record money you shifted between your own accounts. Your total assets stay the \
+                same.
+                """
         ) {
             addTransferButton
         }

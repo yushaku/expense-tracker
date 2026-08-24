@@ -9,12 +9,12 @@ struct FundSection: View {
     /// queried here so the section stays a plain view over values.
     let instruments: [FundInstrument]
     let kinds: [FundInstrumentKind]
-    let sectionTitle: String
+    let sectionTitle: LocalizedStringKey
     let itemName: String
-    let emptyTitle: String
-    let emptyDescription: String
+    let emptyTitle: LocalizedStringKey
+    let emptyDescription: LocalizedStringKey
     let emptySystemImage: String
-    let addTitle: String
+    let addTitle: LocalizedStringKey
     let addIdentifier: String
     let onAdd: () -> Void
 
@@ -91,14 +91,16 @@ struct FundSection: View {
             .accessibilityIdentifier("unpriced-holdings")
     }
 
-    private var unpricedDescription: String {
+    private var unpricedDescription: LocalizedStringKey {
         let count = unpriced.count
         let noun = count == 1 ? "position has" : "positions have"
         let cost = VNDCurrency.format(
             FundSummary.unpricedCostBasis(holdings: displayedHoldings, instruments: instruments)
         )
-        return "\(count) \(noun) no instrument, so \(cost) of cost is counted as worth nothing. "
-            + "Open each one and pick what it is held in."
+        return """
+            \(count) \(noun) no instrument, so \(cost) of cost is counted as worth nothing. Open \
+            each one and pick what it is held in.
+            """
     }
 
     private var costBasis: Decimal {
@@ -118,7 +120,7 @@ struct FundSection: View {
 
     /// The arrow symbol and the explicit sign carry the meaning; the tint only
     /// reinforces it, so the figure still reads with colour ignored.
-    private var profitLossDescription: String {
+    private var profitLossDescription: LocalizedStringKey {
         let label = isGain ? "Unrealized gain" : "Unrealized loss"
         let sign = isGain ? "+" : "−"
         return "\(label) \(sign)\(VNDCurrency.format(abs(profitLoss)))"
@@ -130,7 +132,7 @@ struct FundSection: View {
 
     /// Counts both, because they answer different questions: how many funds are
     /// held, and how many purchases went into them.
-    private var holdingCountLabel: String {
+    private var holdingCountLabel: LocalizedStringKey {
         switch displayedHoldings.count {
         case 0:
             return "Ready for your first holding"

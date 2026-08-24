@@ -68,6 +68,8 @@ enum FundInstrumentListScope: String, Identifiable {
 /// reaches Categories — a list of the records other records point at, kept off
 /// the main screen because it is edited rarely.
 struct FundInstrumentListView: View {
+    @Environment(\.locale) private var locale
+
     @Environment(\.dismiss) private var dismiss
 
     @Query(sort: \FundInstrument.symbol, order: .forward)
@@ -204,7 +206,7 @@ struct FundInstrumentListView: View {
                         .font(.headline)
                         .monospaced()
 
-                    Text("\(instrument.name) · \(instrument.kind.displayName)")
+                    Text("\(instrument.name) · \(instrument.kind.displayName(in: locale))")
                         .font(.subheadline)
                         .foregroundStyle(MonMonTheme.textSecondary)
                         .lineLimit(2)
@@ -311,7 +313,7 @@ struct FundInstrumentListView: View {
             actionButton(
                 title: scope.importSource.displayName,
                 systemImage: "square.and.arrow.down",
-                accessibilityLabel: "Add from \(scope.importSource.displayName)",
+                accessibilityLabel: "Add from \(scope.importSource.displayName(in: locale))",
                 identifier: scope == .gold ? "import-from-vang-today" : "import-from-fmarket"
             ) {
                 isImporting = true
@@ -329,7 +331,7 @@ struct FundInstrumentListView: View {
     }
 
     private func actionButton(
-        title: String,
+        title: LocalizedStringKey,
         systemImage: String,
         accessibilityLabel: String,
         identifier: String,
@@ -396,11 +398,12 @@ struct FundInstrumentListView: View {
     /// States the price's age, its source, and how many positions depend on it,
     /// so the row explains both what it is and why it matters.
     private func statusDescription(_ instrument: FundInstrument) -> String {
-        let day = instrument.priceAsOf.formatted(date: .abbreviated, time: .omitted)
+        let day = TransactionPeriod.day(instrument.priceAsOf, in: locale)
         let held = FundSummary.holdings(for: instrument, holdings: holdings).count
         let position = held == 1 ? "1 position" : "\(held) positions"
         var text =
-            "\(instrument.priceLabel) \(day) · \(instrument.source.displayName) · \(position)"
+            "\(instrument.priceLabel(in: locale)) \(day) · "
+            + "\(instrument.source.displayName(in: locale)) · \(position)"
 
         if isStale(instrument) {
             text += " · Stale"

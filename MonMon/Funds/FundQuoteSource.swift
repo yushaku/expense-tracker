@@ -1,3 +1,5 @@
+import SwiftUI
+
 /// Where an instrument's current price came from.
 ///
 /// Persisted as a raw `String` on `FundInstrument`, so a later provider can be
@@ -14,7 +16,7 @@ enum FundQuoteSource: String, Codable, CaseIterable, Sendable {
     /// Shop buy and sell prices for physical gold.
     case vangToday
 
-    var displayName: String {
+    var displayNameKey: String {
         switch self {
         case .manual:
             "Entered by hand"
@@ -25,5 +27,13 @@ enum FundQuoteSource: String, Codable, CaseIterable, Sendable {
         case .vangToday:
             "vang.today"
         }
+    }
+
+    var displayName: LocalizedStringKey {
+        LocalizedStringKey(displayNameKey)
+    }
+
+    func displayName(in locale: Locale) -> String {
+        AppText.string(key: displayNameKey, in: locale)
     }
 }

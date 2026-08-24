@@ -173,22 +173,21 @@ final class FundCatalogueImport {
 }
 
 extension FundCatalogueImport.Phase {
-    var message: String? {
-        message(providerName: "Fmarket")
-    }
-
-    func message(providerName: String) -> String? {
+    func message(providerName: String, in locale: Locale) -> String? {
         switch self {
         case .idle, .loading, .loaded:
             nil
         case .failed(.transport):
-            "No connection. Try again when you are back online."
+            AppText.string("No connection. Try again when you are back online.", in: locale)
         case .failed(.decoding):
-            "\(providerName) changed its reply. Add the item by hand for now."
+            AppText.string(
+                "\(providerName) changed its reply. Add the item by hand for now.",
+                in: locale
+            )
         case .failed(.symbolNotFound), .failed(.noQuoteAvailable):
-            "\(providerName) listed nothing."
+            AppText.string("\(providerName) listed nothing.", in: locale)
         case .failed(.rateLimited):
-            "Checked a moment ago."
+            AppText.string("Checked a moment ago.", in: locale)
         }
     }
 }

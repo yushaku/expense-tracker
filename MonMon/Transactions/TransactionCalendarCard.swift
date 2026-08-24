@@ -89,7 +89,7 @@ struct TransactionCalendarCard: View {
         TransactionCalendar.monthTotals(of: weeks)
     }
 
-    private var totalsLabel: String {
+    private var totalsLabel: LocalizedStringKey {
         let totals = totals
 
         return "+\(VNDCurrency.format(totals.income))  −\(VNDCurrency.format(totals.expense))"

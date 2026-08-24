@@ -126,8 +126,10 @@ final class AppLock {
         guard let policy = availablePolicy(in: context) else {
             isUnavailable = true
             failureMessage =
-                "This device has no Face ID, Touch ID, or passcode set, so there is "
-                + "nothing to unlock with."
+                """
+                This device has no Face ID, Touch ID, or passcode set, so there is nothing to \
+                unlock with.
+                """
             return false
         }
 

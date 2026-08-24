@@ -130,7 +130,7 @@ struct AssetGrowthCard: View {
         .accessibilityHidden(true)
     }
 
-    private var changeLabel: String {
+    private var changeLabel: LocalizedStringKey {
         let amount = change < 0 ? -change : change
         let sign = change > 0 ? "+" : change < 0 ? "−" : ""
         return "\(sign)\(VNDCurrency.format(amount))"
@@ -150,7 +150,7 @@ struct AssetGrowthCard: View {
         }
     }
 
-    private var changeAccessibilityLabel: String {
+    private var changeAccessibilityLabel: LocalizedStringKey {
         switch change {
         case let value where value > 0:
             "Increased by \(VNDCurrency.format(value))"

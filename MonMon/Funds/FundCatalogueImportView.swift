@@ -3,6 +3,8 @@ import SwiftUI
 
 /// Picks instruments out of a provider's catalogue instead of typing them one at a time.
 struct FundCatalogueImportView: View {
+    @Environment(\.locale) private var locale
+
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
@@ -13,7 +15,7 @@ struct FundCatalogueImportView: View {
     @State private var importer: FundCatalogueImport
     @State private var chosen: Set<String> = []
     @State private var searchText = ""
-    @State private var saveErrorMessage: String?
+    @State private var saveErrorMessage: LocalizedStringKey?
 
     init(title: String, importer: FundCatalogueImport) {
         self.title = title
@@ -69,8 +71,10 @@ struct FundCatalogueImportView: View {
 
         case .failed:
             message(
-                importer.phase.message(providerName: providerName)
-                    ?? "\(providerName) could not be reached.",
+                LocalizedStringKey(
+                    importer.phase.message(providerName: providerName, in: locale)
+                        ?? AppText.string("\(providerName) could not be reached.", in: locale)
+                ),
                 systemImage: "xmark.circle.fill",
                 tint: MonMonTheme.danger,
                 id: "import-error"
@@ -183,8 +187,10 @@ struct FundCatalogueImportView: View {
                 .foregroundStyle(MonMonTheme.textSecondary)
 
             Text(
-                "Grouped by \(groupSingular) · \(groupCountText). "
-                    + "Tap a \(groupSingular) to take all of its \(itemPlural)."
+                """
+                Grouped by \(groupSingular) · \(groupCountText). Tap a \(groupSingular) to \
+                take all of its \(itemPlural).
+                """
             )
             .font(.caption)
             .foregroundStyle(MonMonTheme.textSecondary)
@@ -215,11 +221,15 @@ struct FundCatalogueImportView: View {
         let total = importer.importable.count
         guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             if isGold {
-                return "\(total) gold products, each with the shop buy price "
-                    + "\(providerName) publishes. Pick the ones you hold — nothing is added until you do."
+                return """
+                    \(total) gold products, each with the shop buy price \(providerName) \
+                    publishes. Pick the ones you hold — nothing is added until you do.
+                    """
             }
-            return "\(total) open-ended funds, each with the NAV Fmarket publishes. "
-                + "Pick the ones you hold — nothing is added until you do."
+            return """
+                \(total) open-ended funds, each with the NAV Fmarket publishes. Pick the ones you \
+                hold — nothing is added until you do.
+                """
         }
         return "\(shown.count) of \(total) \(itemPlural) match."
     }
@@ -328,7 +338,7 @@ struct FundCatalogueImportView: View {
     }
 
     private func message(
-        _ text: String,
+        _ text: LocalizedStringKey,
         systemImage: String,
         tint: Color,
         id: String
@@ -352,7 +362,7 @@ struct FundCatalogueImportView: View {
         guard let day = candidate.priceAsOf else {
             return "Refresh will fetch it"
         }
-        return day.formatted(date: .abbreviated, time: .omitted)
+        return TransactionPeriod.day(day, in: locale)
     }
 
     private func toggle(_ symbol: String) {
@@ -378,7 +388,7 @@ struct FundCatalogueImportView: View {
     }
 
     private var isGold: Bool { importer.source == .vangToday }
-    private var providerName: String { importer.source.displayName }
+    private var providerName: String { importer.source.displayName(in: locale) }
     private var itemSingular: String { isGold ? "gold product" : "fund" }
     private var itemPlural: String { isGold ? "gold products" : "funds" }
     private var groupSingular: String { isGold ? "brand" : "manager" }

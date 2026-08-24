@@ -353,12 +353,13 @@ struct TransactionListView: View {
         TransactionSummary.byDay(filteredTransactions)
     }
 
-    private var emptyFilterNotice: String {
+    private var emptyFilterNotice: LocalizedStringKey {
         guard let kind = listFilter.kind else {
             return "Nothing recorded \(range.phrase(in: locale))."
         }
 
-        return "No \(kind.displayName.lowercased()) recorded \(range.phrase(in: locale))."
+        return
+            "No \(kind.displayName(in: locale).lowercased()) recorded \(range.phrase(in: locale))."
     }
 
     private func dayHeader(for group: TransactionDayGroup) -> some View {

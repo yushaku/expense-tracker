@@ -102,4 +102,11 @@ enum AppText {
     static func string(_ key: String.LocalizationValue, in locale: Locale) -> String {
         String(localized: key, bundle: AppLanguage.bundle(for: locale), locale: locale)
     }
+
+    /// The same lookup for a key held as a plain string — what a type does when
+    /// it keeps one key and hands it out twice: once for a view to resolve, once
+    /// resolved here for a sentence or a spoken label.
+    static func string(key: String, in locale: Locale) -> String {
+        AppLanguage.bundle(for: locale).localizedString(forKey: key, value: key, table: nil)
+    }
 }

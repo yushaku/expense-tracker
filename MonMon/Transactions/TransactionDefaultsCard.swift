@@ -77,8 +77,10 @@ struct TransactionDefaultsCard: View {
                 }
 
                 Text(
-                    "New entries start as expenses on these values, "
-                        + "and switching to income picks up the income one."
+                    """
+                    New entries start as expenses on these values, and switching to income \
+                    picks up the income one.
+                    """
                 )
                 .font(.caption)
                 .foregroundStyle(MonMonTheme.textSecondary)

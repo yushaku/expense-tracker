@@ -2,6 +2,8 @@ import SwiftUI
 
 /// One rule as a row: what it records, how often, and when it next falls due.
 struct RecurringCard: View {
+    @Environment(\.locale) private var locale
+
     let rule: RecurringRule
     let category: TransactionCategory?
     let account: CashAccount?
@@ -86,12 +88,12 @@ struct RecurringCard: View {
 
     private var subtitle: String {
         let accountName = account?.name ?? "Unknown account"
-        return "\(rule.schedulePhrase) · \(accountName)"
+        return "\(rule.schedulePhrase(in: locale)) · \(accountName)"
     }
 
     /// A rule that will never fall due again says so, rather than showing a date
     /// that is not coming.
-    private var dueLabel: String {
+    private var dueLabel: LocalizedStringKey {
         guard !rule.isPaused else {
             return "Paused"
         }

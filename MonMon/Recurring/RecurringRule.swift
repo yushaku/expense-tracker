@@ -82,8 +82,8 @@ final class RecurringRule {
 
 extension RecurringRule {
     /// How the schedule reads on screen: "Every 2 weeks".
-    var schedulePhrase: String {
-        frequency.phrase(interval: interval)
+    func schedulePhrase(in locale: Locale) -> String {
+        frequency.phrase(interval: interval, in: locale)
     }
 
     /// The dates this rule still owes, oldest first, up to and including

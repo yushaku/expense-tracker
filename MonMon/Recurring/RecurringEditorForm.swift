@@ -1,13 +1,15 @@
 import SwiftUI
 
 struct RecurringEditorForm: View {
+    @Environment(\.locale) private var locale
+
     @Binding var draft: RecurringRuleDraft
 
     let accounts: [CashAccount]
     let categories: [TransactionCategory]
     let isEditing: Bool
     let validationError: RecurringFormError?
-    let saveErrorMessage: String?
+    let saveErrorMessage: LocalizedStringKey?
     let onDelete: () -> Void
 
     var body: some View {
@@ -144,7 +146,7 @@ struct RecurringEditorForm: View {
                             )
                             .accessibilityLabel("Interval")
 
-                        Text(draft.frequency.phrase(interval: intervalForDisplay))
+                        Text(draft.frequency.phrase(interval: intervalForDisplay, in: locale))
                             .font(.subheadline)
                             .foregroundStyle(MonMonTheme.textSecondary)
                     }
@@ -159,8 +161,10 @@ struct RecurringEditorForm: View {
                     )
 
                     Text(
-                        "A start date in the past records what it already covered, "
-                            + "as soon as you save."
+                        """
+                        A start date in the past records what it already covered, as soon as \
+                        you save.
+                        """
                     )
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
@@ -279,9 +283,11 @@ struct RecurringEditorForm: View {
         Int(draft.intervalText.trimmingCharacters(in: .whitespaces)) ?? 1
     }
 
-    private var missingCategoryNotice: String {
-        "No \(draft.kind.displayName.lowercased()) category yet. "
-            + "Add one from the Categories button."
+    private var missingCategoryNotice: LocalizedStringKey {
+        """
+        No \(draft.kind.displayName(in: locale).lowercased()) category yet. Add one from the \
+        Categories button.
+        """
     }
 
     /// A category only appears for the direction it was created for, so an
@@ -348,18 +354,18 @@ struct RecurringEditorForm: View {
             }
     }
 
-    private func sectionHeader(_ title: String, systemImage: String) -> some View {
+    private func sectionHeader(_ title: LocalizedStringKey, systemImage: String) -> some View {
         Label(title, systemImage: systemImage)
             .font(.headline)
             .foregroundStyle(MonMonTheme.textPrimary)
     }
 
-    private func fieldLabel(_ title: String) -> some View {
+    private func fieldLabel(_ title: LocalizedStringKey) -> some View {
         Text(title)
             .font(.subheadline.weight(.medium))
     }
 
-    private func errorBanner(_ message: String) -> some View {
+    private func errorBanner(_ message: LocalizedStringKey) -> some View {
         validationMessage(message, id: "save-recurring-error")
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
@@ -373,14 +379,14 @@ struct RecurringEditorForm: View {
             }
     }
 
-    private func validationMessage(_ message: String, id: String) -> some View {
+    private func validationMessage(_ message: LocalizedStringKey, id: String) -> some View {
         Label(message, systemImage: "exclamationmark.circle.fill")
             .font(.caption)
             .foregroundStyle(MonMonTheme.danger)
             .accessibilityIdentifier(id)
     }
 
-    private var amountErrorMessage: String? {
+    private var amountErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidAmount:
             "Enter a valid amount."
@@ -391,24 +397,26 @@ struct RecurringEditorForm: View {
         }
     }
 
-    private var accountErrorMessage: String? {
+    private var accountErrorMessage: LocalizedStringKey? {
         validationError == .missingAccount
             ? "Pick the account this money moves through." : nil
     }
 
-    private var categoryErrorMessage: String? {
+    private var categoryErrorMessage: LocalizedStringKey? {
         validationError == .missingCategory ? "Pick a category." : nil
     }
 
-    private var scheduleErrorMessage: String? {
+    private var scheduleErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidInterval:
             "Repeat every whole number of periods, at least one."
         case .endDateBeforeAnchor:
             "The end date cannot come before the start date."
         case .tooManyOccurrences(let count):
-            "Saving this would record \(count) entries at once. "
-                + "Move the start date closer to today."
+            """
+            Saving this would record \(count) entries at once. Move the start date closer to \
+            today.
+            """
         default:
             nil
         }

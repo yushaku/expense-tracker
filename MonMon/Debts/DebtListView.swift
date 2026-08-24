@@ -178,7 +178,7 @@ struct DebtListView: View {
         }
     }
 
-    private var countLabel: String {
+    private var countLabel: LocalizedStringKey {
         debts.count == 1 ? "1 debt" : "\(debts.count) debts"
     }
 
@@ -234,8 +234,10 @@ struct DebtListView: View {
     private var emptyState: some View {
         placeholder(
             title: "Nothing borrowed or lent",
-            message: "Record money you owe and money owed to you. "
-                + "Your total assets stay the same either way."
+            message: """
+                Record money you owe and money owed to you. Your total assets stay the same either\
+                 way.
+                """
         ) {
             addDebtButton
         }

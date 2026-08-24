@@ -154,7 +154,7 @@ struct CategoryBreakdownCard: View {
             .transition(.opacity.combined(with: .scale(scale: 0.9)))
         } else {
             VStack(spacing: 2) {
-                Text(kind.displayName.uppercased())
+                Text(kind.displayName(in: locale).uppercased())
                     .font(.caption2.weight(.semibold))
                     .tracking(0.6)
                     .foregroundStyle(MonMonTheme.textSecondary)
@@ -271,8 +271,10 @@ struct CategoryBreakdownCard: View {
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityLabel(
-            "\(slice.name), \(VNDCurrency.format(slice.amount)), "
-                + "\(Percentage.label(of: slice.amount, in: total)), \(countLabel(slice))"
+            """
+            \(slice.name), \(VNDCurrency.format(slice.amount)), \
+            \(Percentage.label(of: slice.amount, in: total)), \(countLabel(slice))
+            """
         )
     }
 
@@ -281,11 +283,13 @@ struct CategoryBreakdownCard: View {
     }
 
     private var emptyState: some View {
-        Text("No \(kind.displayName.lowercased()) recorded \(range.phrase(in: locale)).")
-            .font(.subheadline)
-            .foregroundStyle(MonMonTheme.textSecondary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, 8)
+        Text(
+            "No \(kind.displayName(in: locale).lowercased()) recorded \(range.phrase(in: locale))."
+        )
+        .font(.subheadline)
+        .foregroundStyle(MonMonTheme.textSecondary)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 8)
     }
 }
 

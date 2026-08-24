@@ -13,6 +13,8 @@ struct FundMetric: Identifiable {
 /// Metrics two to a row. Unit prices and cost bases both run long in đồng, and
 /// four across shrank every one of them past reading on an iPhone.
 struct FundMetricGrid: View {
+    @Environment(\.locale) private var locale
+
     let metrics: [FundMetric]
 
     var body: some View {
@@ -106,6 +108,8 @@ struct FundProfitLossRow: View {
 /// Where the price came from and when it is from. A stale price says so in
 /// words and carries a symbol; colour only reinforces it.
 struct FundPriceStatusRow: View {
+    @Environment(\.locale) private var locale
+
     let instrument: FundInstrument?
     /// Passed in rather than read from the clock, so a preview and a test both
     /// get a stable answer for whether the price is stale.
@@ -161,8 +165,10 @@ struct FundPriceStatusRow: View {
             return "Instrument missing — value cannot be worked out"
         }
 
-        let day = instrument.priceAsOf.formatted(date: .abbreviated, time: .omitted)
-        let base = "\(instrument.priceLabel) \(day) · \(instrument.source.displayName)"
+        let day = TransactionPeriod.day(instrument.priceAsOf, in: locale)
+        let base =
+            "\(instrument.priceLabel(in: locale)) \(day) · "
+            + "\(instrument.source.displayName(in: locale))"
         return isStale ? "\(base) · Stale" : base
     }
 

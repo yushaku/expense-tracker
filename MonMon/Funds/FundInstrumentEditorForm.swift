@@ -9,7 +9,7 @@ struct FundInstrumentEditorForm: View {
     /// refused and the reason names the count.
     let heldCount: Int
     let validationError: FundInstrumentFormError?
-    let saveErrorMessage: String?
+    let saveErrorMessage: LocalizedStringKey?
     let onDelete: () -> Void
 
     var body: some View {
@@ -189,8 +189,10 @@ struct FundInstrumentEditorForm: View {
     private var deleteSection: some View {
         if heldCount > 0 {
             validationMessage(
-                "\(heldCount) \(heldCount == 1 ? "position is" : "positions are") held in this. "
-                    + "Delete them first.",
+                """
+                \(heldCount) \(heldCount == 1 ? "position is" : "positions are") held in \
+                this. Delete them first.
+                """,
                 id: "delete-instrument-blocked"
             )
         } else {
@@ -247,18 +249,18 @@ struct FundInstrumentEditorForm: View {
             }
     }
 
-    private func sectionHeader(_ title: String, systemImage: String) -> some View {
+    private func sectionHeader(_ title: LocalizedStringKey, systemImage: String) -> some View {
         Label(title, systemImage: systemImage)
             .font(.headline)
             .foregroundStyle(MonMonTheme.textPrimary)
     }
 
-    private func fieldLabel(_ title: String) -> some View {
+    private func fieldLabel(_ title: LocalizedStringKey) -> some View {
         Text(title)
             .font(.subheadline.weight(.medium))
     }
 
-    private func errorBanner(_ message: String) -> some View {
+    private func errorBanner(_ message: LocalizedStringKey) -> some View {
         validationMessage(message, id: "save-instrument-error")
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
@@ -272,14 +274,14 @@ struct FundInstrumentEditorForm: View {
             }
     }
 
-    private func validationMessage(_ message: String, id: String) -> some View {
+    private func validationMessage(_ message: LocalizedStringKey, id: String) -> some View {
         Label(message, systemImage: "exclamationmark.circle.fill")
             .font(.caption)
             .foregroundStyle(MonMonTheme.danger)
             .accessibilityIdentifier(id)
     }
 
-    private var kindExplanation: String {
+    private var kindExplanation: LocalizedStringKey {
         switch draft.kind {
         case .fund:
             "An open-ended fund is priced by the NAV its manager publishes, a day behind."
@@ -290,13 +292,13 @@ struct FundInstrumentEditorForm: View {
         }
     }
 
-    private var autoQuoteExplanation: String {
+    private var autoQuoteExplanation: LocalizedStringKey {
         draft.autoQuoteEnabled
             ? "Refresh will fetch this ticker, and an out-of-date price is marked stale."
             : "Refresh skips this ticker and its price is never marked stale."
     }
 
-    private var symbolErrorMessage: String? {
+    private var symbolErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .emptySymbol:
             "Enter the fund or ETF symbol."
@@ -307,12 +309,12 @@ struct FundInstrumentEditorForm: View {
         }
     }
 
-    private var nameErrorMessage: String? {
+    private var nameErrorMessage: LocalizedStringKey? {
         guard validationError == .emptyName else { return nil }
         return "Enter a name for this instrument."
     }
 
-    private var priceErrorMessage: String? {
+    private var priceErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidPrice:
             "Enter a valid price per unit."

@@ -8,7 +8,7 @@ struct DebtPaymentEditorForm: View {
     let accounts: [CashAccount]
     let isEditing: Bool
     let validationError: DebtPaymentFormError?
-    let saveErrorMessage: String?
+    let saveErrorMessage: LocalizedStringKey?
     let onFillOutstanding: () -> Void
     let onDelete: () -> Void
 
@@ -56,8 +56,10 @@ struct DebtPaymentEditorForm: View {
                     .font(.title3.weight(.semibold))
 
                 Text(
-                    "\(VNDCurrency.format(outstanding)) still outstanding "
-                        + "\(preposition) \(debt.counterparty)."
+                    """
+                    \(VNDCurrency.format(outstanding)) still outstanding \(preposition) \
+                    \(debt.counterparty).
+                    """
                 )
                 .font(.subheadline)
                 .foregroundStyle(MonMonTheme.textSecondary)
@@ -278,18 +280,18 @@ struct DebtPaymentEditorForm: View {
             }
     }
 
-    private func sectionHeader(_ title: String, systemImage: String) -> some View {
+    private func sectionHeader(_ title: LocalizedStringKey, systemImage: String) -> some View {
         Label(title, systemImage: systemImage)
             .font(.headline)
             .foregroundStyle(MonMonTheme.textPrimary)
     }
 
-    private func fieldLabel(_ title: String) -> some View {
+    private func fieldLabel(_ title: LocalizedStringKey) -> some View {
         Text(title)
             .font(.subheadline.weight(.medium))
     }
 
-    private func errorBanner(_ message: String) -> some View {
+    private func errorBanner(_ message: LocalizedStringKey) -> some View {
         validationMessage(message, id: "save-debt-payment-error")
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
@@ -303,14 +305,14 @@ struct DebtPaymentEditorForm: View {
             }
     }
 
-    private func validationMessage(_ message: String, id: String) -> some View {
+    private func validationMessage(_ message: LocalizedStringKey, id: String) -> some View {
         Label(message, systemImage: "exclamationmark.circle.fill")
             .font(.caption)
             .foregroundStyle(MonMonTheme.danger)
             .accessibilityIdentifier(id)
     }
 
-    private var amountErrorMessage: String? {
+    private var amountErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidAmount:
             "Enter a valid amount."
@@ -325,7 +327,7 @@ struct DebtPaymentEditorForm: View {
         }
     }
 
-    private var accountErrorMessage: String? {
+    private var accountErrorMessage: LocalizedStringKey? {
         validationError == .missingAccount ? "Pick the account the money moves through." : nil
     }
 }

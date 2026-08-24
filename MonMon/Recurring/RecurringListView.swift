@@ -163,7 +163,7 @@ struct RecurringListView: View {
         return "\(sign)\(VNDCurrency.format(magnitude))"
     }
 
-    private var countLabel: String {
+    private var countLabel: LocalizedStringKey {
         let active = activeRules.count
         let noun = active == 1 ? "active rule" : "active rules"
         guard !pausedRules.isEmpty else {

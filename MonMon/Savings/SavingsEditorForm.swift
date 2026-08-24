@@ -6,7 +6,7 @@ struct SavingsEditorForm: View {
     let accounts: [CashAccount]
     let isEditing: Bool
     let validationError: SavingsFormError?
-    let saveErrorMessage: String?
+    let saveErrorMessage: LocalizedStringKey?
     let onDelete: () -> Void
 
     var body: some View {
@@ -268,18 +268,18 @@ struct SavingsEditorForm: View {
             }
     }
 
-    private func sectionHeader(_ title: String, systemImage: String) -> some View {
+    private func sectionHeader(_ title: LocalizedStringKey, systemImage: String) -> some View {
         Label(title, systemImage: systemImage)
             .font(.headline)
             .foregroundStyle(MonMonTheme.textPrimary)
     }
 
-    private func fieldLabel(_ title: String) -> some View {
+    private func fieldLabel(_ title: LocalizedStringKey) -> some View {
         Text(title)
             .font(.subheadline.weight(.medium))
     }
 
-    private func errorBanner(_ message: String) -> some View {
+    private func errorBanner(_ message: LocalizedStringKey) -> some View {
         validationMessage(message, id: "save-savings-error")
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
@@ -293,14 +293,14 @@ struct SavingsEditorForm: View {
             }
     }
 
-    private func validationMessage(_ message: String, id: String) -> some View {
+    private func validationMessage(_ message: LocalizedStringKey, id: String) -> some View {
         Label(message, systemImage: "exclamationmark.circle.fill")
             .font(.caption)
             .foregroundStyle(MonMonTheme.danger)
             .accessibilityIdentifier(id)
     }
 
-    private var fundingExplanation: String {
+    private var fundingExplanation: LocalizedStringKey {
         if draft.sourceAccountID == nil {
             "Not linked: this deposit adds to your total on its own."
         } else {
@@ -308,12 +308,12 @@ struct SavingsEditorForm: View {
         }
     }
 
-    private var nameErrorMessage: String? {
+    private var nameErrorMessage: LocalizedStringKey? {
         guard validationError == .emptyName else { return nil }
         return "Enter a name for this savings book."
     }
 
-    private var principalErrorMessage: String? {
+    private var principalErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidPrincipal:
             "Enter a valid principal."
@@ -324,7 +324,7 @@ struct SavingsEditorForm: View {
         }
     }
 
-    private var rateErrorMessage: String? {
+    private var rateErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidRate:
             "Enter a valid annual rate."
@@ -335,7 +335,7 @@ struct SavingsEditorForm: View {
         }
     }
 
-    private var termErrorMessage: String? {
+    private var termErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidTerm:
             "Enter the term in whole months."
@@ -346,7 +346,7 @@ struct SavingsEditorForm: View {
         }
     }
 
-    private var sourceErrorMessage: String? {
+    private var sourceErrorMessage: LocalizedStringKey? {
         guard validationError == .insufficientSourceBalance else { return nil }
         return "That account does not have enough available balance."
     }
@@ -357,7 +357,7 @@ struct SavingsEditorForm: View {
         @State var draft: SavingsDraft
         var isEditing = false
         var validationError: SavingsFormError?
-        var saveErrorMessage: String?
+        var saveErrorMessage: LocalizedStringKey?
 
         var body: some View {
             NavigationStack {

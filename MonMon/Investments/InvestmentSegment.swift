@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 /// Which half of the Investments screen is showing. Savings books and fund
 /// holdings are the same idea — money parked rather than spent — so they share
@@ -12,7 +13,7 @@ enum InvestmentSegment: String, CaseIterable, Identifiable, Hashable {
         rawValue
     }
 
-    var displayName: String {
+    var displayName: LocalizedStringKey {
         switch self {
         case .savings:
             "Savings"
@@ -25,7 +26,7 @@ enum InvestmentSegment: String, CaseIterable, Identifiable, Hashable {
 
     /// The add button changes with the segment rather than offering a menu, so
     /// adding stays one tap from whichever list is already in front of you.
-    var addTitle: String {
+    var addTitle: LocalizedStringKey {
         switch self {
         case .savings:
             "Add Savings Book"

@@ -4,6 +4,8 @@ import SwiftUI
 /// single lot stands today. The list groups these by instrument, so this card is
 /// what a group opens into rather than what the list shows.
 struct FundHoldingCard: View {
+    @Environment(\.locale) private var locale
+
     let holding: FundHolding
     /// The instrument this position is held in, or `nil` when nothing in the
     /// catalogue matches. Joins are resolved in Swift, so a dangling
@@ -126,7 +128,7 @@ struct FundHoldingCard: View {
     }
 
     private var subtitle: String {
-        let bought = holding.boughtOn.formatted(date: .abbreviated, time: .omitted)
+        let bought = TransactionPeriod.day(holding.boughtOn, in: locale)
 
         guard let instrument else {
             return "Unknown instrument · \(bought)"

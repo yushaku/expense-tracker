@@ -77,7 +77,7 @@ struct TransactionCard: View {
                 showsDate
                     ? TransactionPeriod.format(Self.dateTemplate, in: locale)
                         .format(transaction.occurredAt)
-                    : transaction.kind.displayName,
+                    : transaction.kind.displayName(in: locale),
                 systemImage: transaction.kind.symbolName
             )
             .font(.caption2.weight(.semibold))

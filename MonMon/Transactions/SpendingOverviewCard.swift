@@ -6,6 +6,8 @@ import SwiftUI
 /// The card reads a period rather than owning one, so the Spending screen and a
 /// single day both put the same summary above their list.
 struct SpendingOverviewCard: View {
+    @Environment(\.locale) private var locale
+
     /// Names the period. Handed in rather than taken from the range, so a screen
     /// showing one day can spell that day out in full.
     let title: String
@@ -112,7 +114,7 @@ struct SpendingOverviewCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Net \(signed(net))")
+        .accessibilityLabel(AppText.string("Net \(signed(net))", in: locale))
     }
 
     /// How much of the money that moved came in against how much went out. It
@@ -178,7 +180,10 @@ struct SpendingOverviewCard: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
-            "\(kind.displayName) \(VNDCurrency.format(amount)), \(shareLabel(of: amount))"
+            """
+            \(kind.displayName(in: locale)) \(VNDCurrency.format(amount)), \
+            \(shareLabel(of: amount))
+            """
         )
     }
 
@@ -201,14 +206,17 @@ struct SpendingOverviewCard: View {
 
     private func shareLabel(of amount: Decimal) -> String {
         guard flow > 0 else {
-            return "Nothing recorded"
+            return AppText.string("Nothing recorded", in: locale)
         }
 
-        return "\(Percentage.label(of: amount, in: flow)) of what moved"
+        return AppText.string("\(Percentage.label(of: amount, in: flow)) of what moved", in: locale)
     }
 
+    /// A count reads as a whole sentence rather than a number glued to a word:
+    /// how a language counts things is its own business, and Vietnamese does not
+    /// change the noun at all.
     private var countLabel: String {
-        count == 1 ? "1 transaction" : "\(count) transactions"
+        AppText.string("\(count) transactions", in: locale)
     }
 }
 

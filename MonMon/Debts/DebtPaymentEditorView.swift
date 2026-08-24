@@ -54,7 +54,7 @@ struct DebtPaymentEditorView: View {
 
     @State private var draft: DebtPaymentDraft
     @State private var validationError: DebtPaymentFormError?
-    @State private var saveErrorMessage: String?
+    @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
 
     init(mode: DebtPaymentEditorMode, debt: Debt, defaultDate: Date = .now) {

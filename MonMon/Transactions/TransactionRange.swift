@@ -1,4 +1,4 @@
-import Foundation
+import SwiftUI
 
 /// How wide a slice of time the spending screen is showing.
 enum TransactionRangeScope: String, CaseIterable, Identifiable, Hashable {
@@ -11,7 +11,7 @@ enum TransactionRangeScope: String, CaseIterable, Identifiable, Hashable {
         rawValue
     }
 
-    var displayName: String {
+    var displayName: LocalizedStringKey {
         switch self {
         case .day:
             "Day"

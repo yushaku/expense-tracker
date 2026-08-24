@@ -88,6 +88,7 @@
 		A00000000000000000000280 /* AppLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000191 /* AppLockTests.swift */; };
 		C10000000000000000000109 /* AppLanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000009 /* AppLanguageTests.swift */; };
 		C1000000000000000000010A /* LanguageResolutionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000000000000000000000A /* LanguageResolutionTests.swift */; };
+		C1000000000000000000010B /* CategorySeedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000000000000000000000B /* CategorySeedTests.swift */; };
 		A00000000000000000000281 /* FloatingAddButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000192 /* FloatingAddButton.swift */; };
 		A00000000000000000000282 /* Percentage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000193 /* Percentage.swift */; };
 		A00000000000000000000283 /* CategoryBreakdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000194 /* CategoryBreakdown.swift */; };
@@ -306,6 +307,7 @@
 		A00000000000000000000191 /* AppLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockTests.swift; sourceTree = "<group>"; };
 		C10000000000000000000009 /* AppLanguageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguageTests.swift; sourceTree = "<group>"; };
 		C1000000000000000000000A /* LanguageResolutionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageResolutionTests.swift; sourceTree = "<group>"; };
+		C1000000000000000000000B /* CategorySeedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySeedTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000192 /* FloatingAddButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingAddButton.swift; sourceTree = "<group>"; };
 		A00000000000000000000193 /* Percentage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Percentage.swift; sourceTree = "<group>"; };
 		A00000000000000000000194 /* CategoryBreakdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBreakdown.swift; sourceTree = "<group>"; };
@@ -722,6 +724,7 @@
 				A00000000000000000000174 /* CategoryDraftTests.swift */,
 				A00000000000000000000175 /* TransactionCategoryPersistenceTests.swift */,
 				A00000000000000000000181 /* TransactionDraftTests.swift */,
+				C1000000000000000000000B /* CategorySeedTests.swift */,
 				A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */,
 				A00000000000000000000197 /* CategoryBreakdownTests.swift */,
 			);
@@ -1133,6 +1136,7 @@
 				A00000000000000000000274 /* AssetAllocationTests.swift in Sources */,
 				A00000000000000000000271 /* MoneyTransactionPersistenceTests.swift in Sources */,
 				A00000000000000000000270 /* TransactionDraftTests.swift in Sources */,
+				C1000000000000000000010B /* CategorySeedTests.swift in Sources */,
 				A00000000000000000000264 /* TransactionCategoryPersistenceTests.swift in Sources */,
 				A00000000000000000000263 /* CategoryDraftTests.swift in Sources */,
 				A00000000000000000000256 /* TransactionSummaryTests.swift in Sources */,

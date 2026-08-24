@@ -53,9 +53,16 @@ enum TransactionDefaults {
         kind: TransactionKind = .expense
     ) -> UUID? {
         if value.isEmpty {
+            // By identity first, then by name. A store seeded before the starter
+            // categories carried fixed ids still has its own, and a store seeded
+            // in the other language has a name this would never match.
             return categories.first {
-                $0.name == CategorySeed.defaultName(for: kind) && $0.kind == kind
-            }?.id
+                $0.id == CategorySeed.defaultID(for: kind) && $0.kind == kind
+            }?
+            .id
+                ?? categories.first {
+                    $0.name == CategorySeed.defaultName(for: kind) && $0.kind == kind
+                }?.id
         }
 
         guard let id = UUID(uuidString: value) else {

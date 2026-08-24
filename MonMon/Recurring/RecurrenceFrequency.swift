@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 /// How often a recurring rule stamps out a transaction.
 ///
@@ -15,7 +16,7 @@ enum RecurrenceFrequency: String, Codable, CaseIterable, Identifiable {
         rawValue
     }
 
-    var displayName: String {
+    var displayNameKey: String {
         switch self {
         case .daily:
             "Daily"
@@ -26,6 +27,14 @@ enum RecurrenceFrequency: String, Codable, CaseIterable, Identifiable {
         case .yearly:
             "Yearly"
         }
+    }
+
+    var displayName: LocalizedStringKey {
+        LocalizedStringKey(displayNameKey)
+    }
+
+    func displayName(in locale: Locale) -> String {
+        AppText.string(key: displayNameKey, in: locale)
     }
 
     var symbolName: String {
@@ -60,25 +69,33 @@ enum RecurrenceFrequency: String, Codable, CaseIterable, Identifiable {
         self == .weekly ? 7 : 1
     }
 
-    /// Reads inside a sentence: "Every month", "Every 2 weeks".
-    func phrase(interval: Int) -> String {
+    /// Reads inside a sentence: "Every month", "Every 2 weeks". Each case is a
+    /// whole phrase rather than a unit with an "s" stuck on the end, because how
+    /// a language counts is its own business — Vietnamese does not change the
+    /// word at all.
+    func phrase(interval: Int, in locale: Locale) -> String {
         guard interval > 1 else {
-            return "Every \(singularUnit)"
+            switch self {
+            case .daily:
+                return AppText.string("Every day", in: locale)
+            case .weekly:
+                return AppText.string("Every week", in: locale)
+            case .monthly:
+                return AppText.string("Every month", in: locale)
+            case .yearly:
+                return AppText.string("Every year", in: locale)
+            }
         }
 
-        return "Every \(interval) \(singularUnit)s"
-    }
-
-    private var singularUnit: String {
         switch self {
         case .daily:
-            "day"
+            return AppText.string("Every \(interval) days", in: locale)
         case .weekly:
-            "week"
+            return AppText.string("Every \(interval) weeks", in: locale)
         case .monthly:
-            "month"
+            return AppText.string("Every \(interval) months", in: locale)
         case .yearly:
-            "year"
+            return AppText.string("Every \(interval) years", in: locale)
         }
     }
 }

@@ -33,4 +33,19 @@ struct AppLanguageTests {
         #expect(AppText.string("Spending", in: Locale(identifier: "en")) == "Spending")
         #expect(AppText.string("Settings", in: Locale(identifier: "vi")) == "Cài đặt")
     }
+
+    /// A spot check across the app rather than one screen, so a catalogue that
+    /// loses a whole module's worth of translations is caught here.
+    @Test("Every tab has Vietnamese behind it")
+    func everyTabIsTranslated() {
+        let vietnamese = Locale(identifier: "vi")
+        let keys = [
+            "Add transaction", "Categories", "Net worth", "Debts", "Savings book",
+            "Add holding", "Transfers", "Every month", "Security", "Delete this account?",
+        ]
+
+        for key in keys {
+            #expect(AppText.string(key: key, in: vietnamese) != key, "\(key) is still English")
+        }
+    }
 }

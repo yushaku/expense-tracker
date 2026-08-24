@@ -25,6 +25,8 @@ enum CategoryEditorMode: Identifiable {
 }
 
 struct CategoryEditorView: View {
+    @Environment(\.locale) private var locale
+
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
@@ -41,7 +43,7 @@ struct CategoryEditorView: View {
 
     @State private var draft: CategoryDraft
     @State private var validationError: CategoryFormError?
-    @State private var saveErrorMessage: String?
+    @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
     @State private var isReassigning = false
 
@@ -166,8 +168,10 @@ struct CategoryEditorView: View {
             return nil
         }
 
-        return "Add another \(draft.kind.displayName.lowercased()) category first, "
-            + "so these records have somewhere to go."
+        return """
+            Add another \(draft.kind.displayName(in: locale).lowercased()) category first, so \
+            these records have somewhere to go.
+            """
     }
 
     private func startDelete() {

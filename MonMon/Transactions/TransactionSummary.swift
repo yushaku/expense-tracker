@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 enum TransactionSummary {
     static func totalIncome(of transactions: [MoneyTransaction]) -> Decimal {
@@ -103,7 +104,7 @@ enum TransactionListFilter: String, CaseIterable, Identifiable {
         }
     }
 
-    var displayName: String {
+    var displayName: LocalizedStringKey {
         switch self {
         case .all:
             "All"
