@@ -120,12 +120,7 @@ struct AssetGrowthCard: View {
                     .foregroundStyle(MonMonTheme.border)
                 AxisValueLabel {
                     if let amount = value.as(Double.self) {
-                        Text(
-                            amount,
-                            format: .number
-                                .notation(.compactName)
-                                .precision(.fractionLength(0...1))
-                        )
+                        Text(VNDCurrency.format(amount))
                     }
                 }
                 .foregroundStyle(MonMonTheme.textMuted)

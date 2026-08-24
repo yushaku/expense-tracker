@@ -3,14 +3,25 @@ import Foundation
 enum VNDCurrency {
     static let code = "VND"
 
+    /// Display tiers, largest first. Amounts below a thousand keep their đồng
+    /// suffix; anything larger is abbreviated so long balances stay readable in
+    /// cards, rows, and chart axes.
+    private static let tiers: [(threshold: Decimal, divisor: Decimal, suffix: String)] = [
+        (1_000_000_000, 1_000_000_000, "B"),
+        (1_000_000, 1_000_000, "M"),
+        (1_000, 1_000, "k"),
+        (0, 1, "đ"),
+    ]
+
     private static let locale = Locale(identifier: "vi_VN")
     private static let numberFormat = Decimal.FormatStyle(locale: locale)
         .grouping(.automatic)
-    private static let currencyFormat = Decimal.FormatStyle.Currency(
-        code: code,
-        locale: locale
-    )
-    .precision(.fractionLength(0))
+    private static let compactFormat =
+        numberFormat
+        .precision(.fractionLength(0...1))
+    private static let wholeFormat =
+        numberFormat
+        .precision(.fractionLength(0))
     private static let unitPriceFormat = Decimal.FormatStyle.Currency(
         code: code,
         locale: locale
@@ -33,8 +44,29 @@ enum VNDCurrency {
         normalizedInput(text) ?? text
     }
 
+    /// An abbreviated amount: `100đ`, `1k`, `1,5k`, `1,2M`, `1B`.
     static func format(_ amount: Decimal) -> String {
-        currencyFormat.format(amount)
+        let isNegative = amount < 0
+        let magnitude = isNegative ? -amount : amount
+
+        var tierIndex = tiers.firstIndex { magnitude >= $0.threshold } ?? tiers.count - 1
+        var scaled = scale(magnitude, at: tierIndex)
+
+        // Rounding can push a value onto the next tier: 999.960 reads as 1M, not
+        // 1000k, and 999,6 reads as 1k, not 1000đ.
+        if scaled >= 1000, tierIndex > 0 {
+            tierIndex -= 1
+            scaled = scale(magnitude, at: tierIndex)
+        }
+
+        let digits =
+            isWholeTier(tierIndex)
+            ? wholeFormat.format(scaled) : compactFormat.format(scaled)
+        return (isNegative ? "-" : "") + digits + tiers[tierIndex].suffix
+    }
+
+    static func format(_ amount: Double) -> String {
+        format(Decimal(amount))
     }
 
     /// Grouped digits without the currency symbol, for prefilling an editable
@@ -47,6 +79,18 @@ enum VNDCurrency {
     /// a đồng, so it keeps up to two decimals instead of rounding to a whole one.
     static func formatUnitPrice(_ amount: Decimal) -> String {
         unitPriceFormat.format(amount)
+    }
+
+    /// The đồng tier shows whole numbers; the abbreviated tiers keep one decimal.
+    private static func isWholeTier(_ index: Int) -> Bool {
+        index == tiers.count - 1
+    }
+
+    private static func scale(_ magnitude: Decimal, at index: Int) -> Decimal {
+        var input = magnitude / tiers[index].divisor
+        var rounded = Decimal()
+        NSDecimalRound(&rounded, &input, isWholeTier(index) ? 0 : 1, .plain)
+        return rounded
     }
 
     private static func normalizedInput(_ text: String) -> String? {
