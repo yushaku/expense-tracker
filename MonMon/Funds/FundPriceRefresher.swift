@@ -143,6 +143,7 @@ final class FundPriceRefresher {
             )
 
             instrument.currentPricePerUnit = quote.pricePerUnit
+            instrument.askPricePerUnit = quote.askPricePerUnit ?? .zero
             instrument.priceAsOf = quote.asOf
             instrument.priceSource = quote.source.rawValue
             instrument.priceFetchedAt = asOf

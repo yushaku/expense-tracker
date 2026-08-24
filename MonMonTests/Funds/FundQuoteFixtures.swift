@@ -10,6 +10,46 @@ import Foundation
 /// on Fmarket being up is a suite that fails on a plane, and a green run has to
 /// mean the code is right rather than that the internet is.
 enum FundQuoteFixtures {
+    /// `GET /api/prices?type=SJL1L10`, captured 2026-08-24.
+    static let vangTodaySJC9999 = """
+        {"success":true,"timestamp":1787544005,"time":"11:00","date":"2026-08-24",
+         "type":"SJL1L10","name":"SJC 9999","buy":147000000,"sell":150000000,
+         "change_buy":1000000,"change_sell":1000000}
+        """
+
+    /// `GET /api/prices`, trimmed to two VND rows and the USD/oz row that must
+    /// never enter this VND-only catalogue.
+    static let vangTodayCatalogue = """
+        {"success":true,"timestamp":1787544005,"time":"11:00","date":"2026-08-24",
+         "count":3,"prices":{
+           "SJL1L10":{"name":"SJC 9999","buy":147000000,"sell":150000000,
+                      "change_buy":1000000,"change_sell":1000000,"currency":"VND"},
+           "DOHCML":{"name":"DOJI HCM","buy":146500000,"sell":149500000,
+                     "change_buy":500000,"change_sell":500000,"currency":"VND"},
+           "XAUUSD":{"name":"World Gold","buy":3370.4,"sell":3371.1,
+                     "change_buy":1.2,"change_sell":1.3,"currency":"USD"}
+         }}
+        """
+
+    static let vangTodayUnknownType = """
+        {"success":true,"timestamp":1787544005,"date":"2026-08-24","type":"OTHER",
+         "name":"Other","buy":147000000,"sell":150000000}
+        """
+
+    static let vangTodayFailure = """
+        {"success":false,"message":"Type not found"}
+        """
+
+    static let vangTodayRenamedBuy = """
+        {"success":true,"timestamp":1787544005,"date":"2026-08-24","type":"SJL1L10",
+         "name":"SJC 9999","purchase":147000000,"sell":150000000}
+        """
+
+    static let vangTodayZeroBuy = """
+        {"success":true,"timestamp":1787544005,"date":"2026-08-24","type":"SJL1L10",
+         "name":"SJC 9999","buy":0,"sell":150000000}
+        """
+
     /// `POST /res/products/filter` with `searchField: "VESAF"`.
     static let fmarketFilterVESAF = """
         {"status":200,"data":{"total":1,"rows":[

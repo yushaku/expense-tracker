@@ -115,6 +115,14 @@ struct FundInstrumentDraftTests {
         #expect(instrument.createdAt == createdAt)
         #expect(instrument.source == .manual)
         #expect(instrument.priceFetchedAt == nil)
+        #expect(instrument.askPricePerUnit == .zero)
+    }
+
+    @Test("Gold is offered as an instrument kind with its shop-buy price label")
+    func goldKindIsDescribed() {
+        #expect(FundInstrumentKind.gold.displayName == "Gold")
+        #expect(FundInstrumentKind.gold.priceLabel == "Shop buy price per lượng")
+        #expect(FundQuoteSource.vangToday.displayName == "vang.today")
     }
 
     @Test("An instrument round-trips through a draft unchanged")
@@ -151,6 +159,33 @@ struct FundInstrumentDraftTests {
         try makeDraft(priceText: "31.000").apply(to: instrument, existing: [instrument])
 
         #expect(instrument.currentPricePerUnit == 31_000)
+        #expect(instrument.source == .manual)
+        #expect(instrument.priceFetchedAt == nil)
+    }
+
+    @Test("Changing the kind clears the old provider and any gold ask")
+    func changingKindClearsProviderState() throws {
+        let fetchedAt = Date(timeIntervalSince1970: 1_700_086_400)
+        let instrument = FundTestFactory.instrument(
+            symbol: "SJL1L10",
+            name: "SJC 9999",
+            kind: .gold,
+            pricePerUnit: 147_000_000,
+            source: .vangToday,
+            priceFetchedAt: fetchedAt
+        )
+        instrument.askPricePerUnit = 150_000_000
+
+        try makeDraft(
+            symbol: "SJL1L10",
+            name: "SJC 9999",
+            kind: .fund,
+            priceText: "147.000.000"
+        )
+        .apply(to: instrument, existing: [instrument])
+
+        #expect(instrument.kind == .fund)
+        #expect(instrument.askPricePerUnit == .zero)
         #expect(instrument.source == .manual)
         #expect(instrument.priceFetchedAt == nil)
     }

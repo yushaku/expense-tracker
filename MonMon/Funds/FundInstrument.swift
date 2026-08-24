@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-/// One tradable fund or ETF, and the price every position in it is valued at.
+/// One fund, ETF, or gold product, and the price every position in it is valued at.
 ///
 /// The price lives here rather than on `FundHolding` because it is a property
 /// of the instrument, not of a position. With it on the holding, two rows for
@@ -17,7 +17,12 @@ final class FundInstrument {
     var symbol: String = ""
     var name: String = ""
     var kind: FundInstrumentKind = FundInstrumentKind.fund
+    /// The price the owner receives for one unit. For funds and ETFs this is the
+    /// only price; for gold it is the shop's buy side.
     var currentPricePerUnit: Decimal = Decimal.zero
+    /// The price the shop charges for one unit of gold. Zero for funds, ETFs,
+    /// and gold products that have not fetched a two-sided quote.
+    var askPricePerUnit: Decimal = Decimal.zero
     /// The trading day this price belongs to — not when it was fetched.
     /// Asking on a Sunday returns Friday's figure, and conflating the two would
     /// report a weekend price that never existed.
@@ -37,6 +42,7 @@ final class FundInstrument {
         name: String,
         kind: FundInstrumentKind,
         currentPricePerUnit: Decimal,
+        askPricePerUnit: Decimal = .zero,
         priceAsOf: Date,
         priceSource: String = FundQuoteSource.manual.rawValue,
         priceFetchedAt: Date? = nil,
@@ -49,6 +55,7 @@ final class FundInstrument {
         self.name = name
         self.kind = kind
         self.currentPricePerUnit = currentPricePerUnit
+        self.askPricePerUnit = askPricePerUnit
         self.priceAsOf = priceAsOf
         self.priceSource = priceSource
         self.priceFetchedAt = priceFetchedAt
@@ -68,7 +75,14 @@ extension FundInstrument {
     /// How this instrument's price should be described in a sentence:
     /// "NAV 21 Aug 2026 · Fmarket", or "Entered by hand".
     var priceLabel: String {
-        kind == FundInstrumentKind.fund ? "NAV" : "Close"
+        switch kind {
+        case .fund:
+            "NAV"
+        case .etf:
+            "Close"
+        case .gold:
+            "Buy"
+        }
     }
 }
 

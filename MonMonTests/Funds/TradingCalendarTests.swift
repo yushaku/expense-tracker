@@ -114,6 +114,33 @@ struct TradingCalendarTests {
         )
     }
 
+    @Test("Gold goes stale at midnight even on Sunday")
+    func goldGoesStaleEveryDay() {
+        let sundayMorning = date(2026, 8, 23, 9)
+
+        #expect(
+            TradingCalendar.isStale(
+                priceAsOf: startOfDay(2026, 8, 22),
+                kind: .gold,
+                asOf: sundayMorning
+            )
+        )
+        #expect(
+            !TradingCalendar.isStale(
+                priceAsOf: startOfDay(2026, 8, 21),
+                kind: .etf,
+                asOf: sundayMorning
+            )
+        )
+        #expect(
+            !TradingCalendar.isStale(
+                priceAsOf: startOfDay(2026, 8, 23),
+                kind: .gold,
+                asOf: sundayMorning
+            )
+        )
+    }
+
     /// Holidays are deliberately not modelled. Reporting Tết as stale is honest
     /// about what the app knows; a hardcoded table would quietly go wrong later.
     @Test("A holiday reads as stale rather than being modelled")

@@ -265,6 +265,8 @@ struct FundInstrumentEditorForm: View {
             "An open-ended fund is priced by the NAV its manager publishes, a day behind."
         case .etf:
             "A listed ETF is priced by its close, which sits above or below its NAV."
+        case .gold:
+            "Gold is valued at the shop's buy price per lượng."
         }
     }
 

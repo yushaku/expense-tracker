@@ -11,6 +11,8 @@ enum FundQuoteSource: String, Codable, CaseIterable, Sendable {
     case fmarket
     /// Closing price of an ETF listed on HOSE.
     case vndirect
+    /// Shop buy and sell prices for physical gold.
+    case vangToday
 
     var displayName: String {
         switch self {
@@ -20,6 +22,8 @@ enum FundQuoteSource: String, Codable, CaseIterable, Sendable {
             "Fmarket"
         case .vndirect:
             "VNDIRECT"
+        case .vangToday:
+            "vang.today"
         }
     }
 }

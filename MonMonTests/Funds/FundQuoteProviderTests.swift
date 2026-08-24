@@ -275,22 +275,30 @@ struct FundQuoteRouterTests {
         }
     }
 
-    @Test("A fund routes to Fmarket and an ETF to VNDIRECT")
+    @Test("Each instrument kind routes only to its provider")
     func kindDecidesTheProvider() async throws {
         let fmarketBox = SpyProvider.Box()
         let vndirectBox = SpyProvider.Box()
+        let vangTodayBox = SpyProvider.Box()
         let router = FundQuoteRouter(
             fmarket: SpyProvider(source: .fmarket, box: fmarketBox),
-            vndirect: SpyProvider(source: .vndirect, box: vndirectBox)
+            vndirect: SpyProvider(source: .vndirect, box: vndirectBox),
+            vangToday: SpyProvider(source: .vangToday, box: vangTodayBox)
         )
 
         let fundQuote = try await router.latestQuote(symbol: "VESAF", kind: .fund, asOf: asOf)
         #expect(fundQuote.source == .fmarket)
         #expect(fmarketBox.asked)
         #expect(!vndirectBox.asked)
+        #expect(!vangTodayBox.asked)
 
         let etfQuote = try await router.latestQuote(symbol: "FUEVFVND", kind: .etf, asOf: asOf)
         #expect(etfQuote.source == .vndirect)
         #expect(vndirectBox.asked)
+
+        let goldQuote = try await router.latestQuote(
+            symbol: "SJL1L10", kind: .gold, asOf: asOf)
+        #expect(goldQuote.source == .vangToday)
+        #expect(vangTodayBox.asked)
     }
 }

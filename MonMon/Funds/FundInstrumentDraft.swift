@@ -132,9 +132,10 @@ struct FundInstrumentDraft: Equatable {
     ) throws {
         let values = try validate(existing: existing, editedID: instrument.id)
 
-        let priceChanged =
+        let quoteOwnershipChanged =
             instrument.currentPricePerUnit != values.currentPricePerUnit
             || instrument.priceAsOf != values.priceAsOf
+            || instrument.kind != values.kind
 
         instrument.symbol = values.symbol
         instrument.name = values.name
@@ -143,7 +144,8 @@ struct FundInstrumentDraft: Equatable {
         instrument.priceAsOf = values.priceAsOf
         instrument.autoQuoteEnabled = values.autoQuoteEnabled
 
-        if priceChanged {
+        if quoteOwnershipChanged {
+            instrument.askPricePerUnit = .zero
             instrument.priceSource = FundQuoteSource.manual.rawValue
             instrument.priceFetchedAt = nil
         }

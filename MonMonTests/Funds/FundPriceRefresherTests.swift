@@ -37,6 +37,7 @@ struct FundPriceRefresherTests {
     private struct StubProvider: FundQuoteProvider {
         let source: FundQuoteSource
         var price: Decimal = 30_000
+        var askPrice: Decimal?
         var asOf: Date = .distantPast
         var error: FundQuoteError?
         let calls: Calls
@@ -59,6 +60,7 @@ struct FundPriceRefresherTests {
             return FundQuote(
                 symbol: symbol,
                 pricePerUnit: price,
+                askPricePerUnit: askPrice,
                 asOf: self.asOf,
                 source: source
             )
@@ -71,6 +73,7 @@ struct FundPriceRefresherTests {
 
     private func refresher(
         price: Decimal = 30_000,
+        askPrice: Decimal? = nil,
         quoteDay: Date? = nil,
         error: FundQuoteError? = nil
     ) -> (FundPriceRefresher, StubProvider.Calls) {
@@ -78,14 +81,78 @@ struct FundPriceRefresherTests {
         let stub = StubProvider(
             source: .fmarket,
             price: price,
+            askPrice: askPrice,
             asOf: quoteDay ?? startOfAsOf,
             error: error,
             calls: calls
         )
         return (
-            FundPriceRefresher(router: FundQuoteRouter(fmarket: stub, vndirect: stub)),
+            FundPriceRefresher(
+                router: FundQuoteRouter(
+                    fmarket: stub,
+                    vndirect: stub,
+                    vangToday: stub
+                )
+            ),
             calls
         )
+    }
+
+    @Test("A refresh stores both sides of a gold quote")
+    func goldRefreshStoresBidAndAsk() async throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let instrument = FundTestFactory.instrument(
+            symbol: "SJL1L10",
+            kind: .gold,
+            pricePerUnit: 145_000_000,
+            priceAsOf: day(-1)
+        )
+        context.insert(instrument)
+        context.insert(
+            FundTestFactory.holding(
+                in: instrument,
+                units: 1,
+                averageCostPerUnit: 140_000_000
+            )
+        )
+        try context.save()
+
+        let (refresher, calls) = refresher(
+            price: 147_000_000,
+            askPrice: 150_000_000
+        )
+        let (instruments, holdings) = try fetch(context)
+        await refresher.refresh(
+            instruments: instruments,
+            holdings: holdings,
+            in: context,
+            asOf: asOf
+        )
+
+        #expect(calls.count == 1)
+        #expect(instrument.currentPricePerUnit == 147_000_000)
+        #expect(instrument.askPricePerUnit == 150_000_000)
+    }
+
+    @Test("A quote without an ask clears a previously stored ask")
+    func quoteWithoutAskClearsAsk() async throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let instrument = seed(context, priceAsOf: day(-10))
+        instrument.askPricePerUnit = 26_000
+        try context.save()
+
+        let (refresher, _) = refresher(price: 31_581)
+        let (instruments, holdings) = try fetch(context)
+        await refresher.refresh(
+            instruments: instruments,
+            holdings: holdings,
+            in: context,
+            asOf: asOf
+        )
+
+        #expect(instrument.askPricePerUnit == .zero)
     }
 
     private func seed(
@@ -208,6 +275,7 @@ struct FundPriceRefresherTests {
         let container = try makeContainer()
         let context = container.mainContext
         let instrument = seed(context, priceAsOf: day(-10))
+        instrument.askPricePerUnit = 26_000
         try context.save()
 
         let (refresher, _) = refresher(error: .transport)
@@ -216,6 +284,7 @@ struct FundPriceRefresherTests {
             instruments: instruments, holdings: holdings, in: context, asOf: asOf)
 
         #expect(instrument.currentPricePerUnit == 25_000)
+        #expect(instrument.askPricePerUnit == 26_000)
         #expect(instrument.priceAsOf == day(-10))
         #expect(instrument.source == .manual)
         #expect(instrument.priceFetchedAt == nil)

@@ -141,6 +141,15 @@ enum JSONReader {
         return number.intValue
     }
 
+    static func bool(_ value: Any?) throws -> Bool {
+        guard let number = value as? NSNumber,
+            CFGetTypeID(number) == CFBooleanGetTypeID()
+        else {
+            throw FundQuoteError.decoding
+        }
+        return number.boolValue
+    }
+
     /// A price, read through its textual form. Must be greater than zero: a zero
     /// or negative figure is a malformed response, not a price.
     static func price(_ value: Any?) throws -> Decimal {

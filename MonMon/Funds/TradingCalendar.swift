@@ -1,6 +1,6 @@
 import Foundation
 
-/// When the market last closed, and whether a stored price is older than that.
+/// The newest day each market can cover, and whether a stored price is older.
 ///
 /// Built on the calendar `TransactionPeriod` already shares (Gregorian,
 /// `Asia/Ho_Chi_Minh`) rather than a second one, so no module reads the
@@ -59,15 +59,15 @@ enum TradingCalendar {
         priceAsOf < calendar.startOfDay(for: freshestExpected(kind: kind, asOf: asOf))
     }
 
-    /// The oldest trading day a current price is allowed to carry.
+    /// The oldest day a current price is allowed to carry.
     static func freshestExpected(kind: FundInstrumentKind, asOf: Date) -> Date {
-        let lastClose = lastCompletedTradingDay(asOf: asOf)
-
         switch kind {
+        case .gold:
+            return calendar.startOfDay(for: asOf)
         case .etf:
-            return lastClose
+            return lastCompletedTradingDay(asOf: asOf)
         case .fund:
-            return previousTradingDay(before: lastClose)
+            return previousTradingDay(before: lastCompletedTradingDay(asOf: asOf))
         }
     }
 }

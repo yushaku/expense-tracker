@@ -7,9 +7,26 @@ struct FundQuote: Sendable, Equatable {
     /// VND per unit, already normalised. Providers quote in different units;
     /// nothing outside a provider ever sees the raw figure.
     let pricePerUnit: Decimal
+    /// The other side of a two-sided quote. Present for gold, where
+    /// `pricePerUnit` is the shop's buy and this is the shop's sell.
+    let askPricePerUnit: Decimal?
     /// Start of the trading day the price belongs to, not when it was fetched.
     let asOf: Date
     let source: FundQuoteSource
+
+    init(
+        symbol: String,
+        pricePerUnit: Decimal,
+        askPricePerUnit: Decimal? = nil,
+        asOf: Date,
+        source: FundQuoteSource
+    ) {
+        self.symbol = symbol
+        self.pricePerUnit = pricePerUnit
+        self.askPricePerUnit = askPricePerUnit
+        self.asOf = asOf
+        self.source = source
+    }
 }
 
 /// A catalogue entry a provider can offer, before the owner confirms it.
@@ -24,6 +41,8 @@ struct FundInstrumentCandidate: Sendable, Equatable, Identifiable {
     /// catalogue call returns every fund's NAV alongside its name, so importing
     /// the whole list costs one request rather than one per fund.
     let pricePerUnit: Decimal?
+    /// The shop's sell price when the candidate carries a gold spread.
+    let askPricePerUnit: Decimal?
     /// The trading day that price belongs to.
     let priceAsOf: Date?
     /// The fund management company, as the listing gives it. Empty when the
@@ -37,6 +56,7 @@ struct FundInstrumentCandidate: Sendable, Equatable, Identifiable {
         name: String,
         kind: FundInstrumentKind,
         pricePerUnit: Decimal? = nil,
+        askPricePerUnit: Decimal? = nil,
         priceAsOf: Date? = nil,
         owner: String = ""
     ) {
@@ -44,6 +64,7 @@ struct FundInstrumentCandidate: Sendable, Equatable, Identifiable {
         self.name = name
         self.kind = kind
         self.pricePerUnit = pricePerUnit
+        self.askPricePerUnit = askPricePerUnit
         self.priceAsOf = priceAsOf
         self.owner = owner
     }
@@ -110,13 +131,16 @@ protocol FundQuoteProvider: Sendable {
 struct FundQuoteRouter: Sendable {
     private let fmarket: any FundQuoteProvider
     private let vndirect: any FundQuoteProvider
+    private let vangToday: any FundQuoteProvider
 
     init(
         fmarket: any FundQuoteProvider = FmarketQuoteProvider(),
-        vndirect: any FundQuoteProvider = VNDirectQuoteProvider()
+        vndirect: any FundQuoteProvider = VNDirectQuoteProvider(),
+        vangToday: any FundQuoteProvider = VangTodayQuoteProvider()
     ) {
         self.fmarket = fmarket
         self.vndirect = vndirect
+        self.vangToday = vangToday
     }
 
     func provider(for kind: FundInstrumentKind) -> any FundQuoteProvider {
@@ -125,6 +149,8 @@ struct FundQuoteRouter: Sendable {
             fmarket
         case .etf:
             vndirect
+        case .gold:
+            vangToday
         }
     }
 
