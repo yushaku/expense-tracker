@@ -7,6 +7,7 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
 
     @AppStorage(AppTheme.storageKey) private var theme = AppTheme.system
+    @AppStorage(AppLanguage.storageKey) private var language = AppLanguage.system
     @AppStorage(AppLock.enabledKey) private var isLockEnabled = false
     @State private var instrumentScope: FundInstrumentListScope?
 
@@ -55,6 +56,25 @@ struct SettingsView: View {
                 .accessibilityIdentifier("theme-picker")
 
                 Text("Catppuccin Latte in light, Frappé in dark. System follows the device.")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+
+                Divider()
+                    .overlay(MonMonTheme.border)
+
+                // Each language names itself, so the picker can be read whichever
+                // one is currently on show.
+                Picker("Language", selection: $language) {
+                    ForEach(AppLanguage.allCases) { option in
+                        Text(option.displayName)
+                            .tag(option)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .accessibilityIdentifier("language-picker")
+
+                Text("What the app is written in. System follows the device.")
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
             }

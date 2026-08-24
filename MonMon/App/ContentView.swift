@@ -5,6 +5,7 @@ struct ContentView: View {
     @Environment(AppLock.self) private var appLock
 
     @AppStorage(AppTheme.storageKey) private var theme = AppTheme.system
+    @AppStorage(AppLanguage.storageKey) private var language = AppLanguage.system
 
     var body: some View {
         RootTabView()
@@ -14,6 +15,9 @@ struct ContentView: View {
             // `MonMonTheme.colorScheme` is what makes a change repaint the whole
             // tree the moment it is picked.
             .preferredColorScheme(theme.colorScheme)
+            // Every localized string and date format resolves against this,
+            // so picking a language repaints the whole tree at once.
+            .environment(\.locale, language.locale)
             .overlay {
                 if appLock.isLocked {
                     LockScreenView(

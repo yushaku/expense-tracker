@@ -122,6 +122,8 @@
 		A0000000000000000000080A /* AccountsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000809 /* AccountsScreen.swift */; };
 		A0000000000000000000080C /* DateRangeFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000080B /* DateRangeFilter.swift */; };
 		C10000000000000000000105 /* MonthRail.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000005 /* MonthRail.swift */; };
+		C10000000000000000000107 /* AppLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000007 /* AppLanguage.swift */; };
+		C10000000000000000000108 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000008 /* Localizable.xcstrings */; };
 		A0000000000000000000080E /* PeriodGridPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000080D /* PeriodGridPicker.swift */; };
 		A00000000000000000000811 /* FundInstrument.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000810 /* FundInstrument.swift */; };
 		A00000000000000000000813 /* FundQuoteSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000812 /* FundQuoteSource.swift */; };
@@ -336,6 +338,8 @@
 		A00000000000000000000809 /* AccountsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsScreen.swift; sourceTree = "<group>"; };
 		A0000000000000000000080B /* DateRangeFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateRangeFilter.swift; sourceTree = "<group>"; };
 		C10000000000000000000005 /* MonthRail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthRail.swift; sourceTree = "<group>"; };
+		C10000000000000000000007 /* AppLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguage.swift; sourceTree = "<group>"; };
+		C10000000000000000000008 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		A0000000000000000000080D /* PeriodGridPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodGridPicker.swift; sourceTree = "<group>"; };
 		A00000000000000000000810 /* FundInstrument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrument.swift; sourceTree = "<group>"; };
 		A00000000000000000000812 /* FundQuoteSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundQuoteSource.swift; sourceTree = "<group>"; };
@@ -495,6 +499,7 @@
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000113 /* Assets.xcassets */,
+				C10000000000000000000008 /* Localizable.xcstrings */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -567,6 +572,7 @@
 				A00000000000000000000127 /* MonMonTheme.swift */,
 				A00000000000000000000186 /* DateField.swift */,
 				A00000000000000000000187 /* AppTheme.swift */,
+				C10000000000000000000007 /* AppLanguage.swift */,
 				A00000000000000000000192 /* FloatingAddButton.swift */,
 				A00000000000000000000803 /* ProminentActionButtonStyle.swift */,
 				A0000000000000000000080B /* DateRangeFilter.swift */,
@@ -920,6 +926,7 @@
 			knownRegions = (
 				en,
 				Base,
+				vi,
 			);
 			mainGroup = A00000000000000000000010;
 			packageReferences = (
@@ -941,6 +948,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A00000000000000000000204 /* Assets.xcassets in Resources */,
+				C10000000000000000000108 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -983,6 +991,7 @@
 				A00000000000000000000804 /* ProminentActionButtonStyle.swift in Sources */,
 				A0000000000000000000080C /* DateRangeFilter.swift in Sources */,
 				C10000000000000000000105 /* MonthRail.swift in Sources */,
+				C10000000000000000000107 /* AppLanguage.swift in Sources */,
 				A00000000000000000000F02 /* WebPage.swift in Sources */,
 				A0000000000000000000080E /* PeriodGridPicker.swift in Sources */,
 				A00000000000000000000802 /* SegmentedTabs.swift in Sources */,
