@@ -228,7 +228,9 @@ struct FundInstrumentListView: View {
                 }
             }
 
-            if let outcome = refresher.outcomes[instrument.id], let message = outcome.message {
+            if let outcome = refresher.outcomes[instrument.id],
+                let message = outcome.message(in: locale)
+            {
                 Label(
                     message,
                     systemImage: outcome.isFailure ? "xmark.circle.fill" : "checkmark.circle.fill"

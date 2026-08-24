@@ -1,40 +1,17 @@
 # Capability Map: MonMon
 
-MonMon is a private, Apple-platform personal asset manager. Each module below is a
-small vertical feature that includes the minimum domain logic, storage, UI, and
-tests needed for the owner to try it on iPhone and Mac before the next module
-begins.
+MonMon is a private, Apple-platform personal asset manager. Each module below is a small vertical feature that includes the minimum domain logic, storage, UI, and tests needed for the owner to try it on iPhone and Mac before the next module begins.
 
-
-| Module id                 | User-visible responsibility                                                                                                                                            | Depends on                                                                                 |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `app-bootstrap`           | Build and run a configured native app on iPhone and Mac, with a Settings tab for the theme and an optional biometric lock                                              | —                                                                                          |
-| `cash-balance`            | Create, edit, and delete cash, bank, and credit card accounts and view their balances                                                                                  | `app-bootstrap`                                                                            |
-| `savings-deposit`         | Record term deposits with maturity dates, projected interest, and an optional funding account, and see total assets                                                    | `cash-balance`                                                                             |
-| `fund-etf-holdings`       | Record fund, ETF, and physical-gold holdings and see cost basis, market value, and unrealized profit or loss                                                           | `cash-balance`, `savings-deposit`                                                          |
-| `income-expense`          | Record income and expenses against one account each, under owner-managed categories, and see account balances update. Transfers between accounts are out of scope      | `cash-balance`                                                                             |
-| `account-transfer`        | Move money between two of the owner's own accounts, so both balances follow and total assets stay put                                                                  | `cash-balance`, `income-expense`                                                           |
-| `debt-tracking`           | Record money borrowed and money lent out, with the payments against them, so balances follow and total assets stay put                                                 | `cash-balance`, `income-expense`, `account-transfer`                                       |
-| `~~investment-tracking~~` | **Dropped as a trade ledger.** Individual buy/sell trades, realized profit and loss, equity, and crypto remain out of scope                                             | —                                                                                          |
-| `recurring-transactions`  | Record money that repeats — rent, salary, a subscription — from one rule, caught up on every launch, with no balance of its own                            | `income-expense`                                                                           |
-| `market-valuation`        | Import fund and gold catalogues, refresh fund, ETF, and gold prices on demand, and show what each holding is worth                                                       | `fund-etf-holdings`                                                                        |
-| `icloud-sync`             | Synchronize all financial records through the owner's private iCloud database                                                                                          | `cash-balance`, `income-expense`, `debt-tracking`, `fund-etf-holdings`, `market-valuation` |
-| `mcp-readonly`            | Expose synchronized financial data to AI clients from a read-only macOS MCP server                                                                                     | `icloud-sync`                                                                              |
-
-
-Build order:
-
-1. `app-bootstrap`
-2. `cash-balance`
-3. `savings-deposit`
-4. `fund-etf-holdings`
-5. `income-expense`
-6. `account-transfer`
-7. `debt-tracking`
-8. `market-valuation`
-9. `icloud-sync`
-10. `recurring-transactions`
-11. `mcp-readonly`
+1. `cash-balance`
+2. `savings-deposit`
+3. `fund-etf-holdings`
+4. `income-expense`
+5. `account-transfer`
+6. `debt-tracking`
+7. `market-valuation`
+8. `icloud-sync`
+9. `recurring-transactions`
+10. `mcp-readonly`
 
 ## Initiative-wide boundaries
 
@@ -44,10 +21,10 @@ Build order:
 - Market-data providers remain replaceable behind a typed interface.
 - Development stops at each module checkpoint for hands-on user testing.
 - `savings-deposit` and `fund-etf-holdings` share one Investments tab. That tab
-is a screen, not a module.
+  is a screen, not a module.
 - `recurring-transactions` writes ordinary `MoneyTransaction` records and holds
-no balance of its own, so it adds no term to any total. It runs when the app is
-opened, never on a timer and never in the background.
+  no balance of its own, so it adds no term to any total. It runs when the app is
+  opened, never on a timer and never in the background.
 
 ## Dropped
 

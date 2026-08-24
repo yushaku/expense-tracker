@@ -180,7 +180,7 @@ struct TransactionRange: Hashable {
         }
     }
 
-    var stepBackLabel: String {
+    var stepBackLabel: LocalizedStringKey {
         switch scope {
         case .day:
             "Previous day"
@@ -193,7 +193,7 @@ struct TransactionRange: Hashable {
         }
     }
 
-    var stepForwardLabel: String {
+    var stepForwardLabel: LocalizedStringKey {
         switch scope {
         case .day:
             "Next day"

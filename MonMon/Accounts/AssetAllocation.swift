@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 /// One wedge of the assets doughnut on the Home screen.
 struct AssetAllocationSlice: Identifiable, Equatable {
@@ -11,7 +12,7 @@ struct AssetAllocationSlice: Identifiable, Equatable {
         /// while this is a claim on money someone else holds.
         case lent
 
-        var displayName: String {
+        var displayNameKey: String {
             switch self {
             case .cash:
                 "Cash"
@@ -24,6 +25,14 @@ struct AssetAllocationSlice: Identifiable, Equatable {
             case .lent:
                 "Lent out"
             }
+        }
+
+        var displayName: LocalizedStringKey {
+            LocalizedStringKey(displayNameKey)
+        }
+
+        func displayName(in locale: Locale) -> String {
+            AppText.string(key: displayNameKey, in: locale)
         }
     }
 
@@ -39,13 +48,21 @@ struct LiabilityAllocationSlice: Identifiable, Equatable {
         case borrowed
         case overdraft
 
-        var displayName: String {
+        var displayNameKey: String {
             switch self {
             case .borrowed:
                 "Borrowed"
             case .overdraft:
                 "Overdraft"
             }
+        }
+
+        var displayName: LocalizedStringKey {
+            LocalizedStringKey(displayNameKey)
+        }
+
+        func displayName(in locale: Locale) -> String {
+            AppText.string(key: displayNameKey, in: locale)
         }
     }
 

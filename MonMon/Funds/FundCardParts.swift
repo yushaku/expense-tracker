@@ -4,10 +4,13 @@ import SwiftUI
 /// position cards inside it so the two read as the same object at two zoom
 /// levels rather than as two designs.
 struct FundMetric: Identifiable {
-    let title: String
+    /// The key naming the column, and the figure under it. The figure is
+    /// already formatted, so only the name goes through the catalogue.
+    let titleKey: String
     let value: String
 
-    var id: String { title }
+    var title: LocalizedStringKey { LocalizedStringKey(titleKey) }
+    var id: String { titleKey }
 }
 
 /// Metrics two to a row. Unit prices and cost bases both run long in đồng, and
@@ -162,14 +165,14 @@ struct FundPriceStatusRow: View {
 
     private var description: String {
         guard let instrument else {
-            return "Instrument missing — value cannot be worked out"
+            return AppText.string("Instrument missing — value cannot be worked out", in: locale)
         }
 
         let day = TransactionPeriod.day(instrument.priceAsOf, in: locale)
         let base =
             "\(instrument.priceLabel(in: locale)) \(day) · "
             + "\(instrument.source.displayName(in: locale))"
-        return isStale ? "\(base) · Stale" : base
+        return isStale ? AppText.string("\(base) · Stale", in: locale) : base
     }
 
     private var spreadDescription: String? {
@@ -180,7 +183,7 @@ struct FundPriceStatusRow: View {
         let sell =
             instrument.askPricePerUnit > 0
             ? VNDCurrency.formatUnitPrice(instrument.askPricePerUnit) : "—"
-        return "Shop buys \(buy) · sells \(sell) per lượng"
+        return AppText.string("Shop buys \(buy) · sells \(sell) per lượng", in: locale)
     }
 }
 

@@ -57,7 +57,7 @@ struct AssetAllocationCard: View {
             } else {
                 AllocationDoughnut(
                     context: AllocationTab.assets.displayName(in: locale).lowercased(),
-                    items: slices.map(\.doughnutItem)
+                    items: slices.map { $0.doughnutItem(in: locale) }
                 )
             }
         case .liabilities:
@@ -66,7 +66,7 @@ struct AssetAllocationCard: View {
             } else {
                 AllocationDoughnut(
                     context: AllocationTab.liabilities.displayName(in: locale).lowercased(),
-                    items: liabilities.map(\.doughnutItem)
+                    items: liabilities.map { $0.doughnutItem(in: locale) }
                 )
             }
         }
@@ -261,10 +261,10 @@ private struct AllocationDoughnut: View {
 }
 
 private extension AssetAllocationSlice {
-    var doughnutItem: AllocationDoughnutItem {
+    func doughnutItem(in locale: Locale) -> AllocationDoughnutItem {
         AllocationDoughnutItem(
             id: id,
-            name: kind.displayName,
+            name: kind.displayName(in: locale),
             amount: amount,
             tint: kind.tint,
             symbolName: kind.symbolName
@@ -273,10 +273,10 @@ private extension AssetAllocationSlice {
 }
 
 private extension LiabilityAllocationSlice {
-    var doughnutItem: AllocationDoughnutItem {
+    func doughnutItem(in locale: Locale) -> AllocationDoughnutItem {
         AllocationDoughnutItem(
             id: id,
-            name: kind.displayName,
+            name: kind.displayName(in: locale),
             amount: amount,
             tint: kind.tint,
             symbolName: kind.symbolName

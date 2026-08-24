@@ -87,7 +87,7 @@ struct RecurringCard: View {
     }
 
     private var subtitle: String {
-        let accountName = account?.name ?? "Unknown account"
+        let accountName = account?.name ?? AppText.string("Unknown account", in: locale)
         return "\(rule.schedulePhrase(in: locale)) · \(accountName)"
     }
 

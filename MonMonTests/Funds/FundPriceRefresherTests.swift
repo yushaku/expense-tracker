@@ -289,7 +289,9 @@ struct FundPriceRefresherTests {
         #expect(instrument.source == .manual)
         #expect(instrument.priceFetchedAt == nil)
         #expect(refresher.outcomes[instrument.id] == .failed(.transport))
-        #expect(refresher.outcomes[instrument.id]?.message == "No connection")
+        #expect(
+            refresher.outcomes[instrument.id]?.message(in: Locale(identifier: "en"))
+                == "No connection")
     }
 
     @Test("One ticker failing leaves the others updated")
@@ -331,7 +333,9 @@ struct FundPriceRefresherTests {
         #expect(good.currentPricePerUnit == 31_581)
         #expect(bad.currentPricePerUnit == 25_000)
         #expect(refresher.outcomes[bad.id] == .failed(.symbolNotFound))
-        #expect(refresher.outcomes[bad.id]?.message == "Symbol not found")
+        #expect(
+            refresher.outcomes[bad.id]?.message(in: Locale(identifier: "en")) == "Symbol not found"
+        )
     }
 
     /// Ten positions in one ticker are one question, not ten.

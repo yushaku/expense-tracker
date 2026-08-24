@@ -86,11 +86,11 @@ struct TransactionCard: View {
     }
 
     private var categoryName: String {
-        category?.name ?? "Uncategorized"
+        category?.name ?? AppText.string("Uncategorized", in: locale)
     }
 
     private var subtitle: String {
-        let accountName = account?.name ?? "Unknown account"
+        let accountName = account?.name ?? AppText.string("Unknown account", in: locale)
         let trimmedNote = transaction.note.trimmingCharacters(in: .whitespacesAndNewlines)
 
         return trimmedNote.isEmpty ? accountName : "\(accountName) · \(trimmedNote)"

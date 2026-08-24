@@ -65,7 +65,7 @@ struct DebtEditorForm: View {
         }
     }
 
-    private var title: String {
+    private var title: LocalizedStringKey {
         if isEditing {
             return "Fix what you recorded"
         }
@@ -197,7 +197,7 @@ struct DebtEditorForm: View {
         draft.direction == .borrowed ? "Who you owe" : "Who owes you"
     }
 
-    private var counterpartyPrompt: String {
+    private var counterpartyPrompt: LocalizedStringKey {
         draft.direction == .borrowed ? "Who lent it to you" : "Who you lent it to"
     }
 

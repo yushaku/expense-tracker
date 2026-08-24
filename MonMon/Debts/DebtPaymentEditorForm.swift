@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct DebtPaymentEditorForm: View {
+    @Environment(\.locale) private var locale
+
     @Binding var draft: DebtPaymentDraft
 
     let debt: Debt
@@ -67,7 +69,7 @@ struct DebtPaymentEditorForm: View {
         }
     }
 
-    private var title: String {
+    private var title: LocalizedStringKey {
         if isEditing {
             return "Fix what you recorded"
         }
@@ -76,7 +78,9 @@ struct DebtPaymentEditorForm: View {
     }
 
     private var preposition: String {
-        debt.direction == .borrowed ? "to" : "from"
+        debt.direction == .borrowed
+            ? AppText.string("to", in: locale)
+            : AppText.string("from", in: locale)
     }
 
     private var amountCard: some View {
@@ -134,7 +138,7 @@ struct DebtPaymentEditorForm: View {
         }
     }
 
-    private var settleTitle: String {
+    private var settleTitle: LocalizedStringKey {
         debt.direction == .borrowed ? "Pay it all off" : "Settle it"
     }
 
@@ -144,7 +148,7 @@ struct DebtPaymentEditorForm: View {
 
     /// Live, so the owner can see a payment land exactly on settled before
     /// saving it.
-    private var remainderCaption: String {
+    private var remainderCaption: LocalizedStringKey {
         guard let amount = VNDCurrency.parse(draft.amountText), amount > 0 else {
             return "VND · This moves one account and lowers what is outstanding by the same amount."
         }

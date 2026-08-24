@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct TransferCard: View {
+    @Environment(\.locale) private var locale
+
     let transfer: AccountTransfer
     let sourceAccount: CashAccount?
     let destinationAccount: CashAccount?
@@ -80,11 +82,11 @@ struct TransferCard: View {
     private var subtitle: String {
         let trimmedNote = transfer.note.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        return trimmedNote.isEmpty ? "Internal transfer" : trimmedNote
+        return trimmedNote.isEmpty ? AppText.string("Internal transfer", in: locale) : trimmedNote
     }
 
     private func name(of account: CashAccount?) -> String {
-        account?.name ?? "Unknown account"
+        account?.name ?? AppText.string("Unknown account", in: locale)
     }
 }
 

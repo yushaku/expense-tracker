@@ -91,6 +91,16 @@
         }
       }
     },
+    "%@ outstanding after this payment.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Còn nợ %@ sau lần trả này."
+          }
+        }
+      }
+    },
     "%@ still outstanding %@ %@.": {
       "localizations": {
         "vi": {
@@ -107,6 +117,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ · %@ %@ tính đến %@. Sửa giá trong mục Sản phẩm."
+          }
+        }
+      }
+    },
+    "%@ · Stale": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · Giá cũ"
           }
         }
       }
@@ -327,6 +347,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "SỐ DƯ KHẢ DỤNG"
+          }
+        }
+      }
+    },
+    "AVG COST": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIÁ VỐN TB"
           }
         }
       }
@@ -871,6 +901,16 @@
         }
       }
     },
+    "BUY": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIÁ MUA"
+          }
+        }
+      }
+    },
     "BY CATEGORY": {
       "localizations": {
         "vi": {
@@ -991,6 +1031,16 @@
         }
       }
     },
+    "COST BASIS": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIÁ VỐN"
+          }
+        }
+      }
+    },
     "CURRENT BALANCE": {
       "localizations": {
         "vi": {
@@ -1077,6 +1127,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sửa nội dung lặp lại"
+          }
+        }
+      }
+    },
+    "Checked a moment ago": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vừa kiểm tra xong"
           }
         }
       }
@@ -2051,6 +2111,16 @@
         }
       }
     },
+    "Entered by hand": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập bằng tay"
+          }
+        }
+      }
+    },
     "Entertainment": {
       "localizations": {
         "vi": {
@@ -2322,6 +2392,16 @@
         }
       }
     },
+    "Getting it back": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhận lại tiền"
+          }
+        }
+      }
+    },
     "Give them a new home": {
       "localizations": {
         "vi": {
@@ -2522,6 +2602,16 @@
         }
       }
     },
+    "Instrument missing — value cannot be worked out": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thiếu sản phẩm — không tính được giá trị"
+          }
+        }
+      }
+    },
     "Instruments": {
       "localizations": {
         "vi": {
@@ -2558,6 +2648,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Lãi được trả trọn vào ngày đáo hạn."
+          }
+        }
+      }
+    },
+    "Internal transfer": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyển nội bộ"
           }
         }
       }
@@ -2852,6 +2952,26 @@
         }
       }
     },
+    "Money you borrowed": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiền bạn đi vay"
+          }
+        }
+      }
+    },
+    "Money you lent": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiền bạn cho vay"
+          }
+        }
+      }
+    },
     "Month": {
       "localizations": {
         "vi": {
@@ -3032,6 +3152,46 @@
         }
       }
     },
+    "Next day": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngày sau"
+          }
+        }
+      }
+    },
+    "Next month": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tháng sau"
+          }
+        }
+      }
+    },
+    "Next range": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khoảng sau"
+          }
+        }
+      }
+    },
+    "Next year": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Năm sau"
+          }
+        }
+      }
+    },
     "No %@ category yet. Add one from the Categories button.": {
       "localizations": {
         "vi": {
@@ -3112,6 +3272,16 @@
         }
       }
     },
+    "No connection": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không có kết nối"
+          }
+        }
+      }
+    },
     "No connection. Try again when you are back online.": {
       "localizations": {
         "vi": {
@@ -3172,6 +3342,16 @@
         }
       }
     },
+    "No price published": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa công bố giá"
+          }
+        }
+      }
+    },
     "No transaction uses it, so nothing else changes.": {
       "localizations": {
         "vi": {
@@ -3208,6 +3388,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Không liên kết: khoản này tự cộng vào tổng tài sản của bạn."
+          }
+        }
+      }
+    },
+    "Not used yet": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa dùng đến"
           }
         }
       }
@@ -3542,6 +3732,16 @@
         }
       }
     },
+    "Overdraft": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thấu chi"
+          }
+        }
+      }
+    },
     "Overdrawn": {
       "localizations": {
         "vi": {
@@ -3572,6 +3772,16 @@
         }
       }
     },
+    "PRICE": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIÁ"
+          }
+        }
+      }
+    },
     "PRINCIPAL": {
       "localizations": {
         "vi": {
@@ -3588,6 +3798,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tạm dừng"
+          }
+        }
+      }
+    },
+    "Pay it all off": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trả hết"
+          }
+        }
+      }
+    },
+    "Paying it back": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trả lại tiền"
           }
         }
       }
@@ -3748,6 +3978,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Khoản nắm giữ"
+          }
+        }
+      }
+    },
+    "Previous day": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngày trước"
+          }
+        }
+      }
+    },
+    "Previous month": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tháng trước"
+          }
+        }
+      }
+    },
+    "Previous range": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khoảng trước"
+          }
+        }
+      }
+    },
+    "Previous year": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Năm trước"
           }
         }
       }
@@ -4122,12 +4392,32 @@
         }
       }
     },
+    "Settle it": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tất toán"
+          }
+        }
+      }
+    },
     "Shop buy price per lượng": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
             "value": "Giá tiệm mua vào mỗi lượng"
+          }
+        }
+      }
+    },
+    "Shop buys %@ · sells %@ per lượng": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiệm mua %@ · bán %@ mỗi lượng"
           }
         }
       }
@@ -4238,6 +4528,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mã"
+          }
+        }
+      }
+    },
+    "Symbol not found": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không tìm thấy mã"
           }
         }
       }
@@ -4372,6 +4672,16 @@
         }
       }
     },
+    "That is more than is still owed.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số đó lớn hơn số còn nợ."
+          }
+        }
+      }
+    },
     "That is more than the account you picked can hand over.": {
       "localizations": {
         "vi": {
@@ -4468,6 +4778,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Giá phải lớn hơn 0."
+          }
+        }
+      }
+    },
+    "The provider changed its reply": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nguồn dữ liệu đã đổi cách trả về"
           }
         }
       }
@@ -4632,6 +4952,16 @@
         }
       }
     },
+    "UNITS": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SỐ ĐƠN VỊ"
+          }
+        }
+      }
+    },
     "UNREALIZED GAIN": {
       "localizations": {
         "vi": {
@@ -4702,6 +5032,16 @@
         }
       }
     },
+    "Unknown instrument": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sản phẩm không rõ"
+          }
+        }
+      }
+    },
     "Unlock": {
       "localizations": {
         "vi": {
@@ -4732,6 +5072,16 @@
         }
       }
     },
+    "Updated": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã cập nhật"
+          }
+        }
+      }
+    },
     "VESAF": {},
     "VND · Enter a negative amount for money you owe.": {
       "localizations": {
@@ -4753,6 +5103,16 @@
         }
       }
     },
+    "VND · This moves one account and lowers what is outstanding by the same amount.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VND · Thao tác này làm thay đổi một tài khoản và giảm số còn nợ đúng bấy nhiêu."
+          }
+        }
+      }
+    },
     "VND · Your total assets do not change; only where the money sits does.": {
       "localizations": {
         "vi": {
@@ -4764,6 +5124,16 @@
       }
     },
     "VinaCapital VESAF": {},
+    "WEIGHT": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KHỐI LƯỢNG"
+          }
+        }
+      }
+    },
     "WHERE YOUR CASH SITS": {
       "localizations": {
         "vi": {
@@ -4854,12 +5224,32 @@
         }
       }
     },
+    "Who lent it to you": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ai cho bạn vay"
+          }
+        }
+      }
+    },
     "Who owes you": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
             "value": "Ai nợ bạn"
+          }
+        }
+      }
+    },
+    "Who you lent it to": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bạn cho ai vay"
           }
         }
       }
@@ -5100,6 +5490,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "lần chuyển khoản"
+          }
+        }
+      }
+    },
+    "₫0 — settled.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "₫0 — đã tất toán."
           }
         }
       }

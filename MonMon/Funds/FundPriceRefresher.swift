@@ -167,24 +167,24 @@ extension FundPriceRefresher.Outcome {
 
     /// What to put on the card. `nil` where there is nothing worth saying — a
     /// row nobody holds, or one already current, needs no explanation.
-    var message: String? {
+    func message(in locale: Locale) -> String? {
         switch self {
         case .updated:
-            "Updated"
+            AppText.string("Updated", in: locale)
         case .unchanged(.automaticQuotesOff), .unchanged(.notHeld), .unchanged(.alreadyCurrent):
             nil
         case .unchanged(.askedTooRecently):
-            "Checked a moment ago"
+            AppText.string("Checked a moment ago", in: locale)
         case .failed(.symbolNotFound):
-            "Symbol not found"
+            AppText.string("Symbol not found", in: locale)
         case .failed(.noQuoteAvailable):
-            "No price published"
+            AppText.string("No price published", in: locale)
         case .failed(.transport):
-            "No connection"
+            AppText.string("No connection", in: locale)
         case .failed(.decoding):
-            "The provider changed its reply"
+            AppText.string("The provider changed its reply", in: locale)
         case .failed(.rateLimited):
-            "Checked a moment ago"
+            AppText.string("Checked a moment ago", in: locale)
         }
     }
 

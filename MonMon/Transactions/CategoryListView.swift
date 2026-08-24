@@ -2,6 +2,8 @@ import SwiftData
 import SwiftUI
 
 struct CategoryListView: View {
+    @Environment(\.locale) private var locale
+
     @Environment(\.dismiss) private var dismiss
 
     @Query(sort: \TransactionCategory.createdAt, order: .forward)
@@ -145,14 +147,11 @@ struct CategoryListView: View {
     private func usageLabel(for category: TransactionCategory) -> String {
         let count = TransactionSummary.count(for: category, transactions: transactions)
 
-        switch count {
-        case 0:
-            return "Not used yet"
-        case 1:
-            return "1 transaction"
-        default:
-            return "\(count) transactions"
+        guard count > 0 else {
+            return AppText.string("Not used yet", in: locale)
         }
+
+        return AppText.string("\(count) transactions", in: locale)
     }
 
     private var emptyState: some View {
