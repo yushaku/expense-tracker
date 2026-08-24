@@ -1,11 +1,21 @@
 import Charts
 import SwiftUI
 
-/// Separate assets and liabilities doughnuts on the Home screen, each with a
-/// legend naming every wedge, its amount, and its share.
+/// Assets and liabilities doughnuts on the Home screen, switched by tabs so
+/// the card stays compact while each legend keeps its full detail.
 struct AssetAllocationCard: View {
     let slices: [AssetAllocationSlice]
     let liabilities: [LiabilityAllocationSlice]
+
+    @State private var selectedTab: AllocationTab
+
+    init(slices: [AssetAllocationSlice], liabilities: [LiabilityAllocationSlice]) {
+        self.slices = slices
+        self.liabilities = liabilities
+        _selectedTab = State(
+            initialValue: slices.isEmpty && !liabilities.isEmpty ? .liabilities : .assets
+        )
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -14,24 +24,15 @@ struct AssetAllocationCard: View {
                 .tracking(0.8)
                 .foregroundStyle(MonMonTheme.textSecondary)
 
-            if !slices.isEmpty {
-                AllocationDoughnut(
-                    title: "ASSETS",
-                    items: slices.map(\.doughnutItem)
-                )
-            }
+            SegmentedTabs(
+                label: "Allocation type",
+                selection: $selectedTab,
+                options: AllocationTab.allCases,
+                title: \.displayName
+            )
+            .accessibilityIdentifier("allocation-tabs")
 
-            if !slices.isEmpty, !liabilities.isEmpty {
-                Divider()
-                    .overlay(MonMonTheme.border)
-            }
-
-            if !liabilities.isEmpty {
-                AllocationDoughnut(
-                    title: "LIABILITIES",
-                    items: liabilities.map(\.doughnutItem)
-                )
-            }
+            selectedAllocation
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(24)
@@ -42,6 +43,90 @@ struct AssetAllocationCard: View {
         .overlay {
             RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
                 .stroke(MonMonTheme.border, lineWidth: 1)
+        }
+    }
+
+    @ViewBuilder
+    private var selectedAllocation: some View {
+        switch selectedTab {
+        case .assets:
+            if slices.isEmpty {
+                emptyState(for: .assets)
+            } else {
+                AllocationDoughnut(
+                    context: AllocationTab.assets.displayName.lowercased(),
+                    items: slices.map(\.doughnutItem)
+                )
+            }
+        case .liabilities:
+            if liabilities.isEmpty {
+                emptyState(for: .liabilities)
+            } else {
+                AllocationDoughnut(
+                    context: AllocationTab.liabilities.displayName.lowercased(),
+                    items: liabilities.map(\.doughnutItem)
+                )
+            }
+        }
+    }
+
+    private func emptyState(for tab: AllocationTab) -> some View {
+        VStack(spacing: 8) {
+            Image(systemName: tab.emptySymbolName)
+                .font(.title2.weight(.semibold))
+                .foregroundStyle(MonMonTheme.textMuted)
+                .accessibilityHidden(true)
+
+            Text(tab.emptyTitle)
+                .font(.subheadline.weight(.semibold))
+
+            Text(tab.emptyDescription)
+                .font(.caption)
+                .foregroundStyle(MonMonTheme.textSecondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity, minHeight: 168)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+private enum AllocationTab: String, CaseIterable {
+    case assets
+    case liabilities
+
+    var displayName: String {
+        switch self {
+        case .assets:
+            "Assets"
+        case .liabilities:
+            "Liabilities"
+        }
+    }
+
+    var emptyTitle: String {
+        switch self {
+        case .assets:
+            "No assets"
+        case .liabilities:
+            "No liabilities"
+        }
+    }
+
+    var emptyDescription: String {
+        switch self {
+        case .assets:
+            "Assets will appear here as they are recorded."
+        case .liabilities:
+            "Borrowed money and overdrafts will appear here."
+        }
+    }
+
+    var emptySymbolName: String {
+        switch self {
+        case .assets:
+            "chart.pie"
+        case .liabilities:
+            "creditcard"
         }
     }
 }
@@ -55,7 +140,7 @@ private struct AllocationDoughnutItem: Identifiable {
 }
 
 private struct AllocationDoughnut: View {
-    let title: String
+    let context: String
     let items: [AllocationDoughnutItem]
 
     private var total: Decimal {
@@ -63,23 +148,16 @@ private struct AllocationDoughnut: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text(title)
-                .font(.caption.weight(.bold))
-                .tracking(0.8)
-                .foregroundStyle(MonMonTheme.textPrimary)
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .center, spacing: 24) {
+                doughnut
+                legend
+            }
 
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .center, spacing: 24) {
-                    doughnut
-                    legend
-                }
-
-                VStack(alignment: .leading, spacing: 20) {
-                    doughnut
-                        .frame(maxWidth: .infinity)
-                    legend
-                }
+            VStack(alignment: .leading, spacing: 20) {
+                doughnut
+                    .frame(maxWidth: .infinity)
+                legend
             }
         }
     }
@@ -158,7 +236,7 @@ private struct AllocationDoughnut: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel(
             "\(item.name), \(VNDCurrency.format(item.amount)), "
-                + "\(percentLabel(for: item)) of \(title.lowercased())"
+                + "\(percentLabel(for: item)) of \(context)"
         )
     }
 

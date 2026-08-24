@@ -130,11 +130,11 @@ struct InvestmentsView: View {
         .padding(24)
         .background {
             RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .fill(MonMonTheme.hero)
+                .fill(MonMonTheme.surface)
         }
         .overlay {
             RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .stroke(MonMonTheme.heroBorder, lineWidth: 1)
+                .stroke(MonMonTheme.border, lineWidth: 1)
         }
         .accessibilityElement(children: .combine)
     }

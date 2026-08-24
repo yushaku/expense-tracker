@@ -1,11 +1,10 @@
 import SwiftUI
 
-/// Declaration order is the order of the bar: the two screens touched daily
-/// sit together on the left, the one that holds longer-term money follows, and
-/// settings stays last.
+/// Declaration order is the order of the bar: daily transactions come first,
+/// the broader report follows, then longer-term money and settings.
 enum RootTab: String, CaseIterable, Identifiable {
-    case home
     case spending
+    case report
     case investments
     case settings
 
@@ -13,8 +12,8 @@ enum RootTab: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .home:
-            "Home"
+        case .report:
+            "Report"
         case .investments:
             "Investments"
         case .spending:
@@ -26,8 +25,8 @@ enum RootTab: String, CaseIterable, Identifiable {
 
     var symbolName: String {
         switch self {
-        case .home:
-            "house.fill"
+        case .report:
+            "chart.bar.fill"
         case .investments:
             "chart.pie.fill"
         case .spending:
@@ -43,7 +42,7 @@ enum RootTab: String, CaseIterable, Identifiable {
 }
 
 struct RootTabView: View {
-    @State private var selection: RootTab = .home
+    @State private var selection: RootTab = .spending
 
     #if os(macOS)
         @Namespace private var pill
@@ -80,7 +79,7 @@ struct RootTabView: View {
         @ViewBuilder
         private var destinations: some View {
             switch selection {
-            case .home:
+            case .report:
                 AccountListView()
             case .investments:
                 InvestmentsView()
@@ -150,19 +149,19 @@ struct RootTabView: View {
     #else
         private var nativeTabs: some View {
             TabView(selection: $selection) {
-                AccountListView()
-                    .tabItem {
-                        Label(RootTab.home.title, systemImage: RootTab.home.symbolName)
-                    }
-                    .accessibilityIdentifier(RootTab.home.accessibilityIdentifier)
-                    .tag(RootTab.home)
-
                 TransactionListView()
                     .tabItem {
                         Label(RootTab.spending.title, systemImage: RootTab.spending.symbolName)
                     }
                     .accessibilityIdentifier(RootTab.spending.accessibilityIdentifier)
                     .tag(RootTab.spending)
+
+                AccountListView()
+                    .tabItem {
+                        Label(RootTab.report.title, systemImage: RootTab.report.symbolName)
+                    }
+                    .accessibilityIdentifier(RootTab.report.accessibilityIdentifier)
+                    .tag(RootTab.report)
 
                 InvestmentsView()
                     .tabItem {
@@ -209,7 +208,7 @@ extension View {
 }
 
 #if DEBUG
-    #Preview("Tabs · accounts") {
+    #Preview("Tabs · spending") {
         RootTabView()
             .modelContainer(PreviewData.populated)
             .tint(MonMonTheme.accent)

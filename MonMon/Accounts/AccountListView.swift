@@ -69,7 +69,7 @@ struct AccountListView: View {
                     }
                 }
             }
-            .compactRootNavigationTitle("Home")
+            .compactRootNavigationTitle("Report")
             .accessibilityIdentifier("account-list")
             .navigationDestination(for: DebtRoute.self) { route in
                 DebtDetailView(route: route)
