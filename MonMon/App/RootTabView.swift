@@ -185,6 +185,29 @@ struct RootTabView: View {
     #endif
 }
 
+/// Root tabs keep their title compact so the navigation bar identifies each
+/// screen without reserving the large-title header space.
+private struct CompactRootNavigationTitle: ViewModifier {
+    let title: String
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        #if os(iOS)
+            content
+                .navigationTitle(title)
+                .navigationBarTitleDisplayMode(.inline)
+        #else
+            content.navigationTitle(title)
+        #endif
+    }
+}
+
+extension View {
+    func compactRootNavigationTitle(_ title: String) -> some View {
+        modifier(CompactRootNavigationTitle(title: title))
+    }
+}
+
 #if DEBUG
     #Preview("Tabs · accounts") {
         RootTabView()

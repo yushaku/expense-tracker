@@ -63,7 +63,7 @@ struct TransactionListView: View {
             .navigationDestination(for: CategoryPeriod.self) { period in
                 CategoryTransactionsView(period: period)
             }
-            .navigationTitle("Spending")
+            .compactRootNavigationTitle("Spending")
             .accessibilityIdentifier("spending-list")
             .sheet(item: $editorMode) { mode in
                 TransactionEditorView(mode: mode, defaultDate: defaultDate)

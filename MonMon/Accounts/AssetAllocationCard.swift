@@ -1,38 +1,36 @@
 import Charts
 import SwiftUI
 
-/// The assets doughnut on the Home screen, with a legend naming every wedge,
-/// its amount, and its share.
+/// Separate assets and liabilities doughnuts on the Home screen, each with a
+/// legend naming every wedge, its amount, and its share.
 struct AssetAllocationCard: View {
     let slices: [AssetAllocationSlice]
-    let liabilities: Decimal
-
-    private var total: Decimal {
-        AssetAllocation.total(of: slices)
-    }
+    let liabilities: [LiabilityAllocationSlice]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 20) {
             Label("ALLOCATION", systemImage: "chart.pie.fill")
                 .font(.caption.weight(.semibold))
                 .tracking(0.8)
                 .foregroundStyle(MonMonTheme.textSecondary)
 
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .center, spacing: 24) {
-                    doughnut
-                    legend
-                }
-
-                VStack(alignment: .leading, spacing: 20) {
-                    doughnut
-                        .frame(maxWidth: .infinity)
-                    legend
-                }
+            if !slices.isEmpty {
+                AllocationDoughnut(
+                    title: "ASSETS",
+                    items: slices.map(\.doughnutItem)
+                )
             }
 
-            if liabilities > 0 {
-                liabilitiesRow
+            if !slices.isEmpty, !liabilities.isEmpty {
+                Divider()
+                    .overlay(MonMonTheme.border)
+            }
+
+            if !liabilities.isEmpty {
+                AllocationDoughnut(
+                    title: "LIABILITIES",
+                    items: liabilities.map(\.doughnutItem)
+                )
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -46,16 +44,55 @@ struct AssetAllocationCard: View {
                 .stroke(MonMonTheme.border, lineWidth: 1)
         }
     }
+}
+
+private struct AllocationDoughnutItem: Identifiable {
+    let id: String
+    let name: String
+    let amount: Decimal
+    let tint: Color
+    let symbolName: String
+}
+
+private struct AllocationDoughnut: View {
+    let title: String
+    let items: [AllocationDoughnutItem]
+
+    private var total: Decimal {
+        items.reduce(Decimal.zero) { $0 + $1.amount }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(title)
+                .font(.caption.weight(.bold))
+                .tracking(0.8)
+                .foregroundStyle(MonMonTheme.textPrimary)
+
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .center, spacing: 24) {
+                    doughnut
+                    legend
+                }
+
+                VStack(alignment: .leading, spacing: 20) {
+                    doughnut
+                        .frame(maxWidth: .infinity)
+                    legend
+                }
+            }
+        }
+    }
 
     private var doughnut: some View {
-        Chart(slices) { slice in
+        Chart(items) { item in
             SectorMark(
-                angle: .value("Amount", slice.amount.doubleValue),
+                angle: .value("Amount", item.amount.doubleValue),
                 innerRadius: .ratio(0.62),
                 angularInset: 1.5
             )
             .cornerRadius(4)
-            .foregroundStyle(slice.kind.tint)
+            .foregroundStyle(item.tint)
         }
         .chartLegend(.hidden)
         .frame(width: 168, height: 168)
@@ -81,29 +118,29 @@ struct AssetAllocationCard: View {
 
     private var legend: some View {
         VStack(alignment: .leading, spacing: 12) {
-            ForEach(slices) { slice in
-                legendRow(slice)
+            ForEach(items) { item in
+                legendRow(item)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func legendRow(_ slice: AssetAllocationSlice) -> some View {
+    private func legendRow(_ item: AllocationDoughnutItem) -> some View {
         HStack(spacing: 12) {
             // The symbol repeats what the colour says, so the wedge is
             // identifiable without relying on colour.
-            Image(systemName: slice.kind.symbolName)
+            Image(systemName: item.symbolName)
                 .font(.footnote.weight(.bold))
-                .foregroundStyle(slice.kind.tint)
+                .foregroundStyle(item.tint)
                 .frame(width: 28, height: 28)
-                .background(slice.kind.tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 9))
+                .background(item.tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 9))
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(slice.kind.displayName)
+                Text(item.name)
                     .font(.subheadline.weight(.semibold))
 
-                Text(VNDCurrency.format(slice.amount))
+                Text(VNDCurrency.format(item.amount))
                     .font(.caption)
                     .monospacedDigit()
                     .lineLimit(1)
@@ -113,52 +150,65 @@ struct AssetAllocationCard: View {
 
             Spacer(minLength: 8)
 
-            Text(percentLabel(for: slice))
+            Text(percentLabel(for: item))
                 .font(.subheadline.weight(.bold))
                 .monospacedDigit()
                 .foregroundStyle(MonMonTheme.textPrimary)
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(
-            "\(slice.kind.displayName), \(VNDCurrency.format(slice.amount)), "
-                + "\(percentLabel(for: slice)) of assets"
+            "\(item.name), \(VNDCurrency.format(item.amount)), "
+                + "\(percentLabel(for: item)) of \(title.lowercased())"
         )
     }
 
-    private func percentLabel(for slice: AssetAllocationSlice) -> String {
-        let percent = AssetAllocation.percent(of: slice.amount, in: total)
+    private func percentLabel(for item: AllocationDoughnutItem) -> String {
+        let percent = AssetAllocation.percent(of: item.amount, in: total)
         return "\(PercentInput.format(percent))%"
     }
+}
 
-    private var liabilitiesRow: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "creditcard.fill")
-                .font(.footnote.weight(.bold))
-                .foregroundStyle(MonMonTheme.danger)
-                .frame(width: 28, height: 28)
-                .background(MonMonTheme.danger.opacity(0.16), in: RoundedRectangle(cornerRadius: 9))
-                .accessibilityHidden(true)
+private extension AssetAllocationSlice {
+    var doughnutItem: AllocationDoughnutItem {
+        AllocationDoughnutItem(
+            id: id,
+            name: kind.displayName,
+            amount: amount,
+            tint: kind.tint,
+            symbolName: kind.symbolName
+        )
+    }
+}
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Owed")
-                    .font(.subheadline.weight(.semibold))
+private extension LiabilityAllocationSlice {
+    var doughnutItem: AllocationDoughnutItem {
+        AllocationDoughnutItem(
+            id: id,
+            name: kind.displayName,
+            amount: amount,
+            tint: kind.tint,
+            symbolName: kind.symbolName
+        )
+    }
+}
 
-                Text("Borrowed money and overdrawn accounts, already subtracted from total assets")
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-            }
-
-            Spacer(minLength: 8)
-
-            Text("−\(VNDCurrency.format(liabilities))")
-                .font(.subheadline.weight(.bold))
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .foregroundStyle(MonMonTheme.danger)
+private extension LiabilityAllocationSlice.Kind {
+    var tint: Color {
+        switch self {
+        case .borrowed:
+            MonMonTheme.danger
+        case .overdraft:
+            MonMonTheme.Hue.peach
         }
-        .padding(.top, 2)
-        .accessibilityElement(children: .combine)
+    }
+
+    var symbolName: String {
+        switch self {
+        case .borrowed:
+            "creditcard.fill"
+        case .overdraft:
+            "exclamationmark.triangle.fill"
+        }
     }
 }
 
@@ -217,12 +267,15 @@ private extension Decimal {
                         AssetAllocationSlice(kind: .funds, amount: 93_565_000),
                         AssetAllocationSlice(kind: .cash, amount: 49_150_000),
                     ],
-                    liabilities: 5_200_000
+                    liabilities: [
+                        LiabilityAllocationSlice(kind: .borrowed, amount: 20_000_000),
+                        LiabilityAllocationSlice(kind: .overdraft, amount: 5_200_000),
+                    ]
                 )
 
                 AssetAllocationCard(
                     slices: [AssetAllocationSlice(kind: .cash, amount: 1_250_000)],
-                    liabilities: 0
+                    liabilities: []
                 )
             }
             .padding(20)

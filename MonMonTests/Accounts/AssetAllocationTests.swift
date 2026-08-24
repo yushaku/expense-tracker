@@ -78,6 +78,22 @@ final class AssetAllocationTests {
         )
     }
 
+    private func makeBorrowedDebt(principal: Decimal) -> Debt {
+        Debt(
+            id: UUID(),
+            counterparty: "Anh Minh",
+            direction: .borrowed,
+            principal: principal,
+            annualInterestRate: 0,
+            openedAt: fixedDate,
+            dueDate: nil,
+            accountID: nil,
+            note: "",
+            currencyCode: VNDCurrency.code,
+            createdAt: fixedDate
+        )
+    }
+
     @Test("Nothing held produces no wedges")
     func emptyPortfolioHasNoSlices() {
         let slices = AssetAllocation.slices(
@@ -303,6 +319,42 @@ final class AssetAllocationTests {
                 payments: []
             ) == 0
         )
+    }
+
+    @Test("Liabilities are split into borrowed money and overdrafts")
+    func liabilitiesAreSplitAndOrdered() {
+        let account = makeAccount(openingBalance: -5_000_000)
+        let debt = makeBorrowedDebt(principal: 20_000_000)
+
+        let slices = AssetAllocation.liabilitySlices(
+            accounts: [account],
+            deposits: [],
+            holdings: [],
+            transactions: [],
+            transfers: [],
+            debts: [debt],
+            payments: []
+        )
+
+        #expect(slices.map(\.kind) == [.borrowed, .overdraft])
+        #expect(slices.map(\.amount) == [20_000_000, 5_000_000])
+        #expect(AssetAllocation.totalLiabilities(of: slices) == 25_000_000)
+    }
+
+    @Test("No amount owed produces no liability wedges")
+    func noLiabilitiesHaveNoSlices() {
+        let slices = AssetAllocation.liabilitySlices(
+            accounts: [makeAccount(openingBalance: 10_000_000)],
+            deposits: [],
+            holdings: [],
+            transactions: [],
+            transfers: [],
+            debts: [],
+            payments: []
+        )
+
+        #expect(slices.isEmpty)
+        #expect(AssetAllocation.totalLiabilities(of: slices) == 0)
     }
 
     @Test("Shares are rounded to one decimal place")

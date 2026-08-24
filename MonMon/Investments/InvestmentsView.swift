@@ -75,7 +75,7 @@ struct InvestmentsView: View {
             .navigationDestination(for: FundGroupRoute.self) { route in
                 FundGroupDetailView(route: route)
             }
-            .navigationTitle("Investments")
+            .compactRootNavigationTitle("Investments")
             .accessibilityIdentifier("investments-list")
             .sheet(item: $editor) { mode in
                 switch mode {

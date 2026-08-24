@@ -37,8 +37,11 @@ struct AccountListView: View {
 
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                        if !allocationSlices.isEmpty {
-                            AssetAllocationCard(slices: allocationSlices, liabilities: liabilities)
+                        if !allocationSlices.isEmpty || !liabilitySlices.isEmpty {
+                            AssetAllocationCard(
+                                slices: allocationSlices,
+                                liabilities: liabilitySlices
+                            )
                         }
 
                         if accounts.isEmpty {
@@ -66,7 +69,7 @@ struct AccountListView: View {
                     }
                 }
             }
-            .navigationTitle("Home")
+            .compactRootNavigationTitle("Home")
             .accessibilityIdentifier("account-list")
             .navigationDestination(for: DebtRoute.self) { route in
                 DebtDetailView(route: route)
@@ -94,8 +97,8 @@ struct AccountListView: View {
         )
     }
 
-    private var liabilities: Decimal {
-        AssetAllocation.liabilities(
+    private var liabilitySlices: [LiabilityAllocationSlice] {
+        AssetAllocation.liabilitySlices(
             accounts: accounts,
             deposits: deposits,
             holdings: holdings,

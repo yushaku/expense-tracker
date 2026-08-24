@@ -30,7 +30,7 @@ struct SettingsView: View {
                     .frame(maxWidth: .infinity)
                 }
             }
-            .navigationTitle("Settings")
+            .compactRootNavigationTitle("Settings")
             .accessibilityIdentifier("settings")
             .tint(MonMonTheme.accent)
             .sheet(item: $instrumentScope) { scope in

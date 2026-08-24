@@ -33,6 +33,28 @@ struct AssetAllocationSlice: Identifiable, Equatable {
     var id: String { kind.rawValue }
 }
 
+/// One wedge of the liabilities doughnut on the Home screen.
+struct LiabilityAllocationSlice: Identifiable, Equatable {
+    enum Kind: String, CaseIterable {
+        case borrowed
+        case overdraft
+
+        var displayName: String {
+            switch self {
+            case .borrowed:
+                "Borrowed"
+            case .overdraft:
+                "Overdraft"
+            }
+        }
+    }
+
+    let kind: Kind
+    let amount: Decimal
+
+    var id: String { kind.rawValue }
+}
+
 /// Splits what the owner holds into the groups `AssetSummary.netWorth`
 /// adds up, so the doughnut and the total can never disagree.
 ///
@@ -177,20 +199,62 @@ enum AssetAllocation {
         debts: [Debt],
         payments: [DebtPayment]
     ) -> Decimal {
-        overdraft(
-            accounts: accounts,
-            deposits: deposits,
-            holdings: holdings,
-            transactions: transactions,
-            transfers: transfers,
-            debts: debts,
-            payments: payments
-        )
-            + DebtSummary.totalOutstanding(
-                of: debts,
-                payments: payments,
-                direction: .borrowed
+        totalLiabilities(
+            of: liabilitySlices(
+                accounts: accounts,
+                deposits: deposits,
+                holdings: holdings,
+                transactions: transactions,
+                transfers: transfers,
+                debts: debts,
+                payments: payments
             )
+        )
+    }
+
+    /// The groups that make up what the owner owes, largest first.
+    static func liabilitySlices(
+        accounts: [CashAccount],
+        deposits: [SavingsDeposit],
+        holdings: [FundHolding],
+        transactions: [MoneyTransaction],
+        transfers: [AccountTransfer],
+        debts: [Debt],
+        payments: [DebtPayment]
+    ) -> [LiabilityAllocationSlice] {
+        let candidates = [
+            LiabilityAllocationSlice(
+                kind: .borrowed,
+                amount: DebtSummary.totalOutstanding(
+                    of: debts,
+                    payments: payments,
+                    direction: .borrowed
+                )
+            ),
+            LiabilityAllocationSlice(
+                kind: .overdraft,
+                amount: overdraft(
+                    accounts: accounts,
+                    deposits: deposits,
+                    holdings: holdings,
+                    transactions: transactions,
+                    transfers: transfers,
+                    debts: debts,
+                    payments: payments
+                )
+            ),
+        ]
+
+        return
+            candidates
+            .filter { $0.amount > 0 }
+            .sorted { $0.amount > $1.amount }
+    }
+
+    static func totalLiabilities(of slices: [LiabilityAllocationSlice]) -> Decimal {
+        slices.reduce(Decimal.zero) { total, slice in
+            total + slice.amount
+        }
     }
 
     static func total(of slices: [AssetAllocationSlice]) -> Decimal {
