@@ -165,12 +165,12 @@ struct RecurringListView: View {
 
     private var countLabel: LocalizedStringKey {
         let active = activeRules.count
-        let noun = active == 1 ? "active rule" : "active rules"
+
         guard !pausedRules.isEmpty else {
-            return "\(active) \(noun)"
+            return "\(active) active rules"
         }
 
-        return "\(active) \(noun) · \(pausedRules.count) paused"
+        return "\(active) active rules · \(pausedRules.count) paused"
     }
 
     @ViewBuilder

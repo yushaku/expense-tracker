@@ -134,8 +134,8 @@ struct CategoryTransactionsView: View {
         .accessibilityElement(children: .combine)
     }
 
-    private var countLabel: LocalizedStringKey {
-        matching.count == 1 ? "1 transaction" : "\(matching.count) transactions"
+    private var countLabel: String {
+        AppText.string("\(matching.count) transactions", in: locale)
     }
 
     private var emptyState: some View {

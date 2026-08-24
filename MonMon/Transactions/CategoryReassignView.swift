@@ -97,8 +97,7 @@ struct CategoryReassignView: View {
     }
 
     private var explanation: String {
-        let noun = usageCount == 1 ? "record" : "records"
-        return "\(usageCount) \(noun) use \(category.name). Pick where they move to."
+        "\(usageCount) records use \(category.name). Pick where they move to."
     }
 
     private var replacementCard: some View {

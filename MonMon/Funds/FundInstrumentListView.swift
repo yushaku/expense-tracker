@@ -400,7 +400,7 @@ struct FundInstrumentListView: View {
     private func statusDescription(_ instrument: FundInstrument) -> String {
         let day = TransactionPeriod.day(instrument.priceAsOf, in: locale)
         let held = FundSummary.holdings(for: instrument, holdings: holdings).count
-        let position = held == 1 ? "1 position" : "\(held) positions"
+        let position = AppText.string("\(held) positions", in: locale)
         var text =
             "\(instrument.priceLabel(in: locale)) \(day) · "
             + "\(instrument.source.displayName(in: locale)) · \(position)"

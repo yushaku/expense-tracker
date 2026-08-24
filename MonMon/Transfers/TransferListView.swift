@@ -110,7 +110,7 @@ struct TransferListView: View {
     }
 
     private var countLabel: LocalizedStringKey {
-        transfers.count == 1 ? "1 transfer" : "\(transfers.count) transfers"
+        "\(transfers.count) transfers"
     }
 
     private var transfersSection: some View {

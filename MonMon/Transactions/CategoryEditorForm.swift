@@ -203,8 +203,7 @@ struct CategoryEditorForm: View {
     }
 
     private var reassignNotice: LocalizedStringKey {
-        let noun = usageCount == 1 ? "transaction" : "transactions"
-        return "\(usageCount) \(noun) use this category. You will pick where they go."
+        "\(usageCount) transactions use this category. You will pick where they go."
     }
 
     private var deleteButton: some View {

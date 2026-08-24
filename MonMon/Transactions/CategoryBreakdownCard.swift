@@ -279,7 +279,7 @@ struct CategoryBreakdownCard: View {
     }
 
     private func countLabel(_ slice: CategoryBreakdownSlice) -> String {
-        slice.count == 1 ? "1 transaction" : "\(slice.count) transactions"
+        AppText.string("\(slice.count) transactions", in: locale)
     }
 
     private var emptyState: some View {

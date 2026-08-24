@@ -213,23 +213,19 @@ struct AccountEditorView: View {
         }
 
         if transactionCount > 0 {
-            let noun = transactionCount == 1 ? "transaction" : "transactions"
-            return "This account still has \(transactionCount) \(noun). Delete them first."
+            return "This account still has \(transactionCount) transactions. Delete them first."
         }
 
         if transferCount > 0 {
-            let noun = transferCount == 1 ? "transfer" : "transfers"
-            return "This account still has \(transferCount) \(noun). Delete them first."
+            return "This account still has \(transferCount) transfers. Delete them first."
         }
 
         if debtCount > 0 {
-            let noun = debtCount == 1 ? "debt record" : "debt records"
-            return "This account still has \(debtCount) \(noun). Delete them first."
+            return "This account still has \(debtCount) debt records. Delete them first."
         }
 
         if recurringCount > 0 {
-            let noun = recurringCount == 1 ? "recurring rule" : "recurring rules"
-            return "This account still has \(recurringCount) \(noun). Delete them first."
+            return "This account still has \(recurringCount) recurring rules. Delete them first."
         }
 
         return "Set the balance to 0 before deleting this account."

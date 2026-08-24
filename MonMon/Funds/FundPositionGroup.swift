@@ -71,7 +71,7 @@ struct FundPositionGroup: Identifiable {
     }
 
     var positionCountLabel: String {
-        holdings.count == 1 ? "1 position" : "\(holdings.count) positions"
+        "\(holdings.count) positions"
     }
 }
 

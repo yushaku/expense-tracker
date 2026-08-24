@@ -141,32 +141,22 @@
         }
       }
     },
-    "%lld %@ no instrument, so %@ of cost is counted as worth nothing. Open each one and pick what it is held in.": {
+    "%lld active rules": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld %@ chưa gắn sản phẩm, nên %@ tiền vốn bị tính là không có giá trị. Mở từng khoản và chọn nơi nắm giữ."
+            "value": "%lld lịch đang chạy"
           }
         }
       }
     },
-    "%lld %@ use this category. You will pick where they go.": {
+    "%lld active rules · %lld paused": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld %@ đang dùng danh mục này. Bạn sẽ chọn nơi chuyển chúng sang."
-          }
-        }
-      }
-    },
-    "%lld %@ · %lld paused": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld %@ · %lld đang tạm dừng"
+            "value": "%lld lịch đang chạy · %lld tạm dừng"
           }
         }
       }
@@ -191,12 +181,42 @@
         }
       }
     },
+    "%lld positions": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld khoản nắm giữ"
+          }
+        }
+      }
+    },
+    "%lld positions have no instrument, so %@ of cost is counted as worth nothing. Open each one and pick what it is held in.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld khoản nắm giữ chưa gắn sản phẩm, nên %@ tiền vốn bị tính là không có giá trị. Mở từng khoản và chọn nơi nắm giữ."
+          }
+        }
+      }
+    },
     "%lld transactions": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
             "value": "%lld giao dịch"
+          }
+        }
+      }
+    },
+    "%lld transactions use this category. You will pick where they go.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld giao dịch đang dùng danh mục này. Bạn sẽ chọn nơi chuyển chúng sang."
           }
         }
       }
@@ -381,12 +401,12 @@
         }
       }
     },
-    "Across %@ · %lld positions": {
+    "Across %lld %@ · %lld positions": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gồm %@ · %lld khoản"
+            "value": "Gồm %lld %@ · %lld khoản nắm giữ"
           }
         }
       }
@@ -397,16 +417,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gồm %lld sổ tiết kiệm"
-          }
-        }
-      }
-    },
-    "Across 1 %@ · 1 position": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gồm 1 %@ · 1 khoản"
           }
         }
       }
@@ -2592,12 +2602,12 @@
         }
       }
     },
-    "Its %lld %@ with it, and the account balance returns to what it was.": {
+    "Its %lld payments go with it, and the account balance returns to what it was.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld %@ của nó cũng mất theo, và số dư tài khoản trở lại như cũ."
+            "value": "%lld lần trả của nó cũng mất theo, và số dư tài khoản trở lại như cũ."
           }
         }
       }
@@ -4904,6 +4914,36 @@
         }
       }
     },
+    "brand": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "thương hiệu"
+          }
+        }
+      }
+    },
+    "brands": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "thương hiệu"
+          }
+        }
+      }
+    },
+    "debt records": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bản ghi khoản nợ"
+          }
+        }
+      }
+    },
     "from": {
       "localizations": {
         "vi": {
@@ -4914,12 +4954,72 @@
         }
       }
     },
+    "fund": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "quỹ"
+          }
+        }
+      }
+    },
+    "funds": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "quỹ"
+          }
+        }
+      }
+    },
+    "gold product": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sản phẩm vàng"
+          }
+        }
+      }
+    },
+    "gold products": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sản phẩm vàng"
+          }
+        }
+      }
+    },
     "in %@": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
             "value": "trong %@"
+          }
+        }
+      }
+    },
+    "manager": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "công ty quản lý"
+          }
+        }
+      }
+    },
+    "managers": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "công ty quản lý"
           }
         }
       }
@@ -4944,12 +5044,62 @@
         }
       }
     },
+    "positions": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "khoản nắm giữ"
+          }
+        }
+      }
+    },
+    "records": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bản ghi"
+          }
+        }
+      }
+    },
+    "recurring rules": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lịch lặp"
+          }
+        }
+      }
+    },
     "to": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
             "value": "cho"
+          }
+        }
+      }
+    },
+    "transactions": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "giao dịch"
+          }
+        }
+      }
+    },
+    "transfers": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lần chuyển khoản"
           }
         }
       }

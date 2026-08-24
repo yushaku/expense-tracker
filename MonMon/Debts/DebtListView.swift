@@ -179,7 +179,7 @@ struct DebtListView: View {
     }
 
     private var countLabel: LocalizedStringKey {
-        debts.count == 1 ? "1 debt" : "\(debts.count) debts"
+        "\(debts.count) debts"
     }
 
     // MARK: - Sections

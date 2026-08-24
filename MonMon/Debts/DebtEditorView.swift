@@ -132,8 +132,7 @@ struct DebtEditorView: View {
             return "Any account balance it moved returns to what it was."
         }
 
-        let noun = count == 1 ? "payment goes" : "payments go"
-        return "Its \(count) \(noun) with it, and the account balance returns to what it was."
+        return "Its \(count) payments go with it, and the account balance returns to what it was."
     }
 
     private var sourceAccount: CashAccount? {
