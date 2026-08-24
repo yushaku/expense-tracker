@@ -169,14 +169,13 @@ struct TransactionRange: Hashable {
     func phrase(in locale: Locale) -> String {
         switch scope {
         case .day:
-            String(localized: "on \(title(in: locale))", locale: locale)
+            AppText.string("on \(title(in: locale))", in: locale)
         case .month, .year:
-            String(localized: "in \(title(in: locale))", locale: locale)
+            AppText.string("in \(title(in: locale))", in: locale)
         case .custom:
-            String(
-                localized:
-                    "between \(Self.day(start, in: locale)) and \(Self.day(lastDay, in: locale))",
-                locale: locale
+            AppText.string(
+                "between \(Self.day(start, in: locale)) and \(Self.day(lastDay, in: locale))",
+                in: locale
             )
         }
     }

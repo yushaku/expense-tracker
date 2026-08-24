@@ -63,6 +63,23 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         return Locale(identifier: localeIdentifier)
     }
 
+    /// Where a key is looked up. Foundation resolves a key against the bundle's
+    /// own language and ignores the locale handed to `String(localized:)` —
+    /// that one only formats what is interpolated. So code outside the view
+    /// tree, which cannot lean on SwiftUI's own resolution, asks the language's
+    /// own catalogue directly. English is the language the keys are written in
+    /// and has no catalogue of its own, which is why the main bundle answers.
+    static func bundle(for locale: Locale) -> Bundle {
+        guard let code = locale.language.languageCode?.identifier,
+            let path = Bundle.main.path(forResource: code, ofType: "lproj"),
+            let bundle = Bundle(path: path)
+        else {
+            return .main
+        }
+
+        return bundle
+    }
+
     /// The current choice, read straight from storage. Code outside the view
     /// tree — a seeder, a formatter helper — has no environment to read, and a
     /// sheet may not inherit one, so both come through here.
@@ -72,5 +89,17 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         }
 
         return AppLanguage(rawValue: rawValue) ?? .system
+    }
+}
+
+/// Localized text for code that has no view to read a locale from — a seeder, a
+/// phrase composed for a sentence, a label handed to VoiceOver as a `String`.
+///
+/// Views should keep passing plain literals to `Text` and friends, which SwiftUI
+/// resolves against the environment on its own. This is the way in for
+/// everything else.
+enum AppText {
+    static func string(_ key: String.LocalizationValue, in locale: Locale) -> String {
+        String(localized: key, bundle: AppLanguage.bundle(for: locale), locale: locale)
     }
 }
