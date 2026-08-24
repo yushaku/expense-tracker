@@ -16,6 +16,91 @@ struct AccountSeedTests {
         )
     }
 
+    private func makeDefaults() -> UserDefaults {
+        let suiteName = "AccountSeedTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName) ?? .standard
+        defaults.removePersistentDomain(forName: suiteName)
+        return defaults
+    }
+
+    @Test("An empty store gains the starter Bank account once")
+    func emptyStoreGainsStarterBankOnce() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let defaults = makeDefaults()
+
+        AccountSeed.seedDefaultBankIfNeeded(
+            in: context,
+            defaults: defaults,
+            createdAt: referenceDate
+        )
+        AccountSeed.seedDefaultBankIfNeeded(
+            in: context,
+            defaults: defaults,
+            createdAt: referenceDate
+        )
+
+        let accounts = try context.fetch(FetchDescriptor<CashAccount>())
+        let bank = try #require(accounts.first)
+
+        #expect(accounts.count == 1)
+        #expect(bank.id == AccountSeed.defaultBankID)
+        #expect(bank.name == "Bank")
+        #expect(bank.kind == .bank)
+        #expect(bank.openingBalance == .zero)
+    }
+
+    @Test("An existing store gains the starter Bank during upgrade")
+    func existingStoreGainsStarterBank() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let defaults = makeDefaults()
+        context.insert(
+            CashAccount(
+                id: UUID(),
+                name: "Wallet",
+                kind: .cash,
+                openingBalance: .zero,
+                currencyCode: VNDCurrency.code,
+                createdAt: referenceDate
+            )
+        )
+        try context.save()
+
+        AccountSeed.seedDefaultBankIfNeeded(
+            in: context,
+            defaults: defaults,
+            createdAt: referenceDate
+        )
+
+        let accounts = try context.fetch(FetchDescriptor<CashAccount>())
+        #expect(accounts.contains { $0.id == AccountSeed.defaultBankID })
+    }
+
+    @Test("Deleting the seeded Bank does not recreate it")
+    func deletedStarterBankStaysDeleted() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let defaults = makeDefaults()
+
+        AccountSeed.seedDefaultBankIfNeeded(
+            in: context,
+            defaults: defaults,
+            createdAt: referenceDate
+        )
+        let account = try #require(context.fetch(FetchDescriptor<CashAccount>()).first)
+        context.delete(account)
+        try context.save()
+
+        AccountSeed.seedDefaultBankIfNeeded(
+            in: context,
+            defaults: defaults,
+            createdAt: referenceDate
+        )
+
+        #expect(try context.fetchCount(FetchDescriptor<CashAccount>()) == 0)
+    }
+
     @Test("An empty store gains the anchor account")
     func emptyStoreGainsAnchor() throws {
         let container = try makeContainer()

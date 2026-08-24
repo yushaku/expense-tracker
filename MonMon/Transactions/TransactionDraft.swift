@@ -7,6 +7,61 @@ enum TransactionFormError: Error, Equatable {
     case missingCategory
 }
 
+enum TransactionDefaults {
+    static let accountStorageKey = "defaultTransactionAccountID"
+    static let categoryStorageKey = "defaultTransactionCategoryID"
+
+    /// A missing preference means first run and resolves to starter data. Once
+    /// an id has been stored, it must still name a current record; stale ids do
+    /// not silently switch the owner to a different account or category.
+    static func apply(
+        accountValue: String,
+        categoryValue: String,
+        accounts: [CashAccount],
+        categories: [TransactionCategory],
+        to draft: inout TransactionDraft
+    ) {
+        draft.kind = .expense
+        draft.accountID = resolveAccountID(accountValue, accounts: accounts)
+        draft.categoryID = resolveCategoryID(categoryValue, categories: categories)
+    }
+
+    static func resolveAccountID(
+        _ value: String,
+        accounts: [CashAccount]
+    ) -> UUID? {
+        if value.isEmpty {
+            return accounts.first { $0.id == AccountSeed.defaultBankID }?.id
+                ?? accounts.first {
+                    $0.name == AccountSeed.defaultBankName && $0.kind == .bank
+                }?.id
+        }
+
+        guard let id = UUID(uuidString: value) else {
+            return nil
+        }
+
+        return accounts.first { $0.id == id }?.id
+    }
+
+    static func resolveCategoryID(
+        _ value: String,
+        categories: [TransactionCategory]
+    ) -> UUID? {
+        if value.isEmpty {
+            return categories.first {
+                $0.name == CategorySeed.defaultExpenseName && $0.kind == .expense
+            }?.id
+        }
+
+        guard let id = UUID(uuidString: value) else {
+            return nil
+        }
+
+        return categories.first { $0.id == id && $0.kind == .expense }?.id
+    }
+}
+
 struct TransactionDraft: Equatable {
     var kind: TransactionKind
     var amountText: String

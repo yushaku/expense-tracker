@@ -26,6 +26,113 @@ struct TransactionDraftTests {
         )
     }
 
+    @Test("Missing preferences apply the seeded Food and Bank defaults")
+    func missingPreferencesApplySeedDefaults() {
+        let bank = CashAccount(
+            id: AccountSeed.defaultBankID,
+            name: "Bank",
+            kind: .bank,
+            openingBalance: .zero,
+            currencyCode: VNDCurrency.code,
+            createdAt: occurredAt
+        )
+        let food = TransactionCategory(
+            id: UUID(),
+            name: CategorySeed.defaultExpenseName,
+            kind: .expense,
+            symbolName: "fork.knife",
+            colorName: "peach",
+            createdAt: occurredAt
+        )
+        var draft = TransactionDraft(kind: .income, occurredAt: occurredAt)
+
+        TransactionDefaults.apply(
+            accountValue: "",
+            categoryValue: "",
+            accounts: [bank],
+            categories: [food],
+            to: &draft
+        )
+
+        #expect(draft.kind == .expense)
+        #expect(draft.accountID == bank.id)
+        #expect(draft.categoryID == food.id)
+    }
+
+    @Test("Stored valid preferences override the seeded defaults")
+    func storedPreferencesOverrideSeedDefaults() {
+        let bank = CashAccount(
+            id: AccountSeed.defaultBankID,
+            name: "Bank",
+            kind: .bank,
+            openingBalance: .zero,
+            currencyCode: VNDCurrency.code,
+            createdAt: occurredAt
+        )
+        let wallet = CashAccount(
+            id: UUID(),
+            name: "Wallet",
+            kind: .cash,
+            openingBalance: .zero,
+            currencyCode: VNDCurrency.code,
+            createdAt: occurredAt
+        )
+        let food = TransactionCategory(
+            id: UUID(),
+            name: CategorySeed.defaultExpenseName,
+            kind: .expense,
+            symbolName: "fork.knife",
+            colorName: "peach",
+            createdAt: occurredAt
+        )
+        let transport = TransactionCategory(
+            id: UUID(),
+            name: "Transport",
+            kind: .expense,
+            symbolName: "car.fill",
+            colorName: "blue",
+            createdAt: occurredAt
+        )
+        var draft = TransactionDraft(kind: .income, occurredAt: occurredAt)
+
+        TransactionDefaults.apply(
+            accountValue: wallet.id.uuidString,
+            categoryValue: transport.id.uuidString,
+            accounts: [bank, wallet],
+            categories: [food, transport],
+            to: &draft
+        )
+
+        #expect(draft.kind == .expense)
+        #expect(draft.accountID == wallet.id)
+        #expect(draft.categoryID == transport.id)
+    }
+
+    @Test("Stale account and income category preferences are not applied")
+    func invalidPreferencesAreNotApplied() {
+        let salary = TransactionCategory(
+            id: UUID(),
+            name: "Salary",
+            kind: .income,
+            symbolName: "briefcase.fill",
+            colorName: "green",
+            createdAt: occurredAt
+        )
+        var draft = TransactionDraft(kind: .income, occurredAt: occurredAt)
+
+        TransactionDefaults.apply(
+            accountValue: UUID().uuidString,
+            categoryValue: salary.id.uuidString,
+            accounts: [],
+            categories: [salary],
+            to: &draft
+        )
+
+        #expect(draft.kind == .expense)
+        #expect(draft.accountID == nil)
+        #expect(draft.categoryID == nil)
+    }
+
     @Test("A complete draft becomes a transaction with a positive amount")
     func completeDraftValidates() throws {
         let draft = makeDraft(kind: .expense, amountText: "1.250.000", note: "  Lunch  ")

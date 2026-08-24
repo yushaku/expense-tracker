@@ -5,6 +5,8 @@ import SwiftData
 /// transaction without setting anything up first. Every one of them can be
 /// renamed, restyled, or deleted afterwards.
 enum CategorySeed {
+    static let defaultExpenseName = "Food"
+
     struct Template {
         let name: String
         let kind: TransactionKind
@@ -13,7 +15,12 @@ enum CategorySeed {
     }
 
     static let templates: [Template] = [
-        Template(name: "Food", kind: .expense, symbolName: "fork.knife", colorName: "peach"),
+        Template(
+            name: defaultExpenseName,
+            kind: .expense,
+            symbolName: "fork.knife",
+            colorName: "peach"
+        ),
         Template(name: "Transport", kind: .expense, symbolName: "car.fill", colorName: "blue"),
         Template(name: "Housing", kind: .expense, symbolName: "house.fill", colorName: "mauve"),
         Template(name: "Shopping", kind: .expense, symbolName: "cart.fill", colorName: "pink"),

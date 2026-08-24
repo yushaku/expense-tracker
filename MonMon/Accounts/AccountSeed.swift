@@ -29,6 +29,15 @@ import SwiftData
 /// device was still recording against it leaves records naming the **dead
 /// account's** id, not this one. That case needs reporting, not a default.
 enum AccountSeed {
+    /// Stable across devices so the first-run transaction preference can name
+    /// the same starter account before the owner changes it in Settings.
+    static let defaultBankID = UUID(
+        uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2)
+    )
+
+    static let defaultBankName = "Bank"
+    private static let defaultBankSeedKey = "didSeedDefaultBankAccount"
+
     /// Fixed rather than generated, because every device has to seed the same
     /// row: a foreign key that defaults to this id must resolve on all of them,
     /// and a per-device id would resolve on exactly one.
@@ -42,6 +51,46 @@ enum AccountSeed {
     )
 
     static let unassignedName = "Unassigned"
+
+    /// Adds the starter Bank once per installation, including when upgrading a
+    /// store created before this seed existed. The marker keeps a later owner
+    /// deletion from recreating it at launch.
+    @MainActor
+    static func seedDefaultBankIfNeeded(
+        in context: ModelContext,
+        defaults: UserDefaults = .standard,
+        createdAt: Date = .now
+    ) {
+        guard !defaults.bool(forKey: defaultBankSeedKey) else {
+            return
+        }
+
+        let accounts = (try? context.fetch(FetchDescriptor<CashAccount>())) ?? []
+        let alreadyExists = accounts.contains {
+            $0.id == defaultBankID || $0.name == defaultBankName && $0.kind == .bank
+        }
+        guard !alreadyExists else {
+            defaults.set(true, forKey: defaultBankSeedKey)
+            return
+        }
+
+        let account = CashAccount(
+            id: defaultBankID,
+            name: defaultBankName,
+            kind: .bank,
+            openingBalance: .zero,
+            currencyCode: VNDCurrency.code,
+            createdAt: createdAt
+        )
+        context.insert(account)
+
+        do {
+            try context.save()
+            defaults.set(true, forKey: defaultBankSeedKey)
+        } catch {
+            context.rollback()
+        }
+    }
 
     /// Written on every launch rather than only into an empty store, because
     /// this row is a referential anchor and not a convenience. `CategorySeed`

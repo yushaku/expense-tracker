@@ -6,8 +6,18 @@ struct SettingsView: View {
     @Environment(CloudSync.self) private var cloudSync
     @Environment(\.modelContext) private var modelContext
 
+    @Query(sort: \CashAccount.createdAt, order: .forward)
+    private var accounts: [CashAccount]
+
+    @Query(sort: \TransactionCategory.createdAt, order: .forward)
+    private var categories: [TransactionCategory]
+
     @AppStorage(AppTheme.storageKey) private var theme = AppTheme.system
     @AppStorage(AppLock.enabledKey) private var isLockEnabled = false
+    @AppStorage(TransactionDefaults.accountStorageKey)
+    private var defaultTransactionAccountValue = ""
+    @AppStorage(TransactionDefaults.categoryStorageKey)
+    private var defaultTransactionCategoryValue = ""
     @State private var instrumentScope: FundInstrumentListScope?
 
     var body: some View {
@@ -19,6 +29,7 @@ struct SettingsView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                         appearanceCard
+                        transactionDefaultsCard
                         instrumentsCard
                         securityCard
                         backupCard
@@ -35,6 +46,9 @@ struct SettingsView: View {
             .tint(MonMonTheme.accent)
             .sheet(item: $instrumentScope) { scope in
                 FundInstrumentListView(scope: scope)
+            }
+            .onAppear {
+                persistInitialTransactionDefaults()
             }
         }
     }
@@ -58,6 +72,104 @@ struct SettingsView: View {
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
+        }
+    }
+
+    private var transactionDefaultsCard: some View {
+        card {
+            VStack(alignment: .leading, spacing: 14) {
+                sectionHeader("Transaction defaults", systemImage: "arrow.down.doc.fill")
+
+                defaultPicker(
+                    title: "Account",
+                    selection: $defaultTransactionAccountValue,
+                    isEmpty: accounts.isEmpty,
+                    isSelectionValid: accounts.contains {
+                        $0.id.uuidString == defaultTransactionAccountValue
+                    },
+                    emptyMessage: "Add an account to choose a default.",
+                    accessibilityIdentifier: "default-transaction-account"
+                ) {
+                    ForEach(accounts) { account in
+                        Text(account.name)
+                            .tag(account.id.uuidString)
+                    }
+                }
+
+                Divider()
+                    .overlay(MonMonTheme.border)
+
+                defaultPicker(
+                    title: "Expense category",
+                    selection: $defaultTransactionCategoryValue,
+                    isEmpty: expenseCategories.isEmpty,
+                    isSelectionValid: expenseCategories.contains {
+                        $0.id.uuidString == defaultTransactionCategoryValue
+                    },
+                    emptyMessage: "Add an expense category to choose a default.",
+                    accessibilityIdentifier: "default-transaction-category"
+                ) {
+                    ForEach(expenseCategories) { category in
+                        Text(category.name)
+                            .tag(category.id.uuidString)
+                    }
+                }
+
+                Text("New transactions start as expenses with these values selected.")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func defaultPicker<Options: View>(
+        title: String,
+        selection: Binding<String>,
+        isEmpty: Bool,
+        isSelectionValid: Bool,
+        emptyMessage: String,
+        accessibilityIdentifier: String,
+        @ViewBuilder options: () -> Options
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.subheadline.weight(.medium))
+
+            if isEmpty {
+                Text(emptyMessage)
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            } else {
+                Picker(title, selection: selection) {
+                    if !isSelectionValid {
+                        Text("Choose")
+                            .tag(selection.wrappedValue)
+                    }
+
+                    options()
+                }
+                .labelsHidden()
+                .accessibilityIdentifier(accessibilityIdentifier)
+            }
+        }
+    }
+
+    private var expenseCategories: [TransactionCategory] {
+        categories.filter { $0.kind == .expense }
+    }
+
+    private func persistInitialTransactionDefaults() {
+        if defaultTransactionAccountValue.isEmpty,
+            let accountID = TransactionDefaults.resolveAccountID("", accounts: accounts)
+        {
+            defaultTransactionAccountValue = accountID.uuidString
+        }
+
+        if defaultTransactionCategoryValue.isEmpty,
+            let categoryID = TransactionDefaults.resolveCategoryID("", categories: categories)
+        {
+            defaultTransactionCategoryValue = categoryID.uuidString
         }
     }
 

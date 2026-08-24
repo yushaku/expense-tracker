@@ -34,12 +34,18 @@ struct TransactionEditorView: View {
     @Query(sort: \TransactionCategory.createdAt, order: .forward)
     private var categories: [TransactionCategory]
 
+    @AppStorage(TransactionDefaults.accountStorageKey)
+    private var defaultTransactionAccountValue = ""
+    @AppStorage(TransactionDefaults.categoryStorageKey)
+    private var defaultTransactionCategoryValue = ""
+
     private let mode: TransactionEditorMode
 
     @State private var draft: TransactionDraft
     @State private var validationError: TransactionFormError?
     @State private var saveErrorMessage: String?
     @State private var isConfirmingDelete = false
+    @State private var didApplyDefaults = false
 
     init(mode: TransactionEditorMode, defaultDate: Date = .now) {
         self.mode = mode
@@ -108,10 +114,28 @@ struct TransactionEditorView: View {
             .onChange(of: draft.kind) { _, _ in
                 clearCategoryIfDirectionChanged()
             }
+            .onAppear {
+                applyDefaultsIfNeeded()
+            }
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
             .preferredColorScheme(MonMonTheme.colorScheme)
         }
+    }
+
+    private func applyDefaultsIfNeeded() {
+        guard !didApplyDefaults, mode.editedTransaction == nil else {
+            return
+        }
+
+        didApplyDefaults = true
+        TransactionDefaults.apply(
+            accountValue: defaultTransactionAccountValue,
+            categoryValue: defaultTransactionCategoryValue,
+            accounts: accounts,
+            categories: categories,
+            to: &draft
+        )
     }
 
     /// Switching between income and expense strands a category from the other

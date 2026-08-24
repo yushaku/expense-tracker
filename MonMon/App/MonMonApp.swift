@@ -19,8 +19,9 @@ struct MonMonApp: App {
             fatalError("Model container failed: \(error)")
         }
 
-        CategorySeed.seedIfEmpty(in: container.mainContext)
+        AccountSeed.seedDefaultBankIfNeeded(in: container.mainContext)
         AccountSeed.ensureUnassignedExists(in: container.mainContext)
+        CategorySeed.seedIfEmpty(in: container.mainContext)
 
         do {
             try StoreReconciler.reconcile(in: container.mainContext)

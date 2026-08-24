@@ -120,10 +120,8 @@ enum StoreReconciler {
 
     /// Matched on the id itself.
     ///
-    /// Only the anchor can duplicate this way — every other account is created
-    /// with a fresh id, so two of them never collide — but keying on the id
-    /// rather than on "is this the anchor" costs nothing and states the actual
-    /// invariant: one row per id.
+    /// Seeded accounts can duplicate this way because their ids are fixed across
+    /// devices. Owner-created accounts use fresh ids and never collide.
     ///
     /// Nothing is repointed because nothing needs to be. The duplicates carry
     /// the same id, so every foreign key naming one already names the survivor.
