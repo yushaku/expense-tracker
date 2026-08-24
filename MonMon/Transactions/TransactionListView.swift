@@ -16,6 +16,7 @@ struct TransactionListView: View {
     @State private var breakdownKind: TransactionKind = .expense
     @State private var isManagingCategories = false
     @State private var isManagingRecurring = false
+    @State private var isEditingDefaults = false
 
     var body: some View {
         NavigationStack {
@@ -30,13 +31,12 @@ struct TransactionListView: View {
                         if accounts.isEmpty {
                             noAccountState
                         } else {
+                            quickActions
+
                             CategoryBreakdownCard(
                                 kind: $breakdownKind,
                                 slices: breakdownSlices,
-                                range: range,
-                                onManageCategories: {
-                                    isManagingCategories = true
-                                }
+                                range: range
                             )
 
                             if !visibleTransactions.isEmpty {
@@ -66,14 +66,6 @@ struct TransactionListView: View {
             }
             .compactRootNavigationTitle("Spending")
             .accessibilityIdentifier("spending-list")
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button("Recurring", systemImage: "arrow.triangle.2.circlepath") {
-                        isManagingRecurring = true
-                    }
-                    .accessibilityIdentifier("manage-recurring")
-                }
-            }
             .sheet(item: $editorMode) { mode in
                 TransactionEditorView(mode: mode, defaultDate: defaultDate)
             }
@@ -82,6 +74,9 @@ struct TransactionListView: View {
             }
             .sheet(isPresented: $isManagingRecurring) {
                 RecurringListView()
+            }
+            .sheet(isPresented: $isEditingDefaults) {
+                TransactionDefaultsView()
             }
             .tint(MonMonTheme.accent)
         }
@@ -103,6 +98,100 @@ struct TransactionListView: View {
             transactions: visibleTransactions,
             categories: categories
         )
+    }
+
+    /// The three things the owner sets up rather than records: what a
+    /// transaction can be filed under, what records itself, and what a new one
+    /// starts on. They sit above the breakdown because each one changes what it
+    /// shows, and none of them belongs on the floating add button.
+    private var quickActions: some View {
+        // Three labelled buttons crowd an iPhone in one row, so the labels drop
+        // below the icons before the row wraps.
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 10) {
+                quickActionButtons(isStacked: false)
+            }
+
+            HStack(spacing: 10) {
+                quickActionButtons(isStacked: true)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func quickActionButtons(isStacked: Bool) -> some View {
+        quickAction(
+            "Categories",
+            systemImage: "tag.fill",
+            isStacked: isStacked,
+            accessibilityIdentifier: "manage-categories"
+        ) {
+            isManagingCategories = true
+        }
+
+        quickAction(
+            "Recurring",
+            systemImage: "arrow.triangle.2.circlepath",
+            isStacked: isStacked,
+            accessibilityIdentifier: "manage-recurring"
+        ) {
+            isManagingRecurring = true
+        }
+
+        quickAction(
+            "Defaults",
+            systemImage: "slider.horizontal.3",
+            isStacked: isStacked,
+            accessibilityIdentifier: "manage-transaction-defaults"
+        ) {
+            isEditingDefaults = true
+        }
+    }
+
+    private func quickAction(
+        _ title: String,
+        systemImage: String,
+        isStacked: Bool,
+        accessibilityIdentifier: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Group {
+                if isStacked {
+                    VStack(spacing: 6) {
+                        Image(systemName: systemImage)
+                            .font(.subheadline.weight(.semibold))
+
+                        Text(title)
+                            .font(.caption.weight(.semibold))
+                    }
+                } else {
+                    HStack(spacing: 8) {
+                        Image(systemName: systemImage)
+                            .font(.subheadline.weight(.semibold))
+
+                        Text(title)
+                            .font(.subheadline.weight(.semibold))
+                    }
+                }
+            }
+            .lineLimit(1)
+            .foregroundStyle(MonMonTheme.accent)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .padding(.horizontal, 10)
+            .background {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(MonMonTheme.surface)
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(MonMonTheme.border, lineWidth: 1)
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier(accessibilityIdentifier)
     }
 
     private var periodCard: some View {

@@ -6,6 +6,19 @@ import SwiftData
 /// renamed, restyled, or deleted afterwards.
 enum CategorySeed {
     static let defaultExpenseName = "Food"
+    static let defaultIncomeName = "Salary"
+
+    /// The starter category a direction falls back on when the owner has not
+    /// chosen one. Renaming or deleting it simply leaves that direction with no
+    /// default, which the pickers show as "Choose".
+    static func defaultName(for kind: TransactionKind) -> String {
+        switch kind {
+        case .expense:
+            defaultExpenseName
+        case .income:
+            defaultIncomeName
+        }
+    }
 
     struct Template {
         let name: String
@@ -31,7 +44,12 @@ enum CategorySeed {
             symbolName: "gamecontroller.fill",
             colorName: "lavender"
         ),
-        Template(name: "Salary", kind: .income, symbolName: "briefcase.fill", colorName: "green"),
+        Template(
+            name: defaultIncomeName,
+            kind: .income,
+            symbolName: "briefcase.fill",
+            colorName: "green"
+        ),
         Template(name: "Bonus", kind: .income, symbolName: "gift.fill", colorName: "yellow"),
         Template(
             name: "Interest",

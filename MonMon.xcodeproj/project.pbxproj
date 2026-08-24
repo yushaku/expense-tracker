@@ -194,6 +194,8 @@
 		A00000000000000000000E0C /* RecurringEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D0E /* RecurringEditorForm.swift */; };
 		A00000000000000000000E0D /* RecurringEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D0F /* RecurringEditorView.swift */; };
 		A00000000000000000000E0E /* RecurringListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D10 /* RecurringListView.swift */; };
+		A00000000000000000000E0F /* TransactionDefaultsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D11 /* TransactionDefaultsCard.swift */; };
+		A00000000000000000000E10 /* TransactionDefaultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D12 /* TransactionDefaultsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -399,6 +401,8 @@
 		A00000000000000000000D0E /* RecurringEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringEditorForm.swift; sourceTree = "<group>"; };
 		A00000000000000000000D0F /* RecurringEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringEditorView.swift; sourceTree = "<group>"; };
 		A00000000000000000000D10 /* RecurringListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringListView.swift; sourceTree = "<group>"; };
+		A00000000000000000000D11 /* TransactionDefaultsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDefaultsCard.swift; sourceTree = "<group>"; };
+		A00000000000000000000D12 /* TransactionDefaultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDefaultsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -651,6 +655,8 @@
 		A00000000000000000000024 /* Transactions */ = {
 			isa = PBXGroup;
 			children = (
+				A00000000000000000000D12 /* TransactionDefaultsView.swift */,
+				A00000000000000000000D11 /* TransactionDefaultsCard.swift */,
 				A00000000000000000000160 /* TransactionKind.swift */,
 				A00000000000000000000161 /* TransactionCategory.swift */,
 				A00000000000000000000162 /* MoneyTransaction.swift */,
@@ -931,6 +937,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A00000000000000000000E10 /* TransactionDefaultsView.swift in Sources */,
+				A00000000000000000000E0F /* TransactionDefaultsCard.swift in Sources */,
 				A00000000000000000000E0E /* RecurringListView.swift in Sources */,
 				A00000000000000000000E0D /* RecurringEditorView.swift in Sources */,
 				A00000000000000000000E0C /* RecurringEditorForm.swift in Sources */,

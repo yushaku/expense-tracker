@@ -128,6 +128,12 @@ and are excluded by `.gitignore`.
   before the write and folded afterwards, so two devices cannot record the same
   month's rent twice. Editing a rule changes only what it records next, and
   deleting one keeps everything it already recorded.
+- Spending setup: one row of buttons above the category breakdown opens the
+  categories, the recurring rules, and the defaults a new entry starts on — the
+  account, the expense category, and the income category. Switching an entry
+  between income and expense picks up that direction's own default instead of
+  emptying the field. The defaults live here rather than on the Settings tab,
+  beside the entries they shape.
 - Settings: a light/dark/system theme, and an optional Face ID, Touch ID, or
   passcode lock that hides the screen on launch and after a minute away. The
   lock is a gate on the screen, not encryption; the records on disk are

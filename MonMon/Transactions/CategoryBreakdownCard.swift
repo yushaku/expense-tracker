@@ -9,7 +9,6 @@ struct CategoryBreakdownCard: View {
 
     let slices: [CategoryBreakdownSlice]
     let range: TransactionRange
-    let onManageCategories: () -> Void
 
     private var total: Decimal {
         CategoryBreakdown.total(of: slices)
@@ -55,26 +54,11 @@ struct CategoryBreakdownCard: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 12) {
-                Label("BY CATEGORY", systemImage: "chart.pie.fill")
-                    .font(.caption.weight(.semibold))
-                    .tracking(0.8)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-
-                Spacer(minLength: 8)
-
-                Button(action: onManageCategories) {
-                    Image(systemName: "plus")
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(MonMonTheme.onAccent)
-                        .frame(width: 32, height: 32)
-                        .background(MonMonTheme.accent, in: Circle())
-                        .contentShape(Circle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Manage Categories")
-                .accessibilityIdentifier("manage-categories")
-            }
+            Label("BY CATEGORY", systemImage: "chart.pie.fill")
+                .font(.caption.weight(.semibold))
+                .tracking(0.8)
+                .foregroundStyle(MonMonTheme.textSecondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
             SegmentedTabs(
                 label: "Direction",

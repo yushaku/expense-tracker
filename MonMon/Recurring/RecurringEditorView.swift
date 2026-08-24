@@ -38,6 +38,8 @@ struct RecurringEditorView: View {
     private var defaultTransactionAccountValue = ""
     @AppStorage(TransactionDefaults.categoryStorageKey)
     private var defaultTransactionCategoryValue = ""
+    @AppStorage(TransactionDefaults.incomeCategoryStorageKey)
+    private var defaultTransactionIncomeCategoryValue = ""
 
     private let mode: RecurringEditorMode
     /// Passed in rather than read from the clock inside, so what the editor
@@ -114,7 +116,7 @@ struct RecurringEditorView: View {
                 Text("What it already recorded stays, and no balance moves.")
             }
             .onChange(of: draft.kind) { _, _ in
-                clearCategoryIfDirectionChanged()
+                applyDefaultCategoryIfDirectionChanged()
             }
             .onAppear {
                 applyDefaultsIfNeeded()
@@ -148,19 +150,24 @@ struct RecurringEditorView: View {
     }
 
     /// Switching between income and expense strands a category from the other
-    /// direction, which the picker no longer offers.
-    private func clearCategoryIfDirectionChanged() {
-        guard let categoryID = draft.categoryID else {
+    /// direction, which the picker no longer offers. The new direction's own
+    /// default takes its place, so the form stays filled in rather than emptying
+    /// itself, and falls back to nothing when that direction has no default.
+    private func applyDefaultCategoryIfDirectionChanged() {
+        let stillOffered = draft.categoryID.map { categoryID in
+            categories.contains { $0.id == categoryID && $0.kind == draft.kind }
+        }
+
+        guard stillOffered != true else {
             return
         }
 
-        let stillOffered = categories.contains {
-            $0.id == categoryID && $0.kind == draft.kind
-        }
-
-        if !stillOffered {
-            draft.categoryID = nil
-        }
+        draft.categoryID = TransactionDefaults.categoryID(
+            for: draft.kind,
+            expenseValue: defaultTransactionCategoryValue,
+            incomeValue: defaultTransactionIncomeCategoryValue,
+            categories: categories
+        )
     }
 
     private func save() {
