@@ -1006,6 +1006,7 @@
 		A00000000000000000000503 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = MonMon/MonMon.entitlements;
 				DEVELOPMENT_TEAM = VB5AW63GJ8;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1020,6 +1021,7 @@
 		A00000000000000000000504 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = MonMon/MonMon.entitlements;
 				DEVELOPMENT_TEAM = VB5AW63GJ8;
 				LD_RUNPATH_SEARCH_PATHS = (
