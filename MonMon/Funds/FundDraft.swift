@@ -19,17 +19,23 @@ struct FundDraft: Equatable {
     var unitsText: String
     var averageCostText: String
     var sourceAccountID: UUID?
+    /// The day the units were bought. Defaults to whatever the caller passes —
+    /// today, for a new position — and can be moved back, because a stack of
+    /// monthly purchases is usually entered after the fact.
+    var purchasedAt: Date
 
     init(
         instrumentID: UUID? = nil,
         unitsText: String = "",
         averageCostText: String = "",
-        sourceAccountID: UUID? = nil
+        sourceAccountID: UUID? = nil,
+        purchasedAt: Date = .now
     ) {
         self.instrumentID = instrumentID
         self.unitsText = unitsText
         self.averageCostText = averageCostText
         self.sourceAccountID = sourceAccountID
+        self.purchasedAt = purchasedAt
     }
 
     init(holding: FundHolding) {
@@ -37,7 +43,8 @@ struct FundDraft: Equatable {
             instrumentID: holding.instrumentID,
             unitsText: UnitQuantity.format(holding.units),
             averageCostText: VNDCurrency.formatPlain(holding.averageCostPerUnit),
-            sourceAccountID: holding.sourceAccountID
+            sourceAccountID: holding.sourceAccountID,
+            purchasedAt: holding.boughtOn
         )
     }
 
@@ -103,7 +110,8 @@ struct FundDraft: Equatable {
             units: values.units,
             averageCostPerUnit: values.averageCostPerUnit,
             createdAt: createdAt,
-            sourceAccountID: sourceAccountID
+            sourceAccountID: sourceAccountID,
+            purchasedAt: purchasedAt
         )
     }
 
@@ -117,5 +125,6 @@ struct FundDraft: Equatable {
         holding.units = values.units
         holding.averageCostPerUnit = values.averageCostPerUnit
         holding.sourceAccountID = sourceAccountID
+        holding.purchasedAt = purchasedAt
     }
 }

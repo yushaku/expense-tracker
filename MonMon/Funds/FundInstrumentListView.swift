@@ -21,6 +21,7 @@ struct FundInstrumentListView: View {
     @State private var editorMode: FundInstrumentEditorMode?
     @State private var refresher = FundPriceRefresher()
     @State private var isImporting = false
+    @State private var fmarketPage: WebPage?
 
     /// Passed in rather than read from the clock so a preview and a test both
     /// get a stable answer for whether a price is stale.
@@ -48,16 +49,7 @@ struct FundInstrumentListView: View {
                             emptyState
                         } else {
                             ForEach(instruments) { instrument in
-                                Button {
-                                    editorMode = .edit(instrument)
-                                } label: {
-                                    row(instrument)
-                                }
-                                .buttonStyle(.plain)
-                                .accessibilityIdentifier(
-                                    "instrument-\(instrument.id.uuidString)"
-                                )
-                                .accessibilityHint("Opens this instrument for editing")
+                                row(instrument)
                             }
                         }
                     }
@@ -80,6 +72,7 @@ struct FundInstrumentListView: View {
             .sheet(isPresented: $isImporting) {
                 FundCatalogueImportView()
             }
+            .webPage($fmarketPage)
         }
         .tint(MonMonTheme.accent)
     }
@@ -108,7 +101,35 @@ struct FundInstrumentListView: View {
         }
     }
 
+    /// The card is two tap targets rather than one: everything but the last line
+    /// opens the editor, and the link on that line opens Fmarket. A button
+    /// nested inside another button's label would never see the tap.
     private func row(_ instrument: FundInstrument) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Button {
+                editorMode = .edit(instrument)
+            } label: {
+                editableContent(instrument)
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("instrument-\(instrument.id.uuidString)")
+            .accessibilityHint("Opens this instrument for editing")
+
+            statusLine(instrument)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background {
+            RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
+                .fill(MonMonTheme.surface)
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
+                .stroke(MonMonTheme.border, lineWidth: 1)
+        }
+    }
+
+    private func editableContent(_ instrument: FundInstrument) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 3) {
@@ -152,89 +173,125 @@ struct FundInstrumentListView: View {
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
 
-            HStack(spacing: 7) {
-                Image(systemName: isStale(instrument) ? "exclamationmark.circle.fill" : "clock")
-                    .font(.caption2.weight(.semibold))
-                    .accessibilityHidden(true)
-
-                Text(statusDescription(instrument))
-                    .font(.caption)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
-
-                Spacer(minLength: 8)
-            }
-            .foregroundStyle(isStale(instrument) ? MonMonTheme.danger : MonMonTheme.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background {
-            RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .fill(MonMonTheme.surface)
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .stroke(MonMonTheme.border, lineWidth: 1)
-        }
+        .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
+    }
+
+    private func statusLine(_ instrument: FundInstrument) -> some View {
+        HStack(spacing: 7) {
+            Image(systemName: isStale(instrument) ? "exclamationmark.circle.fill" : "clock")
+                .font(.caption2.weight(.semibold))
+                .accessibilityHidden(true)
+
+            Text(statusDescription(instrument))
+                .font(.caption)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .foregroundStyle(
+                    isStale(instrument) ? MonMonTheme.danger : MonMonTheme.textSecondary
+                )
+
+            Spacer(minLength: 8)
+
+            if let url = FmarketLink.url(for: instrument) {
+                fmarketButton(url: url, symbol: instrument.symbol)
+            }
+        }
+        .foregroundStyle(isStale(instrument) ? MonMonTheme.danger : MonMonTheme.textSecondary)
+    }
+
+    /// Opens the fund's own page on Fmarket — its strategy, its holdings, its
+    /// chart — which is everything this app deliberately does not store.
+    private func fmarketButton(url: URL, symbol: String) -> some View {
+        Button {
+            fmarketPage = WebPage(url)
+        } label: {
+            Label("Fmarket", systemImage: "safari")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(MonMonTheme.accent)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(MonMonTheme.accent.opacity(0.16), in: Capsule())
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Open \(symbol) on Fmarket")
+        .accessibilityIdentifier("open-fmarket-\(symbol.lowercased())")
     }
 
     /// Refresh and the two ways of adding a fund, in the content rather than the
     /// toolbar. macOS collapses a toolbar's extra primary actions into an
     /// overflow, which is how Refresh managed to ship invisible.
+    ///
+    /// One row, three equal shares, short labels: spelled out in full the three
+    /// wrapped to three stacked rows on an iPhone and cost more height than the
+    /// first fund card. The full wording stays in the accessibility labels.
     private var actionBar: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 10) { actionButtons }
-            VStack(alignment: .leading, spacing: 10) { actionButtons }
+        HStack(spacing: 8) {
+            actionButton(
+                title: refresher.isRunning ? "Refreshing…" : "Refresh",
+                systemImage: "arrow.clockwise",
+                accessibilityLabel: "Refresh prices",
+                identifier: "refresh-quotes",
+                isProminent: true
+            ) {
+                refresh()
+            }
+            .disabled(refresher.isRunning || !canRefresh)
+
+            actionButton(
+                title: "Fmarket",
+                systemImage: "square.and.arrow.down",
+                accessibilityLabel: "Add from Fmarket",
+                identifier: "import-from-fmarket"
+            ) {
+                isImporting = true
+            }
+
+            actionButton(
+                title: "Add",
+                systemImage: "plus",
+                accessibilityLabel: "Add by hand",
+                identifier: "add-instrument"
+            ) {
+                editorMode = .add
+            }
         }
     }
 
-    @ViewBuilder
-    private var actionButtons: some View {
-        Button {
-            refresh()
-        } label: {
-            Label(
-                refresher.isRunning ? "Refreshing…" : "Refresh prices",
-                systemImage: "arrow.clockwise"
-            )
-            .font(.subheadline.weight(.semibold))
-            .padding(.horizontal, 16)
-            .padding(.vertical, 11)
-            .background(MonMonTheme.accent.opacity(0.16), in: Capsule())
-        }
-        .buttonStyle(.plain)
-        .foregroundStyle(MonMonTheme.accent)
-        .disabled(refresher.isRunning || !canRefresh)
-        .accessibilityIdentifier("refresh-quotes")
-
-        Button {
-            isImporting = true
-        } label: {
-            Label("Add from Fmarket", systemImage: "square.and.arrow.down")
+    private func actionButton(
+        title: String,
+        systemImage: String,
+        accessibilityLabel: String,
+        identifier: String,
+        isProminent: Bool = false,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Label(title, systemImage: systemImage)
                 .font(.subheadline.weight(.semibold))
-                .padding(.horizontal, 16)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .padding(.horizontal, 12)
                 .padding(.vertical, 11)
-                .background(MonMonTheme.surface, in: Capsule())
-                .overlay(Capsule().stroke(MonMonTheme.border, lineWidth: 1))
+                .frame(maxWidth: .infinity)
+                .background {
+                    if isProminent {
+                        Capsule().fill(MonMonTheme.accent.opacity(0.16))
+                    } else {
+                        Capsule()
+                            .fill(MonMonTheme.surface)
+                            .overlay(Capsule().stroke(MonMonTheme.border, lineWidth: 1))
+                    }
+                }
+                .contentShape(Capsule())
         }
         .buttonStyle(.plain)
-        .foregroundStyle(MonMonTheme.textPrimary)
-        .accessibilityIdentifier("import-from-fmarket")
-
-        Button {
-            editorMode = .add
-        } label: {
-            Label("Add by hand", systemImage: "plus")
-                .font(.subheadline.weight(.semibold))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 11)
-                .background(MonMonTheme.surface, in: Capsule())
-                .overlay(Capsule().stroke(MonMonTheme.border, lineWidth: 1))
-        }
-        .buttonStyle(.plain)
-        .foregroundStyle(MonMonTheme.textPrimary)
-        .accessibilityIdentifier("add-instrument")
+        .foregroundStyle(isProminent ? MonMonTheme.accent : MonMonTheme.textPrimary)
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityIdentifier(identifier)
     }
 
     /// Refresh is offered only when a request could actually achieve something:

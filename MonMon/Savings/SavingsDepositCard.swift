@@ -63,50 +63,44 @@ struct SavingsDepositCard: View {
         }
     }
 
+    /// One term to a line, label left and figure right. Five of these side by
+    /// side left an iPhone shrinking every figure to fit; stacked, each one
+    /// keeps its own line and the amounts line up down the right edge.
     private var terms: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(alignment: .top, spacing: 12) {
-                termColumns
-            }
-
-            VStack(alignment: .leading, spacing: 12) {
-                termColumns
-            }
+        VStack(alignment: .leading, spacing: 10) {
+            detail(
+                title: "RATE",
+                value: PercentInput.formatWithSymbol(deposit.annualInterestRate)
+            )
+            detail(title: "TERM", value: termDescription)
+            detail(title: "MATURES", value: maturityDescription)
+            detail(
+                title: "INTEREST",
+                value: VNDCurrency.format(deposit.projectedInterest)
+            )
+            detail(
+                title: "AT MATURITY",
+                value: VNDCurrency.format(deposit.maturityValue)
+            )
         }
     }
 
-    @ViewBuilder
-    private var termColumns: some View {
-        detail(
-            title: "RATE",
-            value: PercentInput.formatWithSymbol(deposit.annualInterestRate)
-        )
-        detail(title: "TERM", value: termDescription)
-        detail(title: "MATURES", value: maturityDescription)
-        detail(
-            title: "INTEREST",
-            value: VNDCurrency.format(deposit.projectedInterest)
-        )
-        detail(
-            title: "AT MATURITY",
-            value: VNDCurrency.format(deposit.maturityValue)
-        )
-    }
-
     private func detail(title: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
             Text(title)
                 .font(.caption2.weight(.semibold))
                 .tracking(0.5)
                 .foregroundStyle(MonMonTheme.textSecondary)
+
+            Spacer(minLength: 8)
 
             Text(value)
                 .font(.subheadline.weight(.medium))
                 .monospacedDigit()
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
+                .multilineTextAlignment(.trailing)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var sourceDescription: String {

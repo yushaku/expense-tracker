@@ -169,6 +169,20 @@ struct FundEditorForm: View {
                     }
                 }
 
+                VStack(alignment: .leading, spacing: 8) {
+                    fieldLabel("Bought on")
+
+                    DateField(
+                        selection: $draft.purchasedAt,
+                        accessibilityIdentifier: "fund-purchased-at"
+                    )
+
+                    Text(
+                        "Today by default. Move it back to record a purchase made earlier."
+                    )
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                }
             }
         }
     }

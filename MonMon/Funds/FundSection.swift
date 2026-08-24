@@ -8,9 +8,7 @@ struct FundSection: View {
     /// The catalogue the holdings are priced from. Passed in rather than
     /// queried here so the section stays a plain view over values.
     let instruments: [FundInstrument]
-    let accounts: [CashAccount]
     let onAdd: () -> Void
-    let onEdit: (FundHolding) -> Void
 
     var body: some View {
         if holdings.isEmpty {
@@ -115,14 +113,21 @@ struct FundSection: View {
         return "\(label) \(sign)\(VNDCurrency.format(abs(profitLoss)))"
     }
 
+    private var groups: [FundPositionGroup] {
+        FundSummary.groups(holdings: holdings, instruments: instruments)
+    }
+
+    /// Counts both, because they answer different questions: how many funds are
+    /// held, and how many purchases went into them.
     private var holdingCountLabel: String {
         switch holdings.count {
         case 0:
-            "Ready for your first holding"
+            return "Ready for your first holding"
         case 1:
-            "Across 1 holding"
+            return "Across 1 fund · 1 position"
         default:
-            "Across \(holdings.count) holdings"
+            let funds = groups.count == 1 ? "1 fund" : "\(groups.count) funds"
+            return "Across \(funds) · \(holdings.count) positions"
         }
     }
 
@@ -165,23 +170,18 @@ struct FundSection: View {
         }
     }
 
-    private func accountName(for holding: FundHolding) -> String? {
-        guard let sourceAccountID = holding.sourceAccountID else {
-            return nil
-        }
-
-        return accounts.first { $0.id == sourceAccountID }?.name
-    }
-
+    /// One card per fund, not per purchase. Buying the same fund every month is
+    /// one position built in instalments, and a list that showed each instalment
+    /// buried what the position actually is; the instalments are one tap in.
     private var holdingsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Holdings")
+                Text("Funds")
                     .font(.title3.weight(.semibold))
 
                 Spacer()
 
-                Text(holdings.count.formatted())
+                Text(groups.count.formatted())
                     .font(.caption.weight(.bold))
                     .foregroundStyle(MonMonTheme.funds)
                     .padding(.horizontal, 10)
@@ -189,19 +189,13 @@ struct FundSection: View {
                     .background(MonMonTheme.funds.opacity(0.16), in: Capsule())
             }
 
-            ForEach(holdings) { holding in
-                Button {
-                    onEdit(holding)
-                } label: {
-                    FundHoldingCard(
-                        holding: holding,
-                        instrument: instruments.matching(holding),
-                        sourceAccountName: accountName(for: holding)
-                    )
+            ForEach(groups) { group in
+                NavigationLink(value: FundGroupRoute(instrumentID: group.instrumentID)) {
+                    FundGroupCard(group: group)
                 }
                 .buttonStyle(.plain)
-                .accessibilityIdentifier("fund-\(holding.id.uuidString)")
-                .accessibilityHint("Opens this holding for editing")
+                .accessibilityIdentifier("fund-group-\(group.id)")
+                .accessibilityHint("Opens every position in this fund")
             }
         }
     }

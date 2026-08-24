@@ -34,13 +34,22 @@ final class FundHolding {
     var sourceAccountID: UUID?
     var createdAt: Date = Date(timeIntervalSince1970: 0)
 
+    /// The day the units were bought, which is rarely the day they were typed
+    /// in: a DCA stack is often entered weeks after the purchases it records.
+    ///
+    /// Optional rather than defaulted, because there is no honest default for a
+    /// record written before this field existed. `boughtOn` falls back to
+    /// `createdAt` for those, which is the closest thing that build knew.
+    var purchasedAt: Date?
+
     init(
         id: UUID,
         instrumentID: UUID?,
         units: Decimal,
         averageCostPerUnit: Decimal,
         createdAt: Date,
-        sourceAccountID: UUID? = nil
+        sourceAccountID: UUID? = nil,
+        purchasedAt: Date? = nil
     ) {
         self.id = id
         self.instrumentID = instrumentID
@@ -48,10 +57,18 @@ final class FundHolding {
         self.averageCostPerUnit = averageCostPerUnit
         self.createdAt = createdAt
         self.sourceAccountID = sourceAccountID
+        self.purchasedAt = purchasedAt
     }
 }
 
 extension FundHolding {
+    /// The day this position was bought. Records written before the app asked
+    /// for one report the day they were entered instead, which is what those
+    /// builds meant by it.
+    var boughtOn: Date {
+        purchasedAt ?? createdAt
+    }
+
     /// What this position cost. Needs no instrument: the price paid is the
     /// owner's own figure and never moves with the market. This is also the
     /// amount deducted from the funding account, which is why the cash side of

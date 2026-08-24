@@ -74,6 +74,9 @@ struct InvestmentsView: View {
                     }
                 }
             }
+            .navigationDestination(for: FundGroupRoute.self) { route in
+                FundGroupDetailView(route: route)
+            }
             .navigationTitle("Investments")
             .accessibilityIdentifier("investments-list")
             .toolbar {
@@ -168,10 +171,8 @@ struct InvestmentsView: View {
                 editor = .savings(.edit(deposit))
             }
         case .funds:
-            FundSection(holdings: holdings, instruments: instruments, accounts: accounts) {
+            FundSection(holdings: holdings, instruments: instruments) {
                 add()
-            } onEdit: { holding in
-                editor = .fund(.edit(holding))
             }
         }
     }

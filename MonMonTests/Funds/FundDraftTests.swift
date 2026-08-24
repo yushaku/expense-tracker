@@ -22,6 +22,51 @@ struct FundDraftTests {
         )
     }
 
+    /// The day the units were bought is the owner's, not the app's: a DCA stack
+    /// is usually typed in weeks after the purchases it records.
+    @Test("A new draft defaults to today and carries the chosen day onto the holding")
+    func purchaseDayIsCarried() throws {
+        let lastMonth = createdAt.addingTimeInterval(-30 * 86_400)
+        var draft = makeDraft(instrumentID: instrument.id)
+
+        #expect(abs(draft.purchasedAt.timeIntervalSinceNow) < 5)
+
+        draft.purchasedAt = lastMonth
+        let holding = try draft.makeHolding(
+            id: UUID(),
+            createdAt: createdAt,
+            availableSourceBalance: nil
+        )
+
+        #expect(holding.purchasedAt == lastMonth)
+        #expect(holding.boughtOn == lastMonth)
+        // Entered now, bought then: the two dates are allowed to disagree.
+        #expect(holding.createdAt == createdAt)
+    }
+
+    @Test("Editing moves the purchase day and a record without one reads as entered")
+    func purchaseDayIsEditable() throws {
+        let holding = FundTestFactory.holding(
+            in: instrument,
+            units: 1_000,
+            averageCostPerUnit: 20_000,
+            createdAt: createdAt
+        )
+
+        // Written before the app asked for a purchase day.
+        #expect(holding.purchasedAt == nil)
+        #expect(holding.boughtOn == createdAt)
+
+        var draft = FundDraft(holding: holding)
+        #expect(draft.purchasedAt == createdAt)
+
+        let earlier = createdAt.addingTimeInterval(-7 * 86_400)
+        draft.purchasedAt = earlier
+        try draft.apply(to: holding, availableSourceBalance: nil)
+
+        #expect(holding.boughtOn == earlier)
+    }
+
     @Test("A complete draft validates into exact decimal values")
     func completeDraftValidates() throws {
         let values = try makeDraft(instrumentID: instrument.id)
