@@ -325,6 +325,7 @@ struct DebtPersistenceTests {
             note: "",
             accountID: wallet.id,
             categoryID: nil,
+            sourceRuleID: nil,
             currencyCode: VNDCurrency.code,
             createdAt: occurredAt
         )

@@ -16,6 +16,7 @@ begins.
 | `account-transfer`        | Move money between two of the owner's own accounts, so both balances follow and total assets stay put                                                                  | `cash-balance`, `income-expense`                                                           |
 | `debt-tracking`           | Record money borrowed and money lent out, with the payments against them, so balances follow and total assets stay put                                                 | `cash-balance`, `income-expense`, `account-transfer`                                       |
 | `~~investment-tracking~~` | **Dropped as a trade ledger.** Individual buy/sell trades, realized profit and loss, equity, and crypto remain out of scope                                             | —                                                                                          |
+| `recurring-transactions`  | Record money that repeats — rent, salary, a subscription — from one rule, caught up on every launch, with no balance of its own                            | `income-expense`                                                                           |
 | `market-valuation`        | Import fund and gold catalogues, refresh fund, ETF, and gold prices on demand, and show what each holding is worth                                                       | `fund-etf-holdings`                                                                        |
 | `icloud-sync`             | Synchronize all financial records through the owner's private iCloud database                                                                                          | `cash-balance`, `income-expense`, `debt-tracking`, `fund-etf-holdings`, `market-valuation` |
 | `mcp-readonly`            | Expose synchronized financial data to AI clients from a read-only macOS MCP server                                                                                     | `icloud-sync`                                                                              |
@@ -32,7 +33,8 @@ Build order:
 7. `debt-tracking`
 8. `market-valuation`
 9. `icloud-sync`
-10. `mcp-readonly`
+10. `recurring-transactions`
+11. `mcp-readonly`
 
 ## Initiative-wide boundaries
 
@@ -43,6 +45,9 @@ Build order:
 - Development stops at each module checkpoint for hands-on user testing.
 - `savings-deposit` and `fund-etf-holdings` share one Investments tab. That tab
 is a screen, not a module.
+- `recurring-transactions` writes ordinary `MoneyTransaction` records and holds
+no balance of its own, so it adds no term to any total. It runs when the app is
+opened, never on a timer and never in the background.
 
 ## Dropped
 

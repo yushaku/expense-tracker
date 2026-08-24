@@ -73,6 +73,7 @@ final class AssetAllocationTests {
             note: "",
             accountID: accountID,
             categoryID: nil,
+            sourceRuleID: nil,
             currencyCode: VNDCurrency.code,
             createdAt: fixedDate
         )

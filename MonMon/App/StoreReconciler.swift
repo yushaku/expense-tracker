@@ -32,9 +32,10 @@ enum StoreReconciler {
         var categories = 0
         var instruments = 0
         var accounts = 0
+        var transactions = 0
 
         var isEmpty: Bool {
-            categories == 0 && instruments == 0 && accounts == 0
+            categories == 0 && instruments == 0 && accounts == 0 && transactions == 0
         }
     }
 
@@ -47,6 +48,7 @@ enum StoreReconciler {
         report.categories = try foldCategories(in: context)
         report.instruments = try foldInstruments(in: context)
         report.accounts = try foldAnchorAccounts(in: context)
+        report.transactions = try foldGeneratedTransactions(in: context)
 
         if !report.isEmpty {
             try context.save()
@@ -70,6 +72,7 @@ enum StoreReconciler {
         }
 
         let transactions = try context.fetch(FetchDescriptor<MoneyTransaction>())
+        let rules = try context.fetch(FetchDescriptor<RecurringRule>())
         var folded = 0
 
         for merge in merges {
@@ -77,6 +80,11 @@ enum StoreReconciler {
             for transaction in transactions
             where transaction.categoryID.map(doomed.contains) == true {
                 transaction.categoryID = merge.survivor.id
+            }
+            // A rule files what it will record next, so it has to follow the
+            // survivor too, or tomorrow's entry lands under a deleted category.
+            for rule in rules where rule.categoryID.map(doomed.contains) == true {
+                rule.categoryID = merge.survivor.id
             }
             for duplicate in merge.duplicates {
                 context.delete(duplicate)
@@ -130,6 +138,45 @@ enum StoreReconciler {
         let merges = DuplicateReconciler.merges(
             in: accounts,
             key: { $0.id.uuidString },
+            createdAt: \.createdAt,
+            id: \.id
+        )
+
+        var folded = 0
+        for merge in merges {
+            for duplicate in merge.duplicates {
+                context.delete(duplicate)
+                folded += 1
+            }
+        }
+
+        return folded
+    }
+
+    /// Matched on the rule that wrote the transaction and the day it fell on —
+    /// the same pair `RecurringGenerator` refuses to write twice.
+    ///
+    /// The generator can only check what its own device already holds, so two
+    /// devices that had not met yet both generate the month's rent and the
+    /// duplicate lands when synchronisation does. A hand-typed transaction has
+    /// no rule id and is never folded: two lunches on one day are two lunches.
+    ///
+    /// Nothing is repointed because a transaction has no children.
+    private static func foldGeneratedTransactions(in context: ModelContext) throws -> Int {
+        let transactions = try context.fetch(FetchDescriptor<MoneyTransaction>())
+        let merges = DuplicateReconciler.merges(
+            in: transactions,
+            key: { transaction in
+                guard let sourceRuleID = transaction.sourceRuleID else {
+                    // Dropped by `merges`, which skips an empty key.
+                    return ""
+                }
+
+                return RecurringGenerator.key(
+                    ruleID: sourceRuleID,
+                    occurredAt: transaction.occurredAt
+                )
+            },
             createdAt: \.createdAt,
             id: \.id
         )

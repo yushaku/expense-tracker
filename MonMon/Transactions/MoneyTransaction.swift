@@ -16,6 +16,11 @@ final class MoneyTransaction {
     /// Optional so a half-finished category deletion cannot destroy a
     /// transaction. The UI renders a missing category as "Uncategorized".
     var categoryID: UUID?
+    /// The recurring rule that generated this transaction, or `nil` when the
+    /// owner typed it. It is provenance for the badge on the card, and the key
+    /// `RecurringGenerator` and `StoreReconciler` both dedupe on: one rule may
+    /// only ever produce one transaction per day.
+    var sourceRuleID: UUID?
     var currencyCode: String = VNDCurrency.code
     var createdAt: Date = Date(timeIntervalSince1970: 0)
 
@@ -27,6 +32,7 @@ final class MoneyTransaction {
         note: String,
         accountID: UUID,
         categoryID: UUID?,
+        sourceRuleID: UUID?,
         currencyCode: String,
         createdAt: Date
     ) {
@@ -37,6 +43,7 @@ final class MoneyTransaction {
         self.note = note
         self.accountID = accountID
         self.categoryID = categoryID
+        self.sourceRuleID = sourceRuleID
         self.currencyCode = currencyCode
         self.createdAt = createdAt
     }

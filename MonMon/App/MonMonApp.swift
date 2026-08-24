@@ -31,6 +31,16 @@ struct MonMonApp: App {
             // than folding it and better than not launching.
             assertionFailure("Reconcile failed: \(error)")
         }
+
+        do {
+            // After reconciling, so a rule that arrived twice has been folded
+            // into one before either copy is asked what it owes.
+            try RecurringGenerator.generate(in: container.mainContext)
+        } catch {
+            // The same bargain: an entry the owner adds by hand is a smaller
+            // loss than a launch that does not happen.
+            assertionFailure("Recurring generation failed: \(error)")
+        }
     }
 
     private static var modelConfiguration: ModelConfiguration {
@@ -63,6 +73,10 @@ struct MonMonApp: App {
                         return
                     }
                     _ = try? StoreReconciler.reconcile(in: container.mainContext)
+                    // Coming back is also the moment a rule can have fallen due
+                    // since the app was opened — an app left running overnight
+                    // would otherwise not record today until it was relaunched.
+                    _ = try? RecurringGenerator.generate(in: container.mainContext)
                 }
         }
         .modelContainer(container)

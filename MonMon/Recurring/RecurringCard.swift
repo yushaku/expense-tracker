@@ -1,9 +1,11 @@
 import SwiftUI
 
-struct TransactionCard: View {
-    let transaction: MoneyTransaction
+/// One rule as a row: what it records, how often, and when it next falls due.
+struct RecurringCard: View {
+    let rule: RecurringRule
     let category: TransactionCategory?
     let account: CashAccount?
+    let asOf: Date
 
     private static let dateFormat: Date.FormatStyle = {
         var style = Date.FormatStyle().day().month(.abbreviated)
@@ -18,20 +20,9 @@ struct TransactionCard: View {
             icon
 
             VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 6) {
-                    Text(categoryName)
-                        .font(.headline)
-                        .lineLimit(1)
-
-                    // Marks what a rule recorded, so an entry the owner does not
-                    // remember typing is explained rather than suspicious.
-                    if transaction.sourceRuleID != nil {
-                        Image(systemName: "arrow.triangle.2.circlepath")
-                            .font(.caption2.weight(.bold))
-                            .foregroundStyle(MonMonTheme.textSecondary)
-                            .accessibilityLabel("Recurring")
-                    }
-                }
+                Text(title)
+                    .font(.headline)
+                    .lineLimit(1)
 
                 Text(subtitle)
                     .font(.subheadline)
@@ -52,6 +43,9 @@ struct TransactionCard: View {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(MonMonTheme.border, lineWidth: 1)
         }
+        // A paused rule is still a rule the owner wrote, so it is dimmed rather
+        // than hidden or restyled into something else.
+        .opacity(rule.isPaused ? 0.55 : 1)
         .accessibilityElement(children: .combine)
     }
 
@@ -66,37 +60,61 @@ struct TransactionCard: View {
 
     private var amount: some View {
         VStack(alignment: .trailing, spacing: 3) {
-            // The sign carries the direction; colour only reinforces it.
-            Text("\(transaction.kind.signLabel)\(VNDCurrency.format(transaction.amount))")
+            Text("\(rule.kind.signLabel)\(VNDCurrency.format(rule.amount))")
                 .font(.headline)
                 .monospacedDigit()
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
                 .foregroundStyle(directionTint)
 
-            Label(
-                Self.dateFormat.format(transaction.occurredAt),
-                systemImage: transaction.kind.symbolName
-            )
-            .font(.caption2.weight(.semibold))
-            .foregroundStyle(MonMonTheme.textSecondary)
+            Label(dueLabel, systemImage: dueSymbolName)
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(MonMonTheme.textSecondary)
         }
     }
 
-    private var categoryName: String {
-        category?.name ?? "Uncategorized"
+    /// The note names the rule — "Rent" — and the category stands in when the
+    /// owner left it blank.
+    private var title: String {
+        let trimmedNote = rule.note.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmedNote.isEmpty else {
+            return trimmedNote
+        }
+
+        return category?.name ?? CategoryBreakdown.uncategorizedName
     }
 
     private var subtitle: String {
         let accountName = account?.name ?? "Unknown account"
-        let trimmedNote = transaction.note.trimmingCharacters(in: .whitespacesAndNewlines)
+        return "\(rule.schedulePhrase) · \(accountName)"
+    }
 
-        return trimmedNote.isEmpty ? accountName : "\(accountName) · \(trimmedNote)"
+    /// A rule that will never fall due again says so, rather than showing a date
+    /// that is not coming.
+    private var dueLabel: String {
+        guard !rule.isPaused else {
+            return "Paused"
+        }
+
+        guard let next = rule.nextOccurrence(after: asOf) else {
+            return "Finished"
+        }
+
+        return "Next \(Self.dateFormat.format(next))"
+    }
+
+    private var dueSymbolName: String {
+        if rule.isPaused {
+            return "pause.fill"
+        }
+
+        return rule.nextOccurrence(after: asOf) == nil
+            ? "checkmark.circle.fill" : "arrow.triangle.2.circlepath"
     }
 
     private var symbolName: String {
         guard let category else {
-            return transaction.kind.symbolName
+            return rule.frequency.symbolName
         }
 
         return CategoryPalette.symbolName(category.symbolName)
@@ -111,6 +129,6 @@ struct TransactionCard: View {
     }
 
     private var directionTint: Color {
-        transaction.kind == .income ? MonMonTheme.gain : MonMonTheme.textPrimary
+        rule.kind == .income ? MonMonTheme.gain : MonMonTheme.textPrimary
     }
 }

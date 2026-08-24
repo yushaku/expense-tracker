@@ -15,6 +15,7 @@ struct TransactionListView: View {
     @State private var editorMode: TransactionEditorMode?
     @State private var breakdownKind: TransactionKind = .expense
     @State private var isManagingCategories = false
+    @State private var isManagingRecurring = false
 
     var body: some View {
         NavigationStack {
@@ -65,11 +66,22 @@ struct TransactionListView: View {
             }
             .compactRootNavigationTitle("Spending")
             .accessibilityIdentifier("spending-list")
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Recurring", systemImage: "arrow.triangle.2.circlepath") {
+                        isManagingRecurring = true
+                    }
+                    .accessibilityIdentifier("manage-recurring")
+                }
+            }
             .sheet(item: $editorMode) { mode in
                 TransactionEditorView(mode: mode, defaultDate: defaultDate)
             }
             .sheet(isPresented: $isManagingCategories) {
                 CategoryListView()
+            }
+            .sheet(isPresented: $isManagingRecurring) {
+                RecurringListView()
             }
             .tint(MonMonTheme.accent)
         }

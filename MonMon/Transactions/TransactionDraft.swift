@@ -147,6 +147,7 @@ struct TransactionDraft: Equatable {
             note: values.note,
             accountID: values.accountID,
             categoryID: values.categoryID,
+            sourceRuleID: nil,
             currencyCode: VNDCurrency.code,
             createdAt: createdAt
         )

@@ -179,6 +179,21 @@
 		A00000000000000000000A06 /* DuplicateReconciler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000A05 /* DuplicateReconciler.swift */; };
 		A00000000000000000000A08 /* StoreReconciler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000A07 /* StoreReconciler.swift */; };
 		A00000000000000000000A0B /* StoreReconcilerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000A0A /* StoreReconcilerTests.swift */; };
+		A00000000000000000000E00 /* RecurrenceFrequency.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D01 /* RecurrenceFrequency.swift */; };
+		A00000000000000000000E01 /* RecurrenceSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D02 /* RecurrenceSchedule.swift */; };
+		A00000000000000000000E02 /* RecurrenceScheduleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D04 /* RecurrenceScheduleTests.swift */; };
+		A00000000000000000000E03 /* RecurringRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D05 /* RecurringRule.swift */; };
+		A00000000000000000000E04 /* RecurringRuleDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D06 /* RecurringRuleDraft.swift */; };
+		A00000000000000000000E05 /* RecurringRuleDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D07 /* RecurringRuleDraftTests.swift */; };
+		A00000000000000000000E06 /* RecurringGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D08 /* RecurringGenerator.swift */; };
+		A00000000000000000000E07 /* RecurringGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D09 /* RecurringGeneratorTests.swift */; };
+		A00000000000000000000E08 /* RecurringSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D0A /* RecurringSummary.swift */; };
+		A00000000000000000000E09 /* RecurringRulePersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D0B /* RecurringRulePersistenceTests.swift */; };
+		A00000000000000000000E0A /* RecurringSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D0C /* RecurringSummaryTests.swift */; };
+		A00000000000000000000E0B /* RecurringCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D0D /* RecurringCard.swift */; };
+		A00000000000000000000E0C /* RecurringEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D0E /* RecurringEditorForm.swift */; };
+		A00000000000000000000E0D /* RecurringEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D0F /* RecurringEditorView.swift */; };
+		A00000000000000000000E0E /* RecurringListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D10 /* RecurringListView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -369,6 +384,21 @@
 		A00000000000000000000A05 /* DuplicateReconciler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateReconciler.swift; sourceTree = "<group>"; };
 		A00000000000000000000A07 /* StoreReconciler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreReconciler.swift; sourceTree = "<group>"; };
 		A00000000000000000000A0A /* StoreReconcilerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreReconcilerTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000D01 /* RecurrenceFrequency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurrenceFrequency.swift; sourceTree = "<group>"; };
+		A00000000000000000000D02 /* RecurrenceSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurrenceSchedule.swift; sourceTree = "<group>"; };
+		A00000000000000000000D04 /* RecurrenceScheduleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurrenceScheduleTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000D05 /* RecurringRule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringRule.swift; sourceTree = "<group>"; };
+		A00000000000000000000D06 /* RecurringRuleDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringRuleDraft.swift; sourceTree = "<group>"; };
+		A00000000000000000000D07 /* RecurringRuleDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringRuleDraftTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000D08 /* RecurringGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringGenerator.swift; sourceTree = "<group>"; };
+		A00000000000000000000D09 /* RecurringGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringGeneratorTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000D0A /* RecurringSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringSummary.swift; sourceTree = "<group>"; };
+		A00000000000000000000D0B /* RecurringRulePersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringRulePersistenceTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000D0C /* RecurringSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringSummaryTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000D0D /* RecurringCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringCard.swift; sourceTree = "<group>"; };
+		A00000000000000000000D0E /* RecurringEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringEditorForm.swift; sourceTree = "<group>"; };
+		A00000000000000000000D0F /* RecurringEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringEditorView.swift; sourceTree = "<group>"; };
+		A00000000000000000000D10 /* RecurringListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringListView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -413,6 +443,7 @@
 		A00000000000000000000012 /* MonMon */ = {
 			isa = PBXGroup;
 			children = (
+				A00000000000000000000D00 /* Recurring */,
 				33A69BFF303B567700432AF4 /* MonMon.entitlements */,
 				A00000000000000000000013 /* App */,
 				A00000000000000000000018 /* Accounts */,
@@ -453,6 +484,7 @@
 		A00000000000000000000015 /* MonMonTests */ = {
 			isa = PBXGroup;
 			children = (
+				A00000000000000000000D03 /* Recurring */,
 				A00000000000000000000A09 /* App */,
 				A00000000000000000000017 /* Accounts */,
 				A00000000000000000000021 /* Savings */,
@@ -765,6 +797,35 @@
 			path = App;
 			sourceTree = "<group>";
 		};
+		A00000000000000000000D00 /* Recurring */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000D10 /* RecurringListView.swift */,
+				A00000000000000000000D0F /* RecurringEditorView.swift */,
+				A00000000000000000000D0E /* RecurringEditorForm.swift */,
+				A00000000000000000000D0D /* RecurringCard.swift */,
+				A00000000000000000000D0A /* RecurringSummary.swift */,
+				A00000000000000000000D08 /* RecurringGenerator.swift */,
+				A00000000000000000000D06 /* RecurringRuleDraft.swift */,
+				A00000000000000000000D05 /* RecurringRule.swift */,
+				A00000000000000000000D02 /* RecurrenceSchedule.swift */,
+				A00000000000000000000D01 /* RecurrenceFrequency.swift */,
+			);
+			path = Recurring;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000D03 /* Recurring */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000D0C /* RecurringSummaryTests.swift */,
+				A00000000000000000000D0B /* RecurringRulePersistenceTests.swift */,
+				A00000000000000000000D09 /* RecurringGeneratorTests.swift */,
+				A00000000000000000000D07 /* RecurringRuleDraftTests.swift */,
+				A00000000000000000000D04 /* RecurrenceScheduleTests.swift */,
+			);
+			path = Recurring;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -870,6 +931,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A00000000000000000000E0E /* RecurringListView.swift in Sources */,
+				A00000000000000000000E0D /* RecurringEditorView.swift in Sources */,
+				A00000000000000000000E0C /* RecurringEditorForm.swift in Sources */,
+				A00000000000000000000E0B /* RecurringCard.swift in Sources */,
+				A00000000000000000000E08 /* RecurringSummary.swift in Sources */,
+				A00000000000000000000E06 /* RecurringGenerator.swift in Sources */,
+				A00000000000000000000E04 /* RecurringRuleDraft.swift in Sources */,
+				A00000000000000000000E03 /* RecurringRule.swift in Sources */,
+				A00000000000000000000E01 /* RecurrenceSchedule.swift in Sources */,
+				A00000000000000000000E00 /* RecurrenceFrequency.swift in Sources */,
 				A00000000000000000000287 /* CalendarTheme.swift in Sources */,
 				A00000000000000000000285 /* CategoryTransactionsView.swift in Sources */,
 				A00000000000000000000284 /* CategoryBreakdownCard.swift in Sources */,
@@ -1000,6 +1071,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A00000000000000000000E0A /* RecurringSummaryTests.swift in Sources */,
+				A00000000000000000000E09 /* RecurringRulePersistenceTests.swift in Sources */,
+				A00000000000000000000E07 /* RecurringGeneratorTests.swift in Sources */,
+				A00000000000000000000E05 /* RecurringRuleDraftTests.swift in Sources */,
+				A00000000000000000000E02 /* RecurrenceScheduleTests.swift in Sources */,
 				A00000000000000000000286 /* CategoryBreakdownTests.swift in Sources */,
 				A00000000000000000000280 /* AppLockTests.swift in Sources */,
 				A00000000000000000000973 /* CloudSyncTests.swift in Sources */,

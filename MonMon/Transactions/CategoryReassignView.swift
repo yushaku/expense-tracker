@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// Asks where a category's transactions should go before it is deleted. The
-/// caller performs the move and the deletion together, so cancelling here
-/// leaves both the category and its transactions untouched.
+/// Asks where a category's records — the transactions already recorded under
+/// it and the recurring rules that would record more — should go before it is
+/// deleted. The caller performs the move and the deletion together, so
+/// cancelling here leaves both the category and its records untouched.
 struct CategoryReassignView: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -44,7 +45,7 @@ struct CategoryReassignView: View {
                     .frame(maxWidth: .infinity)
                 }
             }
-            .navigationTitle("Move transactions")
+            .navigationTitle("Move records")
             .accessibilityIdentifier("reassign-category")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -94,7 +95,7 @@ struct CategoryReassignView: View {
     }
 
     private var explanation: String {
-        let noun = usageCount == 1 ? "transaction" : "transactions"
+        let noun = usageCount == 1 ? "record" : "records"
         return "\(usageCount) \(noun) use \(category.name). Pick where they move to."
     }
 

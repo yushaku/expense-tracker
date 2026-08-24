@@ -38,6 +38,7 @@ struct CategoryBreakdownTests {
             note: "",
             accountID: accountID,
             categoryID: categoryID,
+            sourceRuleID: nil,
             currencyCode: VNDCurrency.code,
             createdAt: fixedDate
         )
