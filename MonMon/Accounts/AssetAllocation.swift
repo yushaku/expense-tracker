@@ -6,7 +6,8 @@ struct AssetAllocationSlice: Identifiable, Equatable {
         case cash
         case savings
         case funds
-        /// Declared last because the first three are money the owner holds,
+        case gold
+        /// Declared last because the first four are money the owner holds,
         /// while this is a claim on money someone else holds.
         case lent
 
@@ -18,6 +19,8 @@ struct AssetAllocationSlice: Identifiable, Equatable {
                 "Savings"
             case .funds:
                 "Funds"
+            case .gold:
+                "Gold"
             case .lent:
                 "Lent out"
             }
@@ -30,7 +33,7 @@ struct AssetAllocationSlice: Identifiable, Equatable {
     var id: String { kind.rawValue }
 }
 
-/// Splits what the owner holds into the four groups `AssetSummary.netWorth`
+/// Splits what the owner holds into the groups `AssetSummary.netWorth`
 /// adds up, so the doughnut and the total can never disagree.
 ///
 /// A doughnut cannot draw a negative wedge, and drawing one by magnitude would
@@ -75,7 +78,19 @@ enum AssetAllocation {
             ),
             AssetAllocationSlice(
                 kind: .funds,
-                amount: FundSummary.totalMarketValue(of: holdings, instruments: instruments)
+                amount: FundSummary.totalMarketValue(
+                    of: holdings,
+                    instruments: instruments,
+                    kinds: [.fund, .etf]
+                )
+            ),
+            AssetAllocationSlice(
+                kind: .gold,
+                amount: FundSummary.totalMarketValue(
+                    of: holdings,
+                    instruments: instruments,
+                    kinds: [.gold]
+                )
             ),
             AssetAllocationSlice(
                 kind: .lent,

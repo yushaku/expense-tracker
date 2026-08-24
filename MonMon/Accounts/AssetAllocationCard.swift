@@ -171,6 +171,8 @@ private extension AssetAllocationSlice.Kind {
             MonMonTheme.savings
         case .funds:
             MonMonTheme.funds
+        case .gold:
+            MonMonTheme.Hue.peach
         case .lent:
             MonMonTheme.lent
         }
@@ -184,6 +186,8 @@ private extension AssetAllocationSlice.Kind {
             "building.columns.fill"
         case .funds:
             "chart.line.uptrend.xyaxis"
+        case .gold:
+            "seal.fill"
         case .lent:
             "tray.and.arrow.up.fill"
         }
@@ -209,6 +213,7 @@ private extension Decimal {
                 AssetAllocationCard(
                     slices: [
                         AssetAllocationSlice(kind: .savings, amount: 350_000_000),
+                        AssetAllocationSlice(kind: .gold, amount: 147_000_000),
                         AssetAllocationSlice(kind: .funds, amount: 93_565_000),
                         AssetAllocationSlice(kind: .cash, amount: 49_150_000),
                     ],

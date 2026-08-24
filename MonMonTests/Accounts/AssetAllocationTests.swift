@@ -42,10 +42,12 @@ final class AssetAllocationTests {
         averageCostPerUnit: Decimal,
         pricePerUnit: Decimal,
         symbol: String = "VESAF",
+        kind: FundInstrumentKind = .fund,
         sourceAccountID: UUID? = nil
     ) -> FundHolding {
         let instrument = FundTestFactory.instrument(
             symbol: symbol,
+            kind: kind,
             pricePerUnit: pricePerUnit
         )
         catalogue.append(instrument)
@@ -229,6 +231,53 @@ final class AssetAllocationTests {
                 == AssetSummary.netWorth(
                     accounts: accounts,
                     deposits: deposits,
+                    holdings: holdings,
+                    instruments: catalogue,
+                    transactions: [],
+                    transfers: [],
+                    debts: [],
+                    payments: []
+                )
+        )
+    }
+
+    @Test("Gold draws its own wedge and funds no longer count it")
+    func goldHasItsOwnWedge() {
+        let account = makeAccount(openingBalance: 200_000_000)
+        let fund = makeHolding(
+            units: 1_000,
+            averageCostPerUnit: 20_000,
+            pricePerUnit: 25_000,
+            sourceAccountID: account.id
+        )
+        let gold = makeHolding(
+            units: 1,
+            averageCostPerUnit: 140_000_000,
+            pricePerUnit: 147_000_000,
+            symbol: "SJL1L10",
+            kind: .gold,
+            sourceAccountID: account.id
+        )
+        let holdings = [fund, gold]
+
+        let slices = AssetAllocation.slices(
+            accounts: [account],
+            deposits: [],
+            holdings: holdings,
+            instruments: catalogue,
+            transactions: [],
+            transfers: [],
+            debts: [],
+            payments: []
+        )
+
+        #expect(slices.first { $0.kind == .funds }?.amount == 25_000_000)
+        #expect(slices.first { $0.kind == .gold }?.amount == 147_000_000)
+        #expect(
+            AssetAllocation.total(of: slices)
+                == AssetSummary.netWorth(
+                    accounts: [account],
+                    deposits: [],
                     holdings: holdings,
                     instruments: catalogue,
                     transactions: [],
