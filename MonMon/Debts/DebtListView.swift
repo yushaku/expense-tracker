@@ -54,13 +54,13 @@ struct DebtListView: View {
 
                             section(
                                 "Money I owe",
-                                debts: sorted(borrowed),
+                                debts: DebtSummary.sortedForDisplay(borrowed, payments: payments),
                                 tint: MonMonTheme.credit
                             )
 
                             section(
                                 "Money owed to me",
-                                debts: sorted(lent),
+                                debts: DebtSummary.sortedForDisplay(lent, payments: payments),
                                 tint: MonMonTheme.lent
                             )
                         }
@@ -183,30 +183,6 @@ struct DebtListView: View {
     }
 
     // MARK: - Sections
-
-    /// Unsettled first by due date, undated last, and settled debts at the
-    /// bottom. No second picker: the screen already refused the first.
-    private func sorted(_ group: [Debt]) -> [Debt] {
-        group.sorted { first, second in
-            let firstSettled = DebtSummary.isSettled(first, payments: payments)
-            let secondSettled = DebtSummary.isSettled(second, payments: payments)
-
-            if firstSettled != secondSettled {
-                return secondSettled
-            }
-
-            switch (first.dueDate, second.dueDate) {
-            case (let firstDue?, let secondDue?):
-                return firstDue < secondDue
-            case (nil, _?):
-                return false
-            case (_?, nil):
-                return true
-            default:
-                return first.createdAt < second.createdAt
-            }
-        }
-    }
 
     @ViewBuilder
     private func section(_ title: String, debts group: [Debt], tint: Color) -> some View {

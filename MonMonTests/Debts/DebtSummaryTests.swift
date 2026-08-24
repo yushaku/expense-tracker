@@ -301,6 +301,25 @@ struct DebtSummaryTests {
         #expect(DebtSummary.isOverdue(debt, payments: [], asOf: date(2030, 1, 1)) == false)
     }
 
+    // MARK: - Display ordering
+
+    @Test("Open debts lead by due date, undated follow, and settled debts finish")
+    func displayOrderPrioritizesActionableDebts() {
+        let wallet = makeAccount()
+        let dueLater = makeDebt(dueDate: date(2026, 8, 1))
+        let settled = makeDebt(dueDate: date(2026, 5, 1))
+        let undated = makeDebt()
+        let dueSooner = makeDebt(dueDate: date(2026, 6, 1))
+        let payments = [makePayment(10_000_000, on: settled, from: wallet)]
+
+        let ordered = DebtSummary.sortedForDisplay(
+            [settled, undated, dueLater, dueSooner],
+            payments: payments
+        )
+
+        #expect(ordered.map(\.id) == [dueSooner.id, dueLater.id, undated.id, settled.id])
+    }
+
     // MARK: - Range filtering
 
     @Test("Range filtering keeps only the debts and payments inside it")

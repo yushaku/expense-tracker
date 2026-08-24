@@ -27,8 +27,7 @@ struct AccountListView: View {
     private var payments: [DebtPayment]
 
     @State private var editorMode: AccountEditorMode?
-    @State private var isManagingTransfers = false
-    @State private var isManagingDebts = false
+    @State private var debtEditorMode: DebtEditorMode?
 
     var body: some View {
         NavigationStack {
@@ -47,6 +46,8 @@ struct AccountListView: View {
                         } else {
                             accountsSection
                         }
+
+                        debtsSection
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
                     .padding(.horizontal, 20)
@@ -67,29 +68,14 @@ struct AccountListView: View {
             }
             .navigationTitle("Home")
             .accessibilityIdentifier("account-list")
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button("Transfers", systemImage: "arrow.left.arrow.right") {
-                        isManagingTransfers = true
-                    }
-                    .accessibilityIdentifier("manage-transfers")
-                }
-
-                ToolbarItem(placement: .primaryAction) {
-                    Button("Debts", systemImage: "person.2.fill") {
-                        isManagingDebts = true
-                    }
-                    .accessibilityIdentifier("manage-debts")
-                }
+            .navigationDestination(for: DebtRoute.self) { route in
+                DebtDetailView(route: route)
             }
             .sheet(item: $editorMode) { mode in
                 AccountEditorView(mode: mode)
             }
-            .sheet(isPresented: $isManagingTransfers) {
-                TransferListView()
-            }
-            .sheet(isPresented: $isManagingDebts) {
-                DebtListView()
+            .sheet(item: $debtEditorMode) { mode in
+                DebtEditorView(mode: mode)
             }
             .tint(MonMonTheme.accent)
         }
@@ -217,6 +203,83 @@ struct AccountListView: View {
                 .accessibilityHint("Opens the account editor.")
             }
         }
+    }
+
+    private var debtsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                Text("Debts")
+                    .font(.title3.weight(.semibold))
+
+                Text(debts.count.formatted())
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(MonMonTheme.accent)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(MonMonTheme.accent.opacity(0.16), in: Capsule())
+
+                Spacer(minLength: 8)
+
+                Button {
+                    debtEditorMode = .add
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(MonMonTheme.onAccent)
+                        .frame(width: 32, height: 32)
+                        .background(MonMonTheme.accent, in: Circle())
+                        .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .disabled(accounts.isEmpty)
+                .opacity(accounts.isEmpty ? 0.4 : 1)
+                .accessibilityLabel("Add Debt")
+                .accessibilityIdentifier("home-add-debt")
+            }
+
+            if debts.isEmpty {
+                Text(
+                    accounts.isEmpty
+                        ? "Add an account before recording debt."
+                        : "No debts recorded."
+                )
+                .font(.subheadline)
+                .foregroundStyle(MonMonTheme.textSecondary)
+                .padding(.vertical, 8)
+            } else {
+                ForEach(sortedDebts) { debt in
+                    NavigationLink(value: DebtRoute(debtID: debt.id)) {
+                        debtCard(for: debt)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("home-debt-\(debt.id.uuidString)")
+                    .accessibilityHint("Opens the debt and its payments.")
+                }
+            }
+        }
+    }
+
+    private var sortedDebts: [Debt] {
+        DebtSummary.sortedForDisplay(debts, payments: payments)
+    }
+
+    private func debtCard(for debt: Debt) -> some View {
+        let asOf = Date.now
+
+        return DebtCard(
+            debt: debt,
+            outstanding: DebtSummary.outstanding(for: debt, payments: payments),
+            paid: DebtSummary.paid(for: debt, payments: payments),
+            progress: DebtSummary.progress(for: debt, payments: payments),
+            accountName: accountName(debt.accountID),
+            isOverdue: DebtSummary.isOverdue(debt, payments: payments, asOf: asOf),
+            projectedInterest: debt.projectedInterest(asOf: asOf)
+        )
+    }
+
+    private func accountName(_ id: UUID?) -> String? {
+        guard let id else { return nil }
+        return accounts.first { $0.id == id }?.name
     }
 }
 

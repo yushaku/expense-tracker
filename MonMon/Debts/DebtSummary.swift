@@ -24,6 +24,31 @@ enum DebtSummary {
         outstanding(for: debt, payments: payments) <= 0
     }
 
+    /// Unsettled debts lead by due date, undated debts follow, and settled debts
+    /// finish the list. Every screen uses the same order so moving a list does
+    /// not make its cards jump around.
+    static func sortedForDisplay(_ debts: [Debt], payments: [DebtPayment]) -> [Debt] {
+        debts.sorted { first, second in
+            let firstSettled = isSettled(first, payments: payments)
+            let secondSettled = isSettled(second, payments: payments)
+
+            if firstSettled != secondSettled {
+                return secondSettled
+            }
+
+            switch (first.dueDate, second.dueDate) {
+            case (let firstDue?, let secondDue?):
+                return firstDue < secondDue
+            case (nil, _?):
+                return false
+            case (_?, nil):
+                return true
+            default:
+                return first.createdAt < second.createdAt
+            }
+        }
+    }
+
     /// Past the agreed date with something still owed. A settled debt is never
     /// overdue, and neither is one that agreed no date.
     static func isOverdue(_ debt: Debt, payments: [DebtPayment], asOf: Date) -> Bool {
