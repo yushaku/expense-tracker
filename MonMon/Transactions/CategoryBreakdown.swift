@@ -68,6 +68,35 @@ enum CategoryBreakdown {
         }
     }
 
+    /// The wedge a given fraction of the way round the doughnut, measured
+    /// clockwise from twelve o'clock, which is where the chart starts drawing.
+    ///
+    /// The wedges are laid out in the order they are listed, so running their
+    /// shares up until the turn is passed lands on the one under the finger.
+    /// Nothing outside a single turn belongs to a wedge.
+    static func slice(
+        atTurn turn: Double,
+        in slices: [CategoryBreakdownSlice]
+    ) -> CategoryBreakdownSlice? {
+        let total = total(of: slices)
+
+        guard total > 0, turn >= 0, turn < 1 else {
+            return nil
+        }
+
+        var passed = Decimal.zero
+
+        for slice in slices {
+            passed += slice.amount
+
+            if Decimal(turn) < passed / total {
+                return slice
+            }
+        }
+
+        return slices.last
+    }
+
     static func total(of slices: [CategoryBreakdownSlice]) -> Decimal {
         slices.reduce(Decimal.zero) { total, slice in
             total + slice.amount

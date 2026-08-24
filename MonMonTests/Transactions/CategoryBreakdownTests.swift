@@ -44,6 +44,44 @@ struct CategoryBreakdownTests {
         )
     }
 
+    private func makeSlice(_ name: String, _ amount: Decimal) -> CategoryBreakdownSlice {
+        CategoryBreakdownSlice(
+            categoryID: UUID(),
+            name: name,
+            symbolName: "fork.knife",
+            colorName: "peach",
+            amount: amount,
+            count: 1
+        )
+    }
+
+    @Test("A turn round the doughnut lands on the wedge covering it")
+    func turnPicksTheWedgeUnderIt() {
+        // A half, then two quarters, so the boundaries fall on easy fractions.
+        let slices = [makeSlice("Food", 500), makeSlice("Rent", 250), makeSlice("Fun", 250)]
+
+        #expect(CategoryBreakdown.slice(atTurn: 0, in: slices)?.name == "Food")
+        #expect(CategoryBreakdown.slice(atTurn: 0.49, in: slices)?.name == "Food")
+        #expect(CategoryBreakdown.slice(atTurn: 0.5, in: slices)?.name == "Rent")
+        #expect(CategoryBreakdown.slice(atTurn: 0.74, in: slices)?.name == "Rent")
+        #expect(CategoryBreakdown.slice(atTurn: 0.75, in: slices)?.name == "Fun")
+        #expect(CategoryBreakdown.slice(atTurn: 0.999, in: slices)?.name == "Fun")
+    }
+
+    @Test("A turn outside one lap belongs to no wedge")
+    func turnOutsideOneLapPicksNothing() {
+        let slices = [makeSlice("Food", 500)]
+
+        #expect(CategoryBreakdown.slice(atTurn: -0.1, in: slices) == nil)
+        #expect(CategoryBreakdown.slice(atTurn: 1, in: slices) == nil)
+    }
+
+    @Test("An empty doughnut has no wedge to land on")
+    func turnOnAnEmptyDoughnutPicksNothing() {
+        #expect(CategoryBreakdown.slice(atTurn: 0.5, in: []) == nil)
+        #expect(CategoryBreakdown.slice(atTurn: 0.5, in: [makeSlice("Food", 0)]) == nil)
+    }
+
     @Test("Nothing recorded produces no wedges")
     func emptyInputHasNoSlices() {
         let slices = CategoryBreakdown.slices(of: .expense, transactions: [], categories: [])
