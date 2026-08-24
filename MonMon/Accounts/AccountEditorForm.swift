@@ -7,7 +7,7 @@ struct AccountEditorForm: View {
     let canDelete: Bool
     let deleteBlockedReason: String?
     let validationError: AccountFormError?
-    let saveErrorMessage: String?
+    let saveErrorMessage: LocalizedStringKey?
     let onDelete: () -> Void
 
     var body: some View {
@@ -189,7 +189,7 @@ struct AccountEditorForm: View {
         #endif
     }
 
-    private var balanceHint: String {
+    private var balanceHint: LocalizedStringKey {
         draft.kind.allowsNegativeBalance
             ? "VND · Enter a negative amount for money you owe."
             : "VND · This becomes the current balance for this account."
@@ -209,13 +209,13 @@ struct AccountEditorForm: View {
             }
     }
 
-    private func sectionHeader(_ title: String, systemImage: String) -> some View {
+    private func sectionHeader(_ title: LocalizedStringKey, systemImage: String) -> some View {
         Label(title, systemImage: systemImage)
             .font(.headline)
             .foregroundStyle(MonMonTheme.textPrimary)
     }
 
-    private func errorBanner(_ message: String) -> some View {
+    private func errorBanner(_ message: LocalizedStringKey) -> some View {
         validationMessage(message, id: "save-account-error")
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
@@ -226,19 +226,19 @@ struct AccountEditorForm: View {
             }
     }
 
-    private func validationMessage(_ message: String, id: String) -> some View {
+    private func validationMessage(_ message: LocalizedStringKey, id: String) -> some View {
         Label(message, systemImage: "exclamationmark.circle.fill")
             .font(.caption)
             .foregroundStyle(MonMonTheme.danger)
             .accessibilityIdentifier(id)
     }
 
-    private var nameErrorMessage: String? {
+    private var nameErrorMessage: LocalizedStringKey? {
         guard validationError == .emptyName else { return nil }
         return "Enter an account name."
     }
 
-    private var balanceErrorMessage: String? {
+    private var balanceErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidOpeningBalance:
             "Enter a valid balance."
@@ -257,7 +257,7 @@ struct AccountEditorForm: View {
         var canDelete = false
         var deleteBlockedReason: String?
         var validationError: AccountFormError?
-        var saveErrorMessage: String?
+        var saveErrorMessage: LocalizedStringKey?
 
         var body: some View {
             NavigationStack {

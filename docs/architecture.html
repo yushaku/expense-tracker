@@ -34,6 +34,7 @@
       --e-category: #4a8438;
       --e-transfer: #2f7d9e;
       --e-debt: #8a5cc4;
+      --e-recurring: #b06a2c;
       --ok: #2f7a52;
       --warn: #9a6a12;
       --idle: #6d7a86;
@@ -63,6 +64,7 @@
         --e-category: #86c46b;
         --e-transfer: #62b4d6;
         --e-debt: #b79be8;
+        --e-recurring: #e0a06a;
         --ok: #5fbd85;
         --warn: #d5a544;
         --idle: #8b98a4;
@@ -90,6 +92,7 @@
       --e-category: #86c46b;
       --e-transfer: #62b4d6;
         --e-debt: #b79be8;
+        --e-recurring: #e0a06a;
       --ok: #5fbd85;
       --warn: #d5a544;
       --idle: #8b98a4;
@@ -693,6 +696,10 @@
             <span class="fname">categoryID</span><span class="ftype">UUID?</span>
             <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span></span>
           </li>
+          <li class="field key" data-anchor="MoneyTransaction.sourceRuleID">
+            <span class="fname">sourceRuleID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">? &mdash; nil when typed by hand</span></span>
+          </li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
         </ul>
@@ -832,6 +839,64 @@
           <li class="field"><span class="fname">colorName</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
         </ul>
+      </article>
+
+      <!-- ============ RecurringRule ============ -->
+      <article class="entity" id="RecurringRule" tabindex="0"
+               style="--e: var(--e-recurring); grid-column: 3; grid-row: 4; align-self: center;">
+        <div class="e-head">
+          <div class="e-name">RecurringRule</div>
+          <div class="e-role">Money that comes back &mdash; an instruction, never a balance</div>
+          <div class="e-file">MonMon/Recurring/RecurringRule.swift</div>
+        </div>
+        <ul class="fields">
+          <li class="field key" data-anchor="RecurringRule.id">
+            <span class="fname">id</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge pk">PK</span></span>
+          </li>
+          <li class="field">
+            <span class="fname">kind</span><span class="ftype">TransactionKind</span>
+            <span class="badges"><span class="badge enum">enum: income | expense</span></span>
+          </li>
+          <li class="field">
+            <span class="fname">amount</span><span class="ftype">Decimal</span>
+            <span class="badges"><span class="badge null">always positive &mdash; kind carries sign</span></span>
+          </li>
+          <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
+          <li class="field key" data-anchor="RecurringRule.accountID">
+            <span class="fname">accountID</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+          </li>
+          <li class="field key" data-anchor="RecurringRule.categoryID">
+            <span class="fname">categoryID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span></span>
+          </li>
+          <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
+          <li class="field">
+            <span class="fname">frequency</span><span class="ftype">RecurrenceFrequency</span>
+            <span class="badges"><span class="badge enum">enum: daily | weekly | monthly | yearly</span></span>
+          </li>
+          <li class="field">
+            <span class="fname">interval</span><span class="ftype">Int</span>
+            <span class="badges"><span class="badge null">at least 1</span></span>
+          </li>
+          <li class="field">
+            <span class="fname">anchorDate</span><span class="ftype">Date</span>
+            <span class="badges"><span class="badge null">every occurrence is measured from here</span></span>
+          </li>
+          <li class="field"><span class="fname">endDate</span><span class="ftype">Date?</span>
+            <span class="badges"><span class="badge null">? &mdash; open-ended</span></span>
+          </li>
+          <li class="field"><span class="fname">isPaused</span><span class="ftype">Bool</span></li>
+          <li class="field"><span class="fname">lastGeneratedAt</span><span class="ftype">Date?</span>
+            <span class="badges"><span class="badge null">? &mdash; caught up through</span></span>
+          </li>
+          <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
+        </ul>
+        <div class="derived">
+          <div class="derived-label">Derived &mdash; computed, not stored</div>
+          <div class="derived-list">pendingOccurrences(asOf:limit:) &nbsp;&middot;&nbsp; nextOccurrence(after:) &nbsp;&middot;&nbsp; schedulePhrase</div>
+        </div>
       </article>
     </div>
   </div>
@@ -1004,8 +1069,29 @@
         No <code>@Relationship</code>, no cascade rules, no <code>@Attribute(.unique)</code>.
         The store will happily keep a <code>MoneyTransaction.accountID</code> pointing at a deleted
         account. Deletion guards in the editors are what actually protect the data: an account
-        cannot go while it funds a deposit or holding, or while any transaction or transfer
-        still names it.
+        cannot go while it funds a deposit or holding, or while any transaction, transfer, debt
+        record or recurring rule still names it.
+      </p>
+    </div>
+    <div class="note">
+      <h3>A rule is not money</h3>
+      <p>
+        <code>RecurringRule</code> holds no balance and reaches no total. It stamps out ordinary
+        <code>MoneyTransaction</code> rows carrying its id, and those rows are what every balance,
+        every total and the category breakdown already derive from &mdash; so a generated entry
+        moves them exactly as a typed one does, and can be edited or deleted like one.
+        Generation runs on launch and on returning to the foreground, never on a timer and never
+        in the background.
+      </p>
+    </div>
+    <div class="note">
+      <h3>One rule, one day</h3>
+      <p>
+        The pair of <code>sourceRuleID</code> and the day an entry fell on is unique by a rule
+        rather than a constraint, the way a category is unique by kind and name. The generator
+        checks before writing, and <code>StoreReconciler</code> folds afterwards, because two
+        devices that have not met yet can each record the same month's rent. A transaction with
+        no <code>sourceRuleID</code> is never folded: two lunches on one day are two lunches.
       </p>
     </div>
     <div class="note">
@@ -1260,7 +1346,10 @@
       { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'AccountTransfer', toAnchor: 'AccountTransfer.sourceAccountID', label: 'from', dashed: false },
       { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'AccountTransfer', toAnchor: 'AccountTransfer.destinationAccountID', label: 'to', dashed: false },
       { from: 'TransactionCategory', fromAnchor: 'TransactionCategory.id', to: 'MoneyTransaction', toAnchor: 'MoneyTransaction.categoryID', label: '1 : 0..N', dashed: true },
-      { from: 'FundInstrument', fromAnchor: 'FundInstrument.id', to: 'FundHolding', toAnchor: 'FundHolding.instrumentID', label: '1 : 0..N', dashed: true }
+      { from: 'FundInstrument', fromAnchor: 'FundInstrument.id', to: 'FundHolding', toAnchor: 'FundHolding.instrumentID', label: '1 : 0..N', dashed: true },
+      { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'RecurringRule', toAnchor: 'RecurringRule.accountID', label: '1 : 0..N', dashed: false },
+      { from: 'TransactionCategory', fromAnchor: 'TransactionCategory.id', to: 'RecurringRule', toAnchor: 'RecurringRule.categoryID', label: '1 : 0..N', dashed: true },
+      { from: 'RecurringRule', fromAnchor: 'RecurringRule.id', to: 'MoneyTransaction', toAnchor: 'MoneyTransaction.sourceRuleID', label: 'generates', dashed: true }
     ]);
 
     wire('sysStage', 'sysEdges', '.node', [

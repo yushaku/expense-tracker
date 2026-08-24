@@ -131,7 +131,10 @@ struct FundCatalogueImportTests {
 
         #expect(importer.phase == .failed(.transport))
         #expect(importer.candidates.isEmpty)
-        #expect(importer.phase.message == "No connection. Try again when you are back online.")
+        #expect(
+            importer.phase.message(providerName: "Fmarket", in: Locale(identifier: "en"))
+                == "No connection. Try again when you are back online."
+        )
     }
 
     @Test("A changed reply is reported as a decoding failure")

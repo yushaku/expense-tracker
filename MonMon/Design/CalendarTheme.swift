@@ -25,6 +25,43 @@ struct ThemedDayView: DayView {
     let isCurrentMonth: Bool
     let selectedDate: Binding<Date?>?
     let selectedRange: Binding<MDateRange?>?
+    /// Which of the two bindings a tap writes to. The library hands every day
+    /// view both of them, non-nil, whatever the calendar was asked for, so the
+    /// day cannot work this out for itself: a calendar built for one date would
+    /// keep opening a span nobody reads, and never write the date.
+    let selectsRange: Bool
+
+    /// A calendar that picks one date.
+    static func day(
+        _ date: Date,
+        _ isCurrentMonth: Bool,
+        _ selectedDate: Binding<Date?>?,
+        _ selectedRange: Binding<MDateRange?>?
+    ) -> any DayView {
+        ThemedDayView(
+            date: date,
+            isCurrentMonth: isCurrentMonth,
+            selectedDate: selectedDate,
+            selectedRange: selectedRange,
+            selectsRange: false
+        )
+    }
+
+    /// A calendar that picks a span of dates.
+    static func range(
+        _ date: Date,
+        _ isCurrentMonth: Bool,
+        _ selectedDate: Binding<Date?>?,
+        _ selectedRange: Binding<MDateRange?>?
+    ) -> any DayView {
+        ThemedDayView(
+            date: date,
+            isCurrentMonth: isCurrentMonth,
+            selectedDate: selectedDate,
+            selectedRange: selectedRange,
+            selectsRange: true
+        )
+    }
 
     func createDayLabel() -> AnyView {
         AnyView(
@@ -75,15 +112,21 @@ struct ThemedDayView: DayView {
 
                 createDayLabel()
             }
+            // An unselected day draws nothing but its number: the circles behind
+            // it sit at zero opacity, and SwiftUI does not hit-test those. Taps
+            // then only landed on the digit itself, which made every day but
+            // today feel unselectable. The whole square takes the tap instead.
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
         )
     }
 
     /// The library's own tap handler only ever writes a single date, so a
-    /// calendar handed a range binding would look selectable and do nothing.
-    /// This adds the tapped day to the span instead: first tap opens it, second
-    /// closes it, third starts a new one.
+    /// calendar picking a span would look selectable and do nothing. This adds
+    /// the tapped day to the span instead: first tap opens it, second closes it,
+    /// third starts a new one.
     func onSelection() {
-        guard let selectedRange else {
+        guard selectsRange, let selectedRange else {
             selectedDate?.wrappedValue = date
             return
         }

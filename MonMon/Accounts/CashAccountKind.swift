@@ -1,9 +1,11 @@
+import SwiftUI
+
 enum CashAccountKind: String, Codable, CaseIterable {
     case cash
     case bank
     case credit
 
-    var displayName: String {
+    var displayNameKey: String {
         switch self {
         case .cash:
             "Cash"
@@ -12,6 +14,14 @@ enum CashAccountKind: String, Codable, CaseIterable {
         case .credit:
             "Credit"
         }
+    }
+
+    var displayName: LocalizedStringKey {
+        LocalizedStringKey(displayNameKey)
+    }
+
+    func displayName(in locale: Locale) -> String {
+        AppText.string(key: displayNameKey, in: locale)
     }
 
     /// Credit cards carry what you owe, so their balance is allowed to go below

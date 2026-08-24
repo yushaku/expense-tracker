@@ -120,12 +120,7 @@ struct AssetGrowthCard: View {
                     .foregroundStyle(MonMonTheme.border)
                 AxisValueLabel {
                     if let amount = value.as(Double.self) {
-                        Text(
-                            amount,
-                            format: .number
-                                .notation(.compactName)
-                                .precision(.fractionLength(0...1))
-                        )
+                        Text(VNDCurrency.format(amount))
                     }
                 }
                 .foregroundStyle(MonMonTheme.textMuted)
@@ -135,7 +130,7 @@ struct AssetGrowthCard: View {
         .accessibilityHidden(true)
     }
 
-    private var changeLabel: String {
+    private var changeLabel: LocalizedStringKey {
         let amount = change < 0 ? -change : change
         let sign = change > 0 ? "+" : change < 0 ? "−" : ""
         return "\(sign)\(VNDCurrency.format(amount))"
@@ -155,7 +150,7 @@ struct AssetGrowthCard: View {
         }
     }
 
-    private var changeAccessibilityLabel: String {
+    private var changeAccessibilityLabel: LocalizedStringKey {
         switch change {
         case let value where value > 0:
             "Increased by \(VNDCurrency.format(value))"

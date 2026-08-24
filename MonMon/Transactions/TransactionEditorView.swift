@@ -38,12 +38,14 @@ struct TransactionEditorView: View {
     private var defaultTransactionAccountValue = ""
     @AppStorage(TransactionDefaults.categoryStorageKey)
     private var defaultTransactionCategoryValue = ""
+    @AppStorage(TransactionDefaults.incomeCategoryStorageKey)
+    private var defaultTransactionIncomeCategoryValue = ""
 
     private let mode: TransactionEditorMode
 
     @State private var draft: TransactionDraft
     @State private var validationError: TransactionFormError?
-    @State private var saveErrorMessage: String?
+    @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
     @State private var didApplyDefaults = false
 
@@ -112,7 +114,7 @@ struct TransactionEditorView: View {
                 Text("Its account balance returns to what it was.")
             }
             .onChange(of: draft.kind) { _, _ in
-                clearCategoryIfDirectionChanged()
+                applyDefaultCategoryIfDirectionChanged()
             }
             .onAppear {
                 applyDefaultsIfNeeded()
@@ -139,20 +141,24 @@ struct TransactionEditorView: View {
     }
 
     /// Switching between income and expense strands a category from the other
-    /// direction, which the picker no longer offers. Clearing it keeps the form
-    /// honest instead of saving a mismatched pair.
-    private func clearCategoryIfDirectionChanged() {
-        guard let categoryID = draft.categoryID else {
+    /// direction, which the picker no longer offers. The new direction's own
+    /// default takes its place, so the form stays filled in rather than emptying
+    /// itself, and falls back to nothing when that direction has no default.
+    private func applyDefaultCategoryIfDirectionChanged() {
+        let stillOffered = draft.categoryID.map { categoryID in
+            categories.contains { $0.id == categoryID && $0.kind == draft.kind }
+        }
+
+        guard stillOffered != true else {
             return
         }
 
-        let stillOffered = categories.contains {
-            $0.id == categoryID && $0.kind == draft.kind
-        }
-
-        if !stillOffered {
-            draft.categoryID = nil
-        }
+        draft.categoryID = TransactionDefaults.categoryID(
+            for: draft.kind,
+            expenseValue: defaultTransactionCategoryValue,
+            incomeValue: defaultTransactionIncomeCategoryValue,
+            categories: categories
+        )
     }
 
     private func save() {

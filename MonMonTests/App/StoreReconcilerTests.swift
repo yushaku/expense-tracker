@@ -203,6 +203,7 @@ struct StoreReconcilerTests {
             note: "",
             accountID: AccountSeed.unassignedID,
             categoryID: duplicate.id,
+            sourceRuleID: nil,
             currencyCode: VNDCurrency.code,
             createdAt: day1
         )
@@ -319,5 +320,129 @@ struct StoreReconcilerTests {
         #expect(try StoreReconciler.reconcile(in: context).categories == 1)
         #expect(try StoreReconciler.reconcile(in: context).isEmpty)
         #expect(try context.fetchCount(FetchDescriptor<TransactionCategory>()) == 1)
+    }
+
+    private func rule(categoryID: UUID?, createdAt: Date) -> RecurringRule {
+        RecurringRule(
+            id: UUID(),
+            kind: .expense,
+            amount: 8_000_000,
+            note: "Rent",
+            accountID: AccountSeed.unassignedID,
+            categoryID: categoryID,
+            currencyCode: VNDCurrency.code,
+            frequency: .monthly,
+            interval: 1,
+            anchorDate: createdAt,
+            endDate: nil,
+            isPaused: false,
+            lastGeneratedAt: nil,
+            createdAt: createdAt
+        )
+    }
+
+    private func generated(
+        ruleID: UUID?,
+        occurredAt: Date,
+        createdAt: Date
+    ) -> MoneyTransaction {
+        MoneyTransaction(
+            id: UUID(),
+            kind: .expense,
+            amount: 8_000_000,
+            occurredAt: occurredAt,
+            note: "Rent",
+            accountID: AccountSeed.unassignedID,
+            categoryID: nil,
+            sourceRuleID: ruleID,
+            currencyCode: VNDCurrency.code,
+            createdAt: createdAt
+        )
+    }
+
+    /// A rule files what it will record next, so it has to follow the survivor
+    /// as well, or tomorrow's entry lands under a category that is gone.
+    @Test("A rule under a folded category moves to the survivor")
+    func ruleMovesToTheSurvivor() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let survivor = category("Food", createdAt: day0)
+        let duplicate = category("Food", createdAt: day1)
+        context.insert(survivor)
+        context.insert(duplicate)
+
+        let recurring = rule(categoryID: duplicate.id, createdAt: day1)
+        context.insert(recurring)
+        try context.save()
+
+        let report = try StoreReconciler.reconcile(in: context)
+
+        #expect(report.categories == 1)
+        #expect(recurring.categoryID == survivor.id)
+    }
+
+    /// Two devices that had not met yet both generate the month's rent. The
+    /// duplicate lands when synchronisation does, which is what this fold is for.
+    @Test("Two entries from one rule on one day fold into the older")
+    func duplicateGeneratedEntriesFold() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let recurring = rule(categoryID: nil, createdAt: day0)
+        context.insert(recurring)
+        let survivor = generated(ruleID: recurring.id, occurredAt: day0, createdAt: day0)
+        context.insert(survivor)
+        context.insert(generated(ruleID: recurring.id, occurredAt: day0, createdAt: day1))
+        try context.save()
+
+        let report = try StoreReconciler.reconcile(in: context)
+
+        #expect(report.transactions == 1)
+
+        let remaining = try context.fetch(FetchDescriptor<MoneyTransaction>())
+        #expect(remaining.count == 1)
+        #expect(remaining.first?.id == survivor.id)
+    }
+
+    @Test("One rule on two different days keeps both entries")
+    func differentDaysFromOneRuleBothSurvive() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let recurring = rule(categoryID: nil, createdAt: day0)
+        context.insert(recurring)
+        context.insert(generated(ruleID: recurring.id, occurredAt: day0, createdAt: day0))
+        context.insert(generated(ruleID: recurring.id, occurredAt: day1, createdAt: day1))
+        try context.save()
+
+        #expect(try StoreReconciler.reconcile(in: context).isEmpty)
+        #expect(try context.fetchCount(FetchDescriptor<MoneyTransaction>()) == 2)
+    }
+
+    /// Two lunches on one day are two lunches.
+    @Test("Hand-typed transactions on one day are never folded")
+    func handTypedTransactionsAreNeverFolded() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        context.insert(generated(ruleID: nil, occurredAt: day0, createdAt: day0))
+        context.insert(generated(ruleID: nil, occurredAt: day0, createdAt: day1))
+        try context.save()
+
+        #expect(try StoreReconciler.reconcile(in: context).isEmpty)
+        #expect(try context.fetchCount(FetchDescriptor<MoneyTransaction>()) == 2)
+    }
+
+    @Test("Two rules falling on the same day keep both entries")
+    func twoRulesOnOneDayBothSurvive() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let rent = rule(categoryID: nil, createdAt: day0)
+        let gym = rule(categoryID: nil, createdAt: day0)
+        context.insert(rent)
+        context.insert(gym)
+        context.insert(generated(ruleID: rent.id, occurredAt: day0, createdAt: day0))
+        context.insert(generated(ruleID: gym.id, occurredAt: day0, createdAt: day0))
+        try context.save()
+
+        #expect(try StoreReconciler.reconcile(in: context).isEmpty)
+        #expect(try context.fetchCount(FetchDescriptor<MoneyTransaction>()) == 2)
     }
 }

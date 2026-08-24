@@ -4,17 +4,22 @@ import SwiftUI
 /// what they are worth, followed by a card per holding. The screen around it
 /// owns the scroll, the running total, and the editor sheet.
 struct FundSection: View {
+    @Environment(\.locale) private var locale
+
     let holdings: [FundHolding]
     /// The catalogue the holdings are priced from. Passed in rather than
     /// queried here so the section stays a plain view over values.
     let instruments: [FundInstrument]
     let kinds: [FundInstrumentKind]
-    let sectionTitle: String
-    let itemName: String
-    let emptyTitle: String
-    let emptyDescription: String
+    let sectionTitle: LocalizedStringKey
+    /// The key naming what one row holds — "fund" or "gold product". Kept as a
+    /// key rather than a word, so the sentences built from it below read in the
+    /// language on show.
+    let itemNameKey: String
+    let emptyTitle: LocalizedStringKey
+    let emptyDescription: LocalizedStringKey
     let emptySystemImage: String
-    let addTitle: String
+    let addTitle: LocalizedStringKey
     let addIdentifier: String
     let onAdd: () -> Void
 
@@ -91,14 +96,16 @@ struct FundSection: View {
             .accessibilityIdentifier("unpriced-holdings")
     }
 
-    private var unpricedDescription: String {
+    private var unpricedDescription: LocalizedStringKey {
         let count = unpriced.count
-        let noun = count == 1 ? "position has" : "positions have"
+
         let cost = VNDCurrency.format(
             FundSummary.unpricedCostBasis(holdings: displayedHoldings, instruments: instruments)
         )
-        return "\(count) \(noun) no instrument, so \(cost) of cost is counted as worth nothing. "
-            + "Open each one and pick what it is held in."
+        return """
+            \(count) positions have no instrument, so \(cost) of cost is counted as worth \
+            nothing. Open each one and pick what it is held in.
+            """
     }
 
     private var costBasis: Decimal {
@@ -118,10 +125,14 @@ struct FundSection: View {
 
     /// The arrow symbol and the explicit sign carry the meaning; the tint only
     /// reinforces it, so the figure still reads with colour ignored.
-    private var profitLossDescription: String {
+    private var profitLossDescription: LocalizedStringKey {
         let label = isGain ? "Unrealized gain" : "Unrealized loss"
         let sign = isGain ? "+" : "−"
         return "\(label) \(sign)\(VNDCurrency.format(abs(profitLoss)))"
+    }
+
+    private var itemNoun: String {
+        AppText.string(key: itemNameKey, in: locale)
     }
 
     private var groups: [FundPositionGroup] {
@@ -130,15 +141,12 @@ struct FundSection: View {
 
     /// Counts both, because they answer different questions: how many funds are
     /// held, and how many purchases went into them.
-    private var holdingCountLabel: String {
+    private var holdingCountLabel: LocalizedStringKey {
         switch displayedHoldings.count {
         case 0:
             return "Ready for your first holding"
-        case 1:
-            return "Across 1 \(itemName) · 1 position"
         default:
-            let items = groups.count == 1 ? "1 \(itemName)" : "\(groups.count) \(itemName)s"
-            return "Across \(items) · \(displayedHoldings.count) positions"
+            return "Across \(groups.count) \(itemNoun) · \(displayedHoldings.count) positions"
         }
     }
 
@@ -204,7 +212,7 @@ struct FundSection: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("fund-group-\(group.id)")
-                .accessibilityHint("Opens every position in this \(itemName)")
+                .accessibilityHint("Opens every position in this \(itemNoun)")
             }
         }
     }

@@ -75,9 +75,13 @@ extension Debt {
         self.accountID == accountID ? signedPrincipal : .zero
     }
 
-    /// How this debt reads on screen: "Borrowed from Anh Minh".
-    var headline: String {
-        "\(direction.displayName) \(direction.counterpartyPreposition) \(counterparty)"
+    /// How this debt reads on screen: "Borrowed from Anh Minh". The whole line
+    /// is one localized sentence, so a language free to order it differently can.
+    func headline(in locale: Locale) -> String {
+        let direction = self.direction.displayName(in: locale)
+        let preposition = self.direction.counterpartyPreposition(in: locale)
+
+        return AppText.string("\(direction) \(preposition) \(counterparty)", in: locale)
     }
 
     /// Days the interest is projected over: the opening date to the due date, or

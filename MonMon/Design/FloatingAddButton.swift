@@ -7,7 +7,7 @@ import SwiftUI
 /// the toolbar sits furthest from wherever the owner was already looking. Lists
 /// leave room for it beneath their last card so nothing hides behind it.
 struct FloatingAddButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let accessibilityIdentifier: String
     let action: () -> Void
 

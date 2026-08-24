@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct DebtCard: View {
+    @Environment(\.locale) private var locale
+
     let debt: Debt
     let outstanding: Decimal
     let paid: Decimal
@@ -130,7 +132,7 @@ struct DebtCard: View {
         }
     }
 
-    private func detail(title: String, value: String) -> some View {
+    private func detail(title: LocalizedStringKey, value: String) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(title)
                 .font(.caption2.weight(.semibold))
@@ -172,31 +174,41 @@ struct DebtCard: View {
     }
 
     private var subtitle: String {
-        let preposition = debt.direction.counterpartyPreposition
-
         guard let accountName else {
-            return "\(debt.direction.displayName) \(preposition) them, no account"
+            let direction = debt.direction.displayName(in: locale)
+            let preposition = debt.direction.counterpartyPreposition(in: locale)
+
+            return AppText.string("\(direction) \(preposition) them, no account", in: locale)
         }
 
         return switch debt.direction {
         case .borrowed:
-            "Borrowed into \(accountName)"
+            AppText.string("Borrowed into \(accountName)", in: locale)
         case .lent:
-            "Lent from \(accountName)"
+            AppText.string("Lent from \(accountName)", in: locale)
         }
     }
 
+    /// Whole sentences per direction, since a language need not put the verb
+    /// where English puts it.
     private var repaymentDescription: String {
-        let verb = debt.direction == .borrowed ? "repaid" : "returned"
-        return "\(VNDCurrency.format(paid)) of \(VNDCurrency.format(debt.principal)) \(verb)"
+        let paidSoFar = VNDCurrency.format(paid)
+        let principal = VNDCurrency.format(debt.principal)
+
+        return switch debt.direction {
+        case .borrowed:
+            AppText.string("\(paidSoFar) of \(principal) repaid", in: locale)
+        case .lent:
+            AppText.string("\(paidSoFar) of \(principal) returned", in: locale)
+        }
     }
 
     private var dueDescription: String {
         guard let dueDate = debt.dueDate else {
-            return "No due date"
+            return AppText.string("No due date", in: locale)
         }
 
-        return dueDate.formatted(date: .abbreviated, time: .omitted)
+        return TransactionPeriod.day(dueDate, in: locale)
     }
 
     private var progressFraction: CGFloat {

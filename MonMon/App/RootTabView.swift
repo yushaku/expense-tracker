@@ -10,7 +10,7 @@ enum RootTab: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var title: String {
+    var title: LocalizedStringKey {
         switch self {
         case .report:
             "Report"
@@ -187,7 +187,7 @@ struct RootTabView: View {
 /// Root tabs keep their title compact so the navigation bar identifies each
 /// screen without reserving the large-title header space.
 private struct CompactRootNavigationTitle: ViewModifier {
-    let title: String
+    let title: LocalizedStringKey
 
     @ViewBuilder
     func body(content: Content) -> some View {
@@ -202,7 +202,7 @@ private struct CompactRootNavigationTitle: ViewModifier {
 }
 
 extension View {
-    func compactRootNavigationTitle(_ title: String) -> some View {
+    func compactRootNavigationTitle(_ title: LocalizedStringKey) -> some View {
         modifier(CompactRootNavigationTitle(title: title))
     }
 }

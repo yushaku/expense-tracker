@@ -9,7 +9,10 @@ enum TransactionFormError: Error, Equatable {
 
 enum TransactionDefaults {
     static let accountStorageKey = "defaultTransactionAccountID"
+    /// The expense default. Named without a direction because it was stored
+    /// before income had one of its own, and a stored key is never renamed.
     static let categoryStorageKey = "defaultTransactionCategoryID"
+    static let incomeCategoryStorageKey = "defaultTransactionIncomeCategoryID"
 
     /// A missing preference means first run and resolves to starter data. Once
     /// an id has been stored, it must still name a current record; stale ids do
@@ -46,19 +49,44 @@ enum TransactionDefaults {
 
     static func resolveCategoryID(
         _ value: String,
-        categories: [TransactionCategory]
+        categories: [TransactionCategory],
+        kind: TransactionKind = .expense
     ) -> UUID? {
         if value.isEmpty {
+            // By identity first, then by name. A store seeded before the starter
+            // categories carried fixed ids still has its own, and a store seeded
+            // in the other language has a name this would never match.
             return categories.first {
-                $0.name == CategorySeed.defaultExpenseName && $0.kind == .expense
-            }?.id
+                $0.id == CategorySeed.defaultID(for: kind) && $0.kind == kind
+            }?
+            .id
+                ?? categories.first {
+                    $0.name == CategorySeed.defaultName(for: kind) && $0.kind == kind
+                }?.id
         }
 
         guard let id = UUID(uuidString: value) else {
             return nil
         }
 
-        return categories.first { $0.id == id && $0.kind == .expense }?.id
+        return categories.first { $0.id == id && $0.kind == kind }?.id
+    }
+
+    /// The default for one direction. A form that switches between income and
+    /// expense asks for the new direction's default rather than clearing the
+    /// field, so the pair of preferences behaves like one.
+    static func categoryID(
+        for kind: TransactionKind,
+        expenseValue: String,
+        incomeValue: String,
+        categories: [TransactionCategory]
+    ) -> UUID? {
+        switch kind {
+        case .expense:
+            resolveCategoryID(expenseValue, categories: categories, kind: .expense)
+        case .income:
+            resolveCategoryID(incomeValue, categories: categories, kind: .income)
+        }
     }
 }
 
@@ -147,6 +175,7 @@ struct TransactionDraft: Equatable {
             note: values.note,
             accountID: values.accountID,
             categoryID: values.categoryID,
+            sourceRuleID: nil,
             currencyCode: VNDCurrency.code,
             createdAt: createdAt
         )

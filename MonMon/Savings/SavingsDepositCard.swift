@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct SavingsDepositCard: View {
+    @Environment(\.locale) private var locale
+
     let deposit: SavingsDeposit
     let sourceAccountName: String?
 
@@ -85,7 +87,7 @@ struct SavingsDepositCard: View {
         }
     }
 
-    private func detail(title: String, value: String) -> some View {
+    private func detail(title: LocalizedStringKey, value: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             Text(title)
                 .font(.caption2.weight(.semibold))
@@ -103,7 +105,7 @@ struct SavingsDepositCard: View {
         }
     }
 
-    private var sourceDescription: String {
+    private var sourceDescription: LocalizedStringKey {
         if let sourceAccountName {
             "Funded from \(sourceAccountName)"
         } else {
@@ -112,11 +114,11 @@ struct SavingsDepositCard: View {
     }
 
     private var termDescription: String {
-        deposit.termMonths == 1 ? "1 month" : "\(deposit.termMonths) months"
+        AppText.string("\(deposit.termMonths) months", in: locale)
     }
 
     private var maturityDescription: String {
-        deposit.maturityDate.formatted(date: .abbreviated, time: .omitted)
+        TransactionPeriod.day(deposit.maturityDate, in: locale)
     }
 }
 

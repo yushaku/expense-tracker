@@ -53,7 +53,7 @@ struct DebtEditorView: View {
 
     @State private var draft: DebtDraft
     @State private var validationError: DebtFormError?
-    @State private var saveErrorMessage: String?
+    @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
 
     init(mode: DebtEditorMode, defaultDate: Date = .now) {
@@ -125,15 +125,14 @@ struct DebtEditorView: View {
 
     /// A payment has no meaning without its debt, so deleting one takes its
     /// payments with it. The dialog says so before the owner agrees.
-    private var deleteMessage: String {
+    private var deleteMessage: LocalizedStringKey {
         let count = mode.editedDebt.map { DebtSummary.payments(for: $0, payments: payments).count }
 
         guard let count, count > 0 else {
             return "Any account balance it moved returns to what it was."
         }
 
-        let noun = count == 1 ? "payment goes" : "payments go"
-        return "Its \(count) \(noun) with it, and the account balance returns to what it was."
+        return "Its \(count) payments go with it, and the account balance returns to what it was."
     }
 
     private var sourceAccount: CashAccount? {

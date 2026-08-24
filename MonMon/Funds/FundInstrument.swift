@@ -74,7 +74,7 @@ extension FundInstrument {
 
     /// How this instrument's price should be described in a sentence:
     /// "NAV 21 Aug 2026 · Fmarket", or "Entered by hand".
-    var priceLabel: String {
+    var priceLabelKey: String {
         switch kind {
         case .fund:
             "NAV"
@@ -83,6 +83,10 @@ extension FundInstrument {
         case .gold:
             "Buy"
         }
+    }
+
+    func priceLabel(in locale: Locale) -> String {
+        AppText.string(key: priceLabelKey, in: locale)
     }
 }
 

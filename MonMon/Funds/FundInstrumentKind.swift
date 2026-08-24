@@ -1,3 +1,5 @@
+import SwiftUI
+
 /// What kind of asset an instrument is. The three cases price differently — an
 /// open-ended fund by its published NAV, a listed ETF by its closing price, and
 /// gold by a shop's buy price — so this decides which market-data provider runs.
@@ -6,7 +8,7 @@ enum FundInstrumentKind: String, Codable, CaseIterable, Sendable {
     case etf
     case gold
 
-    var displayName: String {
+    var displayNameKey: String {
         switch self {
         case .fund:
             "Fund"
@@ -17,11 +19,19 @@ enum FundInstrumentKind: String, Codable, CaseIterable, Sendable {
         }
     }
 
+    var displayName: LocalizedStringKey {
+        LocalizedStringKey(displayNameKey)
+    }
+
+    func displayName(in locale: Locale) -> String {
+        AppText.string(key: displayNameKey, in: locale)
+    }
+
     /// What the price field is called for this kind. An open-ended fund quotes a
     /// NAV per unit; a listed ETF quotes a market price that sits at a premium
     /// or discount to its NAV. Calling both "NAV" would state something false
     /// about half the catalogue.
-    var priceLabel: String {
+    var priceLabelKey: String {
         switch self {
         case .fund:
             "NAV per unit"
@@ -30,5 +40,13 @@ enum FundInstrumentKind: String, Codable, CaseIterable, Sendable {
         case .gold:
             "Shop buy price per lượng"
         }
+    }
+
+    var priceLabel: LocalizedStringKey {
+        LocalizedStringKey(priceLabelKey)
+    }
+
+    func priceLabel(in locale: Locale) -> String {
+        AppText.string(key: priceLabelKey, in: locale)
     }
 }

@@ -121,8 +121,10 @@ struct AccountBalanceCard: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(
-            "\(slice.name), \(VNDCurrency.format(slice.amount)), "
-                + "\(percentLabel(for: slice)) of cash"
+            """
+            \(slice.name), \(VNDCurrency.format(slice.amount)), \(percentLabel(for: slice)) of\
+             cash
+            """
         )
     }
 

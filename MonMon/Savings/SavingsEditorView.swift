@@ -56,7 +56,7 @@ struct SavingsEditorView: View {
 
     @State private var draft: SavingsDraft
     @State private var validationError: SavingsFormError?
-    @State private var saveErrorMessage: String?
+    @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
 
     init(mode: SavingsEditorMode) {

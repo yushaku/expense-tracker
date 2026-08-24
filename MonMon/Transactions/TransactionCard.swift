@@ -1,26 +1,36 @@
 import SwiftUI
 
 struct TransactionCard: View {
+    @Environment(\.locale) private var locale
+
     let transaction: MoneyTransaction
     let category: TransactionCategory?
     let account: CashAccount?
+    /// The spending list puts one date over each day of cards, so the card
+    /// drops its own copy there and keeps it everywhere else.
+    var showsDate = true
 
-    private static let dateFormat: Date.FormatStyle = {
-        var style = Date.FormatStyle().day().month(.abbreviated)
-        style.calendar = TransactionPeriod.calendar
-        style.timeZone = TransactionPeriod.calendar.timeZone
-        style.locale = Locale(identifier: "en_US")
-        return style
-    }()
+    private static let dateTemplate = Date.FormatStyle().day().month(.abbreviated)
 
     var body: some View {
         HStack(spacing: 14) {
             icon
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(categoryName)
-                    .font(.headline)
-                    .lineLimit(1)
+                HStack(spacing: 6) {
+                    Text(categoryName)
+                        .font(.headline)
+                        .lineLimit(1)
+
+                    // Marks what a rule recorded, so an entry the owner does not
+                    // remember typing is explained rather than suspicious.
+                    if transaction.sourceRuleID != nil {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(MonMonTheme.textSecondary)
+                            .accessibilityLabel("Recurring")
+                    }
+                }
 
                 Text(subtitle)
                     .font(.subheadline)
@@ -64,7 +74,10 @@ struct TransactionCard: View {
                 .foregroundStyle(directionTint)
 
             Label(
-                Self.dateFormat.format(transaction.occurredAt),
+                showsDate
+                    ? TransactionPeriod.format(Self.dateTemplate, in: locale)
+                        .format(transaction.occurredAt)
+                    : transaction.kind.displayName(in: locale),
                 systemImage: transaction.kind.symbolName
             )
             .font(.caption2.weight(.semibold))
@@ -73,11 +86,11 @@ struct TransactionCard: View {
     }
 
     private var categoryName: String {
-        category?.name ?? "Uncategorized"
+        category?.name ?? AppText.string("Uncategorized", in: locale)
     }
 
     private var subtitle: String {
-        let accountName = account?.name ?? "Unknown account"
+        let accountName = account?.name ?? AppText.string("Unknown account", in: locale)
         let trimmedNote = transaction.note.trimmingCharacters(in: .whitespacesAndNewlines)
 
         return trimmedNote.isEmpty ? accountName : "\(accountName) · \(trimmedNote)"

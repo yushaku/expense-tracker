@@ -50,7 +50,7 @@ struct SavingsSection: View {
         AssetSummary.totalProjectedInterest(of: deposits)
     }
 
-    private var depositCountLabel: String {
+    private var depositCountLabel: LocalizedStringKey {
         switch deposits.count {
         case 0:
             "Ready for your first savings book"

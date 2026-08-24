@@ -4,15 +4,20 @@ import SwiftUI
 /// position cards inside it so the two read as the same object at two zoom
 /// levels rather than as two designs.
 struct FundMetric: Identifiable {
-    let title: String
+    /// The key naming the column, and the figure under it. The figure is
+    /// already formatted, so only the name goes through the catalogue.
+    let titleKey: String
     let value: String
 
-    var id: String { title }
+    var title: LocalizedStringKey { LocalizedStringKey(titleKey) }
+    var id: String { titleKey }
 }
 
 /// Metrics two to a row. Unit prices and cost bases both run long in đồng, and
 /// four across shrank every one of them past reading on an iPhone.
 struct FundMetricGrid: View {
+    @Environment(\.locale) private var locale
+
     let metrics: [FundMetric]
 
     var body: some View {
@@ -106,6 +111,8 @@ struct FundProfitLossRow: View {
 /// Where the price came from and when it is from. A stale price says so in
 /// words and carries a symbol; colour only reinforces it.
 struct FundPriceStatusRow: View {
+    @Environment(\.locale) private var locale
+
     let instrument: FundInstrument?
     /// Passed in rather than read from the clock, so a preview and a test both
     /// get a stable answer for whether the price is stale.
@@ -158,12 +165,14 @@ struct FundPriceStatusRow: View {
 
     private var description: String {
         guard let instrument else {
-            return "Instrument missing — value cannot be worked out"
+            return AppText.string("Instrument missing — value cannot be worked out", in: locale)
         }
 
-        let day = instrument.priceAsOf.formatted(date: .abbreviated, time: .omitted)
-        let base = "\(instrument.priceLabel) \(day) · \(instrument.source.displayName)"
-        return isStale ? "\(base) · Stale" : base
+        let day = TransactionPeriod.day(instrument.priceAsOf, in: locale)
+        let base =
+            "\(instrument.priceLabel(in: locale)) \(day) · "
+            + "\(instrument.source.displayName(in: locale))"
+        return isStale ? AppText.string("\(base) · Stale", in: locale) : base
     }
 
     private var spreadDescription: String? {
@@ -174,7 +183,7 @@ struct FundPriceStatusRow: View {
         let sell =
             instrument.askPricePerUnit > 0
             ? VNDCurrency.formatUnitPrice(instrument.askPricePerUnit) : "—"
-        return "Shop buys \(buy) · sells \(sell) per lượng"
+        return AppText.string("Shop buys \(buy) · sells \(sell) per lượng", in: locale)
     }
 }
 

@@ -75,17 +75,17 @@ struct FundGroupCard: View {
 
     private var metrics: [FundMetric] {
         [
-            FundMetric(title: quantityTitle, value: quantityValue),
+            FundMetric(titleKey: quantityTitle, value: quantityValue),
             FundMetric(
-                title: "AVG COST",
+                titleKey: "AVG COST",
                 value: VNDCurrency.formatUnitPrice(group.averageCostPerUnit)
             ),
             FundMetric(
-                title: priceTitle,
+                titleKey: priceTitle,
                 value: group.instrument.map { VNDCurrency.formatUnitPrice($0.currentPricePerUnit) }
                     ?? "—"
             ),
-            FundMetric(title: "COST BASIS", value: VNDCurrency.format(group.costBasis)),
+            FundMetric(titleKey: "COST BASIS", value: VNDCurrency.format(group.costBasis)),
         ]
     }
 

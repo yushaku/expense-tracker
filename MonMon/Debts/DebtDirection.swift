@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 /// Which way a debt points. Like `TransactionKind`, it exists so every amount
 /// can be stored positive and no call site has to agree on a sign convention.
@@ -8,7 +9,7 @@ enum DebtDirection: String, Codable, CaseIterable {
     /// Money the owner handed to someone else and expects back. An asset.
     case lent
 
-    var displayName: String {
+    var displayNameKey: String {
         switch self {
         case .borrowed:
             "Borrowed"
@@ -17,14 +18,23 @@ enum DebtDirection: String, Codable, CaseIterable {
         }
     }
 
+    var displayName: LocalizedStringKey {
+        LocalizedStringKey(displayNameKey)
+    }
+
+    func displayName(in locale: Locale) -> String {
+        AppText.string(key: displayNameKey, in: locale)
+    }
+
     /// The preposition the counterparty needs, so one stored name reads right in
-    /// both directions: "Borrowed from Anh Minh", "Lent to Anh Minh".
-    var counterpartyPreposition: String {
+    /// both directions: "Borrowed from Anh Minh", "Lent to Anh Minh". A language
+    /// that words this differently answers with its own word here.
+    func counterpartyPreposition(in locale: Locale) -> String {
         switch self {
         case .borrowed:
-            "from"
+            AppText.string("from", in: locale)
         case .lent:
-            "to"
+            AppText.string("to", in: locale)
         }
     }
 

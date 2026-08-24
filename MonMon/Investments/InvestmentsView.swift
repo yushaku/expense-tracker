@@ -172,10 +172,12 @@ struct InvestmentsView: View {
                 instruments: instruments,
                 kinds: [.fund, .etf],
                 sectionTitle: "Funds",
-                itemName: "fund",
+                itemNameKey: "fund",
                 emptyTitle: "Track your funds and ETFs",
-                emptyDescription: "Add a holding to see what it cost, what it is worth "
-                    + "today, and the gap between them.",
+                emptyDescription: """
+                    Add a holding to see what it cost, what it is worth today, and the gap \
+                    between them.
+                    """,
                 emptySystemImage: "chart.line.uptrend.xyaxis",
                 addTitle: InvestmentSegment.funds.addTitle,
                 addIdentifier: InvestmentSegment.funds.addIdentifier
@@ -188,10 +190,11 @@ struct InvestmentsView: View {
                 instruments: instruments,
                 kinds: [.gold],
                 sectionTitle: "Gold",
-                itemName: "gold product",
+                itemNameKey: "gold product",
                 emptyTitle: "Track your physical gold",
-                emptyDescription: "Add gold to see its cost, shop buy valuation, "
-                    + "and the visible buy/sell spread.",
+                emptyDescription: """
+                    Add gold to see its cost, shop buy valuation, and the visible buy/sell spread.
+                    """,
                 emptySystemImage: "seal.fill",
                 addTitle: InvestmentSegment.gold.addTitle,
                 addIdentifier: InvestmentSegment.gold.addIdentifier

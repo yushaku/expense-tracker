@@ -6,18 +6,11 @@ struct SettingsView: View {
     @Environment(CloudSync.self) private var cloudSync
     @Environment(\.modelContext) private var modelContext
 
-    @Query(sort: \CashAccount.createdAt, order: .forward)
-    private var accounts: [CashAccount]
-
-    @Query(sort: \TransactionCategory.createdAt, order: .forward)
-    private var categories: [TransactionCategory]
+    @Environment(\.locale) private var locale
 
     @AppStorage(AppTheme.storageKey) private var theme = AppTheme.system
+    @AppStorage(AppLanguage.storageKey) private var language = AppLanguage.system
     @AppStorage(AppLock.enabledKey) private var isLockEnabled = false
-    @AppStorage(TransactionDefaults.accountStorageKey)
-    private var defaultTransactionAccountValue = ""
-    @AppStorage(TransactionDefaults.categoryStorageKey)
-    private var defaultTransactionCategoryValue = ""
     @State private var instrumentScope: FundInstrumentListScope?
 
     var body: some View {
@@ -29,7 +22,6 @@ struct SettingsView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                         appearanceCard
-                        transactionDefaultsCard
                         instrumentsCard
                         securityCard
                         backupCard
@@ -47,11 +39,11 @@ struct SettingsView: View {
             .sheet(item: $instrumentScope) { scope in
                 FundInstrumentListView(scope: scope)
             }
-            .onAppear {
-                persistInitialTransactionDefaults()
-            }
         }
     }
+
+    private static let syncedTemplate = Date.FormatStyle().day().month(.abbreviated).year()
+        .hour().minute()
 
     private var appearanceCard: some View {
         card {
@@ -71,105 +63,26 @@ struct SettingsView: View {
                 Text("Catppuccin Latte in light, Frappé in dark. System follows the device.")
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
-            }
-        }
-    }
-
-    private var transactionDefaultsCard: some View {
-        card {
-            VStack(alignment: .leading, spacing: 14) {
-                sectionHeader("Transaction defaults", systemImage: "arrow.down.doc.fill")
-
-                defaultPicker(
-                    title: "Account",
-                    selection: $defaultTransactionAccountValue,
-                    isEmpty: accounts.isEmpty,
-                    isSelectionValid: accounts.contains {
-                        $0.id.uuidString == defaultTransactionAccountValue
-                    },
-                    emptyMessage: "Add an account to choose a default.",
-                    accessibilityIdentifier: "default-transaction-account"
-                ) {
-                    ForEach(accounts) { account in
-                        Text(account.name)
-                            .tag(account.id.uuidString)
-                    }
-                }
 
                 Divider()
                     .overlay(MonMonTheme.border)
 
-                defaultPicker(
-                    title: "Expense category",
-                    selection: $defaultTransactionCategoryValue,
-                    isEmpty: expenseCategories.isEmpty,
-                    isSelectionValid: expenseCategories.contains {
-                        $0.id.uuidString == defaultTransactionCategoryValue
-                    },
-                    emptyMessage: "Add an expense category to choose a default.",
-                    accessibilityIdentifier: "default-transaction-category"
-                ) {
-                    ForEach(expenseCategories) { category in
-                        Text(category.name)
-                            .tag(category.id.uuidString)
+                // Each language names itself, so the picker can be read whichever
+                // one is currently on show.
+                Picker("Language", selection: $language) {
+                    ForEach(AppLanguage.allCases) { option in
+                        Text(option.displayName)
+                            .tag(option)
                     }
                 }
-
-                Text("New transactions start as expenses with these values selected.")
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func defaultPicker<Options: View>(
-        title: String,
-        selection: Binding<String>,
-        isEmpty: Bool,
-        isSelectionValid: Bool,
-        emptyMessage: String,
-        accessibilityIdentifier: String,
-        @ViewBuilder options: () -> Options
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.subheadline.weight(.medium))
-
-            if isEmpty {
-                Text(emptyMessage)
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-            } else {
-                Picker(title, selection: selection) {
-                    if !isSelectionValid {
-                        Text("Choose")
-                            .tag(selection.wrappedValue)
-                    }
-
-                    options()
-                }
+                .pickerStyle(.segmented)
                 .labelsHidden()
-                .accessibilityIdentifier(accessibilityIdentifier)
+                .accessibilityIdentifier("language-picker")
+
+                Text("What the app is written in. System follows the device.")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
             }
-        }
-    }
-
-    private var expenseCategories: [TransactionCategory] {
-        categories.filter { $0.kind == .expense }
-    }
-
-    private func persistInitialTransactionDefaults() {
-        if defaultTransactionAccountValue.isEmpty,
-            let accountID = TransactionDefaults.resolveAccountID("", accounts: accounts)
-        {
-            defaultTransactionAccountValue = accountID.uuidString
-        }
-
-        if defaultTransactionCategoryValue.isEmpty,
-            let categoryID = TransactionDefaults.resolveCategoryID("", categories: categories)
-        {
-            defaultTransactionCategoryValue = categoryID.uuidString
         }
     }
 
@@ -284,10 +197,11 @@ struct SettingsView: View {
         )
     }
 
-    private var lockExplanation: String {
-        "Asks for \(appLock.biometryName) when the app opens, and again after a "
-            + "minute away. This hides the screen; it does not encrypt the file "
-            + "your records are stored in."
+    private var lockExplanation: LocalizedStringKey {
+        """
+        Asks for \(appLock.biometryName) when the app opens, and again after a minute away. \
+        This hides the screen; it does not encrypt the file your records are stored in.
+        """
     }
 
     private var backupCard: some View {
@@ -304,9 +218,10 @@ struct SettingsView: View {
                 .accessibilityIdentifier("icloud-sync")
 
                 Text(
-                    "Keeps every record in your own private iCloud database, so your "
-                        + "iPhone and Mac show the same books. Nobody else can read it, "
-                        + "MonMon included."
+                    """
+                    Keeps every record in your own private iCloud database, so your iPhone and\
+                     Mac show the same books. Nobody else can read it, MonMon included.
+                    """
                 )
                 .font(.caption)
                 .foregroundStyle(MonMonTheme.textSecondary)
@@ -382,7 +297,9 @@ struct SettingsView: View {
             return "No sync recorded yet on this device."
         }
 
-        return "Last synced \(lastSyncedAt.formatted(date: .abbreviated, time: .shortened))."
+        let day = TransactionPeriod.format(Self.syncedTemplate, in: locale).format(lastSyncedAt)
+
+        return AppText.string("Last synced \(day).", in: locale)
     }
 
     private var aboutCard: some View {
@@ -397,10 +314,12 @@ struct SettingsView: View {
         }
     }
 
-    private var storageExplanation: String {
+    private var storageExplanation: LocalizedStringKey {
         cloudSync.isEnabled
-            ? "MonMon keeps everything on this device and in your own iCloud account. "
-                + "No MonMon account, no server of ours."
+            ? """
+            MonMon keeps everything on this device and in your own iCloud account. No MonMon \
+            account, no server of ours.
+            """
             : "MonMon keeps everything on this device. No account, no network."
     }
 
@@ -418,7 +337,7 @@ struct SettingsView: View {
             }
     }
 
-    private func sectionHeader(_ title: String, systemImage: String) -> some View {
+    private func sectionHeader(_ title: LocalizedStringKey, systemImage: String) -> some View {
         Label(title, systemImage: systemImage)
             .font(.headline)
             .foregroundStyle(MonMonTheme.textPrimary)

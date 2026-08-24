@@ -1,15 +1,18 @@
 import SwiftUI
 
-/// Asks where a category's transactions should go before it is deleted. The
-/// caller performs the move and the deletion together, so cancelling here
-/// leaves both the category and its transactions untouched.
+/// Asks where a category's records — the transactions already recorded under
+/// it and the recurring rules that would record more — should go before it is
+/// deleted. The caller performs the move and the deletion together, so
+/// cancelling here leaves both the category and its records untouched.
 struct CategoryReassignView: View {
+    @Environment(\.locale) private var locale
+
     @Environment(\.dismiss) private var dismiss
 
     let category: TransactionCategory
     let usageCount: Int
     let replacements: [TransactionCategory]
-    let errorMessage: String?
+    let errorMessage: LocalizedStringKey?
     let onConfirm: (TransactionCategory) -> Void
 
     @State private var replacementID: UUID?
@@ -44,7 +47,7 @@ struct CategoryReassignView: View {
                     .frame(maxWidth: .infinity)
                 }
             }
-            .navigationTitle("Move transactions")
+            .navigationTitle("Move records")
             .accessibilityIdentifier("reassign-category")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -94,8 +97,7 @@ struct CategoryReassignView: View {
     }
 
     private var explanation: String {
-        let noun = usageCount == 1 ? "transaction" : "transactions"
-        return "\(usageCount) \(noun) use \(category.name). Pick where they move to."
+        "\(usageCount) records use \(category.name). Pick where they move to."
     }
 
     private var replacementCard: some View {
@@ -112,9 +114,11 @@ struct CategoryReassignView: View {
             .labelsHidden()
             .accessibilityIdentifier("reassign-target")
 
-            Text("Only \(category.kind.displayName.lowercased()) categories are offered.")
-                .font(.caption)
-                .foregroundStyle(MonMonTheme.textSecondary)
+            Text(
+                "Only \(category.kind.displayName(in: locale).lowercased()) categories are offered."
+            )
+            .font(.caption)
+            .foregroundStyle(MonMonTheme.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
@@ -128,7 +132,7 @@ struct CategoryReassignView: View {
         }
     }
 
-    private func errorBanner(_ message: String) -> some View {
+    private func errorBanner(_ message: LocalizedStringKey) -> some View {
         Label(message, systemImage: "exclamationmark.circle.fill")
             .font(.caption)
             .foregroundStyle(MonMonTheme.danger)

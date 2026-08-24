@@ -80,7 +80,7 @@ struct TransactionRangeTests {
 
         #expect(range.contains(date(2026, 8, 10, 23, 59)))
         #expect(!range.contains(date(2026, 8, 11)))
-        #expect(range.title == "Aug 10, 2026")
+        #expect(range.title(in: Locale(identifier: "en")) == "Aug 10, 2026")
     }
 
     @Test("Stepping moves by the scope's own unit and crosses the year")
@@ -127,12 +127,35 @@ struct TransactionRangeTests {
 
     @Test("Each scope names itself in English")
     func titlesAreEnglish() {
-        #expect(TransactionRange.day(containing: date(2026, 8, 15)).title == "Aug 15, 2026")
-        #expect(TransactionRange.month(containing: date(2026, 8, 15)).title == "August 2026")
-        #expect(TransactionRange.year(containing: date(2026, 8, 15)).title == "2026")
+        let english = Locale(identifier: "en")
+
         #expect(
-            TransactionRange.custom(from: date(2026, 8, 10), to: date(2026, 9, 2)).title
+            TransactionRange.day(containing: date(2026, 8, 15)).title(in: english)
+                == "Aug 15, 2026"
+        )
+        #expect(
+            TransactionRange.month(containing: date(2026, 8, 15)).title(in: english)
+                == "August 2026"
+        )
+        #expect(TransactionRange.year(containing: date(2026, 8, 15)).title(in: english) == "2026")
+        #expect(
+            TransactionRange.custom(from: date(2026, 8, 10), to: date(2026, 9, 2)).title(
+                in: english)
                 == "Aug 10, 2026 – Sep 2, 2026"
+        )
+    }
+
+    @Test("A title asked for in Vietnamese is written in Vietnamese")
+    func titlesFollowTheLocale() {
+        let vietnamese = Locale(identifier: "vi")
+
+        #expect(
+            TransactionRange.day(containing: date(2026, 8, 15)).title(in: vietnamese)
+                == "15 thg 8, 2026"
+        )
+        #expect(
+            TransactionRange.month(containing: date(2026, 8, 15)).title(in: vietnamese)
+                == "tháng 8 năm 2026"
         )
     }
 }

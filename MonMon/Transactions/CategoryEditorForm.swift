@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct CategoryEditorForm: View {
+    @Environment(\.locale) private var locale
+
     @Binding var draft: CategoryDraft
 
     let isEditing: Bool
@@ -8,7 +10,7 @@ struct CategoryEditorForm: View {
     let canDelete: Bool
     let deleteBlockedReason: String?
     let validationError: CategoryFormError?
-    let saveErrorMessage: String?
+    let saveErrorMessage: LocalizedStringKey?
     let onDelete: () -> Void
 
     private let symbolColumns = [GridItem(.adaptive(minimum: 52), spacing: 10)]
@@ -200,9 +202,8 @@ struct CategoryEditorForm: View {
         }
     }
 
-    private var reassignNotice: String {
-        let noun = usageCount == 1 ? "transaction" : "transactions"
-        return "\(usageCount) \(noun) use this category. You will pick where they go."
+    private var reassignNotice: LocalizedStringKey {
+        "\(usageCount) transactions use this category. You will pick where they go."
     }
 
     private var deleteButton: some View {
@@ -243,18 +244,18 @@ struct CategoryEditorForm: View {
             }
     }
 
-    private func sectionHeader(_ title: String, systemImage: String) -> some View {
+    private func sectionHeader(_ title: LocalizedStringKey, systemImage: String) -> some View {
         Label(title, systemImage: systemImage)
             .font(.headline)
             .foregroundStyle(MonMonTheme.textPrimary)
     }
 
-    private func fieldLabel(_ title: String) -> some View {
+    private func fieldLabel(_ title: LocalizedStringKey) -> some View {
         Text(title)
             .font(.subheadline.weight(.medium))
     }
 
-    private func errorBanner(_ message: String) -> some View {
+    private func errorBanner(_ message: LocalizedStringKey) -> some View {
         validationMessage(message, id: "save-category-error")
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
@@ -268,19 +269,19 @@ struct CategoryEditorForm: View {
             }
     }
 
-    private func validationMessage(_ message: String, id: String) -> some View {
+    private func validationMessage(_ message: LocalizedStringKey, id: String) -> some View {
         Label(message, systemImage: "exclamationmark.circle.fill")
             .font(.caption)
             .foregroundStyle(MonMonTheme.danger)
             .accessibilityIdentifier(id)
     }
 
-    private var nameErrorMessage: String? {
+    private var nameErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .emptyName:
             "Enter a category name."
         case .duplicateName:
-            "Another \(draft.kind.displayName.lowercased()) category already has this name."
+            "Another \(draft.kind.displayName(in: locale).lowercased()) category already has this name."
         case nil:
             nil
         }

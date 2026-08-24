@@ -1,7 +1,7 @@
 # MonMon
 
 MonMon is a private personal-finance app for iPhone and Mac, themed with
-Catppuccin — Latte in light, Frappé in dark. It has eight slices today.
+Catppuccin — Latte in light, Frappé in dark. It has nine slices today.
 `cash-balance` lets one owner add, edit, and delete local cash, bank, and credit
 card accounts with a VND opening balance. `savings-deposit` adds term
 deposits (sổ tiết kiệm) with maturity dates, projected interest, and an optional
@@ -19,7 +19,9 @@ outstanding follows the payments, and total assets stay put through all of it.
 open-ended funds and VNDIRECT for listed ETFs, and values physical gold from the
 shop-buy side of a vang.today quote. The price lives on a `FundInstrument`
 catalogue so one catalogue code can only ever carry one price. Every fetch is
-owner-triggered.
+owner-triggered. `recurring-transactions` records money that comes back — rent,
+salary, a subscription — from a rule the owner writes once, catching up on
+every date it has fallen due each time the app is opened.
 
 ## Requirements
 
@@ -115,6 +117,35 @@ and are excluded by `.gitignore`.
 - Owner validation: form behavior, interest and valuation against a hand
   calculation, relaunch persistence, iPhone Dynamic Type and keyboard, and Mac
   window resizing.
+- Recurring: rules for money that comes back — rent, salary, a subscription —
+  each repeating daily, weekly, monthly, or yearly at an interval the owner
+  picks, from a start date, optionally until an end date, and pausable without
+  being deleted. A rule holds no money: opening the app records every date it
+  has fallen due since it was last caught up, as ordinary transactions carrying
+  the rule's id, so balances and totals follow with no compensating write. A
+  start date in the past backfills what it already covered, capped at 400
+  entries per save. One rule can only ever record one entry per day, enforced
+  before the write and folded afterwards, so two devices cannot record the same
+  month's rent twice. Editing a rule changes only what it records next, and
+  deleting one keeps everything it already recorded.
+- Month rail: the run of months pinned under the Spending navigation bar, the
+  one on show marked and scrolled to the middle, so stepping a month is one tap
+  from anywhere on the screen. The bar's calendar button still opens the fuller
+  picker behind it — a day, a month, a year, or a hand-picked span.
+- Spending calendar: a month grid below the category breakdown, each day
+  carrying what it took in and what it paid out, so a heavy day is visible
+  without opening anything. Days either side of the month are drawn faintly
+  rather than blanked, so every row is a whole week. Its arrows re-cut the
+  period the whole screen is showing, so the totals above it never describe a
+  month the grid is not. Tapping a day opens that day on its own, with its
+  income, expense, and net, the entries behind them, and an add button that
+  starts a new entry on that day.
+- Spending setup: one row of buttons above the category breakdown opens the
+  categories, the recurring rules, and the defaults a new entry starts on — the
+  account, the expense category, and the income category. Switching an entry
+  between income and expense picks up that direction's own default instead of
+  emptying the field. The defaults live here rather than on the Settings tab,
+  beside the entries they shape.
 - Settings: a light/dark/system theme, and an optional Face ID, Touch ID, or
   passcode lock that hides the screen on launch and after a minute away. The
   lock is a gate on the screen, not encryption; the records on disk are
@@ -136,10 +167,9 @@ and are excluded by `.gitignore`.
   alone. A fetch that fails leaves the previous price standing and says why.
   Only a ticker or gold type code ever leaves the device — never a balance, a
   unit count, an account name, or anything identifying the owner.
-- Not included yet: budgets, recurring transactions, interest paid on a
-  schedule, rollover or early withdrawal, compound interest or amortisation
-  schedules on a debt, price history or charts, a market-holiday calendar,
-  AI, or MCP.
+- Not included yet: budgets, interest paid on a schedule, rollover or early
+  withdrawal, compound interest or amortisation schedules on a debt, price
+  history or charts, a market-holiday calendar, AI, or MCP.
 - Not included, and not planned: individual buy/sell trades, realized profit and
   loss, and equity or crypto positions. Gold tracking records current holdings
   and unrealized value only; it does not add a trade ledger.
@@ -153,14 +183,15 @@ and are excluded by `.gitignore`.
   resolved version is pinned in `Package.resolved`.
 - SwiftData stores `CashAccount`, `SavingsDeposit`, `FundInstrument`,
   `FundHolding`, `TransactionCategory`, `MoneyTransaction`, `AccountTransfer`,
-  `Debt`, and `DebtPayment` records
+  `Debt`, `DebtPayment`, and `RecurringRule` records
   in the owner's private iCloud database; `@Query` drives every visible list
   and combined total.
 - Nothing stores a balance. Every account balance, every total, and net worth
   itself is computed from the records each time, and `openingBalance` is never
   rewritten. That is what lets a record be deleted with no compensating write.
 - `AccountDraft`, `SavingsDraft`, `FundDraft`, `TransactionDraft`,
-  `CategoryDraft`, `TransferDraft`, `DebtDraft`, and `DebtPaymentDraft` validate
+  `CategoryDraft`, `TransferDraft`, `DebtDraft`, `DebtPaymentDraft`, and
+  `RecurringRuleDraft` validate
   external text before any model is inserted or mutated, and money uses
   `Decimal` throughout.
 - A savings deposit and a fund holding each store their funding account's `id`;
@@ -185,11 +216,24 @@ and are excluded by `.gitignore`.
   money borrowed joins the overdrawn accounts in the figure beneath the ring.
   Projected interest is shown and never counted: interest actually paid is an
   ordinary expense.
+- A recurring rule is an instruction, not a record of money. It stamps out
+  ordinary `MoneyTransaction` rows and nothing else reads it, so every balance,
+  every total, and the category breakdown follow a generated entry exactly as
+  they follow a typed one — and the owner can edit or delete that entry, because
+  it records money that really moved. Every occurrence is measured from the
+  rule's start date rather than from the previous one, so a rule anchored on the
+  31st clamps to the end of February and comes straight back to the 31st in
+  March instead of drifting. Nothing is ever recorded ahead of today: balances
+  count every transaction whatever its date.
+- Generation runs on launch and on returning to the foreground, never on a timer
+  and never in the background, which is the rule market data already follows. A
+  month spent away is a month recorded in full on the next open.
 - The one network boundary is `FundQuoteTransport`, behind which every provider
   is tested against a recorded reply. The default test run makes no connection.
-- Three identities are unique by a rule rather than by a database constraint: a
-  category by its kind and name, an instrument by its ticker, and the one
-  `Unassigned` account by a fixed id. CloudKit forbids unique attributes, so the
+- Four identities are unique by a rule rather than by a database constraint: a
+  category by its kind and name, an instrument by its ticker, the one
+  `Unassigned` account by a fixed id, and a generated transaction by the pair of
+  the rule that wrote it and the day it fell on. CloudKit forbids unique attributes, so the
   rule is enforced twice instead — by the draft before a write, and by
   `StoreReconciler` afterwards, which folds a duplicate into the older row and
   repoints everything naming it first, so no balance or history moves. Every

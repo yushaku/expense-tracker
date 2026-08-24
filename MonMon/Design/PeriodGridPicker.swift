@@ -25,20 +25,22 @@ enum PeriodGrid {
         date(year: year, month: 1)
     }
 
-    static let monthNames: [String] = {
-        var style = Date.FormatStyle().month(.abbreviated)
-        style.calendar = TransactionPeriod.calendar
-        style.timeZone = TransactionPeriod.calendar.timeZone
-        style.locale = Locale(identifier: "en_US")
+    /// The twelve month names in the language on show. Built per call rather
+    /// than stored, because a stored list would keep the language the app
+    /// happened to launch in.
+    static func monthNames(in locale: Locale) -> [String] {
+        let style = TransactionPeriod.format(Date.FormatStyle().month(.abbreviated), in: locale)
 
         return (1...12).map { style.format(date(year: 2000, month: $0)) }
-    }()
+    }
 }
 
 /// A year at a time, twelve months to a card. Scrolls straight to the year on
 /// show, so picking last March is a scroll away rather than a dozen taps.
 struct MonthGridPicker: View {
     @Binding var selection: Date
+
+    @Environment(\.locale) private var locale
 
     let accessibilityIdentifier: String
 
@@ -92,7 +94,7 @@ struct MonthGridPicker: View {
         return Button {
             selection = PeriodGrid.date(year: year, month: month)
         } label: {
-            Text(PeriodGrid.monthNames[month - 1])
+            Text(PeriodGrid.monthNames(in: locale)[month - 1])
                 .font(.subheadline.weight(isSelected ? .bold : .medium))
                 .foregroundStyle(isSelected ? MonMonTheme.onAccent : MonMonTheme.textPrimary)
                 .frame(maxWidth: .infinity)
@@ -104,7 +106,7 @@ struct MonthGridPicker: View {
                 .contentShape(Capsule(style: .continuous))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(PeriodGrid.monthNames[month - 1]) \(year)")
+        .accessibilityLabel("\(PeriodGrid.monthNames(in: locale)[month - 1]) \(year)")
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 }

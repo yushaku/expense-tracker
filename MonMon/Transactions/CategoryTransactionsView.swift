@@ -12,6 +12,8 @@ struct CategoryPeriod: Hashable {
 
 /// The transactions behind one wedge of the spending doughnut.
 struct CategoryTransactionsView: View {
+    @Environment(\.locale) private var locale
+
     @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
     private var transactions: [MoneyTransaction]
 
@@ -99,7 +101,7 @@ struct CategoryTransactionsView: View {
     private var summaryCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             Label(
-                period.range.title.uppercased(),
+                period.range.title(in: locale).uppercased(),
                 systemImage: period.kind.symbolName
             )
             .font(.caption.weight(.semibold))
@@ -133,11 +135,11 @@ struct CategoryTransactionsView: View {
     }
 
     private var countLabel: String {
-        matching.count == 1 ? "1 transaction" : "\(matching.count) transactions"
+        AppText.string("\(matching.count) transactions", in: locale)
     }
 
     private var emptyState: some View {
-        Text("Nothing left under this category \(period.range.phrase).")
+        Text("Nothing left under this category \(period.range.phrase(in: locale)).")
             .font(.subheadline)
             .foregroundStyle(MonMonTheme.textSecondary)
             .frame(maxWidth: .infinity, alignment: .leading)

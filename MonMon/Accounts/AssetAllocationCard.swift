@@ -4,6 +4,8 @@ import SwiftUI
 /// Assets and liabilities doughnuts on the Home screen, switched by tabs so
 /// the card stays compact while each legend keeps its full detail.
 struct AssetAllocationCard: View {
+    @Environment(\.locale) private var locale
+
     let slices: [AssetAllocationSlice]
     let liabilities: [LiabilityAllocationSlice]
 
@@ -54,8 +56,8 @@ struct AssetAllocationCard: View {
                 emptyState(for: .assets)
             } else {
                 AllocationDoughnut(
-                    context: AllocationTab.assets.displayName.lowercased(),
-                    items: slices.map(\.doughnutItem)
+                    context: AllocationTab.assets.displayName(in: locale).lowercased(),
+                    items: slices.map { $0.doughnutItem(in: locale) }
                 )
             }
         case .liabilities:
@@ -63,8 +65,8 @@ struct AssetAllocationCard: View {
                 emptyState(for: .liabilities)
             } else {
                 AllocationDoughnut(
-                    context: AllocationTab.liabilities.displayName.lowercased(),
-                    items: liabilities.map(\.doughnutItem)
+                    context: AllocationTab.liabilities.displayName(in: locale).lowercased(),
+                    items: liabilities.map { $0.doughnutItem(in: locale) }
                 )
             }
         }
@@ -94,7 +96,9 @@ private enum AllocationTab: String, CaseIterable {
     case assets
     case liabilities
 
-    var displayName: String {
+    /// One key, handed out as a key for a tab label and resolved as a word for
+    /// the sentence the doughnut reads out.
+    var nameKey: String {
         switch self {
         case .assets:
             "Assets"
@@ -103,7 +107,15 @@ private enum AllocationTab: String, CaseIterable {
         }
     }
 
-    var emptyTitle: String {
+    var displayName: LocalizedStringKey {
+        LocalizedStringKey(nameKey)
+    }
+
+    func displayName(in locale: Locale) -> String {
+        AppText.string(key: nameKey, in: locale)
+    }
+
+    var emptyTitle: LocalizedStringKey {
         switch self {
         case .assets:
             "No assets"
@@ -112,7 +124,7 @@ private enum AllocationTab: String, CaseIterable {
         }
     }
 
-    var emptyDescription: String {
+    var emptyDescription: LocalizedStringKey {
         switch self {
         case .assets:
             "Assets will appear here as they are recorded."
@@ -235,8 +247,10 @@ private struct AllocationDoughnut: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(
-            "\(item.name), \(VNDCurrency.format(item.amount)), "
-                + "\(percentLabel(for: item)) of \(context)"
+            """
+            \(item.name), \(VNDCurrency.format(item.amount)), \(percentLabel(for: item)) of \
+            \(context)
+            """
         )
     }
 
@@ -247,10 +261,10 @@ private struct AllocationDoughnut: View {
 }
 
 private extension AssetAllocationSlice {
-    var doughnutItem: AllocationDoughnutItem {
+    func doughnutItem(in locale: Locale) -> AllocationDoughnutItem {
         AllocationDoughnutItem(
             id: id,
-            name: kind.displayName,
+            name: kind.displayName(in: locale),
             amount: amount,
             tint: kind.tint,
             symbolName: kind.symbolName
@@ -259,10 +273,10 @@ private extension AssetAllocationSlice {
 }
 
 private extension LiabilityAllocationSlice {
-    var doughnutItem: AllocationDoughnutItem {
+    func doughnutItem(in locale: Locale) -> AllocationDoughnutItem {
         AllocationDoughnutItem(
             id: id,
-            name: kind.displayName,
+            name: kind.displayName(in: locale),
             amount: amount,
             tint: kind.tint,
             symbolName: kind.symbolName

@@ -1,13 +1,15 @@
 import SwiftUI
 
 struct TransactionEditorForm: View {
+    @Environment(\.locale) private var locale
+
     @Binding var draft: TransactionDraft
 
     let accounts: [CashAccount]
     let categories: [TransactionCategory]
     let isEditing: Bool
     let validationError: TransactionFormError?
-    let saveErrorMessage: String?
+    let saveErrorMessage: LocalizedStringKey?
     let onDelete: () -> Void
 
     var body: some View {
@@ -82,11 +84,6 @@ struct TransactionEditorForm: View {
                             draft.kind == .income ? "Plus" : "Minus"
                         )
 
-                    Text("₫")
-                        .font(.title2.weight(.bold))
-                        .foregroundStyle(MonMonTheme.accent)
-                        .accessibilityHidden(true)
-
                     amountTextField
                         .textFieldStyle(.plain)
                         .font(.system(.title2, design: .rounded, weight: .semibold))
@@ -102,79 +99,6 @@ struct TransactionEditorForm: View {
 
                 if let amountErrorMessage {
                     validationMessage(amountErrorMessage, id: "transaction-amount-error")
-                }
-
-                Text("VND · Enter what you spent or received, never a negative number.")
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-            }
-        }
-    }
-
-    private var detailsCard: some View {
-        card {
-            VStack(alignment: .leading, spacing: 18) {
-                sectionHeader("Details", systemImage: "list.bullet")
-
-                VStack(alignment: .leading, spacing: 8) {
-                    fieldLabel("Category")
-
-                    if matchingCategories.isEmpty {
-                        Text(missingCategoryNotice)
-                            .font(.caption)
-                            .foregroundStyle(MonMonTheme.textSecondary)
-                    } else {
-                        Picker("Category", selection: $draft.categoryID) {
-                            Text("Choose")
-                                .tag(UUID?.none)
-
-                            ForEach(matchingCategories) { category in
-                                Text(category.name)
-                                    .tag(UUID?.some(category.id))
-                            }
-                        }
-                        .labelsHidden()
-                        .accessibilityIdentifier("transaction-category")
-                    }
-
-                    if let categoryErrorMessage {
-                        validationMessage(categoryErrorMessage, id: "transaction-category-error")
-                    }
-                }
-
-                VStack(alignment: .leading, spacing: 8) {
-                    fieldLabel("Account")
-
-                    if accounts.isEmpty {
-                        Text("No account yet. Add one on the Home tab first.")
-                            .font(.caption)
-                            .foregroundStyle(MonMonTheme.textSecondary)
-                    } else {
-                        Picker("Account", selection: $draft.accountID) {
-                            Text("Choose")
-                                .tag(UUID?.none)
-
-                            ForEach(accounts) { account in
-                                Text(account.name)
-                                    .tag(UUID?.some(account.id))
-                            }
-                        }
-                        .labelsHidden()
-                        .accessibilityIdentifier("transaction-account")
-                    }
-
-                    if let accountErrorMessage {
-                        validationMessage(accountErrorMessage, id: "transaction-account-error")
-                    }
-                }
-
-                VStack(alignment: .leading, spacing: 8) {
-                    fieldLabel("Date")
-
-                    DateField(
-                        selection: $draft.occurredAt,
-                        accessibilityIdentifier: "transaction-date"
-                    )
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -193,9 +117,97 @@ struct TransactionEditorForm: View {
         }
     }
 
-    private var missingCategoryNotice: String {
-        "No \(draft.kind.displayName.lowercased()) category yet. "
-            + "Add one from the Categories button."
+    private var detailsCard: some View {
+        card {
+            VStack(alignment: .leading, spacing: 18) {
+                sectionHeader("Details", systemImage: "list.bullet")
+
+                // The two pickers are one decision each and short enough to
+                // share a line, which keeps the date in view while a category
+                // is being chosen.
+                HStack(alignment: .top, spacing: 12) {
+                    categoryField
+
+                    accountField
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    fieldLabel("Date")
+
+                    DateField(
+                        selection: $draft.occurredAt,
+                        accessibilityIdentifier: "transaction-date"
+                    )
+                }
+            }
+        }
+    }
+
+    private var categoryField: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            fieldLabel("Category")
+
+            if matchingCategories.isEmpty {
+                Text(missingCategoryNotice)
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            } else {
+                Picker("Category", selection: $draft.categoryID) {
+                    Text("Choose")
+                        .tag(UUID?.none)
+
+                    ForEach(matchingCategories) { category in
+                        Text(category.name)
+                            .tag(UUID?.some(category.id))
+                    }
+                }
+                .labelsHidden()
+                .lineLimit(1)
+                .accessibilityIdentifier("transaction-category")
+            }
+
+            if let categoryErrorMessage {
+                validationMessage(categoryErrorMessage, id: "transaction-category-error")
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var accountField: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            fieldLabel("Account")
+
+            if accounts.isEmpty {
+                Text("No account yet. Add one on the Home tab first.")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            } else {
+                Picker("Account", selection: $draft.accountID) {
+                    Text("Choose")
+                        .tag(UUID?.none)
+
+                    ForEach(accounts) { account in
+                        Text(account.name)
+                            .tag(UUID?.some(account.id))
+                    }
+                }
+                .labelsHidden()
+                .lineLimit(1)
+                .accessibilityIdentifier("transaction-account")
+            }
+
+            if let accountErrorMessage {
+                validationMessage(accountErrorMessage, id: "transaction-account-error")
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var missingCategoryNotice: LocalizedStringKey {
+        """
+        No \(draft.kind.displayName(in: locale).lowercased()) category yet. Add one from the \
+        Categories button.
+        """
     }
 
     /// A category only appears for the direction it was created for, so an
@@ -250,18 +262,18 @@ struct TransactionEditorForm: View {
             }
     }
 
-    private func sectionHeader(_ title: String, systemImage: String) -> some View {
+    private func sectionHeader(_ title: LocalizedStringKey, systemImage: String) -> some View {
         Label(title, systemImage: systemImage)
             .font(.headline)
             .foregroundStyle(MonMonTheme.textPrimary)
     }
 
-    private func fieldLabel(_ title: String) -> some View {
+    private func fieldLabel(_ title: LocalizedStringKey) -> some View {
         Text(title)
             .font(.subheadline.weight(.medium))
     }
 
-    private func errorBanner(_ message: String) -> some View {
+    private func errorBanner(_ message: LocalizedStringKey) -> some View {
         validationMessage(message, id: "save-transaction-error")
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
@@ -275,14 +287,14 @@ struct TransactionEditorForm: View {
             }
     }
 
-    private func validationMessage(_ message: String, id: String) -> some View {
+    private func validationMessage(_ message: LocalizedStringKey, id: String) -> some View {
         Label(message, systemImage: "exclamationmark.circle.fill")
             .font(.caption)
             .foregroundStyle(MonMonTheme.danger)
             .accessibilityIdentifier(id)
     }
 
-    private var amountErrorMessage: String? {
+    private var amountErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidAmount:
             "Enter a valid amount."
@@ -293,11 +305,11 @@ struct TransactionEditorForm: View {
         }
     }
 
-    private var accountErrorMessage: String? {
+    private var accountErrorMessage: LocalizedStringKey? {
         validationError == .missingAccount ? "Pick the account this money moved through." : nil
     }
 
-    private var categoryErrorMessage: String? {
+    private var categoryErrorMessage: LocalizedStringKey? {
         validationError == .missingCategory ? "Pick a category." : nil
     }
 }

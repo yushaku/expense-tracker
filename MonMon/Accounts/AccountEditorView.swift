@@ -49,11 +49,14 @@ struct AccountEditorView: View {
     @Query(sort: \DebtPayment.occurredAt, order: .reverse)
     private var payments: [DebtPayment]
 
+    @Query(sort: \RecurringRule.createdAt, order: .forward)
+    private var recurringRules: [RecurringRule]
+
     private let mode: AccountEditorMode
 
     @State private var draft: AccountDraft
     @State private var validationError: AccountFormError?
-    @State private var saveErrorMessage: String?
+    @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
 
     init(mode: AccountEditorMode) {
@@ -131,7 +134,8 @@ struct AccountEditorView: View {
     /// checked too. The same is true of a debt: borrowing a sum and repaying it
     /// nets to zero while two records still name the account. A transfer names
     /// two accounts, and deleting either end would leave the other pointing at
-    /// nothing.
+    /// nothing. A recurring rule holds no money at all and would still be
+    /// generating into a deleted account on every launch, so it is counted too.
     private var canDelete: Bool {
         guard let editedAccount = mode.editedAccount else {
             return false
@@ -156,6 +160,7 @@ struct AccountEditorView: View {
             ) == 0
 
         return isEmpty && transactionCount == 0 && transferCount == 0 && debtCount == 0
+            && recurringCount == 0
     }
 
     private var transactionCount: Int {
@@ -184,6 +189,14 @@ struct AccountEditorView: View {
         return DebtSummary.count(for: editedAccount, debts: debts, payments: payments)
     }
 
+    private var recurringCount: Int {
+        guard let editedAccount = mode.editedAccount else {
+            return 0
+        }
+
+        return RecurringSummary.count(for: editedAccount, rules: recurringRules)
+    }
+
     private var deleteBlockedReason: String? {
         guard let editedAccount = mode.editedAccount, !canDelete else {
             return nil
@@ -200,18 +213,19 @@ struct AccountEditorView: View {
         }
 
         if transactionCount > 0 {
-            let noun = transactionCount == 1 ? "transaction" : "transactions"
-            return "This account still has \(transactionCount) \(noun). Delete them first."
+            return "This account still has \(transactionCount) transactions. Delete them first."
         }
 
         if transferCount > 0 {
-            let noun = transferCount == 1 ? "transfer" : "transfers"
-            return "This account still has \(transferCount) \(noun). Delete them first."
+            return "This account still has \(transferCount) transfers. Delete them first."
         }
 
         if debtCount > 0 {
-            let noun = debtCount == 1 ? "debt record" : "debt records"
-            return "This account still has \(debtCount) \(noun). Delete them first."
+            return "This account still has \(debtCount) debt records. Delete them first."
+        }
+
+        if recurringCount > 0 {
+            return "This account still has \(recurringCount) recurring rules. Delete them first."
         }
 
         return "Set the balance to 0 before deleting this account."

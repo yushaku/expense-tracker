@@ -15,6 +15,8 @@ import SwiftUI
 struct DateRangeFilter: View {
     @Binding var range: TransactionRange
 
+    @Environment(\.locale) private var locale
+
     /// Prefixes the accessibility identifiers, so two filters on one screen stay
     /// tellable apart. Empty leaves the plain names the Spending screen has
     /// always used.
@@ -83,7 +85,7 @@ struct DateRangeFilter: View {
                 endLabel("To", date: range.lastDay)
             }
         } else {
-            Text(range.title.uppercased())
+            Text(range.title(in: locale).uppercased())
                 .font(.caption.weight(.semibold))
                 .tracking(0.8)
                 .lineLimit(1)
@@ -100,7 +102,7 @@ struct DateRangeFilter: View {
                 .tracking(0.6)
                 .foregroundStyle(MonMonTheme.textSecondary)
 
-            Text(Self.dayFormat.format(date))
+            Text(TransactionPeriod.format(Self.dayTemplate, in: locale).format(date))
                 .font(.subheadline.weight(.semibold))
                 .monospacedDigit()
                 .lineLimit(1)
@@ -145,7 +147,7 @@ struct DateRangeFilter: View {
 
     private var dayCalendar: some View {
         MCalendarView(selectedDate: daySelection, selectedRange: nil) {
-            calendar($0, scrollingTo: range.start)
+            calendar($0, scrollingTo: range.start, dayView: ThemedDayView.day)
         }
         .frame(minHeight: 320)
         .padding(12)
@@ -158,7 +160,7 @@ struct DateRangeFilter: View {
     /// tap on an already-finished range.
     private var rangeCalendar: some View {
         MCalendarView(selectedDate: nil, selectedRange: $pickedRange) {
-            calendar($0, scrollingTo: range.start)
+            calendar($0, scrollingTo: range.start, dayView: ThemedDayView.range)
         }
         .frame(minHeight: 320)
         .padding(12)
@@ -166,11 +168,15 @@ struct DateRangeFilter: View {
         .accessibilityIdentifier(identifier("range-calendar"))
     }
 
-    private func calendar(_ config: CalendarConfig, scrollingTo date: Date) -> CalendarConfig {
+    private func calendar(
+        _ config: CalendarConfig,
+        scrollingTo date: Date,
+        dayView: @escaping (Date, Bool, Binding<Date?>?, Binding<MDateRange?>?) -> any DayView
+    ) -> CalendarConfig {
         config
             .startMonth(CalendarTheme.startMonth())
             .endMonth(CalendarTheme.endMonth())
-            .dayView(ThemedDayView.init)
+            .dayView(dayView)
             .monthLabel(ThemedMonthLabel.init)
             .weekdaysView(ThemedWeekdaysView.init)
             .monthLabelToDaysDistance(14)
@@ -233,13 +239,7 @@ struct DateRangeFilter: View {
         identifierPrefix.isEmpty ? name : "\(identifierPrefix)-\(name)"
     }
 
-    private static let dayFormat: Date.FormatStyle = {
-        var style = Date.FormatStyle().day().month(.abbreviated).year()
-        style.calendar = TransactionPeriod.calendar
-        style.timeZone = TransactionPeriod.calendar.timeZone
-        style.locale = Locale(identifier: "en_US")
-        return style
-    }()
+    private static let dayTemplate = Date.FormatStyle().day().month(.abbreviated).year()
 }
 
 /// The small button a section title carries to change what slice of time it is
@@ -252,10 +252,17 @@ struct DateRangeFilter: View {
 struct DateRangeFilterButton: View {
     @Binding var range: TransactionRange
 
+    @Environment(\.locale) private var locale
+
     /// Prefixes the accessibility identifiers, so two filters on one screen stay
     /// tellable apart. Empty leaves the plain names the Spending screen has
     /// always used.
     var identifierPrefix: String = ""
+
+    /// The glyph the button wears. A screen that already steps its own months
+    /// asks for a calendar, which names what the sheet holds; a screen that only
+    /// narrows a list keeps the filter lines.
+    var systemImage: String = "line.3.horizontal.decrease"
 
     @State private var isFiltering = false
 
@@ -263,7 +270,7 @@ struct DateRangeFilterButton: View {
         Button {
             isFiltering = true
         } label: {
-            Image(systemName: "line.3.horizontal.decrease")
+            Image(systemName: systemImage)
                 .font(.footnote.weight(.bold))
                 .foregroundStyle(MonMonTheme.accent)
                 .frame(width: 30, height: 30)
@@ -272,7 +279,7 @@ struct DateRangeFilterButton: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Filter by date")
-        .accessibilityValue(range.title)
+        .accessibilityValue(range.title(in: locale))
         .accessibilityIdentifier(identifier("period-filter"))
         .sheet(isPresented: $isFiltering) {
             sheet
@@ -324,12 +331,14 @@ struct DateRangeFilterButton: View {
 
 #if DEBUG
     private struct DateRangeFilterPreview: View {
+        @Environment(\.locale) private var locale
+
         @State private var range = TransactionRange.month(containing: .now)
 
         var body: some View {
             VStack(spacing: 24) {
                 HStack(spacing: 12) {
-                    Text(range.title.uppercased())
+                    Text(range.title(in: locale).uppercased())
                         .font(.caption.weight(.semibold))
                         .tracking(0.8)
                         .foregroundStyle(MonMonTheme.textSecondary)

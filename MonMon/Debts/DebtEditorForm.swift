@@ -6,7 +6,7 @@ struct DebtEditorForm: View {
     let accounts: [CashAccount]
     let isEditing: Bool
     let validationError: DebtFormError?
-    let saveErrorMessage: String?
+    let saveErrorMessage: LocalizedStringKey?
     let onDelete: () -> Void
 
     var body: some View {
@@ -54,8 +54,10 @@ struct DebtEditorForm: View {
                     .font(.title3.weight(.semibold))
 
                 Text(
-                    "The account you pick moves by exactly this amount, "
-                        + "and your total assets stay the same."
+                    """
+                    The account you pick moves by exactly this amount, and your total assets \
+                    stay the same.
+                    """
                 )
                 .font(.subheadline)
                 .foregroundStyle(MonMonTheme.textSecondary)
@@ -63,7 +65,7 @@ struct DebtEditorForm: View {
         }
     }
 
-    private var title: String {
+    private var title: LocalizedStringKey {
         if isEditing {
             return "Fix what you recorded"
         }
@@ -129,11 +131,15 @@ struct DebtEditorForm: View {
     private var principalCaption: String {
         switch draft.direction {
         case .borrowed:
-            "VND · Borrowed money lands in the account you pick. "
-                + "Your total assets do not change, because you owe it back."
+            """
+            VND · Borrowed money lands in the account you pick. Your total assets do not \
+            change, because you owe it back.
+            """
         case .lent:
-            "VND · Lent money leaves the account you pick. "
-                + "Your total assets do not change, because it is still owed to you."
+            """
+            VND · Lent money leaves the account you pick. Your total assets do not change, \
+            because it is still owed to you.
+            """
         }
     }
 
@@ -187,11 +193,11 @@ struct DebtEditorForm: View {
         }
     }
 
-    private var counterpartyLabel: String {
+    private var counterpartyLabel: LocalizedStringKey {
         draft.direction == .borrowed ? "Who you owe" : "Who owes you"
     }
 
-    private var counterpartyPrompt: String {
+    private var counterpartyPrompt: LocalizedStringKey {
         draft.direction == .borrowed ? "Who lent it to you" : "Who you lent it to"
     }
 
@@ -245,8 +251,10 @@ struct DebtEditorForm: View {
                 }
 
                 Text(
-                    "Interest is an estimate on the original amount, shown but never counted. "
-                        + "What you actually pay is an expense on the Spending screen."
+                    """
+                    Interest is an estimate on the original amount, shown but never counted. \
+                    What you actually pay is an expense on the Spending screen.
+                    """
                 )
                 .font(.caption)
                 .foregroundStyle(MonMonTheme.textSecondary)
@@ -295,9 +303,10 @@ struct DebtEditorForm: View {
     private var accountCaption: String {
         guard draft.accountID != nil else {
             // The case the optional account exists for.
-            return "Not linked records what you owe without moving any balance — "
-                + "right for a debt you took before you started tracking, "
-                + "whose money is already in an opening balance."
+            return """
+                Not linked records what you owe without moving any balance — right for a debt you \
+                took before you started tracking, whose money is already in an opening balance.
+                """
         }
 
         return switch draft.direction {
@@ -366,18 +375,18 @@ struct DebtEditorForm: View {
             }
     }
 
-    private func sectionHeader(_ title: String, systemImage: String) -> some View {
+    private func sectionHeader(_ title: LocalizedStringKey, systemImage: String) -> some View {
         Label(title, systemImage: systemImage)
             .font(.headline)
             .foregroundStyle(MonMonTheme.textPrimary)
     }
 
-    private func fieldLabel(_ title: String) -> some View {
+    private func fieldLabel(_ title: LocalizedStringKey) -> some View {
         Text(title)
             .font(.subheadline.weight(.medium))
     }
 
-    private func errorBanner(_ message: String) -> some View {
+    private func errorBanner(_ message: LocalizedStringKey) -> some View {
         validationMessage(message, id: "save-debt-error")
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
@@ -391,14 +400,14 @@ struct DebtEditorForm: View {
             }
     }
 
-    private func validationMessage(_ message: String, id: String) -> some View {
+    private func validationMessage(_ message: LocalizedStringKey, id: String) -> some View {
         Label(message, systemImage: "exclamationmark.circle.fill")
             .font(.caption)
             .foregroundStyle(MonMonTheme.danger)
             .accessibilityIdentifier(id)
     }
 
-    private var principalErrorMessage: String? {
+    private var principalErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidPrincipal:
             "Enter a valid amount."
@@ -411,11 +420,11 @@ struct DebtEditorForm: View {
         }
     }
 
-    private var counterpartyErrorMessage: String? {
+    private var counterpartyErrorMessage: LocalizedStringKey? {
         validationError == .emptyCounterparty ? "Name the other side of this debt." : nil
     }
 
-    private var rateErrorMessage: String? {
+    private var rateErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidRate:
             "Enter a valid rate, or leave it blank for none."
@@ -426,12 +435,12 @@ struct DebtEditorForm: View {
         }
     }
 
-    private var dueDateErrorMessage: String? {
+    private var dueDateErrorMessage: LocalizedStringKey? {
         validationError == .dueDateBeforeOpening
             ? "The due date cannot be before the day the debt opened." : nil
     }
 
-    private var accountErrorMessage: String? {
+    private var accountErrorMessage: LocalizedStringKey? {
         validationError == .insufficientSourceBalance
             ? "That is more than the account you picked can hand over." : nil
     }
