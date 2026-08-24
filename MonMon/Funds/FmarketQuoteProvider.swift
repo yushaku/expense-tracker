@@ -6,7 +6,7 @@ import Foundation
 /// level, no compatibility promise, and no licence to reuse the data, which is
 /// why hand entry stays and why a failure never overwrites a known-good price.
 /// Verified working on 2026-08-21.
-struct FmarketQuoteProvider: FundQuoteProvider {
+struct FmarketQuoteProvider: FundCatalogueProvider {
     static let filterURL = URL.constant("https://api.fmarket.vn/res/products/filter")
     static let navHistoryURL = URL.constant("https://api.fmarket.vn/res/product/get-nav-history")
     static let pageSize = 100

@@ -70,7 +70,10 @@ struct FundInstrumentListView: View {
                 FundInstrumentEditorView(mode: mode)
             }
             .sheet(isPresented: $isImporting) {
-                FundCatalogueImportView()
+                FundCatalogueImportView(
+                    title: "Add from Fmarket",
+                    importer: FundCatalogueImport()
+                )
             }
             .webPage($fmarketPage)
         }

@@ -6,7 +6,7 @@ import Foundation
 /// level, no compatibility promise, and no licence to reuse the data, which is
 /// why hand entry stays and why a failure never overwrites a known-good price.
 /// Verified working on 2026-08-24.
-struct VangTodayQuoteProvider: FundQuoteProvider {
+struct VangTodayQuoteProvider: FundCatalogueProvider {
     static let pricesURL = URL.constant("https://www.vang.today/api/prices")
 
     let source = FundQuoteSource.vangToday

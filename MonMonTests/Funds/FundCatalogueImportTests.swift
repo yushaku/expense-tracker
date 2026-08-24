@@ -21,6 +21,13 @@ struct FundCatalogueImportTests {
         return FundCatalogueImport(provider: FmarketQuoteProvider(transport: transport))
     }
 
+    private func goldImporter() -> FundCatalogueImport {
+        let transport = FixtureTransport([
+            "api/prices": .init(FundQuoteFixtures.vangTodayCatalogue)
+        ])
+        return FundCatalogueImport(provider: VangTodayQuoteProvider(transport: transport))
+    }
+
     @Test("The listing arrives priced, so importing costs one request")
     func listingArrivesPriced() async throws {
         let importer = importer(FundQuoteFixtures.fmarketCatalogue)
@@ -134,6 +141,56 @@ struct FundCatalogueImportTests {
         await importer.load(existing: [])
 
         #expect(importer.phase == .failed(.decoding))
+    }
+
+    @Test("The gold catalogue excludes non-VND entries and groups by brand")
+    func goldCatalogueGroupsVNDEntriesByBrand() async throws {
+        let importer = goldImporter()
+
+        await importer.load(existing: [])
+
+        #expect(importer.candidates.map(\.symbol) == ["DOHCML", "SJL1L10"])
+        #expect(FundCatalogueImport.grouped(importer.importable).map(\.owner) == ["DOJI", "SJC"])
+    }
+
+    @Test("An existing gold code is marked held and not offered again")
+    func existingGoldIsNotOffered() async throws {
+        let existing = FundTestFactory.instrument(
+            symbol: "SJL1L10",
+            kind: .gold,
+            pricePerUnit: 147_000_000
+        )
+        let importer = goldImporter()
+
+        await importer.load(existing: [existing])
+
+        #expect(importer.alreadyHeld == ["SJL1L10"])
+        #expect(importer.importable.map(\.symbol) == ["DOHCML"])
+    }
+
+    @Test("Importing gold keeps its kind, source, and two-sided price")
+    func importingGoldKeepsProviderData() async throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let importer = goldImporter()
+        await importer.load(existing: [])
+        let stamped = Date(timeIntervalSince1970: 1_787_500_000)
+
+        let added = try importer.importing(
+            importer.importable,
+            into: context,
+            existing: [],
+            createdAt: stamped
+        )
+
+        #expect(added == 2)
+        let saved = try context.fetch(FetchDescriptor<FundInstrument>())
+        let sjc = try #require(saved.first { $0.symbol == "SJL1L10" })
+        #expect(sjc.kind == .gold)
+        #expect(sjc.source == .vangToday)
+        #expect(sjc.currentPricePerUnit == 147_000_000)
+        #expect(sjc.askPricePerUnit == 150_000_000)
+        #expect(sjc.priceFetchedAt == stamped)
     }
 }
 

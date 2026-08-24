@@ -123,6 +123,11 @@ protocol FundQuoteProvider: Sendable {
     func search(_ query: String) async throws -> [FundInstrumentCandidate]
 }
 
+/// A quote provider that can offer its complete importable catalogue in one request.
+protocol FundCatalogueProvider: FundQuoteProvider {
+    func catalogue() async throws -> [FundInstrumentCandidate]
+}
+
 /// Picks the provider for an instrument.
 ///
 /// The choice comes from `FundInstrumentKind`, which the owner sets, and never from

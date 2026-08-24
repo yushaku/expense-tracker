@@ -1,7 +1,7 @@
 import SwiftData
 import SwiftUI
 
-/// Picks funds out of Fmarket's list instead of typing them one at a time.
+/// Picks instruments out of a provider's catalogue instead of typing them one at a time.
 struct FundCatalogueImportView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -9,10 +9,16 @@ struct FundCatalogueImportView: View {
     @Query(sort: \FundInstrument.symbol, order: .forward)
     private var instruments: [FundInstrument]
 
-    @State private var importer = FundCatalogueImport()
+    private let title: String
+    @State private var importer: FundCatalogueImport
     @State private var chosen: Set<String> = []
     @State private var searchText = ""
     @State private var saveErrorMessage: String?
+
+    init(title: String, importer: FundCatalogueImport) {
+        self.title = title
+        _importer = State(initialValue: importer)
+    }
 
     var body: some View {
         #if os(macOS)
@@ -30,8 +36,8 @@ struct FundCatalogueImportView: View {
 
                 content
             }
-            .navigationTitle("Add from Fmarket")
-            .accessibilityIdentifier("fmarket-import")
+            .navigationTitle(title)
+            .accessibilityIdentifier("\(importer.source.rawValue)-import")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
@@ -55,7 +61,7 @@ struct FundCatalogueImportView: View {
         case .idle, .loading:
             VStack(spacing: 12) {
                 ProgressView()
-                Text("Asking Fmarket which funds it lists…")
+                Text("Asking \(providerName) which \(itemPlural) it lists…")
                     .font(.subheadline)
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
@@ -63,7 +69,8 @@ struct FundCatalogueImportView: View {
 
         case .failed:
             message(
-                importer.phase.message ?? "Fmarket could not be reached.",
+                importer.phase.message(providerName: providerName)
+                    ?? "\(providerName) could not be reached.",
                 systemImage: "xmark.circle.fill",
                 tint: MonMonTheme.danger,
                 id: "import-error"
@@ -71,7 +78,7 @@ struct FundCatalogueImportView: View {
 
         case .loaded where importer.importable.isEmpty:
             message(
-                "Every fund Fmarket lists is already in your catalogue.",
+                "Every \(itemSingular) \(providerName) lists is already in your catalogue.",
                 systemImage: "checkmark.circle.fill",
                 tint: MonMonTheme.gain,
                 id: "import-empty"
@@ -111,7 +118,7 @@ struct FundCatalogueImportView: View {
         }
     }
 
-    /// The funds on show: everything importable, narrowed by the search.
+    /// The entries on show: everything importable, narrowed by the search.
     private var shown: [FundInstrumentCandidate] {
         importer.matching(searchText)
     }
@@ -153,7 +160,7 @@ struct FundCatalogueImportView: View {
         .buttonStyle(.plain)
         .foregroundStyle(MonMonTheme.textPrimary)
         .accessibilityIdentifier("import-owner-\(group.owner)")
-        .accessibilityHint("Selects every fund from this manager")
+        .accessibilityHint("Selects every \(itemSingular) from this \(groupSingular)")
     }
 
     private func isGroupChosen(_ group: FundCatalogueImport.OwnerGroup) -> Bool {
@@ -176,7 +183,8 @@ struct FundCatalogueImportView: View {
                 .foregroundStyle(MonMonTheme.textSecondary)
 
             Text(
-                "Grouped by manager · \(managerCountText). Tap a manager to take all of its funds."
+                "Grouped by \(groupSingular) · \(groupCountText). "
+                    + "Tap a \(groupSingular) to take all of its \(itemPlural)."
             )
             .font(.caption)
             .foregroundStyle(MonMonTheme.textSecondary)
@@ -206,15 +214,19 @@ struct FundCatalogueImportView: View {
     private var headerText: String {
         let total = importer.importable.count
         guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            if isGold {
+                return "\(total) gold products, each with the shop buy price "
+                    + "\(providerName) publishes. Pick the ones you hold — nothing is added until you do."
+            }
             return "\(total) open-ended funds, each with the NAV Fmarket publishes. "
                 + "Pick the ones you hold — nothing is added until you do."
         }
-        return "\(shown.count) of \(total) funds match."
+        return "\(shown.count) of \(total) \(itemPlural) match."
     }
 
-    private var managerCountText: String {
+    private var groupCountText: String {
         let count = groups.count
-        return count == 1 ? "1 manager" : "\(count) managers"
+        return count == 1 ? "1 \(groupSingular)" : "\(count) \(groupPlural)"
     }
 
     private var searchField: some View {
@@ -223,7 +235,7 @@ struct FundCatalogueImportView: View {
                 .foregroundStyle(MonMonTheme.textSecondary)
                 .accessibilityHidden(true)
 
-            TextField("Ticker, name or manager", text: $searchText)
+            TextField(searchPlaceholder, text: $searchText)
                 .textFieldStyle(.plain)
                 .accessibilityIdentifier("import-search")
 
@@ -247,7 +259,7 @@ struct FundCatalogueImportView: View {
     }
 
     private var noMatches: some View {
-        Text("No fund matches “\(searchText)”.")
+        Text("No \(itemSingular) matches “\(searchText)”.")
             .font(.subheadline)
             .foregroundStyle(MonMonTheme.textSecondary)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -361,7 +373,17 @@ struct FundCatalogueImportView: View {
             dismiss()
         } catch {
             modelContext.rollback()
-            saveErrorMessage = "Couldn’t save these funds. Try again."
+            saveErrorMessage = "Couldn’t save these \(itemPlural). Try again."
         }
+    }
+
+    private var isGold: Bool { importer.source == .vangToday }
+    private var providerName: String { importer.source.displayName }
+    private var itemSingular: String { isGold ? "gold product" : "fund" }
+    private var itemPlural: String { isGold ? "gold products" : "funds" }
+    private var groupSingular: String { isGold ? "brand" : "manager" }
+    private var groupPlural: String { isGold ? "brands" : "managers" }
+    private var searchPlaceholder: String {
+        isGold ? "Code, name or brand" : "Ticker, name or manager"
     }
 }

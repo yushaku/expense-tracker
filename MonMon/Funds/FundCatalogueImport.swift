@@ -2,8 +2,8 @@ import Foundation
 import Observation
 import SwiftData
 
-/// Loads Fmarket's list of open-ended funds so the owner can pick from it
-/// instead of typing a ticker, a name and a price per fund.
+/// Loads a provider's catalogue so the owner can pick entries instead of typing
+/// a symbol, name, and price one at a time.
 ///
 /// Owner-triggered, like every other outbound call in the app: the list is
 /// fetched when the import screen is opened, and nothing is written until
@@ -24,11 +24,13 @@ final class FundCatalogueImport {
     /// offering a duplicate the draft would reject anyway.
     private(set) var alreadyHeld: Set<String> = []
 
-    private let provider: FmarketQuoteProvider
+    private let provider: any FundCatalogueProvider
 
-    init(provider: FmarketQuoteProvider = FmarketQuoteProvider()) {
+    init(provider: any FundCatalogueProvider = FmarketQuoteProvider()) {
         self.provider = provider
     }
+
+    var source: FundQuoteSource { provider.source }
 
     var importable: [FundInstrumentCandidate] {
         candidates.filter { !alreadyHeld.contains($0.symbol.uppercased()) }
@@ -117,7 +119,7 @@ final class FundCatalogueImport {
         }
     }
 
-    /// Writes the chosen funds into the catalogue.
+    /// Writes the chosen entries into the catalogue.
     ///
     /// A candidate the listing priced arrives already priced and sourced to
     /// Fmarket; one it did not is written at zero with automatic quotes on, so
@@ -146,10 +148,11 @@ final class FundCatalogueImport {
                 name: candidate.name,
                 kind: candidate.kind,
                 currentPricePerUnit: candidate.pricePerUnit ?? .zero,
+                askPricePerUnit: candidate.askPricePerUnit ?? .zero,
                 priceAsOf: candidate.priceAsOf ?? Date(timeIntervalSince1970: 0),
                 priceSource: candidate.pricePerUnit == nil
                     ? FundQuoteSource.manual.rawValue
-                    : FundQuoteSource.fmarket.rawValue,
+                    : provider.source.rawValue,
                 priceFetchedAt: candidate.pricePerUnit == nil ? nil : createdAt,
                 autoQuoteEnabled: true,
                 currencyCode: VNDCurrency.code,
@@ -171,15 +174,19 @@ final class FundCatalogueImport {
 
 extension FundCatalogueImport.Phase {
     var message: String? {
+        message(providerName: "Fmarket")
+    }
+
+    func message(providerName: String) -> String? {
         switch self {
         case .idle, .loading, .loaded:
             nil
         case .failed(.transport):
             "No connection. Try again when you are back online."
         case .failed(.decoding):
-            "Fmarket changed its reply. Add the fund by hand for now."
+            "\(providerName) changed its reply. Add the item by hand for now."
         case .failed(.symbolNotFound), .failed(.noQuoteAvailable):
-            "Fmarket listed nothing."
+            "\(providerName) listed nothing."
         case .failed(.rateLimited):
             "Checked a moment ago."
         }
