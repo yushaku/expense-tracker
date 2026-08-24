@@ -1,30 +1,30 @@
 import SwiftData
 import SwiftUI
 
-enum TransactionEditorMode: Identifiable {
+enum RecurringEditorMode: Identifiable {
     case add
-    case edit(MoneyTransaction)
+    case edit(RecurringRule)
 
     var id: String {
         switch self {
         case .add:
             "add"
-        case .edit(let transaction):
-            transaction.id.uuidString
+        case .edit(let rule):
+            rule.id.uuidString
         }
     }
 
-    var editedTransaction: MoneyTransaction? {
+    var editedRule: RecurringRule? {
         switch self {
         case .add:
             nil
-        case .edit(let transaction):
-            transaction
+        case .edit(let rule):
+            rule
         }
     }
 }
 
-struct TransactionEditorView: View {
+struct RecurringEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
@@ -41,22 +41,26 @@ struct TransactionEditorView: View {
     @AppStorage(TransactionDefaults.incomeCategoryStorageKey)
     private var defaultTransactionIncomeCategoryValue = ""
 
-    private let mode: TransactionEditorMode
+    private let mode: RecurringEditorMode
+    /// Passed in rather than read from the clock inside, so what the editor
+    /// backfills is decided by one value the whole screen agrees on.
+    private let asOf: Date
 
-    @State private var draft: TransactionDraft
-    @State private var validationError: TransactionFormError?
+    @State private var draft: RecurringRuleDraft
+    @State private var validationError: RecurringFormError?
     @State private var saveErrorMessage: String?
     @State private var isConfirmingDelete = false
     @State private var didApplyDefaults = false
 
-    init(mode: TransactionEditorMode, defaultDate: Date = .now) {
+    init(mode: RecurringEditorMode, defaultDate: Date = .now, asOf: Date = .now) {
         self.mode = mode
+        self.asOf = asOf
 
         switch mode {
         case .add:
-            _draft = State(initialValue: TransactionDraft(occurredAt: defaultDate))
-        case .edit(let transaction):
-            _draft = State(initialValue: TransactionDraft(transaction: transaction))
+            _draft = State(initialValue: RecurringRuleDraft(anchorDate: defaultDate))
+        case .edit(let rule):
+            _draft = State(initialValue: RecurringRuleDraft(rule: rule))
         }
     }
 
@@ -71,24 +75,22 @@ struct TransactionEditorView: View {
 
     private var form: some View {
         NavigationStack {
-            TransactionEditorForm(
+            RecurringEditorForm(
                 draft: $draft,
                 accounts: accounts,
                 categories: categories,
-                isEditing: mode.editedTransaction != nil,
+                isEditing: mode.editedRule != nil,
                 validationError: validationError,
                 saveErrorMessage: saveErrorMessage,
                 onDelete: { isConfirmingDelete = true }
             )
-            .navigationTitle(
-                mode.editedTransaction == nil ? "Add transaction" : "Edit transaction"
-            )
+            .navigationTitle(mode.editedRule == nil ? "Add rule" : "Edit rule")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .accessibilityIdentifier("cancel-transaction")
+                    .accessibilityIdentifier("cancel-recurring")
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
@@ -96,22 +98,22 @@ struct TransactionEditorView: View {
                         save()
                     }
                     .fontWeight(.semibold)
-                    .accessibilityIdentifier("save-transaction")
+                    .accessibilityIdentifier("save-recurring")
                 }
             }
             .confirmationDialog(
-                "Delete this transaction?",
+                "Delete this rule?",
                 isPresented: $isConfirmingDelete,
                 titleVisibility: .visible
             ) {
                 Button("Delete", role: .destructive) {
                     delete()
                 }
-                .accessibilityIdentifier("confirm-delete-transaction")
+                .accessibilityIdentifier("confirm-delete-recurring")
 
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("Its account balance returns to what it was.")
+                Text("What it already recorded stays, and no balance moves.")
             }
             .onChange(of: draft.kind) { _, _ in
                 applyDefaultCategoryIfDirectionChanged()
@@ -125,19 +127,26 @@ struct TransactionEditorView: View {
         }
     }
 
+    /// A new rule starts on the same account and category a new transaction
+    /// does, because it is the same money seen ahead of time.
     private func applyDefaultsIfNeeded() {
-        guard !didApplyDefaults, mode.editedTransaction == nil else {
+        guard !didApplyDefaults, mode.editedRule == nil else {
             return
         }
 
         didApplyDefaults = true
+        var transactionDraft = TransactionDraft(occurredAt: draft.anchorDate)
         TransactionDefaults.apply(
             accountValue: defaultTransactionAccountValue,
             categoryValue: defaultTransactionCategoryValue,
             accounts: accounts,
             categories: categories,
-            to: &draft
+            to: &transactionDraft
         )
+
+        draft.kind = transactionDraft.kind
+        draft.accountID = transactionDraft.accountID
+        draft.categoryID = transactionDraft.categoryID
     }
 
     /// Switching between income and expense strands a category from the other
@@ -166,13 +175,13 @@ struct TransactionEditorView: View {
         saveErrorMessage = nil
 
         do {
-            if let editedTransaction = mode.editedTransaction {
-                try draft.apply(to: editedTransaction)
+            if let editedRule = mode.editedRule {
+                try draft.apply(to: editedRule, asOf: asOf)
             } else {
-                let transaction = try draft.makeTransaction(id: UUID(), createdAt: .now)
-                modelContext.insert(transaction)
+                let rule = try draft.makeRule(id: UUID(), createdAt: asOf, asOf: asOf)
+                modelContext.insert(rule)
             }
-        } catch let error as TransactionFormError {
+        } catch let error as RecurringFormError {
             validationError = error
             return
         } catch {
@@ -182,27 +191,33 @@ struct TransactionEditorView: View {
 
         do {
             try modelContext.save()
+            // Saved first, so a rule that fails to write records nothing. What
+            // it owes is recorded now rather than at the next launch, because a
+            // rule the owner just wrote should show its entries straight away.
+            try RecurringGenerator.generate(in: modelContext, asOf: asOf)
             dismiss()
         } catch {
             modelContext.rollback()
-            saveErrorMessage = "Couldn’t save this transaction. Try again."
+            saveErrorMessage = "Couldn’t save this rule. Try again."
         }
     }
 
+    /// The transactions this rule already wrote are money that already moved, so
+    /// they stay and no balance changes.
     private func delete() {
-        guard let editedTransaction = mode.editedTransaction else {
+        guard let editedRule = mode.editedRule else {
             return
         }
 
         saveErrorMessage = nil
-        modelContext.delete(editedTransaction)
+        modelContext.delete(editedRule)
 
         do {
             try modelContext.save()
             dismiss()
         } catch {
             modelContext.rollback()
-            saveErrorMessage = "Couldn’t delete this transaction. Try again."
+            saveErrorMessage = "Couldn’t delete this rule. Try again."
         }
     }
 }

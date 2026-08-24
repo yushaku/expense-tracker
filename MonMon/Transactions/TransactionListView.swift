@@ -15,6 +15,18 @@ struct TransactionListView: View {
     @State private var editorMode: TransactionEditorMode?
     @State private var breakdownKind: TransactionKind = .expense
     @State private var isManagingCategories = false
+    @State private var isManagingRecurring = false
+    @State private var isEditingDefaults = false
+
+    /// Weekday first: over a run of days the name is what the eye picks out,
+    /// and the year is left to the period title above the list.
+    private static let dayFormat: Date.FormatStyle = {
+        var style = Date.FormatStyle().weekday(.abbreviated).day().month(.abbreviated)
+        style.calendar = TransactionPeriod.calendar
+        style.timeZone = TransactionPeriod.calendar.timeZone
+        style.locale = Locale(identifier: "en_US")
+        return style
+    }()
 
     var body: some View {
         NavigationStack {
@@ -29,13 +41,12 @@ struct TransactionListView: View {
                         if accounts.isEmpty {
                             noAccountState
                         } else {
+                            quickActions
+
                             CategoryBreakdownCard(
                                 kind: $breakdownKind,
                                 slices: breakdownSlices,
-                                range: range,
-                                onManageCategories: {
-                                    isManagingCategories = true
-                                }
+                                range: range
                             )
 
                             if !visibleTransactions.isEmpty {
@@ -71,6 +82,12 @@ struct TransactionListView: View {
             .sheet(isPresented: $isManagingCategories) {
                 CategoryListView()
             }
+            .sheet(isPresented: $isManagingRecurring) {
+                RecurringListView()
+            }
+            .sheet(isPresented: $isEditingDefaults) {
+                TransactionDefaultsView()
+            }
             .tint(MonMonTheme.accent)
         }
     }
@@ -91,6 +108,100 @@ struct TransactionListView: View {
             transactions: visibleTransactions,
             categories: categories
         )
+    }
+
+    /// The three things the owner sets up rather than records: what a
+    /// transaction can be filed under, what records itself, and what a new one
+    /// starts on. They sit above the breakdown because each one changes what it
+    /// shows, and none of them belongs on the floating add button.
+    private var quickActions: some View {
+        // Three labelled buttons crowd an iPhone in one row, so the labels drop
+        // below the icons before the row wraps.
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 10) {
+                quickActionButtons(isStacked: false)
+            }
+
+            HStack(spacing: 10) {
+                quickActionButtons(isStacked: true)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func quickActionButtons(isStacked: Bool) -> some View {
+        quickAction(
+            "Categories",
+            systemImage: "tag.fill",
+            isStacked: isStacked,
+            accessibilityIdentifier: "manage-categories"
+        ) {
+            isManagingCategories = true
+        }
+
+        quickAction(
+            "Recurring",
+            systemImage: "arrow.triangle.2.circlepath",
+            isStacked: isStacked,
+            accessibilityIdentifier: "manage-recurring"
+        ) {
+            isManagingRecurring = true
+        }
+
+        quickAction(
+            "Defaults",
+            systemImage: "slider.horizontal.3",
+            isStacked: isStacked,
+            accessibilityIdentifier: "manage-transaction-defaults"
+        ) {
+            isEditingDefaults = true
+        }
+    }
+
+    private func quickAction(
+        _ title: String,
+        systemImage: String,
+        isStacked: Bool,
+        accessibilityIdentifier: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Group {
+                if isStacked {
+                    VStack(spacing: 6) {
+                        Image(systemName: systemImage)
+                            .font(.subheadline.weight(.semibold))
+
+                        Text(title)
+                            .font(.caption.weight(.semibold))
+                    }
+                } else {
+                    HStack(spacing: 8) {
+                        Image(systemName: systemImage)
+                            .font(.subheadline.weight(.semibold))
+
+                        Text(title)
+                            .font(.subheadline.weight(.semibold))
+                    }
+                }
+            }
+            .lineLimit(1)
+            .foregroundStyle(MonMonTheme.accent)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .padding(.horizontal, 10)
+            .background {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(MonMonTheme.surface)
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(MonMonTheme.border, lineWidth: 1)
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier(accessibilityIdentifier)
     }
 
     private var periodCard: some View {
@@ -166,8 +277,12 @@ struct TransactionListView: View {
     /// The sign is written out rather than left to the minus the formatter would
     /// place, so a surplus reads as clearly as a shortfall.
     private var signedNet: String {
-        let magnitude = net < 0 ? -net : net
-        let sign = net < 0 ? "−" : "+"
+        signed(net)
+    }
+
+    private func signed(_ amount: Decimal) -> String {
+        let magnitude = amount < 0 ? -amount : amount
+        let sign = amount < 0 ? "−" : "+"
 
         return "\(sign)\(VNDCurrency.format(magnitude))"
     }
@@ -183,26 +298,60 @@ struct TransactionListView: View {
         }
     }
 
+    /// Transactions run in date order, so the list breaks them at each day and
+    /// heads the run with that date and what the day came to. The cards below a
+    /// header drop their own date, which the header now carries.
     private var transactionsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 20) {
             Text("Transactions")
                 .font(.title3.weight(.semibold))
 
-            ForEach(visibleTransactions) { transaction in
-                Button {
-                    editorMode = .edit(transaction)
-                } label: {
-                    TransactionCard(
-                        transaction: transaction,
-                        category: category(for: transaction),
-                        account: account(for: transaction)
-                    )
+            ForEach(dayGroups) { group in
+                VStack(alignment: .leading, spacing: 12) {
+                    dayHeader(for: group)
+
+                    ForEach(group.transactions) { transaction in
+                        Button {
+                            editorMode = .edit(transaction)
+                        } label: {
+                            TransactionCard(
+                                transaction: transaction,
+                                category: category(for: transaction),
+                                account: account(for: transaction),
+                                showsDate: false
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("transaction-\(transaction.id.uuidString)")
+                        .accessibilityHint("Opens the transaction editor.")
+                    }
                 }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("transaction-\(transaction.id.uuidString)")
-                .accessibilityHint("Opens the transaction editor.")
             }
         }
+    }
+
+    private var dayGroups: [TransactionDayGroup] {
+        TransactionSummary.byDay(visibleTransactions)
+    }
+
+    private func dayHeader(for group: TransactionDayGroup) -> some View {
+        HStack(spacing: 12) {
+            Text(Self.dayFormat.format(group.day).uppercased())
+                .font(.caption.weight(.semibold))
+                .tracking(0.8)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+
+            Spacer(minLength: 8)
+
+            Text(signed(group.net))
+                .font(.caption.weight(.semibold))
+                .monospacedDigit()
+                .lineLimit(1)
+        }
+        .foregroundStyle(MonMonTheme.textSecondary)
+        .padding(.horizontal, 4)
+        .accessibilityElement(children: .combine)
     }
 
     private func category(for transaction: MoneyTransaction) -> TransactionCategory? {

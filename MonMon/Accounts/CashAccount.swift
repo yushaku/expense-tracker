@@ -157,8 +157,44 @@ final class CashAccount {
                 note: note,
                 accountID: accountID,
                 categoryID: categoryID,
+                sourceRuleID: nil,
                 currencyCode: VNDCurrency.code,
                 createdAt: occurredAt
+            )
+        }
+    }
+
+    extension RecurringRule {
+        static func preview(
+            kind: TransactionKind,
+            amount: Decimal,
+            note: String,
+            accountID: UUID,
+            categoryID: UUID?,
+            frequency: RecurrenceFrequency = .monthly,
+            interval: Int = 1,
+            anchorOffset: TimeInterval = 0,
+            isPaused: Bool = false
+        ) -> RecurringRule {
+            let anchorDate = Date(timeIntervalSince1970: 1_700_000_000 + anchorOffset)
+
+            return RecurringRule(
+                id: UUID(),
+                kind: kind,
+                amount: amount,
+                note: note,
+                accountID: accountID,
+                categoryID: categoryID,
+                currencyCode: VNDCurrency.code,
+                frequency: frequency,
+                interval: interval,
+                anchorDate: anchorDate,
+                endDate: nil,
+                isPaused: isPaused,
+                // Previews draw rules; they do not run the generator, and a
+                // preview that backfilled years of rent would swamp its own list.
+                lastGeneratedAt: anchorDate,
+                createdAt: anchorDate
             )
         }
     }
@@ -409,6 +445,23 @@ final class CashAccount {
                         accountID: techcombank.id,
                         occurredOffset: 86_400 * 3
                     ),
+                ],
+                rules: [
+                    .preview(
+                        kind: .expense,
+                        amount: 8_000_000,
+                        note: "Rent",
+                        accountID: techcombank.id,
+                        categoryID: food.id
+                    ),
+                    .preview(
+                        kind: .income,
+                        amount: 32_000_000,
+                        note: "Salary",
+                        accountID: techcombank.id,
+                        categoryID: salary.id,
+                        anchorOffset: 86_400 * 2
+                    ),
                 ]
             )
         }()
@@ -422,7 +475,8 @@ final class CashAccount {
             transactions: [MoneyTransaction],
             transfers: [AccountTransfer],
             debts: [Debt] = [],
-            payments: [DebtPayment] = []
+            payments: [DebtPayment] = [],
+            rules: [RecurringRule] = []
         ) -> ModelContainer {
             let container: ModelContainer
             do {
@@ -468,6 +522,10 @@ final class CashAccount {
 
             for payment in payments {
                 container.mainContext.insert(payment)
+            }
+
+            for rule in rules {
+                container.mainContext.insert(rule)
             }
 
             return container

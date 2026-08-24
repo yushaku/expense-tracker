@@ -178,6 +178,7 @@ struct AccountSeedTests {
             note: "",
             accountID: AccountSeed.unassignedID,
             categoryID: nil,
+            sourceRuleID: nil,
             currencyCode: VNDCurrency.code,
             createdAt: referenceDate
         )

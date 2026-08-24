@@ -38,6 +38,7 @@ struct TransactionSummaryTests {
             note: "",
             accountID: accountID,
             categoryID: categoryID,
+            sourceRuleID: nil,
             currencyCode: VNDCurrency.code,
             createdAt: createdAt
         )
@@ -152,5 +153,91 @@ struct TransactionSummaryTests {
         ]
 
         #expect(TransactionSummary.count(for: food, transactions: transactions) == 1)
+    }
+
+    @Test("No transactions make no day groups")
+    func emptyGroupsAreEmpty() {
+        #expect(TransactionSummary.byDay([]).isEmpty)
+    }
+
+    @Test("Transactions group by calendar day, newest day first")
+    func daysGroupNewestFirst() {
+        let account = makeAccount()
+        let older = makeTransaction(
+            kind: .expense,
+            amount: 100_000,
+            accountID: account.id,
+            occurredAt: date(2024, 8, 10)
+        )
+        let sameDay = makeTransaction(
+            kind: .income,
+            amount: 500_000,
+            accountID: account.id,
+            occurredAt: date(2024, 8, 12).addingTimeInterval(3_600)
+        )
+        let newer = makeTransaction(
+            kind: .expense,
+            amount: 200_000,
+            accountID: account.id,
+            occurredAt: date(2024, 8, 12)
+        )
+
+        let groups = TransactionSummary.byDay([sameDay, newer, older])
+
+        #expect(groups.count == 2)
+        #expect(groups[0].day == date(2024, 8, 12))
+        #expect(groups[1].day == date(2024, 8, 10))
+        #expect(groups[0].transactions.count == 2)
+        #expect(groups[1].transactions.count == 1)
+    }
+
+    @Test("A day keeps the order it was handed in")
+    func dayKeepsIncomingOrder() {
+        let account = makeAccount()
+        let first = makeTransaction(
+            kind: .expense,
+            amount: 100_000,
+            accountID: account.id,
+            occurredAt: date(2024, 8, 12)
+        )
+        let second = makeTransaction(
+            kind: .expense,
+            amount: 200_000,
+            accountID: account.id,
+            occurredAt: date(2024, 8, 12)
+        )
+
+        let groups = TransactionSummary.byDay([first, second])
+
+        #expect(groups.count == 1)
+        #expect(groups[0].transactions.map(\.id) == [first.id, second.id])
+    }
+
+    @Test("A day nets its own income against its own expense")
+    func dayNetsItsOwnTransactions() {
+        let account = makeAccount()
+        let groups = TransactionSummary.byDay([
+            makeTransaction(
+                kind: .income,
+                amount: 500_000,
+                accountID: account.id,
+                occurredAt: date(2024, 8, 12)
+            ),
+            makeTransaction(
+                kind: .expense,
+                amount: 200_000,
+                accountID: account.id,
+                occurredAt: date(2024, 8, 12)
+            ),
+            makeTransaction(
+                kind: .expense,
+                amount: 900_000,
+                accountID: account.id,
+                occurredAt: date(2024, 8, 10)
+            ),
+        ])
+
+        #expect(groups[0].net == 300_000)
+        #expect(groups[1].net == -900_000)
     }
 }

@@ -27,6 +27,7 @@ enum MonMonSchema {
             FundInstrument.self, FundHolding.self,
             TransactionCategory.self, MoneyTransaction.self, AccountTransfer.self,
             Debt.self, DebtPayment.self,
+            RecurringRule.self,
         ]
     }
 }

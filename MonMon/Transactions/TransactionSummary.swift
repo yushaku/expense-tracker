@@ -42,4 +42,32 @@ enum TransactionSummary {
     ) -> [MoneyTransaction] {
         transactions.filter { range.contains($0.occurredAt) }
     }
+
+    /// Splits transactions into calendar days, newest day first. The order
+    /// inside a day is the order handed in, so a list already sorted by
+    /// `occurredAt` keeps that sorting instead of being shuffled by a second
+    /// sort over dates that are usually identical.
+    static func byDay(_ transactions: [MoneyTransaction]) -> [TransactionDayGroup] {
+        let calendar = TransactionPeriod.calendar
+        let days = Dictionary(grouping: transactions) { transaction in
+            calendar.startOfDay(for: transaction.occurredAt)
+        }
+
+        return days.keys.sorted(by: >).map { day in
+            TransactionDayGroup(day: day, transactions: days[day] ?? [])
+        }
+    }
+}
+
+/// One calendar day of transactions, used by the spending list to put a date
+/// over a run of cards instead of on every one of them.
+struct TransactionDayGroup: Identifiable {
+    let day: Date
+    let transactions: [MoneyTransaction]
+
+    var id: Date { day }
+
+    var net: Decimal {
+        TransactionSummary.net(of: transactions)
+    }
 }

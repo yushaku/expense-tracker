@@ -373,6 +373,7 @@ final class AssetSummaryTests {
             note: "",
             accountID: account.id,
             categoryID: nil,
+            sourceRuleID: nil,
             currencyCode: VNDCurrency.code,
             createdAt: date(2024, 2, 10)
         )
@@ -384,6 +385,7 @@ final class AssetSummaryTests {
             note: "",
             accountID: account.id,
             categoryID: nil,
+            sourceRuleID: nil,
             currencyCode: VNDCurrency.code,
             createdAt: date(2024, 3, 1)
         )

@@ -133,6 +133,108 @@ struct TransactionDraftTests {
         #expect(draft.categoryID == nil)
     }
 
+    @Test("A missing income preference falls back on the seeded Salary")
+    func missingIncomePreferenceUsesSeedDefault() {
+        let salary = TransactionCategory(
+            id: UUID(),
+            name: CategorySeed.defaultIncomeName,
+            kind: .income,
+            symbolName: "briefcase.fill",
+            colorName: "green",
+            createdAt: occurredAt
+        )
+        let food = TransactionCategory(
+            id: UUID(),
+            name: CategorySeed.defaultExpenseName,
+            kind: .expense,
+            symbolName: "fork.knife",
+            colorName: "peach",
+            createdAt: occurredAt
+        )
+
+        #expect(
+            TransactionDefaults.categoryID(
+                for: .income,
+                expenseValue: "",
+                incomeValue: "",
+                categories: [food, salary]
+            ) == salary.id
+        )
+    }
+
+    @Test("Each direction reads its own stored preference")
+    func eachDirectionReadsItsOwnPreference() {
+        let bonus = TransactionCategory(
+            id: UUID(),
+            name: "Bonus",
+            kind: .income,
+            symbolName: "gift.fill",
+            colorName: "yellow",
+            createdAt: occurredAt
+        )
+        let transport = TransactionCategory(
+            id: UUID(),
+            name: "Transport",
+            kind: .expense,
+            symbolName: "car.fill",
+            colorName: "blue",
+            createdAt: occurredAt
+        )
+        let categories = [transport, bonus]
+
+        #expect(
+            TransactionDefaults.categoryID(
+                for: .expense,
+                expenseValue: transport.id.uuidString,
+                incomeValue: bonus.id.uuidString,
+                categories: categories
+            ) == transport.id
+        )
+        #expect(
+            TransactionDefaults.categoryID(
+                for: .income,
+                expenseValue: transport.id.uuidString,
+                incomeValue: bonus.id.uuidString,
+                categories: categories
+            ) == bonus.id
+        )
+    }
+
+    /// A preference naming a category from the other direction is stale in the
+    /// way that matters most: it would file an expense under Salary.
+    @Test("A preference from the wrong direction is not applied")
+    func crossDirectionPreferenceIsNotApplied() {
+        let bonus = TransactionCategory(
+            id: UUID(),
+            name: "Bonus",
+            kind: .income,
+            symbolName: "gift.fill",
+            colorName: "yellow",
+            createdAt: occurredAt
+        )
+
+        #expect(
+            TransactionDefaults.categoryID(
+                for: .expense,
+                expenseValue: bonus.id.uuidString,
+                incomeValue: "",
+                categories: [bonus]
+            ) == nil
+        )
+    }
+
+    @Test("A direction with no category at all has no default")
+    func directionWithoutCategoriesHasNoDefault() {
+        #expect(
+            TransactionDefaults.categoryID(
+                for: .income,
+                expenseValue: "",
+                incomeValue: "",
+                categories: []
+            ) == nil
+        )
+    }
+
     @Test("A complete draft becomes a transaction with a positive amount")
     func completeDraftValidates() throws {
         let draft = makeDraft(kind: .expense, amountText: "1.250.000", note: "  Lunch  ")

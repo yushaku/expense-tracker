@@ -81,11 +81,9 @@ struct AccountDraftTests {
         }
     }
 
-    @Test("VND display uses Vietnamese grouping and the dong symbol")
+    @Test("VND display abbreviates with a Vietnamese decimal comma")
     func vndDisplayIsLocalized() {
-        let formatted = VNDCurrency.format(Decimal(12_345_678))
-
-        #expect(formatted.contains("12.345.678"))
-        #expect(formatted.contains("₫"))
+        #expect(VNDCurrency.format(Decimal(12_345_678)) == "12,3M")
+        #expect(VNDCurrency.formatPlain(Decimal(12_345_678)) == "12.345.678")
     }
 }

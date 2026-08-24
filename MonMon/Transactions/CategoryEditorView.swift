@@ -31,6 +31,9 @@ struct CategoryEditorView: View {
     @Query(sort: \TransactionCategory.createdAt, order: .forward)
     private var categories: [TransactionCategory]
 
+    @Query(sort: \RecurringRule.createdAt, order: .forward)
+    private var recurringRules: [RecurringRule]
+
     @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
     private var transactions: [MoneyTransaction]
 
@@ -124,12 +127,17 @@ struct CategoryEditorView: View {
         }
     }
 
+    /// Transactions and recurring rules together. A rule files what it will
+    /// record next, so a category deleted out from under one would leave every
+    /// future entry uncategorized — the same harm the reassign sheet exists to
+    /// prevent for transactions already recorded.
     private var usageCount: Int {
         guard let editedCategory = mode.editedCategory else {
             return 0
         }
 
         return TransactionSummary.count(for: editedCategory, transactions: transactions)
+            + RecurringSummary.count(for: editedCategory, rules: recurringRules)
     }
 
     /// Categories the transactions could move to: same direction, not this one.
@@ -159,7 +167,7 @@ struct CategoryEditorView: View {
         }
 
         return "Add another \(draft.kind.displayName.lowercased()) category first, "
-            + "so these transactions have somewhere to go."
+            + "so these records have somewhere to go."
     }
 
     private func startDelete() {
@@ -221,8 +229,9 @@ struct CategoryEditorView: View {
         }
     }
 
-    /// Moves every affected transaction and deletes the category in one save, so
-    /// a failure cannot leave transactions pointing at a category that is gone.
+    /// Moves every affected transaction and recurring rule and deletes the
+    /// category in one save, so a failure cannot leave either pointing at a
+    /// category that is gone.
     private func reassignAndDelete(to replacement: TransactionCategory) {
         guard let editedCategory = mode.editedCategory else {
             return
@@ -235,6 +244,10 @@ struct CategoryEditorView: View {
             transaction.categoryID = replacement.id
         }
 
+        for rule in recurringRules where rule.categoryID == editedCategory.id {
+            rule.categoryID = replacement.id
+        }
+
         modelContext.delete(editedCategory)
 
         do {
@@ -243,7 +256,7 @@ struct CategoryEditorView: View {
             dismiss()
         } catch {
             modelContext.rollback()
-            saveErrorMessage = "Couldn’t move these transactions. Try again."
+            saveErrorMessage = "Couldn’t move these records. Try again."
         }
     }
 }
