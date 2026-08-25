@@ -1,5 +1,24 @@
 import SwiftUI
 
+enum SavingsDepositCardPresentation: Equatable {
+    case detailed
+    case settled(realizedInterest: Decimal)
+
+    init(deposit: SavingsDeposit, withdrawals: [SavingsWithdrawal], asOf: Date) {
+        switch deposit.status(withdrawals: withdrawals, asOf: asOf) {
+        case .active, .matured:
+            self = .detailed
+        case .settled:
+            self = .settled(
+                realizedInterest: SavingsWithdrawalSummary.realizedInterest(
+                    for: deposit,
+                    withdrawals: withdrawals
+                )
+            )
+        }
+    }
+}
+
 struct SavingsDepositCard: View {
     @Environment(\.locale) private var locale
 
@@ -11,9 +30,12 @@ struct SavingsDepositCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             header
-            Divider()
-                .overlay(MonMonTheme.border)
-            terms
+
+            if showsDetails {
+                Divider()
+                    .overlay(MonMonTheme.border)
+                terms
+            }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -56,7 +78,7 @@ struct SavingsDepositCard: View {
                 // A book funded from an account says which one. One that names
                 // no account says nothing: "no linked account" filled the line
                 // with the absence of a fact rather than with a fact.
-                if let sourceAccountName {
+                if showsDetails, let sourceAccountName {
                     Text("Funded from \(sourceAccountName)")
                         .font(.subheadline)
                         .foregroundStyle(MonMonTheme.textSecondary)
@@ -66,16 +88,33 @@ struct SavingsDepositCard: View {
             Spacer(minLength: 12)
 
             VStack(alignment: .trailing, spacing: 3) {
-                Text(VNDCurrency.format(deposit.remainingPrincipal(withdrawals: withdrawals)))
-                    .font(.headline)
-                    .monospacedDigit()
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
+                switch presentation {
+                case .detailed:
+                    Text(VNDCurrency.format(deposit.remainingPrincipal(withdrawals: withdrawals)))
+                        .font(.headline)
+                        .monospacedDigit()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
 
-                Text("REMAINING")
-                    .font(.caption2.weight(.semibold))
-                    .tracking(0.5)
-                    .foregroundStyle(MonMonTheme.textSecondary)
+                    Text("REMAINING")
+                        .font(.caption2.weight(.semibold))
+                        .tracking(0.5)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                case .settled(let realizedInterest):
+                    Text(VNDCurrency.format(realizedInterest))
+                        .font(.headline)
+                        .foregroundStyle(
+                            realizedInterest >= 0 ? MonMonTheme.gain : MonMonTheme.danger
+                        )
+                        .monospacedDigit()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+
+                    Text("INTEREST")
+                        .font(.caption2.weight(.semibold))
+                        .tracking(0.5)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                }
             }
         }
     }
@@ -130,6 +169,18 @@ struct SavingsDepositCard: View {
 
     private var status: SavingsDepositStatus {
         deposit.status(withdrawals: withdrawals, asOf: asOf)
+    }
+
+    private var presentation: SavingsDepositCardPresentation {
+        SavingsDepositCardPresentation(
+            deposit: deposit,
+            withdrawals: withdrawals,
+            asOf: asOf
+        )
+    }
+
+    private var showsDetails: Bool {
+        presentation == .detailed
     }
 
     private var statusTitle: LocalizedStringKey {
