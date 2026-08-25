@@ -29,8 +29,11 @@ MonMon is a private, Apple-platform personal asset manager. Each module below is
   banks and CSV formats extend the parser contract instead of creating separate
   import pipelines.
 - Development stops at each module checkpoint for hands-on user testing.
-- `savings-deposit` and `fund-etf-holdings` share one Investments tab. That tab
-  is a screen, not a module.
+- `savings-deposit` and `fund-etf-holdings` share one Investments screen, one
+  push in from the Wealth tab. That screen is a screen, not a module.
+- The four tabs are Spending, Report, Wealth, Settings. Spending records money,
+  Report searches and charts what was recorded, Wealth holds what the owner has:
+  net worth, allocation, accounts, debts, and the way in to Investments.
 - `recurring-transactions` writes ordinary `MoneyTransaction` records and holds
   no balance of its own, so it adds no term to any total. It runs when the app is
   opened, never on a timer and never in the background.
