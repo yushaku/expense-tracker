@@ -23,6 +23,10 @@ final class MoneyTransaction {
     var sourceRuleID: UUID?
     var currencyCode: String = VNDCurrency.code
     var createdAt: Date = Date(timeIntervalSince1970: 0)
+    /// SHA-256 fingerprint of the statement candidate that created this
+    /// transaction. `nil` means the record was created outside statement
+    /// import or predates provenance tracking.
+    var sourceImportID: String? = nil
 
     init(
         id: UUID,
@@ -34,7 +38,8 @@ final class MoneyTransaction {
         categoryID: UUID?,
         sourceRuleID: UUID?,
         currencyCode: String,
-        createdAt: Date
+        createdAt: Date,
+        sourceImportID: String? = nil
     ) {
         self.id = id
         self.kind = kind
@@ -46,6 +51,7 @@ final class MoneyTransaction {
         self.sourceRuleID = sourceRuleID
         self.currencyCode = currencyCode
         self.createdAt = createdAt
+        self.sourceImportID = sourceImportID
     }
 }
 

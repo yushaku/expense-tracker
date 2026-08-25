@@ -9,18 +9,18 @@ private-CloudKit-compatible schema still builds and opens.
 
 **Acceptance criteria:**
 
-- [ ] `ImportSourceID` accepts exactly 64 lowercase hexadecimal characters and
+- [x] `ImportSourceID` accepts exactly 64 lowercase hexadecimal characters and
       rejects empty, uppercase, short, long, or non-hex input.
-- [ ] Existing/manual/recurring `MoneyTransaction` values default to no import
+- [x] Existing/manual/recurring `MoneyTransaction` values default to no import
       provenance; existing `AccountTransfer` values default both sides to nil.
-- [ ] New model fields have CloudKit-safe defaults and require no uniqueness
+- [x] New model fields have CloudKit-safe defaults and require no uniqueness
       annotation or raw statement field.
 
 **Verification:**
 
-- [ ] New provenance tests fail before implementation and pass afterward.
-- [ ] Existing transaction, transfer, recurring, and CloudSync tests pass.
-- [ ] macOS and compile-only iOS builds accept the updated schema.
+- [x] New provenance tests fail before implementation and pass afterward.
+- [x] Existing transaction, transfer, recurring, and CloudSync tests pass.
+- [x] macOS and compile-only iOS builds accept the updated schema.
 
 **Dependencies:** Approved spec and plan
 

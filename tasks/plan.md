@@ -72,14 +72,14 @@ Full gates + physical acceptance on Yushaku
 
 ### Phase 1: Provenance foundation
 
-- [ ] Task 1: Add validated import provenance to transaction and transfer models
+- [x] Task 1: Add validated import provenance to transaction and transfer models
 - [ ] Task 2: Fold duplicate imported records after CloudKit convergence
 
 ### Checkpoint: Provenance
 
-- [ ] Optional-field migration opens existing and in-memory stores.
-- [ ] Invalid hashes cannot enter an import write path.
-- [ ] Manual and recurring records are untouched by import reconciliation.
+- [x] Optional-field migration opens existing and in-memory stores.
+- [x] Invalid hashes cannot enter an import write path.
+- [x] Manual and recurring records are untouched by import reconciliation.
 - [ ] Same-side imported duplicates converge deterministically.
 
 ### Phase 2: Pure reconciliation
@@ -187,7 +187,7 @@ Expected commit sequence:
 
 ## Review Checklist
 
-- [ ] Schema changes are optional, defaulted, private, and migration-safe.
+- [x] Schema changes are optional, defaulted, private, and migration-safe.
 - [ ] Matching behavior exactly follows the approved conservative fields.
 - [ ] Possible matches never become automatic decisions.
 - [ ] Dedicated-context save and cleanup ordering match the spec.
