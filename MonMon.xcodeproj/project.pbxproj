@@ -243,6 +243,11 @@
 		A00000000000000000002008 /* FundSaleDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000001008 /* FundSaleDraftTests.swift */; };
 		A00000000000000000002009 /* FundSaleNetWorthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000001009 /* FundSaleNetWorthTests.swift */; };
 		A0000000000000000000200A /* FundSalePersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000100A /* FundSalePersistenceTests.swift */; };
+		S10000000000000000000201 /* SavingsWithdrawalSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000101 /* SavingsWithdrawalSummaryTests.swift */; };
+		S10000000000000000000202 /* SavingsWithdrawalDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000102 /* SavingsWithdrawalDraftTests.swift */; };
+		S10000000000000000000211 /* SavingsWithdrawal.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000111 /* SavingsWithdrawal.swift */; };
+		S10000000000000000000212 /* SavingsWithdrawalSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000112 /* SavingsWithdrawalSummary.swift */; };
+		S10000000000000000000213 /* SavingsWithdrawalDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000113 /* SavingsWithdrawalDraft.swift */; };
 		B10000000000000000000201 /* BankStatementParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000101 /* BankStatementParsingTests.swift */; };
 		B10000000000000000000202 /* BankStatementParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000102 /* BankStatementParsing.swift */; };
 		B10000000000000000000203 /* TPBankPDFTestFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000103 /* TPBankPDFTestFixture.swift */; };
@@ -543,6 +548,11 @@
 		A00000000000000000001008 /* FundSaleDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSaleDraftTests.swift; sourceTree = "<group>"; };
 		A00000000000000000001009 /* FundSaleNetWorthTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSaleNetWorthTests.swift; sourceTree = "<group>"; };
 		A0000000000000000000100A /* FundSalePersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSalePersistenceTests.swift; sourceTree = "<group>"; };
+		S10000000000000000000101 /* SavingsWithdrawalSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsWithdrawalSummaryTests.swift; sourceTree = "<group>"; };
+		S10000000000000000000102 /* SavingsWithdrawalDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsWithdrawalDraftTests.swift; sourceTree = "<group>"; };
+		S10000000000000000000111 /* SavingsWithdrawal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsWithdrawal.swift; sourceTree = "<group>"; };
+		S10000000000000000000112 /* SavingsWithdrawalSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsWithdrawalSummary.swift; sourceTree = "<group>"; };
+		S10000000000000000000113 /* SavingsWithdrawalDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsWithdrawalDraft.swift; sourceTree = "<group>"; };
 		B10000000000000000000101 /* BankStatementParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankStatementParsingTests.swift; sourceTree = "<group>"; };
 		B10000000000000000000102 /* BankStatementParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankStatementParsing.swift; sourceTree = "<group>"; };
 		B10000000000000000000103 /* TPBankPDFTestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TPBankPDFTestFixture.swift; sourceTree = "<group>"; };
@@ -748,6 +758,9 @@
 		A00000000000000000000020 /* Savings */ = {
 			isa = PBXGroup;
 			children = (
+				S10000000000000000000113 /* SavingsWithdrawalDraft.swift */,
+				S10000000000000000000112 /* SavingsWithdrawalSummary.swift */,
+				S10000000000000000000111 /* SavingsWithdrawal.swift */,
 				A00000000000000000000130 /* SavingsDeposit.swift */,
 				A00000000000000000000131 /* SavingsInterest.swift */,
 				A00000000000000000000132 /* PercentInput.swift */,
@@ -764,6 +777,8 @@
 		A00000000000000000000021 /* Savings */ = {
 			isa = PBXGroup;
 			children = (
+				S10000000000000000000102 /* SavingsWithdrawalDraftTests.swift */,
+				S10000000000000000000101 /* SavingsWithdrawalSummaryTests.swift */,
 				A00000000000000000000140 /* SavingsInterestTests.swift */,
 				A00000000000000000000141 /* PercentInputTests.swift */,
 				A00000000000000000000142 /* SavingsDraftTests.swift */,
@@ -1236,6 +1251,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				S10000000000000000000213 /* SavingsWithdrawalDraft.swift in Sources */,
+				S10000000000000000000212 /* SavingsWithdrawalSummary.swift in Sources */,
+				S10000000000000000000211 /* SavingsWithdrawal.swift in Sources */,
 				F10000000000000000000202 /* StatementImportInboxService.swift in Sources */,
 				F10000000000000000000204 /* StatementImportInbox.swift in Sources */,
 				F10000000000000000000205 /* StatementImportInboxView.swift in Sources */,
@@ -1411,6 +1429,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				S10000000000000000000202 /* SavingsWithdrawalDraftTests.swift in Sources */,
+				S10000000000000000000201 /* SavingsWithdrawalSummaryTests.swift in Sources */,
 				F10000000000000000000201 /* StatementImportInboxServiceTests.swift in Sources */,
 				F10000000000000000000203 /* StatementImportInboxTests.swift in Sources */,
 				G10000000000000000000201 /* StatementImportProvenanceTests.swift in Sources */,
