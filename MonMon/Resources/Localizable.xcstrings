@@ -271,6 +271,16 @@
         }
       }
     },
+    "Transaction details": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chi tiết giao dịch"
+          }
+        }
+      }
+    },
     "Transaction skipped": {
       "localizations": {
         "vi": {
@@ -4122,6 +4132,16 @@
         }
       }
     },
+    "No note": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không có ghi chú"
+          }
+        }
+      }
+    },
     "No payments yet": {
       "localizations": {
         "vi": {
@@ -4458,6 +4478,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mở phần sửa giao dịch."
+          }
+        }
+      }
+    },
+    "Opens transaction details. Swipe left to edit or right to delete.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở chi tiết giao dịch. Vuốt trái để sửa hoặc vuốt phải để xoá."
           }
         }
       }

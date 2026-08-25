@@ -356,19 +356,16 @@ struct ReportView: View {
                     dayHeader(for: group)
 
                     ForEach(group.transactions) { transaction in
-                        Button {
+                        TransactionItem(
+                            transaction: transaction,
+                            category: category(for: transaction),
+                            account: account(for: transaction),
+                            showsDate: false,
+                            accessibilityIdentifier:
+                                "report-transaction-\(transaction.id.uuidString)"
+                        ) {
                             editorMode = .edit(transaction)
-                        } label: {
-                            TransactionCard(
-                                transaction: transaction,
-                                category: category(for: transaction),
-                                account: account(for: transaction),
-                                showsDate: false
-                            )
                         }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("report-transaction-\(transaction.id.uuidString)")
-                        .accessibilityHint("Opens the transaction editor.")
                     }
                 }
             }
@@ -415,6 +412,7 @@ struct ReportView: View {
     private func account(for transaction: MoneyTransaction) -> CashAccount? {
         accounts.first { $0.id == transaction.accountID }
     }
+
 }
 
 #if DEBUG
