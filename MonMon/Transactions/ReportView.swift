@@ -27,6 +27,10 @@ struct ReportView: View {
     @State private var editorMode: TransactionEditorMode?
     @State private var isFiltering = false
 
+    /// One details sheet and one delete question for the whole list, rather
+    /// than one of each per row.
+    @State private var transactionActions = TransactionActions()
+
     /// Weekday first: over a run of days the name is what the eye picks out, and
     /// the year is left to the period title above the list.
     private static let dayTemplate = Date.FormatStyle().weekday(.abbreviated).day().month(
@@ -39,7 +43,6 @@ struct ReportView: View {
                     .ignoresSafeArea()
 
                 content
-                    .onMonthSwipe(perform: stepReportMonth)
             }
             .compactRootNavigationTitle("Report")
             .accessibilityIdentifier("report")
@@ -71,6 +74,14 @@ struct ReportView: View {
             .sheet(item: $editorMode) { mode in
                 TransactionEditorView(mode: mode, defaultDate: defaultDate)
             }
+            .transactionActions(
+                transactionActions,
+                category: category(for:),
+                account: account(for:),
+                onEdit: { transaction in
+                    editorMode = .edit(transaction)
+                }
+            )
             .tint(MonMonTheme.accent)
         }
     }
@@ -159,20 +170,6 @@ struct ReportView: View {
     /// screen when its date filter is set to a year or a custom range.
     private var reportMonth: Date {
         TransactionPeriod.startOfMonth(for: query.range.start)
-    }
-
-    private func stepReportMonth(_ steps: Int) {
-        guard
-            let moved = TransactionPeriod.calendar.date(
-                byAdding: .month,
-                value: steps,
-                to: reportMonth
-            )
-        else {
-            return
-        }
-
-        query.range = .month(containing: moved)
     }
 
     /// Keep the selected month on the rail even when a custom range lies beyond
@@ -363,9 +360,7 @@ struct ReportView: View {
                             showsDate: false,
                             accessibilityIdentifier:
                                 "report-transaction-\(transaction.id.uuidString)"
-                        ) {
-                            editorMode = .edit(transaction)
-                        }
+                        )
                     }
                 }
             }

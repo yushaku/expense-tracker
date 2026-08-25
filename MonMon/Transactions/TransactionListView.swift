@@ -25,6 +25,10 @@ struct TransactionListView: View {
     @State private var isShowingImportInbox = false
     @State private var isShowingAccounts = false
 
+    /// One details sheet and one delete question for the whole list, rather
+    /// than one of each per row.
+    @State private var transactionActions = TransactionActions()
+
     /// Weekday first: over a run of days the name is what the eye picks out,
     /// and the year is left to the period title above the list.
     private static let dayTemplate = Date.FormatStyle().weekday(.abbreviated).day().month(
@@ -69,7 +73,6 @@ struct TransactionListView: View {
                     .padding(.bottom, FloatingAddButton.contentInset)
                     .frame(maxWidth: .infinity)
                 }
-                .onMonthSwipe(perform: stepCalendarMonth)
             }
             .overlay(alignment: .bottomTrailing) {
                 if !accounts.isEmpty {
@@ -105,6 +108,14 @@ struct TransactionListView: View {
             .sheet(item: $editorMode) { mode in
                 TransactionEditorView(mode: mode, defaultDate: defaultDate)
             }
+            .transactionActions(
+                transactionActions,
+                category: category(for:),
+                account: account(for:),
+                onEdit: { transaction in
+                    editorMode = .edit(transaction)
+                }
+            )
             .sheet(isPresented: $isManagingCategories) {
                 CategoryListView()
             }
@@ -499,9 +510,7 @@ struct TransactionListView: View {
                             account: account(for: transaction),
                             showsDate: false,
                             accessibilityIdentifier: "transaction-\(transaction.id.uuidString)"
-                        ) {
-                            editorMode = .edit(transaction)
-                        }
+                        )
                     }
                 }
             }
