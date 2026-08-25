@@ -337,12 +337,92 @@
     .source-list a { display: inline-block; }
     .source-list small { display: block; margin-top: 2px; color: var(--muted); }
 
+    .inline-source { font-size: .9em; }
+
+    .research-verdict {
+      display: grid;
+      grid-template-columns: 10px minmax(0, 1fr);
+      gap: var(--docs-space-5);
+      margin-bottom: var(--docs-space-5);
+      padding: var(--docs-space-5);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .research-verdict::before {
+      content: "";
+      border-radius: var(--docs-radius-pill);
+      background: var(--green);
+    }
+
+    .research-verdict h3 { margin-bottom: var(--docs-space-2); color: var(--green-text); }
+    .research-verdict p { max-width: 900px; color: var(--text-2); }
+
+    .research-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--docs-grid-gap);
+      margin-bottom: var(--docs-space-5);
+    }
+
+    .research-panel {
+      padding: var(--docs-card-padding);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--docs-radius-md);
+    }
+
+    .research-panel h3 { margin-bottom: var(--docs-space-3); }
+    .research-panel ul { padding-left: var(--docs-space-5); color: var(--text-2); }
+    .research-panel li + li { margin-top: var(--docs-space-2); }
+
+    .siri-flow {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin-top: var(--docs-space-5);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      counter-reset: siri-step;
+    }
+
+    .siri-step {
+      position: relative;
+      min-height: 150px;
+      padding: var(--docs-card-padding);
+      border-right: 1px solid var(--border);
+      counter-increment: siri-step;
+    }
+
+    .siri-step:last-child { border-right: 0; }
+    .siri-step::before {
+      content: "0" counter(siri-step);
+      display: block;
+      margin-bottom: var(--docs-space-3);
+      color: var(--green-text);
+      font-family: var(--mono);
+      font-size: var(--docs-type-sm);
+    }
+
+    .siri-step p { margin-top: var(--docs-space-2); color: var(--text-2); font-size: var(--docs-type-md); }
+
+    .research-note {
+      margin-top: var(--docs-space-5);
+      padding: var(--docs-space-4) var(--docs-space-5);
+      color: var(--text-2);
+      background: var(--blue-soft);
+      border: 1px solid color-mix(in srgb, var(--blue) 36%, transparent);
+      border-radius: var(--docs-radius-md);
+    }
+
     footer { margin-top: var(--docs-section-gap); padding-top: var(--docs-space-5); border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
 
     @media (max-width: 820px) {
       .masthead { grid-template-columns: 1fr; }
       .stamp { width: fit-content; }
-      .route-grid, .roadmap, .feature-grid { grid-template-columns: 1fr; }
+      .route-grid, .roadmap, .feature-grid, .research-grid { grid-template-columns: 1fr; }
       .capture-feature.statement { grid-column: auto; }
       .shared-foundation { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .shared-task:nth-child(2) { border-right: 0; }
@@ -352,6 +432,9 @@
       .flow { grid-template-columns: 1fr; }
       .flow-step { border-right: 0; border-bottom: 1px solid var(--border); }
       .flow-step:last-child { border-bottom: 0; }
+      .siri-flow { grid-template-columns: 1fr; }
+      .siri-step { min-height: 0; border-right: 0; border-bottom: 1px solid var(--border); }
+      .siri-step:last-child { border-bottom: 0; }
       .sources { grid-template-columns: 1fr; }
     }
 
@@ -389,7 +472,7 @@
       <aside class="stamp" aria-label="Phạm vi nghiên cứu">
         <strong>Phạm vi</strong>
         Việt Nam · iPhone<br>
-        Cập nhật 25.08.2026<br>
+        Cập nhật 26.08.2026<br>
         Feature inventory
       </aside>
     </header>
@@ -484,19 +567,21 @@
             <div><span class="feature-code">CAP-04</span><h3>Siri / Action Button</h3></div>
             <span class="feature-status">Chưa làm</span>
           </div>
-          <p class="feature-summary">Một câu như “50 nghìn ăn trưa tiền mặt” tạo draft đã điền sẵn. Action Button mở quick capture hoặc chạy App Shortcut mà không cần tìm MonMon.</p>
+          <p class="feature-summary">Siri gọi App Shortcut rồi hỏi một câu nhập tự do như “50 nghìn ăn trưa tiền mặt”. Action Button mở thẳng quick capture hoặc chạy cùng shortcut sau khi user gán trong Settings.</p>
           <dl class="feature-facts">
-            <div class="feature-fact"><dt>User effort</dt><dd>Một câu/bấm</dd></div>
-            <div class="feature-fact"><dt>Coverage</dt><dd>Tiền mặt</dd></div>
-            <div class="feature-fact"><dt>Surface</dt><dd>Siri + Button</dd></div>
+            <div class="feature-fact"><dt>Platform</dt><dd>Khả thi từ iOS 18</dd></div>
+            <div class="feature-fact"><dt>Siri flow</dt><dd>Gọi + một câu trả lời</dd></div>
+            <div class="feature-fact"><dt>Button setup</dt><dd>Một lần trong Settings</dd></div>
           </dl>
           <h4 class="todo-heading">Implementation checklist</h4>
           <ul class="todo-list">
-            <li class="todo-item"><span class="todo-state">Todo</span><span>Tạo <code>CaptureTransactionIntent</code> và <code>AppShortcutsProvider</code>.</span></li>
-            <li class="todo-item"><span class="todo-state">Todo</span><span>Parse amount tiếng Việt: “50k”, “50 nghìn”, “một triệu hai”.</span></li>
-            <li class="todo-item"><span class="todo-state">Todo</span><span>Cho chọn default account/kind và chỉ hỏi field còn thiếu.</span></li>
-            <li class="todo-item"><span class="todo-state">Todo</span><span>Trả confirmation snippet có Save, Change account và Change category.</span></li>
-            <li class="todo-item"><span class="todo-state">Todo</span><span>Thêm Control Center control; test Siri và Action Button trên iPhone vật lý.</span></li>
+            <li class="todo-item"><span class="todo-state">Todo</span><span>Tạo custom <code>CaptureTransactionIntent</code> và <code>AppShortcutsProvider</code>; Apple hiện chưa có finance app schema.</span></li>
+            <li class="todo-item"><span class="todo-state">Todo</span><span>Chỉ yêu cầu một parameter <code>rawEntry</code>; account, kind và category lấy từ default/rule trước khi hỏi thêm.</span></li>
+            <li class="todo-item"><span class="todo-state">Todo</span><span>Stage raw entry trước; parse “50k”, “50 nghìn”, “một triệu hai” và không bỏ mất câu nói khi category còn mơ hồ.</span></li>
+            <li class="todo-item"><span class="todo-state">Todo</span><span>Tách stage-only intent có thể chạy khi khóa máy khỏi thao tác review/commit cần authentication.</span></li>
+            <li class="todo-item"><span class="todo-state">Todo</span><span>Localize title, dialog và phrase bằng <code>AppShortcuts.xcstrings</code> cho tiếng Việt/Anh.</span></li>
+            <li class="todo-item"><span class="todo-state">Todo</span><span>Trả confirmation/result snippet ngắn; không đọc số dư hoặc chi tiết nhạy cảm trên Lock Screen.</span></li>
+            <li class="todo-item"><span class="todo-state">Todo</span><span>Thêm <code>SiriTipView</code>/<code>ShortcutsLink</code>; test Siri và Action Button trên iPhone vật lý khi khóa/mở máy.</span></li>
           </ul>
         </article>
 
@@ -531,9 +616,87 @@
       </div>
     </section>
 
-    <section aria-labelledby="routes-title">
+    <section aria-labelledby="siri-research-title">
       <div class="section-head">
         <span class="section-index">02</span>
+        <h2 id="siri-research-title">Siri / Action Button — nghiên cứu khả thi</h2>
+      </div>
+      <p class="section-copy">Đối chiếu repository với App Intents và Human Interface Guidelines hiện tại của Apple. MonMon đang target iOS 18.0, chưa có App Intent, và luồng form hiện yêu cầu amount, account cùng category trước khi lưu.</p>
+
+      <aside class="research-verdict">
+        <div>
+          <h3>Xây được ngay; không nên phụ thuộc Siri AI</h3>
+          <p>App Shortcut có thể xuất hiện trong Siri, Spotlight và Shortcuts ngay sau khi cài app. Siri AI trên iOS 27 có thể cải thiện hiểu ngôn ngữ tự nhiên, nhưng baseline cần hoạt động bằng App Intent chuẩn trên iOS 18–26. Vì danh sách app schema hiện không có finance, MonMon nên dùng custom intent thay vì ép giao dịch vào schema khác. <a class="inline-source" href="https://developer.apple.com/documentation/appintents/app-shortcuts">Apple: App Shortcuts</a> · <a class="inline-source" href="https://developer.apple.com/documentation/appintents/app-schema-domains">Apple: schema domains</a></p>
+        </div>
+      </aside>
+
+      <div class="research-grid">
+        <article class="research-panel">
+          <h3>Siri: một activation, một câu trả lời</h3>
+          <ul>
+            <li>Phrase ngắn và có tên app, ví dụ “Ghi chi tiêu với MonMon”.</li>
+            <li>Siri hỏi parameter bắt buộc duy nhất: “Bạn đã chi gì?”. Câu trả lời được giữ nguyên trong <code>rawEntry</code>.</li>
+            <li>Parser tách amount/note; default account và category rule giảm số câu hỏi tiếp theo.</li>
+            <li>Siri đã hỗ trợ tiếng Việt trên iOS 26, nhưng nhận dạng số tiền đời thực vẫn cần test trên thiết bị. <a class="inline-source" href="https://www.apple.com/ios/feature-availability/">Apple: availability</a></li>
+          </ul>
+        </article>
+
+        <article class="research-panel">
+          <h3>Action Button: shortcut do user gán</h3>
+          <ul>
+            <li>User chọn App Shortcut của MonMon trong Settings; app không thể tự thay cấu hình nút.</li>
+            <li>Ưu tiên action “Ghi nhanh” mở đúng quick-capture view hoặc một snippet nhẹ, không chỉ mở Home của app.</li>
+            <li>Không giả định Action Button tự bật dictation. Direct shortcut có input phải được kiểm chứng; fallback chắc chắn là mở form đã focus amount/raw text.</li>
+            <li>Label nên bắt đầu bằng động từ và tối đa ba từ, ví dụ “Ghi Chi Tiêu”. <a class="inline-source" href="https://developer.apple.com/design/human-interface-guidelines/action-button">Apple: Action Button HIG</a></li>
+          </ul>
+        </article>
+
+        <article class="research-panel">
+          <h3>Privacy khi thiết bị đang khóa</h3>
+          <ul>
+            <li><code>AppIntent.authenticationPolicy</code> mặc định cho phép chạy khi máy khóa; AppLock hiện chỉ che UI, không tự bảo vệ background intent.</li>
+            <li>Stage-only intent có thể append raw candidate và trả “Đã ghi nhận”, không đọc số dư hay nói lại merchant.</li>
+            <li>Review, sửa hoặc commit MoneyTransaction dùng policy cần authentication và mới hiện thông tin chi tiết.</li>
+            <li>Policy phải được chọn rõ trong code; không dựa vào overlay của <code>ContentView</code>. <a class="inline-source" href="https://developer.apple.com/documentation/appintents/appintent/authenticationpolicy">Apple: authentication policy</a></li>
+          </ul>
+        </article>
+
+        <article class="research-panel">
+          <h3>Khoảng trống trong code hiện tại</h3>
+          <ul>
+            <li><code>MonMonApp</code> giữ ModelContainer private; intent cần store dependency dùng chung thay vì tự chạm main context tùy ý.</li>
+            <li><code>TransactionDraft.validate()</code> bắt buộc category, nên raw voice chưa hoàn chỉnh cần vào unified Capture Candidate/Import Inbox.</li>
+            <li>Parser VND và default resolver nên là service thuần để UI, Siri, OCR và statement cùng gọi.</li>
+            <li>Thêm provenance + invocation ID để một Siri retry không tạo giao dịch trùng.</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="table-wrap" role="region" aria-label="Contract cho Siri và Action Button" tabindex="0">
+        <table>
+          <thead><tr><th>Surface</th><th>Điểm vào đề xuất</th><th>Kết quả mặc định</th><th>Không nên hứa</th></tr></thead>
+          <tbody>
+            <tr><td>Siri</td><td><code>CaptureTransactionIntent(rawEntry)</code></td><td>Stage ngay; confirm nếu đủ dữ liệu, còn lại vào review.</td><td>Một câu activation luôn parse đúng mọi cách nói tiếng Việt.</td></tr>
+            <tr><td>Action Button</td><td>App Shortcut “Ghi Chi Tiêu”</td><td>Mở quick capture hoặc snippet, giữ context hiện tại khi có thể.</td><td>App tự gán nút hoặc nút luôn khởi động voice dictation.</td></tr>
+            <tr><td>Shortcuts / Spotlight</td><td>Cùng App Intent và preconfigured shortcut</td><td>Có ngay sau cài đặt; cho phép user ghép workflow riêng.</td><td>User không cần setup nếu muốn gán hardware button.</td></tr>
+            <tr><td>Siri AI / iOS 27</td><td>Enhancement sau baseline</td><td>Cải thiện semantic matching khi OS/device/language hỗ trợ.</td><td>Dùng finance schema — hiện Apple chưa cung cấp domain này.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="siri-flow" aria-label="Luồng Siri và Action Button đề xuất">
+        <article class="siri-step"><h3>Invoke</h3><p>Siri, Spotlight, Shortcuts hoặc Action Button gọi cùng capability.</p></article>
+        <article class="siri-step"><h3>Stage first</h3><p>Ghi raw text, locale, timestamp, source và invocation ID trước khi parse.</p></article>
+        <article class="siri-step"><h3>Parse + defaults</h3><p>Tách amount/note; áp account/category default và đánh confidence.</p></article>
+        <article class="siri-step"><h3>Confirm hoặc review</h3><p>Dữ liệu đủ thì xác nhận gọn; mơ hồ vẫn được giữ trong Inbox.</p></article>
+      </div>
+
+      <aside class="research-note"><strong>Đề xuất MVP:</strong> ship một App Shortcut “Ghi Chi Tiêu”, một required text parameter, Vietnamese/English localization và stage-first persistence. Chưa làm Control Center control, interactive snippet nâng cao hay Siri AI schema work cho tới khi flow cơ bản đạt tỷ lệ capture thành công trên iPhone vật lý.</aside>
+    </section>
+
+    <section aria-labelledby="routes-title">
+      <div class="section-head">
+        <span class="section-index">03</span>
         <h2 id="routes-title">Ba cách sản phẩm lấy giao dịch</h2>
       </div>
       <p class="section-copy">Chọn bộ lọc để xem từng hướng. Khi in hoặc lưu PDF, cả ba hướng luôn được hiển thị.</p>
@@ -584,7 +747,7 @@
 
     <section aria-labelledby="market-title">
       <div class="section-head">
-        <span class="section-index">03</span>
+        <span class="section-index">04</span>
         <h2 id="market-title">Pattern từ đối thủ và sản phẩm lân cận</h2>
       </div>
       <div class="table-wrap" role="region" aria-label="Bảng so sánh sản phẩm" tabindex="0">
@@ -606,7 +769,7 @@
 
     <section aria-labelledby="problems-title">
       <div class="section-head">
-        <span class="section-index">04</span>
+        <span class="section-index">05</span>
         <h2 id="problems-title">Bốn vấn đề có tín hiệu mạnh nhất</h2>
       </div>
       <div class="problems">
@@ -619,7 +782,7 @@
 
     <section aria-labelledby="flow-title">
       <div class="section-head">
-        <span class="section-index">05</span>
+        <span class="section-index">06</span>
         <h2 id="flow-title">Luồng đề xuất cho Import Inbox</h2>
       </div>
       <div class="flow" aria-label="Capture, parse, match, review, learn">
@@ -634,7 +797,7 @@
 
     <section aria-labelledby="roadmap-title">
       <div class="section-head">
-        <span class="section-index">06</span>
+        <span class="section-index">07</span>
         <h2 id="roadmap-title">Plan triển khai theo phiên bản iOS</h2>
       </div>
       <p class="section-copy">Ba phase dùng chung một pipeline Capture → Parse → Match → Review. Notification Automation chỉ thay nguồn đầu vào, không tạo một hệ thống giao dịch thứ hai.</p>
@@ -677,7 +840,7 @@
 
     <section aria-labelledby="sources-title">
       <div class="section-head">
-        <span class="section-index">07</span>
+        <span class="section-index">08</span>
         <h2 id="sources-title">Source map</h2>
       </div>
       <div class="sources">
@@ -690,6 +853,14 @@
             <li><a href="https://developer.apple.com/videos/play/wwdc2026/310/">Apple — What’s new in Shortcuts, WWDC26</a><small>Notification Automation theo app và keyword trên iOS 27.</small></li>
             <li><a href="https://developer.apple.com/news/releases/?id=08242026a">Apple — iOS 27 beta 7</a><small>Xác nhận tính năng vẫn nằm trong nhánh beta tại thời điểm nghiên cứu.</small></li>
             <li><a href="https://developer.apple.com/documentation/appintents/app-shortcuts">Apple — App Shortcuts và App Intents</a><small>Cách MonMon đưa action vào Shortcuts.</small></li>
+            <li><a href="https://developer.apple.com/design/human-interface-guidelines/action-button">Apple — Action Button HIG</a><small>User tự gán App Shortcut; guideline về essential action và label.</small></li>
+            <li><a href="https://developer.apple.com/design/human-interface-guidelines/siri">Apple — Siri HIG</a><small>Thiết kế dialog ngắn, đủ nghĩa khi chỉ nghe audio.</small></li>
+            <li><a href="https://developer.apple.com/documentation/appintents/adding-parameters-to-an-app-intent">Apple — App Intent parameters</a><small>Parameter bắt buộc/tùy chọn và parameter summary.</small></li>
+            <li><a href="https://developer.apple.com/documentation/appintents/appintent/supportedmodes">Apple — Intent runtime modes</a><small>Chạy background hoặc chuyển sang foreground khi cần review.</small></li>
+            <li><a href="https://developer.apple.com/documentation/appintents/appintent/authenticationpolicy">Apple — Intent authentication policy</a><small>Mặc định có thể chạy khi khóa máy; các policy yêu cầu xác thực.</small></li>
+            <li><a href="https://developer.apple.com/documentation/appintents/app-schema-domains">Apple — App schema domains</a><small>Không có finance domain tại thời điểm nghiên cứu.</small></li>
+            <li><a href="https://developer.apple.com/design/human-interface-guidelines/snippets">Apple — Snippets HIG</a><small>Confirmation và result UI nhẹ cho Siri/App Shortcuts.</small></li>
+            <li><a href="https://www.apple.com/ios/feature-availability/">Apple — iOS feature availability</a><small>Siri và voice tiếng Việt trên iOS 26.</small></li>
             <li><a href="https://developer.apple.com/documentation/vision/recognizing-text-in-images">Apple — Recognizing text in images</a><small>Vision OCR chạy trên thiết bị cho screenshot và receipt.</small></li>
             <li><a href="https://vanban.chinhphu.vn/?classid=1&amp;docid=212621&amp;pageid=27160">Thông tư 64/2024/TT-NHNN</a><small>Khung Open API ngân hàng, hiệu lực 01.03.2025.</small></li>
           </ul>
@@ -710,7 +881,7 @@
       </div>
     </section>
 
-    <footer>Feature status dựa trên repository ngày 25.08.2026. Platform capability cần được xác nhận lại trên iOS final và iPhone vật lý trước khi triển khai.</footer>
+    <footer>Feature status dựa trên repository ngày 26.08.2026. Platform capability cần được xác nhận lại trên iOS final và iPhone vật lý trước khi triển khai.</footer>
   </main>
 
   <script>
