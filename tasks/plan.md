@@ -85,15 +85,15 @@ Full gates + physical acceptance on Yushaku
 ### Phase 2: Pure reconciliation
 
 - [x] Task 3: Classify exact, possible, new, and unresolved candidates
-- [ ] Task 4: Resolve and remember the statement account safely
+- [x] Task 4: Resolve and remember the statement account safely
 
 ### Checkpoint: Reconciliation
 
-- [ ] Matching uses account, direction, exact Decimal amount, currency, and
+- [x] Matching uses account, direction, exact Decimal amount, currency, and
       Vietnam local day only.
-- [ ] Notes never influence matching.
-- [ ] Possible and ambiguous matches remain explicit owner decisions.
-- [ ] Defaults never resolve to stale or wrong-direction records.
+- [x] Notes never influence matching.
+- [x] Possible and ambiguous matches remain explicit owner decisions.
+- [x] Defaults never resolve to stale or wrong-direction records.
 
 ### Phase 3: Atomic financial commit
 

@@ -113,17 +113,17 @@ after the caller reports successful financial commit.
 
 **Acceptance criteria:**
 
-- [ ] A valid bank/suffix mapping resolves its current account; missing suffix,
+- [x] A valid bank/suffix mapping resolves its current account; missing suffix,
       malformed UUID, stale id, wrong currency, or deleted account resolves nil.
-- [ ] Saving replaces only the exact bank/suffix key and never creates a
+- [x] Saving replaces only the exact bank/suffix key and never creates a
       bank-wide fallback.
-- [ ] Tests use an isolated suite and leave standard owner defaults untouched.
+- [x] Tests use an isolated suite and leave standard owner defaults untouched.
 
 **Verification:**
 
-- [ ] New mapping suite fails first and passes after implementation.
-- [ ] Existing transaction-default tests remain green.
-- [ ] Mapping keys and errors expose no suffix or account id in logs or UI text.
+- [x] New mapping suite fails first and passes after implementation.
+- [x] Existing transaction-default tests remain green.
+- [x] Mapping keys and errors expose no suffix or account id in logs or UI text.
 
 **Dependencies:** Task 3
 
@@ -137,11 +137,11 @@ after the caller reports successful financial commit.
 
 ## Checkpoint: Reconciliation
 
-- [ ] Reconciler and mapping suites pass with deterministic Vietnam-calendar
+- [x] Reconciler and mapping suites pass with deterministic Vietnam-calendar
       behavior.
-- [ ] Possible/ambiguous matches remain unresolved and block commit.
-- [ ] Defaults cannot silently select a different account or category.
-- [ ] Commit Tasks 3 and 4 separately before persistence work.
+- [x] Possible/ambiguous matches remain unresolved and block commit.
+- [x] Defaults cannot silently select a different account or category.
+- [x] Commit Tasks 3 and 4 separately before persistence work.
 
 ## Task 5: Commit and link ordinary transactions idempotently
 
