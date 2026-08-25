@@ -1,11 +1,11 @@
 import SwiftUI
 
-/// Declaration order is the order of the bar: daily transactions come first,
-/// the broader report follows, then longer-term money and settings.
+/// Declaration order is the order of the bar: recording money comes first,
+/// looking back over it follows, then what the owner has, then settings.
 enum RootTab: String, CaseIterable, Identifiable {
     case spending
     case report
-    case investments
+    case wealth
     case settings
 
     var id: String { rawValue }
@@ -14,8 +14,8 @@ enum RootTab: String, CaseIterable, Identifiable {
         switch self {
         case .report:
             "Report"
-        case .investments:
-            "Investments"
+        case .wealth:
+            "Wealth"
         case .spending:
             "Spending"
         case .settings:
@@ -27,7 +27,7 @@ enum RootTab: String, CaseIterable, Identifiable {
         switch self {
         case .report:
             "chart.bar.fill"
-        case .investments:
+        case .wealth:
             "chart.pie.fill"
         case .spending:
             "arrow.left.arrow.right"
@@ -80,9 +80,9 @@ struct RootTabView: View {
         private var destinations: some View {
             switch selection {
             case .report:
-                AccountListView()
-            case .investments:
-                InvestmentsView()
+                ReportView()
+            case .wealth:
+                WealthView()
             case .spending:
                 TransactionListView()
             case .settings:
@@ -156,22 +156,22 @@ struct RootTabView: View {
                     .accessibilityIdentifier(RootTab.spending.accessibilityIdentifier)
                     .tag(RootTab.spending)
 
-                AccountListView()
+                ReportView()
                     .tabItem {
                         Label(RootTab.report.title, systemImage: RootTab.report.symbolName)
                     }
                     .accessibilityIdentifier(RootTab.report.accessibilityIdentifier)
                     .tag(RootTab.report)
 
-                InvestmentsView()
+                WealthView()
                     .tabItem {
                         Label(
-                            RootTab.investments.title,
-                            systemImage: RootTab.investments.symbolName
+                            RootTab.wealth.title,
+                            systemImage: RootTab.wealth.symbolName
                         )
                     }
-                    .accessibilityIdentifier(RootTab.investments.accessibilityIdentifier)
-                    .tag(RootTab.investments)
+                    .accessibilityIdentifier(RootTab.wealth.accessibilityIdentifier)
+                    .tag(RootTab.wealth)
 
                 SettingsView()
                     .tabItem {

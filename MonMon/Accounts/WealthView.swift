@@ -1,7 +1,14 @@
 import SwiftData
 import SwiftUI
 
-struct AccountListView: View {
+/// Everything the owner has, in one picture: what it is all worth over time,
+/// how it splits between cash, savings, funds, gold and what is lent out, then
+/// the accounts and the debts themselves.
+///
+/// The detail behind each part lives one push in — the Accounts screen, the
+/// Investments screen, a debt and its payments — so this screen stays a summary
+/// rather than a second copy of any of them.
+struct WealthView: View {
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
 
@@ -57,6 +64,8 @@ struct AccountListView: View {
                             accountsSection
                         }
 
+                        investmentsSection
+
                         debtsSection
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -76,8 +85,8 @@ struct AccountListView: View {
                     }
                 }
             }
-            .compactRootNavigationTitle("Report")
-            .accessibilityIdentifier("account-list")
+            .compactRootNavigationTitle("Wealth")
+            .accessibilityIdentifier("wealth")
             .navigationDestination(for: DebtRoute.self) { route in
                 DebtDetailView(route: route)
             }
@@ -233,6 +242,58 @@ struct AccountListView: View {
         }
     }
 
+    /// The way in to the savings books and holdings, worth what they are worth
+    /// today. The figure repeats the slice the allocation ring already draws, so
+    /// the row is a door rather than a new claim.
+    private var investmentsSection: some View {
+        NavigationLink {
+            InvestmentsScreen()
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "chart.line.uptrend.xyaxis")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.funds)
+                    .frame(width: 36, height: 36)
+                    .background(MonMonTheme.funds.opacity(0.16), in: RoundedRectangle(cornerRadius: 10))
+                    .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Investments")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(MonMonTheme.textPrimary)
+
+                    Text(VNDCurrency.format(investedTotal))
+                        .font(.subheadline.weight(.semibold))
+                        .monospacedDigit()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                }
+
+                Spacer(minLength: 8)
+
+                Image(systemName: "chevron.right")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .accessibilityHidden(true)
+            }
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("open-investments-screen")
+        .accessibilityHint("Opens the Investments screen.")
+    }
+
+    private var investedTotal: Decimal {
+        InvestmentSummary.total(
+            deposits: deposits,
+            holdings: holdings,
+            instruments: instruments,
+            sales: sales
+        )
+    }
+
     private var debtsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
@@ -312,16 +373,16 @@ struct AccountListView: View {
 }
 
 #if DEBUG
-    #Preview("List · accounts") {
-        AccountListView()
+    #Preview("Wealth") {
+        WealthView()
             .modelContainer(PreviewData.populated)
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
             .preferredColorScheme(MonMonTheme.colorScheme)
     }
 
-    #Preview("List · empty state") {
-        AccountListView()
+    #Preview("Wealth · empty state") {
+        WealthView()
             .modelContainer(PreviewData.empty)
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)

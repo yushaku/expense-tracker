@@ -19,7 +19,7 @@
 		A00000000000000000000211 /* VNDCurrency.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000122 /* VNDCurrency.swift */; };
 		A00000000000000000000212 /* CashBalanceSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000123 /* CashBalanceSummaryTests.swift */; };
 		A00000000000000000000213 /* CashBalanceSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000124 /* CashBalanceSummary.swift */; };
-		A00000000000000000000214 /* AccountListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000125 /* AccountListView.swift */; };
+		A00000000000000000000214 /* WealthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000125 /* WealthView.swift */; };
 		A00000000000000000000215 /* AccountEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000126 /* AccountEditorView.swift */; };
 		A00000000000000000000216 /* MonMonTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000127 /* MonMonTheme.swift */; };
 		A00000000000000000000217 /* CashAccountCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000128 /* CashAccountCard.swift */; };
@@ -60,6 +60,8 @@
 		A00000000000000000000252 /* CategoryPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000163 /* CategoryPalette.swift */; };
 		A00000000000000000000253 /* TransactionPeriod.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000164 /* TransactionPeriod.swift */; };
 		A00000000000000000000254 /* TransactionSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000165 /* TransactionSummary.swift */; };
+		A00000000000000000009006 /* ReportFilterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000009106 /* ReportFilterSheet.swift */; };
+		A00000000000000000009005 /* ReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000009105 /* ReportView.swift */; };
 		A00000000000000000009004 /* NetTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000009104 /* NetTrendCard.swift */; };
 		A00000000000000000009003 /* MonthlyFlowCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000009103 /* MonthlyFlowCard.swift */; };
 		A00000000000000000009001 /* TransactionQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000009101 /* TransactionQuery.swift */; };
@@ -112,7 +114,7 @@
 		A00000000000000000000652 /* AccountTransferPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000632 /* AccountTransferPersistenceTests.swift */; };
 		A00000000000000000000740 /* InvestmentSegment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000720 /* InvestmentSegment.swift */; };
 		A00000000000000000000741 /* InvestmentSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000721 /* InvestmentSummary.swift */; };
-		A00000000000000000000742 /* InvestmentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000722 /* InvestmentsView.swift */; };
+		A00000000000000000000742 /* InvestmentsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000722 /* InvestmentsScreen.swift */; };
 		A00000000000000000000750 /* InvestmentSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000730 /* InvestmentSummaryTests.swift */; };
 		A00000000000000000000802 /* SegmentedTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000801 /* SegmentedTabs.swift */; };
 		A00000000000000000000804 /* ProminentActionButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000803 /* ProminentActionButtonStyle.swift */; };
@@ -312,7 +314,7 @@
 		A00000000000000000000122 /* VNDCurrency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VNDCurrency.swift; sourceTree = "<group>"; };
 		A00000000000000000000123 /* CashBalanceSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashBalanceSummaryTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000124 /* CashBalanceSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashBalanceSummary.swift; sourceTree = "<group>"; };
-		A00000000000000000000125 /* AccountListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountListView.swift; sourceTree = "<group>"; };
+		A00000000000000000000125 /* WealthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WealthView.swift; sourceTree = "<group>"; };
 		A00000000000000000000126 /* AccountEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEditorView.swift; sourceTree = "<group>"; };
 		A00000000000000000000127 /* MonMonTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonMonTheme.swift; sourceTree = "<group>"; };
 		A00000000000000000000128 /* CashAccountCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashAccountCard.swift; sourceTree = "<group>"; };
@@ -353,6 +355,8 @@
 		A00000000000000000000163 /* CategoryPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryPalette.swift; sourceTree = "<group>"; };
 		A00000000000000000000164 /* TransactionPeriod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionPeriod.swift; sourceTree = "<group>"; };
 		A00000000000000000000165 /* TransactionSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionSummary.swift; sourceTree = "<group>"; };
+		A00000000000000000009106 /* ReportFilterSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportFilterSheet.swift; sourceTree = "<group>"; };
+		A00000000000000000009105 /* ReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportView.swift; sourceTree = "<group>"; };
 		A00000000000000000009104 /* NetTrendCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetTrendCard.swift; sourceTree = "<group>"; };
 		A00000000000000000009103 /* MonthlyFlowCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyFlowCard.swift; sourceTree = "<group>"; };
 		A00000000000000000009101 /* TransactionQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionQuery.swift; sourceTree = "<group>"; };
@@ -405,7 +409,7 @@
 		A00000000000000000000632 /* AccountTransferPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTransferPersistenceTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000720 /* InvestmentSegment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvestmentSegment.swift; sourceTree = "<group>"; };
 		A00000000000000000000721 /* InvestmentSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvestmentSummary.swift; sourceTree = "<group>"; };
-		A00000000000000000000722 /* InvestmentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvestmentsView.swift; sourceTree = "<group>"; };
+		A00000000000000000000722 /* InvestmentsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvestmentsScreen.swift; sourceTree = "<group>"; };
 		A00000000000000000000730 /* InvestmentSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvestmentSummaryTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000801 /* SegmentedTabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentedTabs.swift; sourceTree = "<group>"; };
 		A00000000000000000000803 /* ProminentActionButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProminentActionButtonStyle.swift; sourceTree = "<group>"; };
@@ -695,7 +699,7 @@
 				A00000000000000000000129 /* AccountEditorForm.swift */,
 				A00000000000000000000126 /* AccountEditorView.swift */,
 				A00000000000000000000119 /* AccountDraft.swift */,
-				A00000000000000000000125 /* AccountListView.swift */,
+				A00000000000000000000125 /* WealthView.swift */,
 				A00000000000000000000128 /* CashAccountCard.swift */,
 				A00000000000000000000124 /* CashBalanceSummary.swift */,
 				A00000000000000000000117 /* CashAccount.swift */,
@@ -843,6 +847,8 @@
 				A00000000000000000000164 /* TransactionPeriod.swift */,
 				A00000000000000000000610 /* TransactionRange.swift */,
 				A00000000000000000000165 /* TransactionSummary.swift */,
+				A00000000000000000009106 /* ReportFilterSheet.swift */,
+				A00000000000000000009105 /* ReportView.swift */,
 				A00000000000000000009104 /* NetTrendCard.swift */,
 				A00000000000000000009103 /* MonthlyFlowCard.swift */,
 				A00000000000000000009101 /* TransactionQuery.swift */,
@@ -937,7 +943,7 @@
 			children = (
 				A00000000000000000000720 /* InvestmentSegment.swift */,
 				A00000000000000000000721 /* InvestmentSummary.swift */,
-				A00000000000000000000722 /* InvestmentsView.swift */,
+				A00000000000000000000722 /* InvestmentsScreen.swift */,
 			);
 			path = Investments;
 			sourceTree = "<group>";
@@ -1291,6 +1297,8 @@
 				A00000000000000000000258 /* CategorySeed.swift in Sources */,
 				A00000000000000000000257 /* CategoryDraft.swift in Sources */,
 				A00000000000000000000254 /* TransactionSummary.swift in Sources */,
+				A00000000000000000009006 /* ReportFilterSheet.swift in Sources */,
+				A00000000000000000009005 /* ReportView.swift in Sources */,
 				A00000000000000000009004 /* NetTrendCard.swift in Sources */,
 				A00000000000000000009003 /* MonthlyFlowCard.swift in Sources */,
 				A00000000000000000009001 /* TransactionQuery.swift in Sources */,
@@ -1305,7 +1313,7 @@
 				A00000000000000000000646 /* TransferListView.swift in Sources */,
 				A00000000000000000000740 /* InvestmentSegment.swift in Sources */,
 				A00000000000000000000741 /* InvestmentSummary.swift in Sources */,
-				A00000000000000000000742 /* InvestmentsView.swift in Sources */,
+				A00000000000000000000742 /* InvestmentsScreen.swift in Sources */,
 				A00000000000000000000252 /* CategoryPalette.swift in Sources */,
 				A00000000000000000000251 /* MoneyTransaction.swift in Sources */,
 				A00000000000000000000250 /* TransactionCategory.swift in Sources */,
@@ -1313,7 +1321,7 @@
 				A00000000000000000000218 /* AccountEditorForm.swift in Sources */,
 				A00000000000000000000215 /* AccountEditorView.swift in Sources */,
 				A00000000000000000000210 /* AccountDraft.swift in Sources */,
-				A00000000000000000000214 /* AccountListView.swift in Sources */,
+				A00000000000000000000214 /* WealthView.swift in Sources */,
 				A00000000000000000000213 /* CashBalanceSummary.swift in Sources */,
 				A00000000000000000000208 /* CashAccount.swift in Sources */,
 				A00000000000000000000217 /* CashAccountCard.swift in Sources */,

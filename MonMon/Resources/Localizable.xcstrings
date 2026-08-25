@@ -7063,6 +7063,136 @@
           }
         }
       }
+    },
+    "Wealth": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tài sản"
+          }
+        }
+      }
+    },
+    "Filters": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bộ lọc"
+          }
+        }
+      }
+    },
+    "Results": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kết quả"
+          }
+        }
+      }
+    },
+    "Search notes, categories, amounts": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tìm ghi chú, danh mục, số tiền"
+          }
+        }
+      }
+    },
+    "Nothing matches what you are looking for.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không có gì khớp với thứ bạn đang tìm."
+          }
+        }
+      }
+    },
+    "Nothing to chart yet.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có gì để vẽ."
+          }
+        }
+      }
+    },
+    "A day or two of records draws no trend yet.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Một, hai ngày ghi chép thì chưa vẽ được xu hướng."
+          }
+        }
+      }
+    },
+    "MONTH BY MONTH": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TỪNG THÁNG"
+          }
+        }
+      }
+    },
+    "RUNNING NET": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LUỸ KẾ"
+          }
+        }
+      }
+    },
+    "No categories yet.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có danh mục nào."
+          }
+        }
+      }
+    },
+    "No accounts yet.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có tài khoản nào."
+          }
+        }
+      }
+    },
+    "Remove filter %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bỏ bộ lọc %@"
+          }
+        }
+      }
+    },
+    "Opens the Investments screen.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở màn hình Đầu tư."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

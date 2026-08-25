@@ -125,30 +125,6 @@ struct CashAccountCard: View {
     }
 }
 
-private extension CashAccountKind {
-    var iconName: String {
-        switch self {
-        case .cash:
-            "banknote.fill"
-        case .bank:
-            "building.columns.fill"
-        case .credit:
-            "creditcard.fill"
-        }
-    }
-
-    var tint: Color {
-        switch self {
-        case .cash:
-            MonMonTheme.accent
-        case .bank:
-            MonMonTheme.bank
-        case .credit:
-            MonMonTheme.credit
-        }
-    }
-}
-
 #if DEBUG
     #Preview("Cards") {
         ZStack {

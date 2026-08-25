@@ -23,7 +23,11 @@ enum InvestmentEditorMode: Identifiable {
 
 /// Savings books and fund holdings under one roof. The total at the top counts
 /// both, and the picker below it decides which list the screen is showing.
-struct InvestmentsView: View {
+///
+/// Reached one push in from the Wealth screen, which carries the shorter
+/// version — what the holdings come to inside the whole picture — so this is
+/// where the holdings themselves live rather than a second copy of that total.
+struct InvestmentsScreen: View {
     @Query(sort: \SavingsDeposit.createdAt, order: .forward)
     private var deposits: [SavingsDeposit]
 
@@ -45,59 +49,57 @@ struct InvestmentsView: View {
     @State private var editor: InvestmentEditorMode?
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                MonMonTheme.canvas
-                    .ignoresSafeArea()
+        ZStack {
+            MonMonTheme.canvas
+                .ignoresSafeArea()
 
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                        summaryCard
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+                    summaryCard
 
-                        segmentPicker
+                    segmentPicker
 
-                        selectedSection
-                    }
-                    .frame(maxWidth: MonMonTheme.maxContentWidth)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 16)
-                    .padding(.bottom, FloatingAddButton.contentInset)
-                    .frame(maxWidth: .infinity)
+                    selectedSection
                 }
-                .swipeBetweenSegments(
-                    selection: $segment,
-                    options: InvestmentSegment.allCases
-                )
+                .frame(maxWidth: MonMonTheme.maxContentWidth)
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+                .padding(.bottom, FloatingAddButton.contentInset)
+                .frame(maxWidth: .infinity)
             }
-            .overlay(alignment: .bottomTrailing) {
-                // An empty list already offers its own prominent add button, so
-                // the floating one would only repeat it.
-                if !isSelectedSectionEmpty {
-                    FloatingAddButton(
-                        title: segment.addTitle,
-                        accessibilityIdentifier: segment.addIdentifier
-                    ) {
-                        add()
-                    }
-                }
-            }
-            .navigationDestination(for: FundGroupRoute.self) { route in
-                FundGroupDetailView(route: route)
-            }
-            .compactRootNavigationTitle("Investments")
-            .accessibilityIdentifier("investments-list")
-            .sheet(item: $editor) { mode in
-                switch mode {
-                case .savings(let savingsMode):
-                    SavingsEditorView(mode: savingsMode)
-                case .fund(let fundMode):
-                    FundEditorView(mode: fundMode, kinds: [.fund, .etf])
-                case .gold(let goldMode):
-                    FundEditorView(mode: goldMode, kinds: [.gold])
-                }
-            }
-            .tint(MonMonTheme.accent)
+            .swipeBetweenSegments(
+                selection: $segment,
+                options: InvestmentSegment.allCases
+            )
         }
+        .overlay(alignment: .bottomTrailing) {
+            // An empty list already offers its own prominent add button, so
+            // the floating one would only repeat it.
+            if !isSelectedSectionEmpty {
+                FloatingAddButton(
+                    title: segment.addTitle,
+                    accessibilityIdentifier: segment.addIdentifier
+                ) {
+                    add()
+                }
+            }
+        }
+        .navigationDestination(for: FundGroupRoute.self) { route in
+            FundGroupDetailView(route: route)
+        }
+        .navigationTitle("Investments")
+        .accessibilityIdentifier("investments-list")
+        .sheet(item: $editor) { mode in
+            switch mode {
+            case .savings(let savingsMode):
+                SavingsEditorView(mode: savingsMode)
+            case .fund(let fundMode):
+                FundEditorView(mode: fundMode, kinds: [.fund, .etf])
+            case .gold(let goldMode):
+                FundEditorView(mode: goldMode, kinds: [.gold])
+            }
+        }
+        .tint(MonMonTheme.accent)
     }
 
     private var summaryCard: some View {
@@ -270,7 +272,9 @@ struct InvestmentsView: View {
 
 #if DEBUG
     #Preview("Investments · savings") {
-        InvestmentsView()
+        NavigationStack {
+            InvestmentsScreen()
+        }
             .modelContainer(PreviewData.populated)
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
@@ -278,7 +282,9 @@ struct InvestmentsView: View {
     }
 
     #Preview("Investments · empty state") {
-        InvestmentsView()
+        NavigationStack {
+            InvestmentsScreen()
+        }
             .modelContainer(PreviewData.empty)
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
