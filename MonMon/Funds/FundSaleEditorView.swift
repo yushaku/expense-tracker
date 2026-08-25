@@ -58,6 +58,13 @@ struct FundSaleEditorView: View {
     @Query(sort: \FundInstrument.symbol, order: .forward)
     private var instruments: [FundInstrument]
 
+    /// The account the owner told the app to reach for. Shared with the
+    /// transaction and recurring editors rather than given a preference of its
+    /// own: one answer to "which account, normally" is enough, and a second one
+    /// would only be a second thing to keep in step.
+    @AppStorage(TransactionDefaults.accountStorageKey)
+    private var defaultAccountValue = ""
+
     private let mode: FundSaleEditorMode
 
     @State private var draft: FundSaleDraft
@@ -136,6 +143,7 @@ struct FundSaleEditorView: View {
             }
             .task {
                 fillPriceFromCatalogue()
+                fillProceedsAccount()
             }
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
@@ -247,6 +255,20 @@ struct FundSaleEditorView: View {
         }
 
         draft.pricePerUnitText = VNDCurrency.formatPlain(instrument.currentPricePerUnit)
+    }
+
+    /// Offers the default account rather than opening on "Choose". Only ever
+    /// fills an empty field and never touches a sale being edited, for the same
+    /// reason the price fill does not: that one already went somewhere.
+    private func fillProceedsAccount() {
+        guard mode.editedSale == nil, draft.proceedsAccountID == nil else {
+            return
+        }
+
+        draft.proceedsAccountID = TransactionDefaults.resolveAccountID(
+            defaultAccountValue,
+            accounts: accounts
+        )
     }
 
     /// The draft in stored units. Gold is typed in chỉ and kept in lượng, so the
