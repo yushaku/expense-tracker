@@ -1,9 +1,9 @@
 import SwiftUI
 
 enum MonthRailSwipe {
-    /// Well clear of the distance that opens a transaction row's actions, so
-    /// the two swipes are told apart by how far the finger travelled and not
-    /// only by which one claimed the drag first.
+    /// Far enough that a month is stepped on purpose. A swipe that starts on a
+    /// transaction row is settled by the arbiter rather than by distance, so
+    /// this is about intent rather than about telling the two swipes apart.
     private static let minimumHorizontalDistance: CGFloat = 96
 
     /// A month step moves the whole screen, so it asks for a flatter drag than

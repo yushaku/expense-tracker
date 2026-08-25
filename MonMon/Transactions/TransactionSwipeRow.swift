@@ -8,59 +8,18 @@ enum TransactionRowGestureIntent: Equatable {
     case scroll
 
     private static let tapTolerance: CGFloat = 8
+    private static let horizontalDominance: CGFloat = 1.15
 
     static func resolved(after translation: CGSize) -> Self {
         if max(abs(translation.width), abs(translation.height)) <= tapTolerance {
             return .tap
         }
 
-        if TransactionSwipeReveal.horizontalTranslation(in: translation) != nil {
+        if horizontalTranslation(in: translation) != nil {
             return .swipe
         }
 
         return .scroll
-    }
-}
-
-/// Which action is resting behind a transaction after a horizontal drag.
-/// Positive movement follows the finger and exposes delete on the leading edge;
-/// negative movement exposes edit on the trailing edge.
-enum TransactionSwipeReveal: Equatable {
-    case none
-    case delete
-    case edit
-
-    static let actionWidth: CGFloat = 84
-    private static let threshold: CGFloat = actionWidth / 2
-    private static let horizontalDominance: CGFloat = 1.15
-
-    var offset: CGFloat {
-        switch self {
-        case .none:
-            0
-        case .delete:
-            Self.actionWidth
-        case .edit:
-            -Self.actionWidth
-        }
-    }
-
-    static func resolved(after translation: CGSize, from current: Self) -> Self {
-        guard let horizontalTranslation = horizontalTranslation(in: translation) else {
-            return current
-        }
-
-        let proposedOffset = current.offset + horizontalTranslation
-
-        if proposedOffset >= threshold {
-            return .delete
-        }
-
-        if proposedOffset <= -threshold {
-            return .edit
-        }
-
-        return .none
     }
 
     static func horizontalTranslation(in translation: CGSize) -> CGFloat? {
@@ -72,35 +31,67 @@ enum TransactionSwipeReveal: Equatable {
     }
 }
 
+/// What a swipe across a transaction is aimed at. The row moves with the
+/// finger and nothing rests behind it: carry it far enough and letting go
+/// performs the action, the way a mail app does it.
+///
+/// Movement to the right aims at delete, to the left at edit.
+enum TransactionSwipeAction: Equatable {
+    case delete
+    case edit
+
+    /// How far the finger carries the row before letting go acts on it. Well
+    /// past a hesitant nudge, and short enough to reach without a second grab.
+    static let commitDistance: CGFloat = 120
+
+    static func aimed(by translation: CGFloat) -> Self? {
+        if translation > 0 {
+            return .delete
+        }
+
+        if translation < 0 {
+            return .edit
+        }
+
+        return nil
+    }
+}
+
 enum TransactionSwipeAxis: Equatable {
     case undecided
     case horizontal
     case vertical
 }
 
-/// Persistent motion state keeps the card at the finger's last position until
-/// the settling animation takes over. The drag axis is locked once recognized
-/// so a diagonal movement cannot repeatedly move and reset the card.
+/// Where the row is under the finger. The drag axis is locked once recognized
+/// so a diagonal movement cannot repeatedly move and reset the row.
 struct TransactionSwipeMotion: Equatable {
-    let reveal: TransactionSwipeReveal
     let dragOffset: CGFloat
     let axis: TransactionSwipeAxis
 
-    init(
-        reveal: TransactionSwipeReveal = .none,
-        dragOffset: CGFloat = 0,
-        axis: TransactionSwipeAxis = .undecided
-    ) {
-        self.reveal = reveal
+    init(dragOffset: CGFloat = 0, axis: TransactionSwipeAxis = .undecided) {
         self.dragOffset = dragOffset
         self.axis = axis
     }
 
     var displayedOffset: CGFloat {
-        min(
-            TransactionSwipeReveal.actionWidth,
-            max(-TransactionSwipeReveal.actionWidth, reveal.offset + dragOffset)
-        )
+        axis == .horizontal ? dragOffset : 0
+    }
+
+    /// The action the finger is heading towards, shown behind the row from the
+    /// first point of movement so the swipe says what it will do.
+    var aimedAction: TransactionSwipeAction? {
+        TransactionSwipeAction.aimed(by: displayedOffset)
+    }
+
+    /// Whether the row has been carried far enough that letting go acts.
+    var isCommitted: Bool {
+        abs(displayedOffset) >= TransactionSwipeAction.commitDistance
+    }
+
+    /// What letting go now would perform, if anything.
+    var committedAction: TransactionSwipeAction? {
+        isCommitted ? aimedAction : nil
     }
 
     func dragging(_ translation: CGSize) -> Self {
@@ -110,44 +101,23 @@ struct TransactionSwipeMotion: Equatable {
             case .tap:
                 return self
             case .scroll:
-                return Self(reveal: reveal, axis: .vertical)
+                return Self(axis: .vertical)
             case .swipe:
                 guard
-                    let horizontalTranslation = TransactionSwipeReveal.horizontalTranslation(
+                    let horizontalTranslation = TransactionRowGestureIntent.horizontalTranslation(
                         in: translation
                     )
                 else {
                     return self
                 }
 
-                return Self(
-                    reveal: reveal,
-                    dragOffset: horizontalTranslation,
-                    axis: .horizontal
-                )
+                return Self(dragOffset: horizontalTranslation, axis: .horizontal)
             }
         case .horizontal:
-            return Self(
-                reveal: reveal,
-                dragOffset: translation.width,
-                axis: .horizontal
-            )
+            return Self(dragOffset: translation.width, axis: .horizontal)
         case .vertical:
             return self
         }
-    }
-
-    func endingDrag() -> Self {
-        guard axis == .horizontal else {
-            return Self(reveal: reveal)
-        }
-
-        return Self(
-            reveal: TransactionSwipeReveal.resolved(
-                after: CGSize(width: dragOffset, height: 0),
-                from: reveal
-            )
-        )
     }
 }
 
@@ -179,76 +149,64 @@ struct TransactionSwipeRow<Content: View>: View {
 
     var body: some View {
         ZStack {
-            actions
+            background
 
             content
                 .contentShape(Rectangle())
-                .onTapGesture {
-                    handleTap()
-                }
+                .onTapGesture(perform: onTap)
                 .simultaneousGesture(rowGesture)
                 .offset(x: motion.displayedOffset)
         }
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .accessibilityAddTraits(.isButton)
         .accessibilityAction {
-            handleTap()
+            onTap()
         }
         .accessibilityAction(named: Text("Edit")) {
-            perform(onEdit)
+            onEdit()
         }
         .accessibilityAction(named: Text("Delete")) {
-            perform(onDelete)
+            onDelete()
         }
     }
 
-    private var actions: some View {
-        HStack(spacing: 0) {
-            actionButton(
-                title: "Delete",
-                systemImage: "trash.fill",
-                tint: MonMonTheme.danger,
-                isAccessible: motion.reveal == .delete
-            ) {
-                perform(onDelete)
-            }
+    /// What the swipe is heading towards, sitting still behind the moving row.
+    /// It is decoration and never touched: the swipe itself is the action, so
+    /// there is nothing here to tap.
+    @ViewBuilder
+    private var background: some View {
+        if let action = motion.aimedAction {
+            HStack(spacing: 0) {
+                if action == .edit {
+                    Spacer(minLength: 0)
+                }
 
-            Spacer(minLength: 0)
+                icon(for: action)
+                    .frame(width: TransactionSwipeAction.commitDistance)
 
-            actionButton(
-                title: "Edit",
-                systemImage: "pencil",
-                tint: MonMonTheme.accent,
-                isAccessible: motion.reveal == .edit
-            ) {
-                perform(onEdit)
+                if action == .delete {
+                    Spacer(minLength: 0)
+                }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(tint(for: action))
+            .accessibilityHidden(true)
         }
     }
 
-    private func actionButton(
-        title: LocalizedStringKey,
-        systemImage: String,
-        tint: Color,
-        isAccessible: Bool,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            VStack(spacing: 6) {
-                Image(systemName: systemImage)
-                    .font(.body.weight(.bold))
+    private func icon(for action: TransactionSwipeAction) -> some View {
+        VStack(spacing: 6) {
+            Image(systemName: action == .delete ? "trash.fill" : "pencil")
+                .font(.body.weight(.bold))
 
-                Text(title)
-                    .font(.caption.weight(.semibold))
-            }
-            .foregroundStyle(.white)
-            .frame(width: TransactionSwipeReveal.actionWidth)
-            .frame(maxHeight: .infinity)
-            .background(tint)
-            .contentShape(Rectangle())
+            Text(action == .delete ? "Delete" : "Edit")
+                .font(.caption.weight(.semibold))
         }
-        .buttonStyle(.plain)
-        .accessibilityHidden(!isAccessible)
+        .foregroundStyle(.white)
+    }
+
+    private func tint(for action: TransactionSwipeAction) -> Color {
+        action == .delete ? MonMonTheme.danger : MonMonTheme.accent
     }
 
     private var rowGesture: some Gesture {
@@ -261,34 +219,22 @@ struct TransactionSwipeRow<Content: View>: View {
                 }
             }
             .onEnded { value in
-                let settledMotion =
-                    motion
-                    .dragging(value.translation)
-                    .endingDrag()
+                let released = motion.dragging(value.translation)
 
                 arbiter?.release()
 
                 withAnimation(.snappy(duration: 0.25)) {
-                    motion = settledMotion
+                    motion = TransactionSwipeMotion()
+                }
+
+                switch released.committedAction {
+                case .delete:
+                    onDelete()
+                case .edit:
+                    onEdit()
+                case nil:
+                    break
                 }
             }
-    }
-
-    private func handleTap() {
-        guard motion.reveal == .none else {
-            withAnimation(.snappy(duration: 0.2)) {
-                motion = TransactionSwipeMotion()
-            }
-            return
-        }
-
-        onTap()
-    }
-
-    private func perform(_ action: () -> Void) {
-        withAnimation(.snappy(duration: 0.2)) {
-            motion = TransactionSwipeMotion()
-        }
-        action()
     }
 }

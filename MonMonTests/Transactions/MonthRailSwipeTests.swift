@@ -30,14 +30,6 @@ struct MonthRailSwipeTests {
         #expect(MonthRailSwipe.monthOffset(for: CGSize(width: -120, height: 90)) == nil)
     }
 
-    @Test("A drag no longer than a fully opened row does not change the month")
-    func rowSizedDragIsIgnored() {
-        let width = TransactionSwipeReveal.actionWidth
-
-        #expect(MonthRailSwipe.monthOffset(for: CGSize(width: -width, height: 0)) == nil)
-        #expect(MonthRailSwipe.monthOffset(for: CGSize(width: width, height: 0)) == nil)
-    }
-
     @Test("A claimed drag does not change the month, however far it went")
     func claimedDragIsIgnored() {
         #expect(

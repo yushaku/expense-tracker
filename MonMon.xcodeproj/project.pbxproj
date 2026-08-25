@@ -85,7 +85,7 @@
 		A00000000000000000000269 /* TransactionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000180 /* TransactionListView.swift */; };
 		A00000000000000000000270 /* TransactionDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000181 /* TransactionDraftTests.swift */; };
 		A00000000000000000000271 /* MoneyTransactionPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */; };
-		D20000000000000000000002 /* TransactionSwipeRevealTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000001 /* TransactionSwipeRevealTests.swift */; };
+		D20000000000000000000002 /* TransactionSwipeActionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000001 /* TransactionSwipeActionTests.swift */; };
 		A00000000000000000000272 /* AssetAllocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000183 /* AssetAllocation.swift */; };
 		A00000000000000000000273 /* AssetAllocationCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000184 /* AssetAllocationCard.swift */; };
 		A00000000000000000000274 /* AssetAllocationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000185 /* AssetAllocationTests.swift */; };
@@ -384,7 +384,7 @@
 		A00000000000000000000180 /* TransactionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionListView.swift; sourceTree = "<group>"; };
 		A00000000000000000000181 /* TransactionDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDraftTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoneyTransactionPersistenceTests.swift; sourceTree = "<group>"; };
-		D20000000000000000000001 /* TransactionSwipeRevealTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionSwipeRevealTests.swift; sourceTree = "<group>"; };
+		D20000000000000000000001 /* TransactionSwipeActionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionSwipeActionTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000183 /* AssetAllocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocation.swift; sourceTree = "<group>"; };
 		A00000000000000000000184 /* AssetAllocationCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocationCard.swift; sourceTree = "<group>"; };
 		A00000000000000000000185 /* AssetAllocationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocationTests.swift; sourceTree = "<group>"; };
@@ -898,7 +898,7 @@
 				A00000000000000000000181 /* TransactionDraftTests.swift */,
 				C1000000000000000000000B /* CategorySeedTests.swift */,
 				A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */,
-				D20000000000000000000001 /* TransactionSwipeRevealTests.swift */,
+				D20000000000000000000001 /* TransactionSwipeActionTests.swift */,
 				A00000000000000000000197 /* CategoryBreakdownTests.swift */,
 			);
 			path = Transactions;
@@ -1438,7 +1438,7 @@
 				A00000000000000000000973 /* CloudSyncTests.swift in Sources */,
 				A00000000000000000000274 /* AssetAllocationTests.swift in Sources */,
 				A00000000000000000000271 /* MoneyTransactionPersistenceTests.swift in Sources */,
-				D20000000000000000000002 /* TransactionSwipeRevealTests.swift in Sources */,
+				D20000000000000000000002 /* TransactionSwipeActionTests.swift in Sources */,
 				A00000000000000000000270 /* TransactionDraftTests.swift in Sources */,
 				C1000000000000000000010B /* CategorySeedTests.swift in Sources */,
 				A00000000000000000000264 /* TransactionCategoryPersistenceTests.swift in Sources */,
