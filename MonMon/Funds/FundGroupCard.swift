@@ -3,6 +3,8 @@ import SwiftUI
 /// One fund, however many times it was bought: total units, what the stack cost
 /// per unit on average, and where it stands against today's price.
 struct FundGroupCard: View {
+    @Environment(\.locale) private var locale
+
     let group: FundPositionGroup
     /// Passed in rather than read from the clock, so a preview and a test both
     /// get a stable answer for whether the price is stale.
@@ -19,10 +21,24 @@ struct FundGroupCard: View {
 
             FundPriceStatusRow(instrument: group.instrument, asOf: asOf)
 
-            FundProfitLossRow(
-                profitLoss: group.unrealizedProfitLoss,
-                returnPercent: group.returnPercent
-            )
+            if !group.isFullyClosed {
+                FundProfitLossRow(
+                    kind: .unrealized,
+                    profitLoss: group.unrealizedProfitLoss,
+                    returnPercent: group.returnPercent
+                )
+            }
+
+            if group.hasSales {
+                FundProfitLossRow(
+                    kind: .realized,
+                    profitLoss: group.realizedProfitLoss,
+                    returnPercent: FundSaleSummary.totalRealizedReturnPercent(
+                        of: group.sales,
+                        holdings: group.holdings
+                    )
+                )
+            }
         }
         .fundCardBackground()
         .accessibilityElement(children: .combine)
@@ -41,9 +57,15 @@ struct FundGroupCard: View {
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(group.symbol)
-                    .font(.headline)
-                    .lineLimit(1)
+                HStack(spacing: 8) {
+                    Text(group.symbol)
+                        .font(.headline)
+                        .lineLimit(1)
+
+                    if group.isFullyClosed {
+                        FundClosedBadge()
+                    }
+                }
 
                 Text(subtitle)
                     .font(.subheadline)
@@ -114,9 +136,10 @@ struct FundGroupCard: View {
     /// nothing the ticker had not.
     private var subtitle: String {
         guard group.instrument != nil else {
-            return "Unknown instrument · \(group.positionCountLabel)"
+            let unknown = AppText.string("Unknown instrument", in: locale)
+            return "\(unknown) · \(group.positionCountLabel(in: locale))"
         }
 
-        return group.positionCountLabel
+        return group.positionCountLabel(in: locale)
     }
 }

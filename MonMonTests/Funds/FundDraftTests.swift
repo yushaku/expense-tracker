@@ -195,7 +195,7 @@ struct FundDraftTests {
         #expect(holding.instrumentID == instrument.id)
         #expect(holding.createdAt == stamped)
         #expect(holding.sourceAccountID == accountID)
-        #expect(holding.marketValue(in: [instrument]) == 25_000_000)
+        #expect(holding.marketValue(in: [instrument], sales: []) == 25_000_000)
     }
 
     @Test("Applying a draft rewrites every editable field")
@@ -231,11 +231,11 @@ struct FundDraftTests {
             averageCostPerUnit: 10_000
         )
 
-        #expect(holding.marketValue(in: [cheap, dear]) == 1_000_000)
+        #expect(holding.marketValue(in: [cheap, dear], sales: []) == 1_000_000)
 
         holding.instrumentID = dear.id
 
-        #expect(holding.marketValue(in: [cheap, dear]) == 4_000_000)
+        #expect(holding.marketValue(in: [cheap, dear], sales: []) == 4_000_000)
         #expect(holding.costBasis == 1_000_000)
     }
 }

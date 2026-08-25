@@ -119,6 +119,30 @@ final class CashAccount {
         }
     }
 
+    extension FundSale {
+        static func preview(
+            holding: FundHolding,
+            units: Decimal,
+            pricePerUnit: Decimal,
+            proceedsAccountID: UUID,
+            note: String = "",
+            soldOffset: TimeInterval = 0
+        ) -> FundSale {
+            let soldAt = Date(timeIntervalSince1970: 1_700_000_000 - soldOffset)
+            return FundSale(
+                id: UUID(),
+                holdingID: holding.id,
+                units: units,
+                pricePerUnit: pricePerUnit,
+                proceedsAccountID: proceedsAccountID,
+                soldAt: soldAt,
+                note: note,
+                currencyCode: VNDCurrency.code,
+                createdAt: soldAt
+            )
+        }
+    }
+
     extension TransactionCategory {
         static func preview(
             name: String,
@@ -339,6 +363,14 @@ final class CashAccount {
                 source: .vangToday
             )
 
+            // Named rather than inlined, because a sale has to point at it.
+            let vesafLot = FundHolding.preview(
+                instrument: vesaf,
+                units: Decimal(string: "1234.5678") ?? 0,
+                averageCostPerUnit: 24_500,
+                sourceAccountID: techcombank.id
+            )
+
             let borrowed = Debt.preview(
                 counterparty: "Anh Minh",
                 direction: .borrowed,
@@ -384,12 +416,7 @@ final class CashAccount {
                 ],
                 instruments: [vesaf, diamond, sjc],
                 holdings: [
-                    .preview(
-                        instrument: vesaf,
-                        units: Decimal(string: "1234.5678") ?? 0,
-                        averageCostPerUnit: 24_500,
-                        sourceAccountID: techcombank.id
-                    ),
+                    vesafLot,
                     .preview(
                         instrument: diamond,
                         units: 2_000,
@@ -462,6 +489,16 @@ final class CashAccount {
                         categoryID: salary.id,
                         anchorOffset: 86_400 * 2
                     ),
+                ],
+                sales: [
+                    .preview(
+                        holding: vesafLot,
+                        units: 234,
+                        pricePerUnit: 27_000,
+                        proceedsAccountID: techcombank.id,
+                        note: "Took some off the table",
+                        soldOffset: 86_400 * 5
+                    )
                 ]
             )
         }()
@@ -476,7 +513,8 @@ final class CashAccount {
             transfers: [AccountTransfer],
             debts: [Debt] = [],
             payments: [DebtPayment] = [],
-            rules: [RecurringRule] = []
+            rules: [RecurringRule] = [],
+            sales: [FundSale] = []
         ) -> ModelContainer {
             let container: ModelContainer
             do {
@@ -494,6 +532,10 @@ final class CashAccount {
 
             for deposit in deposits {
                 container.mainContext.insert(deposit)
+            }
+
+            for sale in sales {
+                container.mainContext.insert(sale)
             }
 
             for instrument in instruments {

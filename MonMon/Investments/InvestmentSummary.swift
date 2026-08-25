@@ -7,9 +7,14 @@ enum InvestmentSummary {
     static func total(
         deposits: [SavingsDeposit],
         holdings: [FundHolding],
-        instruments: [FundInstrument]
+        instruments: [FundInstrument],
+        sales: [FundSale]
     ) -> Decimal {
         AssetSummary.totalPrincipal(of: deposits)
-            + FundSummary.totalMarketValue(of: holdings, instruments: instruments)
+            + FundSummary.totalMarketValue(
+                of: holdings,
+                instruments: instruments,
+                sales: sales
+            )
     }
 }

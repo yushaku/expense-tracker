@@ -104,7 +104,9 @@ and are excluded by `.gitignore`.
   edit, and delete fund, ETF, and physical-gold holdings, each held in a
   catalogue instrument that owns its price, under one Investments tab that
   totals them together; enter gold weight in chỉ while storing lượng; value
-  gold at the shop's buy price while showing its buy/sell spread; record
+  gold at the shop's buy price while showing its buy/sell spread; sell part or
+  all of a position into a chosen cash account, which settles its profit as
+  realized without ever rewriting the lot it came out of; record
   income and expenses against one account each under owner-managed categories,
   browsed a day, a month, a year, or a hand-picked range at a time; add, edit,
   and delete transfers between two accounts, opened from the Home toolbar; an
@@ -170,9 +172,10 @@ and are excluded by `.gitignore`.
 - Not included yet: budgets, interest paid on a schedule, rollover or early
   withdrawal, compound interest or amortisation schedules on a debt, price
   history or charts, a market-holiday calendar, AI, or MCP.
-- Not included, and not planned: individual buy/sell trades, realized profit and
-  loss, and equity or crypto positions. Gold tracking records current holdings
-  and unrealized value only; it does not add a trade ledger.
+- Not included, and not planned: individual buy/sell trades and equity or
+  crypto positions. Closing a position is recorded, so realized profit and loss
+  is too — but only against the lot the units left, which is a way out of a
+  holding rather than a trade ledger.
 
 ## Architecture
 
@@ -182,16 +185,16 @@ and are excluded by `.gitignore`.
   both platforms and touches nothing but the view it is asked to draw. The
   resolved version is pinned in `Package.resolved`.
 - SwiftData stores `CashAccount`, `SavingsDeposit`, `FundInstrument`,
-  `FundHolding`, `TransactionCategory`, `MoneyTransaction`, `AccountTransfer`,
-  `Debt`, `DebtPayment`, and `RecurringRule` records
+  `FundHolding`, `FundSale`, `TransactionCategory`, `MoneyTransaction`,
+  `AccountTransfer`, `Debt`, `DebtPayment`, and `RecurringRule` records
   in the owner's private iCloud database; `@Query` drives every visible list
   and combined total.
 - Nothing stores a balance. Every account balance, every total, and net worth
   itself is computed from the records each time, and `openingBalance` is never
   rewritten. That is what lets a record be deleted with no compensating write.
-- `AccountDraft`, `SavingsDraft`, `FundDraft`, `TransactionDraft`,
-  `CategoryDraft`, `TransferDraft`, `DebtDraft`, `DebtPaymentDraft`, and
-  `RecurringRuleDraft` validate
+- `AccountDraft`, `SavingsDraft`, `FundDraft`, `FundSaleDraft`,
+  `TransactionDraft`, `CategoryDraft`, `TransferDraft`, `DebtDraft`,
+  `DebtPaymentDraft`, and `RecurringRuleDraft` validate
   external text before any model is inserted or mutated, and money uses
   `Decimal` throughout.
 - A savings deposit and a fund holding each store their funding account's `id`;
@@ -199,6 +202,13 @@ and are excluded by `.gitignore`.
   compensating write.
 - A holding's cost basis leaves the cash side while its market value enters the
   asset side, so invested money is counted once and a gain shows as growth.
+- A sale is its own record and never shrinks the lot it came out of. The lot
+  keeps its original cost subtracted from the cash side, because that is the
+  money that left on the day it was bought; the sale adds its proceeds back, and
+  only the units still held carry a market value. At the moment of a sale those
+  three cancel, so net worth does not move — the gain stops being unrealized and
+  starts being cash. It also means a past month can still be reconstructed with
+  the position open, which shrinking the lot would have made impossible.
 - A transaction stores a positive amount and carries its direction in `kind`, so
   no call site has to agree on a sign convention. An account's available balance
   is its opening balance plus recorded flow minus what it funds; the opening

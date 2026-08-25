@@ -16,7 +16,8 @@ struct FundPositionGroupTests {
                 FundTestFactory.holding(in: vesaf, units: 100, averageCostPerUnit: 24_000),
                 FundTestFactory.holding(in: dcds, units: 10, averageCostPerUnit: 80_000),
             ],
-            instruments: [vesaf, dcds]
+            instruments: [vesaf, dcds],
+            sales: []
         )
 
         #expect(groups.count == 2)
@@ -35,7 +36,8 @@ struct FundPositionGroupTests {
             holdings: [
                 FundTestFactory.holding(in: vesaf, units: 300, averageCostPerUnit: 20_000),
                 FundTestFactory.holding(in: vesaf, units: 100, averageCostPerUnit: 28_000),
-            ]
+            ],
+            sales: []
         )
 
         #expect(group.units == 400)
@@ -53,7 +55,8 @@ struct FundPositionGroupTests {
             holdings: [
                 FundTestFactory.holding(in: vesaf, units: 500, averageCostPerUnit: 20_000),
                 FundTestFactory.holding(in: vesaf, units: 500, averageCostPerUnit: 20_000),
-            ]
+            ],
+            sales: []
         )
 
         #expect(group.marketValue == 25_000_000)
@@ -78,7 +81,8 @@ struct FundPositionGroupTests {
                 FundTestFactory.holding(in: vesaf, units: 100, averageCostPerUnit: 20_000),
                 orphan,
             ],
-            instruments: [vesaf]
+            instruments: [vesaf],
+            sales: []
         )
 
         #expect(groups.count == 2)
@@ -95,7 +99,8 @@ struct FundPositionGroupTests {
         let group = FundPositionGroup(
             instrument: vesaf,
             instrumentID: vesaf.id,
-            holdings: [FundTestFactory.holding(in: vesaf, units: 0, averageCostPerUnit: 0)]
+            holdings: [FundTestFactory.holding(in: vesaf, units: 0, averageCostPerUnit: 0)],
+            sales: []
         )
 
         #expect(group.averageCostPerUnit == 0)
@@ -124,5 +129,107 @@ struct FundPositionGroupTests {
         )
 
         #expect(positions.map(\.id) == [newer.id, older.id])
+    }
+
+    @Test("A part-sold stack counts only what is left, and banks what went")
+    func partSoldStackCountsWhatIsLeft() {
+        let vesaf = FundTestFactory.instrument(pricePerUnit: 30_000)
+        let first = FundTestFactory.holding(in: vesaf, units: 300, averageCostPerUnit: 20_000)
+        let second = FundTestFactory.holding(in: vesaf, units: 100, averageCostPerUnit: 28_000)
+        let sales = [FundTestFactory.sale(of: first, units: 100, pricePerUnit: 32_000)]
+        let group = FundPositionGroup(
+            instrument: vesaf,
+            instrumentID: vesaf.id,
+            holdings: [first, second],
+            sales: sales
+        )
+
+        #expect(group.units == 300)
+        // 200 × 20.000 still in the first lot, 100 × 28.000 in the second.
+        #expect(group.costBasis == 6_800_000)
+        // The whole outlay stands, because that is what left the accounts.
+        #expect(group.investedCostBasis == 8_800_000)
+        #expect(group.marketValue == 9_000_000)
+        #expect(group.unrealizedProfitLoss == 2_200_000)
+        // 100 × (32.000 − 20.000)
+        #expect(group.realizedProfitLoss == 1_200_000)
+        #expect(group.proceeds == 3_200_000)
+        #expect(group.isFullyClosed == false)
+        #expect(group.openHoldings.count == 2)
+    }
+
+    @Test("A stack sold out of entirely is closed, and only its realized figure stands")
+    func fullySoldStackIsClosed() {
+        let vesaf = FundTestFactory.instrument(pricePerUnit: 30_000)
+        let first = FundTestFactory.holding(in: vesaf, units: 300, averageCostPerUnit: 20_000)
+        let second = FundTestFactory.holding(in: vesaf, units: 100, averageCostPerUnit: 28_000)
+        let sales = [
+            FundTestFactory.sale(of: first, units: 300, pricePerUnit: 32_000),
+            FundTestFactory.sale(of: second, units: 100, pricePerUnit: 32_000),
+        ]
+        let group = FundPositionGroup(
+            instrument: vesaf,
+            instrumentID: vesaf.id,
+            holdings: [first, second],
+            sales: sales
+        )
+
+        #expect(group.units == 0)
+        #expect(group.costBasis == 0)
+        #expect(group.marketValue == 0)
+        #expect(group.unrealizedProfitLoss == 0)
+        #expect(group.returnPercent == 0)
+        // 300 × 12.000 + 100 × 4.000
+        #expect(group.realizedProfitLoss == 4_000_000)
+        #expect(group.isFullyClosed)
+        #expect(group.openHoldings.isEmpty)
+    }
+
+    @Test("A stack nobody has sold out of is not closed, however empty")
+    func emptyStackIsNotClosed() {
+        let vesaf = FundTestFactory.instrument(pricePerUnit: 30_000)
+        let group = FundPositionGroup(
+            instrument: vesaf,
+            instrumentID: vesaf.id,
+            holdings: [FundTestFactory.holding(in: vesaf, units: 0, averageCostPerUnit: 0)],
+            sales: []
+        )
+
+        #expect(group.isFullyClosed == false)
+        #expect(group.hasSales == false)
+    }
+
+    @Test("Grouping hands each stack only its own sales")
+    func groupingSplitsSalesByStack() {
+        let vesaf = FundTestFactory.instrument(symbol: "VESAF", pricePerUnit: 30_000)
+        let diamond = FundTestFactory.instrument(
+            symbol: "FUEVFVND",
+            kind: .etf,
+            pricePerUnit: 40_000
+        )
+        let vesafLot = FundTestFactory.holding(in: vesaf, units: 300, averageCostPerUnit: 20_000)
+        let diamondLot = FundTestFactory.holding(
+            in: diamond,
+            units: 100,
+            averageCostPerUnit: 30_000
+        )
+        let sales = [
+            FundTestFactory.sale(of: vesafLot, units: 100, pricePerUnit: 32_000),
+            FundTestFactory.sale(of: diamondLot, units: 50, pricePerUnit: 45_000),
+        ]
+
+        let groups = FundSummary.groups(
+            holdings: [vesafLot, diamondLot],
+            instruments: [vesaf, diamond],
+            sales: sales
+        )
+
+        let vesafGroup = groups.first { $0.symbol == "VESAF" }
+        let diamondGroup = groups.first { $0.symbol == "FUEVFVND" }
+
+        #expect(vesafGroup?.sales.count == 1)
+        #expect(vesafGroup?.units == 200)
+        #expect(diamondGroup?.sales.count == 1)
+        #expect(diamondGroup?.units == 50)
     }
 }

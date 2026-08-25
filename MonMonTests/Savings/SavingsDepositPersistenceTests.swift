@@ -119,7 +119,8 @@ struct SavingsDepositPersistenceTests {
                 transactions: [],
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             )
                 == 48_900_000
         )
@@ -140,7 +141,8 @@ struct SavingsDepositPersistenceTests {
                 transactions: [],
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             )
                 == 148_900_000
         )

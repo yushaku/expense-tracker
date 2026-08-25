@@ -37,6 +37,9 @@ struct AccountEditorView: View {
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
+    @Query(sort: \FundSale.soldAt, order: .reverse)
+    private var sales: [FundSale]
+
     @Query(sort: \FundInstrument.symbol, order: .forward)
     private var instruments: [FundInstrument]
 
@@ -129,7 +132,9 @@ struct AccountEditorView: View {
 
     /// An account may only be removed once it holds nothing and nothing points
     /// at it. A zero available balance rules out a savings deposit or a fund
-    /// holding, but not a transaction or a transfer: an account with 100 in and
+    /// holding, but not a transaction, a transfer, or a sale: a position bought
+    /// from this account and sold back into it nets to zero while two records
+    /// still name it. The same is true of a transaction or a transfer: an account with 100 in and
     /// 100 out sits at zero while still owning two records, so both counts are
     /// checked too. The same is true of a debt: borrowing a sum and repaying it
     /// nets to zero while two records still name the account. A transfer names
@@ -156,11 +161,22 @@ struct AccountEditorView: View {
                 transactions: transactions,
                 transfers: transfers,
                 debts: debts,
-                payments: payments
+                payments: payments,
+                sales: sales
             ) == 0
 
         return isEmpty && transactionCount == 0 && transferCount == 0 && debtCount == 0
-            && recurringCount == 0
+            && recurringCount == 0 && saleCount == 0
+    }
+
+    /// Sales that paid into this account. A closed position keeps its record
+    /// forever, and that record has to keep naming somewhere the money went.
+    private var saleCount: Int {
+        guard let editedAccount = mode.editedAccount else {
+            return 0
+        }
+
+        return FundSaleSummary.count(for: editedAccount, sales: sales)
     }
 
     private var transactionCount: Int {
@@ -226,6 +242,10 @@ struct AccountEditorView: View {
 
         if recurringCount > 0 {
             return "This account still has \(recurringCount) recurring rules. Delete them first."
+        }
+
+        if saleCount > 0 {
+            return "This account received \(saleCount) sales. Delete them first."
         }
 
         return "Set the balance to 0 before deleting this account."

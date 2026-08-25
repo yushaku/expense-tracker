@@ -106,7 +106,9 @@ struct FundHoldingPersistenceTests {
 
         var instruments = try context.fetch(FetchDescriptor<FundInstrument>())
         var holdings = try context.fetch(FetchDescriptor<FundHolding>())
-        #expect(FundSummary.totalMarketValue(of: holdings, instruments: instruments) == 10_000_000)
+        #expect(
+            FundSummary.totalMarketValue(of: holdings, instruments: instruments, sales: [])
+                == 10_000_000)
 
         try #require(instruments.first).currentPricePerUnit = 30_000
         try context.save()
@@ -114,7 +116,9 @@ struct FundHoldingPersistenceTests {
         instruments = try context.fetch(FetchDescriptor<FundInstrument>())
         holdings = try context.fetch(FetchDescriptor<FundHolding>())
 
-        #expect(FundSummary.totalMarketValue(of: holdings, instruments: instruments) == 12_000_000)
+        #expect(
+            FundSummary.totalMarketValue(of: holdings, instruments: instruments, sales: [])
+                == 12_000_000)
         // Cost basis is a position's own figure and never follows the market.
         #expect(FundSummary.totalCostBasis(of: holdings) == 8_600_000)
     }
@@ -168,7 +172,8 @@ struct FundHoldingPersistenceTests {
                 transactions: [],
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             )
                 == 128_900_000
         )
@@ -189,7 +194,8 @@ struct FundHoldingPersistenceTests {
                 transactions: [],
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             )
                 == 148_900_000
         )
@@ -221,7 +227,8 @@ struct FundHoldingPersistenceTests {
 
         #expect(instruments.isEmpty)
         #expect(holdings.count == 1)
-        #expect(FundSummary.totalMarketValue(of: holdings, instruments: instruments) == 0)
+        #expect(
+            FundSummary.totalMarketValue(of: holdings, instruments: instruments, sales: []) == 0)
         #expect(FundSummary.totalCostBasis(of: holdings) == 20_000_000)
     }
 
@@ -254,7 +261,7 @@ struct FundHoldingPersistenceTests {
         #expect(saved.units == 500)
         #expect(saved.averageCostPerUnit == 20_000)
         #expect(saved.instrumentID == instrument.id)
-        #expect(saved.marketValue(in: instruments) == 12_500_000)
+        #expect(saved.marketValue(in: instruments, sales: []) == 12_500_000)
         #expect(saved.sourceAccountID == sourceAccountID)
     }
 }

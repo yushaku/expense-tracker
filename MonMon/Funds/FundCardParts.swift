@@ -62,9 +62,30 @@ struct FundMetricGrid: View {
     }
 }
 
+/// Which of the two profits a row is showing.
+///
+/// They are told apart in words rather than by colour or position, because they
+/// mean opposite things about certainty: one is what today's price says the
+/// position would fetch, the other is what it actually fetched and can no longer
+/// change.
+enum FundProfitLossKind {
+    case unrealized
+    case realized
+
+    func titleKey(isGain: Bool) -> String {
+        switch self {
+        case .unrealized:
+            isGain ? "UNREALIZED GAIN" : "UNREALIZED LOSS"
+        case .realized:
+            isGain ? "REALIZED GAIN" : "REALIZED LOSS"
+        }
+    }
+}
+
 /// Profit and loss never rests on colour alone: the arrow and the explicit sign
 /// carry the meaning, and the tint only reinforces it.
 struct FundProfitLossRow: View {
+    let kind: FundProfitLossKind
     let profitLoss: Decimal
     let returnPercent: Decimal
 
@@ -86,7 +107,7 @@ struct FundProfitLossRow: View {
 
             Spacer(minLength: 8)
 
-            Text(isGain ? "UNREALIZED GAIN" : "UNREALIZED LOSS")
+            Text(LocalizedStringKey(kind.titleKey(isGain: isGain)))
                 .font(.caption2.weight(.semibold))
                 .tracking(0.5)
                 .foregroundStyle(MonMonTheme.textSecondary)
@@ -105,6 +126,24 @@ struct FundProfitLossRow: View {
         let amount = VNDCurrency.format(abs(profitLoss))
         let percent = PercentInput.format(abs(returnPercent))
         return "\(sign)\(amount) (\(sign)\(percent)%)"
+    }
+}
+
+/// Says a position has nothing left in it.
+///
+/// A closed lot stays in the list rather than disappearing, so it needs to say
+/// what it is: without this it reads as a position worth nothing, which is a
+/// very different thing from one that was sold.
+struct FundClosedBadge: View {
+    var body: some View {
+        Text("CLOSED")
+            .font(.caption2.weight(.bold))
+            .tracking(0.5)
+            .foregroundStyle(MonMonTheme.textSecondary)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(MonMonTheme.border.opacity(0.6), in: Capsule())
+            .accessibilityIdentifier("closed-position")
     }
 }
 

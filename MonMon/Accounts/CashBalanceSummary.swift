@@ -26,9 +26,18 @@ enum CashBalanceSummary {
     }
 
     /// Where tracking started, plus the recorded cash flow, plus what internal
-    /// transfers moved in or out, plus what debts and their payments moved,
-    /// minus the money moved into savings deposits and funds. `openingBalance`
-    /// is never rewritten; every later change is derived.
+    /// transfers moved in or out, plus what debts and their payments moved, plus
+    /// what selling a position paid back in, minus the money moved into savings
+    /// deposits and funds. `openingBalance` is never rewritten; every later
+    /// change is derived.
+    ///
+    /// A sale is added rather than netted against `fundedAmount`, and that pair
+    /// is what makes closing a position come out right. `fundedAmount` keeps
+    /// subtracting the lot's original cost, because that is the money that
+    /// genuinely left on the day it was bought and no later event changes it;
+    /// the sale adds what came back. Over a full round trip the account moves by
+    /// the realized profit alone, which is why selling never has to rewrite the
+    /// lot it came out of.
     ///
     /// Like `holdings`, none of the collections has a default value, and the
     /// reason has grown teeth: a forgotten argument would silently misreport the
@@ -45,12 +54,14 @@ enum CashBalanceSummary {
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
         debts: [Debt],
-        payments: [DebtPayment]
+        payments: [DebtPayment],
+        sales: [FundSale]
     ) -> Decimal {
         account.openingBalance
             + TransactionSummary.netFlow(for: account, transactions: transactions)
             + TransferSummary.netFlow(for: account, transfers: transfers)
             + DebtSummary.netFlow(for: account, debts: debts, payments: payments)
+            + FundSaleSummary.netFlow(for: account, sales: sales)
             - fundedAmount(for: account, deposits: deposits, holdings: holdings)
     }
 
@@ -68,7 +79,8 @@ enum CashBalanceSummary {
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
         debts: [Debt],
-        payments: [DebtPayment]
+        payments: [DebtPayment],
+        sales: [FundSale]
     ) -> Decimal {
         accounts.reduce(Decimal.zero) { total, account in
             total
@@ -79,7 +91,8 @@ enum CashBalanceSummary {
                     transactions: transactions,
                     transfers: transfers,
                     debts: debts,
-                    payments: payments
+                    payments: payments,
+                    sales: sales
                 )
         }
     }

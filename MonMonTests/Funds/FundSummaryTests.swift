@@ -8,8 +8,8 @@ struct FundSummaryTests {
     @Test("No holdings total to zero")
     func emptyHoldingsTotalZero() {
         #expect(FundSummary.totalCostBasis(of: []) == 0)
-        #expect(FundSummary.totalMarketValue(of: [], instruments: []) == 0)
-        #expect(FundSummary.totalUnrealizedProfitLoss(of: [], instruments: []) == 0)
+        #expect(FundSummary.totalMarketValue(of: [], instruments: [], sales: []) == 0)
+        #expect(FundSummary.totalUnrealizedProfitLoss(of: [], instruments: [], sales: []) == 0)
     }
 
     @Test("Cost bases and market values add exactly")
@@ -27,7 +27,8 @@ struct FundSummaryTests {
 
         #expect(FundSummary.totalCostBasis(of: holdings) == 36_000_000)
         #expect(
-            FundSummary.totalMarketValue(of: holdings, instruments: [fund, etf]) == 40_000_000
+            FundSummary.totalMarketValue(of: holdings, instruments: [fund, etf], sales: [])
+                == 40_000_000
         )
     }
 
@@ -46,7 +47,8 @@ struct FundSummaryTests {
 
         // +5.000.000 ₫ on the fund, −1.000.000 ₫ on the ETF.
         #expect(
-            FundSummary.totalUnrealizedProfitLoss(of: holdings, instruments: [fund, etf])
+            FundSummary.totalUnrealizedProfitLoss(
+                of: holdings, instruments: [fund, etf], sales: [])
                 == 4_000_000
         )
     }
@@ -62,10 +64,11 @@ struct FundSummaryTests {
         ]
 
         #expect(
-            FundSummary.totalMarketValue(of: holdings, instruments: [instrument]) == 15_000_000
+            FundSummary.totalMarketValue(of: holdings, instruments: [instrument], sales: [])
+                == 15_000_000
         )
         #expect(FundSummary.totalCostBasis(of: holdings) == 12_000_000)
-        #expect(FundSummary.totalUnits(for: instrument, holdings: holdings) == 500)
+        #expect(FundSummary.totalUnits(for: instrument, holdings: holdings, sales: []) == 500)
         #expect(FundSummary.holdings(for: instrument, holdings: holdings).count == 2)
     }
 
@@ -80,7 +83,8 @@ struct FundSummaryTests {
             averageCostPerUnit: 20_000
         )
 
-        #expect(FundSummary.totalMarketValue(of: [orphan], instruments: [instrument]) == 0)
+        #expect(
+            FundSummary.totalMarketValue(of: [orphan], instruments: [instrument], sales: []) == 0)
         #expect(FundSummary.totalCostBasis(of: [orphan]) == 2_000_000)
     }
 
@@ -112,7 +116,9 @@ struct FundSummaryTests {
         )
         // The total still counts the orphan as nothing; it is now knowable that
         // it did, and by how much cost.
-        #expect(FundSummary.totalMarketValue(of: holdings, instruments: catalogue) == 3_000_000)
+        #expect(
+            FundSummary.totalMarketValue(of: holdings, instruments: catalogue, sales: [])
+                == 3_000_000)
         #expect(FundSummary.totalCostBasis(of: holdings) == 3_500_000)
     }
 
@@ -167,6 +173,7 @@ struct FundSummaryTests {
             FundSummary.totalMarketValue(
                 of: holdings,
                 instruments: instruments,
+                sales: [],
                 kinds: [.fund, .etf]
             ) == 5_500_000
         )
@@ -174,6 +181,7 @@ struct FundSummaryTests {
             FundSummary.totalMarketValue(
                 of: holdings,
                 instruments: instruments,
+                sales: [],
                 kinds: [.gold]
             ) == 147_000_000
         )

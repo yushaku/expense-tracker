@@ -30,11 +30,16 @@ struct InvestmentsView: View {
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
+    @Query(sort: \FundSale.soldAt, order: .reverse)
+    private var sales: [FundSale]
+
     @Query(sort: \FundInstrument.symbol, order: .forward)
     private var instruments: [FundInstrument]
 
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
+
+    @Environment(\.locale) private var locale
 
     @State private var segment: InvestmentSegment = .savings
     @State private var editor: InvestmentEditorMode?
@@ -59,6 +64,10 @@ struct InvestmentsView: View {
                     .padding(.bottom, FloatingAddButton.contentInset)
                     .frame(maxWidth: .infinity)
                 }
+                .swipeBetweenSegments(
+                    selection: $segment,
+                    options: InvestmentSegment.allCases
+                )
             }
             .overlay(alignment: .bottomTrailing) {
                 // An empty list already offers its own prominent add button, so
@@ -98,33 +107,14 @@ struct InvestmentsView: View {
                 .tracking(0.8)
                 .foregroundStyle(MonMonTheme.textSecondary)
 
-            Text(VNDCurrency.format(total))
-                .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.58)
-                .foregroundStyle(MonMonTheme.textPrimary)
-
-            VStack(alignment: .leading, spacing: 6) {
-                Label(
-                    "Savings \(VNDCurrency.format(AssetSummary.totalPrincipal(of: deposits)))",
-                    systemImage: "building.columns.fill"
+            if slices.isEmpty {
+                emptySummary
+            } else {
+                AllocationDoughnut(
+                    context: AppText.string(key: "Investments", in: locale).lowercased(),
+                    items: slices.map { $0.doughnutItem(in: locale) }
                 )
-                .font(.subheadline.weight(.medium))
-
-                Label(
-                    "Funds \(VNDCurrency.format(FundSummary.totalMarketValue(of: holdings, instruments: instruments, kinds: [.fund, .etf])))",
-                    systemImage: "chart.line.uptrend.xyaxis"
-                )
-                .font(.subheadline.weight(.medium))
-
-                Label(
-                    "Gold \(VNDCurrency.format(FundSummary.totalMarketValue(of: holdings, instruments: instruments, kinds: [.gold])))",
-                    systemImage: "seal.fill"
-                )
-                .font(.subheadline.weight(.medium))
             }
-            .foregroundStyle(MonMonTheme.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(24)
@@ -136,14 +126,63 @@ struct InvestmentsView: View {
             RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
                 .stroke(MonMonTheme.border, lineWidth: 1)
         }
+    }
+
+    /// Nothing invested yet draws no ring, so the card falls back to the plain
+    /// zero rather than an empty circle.
+    private var emptySummary: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(VNDCurrency.format(total))
+                .font(.system(.largeTitle, design: .rounded, weight: .bold))
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.58)
+                .foregroundStyle(MonMonTheme.textPrimary)
+
+            Text("Savings books, funds, and gold will be split up here.")
+                .font(.subheadline)
+                .foregroundStyle(MonMonTheme.textSecondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
+    }
+
+    /// One wedge per kind, in the order the segments below are listed. A kind
+    /// worth nothing is dropped rather than drawn as a hairline.
+    private var slices: [AssetAllocationSlice] {
+        [
+            AssetAllocationSlice(
+                kind: .savings,
+                amount: AssetSummary.totalPrincipal(of: deposits)
+            ),
+            AssetAllocationSlice(
+                kind: .funds,
+                amount: FundSummary.totalMarketValue(
+                    of: holdings,
+                    instruments: instruments,
+                    sales: sales,
+                    kinds: [.fund, .etf]
+                )
+            ),
+            AssetAllocationSlice(
+                kind: .gold,
+                amount: FundSummary.totalMarketValue(
+                    of: holdings,
+                    instruments: instruments,
+                    sales: sales,
+                    kinds: [.gold]
+                )
+            ),
+        ]
+        .filter { $0.amount > 0 }
     }
 
     private var total: Decimal {
         InvestmentSummary.total(
             deposits: deposits,
             holdings: holdings,
-            instruments: instruments
+            instruments: instruments,
+            sales: sales
         )
     }
 
@@ -170,6 +209,7 @@ struct InvestmentsView: View {
             FundSection(
                 holdings: holdings,
                 instruments: instruments,
+                sales: sales,
                 kinds: [.fund, .etf],
                 sectionTitle: "Funds",
                 itemNameKey: "fund",
@@ -188,6 +228,7 @@ struct InvestmentsView: View {
             FundSection(
                 holdings: holdings,
                 instruments: instruments,
+                sales: sales,
                 kinds: [.gold],
                 sectionTitle: "Gold",
                 itemNameKey: "gold product",

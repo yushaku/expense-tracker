@@ -28,7 +28,8 @@ enum AccountBalanceAllocation {
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
         debts: [Debt],
-        payments: [DebtPayment]
+        payments: [DebtPayment],
+        sales: [FundSale]
     ) -> [AccountBalanceSlice] {
         accounts
             .map { account in
@@ -43,7 +44,8 @@ enum AccountBalanceAllocation {
                         transactions: transactions,
                         transfers: transfers,
                         debts: debts,
-                        payments: payments
+                        payments: payments,
+                        sales: sales
                     )
                 )
             }

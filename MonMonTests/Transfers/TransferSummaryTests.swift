@@ -142,7 +142,8 @@ struct TransferSummaryTests {
                 transactions: [],
                 transfers: transfers,
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             ) == 3_000_000
         )
         #expect(
@@ -153,7 +154,8 @@ struct TransferSummaryTests {
                 transactions: [],
                 transfers: transfers,
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             ) == 8_000_000
         )
         #expect(
@@ -164,7 +166,8 @@ struct TransferSummaryTests {
                 transactions: [],
                 transfers: transfers,
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             ) == 11_000_000
         )
     }
@@ -184,7 +187,8 @@ struct TransferSummaryTests {
             transactions: [],
             transfers: [],
             debts: [],
-            payments: []
+            payments: [],
+            sales: []
         )
         let after = AssetSummary.netWorth(
             accounts: accounts,
@@ -194,7 +198,8 @@ struct TransferSummaryTests {
             transactions: [],
             transfers: transfers,
             debts: [],
-            payments: []
+            payments: [],
+            sales: []
         )
 
         #expect(before == 11_000_000)
@@ -215,7 +220,8 @@ struct TransferSummaryTests {
                 transactions: [],
                 transfers: transfers,
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             ) == -3_000_000
         )
         #expect(
@@ -226,7 +232,8 @@ struct TransferSummaryTests {
                 transactions: [],
                 transfers: transfers,
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             ) == 3_000_000
         )
     }

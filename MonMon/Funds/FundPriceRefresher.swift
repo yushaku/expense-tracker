@@ -16,8 +16,10 @@ final class FundPriceRefresher {
         case failed(FundQuoteError)
 
         enum Skip: Equatable {
-            /// Nothing is held in it. The catalogue may outlive a sold position,
-            /// but a row nobody holds is not worth a request.
+            /// Nothing is held in it. The catalogue may outlive a sold
+            /// position, but a row nobody holds is not worth a request — and a
+            /// position that has been closed is one nobody holds, however many
+            /// records of it remain.
             case notHeld
             /// The owner switched automatic quotes off for this ticker.
             case automaticQuotesOff
@@ -46,10 +48,18 @@ final class FundPriceRefresher {
     /// Instruments worth asking about at all: held by something, and not opted
     /// out. Used to disable Refresh rather than offer a button that does
     /// nothing.
-    func hasAnythingToRefresh(instruments: [FundInstrument], holdings: [FundHolding]) -> Bool {
+    func hasAnythingToRefresh(
+        instruments: [FundInstrument],
+        holdings: [FundHolding],
+        sales: [FundSale]
+    ) -> Bool {
         instruments.contains { instrument in
             instrument.autoQuoteEnabled
-                && !FundSummary.holdings(for: instrument, holdings: holdings).isEmpty
+                && FundSummary.totalUnits(
+                    for: instrument,
+                    holdings: holdings,
+                    sales: sales
+                ) > 0
         }
     }
 
@@ -63,6 +73,7 @@ final class FundPriceRefresher {
     func refresh(
         instruments: [FundInstrument],
         holdings: [FundHolding],
+        sales: [FundSale],
         in context: ModelContext,
         asOf: Date = .now
     ) async {
@@ -80,6 +91,7 @@ final class FundPriceRefresher {
             let outcome = await refreshOne(
                 instrument,
                 holdings: holdings,
+                sales: sales,
                 asOf: asOf
             )
             outcomes[instrument.id] = outcome
@@ -109,13 +121,15 @@ final class FundPriceRefresher {
     private func refreshOne(
         _ instrument: FundInstrument,
         holdings: [FundHolding],
+        sales: [FundSale],
         asOf: Date
     ) async -> Outcome {
         guard instrument.autoQuoteEnabled else {
             return .unchanged(.automaticQuotesOff)
         }
 
-        guard !FundSummary.holdings(for: instrument, holdings: holdings).isEmpty else {
+        guard FundSummary.totalUnits(for: instrument, holdings: holdings, sales: sales) > 0
+        else {
             return .unchanged(.notHeld)
         }
 

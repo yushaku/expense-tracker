@@ -75,6 +75,9 @@ struct FundInstrumentListView: View {
     @Query(sort: \FundInstrument.symbol, order: .forward)
     private var instruments: [FundInstrument]
 
+    @Query(sort: \FundSale.soldAt, order: .reverse)
+    private var sales: [FundSale]
+
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
@@ -368,7 +371,11 @@ struct FundInstrumentListView: View {
     /// Refresh is offered only when a request could actually achieve something:
     /// a held instrument, with automatic quotes left on.
     private var canRefresh: Bool {
-        refresher.hasAnythingToRefresh(instruments: filteredInstruments, holdings: holdings)
+        refresher.hasAnythingToRefresh(
+            instruments: filteredInstruments,
+            holdings: holdings,
+            sales: sales
+        )
     }
 
     /// Owner-triggered, and the only thing in the app that opens a connection.
@@ -377,6 +384,7 @@ struct FundInstrumentListView: View {
             await refresher.refresh(
                 instruments: filteredInstruments,
                 holdings: holdings,
+                sales: sales,
                 in: modelContext
             )
         }

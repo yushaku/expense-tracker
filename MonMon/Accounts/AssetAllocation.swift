@@ -96,7 +96,8 @@ enum AssetAllocation {
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
         debts: [Debt],
-        payments: [DebtPayment]
+        payments: [DebtPayment],
+        sales: [FundSale]
     ) -> [AssetAllocationSlice] {
         let candidates = [
             AssetAllocationSlice(
@@ -108,7 +109,8 @@ enum AssetAllocation {
                     transactions: transactions,
                     transfers: transfers,
                     debts: debts,
-                    payments: payments
+                    payments: payments,
+                    sales: sales
                 )
             ),
             AssetAllocationSlice(
@@ -120,6 +122,7 @@ enum AssetAllocation {
                 amount: FundSummary.totalMarketValue(
                     of: holdings,
                     instruments: instruments,
+                    sales: sales,
                     kinds: [.fund, .etf]
                 )
             ),
@@ -128,6 +131,7 @@ enum AssetAllocation {
                 amount: FundSummary.totalMarketValue(
                     of: holdings,
                     instruments: instruments,
+                    sales: sales,
                     kinds: [.gold]
                 )
             ),
@@ -155,7 +159,8 @@ enum AssetAllocation {
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
         debts: [Debt],
-        payments: [DebtPayment]
+        payments: [DebtPayment],
+        sales: [FundSale]
     ) -> Decimal {
         accounts.reduce(Decimal.zero) { total, account in
             let available = CashBalanceSummary.available(
@@ -165,7 +170,8 @@ enum AssetAllocation {
                 transactions: transactions,
                 transfers: transfers,
                 debts: debts,
-                payments: payments
+                payments: payments,
+                sales: sales
             )
 
             return available > 0 ? total + available : total
@@ -186,7 +192,8 @@ enum AssetAllocation {
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
         debts: [Debt],
-        payments: [DebtPayment]
+        payments: [DebtPayment],
+        sales: [FundSale]
     ) -> Decimal {
         accounts.reduce(Decimal.zero) { total, account in
             let available = CashBalanceSummary.available(
@@ -196,7 +203,8 @@ enum AssetAllocation {
                 transactions: transactions,
                 transfers: transfers,
                 debts: debts,
-                payments: payments
+                payments: payments,
+                sales: sales
             )
 
             return available < 0 ? total - available : total
@@ -214,7 +222,8 @@ enum AssetAllocation {
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
         debts: [Debt],
-        payments: [DebtPayment]
+        payments: [DebtPayment],
+        sales: [FundSale]
     ) -> Decimal {
         totalLiabilities(
             of: liabilitySlices(
@@ -224,7 +233,8 @@ enum AssetAllocation {
                 transactions: transactions,
                 transfers: transfers,
                 debts: debts,
-                payments: payments
+                payments: payments,
+                sales: sales
             )
         )
     }
@@ -237,7 +247,8 @@ enum AssetAllocation {
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
         debts: [Debt],
-        payments: [DebtPayment]
+        payments: [DebtPayment],
+        sales: [FundSale]
     ) -> [LiabilityAllocationSlice] {
         let candidates = [
             LiabilityAllocationSlice(
@@ -257,7 +268,8 @@ enum AssetAllocation {
                     transactions: transactions,
                     transfers: transfers,
                     debts: debts,
-                    payments: payments
+                    payments: payments,
+                    sales: sales
                 )
             ),
         ]

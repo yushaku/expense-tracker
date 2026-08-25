@@ -1,12 +1,25 @@
 import Foundation
 
 enum FundSummary {
-    /// What every position cost. Needs no catalogue: cost basis lives entirely
-    /// on the holding, which is why refreshing a price cannot move a cash
-    /// balance or the funded amount.
+    /// What every position cost when it was bought. Needs no catalogue and no
+    /// sales: cost basis lives entirely on the holding, which is why refreshing
+    /// a price cannot move a cash balance or the funded amount, and why closing
+    /// a position cannot either. `CashBalanceSummary.fundedAmount` reads this
+    /// figure and needs it whole.
     static func totalCostBasis(of holdings: [FundHolding]) -> Decimal {
         holdings.reduce(Decimal.zero) { total, holding in
             total + holding.costBasis
+        }
+    }
+
+    /// What the units still held cost. The figure to compare against market
+    /// value, because a position that has been half sold is only half open.
+    static func totalOpenCostBasis(
+        of holdings: [FundHolding],
+        sales: [FundSale]
+    ) -> Decimal {
+        holdings.reduce(Decimal.zero) { total, holding in
+            total + holding.remainingCostBasis(sales: sales)
         }
     }
 
@@ -15,21 +28,24 @@ enum FundSummary {
     /// would silently value the whole portfolio at zero.
     static func totalMarketValue(
         of holdings: [FundHolding],
-        instruments: [FundInstrument]
+        instruments: [FundInstrument],
+        sales: [FundSale]
     ) -> Decimal {
         holdings.reduce(Decimal.zero) { total, holding in
-            total + holding.marketValue(in: instruments)
+            total + holding.marketValue(in: instruments, sales: sales)
         }
     }
 
     static func totalMarketValue(
         of holdings: [FundHolding],
         instruments: [FundInstrument],
+        sales: [FundSale],
         kinds: [FundInstrumentKind]
     ) -> Decimal {
         totalMarketValue(
             of: self.holdings(holdings, in: instruments, matching: kinds),
-            instruments: instruments
+            instruments: instruments,
+            sales: sales
         )
     }
 
@@ -43,12 +59,16 @@ enum FundSummary {
         }
     }
 
+    /// What the open part of these positions has made on paper. Measured
+    /// against the cost of the units still held, so selling at a profit moves
+    /// the gain from this figure into the realized one rather than deleting it.
     static func totalUnrealizedProfitLoss(
         of holdings: [FundHolding],
-        instruments: [FundInstrument]
+        instruments: [FundInstrument],
+        sales: [FundSale]
     ) -> Decimal {
-        totalMarketValue(of: holdings, instruments: instruments)
-            - totalCostBasis(of: holdings)
+        totalMarketValue(of: holdings, instruments: instruments, sales: sales)
+            - totalOpenCostBasis(of: holdings, sales: sales)
     }
 
     /// Positions whose instrument is missing from the catalogue.
@@ -83,13 +103,16 @@ enum FundSummary {
         holdings.filter { $0.instrumentID == instrument.id }
     }
 
+    /// How much of one instrument is still held. Counts what is left rather
+    /// than what was bought, so a fully closed catalogue entry reads as unheld.
     static func totalUnits(
         for instrument: FundInstrument,
-        holdings all: [FundHolding]
+        holdings all: [FundHolding],
+        sales: [FundSale]
     ) -> Decimal {
         holdings(for: instrument, holdings: all)
             .reduce(Decimal.zero) { total, holding in
-                total + holding.units
+                total + holding.remainingUnits(sales: sales)
             }
     }
 }

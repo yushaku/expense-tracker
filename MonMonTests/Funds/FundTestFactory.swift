@@ -54,6 +54,26 @@ enum FundTestFactory {
         )
     }
 
+    static func sale(
+        of holding: FundHolding,
+        units: Decimal,
+        pricePerUnit: Decimal,
+        proceedsAccountID: UUID = AccountSeed.unassignedID,
+        soldAt: Date = referenceDate,
+        id: UUID = UUID()
+    ) -> FundSale {
+        FundSale(
+            id: id,
+            holdingID: holding.id,
+            units: units,
+            pricePerUnit: pricePerUnit,
+            proceedsAccountID: proceedsAccountID,
+            soldAt: soldAt,
+            currencyCode: VNDCurrency.code,
+            createdAt: soldAt
+        )
+    }
+
     /// One instrument and one position in it, for the common case where a test
     /// only cares about the pair as a unit.
     static func pair(

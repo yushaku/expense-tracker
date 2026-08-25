@@ -10,6 +10,10 @@ struct FundSection: View {
     /// The catalogue the holdings are priced from. Passed in rather than
     /// queried here so the section stays a plain view over values.
     let instruments: [FundInstrument]
+    /// Every sale, for the same reason: what is still held is derived from
+    /// these, so a section handed the holdings alone would report closed
+    /// positions as open.
+    let sales: [FundSale]
     let kinds: [FundInstrumentKind]
     let sectionTitle: LocalizedStringKey
     /// The key naming what one row holds — "fund" or "gold product". Kept as a
@@ -108,14 +112,28 @@ struct FundSection: View {
             """
     }
 
+    /// The cost of what is still held, so the gap below it is a gap between two
+    /// figures about the same units.
     private var costBasis: Decimal {
-        FundSummary.totalCostBasis(of: displayedHoldings)
+        FundSummary.totalOpenCostBasis(of: displayedHoldings, sales: sales)
+    }
+
+    private var realizedProfitLoss: Decimal {
+        FundSaleSummary.totalRealizedProfitLoss(
+            of: FundSaleSummary.sales(of: displayedHoldings, sales: sales),
+            holdings: displayedHoldings
+        )
+    }
+
+    private var hasRealized: Bool {
+        !FundSaleSummary.sales(of: displayedHoldings, sales: sales).isEmpty
     }
 
     private var profitLoss: Decimal {
         FundSummary.totalUnrealizedProfitLoss(
             of: displayedHoldings,
-            instruments: instruments
+            instruments: instruments,
+            sales: sales
         )
     }
 
@@ -136,7 +154,7 @@ struct FundSection: View {
     }
 
     private var groups: [FundPositionGroup] {
-        FundSummary.groups(holdings: displayedHoldings, instruments: instruments)
+        FundSummary.groups(holdings: displayedHoldings, instruments: instruments, sales: sales)
     }
 
     /// Counts both, because they answer different questions: how many funds are

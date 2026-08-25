@@ -69,32 +69,60 @@ extension FundHolding {
         purchasedAt ?? createdAt
     }
 
-    /// What this position cost. Needs no instrument: the price paid is the
-    /// owner's own figure and never moves with the market. This is also the
-    /// amount deducted from the funding account, which is why the cash side of
-    /// the app is untouched by a price refresh.
+    /// What this position cost when it was bought, whether or not any of it has
+    /// since been sold.
+    ///
+    /// Needs no instrument: the price paid is the owner's own figure and never
+    /// moves with the market. This is also the amount deducted from the funding
+    /// account, which is why the cash side of the app is untouched by a price
+    /// refresh — and why selling must not shrink it. That deduction records a
+    /// payment that already happened; a sale adds its proceeds separately, and
+    /// shrinking this as well would hand the cost back twice.
     var costBasis: Decimal {
         FundValuation.costBasis(units: units, averageCostPerUnit: averageCostPerUnit)
     }
 
-    /// Valuation takes the price as a value rather than reading a model, so
-    /// `FundValuation` stays pure and a caller cannot accidentally value a
-    /// position against another instrument's price.
-    func marketValue(pricePerUnit: Decimal) -> Decimal {
-        FundValuation.marketValue(units: units, pricePerUnit: pricePerUnit)
+    /// What is still held here, once every sale out of this lot is taken off.
+    func remainingUnits(sales: [FundSale]) -> Decimal {
+        FundSaleSummary.remainingUnits(of: self, sales: sales)
     }
 
-    func unrealizedProfitLoss(pricePerUnit: Decimal) -> Decimal {
+    /// What the units still held cost. The figure the open part of the position
+    /// is measured against — unlike `costBasis`, which stays whole because the
+    /// cash side is settled against it.
+    func remainingCostBasis(sales: [FundSale]) -> Decimal {
+        FundValuation.costBasis(
+            units: remainingUnits(sales: sales),
+            averageCostPerUnit: averageCostPerUnit
+        )
+    }
+
+    func realizedProfitLoss(sales: [FundSale]) -> Decimal {
+        FundSaleSummary.realizedProfitLoss(for: self, sales: sales)
+    }
+
+    /// Valuation takes the price as a value rather than reading a model, so
+    /// `FundValuation` stays pure and a caller cannot accidentally value a
+    /// position against another instrument's price. It takes the sales too,
+    /// because only what is still held has a market value at all.
+    func marketValue(pricePerUnit: Decimal, sales: [FundSale]) -> Decimal {
+        FundValuation.marketValue(
+            units: remainingUnits(sales: sales),
+            pricePerUnit: pricePerUnit
+        )
+    }
+
+    func unrealizedProfitLoss(pricePerUnit: Decimal, sales: [FundSale]) -> Decimal {
         FundValuation.unrealizedProfitLoss(
-            units: units,
+            units: remainingUnits(sales: sales),
             averageCostPerUnit: averageCostPerUnit,
             pricePerUnit: pricePerUnit
         )
     }
 
-    func returnPercent(pricePerUnit: Decimal) -> Decimal {
+    func returnPercent(pricePerUnit: Decimal, sales: [FundSale]) -> Decimal {
         FundValuation.returnPercent(
-            units: units,
+            units: remainingUnits(sales: sales),
             averageCostPerUnit: averageCostPerUnit,
             pricePerUnit: pricePerUnit
         )
@@ -103,7 +131,10 @@ extension FundHolding {
     /// Convenience for the common case where the catalogue is already to hand.
     /// A holding whose instrument is missing is worth nothing rather than
     /// crashing; the card renders that state explicitly.
-    func marketValue(in instruments: [FundInstrument]) -> Decimal {
-        marketValue(pricePerUnit: instruments.matching(self)?.currentPricePerUnit ?? .zero)
+    func marketValue(in instruments: [FundInstrument], sales: [FundSale]) -> Decimal {
+        marketValue(
+            pricePerUnit: instruments.matching(self)?.currentPricePerUnit ?? .zero,
+            sales: sales
+        )
     }
 }

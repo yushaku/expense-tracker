@@ -42,7 +42,8 @@ struct CashBalanceSummaryTests {
                 transactions: transactions,
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             ) == 14_800_000
         )
     }
@@ -63,7 +64,8 @@ struct CashBalanceSummaryTests {
                 transactions: transactions,
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             ) == 1_000_000
         )
         #expect(
@@ -74,7 +76,8 @@ struct CashBalanceSummaryTests {
                 transactions: transactions,
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             ) == 9_600_000
         )
     }
@@ -94,7 +97,8 @@ struct CashBalanceSummaryTests {
                 transactions: transactions,
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             ) == -250_000
         )
     }
@@ -133,7 +137,8 @@ struct CashBalanceSummaryTests {
                 transactions: transactions,
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             ) == 24_000_000
         )
     }

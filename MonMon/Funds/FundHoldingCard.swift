@@ -12,12 +12,46 @@ struct FundHoldingCard: View {
     /// `instrumentID` is representable and the card has to say so rather than
     /// quietly rendering a zero.
     let instrument: FundInstrument?
+    /// Every sale out of this lot. What is still held is derived from these, so
+    /// a card handed the holding alone would show a closed position as open.
+    let sales: [FundSale]
     let sourceAccountName: String?
     /// Passed in rather than read from the clock, so a preview and a test both
     /// get a stable answer for whether the price is stale.
     var asOf: Date = .now
 
+    /// What can be done to this position, if anything.
+    ///
+    /// Optional so a card can still be shown where there is nothing to do with
+    /// it — a preview, or a screen that only reports. When none is given the
+    /// card loses its footer entirely rather than showing dead buttons.
+    var onEdit: (() -> Void)?
+    var onSell: (() -> Void)?
+    /// Opens or folds away the sales beneath the card. `nil` when this lot has
+    /// none, so the affordance never appears over an empty list.
+    var onToggleSales: (() -> Void)?
+    var isShowingSales = false
+
     var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            details
+                .accessibilityElement(children: .combine)
+
+            // The actions live inside the card rather than under it. A position
+            // and the things you can do to it are one object, and a row of
+            // buttons floating below the surface read as belonging to the list
+            // rather than to the card above them.
+            if hasActions {
+                Divider()
+                    .overlay(MonMonTheme.border)
+
+                actions
+            }
+        }
+        .fundCardBackground()
+    }
+
+    private var details: some View {
         VStack(alignment: .leading, spacing: 16) {
             header
 
@@ -28,13 +62,71 @@ struct FundHoldingCard: View {
 
             FundPriceStatusRow(instrument: instrument, asOf: asOf)
 
-            FundProfitLossRow(
-                profitLoss: unrealizedProfitLoss,
-                returnPercent: holding.returnPercent(pricePerUnit: pricePerUnit)
-            )
+            if !isClosed {
+                FundProfitLossRow(
+                    kind: .unrealized,
+                    profitLoss: unrealizedProfitLoss,
+                    returnPercent: holding.returnPercent(
+                        pricePerUnit: pricePerUnit,
+                        sales: sales
+                    )
+                )
+            }
+
+            if hasSales {
+                FundProfitLossRow(
+                    kind: .realized,
+                    profitLoss: realizedProfitLoss,
+                    returnPercent: FundSaleSummary.realizedReturnPercent(
+                        for: holding,
+                        sales: sales
+                    )
+                )
+            }
         }
-        .fundCardBackground()
-        .accessibilityElement(children: .combine)
+    }
+
+    private var hasActions: Bool {
+        onEdit != nil || onSell != nil || onToggleSales != nil
+    }
+
+    private var actions: some View {
+        HStack(spacing: 16) {
+            if let onEdit {
+                Button("Edit", systemImage: "pencil", action: onEdit)
+                    .buttonStyle(.plain)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.accent)
+                    .accessibilityIdentifier("fund-\(holding.id.uuidString)")
+            }
+
+            if let onSell, !isClosed {
+                Button("Sell", systemImage: "arrow.up.right", action: onSell)
+                    .buttonStyle(.plain)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.funds)
+                    .accessibilityIdentifier("fund-sell-\(holding.id.uuidString)")
+            }
+
+            Spacer(minLength: 8)
+
+            if let onToggleSales {
+                Button(action: onToggleSales) {
+                    Label(
+                        "\(saleCount) sales",
+                        systemImage: isShowingSales ? "chevron.up" : "chevron.down"
+                    )
+                }
+                .buttonStyle(.plain)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(MonMonTheme.textSecondary)
+                .accessibilityIdentifier("fund-sales-\(holding.id.uuidString)")
+            }
+        }
+    }
+
+    private var saleCount: Int {
+        FundSaleSummary.sales(for: holding, sales: sales).count
     }
 
     private var header: some View {
@@ -54,9 +146,15 @@ struct FundHoldingCard: View {
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(instrument?.symbol ?? "Unknown instrument")
-                    .font(.headline)
-                    .lineLimit(1)
+                HStack(spacing: 8) {
+                    Text(instrument?.symbol ?? "Unknown instrument")
+                        .font(.headline)
+                        .lineLimit(1)
+
+                    if isClosed {
+                        FundClosedBadge()
+                    }
+                }
 
                 Text(subtitle)
                     .font(.subheadline)
@@ -80,8 +178,10 @@ struct FundHoldingCard: View {
         }
     }
 
+    /// The sold column only appears once something has been sold, so an
+    /// untouched lot reads exactly as it did before selling existed.
     private var metrics: [FundMetric] {
-        [
+        var metrics = [
             FundMetric(titleKey: quantityTitle, value: quantityValue),
             FundMetric(
                 titleKey: "AVG COST",
@@ -91,20 +191,69 @@ struct FundHoldingCard: View {
                 titleKey: priceTitle,
                 value: instrument.map { VNDCurrency.formatUnitPrice($0.currentPricePerUnit) } ?? "—"
             ),
-            FundMetric(titleKey: "COST BASIS", value: VNDCurrency.format(holding.costBasis)),
+            FundMetric(titleKey: "COST BASIS", value: VNDCurrency.format(costBasis)),
         ]
+
+        if hasSales {
+            metrics.append(FundMetric(titleKey: soldTitle, value: soldValue))
+            metrics.append(
+                FundMetric(
+                    titleKey: "PROCEEDS",
+                    value: VNDCurrency.format(
+                        FundSaleSummary.totalProceeds(
+                            of: FundSaleSummary.sales(for: holding, sales: sales)
+                        )
+                    )
+                )
+            )
+        }
+
+        return metrics
     }
 
     private var pricePerUnit: Decimal {
         instrument?.currentPricePerUnit ?? .zero
     }
 
+    private var remainingUnits: Decimal {
+        holding.remainingUnits(sales: sales)
+    }
+
+    private var isClosed: Bool {
+        FundSaleSummary.isClosed(holding, sales: sales)
+    }
+
+    private var hasSales: Bool {
+        FundSaleSummary.hasSales(holding, sales: sales)
+    }
+
+    /// What the units still held cost, so it sits beside a market value about
+    /// the same units. The original outlay is not lost — it is the sum of this
+    /// and the cost of everything sold, which the proceeds column stands over.
+    private var costBasis: Decimal {
+        holding.remainingCostBasis(sales: sales)
+    }
+
     private var marketValue: Decimal {
-        holding.marketValue(pricePerUnit: pricePerUnit)
+        holding.marketValue(pricePerUnit: pricePerUnit, sales: sales)
     }
 
     private var unrealizedProfitLoss: Decimal {
-        holding.unrealizedProfitLoss(pricePerUnit: pricePerUnit)
+        holding.unrealizedProfitLoss(pricePerUnit: pricePerUnit, sales: sales)
+    }
+
+    private var realizedProfitLoss: Decimal {
+        holding.realizedProfitLoss(sales: sales)
+    }
+
+    private var soldTitle: String {
+        instrument?.kind == .gold ? "SOLD WEIGHT" : "SOLD UNITS"
+    }
+
+    private var soldValue: String {
+        let sold = FundSaleSummary.unitsSold(for: holding, sales: sales)
+        return instrument?.kind == .gold
+            ? GoldWeight.label(luong: sold) : UnitQuantity.format(sold)
     }
 
     private var priceTitle: String {
@@ -122,23 +271,35 @@ struct FundHoldingCard: View {
         instrument?.kind == .gold ? "WEIGHT" : "UNITS"
     }
 
+    /// What is still held, not what was bought. The bought figure is still
+    /// reachable — it is this plus the sold column beside it — and showing it
+    /// here would put a number on the card that no longer describes anything.
     private var quantityValue: String {
         instrument?.kind == .gold
-            ? GoldWeight.label(luong: holding.units) : UnitQuantity.format(holding.units)
+            ? GoldWeight.label(luong: remainingUnits) : UnitQuantity.format(remainingUnits)
     }
 
+    /// Built as a plain `String`, so every word in it has to be resolved here.
+    ///
+    /// `kind.displayName` is a `LocalizedStringKey`, and interpolating one of
+    /// those into a string does not look it up — it prints the key's debug
+    /// description, brackets and all. The kind therefore goes through
+    /// `displayName(in:)`, and the two words around it through `AppText`.
     private var subtitle: String {
         let bought = TransactionPeriod.day(holding.boughtOn, in: locale)
 
         guard let instrument else {
-            return "Unknown instrument · \(bought)"
+            return "\(AppText.string("Unknown instrument", in: locale)) · \(bought)"
         }
+
+        let kind = instrument.kind.displayName(in: locale)
 
         if let sourceAccountName {
-            return "\(instrument.kind.displayName) · \(bought) · from \(sourceAccountName)"
+            let from = AppText.string("from", in: locale)
+            return "\(kind) · \(bought) · \(from) \(sourceAccountName)"
         }
 
-        return "\(instrument.kind.displayName) · \(bought)"
+        return "\(kind) · \(bought)"
     }
 }
 
@@ -171,8 +332,11 @@ struct FundHoldingCard: View {
                         averageCostPerUnit: 24_500
                     ),
                     instrument: vesaf,
+                    sales: [],
                     sourceAccountName: "Techcombank",
-                    asOf: vesaf.priceAsOf
+                    asOf: vesaf.priceAsOf,
+                    onEdit: {},
+                    onSell: {}
                 )
 
                 FundHoldingCard(
@@ -182,6 +346,7 @@ struct FundHoldingCard: View {
                         averageCostPerUnit: 32_100
                     ),
                     instrument: diamond,
+                    sales: [],
                     sourceAccountName: nil,
                     asOf: Date(timeIntervalSince1970: 1_700_000_000 + 86_400 * 20)
                 )

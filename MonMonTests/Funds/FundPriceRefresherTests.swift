@@ -126,6 +126,7 @@ struct FundPriceRefresherTests {
         await refresher.refresh(
             instruments: instruments,
             holdings: holdings,
+            sales: [],
             in: context,
             asOf: asOf
         )
@@ -148,6 +149,7 @@ struct FundPriceRefresherTests {
         await refresher.refresh(
             instruments: instruments,
             holdings: holdings,
+            sales: [],
             in: context,
             asOf: asOf
         )
@@ -196,7 +198,8 @@ struct FundPriceRefresherTests {
         let (refresher, calls) = refresher(price: 31_581)
         let (instruments, holdings) = try fetch(context)
         await refresher.refresh(
-            instruments: instruments, holdings: holdings, in: context, asOf: asOf)
+            instruments: instruments, holdings: holdings, sales: [], in: context,
+            asOf: asOf)
 
         #expect(calls.count == 1)
         #expect(instrument.currentPricePerUnit == 31_581)
@@ -244,17 +247,23 @@ struct FundPriceRefresherTests {
             transactions: [],
             transfers: [],
             debts: [],
-            payments: []
+            payments: [],
+            sales: []
         )
-        #expect(FundSummary.totalMarketValue(of: holdingsBefore, instruments: before) == 2_500_000)
+        #expect(
+            FundSummary.totalMarketValue(of: holdingsBefore, instruments: before, sales: [])
+                == 2_500_000)
 
         let (refresher, _) = refresher(price: 40_000)
         await refresher.refresh(
-            instruments: before, holdings: holdingsBefore, in: context, asOf: asOf)
+            instruments: before, holdings: holdingsBefore, sales: [], in: context,
+            asOf: asOf)
 
         let (after, holdingsAfter) = try fetch(context)
 
-        #expect(FundSummary.totalMarketValue(of: holdingsAfter, instruments: after) == 4_000_000)
+        #expect(
+            FundSummary.totalMarketValue(of: holdingsAfter, instruments: after, sales: [])
+                == 4_000_000)
         #expect(FundSummary.totalCostBasis(of: holdingsAfter) == 2_000_000)
         #expect(
             CashBalanceSummary.available(
@@ -264,7 +273,8 @@ struct FundPriceRefresherTests {
                 transactions: [],
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             ) == availableBefore
         )
     }
@@ -281,7 +291,8 @@ struct FundPriceRefresherTests {
         let (refresher, _) = refresher(error: .transport)
         let (instruments, holdings) = try fetch(context)
         await refresher.refresh(
-            instruments: instruments, holdings: holdings, in: context, asOf: asOf)
+            instruments: instruments, holdings: holdings, sales: [], in: context,
+            asOf: asOf)
 
         #expect(instrument.currentPricePerUnit == 25_000)
         #expect(instrument.askPricePerUnit == 26_000)
@@ -327,7 +338,8 @@ struct FundPriceRefresherTests {
             router: FundQuoteRouter(fmarket: provider, vndirect: provider))
         let (instruments, holdings) = try fetch(context)
         await refresher.refresh(
-            instruments: instruments, holdings: holdings, in: context, asOf: asOf)
+            instruments: instruments, holdings: holdings, sales: [], in: context,
+            asOf: asOf)
 
         #expect(calls.count == 2)
         #expect(good.currentPricePerUnit == 31_581)
@@ -357,7 +369,8 @@ struct FundPriceRefresherTests {
         #expect(holdings.count == 10)
 
         await refresher.refresh(
-            instruments: instruments, holdings: holdings, in: context, asOf: asOf)
+            instruments: instruments, holdings: holdings, sales: [], in: context,
+            asOf: asOf)
 
         #expect(calls.count == 1)
     }
@@ -372,7 +385,8 @@ struct FundPriceRefresherTests {
         let (refresher, calls) = refresher()
         let (instruments, holdings) = try fetch(context)
         await refresher.refresh(
-            instruments: instruments, holdings: holdings, in: context, asOf: asOf)
+            instruments: instruments, holdings: holdings, sales: [], in: context,
+            asOf: asOf)
 
         #expect(calls.count == 0)
         #expect(refresher.outcomes[instrument.id] == .unchanged(.notHeld))
@@ -388,7 +402,8 @@ struct FundPriceRefresherTests {
         let (refresher, calls) = refresher()
         let (instruments, holdings) = try fetch(context)
         await refresher.refresh(
-            instruments: instruments, holdings: holdings, in: context, asOf: asOf)
+            instruments: instruments, holdings: holdings, sales: [], in: context,
+            asOf: asOf)
 
         #expect(calls.count == 0)
         #expect(refresher.outcomes[instrument.id] == .unchanged(.automaticQuotesOff))
@@ -405,7 +420,8 @@ struct FundPriceRefresherTests {
         let (refresher, calls) = refresher()
         let (instruments, holdings) = try fetch(context)
         await refresher.refresh(
-            instruments: instruments, holdings: holdings, in: context, asOf: asOf)
+            instruments: instruments, holdings: holdings, sales: [], in: context,
+            asOf: asOf)
 
         #expect(calls.count == 0)
         #expect(refresher.outcomes[instrument.id] == .unchanged(.alreadyCurrent))
@@ -425,12 +441,14 @@ struct FundPriceRefresherTests {
         let (instruments, holdings) = try fetch(context)
 
         await refresher.refresh(
-            instruments: instruments, holdings: holdings, in: context, asOf: asOf)
+            instruments: instruments, holdings: holdings, sales: [], in: context,
+            asOf: asOf)
         #expect(calls.count == 1)
 
         await refresher.refresh(
             instruments: instruments,
             holdings: holdings,
+            sales: [],
             in: context,
             asOf: asOf.addingTimeInterval(60)
         )
@@ -450,10 +468,12 @@ struct FundPriceRefresherTests {
         let (instruments, holdings) = try fetch(context)
 
         await refresher.refresh(
-            instruments: instruments, holdings: holdings, in: context, asOf: asOf)
+            instruments: instruments, holdings: holdings, sales: [], in: context,
+            asOf: asOf)
         await refresher.refresh(
             instruments: instruments,
             holdings: holdings,
+            sales: [],
             in: context,
             asOf: asOf.addingTimeInterval(FundPriceRefresher.requestFloor + 1)
         )
@@ -467,16 +487,19 @@ struct FundPriceRefresherTests {
         let context = container.mainContext
         let (refresher, _) = refresher()
 
-        #expect(!refresher.hasAnythingToRefresh(instruments: [], holdings: []))
+        #expect(!refresher.hasAnythingToRefresh(instruments: [], holdings: [], sales: []))
 
         _ = seed(context, priceAsOf: day(-10), held: false)
         try context.save()
         var (instruments, holdings) = try fetch(context)
-        #expect(!refresher.hasAnythingToRefresh(instruments: instruments, holdings: holdings))
+        #expect(
+            !refresher.hasAnythingToRefresh(instruments: instruments, holdings: holdings, sales: [])
+        )
 
         _ = seed(context, priceAsOf: day(-10), symbol: "FUEVFVND")
         try context.save()
         (instruments, holdings) = try fetch(context)
-        #expect(refresher.hasAnythingToRefresh(instruments: instruments, holdings: holdings))
+        #expect(
+            refresher.hasAnythingToRefresh(instruments: instruments, holdings: holdings, sales: []))
     }
 }

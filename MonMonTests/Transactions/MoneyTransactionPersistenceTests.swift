@@ -97,7 +97,8 @@ struct MoneyTransactionPersistenceTests {
                 transactions: transactions,
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             ) == 14_800_000
         )
     }
@@ -136,7 +137,8 @@ struct MoneyTransactionPersistenceTests {
                 transactions: transactions,
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             ) == 9_650_000
         )
     }
@@ -173,7 +175,8 @@ struct MoneyTransactionPersistenceTests {
                 transactions: transactions,
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             ) == 10_000_000
         )
     }
