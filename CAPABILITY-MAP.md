@@ -12,6 +12,10 @@ MonMon is a private, Apple-platform personal asset manager. Each module below is
 8. `icloud-sync`
 9. `recurring-transactions`
 10. `mcp-readonly`
+11. `bank-statement-parser`
+12. `statement-share-intake`
+13. `import-reconciliation`
+14. `transaction-import-inbox`
 
 ## Initiative-wide boundaries
 
@@ -19,6 +23,11 @@ MonMon is a private, Apple-platform personal asset manager. Each module below is
 - The MCP server exposes read operations only and cannot mutate records or execute trades.
 - Real-estate assets and prescriptive AI-advisor behavior are outside the initial scope.
 - Market-data providers remain replaceable behind a typed interface.
+- Bank statements are parsed on-device. Raw statement files are never uploaded,
+  added to CloudKit, or committed to the repository.
+- TPBank text-based PDF is the first supported statement format. Additional
+  banks and CSV formats extend the parser contract instead of creating separate
+  import pipelines.
 - Development stops at each module checkpoint for hands-on user testing.
 - `savings-deposit` and `fund-etf-holdings` share one Investments tab. That tab
   is a screen, not a module.
