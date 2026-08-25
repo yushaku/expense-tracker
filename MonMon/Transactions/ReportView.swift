@@ -40,6 +40,7 @@ struct ReportView: View {
                     .ignoresSafeArea()
 
                 content
+                    .onMonthSwipe(perform: stepReportMonth)
             }
             .compactRootNavigationTitle("Report")
             .accessibilityIdentifier("report")
@@ -177,6 +178,20 @@ struct ReportView: View {
     /// screen when its date filter is set to a year or a custom range.
     private var reportMonth: Date {
         TransactionPeriod.startOfMonth(for: query.range.start)
+    }
+
+    private func stepReportMonth(_ steps: Int) {
+        guard
+            let moved = TransactionPeriod.calendar.date(
+                byAdding: .month,
+                value: steps,
+                to: reportMonth
+            )
+        else {
+            return
+        }
+
+        query.range = .month(containing: moved)
     }
 
     /// Keep the selected month on the rail even when a custom range lies beyond

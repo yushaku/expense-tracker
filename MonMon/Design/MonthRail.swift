@@ -15,6 +15,21 @@ enum MonthRailSwipe {
     }
 }
 
+extension View {
+    func onMonthSwipe(perform action: @escaping (Int) -> Void) -> some View {
+        simultaneousGesture(
+            DragGesture(minimumDistance: 12)
+                .onEnded { value in
+                    guard let offset = MonthRailSwipe.monthOffset(for: value.translation) else {
+                        return
+                    }
+
+                    action(offset)
+                }
+        )
+    }
+}
+
 /// The run of months across the top of a screen, with the one on show marked
 /// and scrolled to the middle and the current calendar month called out. It is
 /// the fastest way to move a month either way; the fuller pickers stay behind
@@ -62,30 +77,7 @@ struct MonthRail: View {
             }
         }
         .frame(height: railHeight)
-        .contentShape(Rectangle())
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 12)
-                .onEnded { value in
-                    selectMonth(after: value.translation)
-                }
-        )
         .accessibilityIdentifier("month-rail")
-    }
-
-    private func selectMonth(after translation: CGSize) {
-        guard
-            let offset = MonthRailSwipe.monthOffset(for: translation),
-            let selectedIndex = months.firstIndex(of: selection)
-        else {
-            return
-        }
-
-        let destinationIndex = selectedIndex + offset
-        guard months.indices.contains(destinationIndex) else {
-            return
-        }
-
-        onSelect(months[destinationIndex])
     }
 
     private func monthButton(_ month: Date) -> some View {
