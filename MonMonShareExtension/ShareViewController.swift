@@ -3,9 +3,6 @@ import UniformTypeIdentifiers
 
 @MainActor
 final class ShareViewController: UIViewController {
-    private nonisolated static let appGroupIdentifier =
-        "group.com.sonlv.monmon.local.yushaku"
-
     private let activityIndicator = UIActivityIndicatorView(style: .medium)
     private let messageLabel = UILabel()
     private let closeButton = UIButton(type: .system)
@@ -80,7 +77,8 @@ final class ShareViewController: UIViewController {
             let result = Result {
                 guard
                     let rootURL = FileManager.default.containerURL(
-                        forSecurityApplicationGroupIdentifier: Self.appGroupIdentifier
+                        forSecurityApplicationGroupIdentifier:
+                            StatementInboxConfiguration.appGroupIdentifier
                     )
                 else {
                     throw StatementIntakeError.appGroupUnavailable

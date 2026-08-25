@@ -9,20 +9,20 @@ both the containing app and existing Share Extension.
 
 **Acceptance criteria:**
 
-- [ ] Live composition resolves `group.com.sonlv.monmon.local.yushaku` through
+- [x] Live composition resolves `group.com.sonlv.monmon.local.yushaku` through
       `FileManager.containerURL` and reports `.appGroupUnavailable` safely.
-- [ ] Pending statements preserve `StatementIntakeStore` ordering and metadata.
-- [ ] Preview passes only store-validated bytes to `BankStatementParsing` and
+- [x] Pending statements preserve `StatementIntakeStore` ordering and metadata.
+- [x] Preview passes only store-validated bytes to `BankStatementParsing` and
       returns the selected manifest with the unchanged parsed result.
-- [ ] Removing one item is idempotent and does not affect siblings.
-- [ ] The Share Extension uses the shared identifier and otherwise keeps its
+- [x] Removing one item is idempotent and does not affect siblings.
+- [x] The Share Extension uses the shared identifier and otherwise keeps its
       already-verified staging behavior.
 
 **Verification:**
 
-- [ ] New `StatementImportInboxServiceTests` fail before implementation.
-- [ ] Focused service, parser, and intake-store tests pass afterward.
-- [ ] Containing app and Share Extension targets compile.
+- [x] New `StatementImportInboxServiceTests` fail before implementation.
+- [x] Focused service, parser, and intake-store tests pass afterward.
+- [x] Containing app and Share Extension targets compile.
 
 **Dependencies:** Approved spec
 
@@ -38,9 +38,9 @@ both the containing app and existing Share Extension.
 
 ## Checkpoint: Service
 
-- [ ] Listing, preview, removal, and failure contracts pass focused tests.
-- [ ] Service code imports no SwiftUI or SwiftData.
-- [ ] No production/test diagnostic includes PDF text, path, hash, or reference.
+- [x] Listing, preview, removal, and failure contracts pass focused tests.
+- [x] Service code imports no SwiftUI or SwiftData.
+- [x] No production/test diagnostic includes PDF text, path, hash, or reference.
 
 ## Task 2: Add observable inbox state with stale-result protection
 

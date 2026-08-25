@@ -1,6 +1,10 @@
 import CryptoKit
 import Foundation
 
+enum StatementInboxConfiguration {
+    static let appGroupIdentifier = "group.com.sonlv.monmon.local.yushaku"
+}
+
 struct StagedBankStatement: Codable, Sendable, Equatable, Identifiable {
     let id: String
     let originalFilename: String

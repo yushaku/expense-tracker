@@ -59,15 +59,15 @@ silently bypass that module.
 
 ### Phase 1: Inbox domain boundary
 
-- [ ] Task 1: Add shared App Group configuration and the inbox service with
+- [x] Task 1: Add shared App Group configuration and the inbox service with
       failing-first contract tests
 
 ### Checkpoint: Service
 
-- [ ] Pending items list in intake-store order.
-- [ ] Preview revalidates bytes and returns the parser result for the selected id.
-- [ ] Removal affects only the selected item.
-- [ ] App Group and parser failures remain typed and content-free.
+- [x] Pending items list in intake-store order.
+- [x] Preview revalidates bytes and returns the parser result for the selected id.
+- [x] Removal affects only the selected item.
+- [x] App Group and parser failures remain typed and content-free.
 
 ### Phase 2: Observable inbox state
 
