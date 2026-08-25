@@ -9,6 +9,7 @@ struct StatementImportCommitRequest: Sendable {
 
 struct StatementImportCommitReport: Equatable, Sendable {
     var createdTransactionCount = 0
+    var createdTransferCount = 0
     var linkedCount = 0
     var alreadyImportedCount = 0
     var skippedCount = 0
@@ -23,9 +24,14 @@ enum StatementImportCommitError: Error, Equatable, Sendable {
 @MainActor
 struct StatementImportCommitService {
     private let container: ModelContainer
+    private let save: @MainActor (ModelContext) throws -> Void
 
-    init(container: ModelContainer) {
+    init(
+        container: ModelContainer,
+        save: @MainActor @escaping (ModelContext) throws -> Void = { try $0.save() }
+    ) {
         self.container = container
+        self.save = save
     }
 
     func commit(_ request: StatementImportCommitRequest) throws -> StatementImportCommitReport {
@@ -111,10 +117,14 @@ struct StatementImportCommitService {
         )
 
         let transactionByID = Dictionary(uniqueKeysWithValues: transactions.map { ($0.id, $0) })
+        let transferByID = Dictionary(uniqueKeysWithValues: transfers.map { ($0.id, $0) })
         let categoryByID = Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0) })
         var newTransactions: [MoneyTransaction] = []
+        var newTransfers: [AccountTransfer] = []
         var linkedTransactions: [(MoneyTransaction, ImportSourceID)] = []
-        var linkedTargetIDs: Set<UUID> = []
+        var linkedTransfers: [(AccountTransfer, TransactionKind, ImportSourceID)] = []
+        var linkedTransactionIDs: Set<UUID> = []
+        var linkedTransferIDs: Set<UUID> = []
         var report = StatementImportCommitReport()
         let createdAt = Date()
 
@@ -154,7 +164,7 @@ struct StatementImportCommitService {
             case let .linkTransaction(transactionID):
                 guard case let .possibleMatches(transactionIDs, _) = currentRow.disposition,
                     transactionIDs.contains(transactionID),
-                    linkedTargetIDs.insert(transactionID).inserted,
+                    linkedTransactionIDs.insert(transactionID).inserted,
                     let transaction = transactionByID[transactionID],
                     transaction.sourceImportID == nil
                 else {
@@ -163,13 +173,75 @@ struct StatementImportCommitService {
                 linkedTransactions.append((transaction, sourceID))
                 report.linkedCount += 1
 
+            case let .newTransfer(otherAccountID, note):
+                guard otherAccountID != request.statementAccountID,
+                    accounts.contains(where: {
+                        $0.id == otherAccountID && $0.currencyCode == VNDCurrency.code
+                    })
+                else {
+                    throw StatementImportCommitError.invalidRequest
+                }
+                let endpoints: (source: UUID, destination: UUID)
+                switch requestedRow.candidate.kind {
+                case .expense:
+                    endpoints = (request.statementAccountID, otherAccountID)
+                case .income:
+                    endpoints = (otherAccountID, request.statementAccountID)
+                }
+                let draft = TransferDraft(
+                    amountText: VNDCurrency.formatPlain(requestedRow.candidate.amount),
+                    occurredAt: requestedRow.candidate.occurredAt,
+                    note: note,
+                    sourceAccountID: endpoints.source,
+                    destinationAccountID: endpoints.destination
+                )
+                let transfer: AccountTransfer
+                do {
+                    transfer = try draft.makeTransfer(
+                        id: UUID(),
+                        createdAt: createdAt,
+                        availableSourceBalance: nil
+                    )
+                } catch {
+                    throw StatementImportCommitError.invalidRequest
+                }
+                switch requestedRow.candidate.kind {
+                case .expense:
+                    transfer.sourceAccountImportID = sourceID.rawValue
+                case .income:
+                    transfer.destinationAccountImportID = sourceID.rawValue
+                }
+                newTransfers.append(transfer)
+                report.createdTransferCount += 1
+
+            case let .linkTransfer(transferID):
+                guard case let .possibleMatches(_, transferIDs) = currentRow.disposition,
+                    transferIDs.contains(transferID),
+                    linkedTransferIDs.insert(transferID).inserted,
+                    let transfer = transferByID[transferID]
+                else {
+                    throw StatementImportCommitError.staleReview
+                }
+                switch requestedRow.candidate.kind {
+                case .expense:
+                    guard transfer.sourceAccountImportID == nil else {
+                        throw StatementImportCommitError.staleReview
+                    }
+                case .income:
+                    guard transfer.destinationAccountImportID == nil else {
+                        throw StatementImportCommitError.staleReview
+                    }
+                }
+                linkedTransfers.append((transfer, requestedRow.candidate.kind, sourceID))
+                report.linkedCount += 1
+
             case .skip:
                 report.skippedCount += 1
 
             case .alreadyImported:
                 throw StatementImportCommitError.staleReview
 
-            case .newTransfer, .linkTransfer, .unresolved:
+            case .unresolved:
                 throw StatementImportCommitError.invalidRequest
             }
         }
@@ -177,11 +249,24 @@ struct StatementImportCommitService {
         for transaction in newTransactions {
             context.insert(transaction)
         }
+        for transfer in newTransfers {
+            context.insert(transfer)
+        }
         for (transaction, sourceID) in linkedTransactions {
             transaction.sourceImportID = sourceID.rawValue
         }
-        if !newTransactions.isEmpty || !linkedTransactions.isEmpty {
-            try context.save()
+        for (transfer, kind, sourceID) in linkedTransfers {
+            switch kind {
+            case .expense:
+                transfer.sourceAccountImportID = sourceID.rawValue
+            case .income:
+                transfer.destinationAccountImportID = sourceID.rawValue
+            }
+        }
+        if !newTransactions.isEmpty || !newTransfers.isEmpty || !linkedTransactions.isEmpty
+            || !linkedTransfers.isEmpty
+        {
+            try save(context)
         }
 
         return report

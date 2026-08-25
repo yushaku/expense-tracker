@@ -252,6 +252,154 @@ struct StatementImportCommitServiceTests {
         #expect(try fetchTransactions(from: fixture.container).count == 1)
     }
 
+    @Test("Transfer resolutions create direction-correct neutral records")
+    func createsDirectionCorrectTransfers() throws {
+        let fixture = try makeFixture()
+        let outgoing = candidate(id: importA, kind: .expense, amount: 9_000_000)
+        let incoming = candidate(id: importB, kind: .income, amount: 2_000_000)
+        let request = request(
+            candidates: [outgoing, incoming],
+            rows: [
+                row(
+                    outgoing,
+                    resolution: .newTransfer(
+                        otherAccountID: fixture.otherAccountID,
+                        note: "  Historical outgoing  "
+                    )
+                ),
+                row(
+                    incoming,
+                    resolution: .newTransfer(
+                        otherAccountID: fixture.otherAccountID,
+                        note: "Historical incoming"
+                    )
+                ),
+            ],
+            accountID: fixture.accountID
+        )
+
+        let report = try fixture.service.commit(request)
+        let transfers = try fetchTransfers(from: fixture.container)
+        let transactions = try fetchTransactions(from: fixture.container)
+        let accounts = try ModelContext(fixture.container).fetch(FetchDescriptor<CashAccount>())
+
+        #expect(report.createdTransferCount == 2)
+        #expect(transfers.count == 2)
+        #expect(transactions.isEmpty)
+        #expect(
+            transfers.contains {
+                $0.sourceAccountID == fixture.accountID
+                    && $0.destinationAccountID == fixture.otherAccountID
+                    && $0.sourceAccountImportID == importA
+                    && $0.destinationAccountImportID == nil
+                    && $0.note == "Historical outgoing"
+            }
+        )
+        #expect(
+            transfers.contains {
+                $0.sourceAccountID == fixture.otherAccountID
+                    && $0.destinationAccountID == fixture.accountID
+                    && $0.sourceAccountImportID == nil
+                    && $0.destinationAccountImportID == importB
+            }
+        )
+        #expect(TransactionSummary.totalExpense(of: transactions) == 0)
+        #expect(TransactionSummary.totalIncome(of: transactions) == 0)
+        #expect(
+            accounts.reduce(Decimal.zero) {
+                $0 + TransferSummary.netFlow(for: $1, transfers: transfers)
+            } == 0
+        )
+    }
+
+    @Test("Transfer links fill only the eligible statement side")
+    func linksDirectionCorrectTransferSides() throws {
+        let fixture = try makeFixture()
+        let outgoingID = UUID()
+        let incomingID = UUID()
+        try insert(
+            transfer(
+                id: outgoingID,
+                sourceAccountID: fixture.accountID,
+                destinationAccountID: fixture.otherAccountID,
+                destinationAccountImportID: String(repeating: "c", count: 64)
+            ),
+            into: fixture.container
+        )
+        try insert(
+            transfer(
+                id: incomingID,
+                sourceAccountID: fixture.otherAccountID,
+                destinationAccountID: fixture.accountID,
+                sourceAccountImportID: String(repeating: "d", count: 64)
+            ),
+            into: fixture.container
+        )
+        let outgoing = candidate(id: importA, kind: .expense)
+        let incoming = candidate(id: importB, kind: .income)
+        let request = request(
+            candidates: [outgoing, incoming],
+            rows: [
+                row(outgoing, resolution: .linkTransfer(transferID: outgoingID)),
+                row(incoming, resolution: .linkTransfer(transferID: incomingID)),
+            ],
+            accountID: fixture.accountID
+        )
+
+        let report = try fixture.service.commit(request)
+        let transfers = try fetchTransfers(from: fixture.container)
+
+        #expect(report.linkedCount == 2)
+        #expect(try fetchTransactions(from: fixture.container).isEmpty)
+        #expect(
+            transfers.first { $0.id == outgoingID }?.sourceAccountImportID == importA
+        )
+        #expect(
+            transfers.first { $0.id == outgoingID }?.destinationAccountImportID
+                == String(repeating: "c", count: 64)
+        )
+        #expect(
+            transfers.first { $0.id == incomingID }?.destinationAccountImportID == importB
+        )
+        #expect(
+            transfers.first { $0.id == incomingID }?.sourceAccountImportID
+                == String(repeating: "d", count: 64)
+        )
+    }
+
+    @Test("Invalid transfer endpoints roll back every row")
+    func invalidTransferEndpointsWriteNothing() throws {
+        let fixture = try makeFixture()
+        let ordinary = candidate(id: importA)
+        let invalidTransfer = candidate(id: importB, kind: .income)
+        let request = request(
+            candidates: [ordinary, invalidTransfer],
+            rows: [
+                row(
+                    ordinary,
+                    resolution: .transaction(
+                        categoryID: fixture.expenseCategoryID,
+                        note: "Must roll back"
+                    )
+                ),
+                row(
+                    invalidTransfer,
+                    resolution: .newTransfer(
+                        otherAccountID: fixture.accountID,
+                        note: "Same endpoint"
+                    )
+                ),
+            ],
+            accountID: fixture.accountID
+        )
+
+        #expect(throws: StatementImportCommitError.invalidRequest) {
+            try fixture.service.commit(request)
+        }
+        #expect(try fetchTransactions(from: fixture.container).isEmpty)
+        #expect(try fetchTransfers(from: fixture.container).isEmpty)
+    }
+
     private func makeFixture() throws -> Fixture {
         let container = try ModelContainer(
             for: Schema(MonMonSchema.models),
@@ -271,6 +419,17 @@ struct StatementImportCommitServiceTests {
                 createdAt: occurredAt
             )
         )
+        let otherAccountID = UUID()
+        context.insert(
+            CashAccount(
+                id: otherAccountID,
+                name: "Synthetic wallet",
+                kind: .cash,
+                openingBalance: 0,
+                currencyCode: VNDCurrency.code,
+                createdAt: occurredAt
+            )
+        )
         context.insert(category(id: expenseCategoryID, kind: .expense))
         context.insert(category(id: incomeCategoryID, kind: .income))
         try context.save()
@@ -278,6 +437,7 @@ struct StatementImportCommitServiceTests {
             container: container,
             service: StatementImportCommitService(container: container),
             accountID: accountID,
+            otherAccountID: otherAccountID,
             expenseCategoryID: expenseCategoryID,
             incomeCategoryID: incomeCategoryID
         )
@@ -378,14 +538,46 @@ struct StatementImportCommitServiceTests {
         try context.save()
     }
 
+    private func transfer(
+        id: UUID,
+        sourceAccountID: UUID,
+        destinationAccountID: UUID,
+        sourceAccountImportID: String? = nil,
+        destinationAccountImportID: String? = nil
+    ) -> AccountTransfer {
+        AccountTransfer(
+            id: id,
+            amount: 125_000,
+            occurredAt: occurredAt,
+            note: "Synthetic existing transfer",
+            sourceAccountID: sourceAccountID,
+            destinationAccountID: destinationAccountID,
+            currencyCode: VNDCurrency.code,
+            createdAt: occurredAt,
+            sourceAccountImportID: sourceAccountImportID,
+            destinationAccountImportID: destinationAccountImportID
+        )
+    }
+
+    private func insert(_ transfer: AccountTransfer, into container: ModelContainer) throws {
+        let context = ModelContext(container)
+        context.insert(transfer)
+        try context.save()
+    }
+
     private func fetchTransactions(from container: ModelContainer) throws -> [MoneyTransaction] {
         try ModelContext(container).fetch(FetchDescriptor<MoneyTransaction>())
+    }
+
+    private func fetchTransfers(from container: ModelContainer) throws -> [AccountTransfer] {
+        try ModelContext(container).fetch(FetchDescriptor<AccountTransfer>())
     }
 
     private struct Fixture {
         let container: ModelContainer
         let service: StatementImportCommitService
         let accountID: UUID
+        let otherAccountID: UUID
         let expenseCategoryID: UUID
         let incomeCategoryID: UUID
     }

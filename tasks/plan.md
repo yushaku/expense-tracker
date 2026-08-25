@@ -98,15 +98,15 @@ Full gates + physical acceptance on Yushaku
 ### Phase 3: Atomic financial commit
 
 - [x] Task 5: Commit and link ordinary transactions idempotently
-- [ ] Task 6: Commit/link transfers and recover staged cleanup failures
+- [x] Task 6: Commit/link transfers and recover staged cleanup failures
 
 ### Checkpoint: Persistence
 
-- [ ] One invalid row prevents every financial/provenance write.
-- [ ] Repeating a request cannot create a second record for one fingerprint.
-- [ ] Historical transfers bypass today's balance restriction but retain all
+- [x] One invalid row prevents every financial/provenance write.
+- [x] Repeating a request cannot create a second record for one fingerprint.
+- [x] Historical transfers bypass today's balance restriction but retain all
       other `TransferDraft` validation.
-- [ ] PDF removal happens only after a successful save and is safely retryable.
+- [x] PDF removal happens only after a successful save and is safely retryable.
 
 ### Phase 4: Owner-facing review and commit
 

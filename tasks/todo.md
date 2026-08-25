@@ -182,19 +182,19 @@ financial save. Model saved-but-not-cleaned as an explicit retryable result.
 
 **Acceptance criteria:**
 
-- [ ] Expense/income candidates create the correct source/destination endpoints;
+- [x] Expense/income candidates create the correct source/destination endpoints;
       links fill only an eligible empty side and never create income/expense.
-- [ ] Historical transfers skip current-balance enforcement while retaining
+- [x] Historical transfers skip current-balance enforcement while retaining
       positive amount, existing distinct accounts, and currency validation.
-- [ ] Save failure leaves mapping/PDF untouched; cleanup failure preserves saved
+- [x] Save failure leaves mapping/PDF untouched; cleanup failure preserves saved
       records, reports cleanup-needed, and retries without another financial write.
 
 **Verification:**
 
-- [ ] Focused transfer, linking, all-exact, save-failure, and cleanup-retry tests
+- [x] Focused transfer, linking, all-exact, save-failure, and cleanup-retry tests
       fail first and pass afterward.
-- [ ] Balance and Spending-summary assertions prove transfers remain neutral.
-- [ ] Existing transfer, intake-store, and inbox-service suites remain green.
+- [x] Balance and Spending-summary assertions prove transfers remain neutral.
+- [x] Existing transfer, intake-store, and inbox-service suites remain green.
 
 **Dependencies:** Task 5
 
@@ -209,11 +209,11 @@ financial save. Model saved-but-not-cleaned as an explicit retryable result.
 
 ## Checkpoint: Persistence
 
-- [ ] Full import, transaction, transfer, persistence, and balance suites pass.
-- [ ] One save contains every financial/provenance mutation or none.
-- [ ] Repeated and interrupted requests are idempotent.
-- [ ] Staged bytes are removed only after saved provenance exists.
-- [ ] Commit Tasks 5 and 6 separately before UI/state integration.
+- [x] Full import, transaction, transfer, persistence, and balance suites pass.
+- [x] One save contains every financial/provenance mutation or none.
+- [x] Repeated and interrupted requests are idempotent.
+- [x] Staged bytes are removed only after saved provenance exists.
+- [x] Commit Tasks 5 and 6 separately before UI/state integration.
 
 ## Task 7: Add observable reconciliation and commit phases
 

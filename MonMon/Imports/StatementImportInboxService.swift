@@ -5,16 +5,25 @@ struct StatementImportPreview: Sendable, Equatable {
     let statement: ParsedBankStatement
 }
 
+enum StatementImportCompletion: Equatable, Sendable {
+    case completed(StatementImportCommitReport)
+    case cleanupNeeded(StatementImportCommitReport)
+}
+
 struct StatementImportInboxService: Sendable {
     private let store: StatementIntakeStore
     private let parser: any BankStatementParsing
+    private let removeStatement: @Sendable (StagedBankStatement) throws -> Void
 
     init(
         rootURL: URL,
-        parser: any BankStatementParsing = TPBankPDFStatementParser()
+        parser: any BankStatementParsing = TPBankPDFStatementParser(),
+        removeStatement: (@Sendable (StagedBankStatement) throws -> Void)? = nil
     ) {
-        store = StatementIntakeStore(rootURL: rootURL)
+        let store = StatementIntakeStore(rootURL: rootURL)
+        self.store = store
         self.parser = parser
+        self.removeStatement = removeStatement ?? { try store.remove($0) }
     }
 
     static func live(
@@ -48,6 +57,44 @@ struct StatementImportInboxService: Sendable {
     }
 
     func remove(_ staged: StagedBankStatement) throws {
-        try store.remove(staged)
+        try removeStatement(staged)
+    }
+
+    @MainActor
+    func completeImport(
+        _ request: StatementImportCommitRequest,
+        staged: StagedBankStatement,
+        commitService: StatementImportCommitService,
+        accountMapping: StatementAccountMapping
+    ) throws -> StatementImportCompletion {
+        let report = try commitService.commit(request)
+        accountMapping.remember(
+            accountID: request.statementAccountID,
+            bank: request.statement.bank,
+            accountLastFour: request.statement.accountLastFour,
+            accounts: [
+                StatementImportAccountSnapshot(
+                    id: request.statementAccountID,
+                    currencyCode: request.statement.currencyCode
+                )
+            ],
+            financialCommitSucceeded: true
+        )
+
+        do {
+            try remove(staged)
+            return .completed(report)
+        } catch {
+            return .cleanupNeeded(report)
+        }
+    }
+
+    func retryCleanup(_ staged: StagedBankStatement) -> Bool {
+        do {
+            try remove(staged)
+            return true
+        } catch {
+            return false
+        }
     }
 }
