@@ -20,7 +20,15 @@ struct TransactionQuery: Equatable {
     /// Whether anything beyond the period is narrowing the results, which is
     /// what the screen offers a "clear" button for.
     var isNarrowed: Bool {
-        !trimmedText.isEmpty || filter != .all || !categoryIDs.isEmpty || !accountIDs.isEmpty
+        hasSearchText || hasStructuredFilters
+    }
+
+    var hasSearchText: Bool {
+        !trimmedText.isEmpty
+    }
+
+    var hasStructuredFilters: Bool {
+        filter != .all || !categoryIDs.isEmpty || !accountIDs.isEmpty
     }
 
     var trimmedText: String {

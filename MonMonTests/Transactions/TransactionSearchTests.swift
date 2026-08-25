@@ -172,4 +172,34 @@ struct TransactionSearchTests {
         query.text = "coffee"
         #expect(query.isNarrowed)
     }
+
+    @Test("Search text reports its state separately from structured filters")
+    func searchStateIsSeparate() {
+        var query = januaryQuery
+        #expect(!query.hasSearchText)
+        #expect(!query.hasStructuredFilters)
+
+        query.text = "  coffee  "
+
+        #expect(query.hasSearchText)
+        #expect(!query.hasStructuredFilters)
+        #expect(query.isNarrowed)
+    }
+
+    @Test("Direction, category, and account filters report structured state")
+    func structuredFilterState() {
+        var byDirection = januaryQuery
+        byDirection.filter = .income
+
+        var byCategory = januaryQuery
+        byCategory.categoryIDs = [UUID()]
+
+        var byAccount = januaryQuery
+        byAccount.accountIDs = [UUID()]
+
+        #expect(byDirection.hasStructuredFilters)
+        #expect(byCategory.hasStructuredFilters)
+        #expect(byAccount.hasStructuredFilters)
+        #expect(!byDirection.hasSearchText)
+    }
 }

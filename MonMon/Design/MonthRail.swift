@@ -1,8 +1,9 @@
 import SwiftUI
 
 /// The run of months across the top of a screen, with the one on show marked
-/// and scrolled to the middle. It is the fastest way to move a month either
-/// way; the fuller pickers stay behind the filter button beside it.
+/// and scrolled to the middle and the current calendar month called out. It is
+/// the fastest way to move a month either way; the fuller pickers stay behind
+/// the filter button beside it.
 ///
 /// It owns no period of its own. The screen keeps the range, hands down the
 /// month it is showing, and is told which month was tapped.
@@ -50,16 +51,27 @@ struct MonthRail: View {
 
     private func monthButton(_ month: Date) -> some View {
         let isSelected = month == selection
+        let isCurrentMonth = TransactionPeriod.calendar.isDate(
+            month,
+            equalTo: .now,
+            toGranularity: .month
+        )
 
         return Button {
             onSelect(month)
         } label: {
             VStack(spacing: 5) {
                 Text(label(for: month))
-                    .font(.subheadline.weight(isSelected ? .bold : .medium))
+                    .font(
+                        .subheadline.weight(
+                            isSelected ? .bold : (isCurrentMonth ? .semibold : .medium)
+                        )
+                    )
                     .lineLimit(1)
                     .foregroundStyle(
-                        isSelected ? MonMonTheme.textPrimary : MonMonTheme.textMuted
+                        isCurrentMonth
+                            ? MonMonTheme.accent
+                            : (isSelected ? MonMonTheme.textPrimary : MonMonTheme.textMuted)
                     )
 
                 // The month on show keeps a bar under it, so it is marked by
@@ -71,12 +83,17 @@ struct MonthRail: View {
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
+            .background(
+                isCurrentMonth ? MonMonTheme.accent.opacity(0.14) : Color.clear,
+                in: Capsule()
+            )
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .id(month)
         .animation(.snappy(duration: 0.22), value: isSelected)
         .accessibilityLabel(TransactionPeriod.title(for: month, in: locale))
+        .accessibilityValue(isCurrentMonth ? Text("Current month") : Text(""))
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
         .accessibilityIdentifier("month-rail-\(identifier(month))")
     }
