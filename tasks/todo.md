@@ -151,17 +151,17 @@ eligibility, validates the complete request, and saves all changes once.
 
 **Acceptance criteria:**
 
-- [ ] Valid transaction resolutions create `MoneyTransaction` through existing
+- [x] Valid transaction resolutions create `MoneyTransaction` through existing
       draft validation with one validated `sourceImportID`.
-- [ ] Eligible links attach provenance without creating a record; exact and
+- [x] Eligible links attach provenance without creating a record; exact and
       skipped rows make no write.
-- [ ] Any stale/invalid/unresolved row rolls back the whole request, and a repeat
+- [x] Any stale/invalid/unresolved row rolls back the whole request, and a repeat
       request cannot create a second financial record.
 
 **Verification:**
 
-- [ ] New in-memory commit-service tests fail first and pass after implementation.
-- [ ] Failure tests prove zero partial transaction or provenance writes.
+- [x] New in-memory commit-service tests fail first and pass after implementation.
+- [x] Failure tests prove zero partial transaction or provenance writes.
 - [ ] Existing transaction persistence and summary suites remain green.
 
 **Dependencies:** Task 4

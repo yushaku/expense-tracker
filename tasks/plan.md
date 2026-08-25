@@ -97,7 +97,7 @@ Full gates + physical acceptance on Yushaku
 
 ### Phase 3: Atomic financial commit
 
-- [ ] Task 5: Commit and link ordinary transactions idempotently
+- [x] Task 5: Commit and link ordinary transactions idempotently
 - [ ] Task 6: Commit/link transfers and recover staged cleanup failures
 
 ### Checkpoint: Persistence
