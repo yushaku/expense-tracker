@@ -60,8 +60,10 @@
 		A00000000000000000000252 /* CategoryPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000163 /* CategoryPalette.swift */; };
 		A00000000000000000000253 /* TransactionPeriod.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000164 /* TransactionPeriod.swift */; };
 		A00000000000000000000254 /* TransactionSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000165 /* TransactionSummary.swift */; };
+		A00000000000000000009001 /* TransactionQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000009101 /* TransactionQuery.swift */; };
 		A00000000000000000000255 /* TransactionPeriodTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000166 /* TransactionPeriodTests.swift */; };
 		A00000000000000000000256 /* TransactionSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000167 /* TransactionSummaryTests.swift */; };
+		A00000000000000000009002 /* TransactionSearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000009102 /* TransactionSearchTests.swift */; };
 		A00000000000000000000257 /* CategoryDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000168 /* CategoryDraft.swift */; };
 		A00000000000000000000258 /* CategorySeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000169 /* CategorySeed.swift */; };
 		A00000000000000000000259 /* CategoryEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000170 /* CategoryEditorForm.swift */; };
@@ -349,8 +351,10 @@
 		A00000000000000000000163 /* CategoryPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryPalette.swift; sourceTree = "<group>"; };
 		A00000000000000000000164 /* TransactionPeriod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionPeriod.swift; sourceTree = "<group>"; };
 		A00000000000000000000165 /* TransactionSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionSummary.swift; sourceTree = "<group>"; };
+		A00000000000000000009101 /* TransactionQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionQuery.swift; sourceTree = "<group>"; };
 		A00000000000000000000166 /* TransactionPeriodTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionPeriodTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000167 /* TransactionSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionSummaryTests.swift; sourceTree = "<group>"; };
+		A00000000000000000009102 /* TransactionSearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionSearchTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000168 /* CategoryDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryDraft.swift; sourceTree = "<group>"; };
 		A00000000000000000000169 /* CategorySeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySeed.swift; sourceTree = "<group>"; };
 		A00000000000000000000170 /* CategoryEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryEditorForm.swift; sourceTree = "<group>"; };
@@ -835,6 +839,7 @@
 				A00000000000000000000164 /* TransactionPeriod.swift */,
 				A00000000000000000000610 /* TransactionRange.swift */,
 				A00000000000000000000165 /* TransactionSummary.swift */,
+				A00000000000000000009101 /* TransactionQuery.swift */,
 				A00000000000000000000168 /* CategoryDraft.swift */,
 				A00000000000000000000169 /* CategorySeed.swift */,
 				A00000000000000000000170 /* CategoryEditorForm.swift */,
@@ -863,6 +868,7 @@
 				A00000000000000000000166 /* TransactionPeriodTests.swift */,
 				A00000000000000000000611 /* TransactionRangeTests.swift */,
 				A00000000000000000000167 /* TransactionSummaryTests.swift */,
+				A00000000000000000009102 /* TransactionSearchTests.swift */,
 				C10000000000000000000004 /* TransactionCalendarTests.swift */,
 				A00000000000000000000174 /* CategoryDraftTests.swift */,
 				A00000000000000000000175 /* TransactionCategoryPersistenceTests.swift */,
@@ -1279,6 +1285,7 @@
 				A00000000000000000000258 /* CategorySeed.swift in Sources */,
 				A00000000000000000000257 /* CategoryDraft.swift in Sources */,
 				A00000000000000000000254 /* TransactionSummary.swift in Sources */,
+				A00000000000000000009001 /* TransactionQuery.swift in Sources */,
 				A00000000000000000000253 /* TransactionPeriod.swift in Sources */,
 				A00000000000000000000612 /* TransactionRange.swift in Sources */,
 				A00000000000000000000640 /* AccountTransfer.swift in Sources */,
@@ -1406,6 +1413,7 @@
 				A00000000000000000000264 /* TransactionCategoryPersistenceTests.swift in Sources */,
 				A00000000000000000000263 /* CategoryDraftTests.swift in Sources */,
 				A00000000000000000000256 /* TransactionSummaryTests.swift in Sources */,
+				A00000000000000000009002 /* TransactionSearchTests.swift in Sources */,
 				C10000000000000000000104 /* TransactionCalendarTests.swift in Sources */,
 				A00000000000000000000255 /* TransactionPeriodTests.swift in Sources */,
 				A00000000000000000000613 /* TransactionRangeTests.swift in Sources */,
