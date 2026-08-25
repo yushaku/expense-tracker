@@ -5,6 +5,33 @@ import Testing
 
 @Suite("Transaction report swipe actions")
 struct TransactionSwipeRevealTests {
+    @Test("A stationary touch resolves only as a tap")
+    func stationaryTouchResolvesAsTap() {
+        #expect(
+            TransactionRowGestureIntent.resolved(
+                after: CGSize(width: 2, height: 3)
+            ) == .tap
+        )
+    }
+
+    @Test("A horizontal drag resolves only as a swipe")
+    func horizontalDragResolvesAsSwipe() {
+        #expect(
+            TransactionRowGestureIntent.resolved(
+                after: CGSize(width: -70, height: 8)
+            ) == .swipe
+        )
+    }
+
+    @Test("A vertical drag resolves only as scrolling")
+    func verticalDragResolvesAsScrolling() {
+        #expect(
+            TransactionRowGestureIntent.resolved(
+                after: CGSize(width: 8, height: 70)
+            ) == .scroll
+        )
+    }
+
     @Test("Swiping right reveals delete")
     func swipingRightRevealsDelete() {
         #expect(

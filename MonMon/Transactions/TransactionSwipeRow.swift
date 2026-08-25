@@ -1,5 +1,27 @@
 import SwiftUI
 
+/// One touch resolves to exactly one intent. This keeps a horizontal swipe from
+/// falling through to the row's detail action when the finger lifts.
+enum TransactionRowGestureIntent: Equatable {
+    case tap
+    case swipe
+    case scroll
+
+    private static let tapTolerance: CGFloat = 8
+
+    static func resolved(after translation: CGSize) -> Self {
+        if max(abs(translation.width), abs(translation.height)) <= tapTolerance {
+            return .tap
+        }
+
+        if TransactionSwipeReveal.horizontalTranslation(in: translation) != nil {
+            return .swipe
+        }
+
+        return .scroll
+    }
+}
+
 /// Which action is resting behind a transaction after a horizontal drag.
 /// Positive movement follows the finger and exposes delete on the leading edge;
 /// negative movement exposes edit on the trailing edge.
@@ -53,6 +75,7 @@ enum TransactionSwipeReveal: Equatable {
 /// Swipe actions for a card inside a `ScrollView`, where SwiftUI's native
 /// `swipeActions` modifier does not provide list-row behaviour.
 struct TransactionSwipeRow<Content: View>: View {
+    let onTap: () -> Void
     let onEdit: () -> Void
     let onDelete: () -> Void
     let content: Content
@@ -61,10 +84,12 @@ struct TransactionSwipeRow<Content: View>: View {
     @GestureState private var dragTranslation = CGSize.zero
 
     init(
+        onTap: @escaping () -> Void,
         onEdit: @escaping () -> Void,
         onDelete: @escaping () -> Void,
         @ViewBuilder content: () -> Content
     ) {
+        self.onTap = onTap
         self.onEdit = onEdit
         self.onDelete = onDelete
         self.content = content()
@@ -76,9 +101,14 @@ struct TransactionSwipeRow<Content: View>: View {
 
             content
                 .offset(x: displayedOffset)
+                .contentShape(Rectangle())
+                .simultaneousGesture(rowGesture)
         }
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .simultaneousGesture(swipeGesture)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAction {
+            handleTap()
+        }
         .accessibilityAction(named: Text("Edit")) {
             perform(onEdit)
         }
@@ -146,8 +176,8 @@ struct TransactionSwipeRow<Content: View>: View {
         )
     }
 
-    private var swipeGesture: some Gesture {
-        DragGesture(minimumDistance: 12)
+    private var rowGesture: some Gesture {
+        DragGesture(minimumDistance: 0)
             .updating($dragTranslation) { value, state, _ in
                 guard
                     let horizontalTranslation = TransactionSwipeReveal.horizontalTranslation(
@@ -160,13 +190,35 @@ struct TransactionSwipeRow<Content: View>: View {
                 state = CGSize(width: horizontalTranslation, height: value.translation.height)
             }
             .onEnded { value in
-                withAnimation(.snappy(duration: 0.25)) {
-                    reveal = TransactionSwipeReveal.resolved(
-                        after: value.translation,
-                        from: reveal
-                    )
-                }
+                finishGesture(value.translation)
             }
+    }
+
+    private func finishGesture(_ translation: CGSize) {
+        switch TransactionRowGestureIntent.resolved(after: translation) {
+        case .tap:
+            handleTap()
+        case .swipe:
+            withAnimation(.snappy(duration: 0.25)) {
+                reveal = TransactionSwipeReveal.resolved(
+                    after: translation,
+                    from: reveal
+                )
+            }
+        case .scroll:
+            break
+        }
+    }
+
+    private func handleTap() {
+        guard reveal == .none else {
+            withAnimation(.snappy(duration: 0.2)) {
+                reveal = .none
+            }
+            return
+        }
+
+        onTap()
     }
 
     private func perform(_ action: () -> Void) {

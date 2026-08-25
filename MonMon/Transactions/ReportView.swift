@@ -439,6 +439,9 @@ struct ReportView: View {
 
                     ForEach(group.transactions) { transaction in
                         TransactionSwipeRow(
+                            onTap: {
+                                selectedTransaction = transaction
+                            },
                             onEdit: {
                                 editorMode = .edit(transaction)
                             },
@@ -446,24 +449,19 @@ struct ReportView: View {
                                 transactionPendingDeletion = transaction
                             }
                         ) {
-                            Button {
-                                selectedTransaction = transaction
-                            } label: {
-                                TransactionCard(
-                                    transaction: transaction,
-                                    category: category(for: transaction),
-                                    account: account(for: transaction),
-                                    showsDate: false
-                                )
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityIdentifier(
-                                "report-transaction-\(transaction.id.uuidString)"
-                            )
-                            .accessibilityHint(
-                                "Opens transaction details. Swipe left to edit or right to delete."
+                            TransactionCard(
+                                transaction: transaction,
+                                category: category(for: transaction),
+                                account: account(for: transaction),
+                                showsDate: false
                             )
                         }
+                        .accessibilityIdentifier(
+                            "report-transaction-\(transaction.id.uuidString)"
+                        )
+                        .accessibilityHint(
+                            "Opens transaction details. Swipe left to edit or right to delete."
+                        )
                     }
                 }
             }
