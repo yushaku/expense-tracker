@@ -68,6 +68,7 @@ struct TransactionListView: View {
                     .padding(.bottom, FloatingAddButton.contentInset)
                     .frame(maxWidth: .infinity)
                 }
+                .onMonthSwipe(perform: stepCalendarMonth)
             }
             .overlay(alignment: .bottomTrailing) {
                 if !accounts.isEmpty {
