@@ -3,13 +3,6 @@ import UniformTypeIdentifiers
 
 @MainActor
 final class ShareViewController: UIViewController {
-    /// The app group this build stages into, set per configuration in the
-    /// xcconfigs. Dev and prod carry different groups, so a statement shared
-    /// into one build never appears in the other.
-    private nonisolated static var appGroupIdentifier: String? {
-        Bundle.main.object(forInfoDictionaryKey: "MonMonAppGroupIdentifier") as? String
-    }
-
     private let activityIndicator = UIActivityIndicatorView(style: .medium)
     private let messageLabel = UILabel()
     private let closeButton = UIButton(type: .system)
@@ -83,7 +76,7 @@ final class ShareViewController: UIViewController {
 
             let result = Result {
                 guard
-                    let groupIdentifier = Self.appGroupIdentifier,
+                    let groupIdentifier = StatementInboxConfiguration.appGroupIdentifier,
                     let rootURL = FileManager.default.containerURL(
                         forSecurityApplicationGroupIdentifier: groupIdentifier
                     )
