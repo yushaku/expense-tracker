@@ -131,6 +131,42 @@ struct SavingsWithdrawalSummaryTests {
         #expect(deposit.projectedInterest(withdrawals: [withdrawal]) == expected)
     }
 
+    @Test("A settled card keeps only the realized interest summary")
+    func settledCardUsesRealizedInterestSummary() {
+        let deposit = makeDeposit()
+        let firstWithdrawal = makeWithdrawal(
+            from: deposit,
+            principal: 40_000_000,
+            received: 40_100_000
+        )
+        let settlement = makeWithdrawal(
+            from: deposit,
+            principal: 60_000_000,
+            received: 60_500_000
+        )
+
+        let presentation = SavingsDepositCardPresentation(
+            deposit: deposit,
+            withdrawals: [firstWithdrawal, settlement],
+            asOf: deposit.maturityDate
+        )
+
+        #expect(presentation == .settled(realizedInterest: 600_000))
+    }
+
+    @Test("An open card keeps its detailed presentation")
+    func openCardKeepsDetailedPresentation() {
+        let deposit = makeDeposit()
+
+        let presentation = SavingsDepositCardPresentation(
+            deposit: deposit,
+            withdrawals: [],
+            asOf: openedAt
+        )
+
+        #expect(presentation == .detailed)
+    }
+
     @Test("Matured books lead, active books follow, and settled books stay last")
     func depositsAreSortedForAction() {
         let active = makeDeposit()
