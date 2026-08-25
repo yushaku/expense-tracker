@@ -1,103 +1,148 @@
-# Implementation Plan: Statement Share Intake
+# Implementation Plan: Transaction Import Inbox — Review Checkpoint
 
 ## Overview
 
-Implement only `statement-share-intake`: one PDF enters through the iOS share
-sheet, is validated and atomically staged in an App Group container, and becomes
-available to the containing app. Parsing UI, reconciliation, and persistence
-remain later modules.
+Implement the approved review-only checkpoint of `transaction-import-inbox`.
+MonMon will surface PDFs already staged by the Share Extension, parse a selected
+TPBank statement locally, show its metadata/candidates/issues, and remove a
+statement only after explicit confirmation. No SwiftData record is created.
+
+The previous `statement-share-intake` checkpoint is physically verified: MonMon
+appears in the share sheet and the owner successfully staged a PDF on `Yushaku`.
 
 ## Dependency Graph
 
 ```text
-Typed staging store + temporary-directory tests
+App Group composition + inbox service + contract tests
     |
     v
-App Group entitlements + Share Extension target
+Main-actor inbox state + state-transition tests
     |
     v
-NSItemProvider adapter + safe extension result UI
+Inbox list + parsed preview UI
     |
     v
-iOS build/signing + physical share-sheet validation
+Spending banner/toolbar entry + active-scene refresh
+    |
+    v
+Automated gates + physical build/install/launch on Yushaku
 ```
+
+`import-reconciliation` remains a downstream prerequisite for row editing,
+duplicate detection, transfer matching, and commit. This plan does not absorb or
+silently bypass that module.
 
 ## Architecture Decisions
 
-- Core staging code is compiled into both targets and accepts an injected root
-  URL; only platform adapters resolve the App Group container.
-- A SHA-256 content id makes repeated delivery idempotent without exposing PDF
-  text or source metadata.
-- Fixed filenames live under a hash-named directory. The original filename is
-  display metadata only.
-- Partial directories are invisible to readers; one final same-volume move
-  publishes a complete PDF plus manifest.
-- The extension loads `UTType.pdf`, stages locally, completes the host request,
-  and never attempts to open the containing app.
-- `transaction-import-inbox` owns parsing presentation and final deletion.
+- Reuse `StatementIntakeStore` as the only reader/remover of staged bytes; UI
+  code never constructs inbox paths or reads PDFs directly.
+- Add a small `StatementImportInboxService` that composes the store with
+  `TPBankPDFStatementParser`. Its live factory resolves the App Group; tests
+  inject a temporary root and parser double.
+- Move the App Group identifier to one shared configuration constant used by the
+  containing app and Share Extension, eliminating configuration drift without
+  moving parsing into the extension.
+- Parse asynchronously outside the main actor. An observable main-actor state
+  type owns explicit list and preview phases and rejects stale async results by
+  staged statement id.
+- Present Import Inbox as a sheet from Spending. Keep an always-visible toolbar
+  entry, plus a high-salience banner only when pending statements exist.
+- Refresh pending state when Spending first appears, when the app becomes
+  active, and after a removal. A lookup error is a visible error state, never an
+  empty count.
+- Keep parsed output ephemeral. Reopening a statement parses its revalidated
+  stored bytes again; there is no import-session persistence or schema change.
+- Map typed intake/parser failures to localized, content-free messages. Never
+  interpolate local paths, content hashes, notes, or references into errors.
 
 ## Task List
 
-### Phase 1: Staging foundation
+### Phase 1: Inbox domain boundary
 
-- [x] Task 1: Define the staged-item contract and atomic inbox store
+- [ ] Task 1: Add shared App Group configuration and the inbox service with
+      failing-first contract tests
 
-### Checkpoint: Store
+### Checkpoint: Service
 
-- [x] Validation, idempotency, listing, corruption, and removal tests pass.
-- [x] No entitlement or UIKit dependency exists in the core store.
+- [ ] Pending items list in intake-store order.
+- [ ] Preview revalidates bytes and returns the parser result for the selected id.
+- [ ] Removal affects only the selected item.
+- [ ] App Group and parser failures remain typed and content-free.
 
-### Phase 2: Share Extension
+### Phase 2: Observable inbox state
 
-- [x] Task 2: Add App Group capabilities and an embedded extension target
-- [x] Task 3: Load one PDF provider and render safe progress/result states
+- [ ] Task 2: Add explicit list/preview phases, refresh/removal behavior, and
+      stale-result protection with failing-first state tests
 
-### Checkpoint: Extension
+### Checkpoint: State
 
-- [x] Exact-one-PDF activation rule is present.
-- [x] App and extension compile with the shared staging implementation.
-- [x] Every success and failure exposes an explicit completion/cancellation action.
+- [ ] Empty, loading, loaded, and failed states are distinguishable.
+- [ ] A slow parse cannot overwrite a newer selection.
+- [ ] Viewing, retrying, and failing do not delete staged data.
 
-### Phase 3: Completion gates
+### Phase 3: Owner-facing review flow
 
-- [ ] Task 4: Clear automated gates and validate the share flow on `Yushaku`
+- [ ] Task 3: Build the accessible inbox list and statement preview screens
+- [ ] Task 4: Integrate the pending banner, toolbar entry, scene-active refresh,
+      and English/Vietnamese strings into Spending
+
+### Checkpoint: UI
+
+- [ ] The already-staged PDF is discoverable from Spending.
+- [ ] Supported metadata, totals, candidates, and issues are visibly distinct.
+- [ ] Parse failures remain actionable; confirmed removal returns to the updated
+      list.
+- [ ] No import/commit control or SwiftData mutation is present.
+
+### Phase 4: Completion gates
+
+- [ ] Task 5: Run all automated gates and build/install/launch on `Yushaku`
 
 ### Checkpoint: Complete
 
 - [ ] Approved spec success criteria are met.
-- [x] Full tests, format lint, and iOS SDK build pass.
-- [ ] Physical build, install, launch, and one-PDF share invocation succeed.
-- [x] Invalid input leaves no ready item in automated store tests.
-- [x] No real PDF, statement content, local path, or generated output exists in
-      the repository.
-- [ ] Human reviews the intake checkpoint before `transaction-import-inbox`.
+- [ ] Full macOS tests and recursive format lint pass.
+- [ ] Compile-only iOS SDK build passes without using a Simulator runtime.
+- [ ] Physical build, install, and launch succeed on `Yushaku`.
+- [ ] Owner performs hands-on inbox/preview/removal acceptance testing.
+- [ ] No real PDF, extracted statement content, local path, or generated output
+      exists in the repository.
 
 ## Risks and Mitigations
 
 | Risk | Impact | Mitigation |
 |---|---|---|
-| App Group is not registered for the signing team | High | Use one documented identifier; fail clearly; register it once if automatic provisioning cannot. |
-| Host removes its temporary provider file | High | Copy and publish into the App Group before completing the request. |
-| App reads while extension writes | High | Readers inspect only atomically moved ready directories. |
-| Same statement is shared repeatedly | Medium | Use a complete-file SHA-256 id and return the existing ready item. |
-| Filename attempts path traversal | High | Store under fixed filenames; sanitize metadata to a bounded last path component. |
-| Extension exceeds memory or execution budget | High | Check file size before loading, cap at 25 MB, avoid parsing and network work. |
-| Extension code uses unavailable APIs | High | Keep target small, set application-extension-only, and build the embedded target for iOS. |
+| App and extension resolve different App Groups | High | Use one shared identifier constant and keep entitlement values unchanged. |
+| A 90-day PDF blocks the UI | High | Read and parse off the main actor; publish only state changes on it. |
+| An older parse completes after a newer selection | High | Associate each task/result with the selected staged id and discard stale results. |
+| Parser failure makes a staged file disappear | High | List from manifests independently; show per-item failure and delete only by confirmed action. |
+| Foregrounding shows a stale zero count | Medium | Refresh on initial task and every active scene-phase transition. |
+| Raw financial text leaks through diagnostics | High | Closed error mapping; no raw error interpolation, logging, analytics, or path display. |
+| Toolbar becomes crowded beside the date filter | Medium | Use one compact tray control and put the explanatory call-to-action in the conditional banner. |
+| Review UI implies transactions were imported | High | Use “Review” language, show pending status, and provide no save/import/commit action. |
 
 ## Verification Strategy
 
-- Start each store behavior with a failing Swift Testing test.
-- Build the extension after target wiring before adding provider orchestration.
-- Test provider success/failure with fake `NSItemProvider` representations where
-  feasible; keep storage behavior in the independently tested core store.
-- Run full macOS tests, recursive format lint, compile-only iOS SDK build, then
-  `scripts/run-iphone.sh Yushaku`.
-- The owner performs the final share-sheet interaction with a local PDF; the
-  agent reports only build/install/launch status and the owner reports UI result.
+- Follow TDD for service and state logic: add one failing behavior test, make it
+  pass minimally, then refactor while green.
+- Reuse temporary-directory intake fixtures and synthetic parser output. Never
+  use `/Users/sonlv/Downloads/Trich_dan_sao_ke.pdf` in automated tests.
+- Run focused import tests after Tasks 1 and 2.
+- Build the iOS target after project membership and again after UI integration.
+- Run full macOS tests, recursive format lint, and compile-only iOS SDK build
+  before physical deployment.
+- Run `rtk scripts/run-iphone.sh Yushaku` only for physical runtime validation.
+  Report build/install/launch success; the owner performs UI acceptance.
+
+## Review Checklist
+
+- [ ] Scope matches the approved review-only spec.
+- [ ] New abstractions are justified by entitlement and async-test seams.
+- [ ] Accessibility labels do not rely on color or icon meaning alone.
+- [ ] Error messages contain no statement-derived values.
+- [ ] No unrelated transaction, parser, or storage behavior changed.
+- [ ] `import-reconciliation` is still required before commit controls.
 
 ## Open Questions
 
-- Physical signing is paused: Xcode has no signed-in developer account, the
-  current app profile lacks App Groups, and no extension profile exists. The
-  owner must register/enable the App Group and both bundle identifiers, then
-  rerun `scripts/run-iphone.sh Yushaku`.
+None. Implementation starts only after this plan is approved.
