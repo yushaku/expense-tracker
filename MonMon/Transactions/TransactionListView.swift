@@ -23,6 +23,7 @@ struct TransactionListView: View {
     @State private var listFilter = TransactionListFilter.all
     @State private var importInbox = StatementImportInbox.live()
     @State private var isShowingImportInbox = false
+    @State private var isShowingAccounts = false
 
     /// Weekday first: over a run of days the name is what the eye picks out,
     /// and the year is left to the period title above the list.
@@ -95,6 +96,9 @@ struct TransactionListView: View {
             }
             .navigationDestination(for: DayPeriod.self) { period in
                 DayTransactionsView(period: period)
+            }
+            .navigationDestination(isPresented: $isShowingAccounts) {
+                AccountsScreen()
             }
             .compactRootNavigationTitle("Spending")
             .accessibilityIdentifier("spending-list")
@@ -303,7 +307,7 @@ struct TransactionListView: View {
     /// starts on. They sit above the breakdown because each one changes what it
     /// shows, and none of them belongs on the floating add button.
     private var quickActions: some View {
-        // Three labelled buttons crowd an iPhone in one row, so the labels drop
+        // Four labelled buttons crowd an iPhone in one row, so the labels drop
         // below the icons before the row wraps.
         ViewThatFits(in: .horizontal) {
             HStack(spacing: 10) {
@@ -343,6 +347,18 @@ struct TransactionListView: View {
             accessibilityIdentifier: "manage-transaction-defaults"
         ) {
             isEditingDefaults = true
+        }
+
+        // The one that pushes rather than opening a sheet: accounts are a screen
+        // of their own, and reaching them from the Wealth tab is two taps from
+        // where the money is being recorded.
+        quickAction(
+            "Accounts",
+            systemImage: "wallet.bifold.fill",
+            isStacked: isStacked,
+            accessibilityIdentifier: "open-accounts"
+        ) {
+            isShowingAccounts = true
         }
     }
 
