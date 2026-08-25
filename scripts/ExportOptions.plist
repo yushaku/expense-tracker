@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<!--
+	Development signing, which is what the account can do today: it holds no
+	Apple Distribution certificate. Switch to release-testing (ad-hoc) or
+	app-store-connect once one exists, and raise APS_ENVIRONMENT in
+	Config/Release.xcconfig to production in the same change.
+-->
+<dict>
+	<key>method</key>
+	<string>development</string>
+	<key>teamID</key>
+	<string>VB5AW63GJ8</string>
+	<key>signingStyle</key>
+	<string>automatic</string>
+	<key>destination</key>
+	<string>export</string>
+	<key>stripSwiftSymbols</key>
+	<true/>
+	<key>compileBitcode</key>
+	<false/>
+</dict>
+</plist>

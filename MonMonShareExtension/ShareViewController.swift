@@ -3,8 +3,12 @@ import UniformTypeIdentifiers
 
 @MainActor
 final class ShareViewController: UIViewController {
-    private nonisolated static let appGroupIdentifier =
-        "group.com.sonlv.monmon.local.yushaku"
+    /// The app group this build stages into, set per configuration in the
+    /// xcconfigs. Dev and prod carry different groups, so a statement shared
+    /// into one build never appears in the other.
+    private nonisolated static var appGroupIdentifier: String? {
+        Bundle.main.object(forInfoDictionaryKey: "MonMonAppGroupIdentifier") as? String
+    }
 
     private let activityIndicator = UIActivityIndicatorView(style: .medium)
     private let messageLabel = UILabel()
@@ -79,8 +83,9 @@ final class ShareViewController: UIViewController {
 
             let result = Result {
                 guard
+                    let groupIdentifier = Self.appGroupIdentifier,
                     let rootURL = FileManager.default.containerURL(
-                        forSecurityApplicationGroupIdentifier: Self.appGroupIdentifier
+                        forSecurityApplicationGroupIdentifier: groupIdentifier
                     )
                 else {
                     throw StatementIntakeError.appGroupUnavailable

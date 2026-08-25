@@ -1,5 +1,19 @@
 #include "Base.xcconfig"
 
+// Prod flavour. The identifier carries an .app suffix because plain
+// com.sonlv.monmon is already registered to another team and Apple will not
+// hand it to VB5AW63GJ8.
+APP_BUNDLE_ID = com.sonlv.monmon.app
+ICLOUD_CONTAINER_ID = iCloud.monmon
+APP_DISPLAY_NAME = MonMon
+// Development, not production, because this build is signed with a development
+// profile: the account holds no Apple Distribution certificate, and a
+// development profile carries the development value. Flip this to production at
+// the same time as the export method in scripts/ExportOptions.plist, once the
+// build is signed for distribution. It has no bearing on which data the prod
+// flavour reads; the bundle identifier, app group and iCloud container do that.
+APS_ENVIRONMENT = development
+
 SWIFT_OPTIMIZATION_LEVEL = -O
 SWIFT_COMPILATION_MODE = wholemodule
 DEBUG_INFORMATION_FORMAT = dwarf-with-dsym

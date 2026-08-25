@@ -1,5 +1,12 @@
 #include "Base.xcconfig"
 
+// Dev flavour. Keeps the bundle identifier the device already carries, so the
+// data staged on Yushaku survives this split.
+APP_BUNDLE_ID = com.sonlv.monmon.local.yushaku
+ICLOUD_CONTAINER_ID = iCloud.monmon.dev
+APP_DISPLAY_NAME = MonMon Dev
+APS_ENVIRONMENT = development
+
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG $(inherited)
 SWIFT_OPTIMIZATION_LEVEL = -Onone
 GCC_OPTIMIZATION_LEVEL = 0

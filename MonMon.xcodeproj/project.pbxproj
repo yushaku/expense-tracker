@@ -79,7 +79,6 @@
 		A00000000000000000000271 /* MoneyTransactionPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */; };
 		A00000000000000000000272 /* AssetAllocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000183 /* AssetAllocation.swift */; };
 		A00000000000000000000273 /* AssetAllocationCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000184 /* AssetAllocationCard.swift */; };
-		A00000000000000000000F31 /* AllocationDoughnut.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F30 /* AllocationDoughnut.swift */; };
 		A00000000000000000000274 /* AssetAllocationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000185 /* AssetAllocationTests.swift */; };
 		A00000000000000000000275 /* DateField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000186 /* DateField.swift */; };
 		A00000000000000000000276 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000187 /* AppTheme.swift */; };
@@ -87,19 +86,11 @@
 		A00000000000000000000278 /* LockScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000189 /* LockScreenView.swift */; };
 		A00000000000000000000279 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000190 /* SettingsView.swift */; };
 		A00000000000000000000280 /* AppLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000191 /* AppLockTests.swift */; };
-		C10000000000000000000109 /* AppLanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000009 /* AppLanguageTests.swift */; };
-		C1000000000000000000010A /* LanguageResolutionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000000000000000000000A /* LanguageResolutionTests.swift */; };
-		C1000000000000000000010B /* CategorySeedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000000000000000000000B /* CategorySeedTests.swift */; };
 		A00000000000000000000281 /* FloatingAddButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000192 /* FloatingAddButton.swift */; };
 		A00000000000000000000282 /* Percentage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000193 /* Percentage.swift */; };
 		A00000000000000000000283 /* CategoryBreakdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000194 /* CategoryBreakdown.swift */; };
 		A00000000000000000000284 /* CategoryBreakdownCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000195 /* CategoryBreakdownCard.swift */; };
 		A00000000000000000000285 /* CategoryTransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000196 /* CategoryTransactionsView.swift */; };
-		C10000000000000000000101 /* TransactionCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000001 /* TransactionCalendar.swift */; };
-		C10000000000000000000102 /* TransactionCalendarCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000002 /* TransactionCalendarCard.swift */; };
-		C10000000000000000000103 /* DayTransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000003 /* DayTransactionsView.swift */; };
-		C10000000000000000000106 /* SpendingOverviewCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000006 /* SpendingOverviewCard.swift */; };
-		C10000000000000000000104 /* TransactionCalendarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000004 /* TransactionCalendarTests.swift */; };
 		A00000000000000000000286 /* CategoryBreakdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000197 /* CategoryBreakdownTests.swift */; };
 		A00000000000000000000287 /* CalendarTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000198 /* CalendarTheme.swift */; };
 		A00000000000000000000288 /* VNDCurrencyFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000199 /* VNDCurrencyFormatTests.swift */; };
@@ -125,9 +116,6 @@
 		A00000000000000000000808 /* AccountBalanceCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000807 /* AccountBalanceCard.swift */; };
 		A0000000000000000000080A /* AccountsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000809 /* AccountsScreen.swift */; };
 		A0000000000000000000080C /* DateRangeFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000080B /* DateRangeFilter.swift */; };
-		C10000000000000000000105 /* MonthRail.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000005 /* MonthRail.swift */; };
-		C10000000000000000000107 /* AppLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000007 /* AppLanguage.swift */; };
-		C10000000000000000000108 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000008 /* Localizable.xcstrings */; };
 		A0000000000000000000080E /* PeriodGridPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000080D /* PeriodGridPicker.swift */; };
 		A00000000000000000000811 /* FundInstrument.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000810 /* FundInstrument.swift */; };
 		A00000000000000000000813 /* FundQuoteSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000812 /* FundQuoteSource.swift */; };
@@ -156,16 +144,6 @@
 		A00000000000000000000854 /* DebtPaymentDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000834 /* DebtPaymentDraftTests.swift */; };
 		A00000000000000000000855 /* DebtPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000835 /* DebtPersistenceTests.swift */; };
 		A00000000000000000000856 /* DebtPaymentPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000836 /* DebtPaymentPersistenceTests.swift */; };
-		B10000000000000000000201 /* BankStatementParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000101 /* BankStatementParsingTests.swift */; };
-		B10000000000000000000202 /* BankStatementParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000102 /* BankStatementParsing.swift */; };
-		B10000000000000000000203 /* TPBankPDFTestFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000103 /* TPBankPDFTestFixture.swift */; };
-		B10000000000000000000204 /* TPBankPDFStatementParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000104 /* TPBankPDFStatementParserTests.swift */; };
-		B10000000000000000000205 /* TPBankPDFStatementParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000105 /* TPBankPDFStatementParser.swift */; };
-		C10000000000000000000201 /* StatementIntakeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000101 /* StatementIntakeStore.swift */; };
-		C10000000000000000000202 /* StatementIntakeStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000102 /* StatementIntakeStoreTests.swift */; };
-		D10000000000000000000201 /* StatementIntakeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000101 /* StatementIntakeStore.swift */; };
-		D10000000000000000000202 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000102 /* ShareViewController.swift */; };
-		D10000000000000000000203 /* MonMonShareExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D10000000000000000000101 /* MonMonShareExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A00000000000000000000901 /* FundTestFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000900 /* FundTestFactory.swift */; };
 		A00000000000000000000903 /* FundInstrumentEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000902 /* FundInstrumentEditorView.swift */; };
 		A00000000000000000000905 /* FundInstrumentEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000904 /* FundInstrumentEditorForm.swift */; };
@@ -218,7 +196,7 @@
 		A00000000000000000000F15 /* FundGroupCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F14 /* FundGroupCard.swift */; };
 		A00000000000000000000F17 /* FundGroupDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F16 /* FundGroupDetailView.swift */; };
 		A00000000000000000000F21 /* FundPositionGroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F20 /* FundPositionGroupTests.swift */; };
-		B12345678901234567890101 /* AssetGrowthCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B12345678901234567890201 /* AssetGrowthCard.swift */; };
+		A00000000000000000000F31 /* AllocationDoughnut.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F30 /* AllocationDoughnut.swift */; };
 		A00000000000000000002001 /* FundSale.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000001001 /* FundSale.swift */; };
 		A00000000000000000002002 /* FundSaleSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000001002 /* FundSaleSummary.swift */; };
 		A00000000000000000002003 /* FundSaleSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000001003 /* FundSaleSummaryTests.swift */; };
@@ -229,6 +207,28 @@
 		A00000000000000000002008 /* FundSaleDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000001008 /* FundSaleDraftTests.swift */; };
 		A00000000000000000002009 /* FundSaleNetWorthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000001009 /* FundSaleNetWorthTests.swift */; };
 		A0000000000000000000200A /* FundSalePersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000100A /* FundSalePersistenceTests.swift */; };
+		B10000000000000000000201 /* BankStatementParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000101 /* BankStatementParsingTests.swift */; };
+		B10000000000000000000202 /* BankStatementParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000102 /* BankStatementParsing.swift */; };
+		B10000000000000000000203 /* TPBankPDFTestFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000103 /* TPBankPDFTestFixture.swift */; };
+		B10000000000000000000204 /* TPBankPDFStatementParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000104 /* TPBankPDFStatementParserTests.swift */; };
+		B10000000000000000000205 /* TPBankPDFStatementParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000105 /* TPBankPDFStatementParser.swift */; };
+		B12345678901234567890101 /* AssetGrowthCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B12345678901234567890201 /* AssetGrowthCard.swift */; };
+		C10000000000000000000101 /* TransactionCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000001 /* TransactionCalendar.swift */; };
+		C10000000000000000000102 /* TransactionCalendarCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000002 /* TransactionCalendarCard.swift */; };
+		C10000000000000000000103 /* DayTransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000003 /* DayTransactionsView.swift */; };
+		C10000000000000000000104 /* TransactionCalendarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000004 /* TransactionCalendarTests.swift */; };
+		C10000000000000000000105 /* MonthRail.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000005 /* MonthRail.swift */; };
+		C10000000000000000000106 /* SpendingOverviewCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000006 /* SpendingOverviewCard.swift */; };
+		C10000000000000000000107 /* AppLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000007 /* AppLanguage.swift */; };
+		C10000000000000000000108 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000008 /* Localizable.xcstrings */; };
+		C10000000000000000000109 /* AppLanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000009 /* AppLanguageTests.swift */; };
+		C1000000000000000000010A /* LanguageResolutionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000000000000000000000A /* LanguageResolutionTests.swift */; };
+		C1000000000000000000010B /* CategorySeedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000000000000000000000B /* CategorySeedTests.swift */; };
+		C10000000000000000000201 /* StatementIntakeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000101 /* StatementIntakeStore.swift */; };
+		C10000000000000000000202 /* StatementIntakeStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000102 /* StatementIntakeStoreTests.swift */; };
+		D10000000000000000000201 /* StatementIntakeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000101 /* StatementIntakeStore.swift */; };
+		D10000000000000000000202 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000102 /* ShareViewController.swift */; };
+		D10000000000000000000203 /* MonMonShareExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D10000000000000000000101 /* MonMonShareExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -264,6 +264,7 @@
 
 /* Begin PBXFileReference section */
 		33A69BFF303B567700432AF4 /* MonMon.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MonMon.entitlements; sourceTree = "<group>"; };
+		33DE4088303D787400918EDF /* MonMonDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MonMonDebug.entitlements; sourceTree = "<group>"; };
 		A00000000000000000000101 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
 		A00000000000000000000102 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		A00000000000000000000103 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
@@ -340,7 +341,6 @@
 		A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoneyTransactionPersistenceTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000183 /* AssetAllocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocation.swift; sourceTree = "<group>"; };
 		A00000000000000000000184 /* AssetAllocationCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocationCard.swift; sourceTree = "<group>"; };
-		A00000000000000000000F30 /* AllocationDoughnut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllocationDoughnut.swift; sourceTree = "<group>"; };
 		A00000000000000000000185 /* AssetAllocationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocationTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000186 /* DateField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateField.swift; sourceTree = "<group>"; };
 		A00000000000000000000187 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
@@ -348,19 +348,11 @@
 		A00000000000000000000189 /* LockScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenView.swift; sourceTree = "<group>"; };
 		A00000000000000000000190 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A00000000000000000000191 /* AppLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockTests.swift; sourceTree = "<group>"; };
-		C10000000000000000000009 /* AppLanguageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguageTests.swift; sourceTree = "<group>"; };
-		C1000000000000000000000A /* LanguageResolutionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageResolutionTests.swift; sourceTree = "<group>"; };
-		C1000000000000000000000B /* CategorySeedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySeedTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000192 /* FloatingAddButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingAddButton.swift; sourceTree = "<group>"; };
 		A00000000000000000000193 /* Percentage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Percentage.swift; sourceTree = "<group>"; };
 		A00000000000000000000194 /* CategoryBreakdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBreakdown.swift; sourceTree = "<group>"; };
 		A00000000000000000000195 /* CategoryBreakdownCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBreakdownCard.swift; sourceTree = "<group>"; };
 		A00000000000000000000196 /* CategoryTransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryTransactionsView.swift; sourceTree = "<group>"; };
-		C10000000000000000000001 /* TransactionCalendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCalendar.swift; sourceTree = "<group>"; };
-		C10000000000000000000002 /* TransactionCalendarCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCalendarCard.swift; sourceTree = "<group>"; };
-		C10000000000000000000003 /* DayTransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayTransactionsView.swift; sourceTree = "<group>"; };
-		C10000000000000000000006 /* SpendingOverviewCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendingOverviewCard.swift; sourceTree = "<group>"; };
-		C10000000000000000000004 /* TransactionCalendarTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCalendarTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000197 /* CategoryBreakdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBreakdownTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000198 /* CalendarTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarTheme.swift; sourceTree = "<group>"; };
 		A00000000000000000000199 /* VNDCurrencyFormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VNDCurrencyFormatTests.swift; sourceTree = "<group>"; };
@@ -386,9 +378,6 @@
 		A00000000000000000000807 /* AccountBalanceCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceCard.swift; sourceTree = "<group>"; };
 		A00000000000000000000809 /* AccountsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsScreen.swift; sourceTree = "<group>"; };
 		A0000000000000000000080B /* DateRangeFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateRangeFilter.swift; sourceTree = "<group>"; };
-		C10000000000000000000005 /* MonthRail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthRail.swift; sourceTree = "<group>"; };
-		C10000000000000000000007 /* AppLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguage.swift; sourceTree = "<group>"; };
-		C10000000000000000000008 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		A0000000000000000000080D /* PeriodGridPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodGridPicker.swift; sourceTree = "<group>"; };
 		A00000000000000000000810 /* FundInstrument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrument.swift; sourceTree = "<group>"; };
 		A00000000000000000000812 /* FundQuoteSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundQuoteSource.swift; sourceTree = "<group>"; };
@@ -417,17 +406,6 @@
 		A00000000000000000000834 /* DebtPaymentDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPaymentDraftTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000835 /* DebtPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPersistenceTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000836 /* DebtPaymentPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPaymentPersistenceTests.swift; sourceTree = "<group>"; };
-		B10000000000000000000101 /* BankStatementParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankStatementParsingTests.swift; sourceTree = "<group>"; };
-		B10000000000000000000102 /* BankStatementParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankStatementParsing.swift; sourceTree = "<group>"; };
-		B10000000000000000000103 /* TPBankPDFTestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TPBankPDFTestFixture.swift; sourceTree = "<group>"; };
-		B10000000000000000000104 /* TPBankPDFStatementParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TPBankPDFStatementParserTests.swift; sourceTree = "<group>"; };
-		B10000000000000000000105 /* TPBankPDFStatementParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TPBankPDFStatementParser.swift; sourceTree = "<group>"; };
-		E10000000000000000000101 /* StatementIntakeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatementIntakeStore.swift; sourceTree = "<group>"; };
-		E10000000000000000000102 /* StatementIntakeStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatementIntakeStoreTests.swift; sourceTree = "<group>"; };
-		D10000000000000000000101 /* MonMonShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MonMonShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		D10000000000000000000102 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
-		D10000000000000000000103 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		D10000000000000000000104 /* MonMonShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MonMonShareExtension.entitlements; sourceTree = "<group>"; };
 		A00000000000000000000900 /* FundTestFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundTestFactory.swift; sourceTree = "<group>"; };
 		A00000000000000000000902 /* FundInstrumentEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentEditorView.swift; sourceTree = "<group>"; };
 		A00000000000000000000904 /* FundInstrumentEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentEditorForm.swift; sourceTree = "<group>"; };
@@ -480,7 +458,7 @@
 		A00000000000000000000F14 /* FundGroupCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundGroupCard.swift; sourceTree = "<group>"; };
 		A00000000000000000000F16 /* FundGroupDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundGroupDetailView.swift; sourceTree = "<group>"; };
 		A00000000000000000000F20 /* FundPositionGroupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundPositionGroupTests.swift; sourceTree = "<group>"; };
-		B12345678901234567890201 /* AssetGrowthCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetGrowthCard.swift; sourceTree = "<group>"; };
+		A00000000000000000000F30 /* AllocationDoughnut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllocationDoughnut.swift; sourceTree = "<group>"; };
 		A00000000000000000001001 /* FundSale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSale.swift; sourceTree = "<group>"; };
 		A00000000000000000001002 /* FundSaleSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSaleSummary.swift; sourceTree = "<group>"; };
 		A00000000000000000001003 /* FundSaleSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSaleSummaryTests.swift; sourceTree = "<group>"; };
@@ -491,6 +469,29 @@
 		A00000000000000000001008 /* FundSaleDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSaleDraftTests.swift; sourceTree = "<group>"; };
 		A00000000000000000001009 /* FundSaleNetWorthTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSaleNetWorthTests.swift; sourceTree = "<group>"; };
 		A0000000000000000000100A /* FundSalePersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSalePersistenceTests.swift; sourceTree = "<group>"; };
+		B10000000000000000000101 /* BankStatementParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankStatementParsingTests.swift; sourceTree = "<group>"; };
+		B10000000000000000000102 /* BankStatementParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankStatementParsing.swift; sourceTree = "<group>"; };
+		B10000000000000000000103 /* TPBankPDFTestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TPBankPDFTestFixture.swift; sourceTree = "<group>"; };
+		B10000000000000000000104 /* TPBankPDFStatementParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TPBankPDFStatementParserTests.swift; sourceTree = "<group>"; };
+		B10000000000000000000105 /* TPBankPDFStatementParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TPBankPDFStatementParser.swift; sourceTree = "<group>"; };
+		B12345678901234567890201 /* AssetGrowthCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetGrowthCard.swift; sourceTree = "<group>"; };
+		C10000000000000000000001 /* TransactionCalendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCalendar.swift; sourceTree = "<group>"; };
+		C10000000000000000000002 /* TransactionCalendarCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCalendarCard.swift; sourceTree = "<group>"; };
+		C10000000000000000000003 /* DayTransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayTransactionsView.swift; sourceTree = "<group>"; };
+		C10000000000000000000004 /* TransactionCalendarTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCalendarTests.swift; sourceTree = "<group>"; };
+		C10000000000000000000005 /* MonthRail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthRail.swift; sourceTree = "<group>"; };
+		C10000000000000000000006 /* SpendingOverviewCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendingOverviewCard.swift; sourceTree = "<group>"; };
+		C10000000000000000000007 /* AppLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguage.swift; sourceTree = "<group>"; };
+		C10000000000000000000008 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		C10000000000000000000009 /* AppLanguageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguageTests.swift; sourceTree = "<group>"; };
+		C1000000000000000000000A /* LanguageResolutionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageResolutionTests.swift; sourceTree = "<group>"; };
+		C1000000000000000000000B /* CategorySeedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySeedTests.swift; sourceTree = "<group>"; };
+		D10000000000000000000101 /* MonMonShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MonMonShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D10000000000000000000102 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		D10000000000000000000103 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D10000000000000000000104 /* MonMonShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MonMonShareExtension.entitlements; sourceTree = "<group>"; };
+		E10000000000000000000101 /* StatementIntakeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatementIntakeStore.swift; sourceTree = "<group>"; };
+		E10000000000000000000102 /* StatementIntakeStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatementIntakeStoreTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -543,6 +544,7 @@
 		A00000000000000000000012 /* MonMon */ = {
 			isa = PBXGroup;
 			children = (
+				33DE4088303D787400918EDF /* MonMonDebug.entitlements */,
 				A00000000000000000000D00 /* Recurring */,
 				33A69BFF303B567700432AF4 /* MonMon.entitlements */,
 				A00000000000000000000013 /* App */,
@@ -954,6 +956,16 @@
 			path = Recurring;
 			sourceTree = "<group>";
 		};
+		B10000000000000000000001 /* Imports */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000102 /* BankStatementParsing.swift */,
+				B10000000000000000000105 /* TPBankPDFStatementParser.swift */,
+				E10000000000000000000101 /* StatementIntakeStore.swift */,
+			);
+			path = Imports;
+			sourceTree = "<group>";
+		};
 		B10000000000000000000002 /* Imports */ = {
 			isa = PBXGroup;
 			children = (
@@ -961,16 +973,6 @@
 				B10000000000000000000103 /* TPBankPDFTestFixture.swift */,
 				B10000000000000000000104 /* TPBankPDFStatementParserTests.swift */,
 				E10000000000000000000102 /* StatementIntakeStoreTests.swift */,
-			);
-			path = Imports;
-			sourceTree = "<group>";
-		};
-		B10000000000000000000001 /* Imports */ = {
-			isa = PBXGroup;
-			children = (
-				B10000000000000000000102 /* BankStatementParsing.swift */,
-				B10000000000000000000105 /* TPBankPDFStatementParser.swift */,
-				E10000000000000000000101 /* StatementIntakeStore.swift */,
 			);
 			path = Imports;
 			sourceTree = "<group>";
@@ -1392,13 +1394,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
-				CODE_SIGN_ENTITLEMENTS = MonMon/MonMon.entitlements;
+				CODE_SIGN_ENTITLEMENTS = MonMon/MonMonDebug.entitlements;
 				DEVELOPMENT_TEAM = VB5AW63GJ8;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sonlv.monmon.local.yushaku;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_ID)";
 				PRODUCT_NAME = MonMon;
 			};
 			name = Debug;
@@ -1413,7 +1415,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sonlv.monmon.local.yushaku;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_ID)";
 				PRODUCT_NAME = MonMon;
 			};
 			name = Release;
@@ -1461,7 +1463,7 @@
 					"$(inherited)",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sonlv.monmon.local.yushaku.ShareExtension;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_ID).ShareExtension";
 				PRODUCT_NAME = MonMonShareExtension;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -1482,7 +1484,7 @@
 					"$(inherited)",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sonlv.monmon.local.yushaku.ShareExtension;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_ID).ShareExtension";
 				PRODUCT_NAME = MonMonShareExtension;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;

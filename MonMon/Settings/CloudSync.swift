@@ -27,7 +27,22 @@ import SwiftUI
 final class CloudSync {
     static let enabledKey = "iCloudSyncEnabled"
     static let lastSyncedAtKey = "iCloudLastSyncedAt"
-    static let containerIdentifier = "iCloud.monmon"
+    /// The CloudKit container this build mirrors to. Set per configuration in
+    /// the xcconfigs and read back from the bundle, so the dev and prod flavours
+    /// can never reach each other's records. A build that lost the key is
+    /// misconfigured in a way no fallback could make safe: guessing would point
+    /// a dev build at the owner's real data.
+    static let containerIdentifier: String = {
+        guard
+            let identifier = Bundle.main.object(
+                forInfoDictionaryKey: "MonMonCloudKitContainer"
+            ) as? String,
+            !identifier.isEmpty
+        else {
+            fatalError("MonMonCloudKitContainer missing from Info.plist")
+        }
+        return identifier
+    }()
 
     /// How long the button waits for the store to publish an event before it
     /// stops speaking for the result. Mirroring carries on either way, so the

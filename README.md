@@ -38,6 +38,51 @@ rtk open MonMon.xcodeproj
 
 Use the shared `MonMon` scheme in Xcode.
 
+## Build flavours
+
+The build configuration picks the flavour, and the flavour owns every identifier
+that decides where data lives. A dev install and a prod install on the same phone
+share nothing.
+
+| | Dev (`Debug`) | Prod (`Release`) |
+| --- | --- | --- |
+| Home screen name | MonMon Dev | MonMon |
+| Bundle identifier | `com.sonlv.monmon.local.yushaku` | `com.sonlv.monmon.app` |
+| App group | `group.com.sonlv.monmon.local.yushaku` | `group.com.sonlv.monmon.app` |
+| CloudKit container | `iCloud.monmon.dev` | `iCloud.monmon` |
+| Push environment | `development` | `development` (see `APS_ENVIRONMENT` in `Config/Release.xcconfig`) |
+
+Those values are set in `Config/Debug.xcconfig` and `Config/Release.xcconfig`.
+Everything downstream reads them: `PRODUCT_BUNDLE_IDENTIFIER` in the project, the
+two `.entitlements` files, and the `Info.plist` keys `MonMonAppGroupIdentifier`
+and `MonMonCloudKitContainer` that `ShareViewController` and `CloudSync` read at
+runtime. Nothing hard-codes an identifier in Swift, so adding a flavour is an
+xcconfig change.
+
+A distinct bundle identifier gives each flavour its own container, which is what
+separates the SwiftData store and `UserDefaults`; the app group separates the
+share extension's statement inbox; the CloudKit container separates what syncs.
+
+Build and install the dev flavour on the phone:
+
+```sh
+scripts/run-iphone.sh Yushaku
+```
+
+Build the prod flavour. The script refuses to run unless `HEAD` is a clean `main`
+matching `origin/main`, archives with the `Release` configuration, and exports an
+`.ipa` into `build/prod`. Pass a device name to also install and launch it:
+
+```sh
+scripts/build-prod.sh
+scripts/build-prod.sh Yushaku
+```
+
+Both flavours need their App ID, app group, and CloudKit container to exist in
+the developer account before signing succeeds. Xcode registers them when you add
+the capability under **Signing & Capabilities** with that configuration selected;
+`xcodebuild` will not create a CloudKit container on its own.
+
 ## Build
 
 Build the native Mac app:
