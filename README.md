@@ -47,10 +47,15 @@ share nothing.
 | | Dev (`Debug`) | Prod (`Release`) |
 | --- | --- | --- |
 | Home screen name | MonMon Dev | MonMon |
+| App icon | `AppIconDev` (DEV band) | `AppIcon` |
 | Bundle identifier | `com.sonlv.monmon.local.yushaku` | `com.sonlv.monmon.app` |
 | App group | `group.com.sonlv.monmon.local.yushaku` | `group.com.sonlv.monmon.app` |
 | CloudKit container | `iCloud.monmon.dev` | `iCloud.monmon` |
 | Push environment | `development` | `development` (see `APS_ENVIRONMENT` in `Config/Release.xcconfig`) |
+
+The dev icon is derived art, not a hand-drawn second logo. Regenerate it from
+the real one with `swift scripts/make-dev-appicon.swift` whenever `AppIcon`
+changes.
 
 Those values are set in `Config/Debug.xcconfig` and `Config/Release.xcconfig`.
 Everything downstream reads them: `PRODUCT_BUNDLE_IDENTIFIER` in the project, the
@@ -141,162 +146,3 @@ above can compile the iOS target without it.
 
 Signing identities, provisioning profiles, and Xcode user state must remain local
 and are excluded by `.gitignore`.
-
-## Current scope
-
-- Included: add, edit, and delete cash, bank, and credit card accounts; add,
-  edit, and delete savings deposits with simple interest paid at maturity; add,
-  edit, and delete fund, ETF, and physical-gold holdings, each held in a
-  catalogue instrument that owns its price, under one Investments tab that
-  totals them together; enter gold weight in chỉ while storing lượng; value
-  gold at the shop's buy price while showing its buy/sell spread; sell part or
-  all of a position into a chosen cash account, which settles its profit as
-  realized without ever rewriting the lot it came out of; record
-  income and expenses against one account each under owner-managed categories,
-  browsed a day, a month, a year, or a hand-picked range at a time; add, edit,
-  and delete transfers between two accounts, opened from the Home toolbar; an
-  optional funding link that lowers an account's available balance without
-  touching its opening balance; add, edit, and delete debts in both directions
-  with their payments, opened from the Home toolbar, with an optional cash
-  account, an optional rate and due date, and projected interest that is shown
-  but never counted; VND validation and formatting, exact `Decimal` totals,
-  private iCloud-backed SwiftData persistence, and shared SwiftUI UI.
-- Owner validation: form behavior, interest and valuation against a hand
-  calculation, relaunch persistence, iPhone Dynamic Type and keyboard, and Mac
-  window resizing.
-- Recurring: rules for money that comes back — rent, salary, a subscription —
-  each repeating daily, weekly, monthly, or yearly at an interval the owner
-  picks, from a start date, optionally until an end date, and pausable without
-  being deleted. A rule holds no money: opening the app records every date it
-  has fallen due since it was last caught up, as ordinary transactions carrying
-  the rule's id, so balances and totals follow with no compensating write. A
-  start date in the past backfills what it already covered, capped at 400
-  entries per save. One rule can only ever record one entry per day, enforced
-  before the write and folded afterwards, so two devices cannot record the same
-  month's rent twice. Editing a rule changes only what it records next, and
-  deleting one keeps everything it already recorded.
-- Month rail: the run of months pinned under the Spending navigation bar, the
-  one on show marked and scrolled to the middle, so stepping a month is one tap
-  from anywhere on the screen. The bar's calendar button still opens the fuller
-  picker behind it — a day, a month, a year, or a hand-picked span.
-- Spending calendar: a month grid below the category breakdown, each day
-  carrying what it took in and what it paid out, so a heavy day is visible
-  without opening anything. Days either side of the month are drawn faintly
-  rather than blanked, so every row is a whole week. Its arrows re-cut the
-  period the whole screen is showing, so the totals above it never describe a
-  month the grid is not. Tapping a day opens that day on its own, with its
-  income, expense, and net, the entries behind them, and an add button that
-  starts a new entry on that day.
-- Spending setup: one row of buttons above the category breakdown opens the
-  categories, the recurring rules, and the defaults a new entry starts on — the
-  account, the expense category, and the income category. Switching an entry
-  between income and expense picks up that direction's own default instead of
-  emptying the field. The defaults live here rather than on the Settings tab,
-  beside the entries they shape.
-- Settings: a light/dark/system theme, and an optional Face ID, Touch ID, or
-  passcode lock that hides the screen on launch and after a minute away. The
-  lock is a gate on the screen, not encryption; the records on disk are
-  protected by the operating system's file protection and nothing more.
-- Backup: a switch for mirroring every record through the owner's own private
-  iCloud database, and a "Sync now" button that flushes pending edits, checks
-  the account, and reports what the store says next. SwiftData fixes a store's
-  mirroring when the container is built, so the switch takes effect on the next
-  launch and says so on screen. No call forces a push, so the button never
-  claims one happened; when nothing is reported back it says the changes stay
-  queued.
-- Market data: a fund, ETF, and gold catalogue with one price per code,
-  refreshed when the owner asks and never on a timer, on launch, or in the
-  background.
-  Fmarket supplies open-ended fund NAV, VNDIRECT supplies listed ETF closes, and
-  vang.today supplies VND gold shop-buy and shop-sell quotes per lượng. The
-  Fmarket and vang.today catalogues can be imported and searched, grouped by
-  provider owner or brand. A stale price is marked in words, not by colour
-  alone. A fetch that fails leaves the previous price standing and says why.
-  Only a ticker or gold type code ever leaves the device — never a balance, a
-  unit count, an account name, or anything identifying the owner.
-- Not included yet: budgets, interest paid on a schedule, rollover or early
-  withdrawal, compound interest or amortisation schedules on a debt, price
-  history or charts, a market-holiday calendar, AI, or MCP.
-- Not included, and not planned: individual buy/sell trades and equity or
-  crypto positions. Closing a position is recorded, so realized profit and loss
-  is too — but only against the lot the units left, which is a way out of a
-  holding rather than a trade ledger.
-
-## Architecture
-
-- One multiplatform app target shares SwiftUI source between iOS and macOS.
-- One dependency: [MijickCalendarView](https://github.com/Mijick/CalendarView)
-  (MIT), which draws the calendar inside `DateField`. It is plain SwiftUI on
-  both platforms and touches nothing but the view it is asked to draw. The
-  resolved version is pinned in `Package.resolved`.
-- SwiftData stores `CashAccount`, `SavingsDeposit`, `FundInstrument`,
-  `FundHolding`, `FundSale`, `TransactionCategory`, `MoneyTransaction`,
-  `AccountTransfer`, `Debt`, `DebtPayment`, and `RecurringRule` records
-  in the owner's private iCloud database; `@Query` drives every visible list
-  and combined total.
-- Nothing stores a balance. Every account balance, every total, and net worth
-  itself is computed from the records each time, and `openingBalance` is never
-  rewritten. That is what lets a record be deleted with no compensating write.
-- `AccountDraft`, `SavingsDraft`, `FundDraft`, `FundSaleDraft`,
-  `TransactionDraft`, `CategoryDraft`, `TransferDraft`, `DebtDraft`,
-  `DebtPaymentDraft`, and `RecurringRuleDraft` validate
-  external text before any model is inserted or mutated, and money uses
-  `Decimal` throughout.
-- A savings deposit and a fund holding each store their funding account's `id`;
-  available balances and total assets are derived, so deleting one needs no
-  compensating write.
-- A holding's cost basis leaves the cash side while its market value enters the
-  asset side, so invested money is counted once and a gain shows as growth.
-- A sale is its own record and never shrinks the lot it came out of. The lot
-  keeps its original cost subtracted from the cash side, because that is the
-  money that left on the day it was bought; the sale adds its proceeds back, and
-  only the units still held carry a market value. At the moment of a sale those
-  three cancel, so net worth does not move — the gain stops being unrealized and
-  starts being cash. It also means a past month can still be reconstructed with
-  the position open, which shrinking the lot would have made impossible.
-- A transaction stores a positive amount and carries its direction in `kind`, so
-  no call site has to agree on a sign convention. An account's available balance
-  is its opening balance plus recorded flow minus what it funds; the opening
-  balance itself is never rewritten.
-- A transfer stores a positive amount too, and the pair of accounts it names
-  carries the direction. It is neither income nor an expense, so it never
-  reaches the Spending totals, and because one account's outflow is another's
-  inflow it leaves total assets untouched.
-- A debt stores a positive principal and carries its direction in an enum, and
-  its payments read that direction from the debt rather than repeating it. Debt
-  flow does not cancel out the way transfer flow does, because the counterparty
-  lives outside the app — so net worth adds what is still owed to the owner and
-  subtracts what the owner still owes, and borrowing, lending, and repaying all
-  leave it exactly where it was. Money lent out is drawn as its own wedge;
-  money borrowed joins the overdrawn accounts in the figure beneath the ring.
-  Projected interest is shown and never counted: interest actually paid is an
-  ordinary expense.
-- A recurring rule is an instruction, not a record of money. It stamps out
-  ordinary `MoneyTransaction` rows and nothing else reads it, so every balance,
-  every total, and the category breakdown follow a generated entry exactly as
-  they follow a typed one — and the owner can edit or delete that entry, because
-  it records money that really moved. Every occurrence is measured from the
-  rule's start date rather than from the previous one, so a rule anchored on the
-  31st clamps to the end of February and comes straight back to the 31st in
-  March instead of drifting. Nothing is ever recorded ahead of today: balances
-  count every transaction whatever its date.
-- Generation runs on launch and on returning to the foreground, never on a timer
-  and never in the background, which is the rule market data already follows. A
-  month spent away is a month recorded in full on the next open.
-- The one network boundary is `FundQuoteTransport`, behind which every provider
-  is tested against a recorded reply. The default test run makes no connection.
-- Four identities are unique by a rule rather than by a database constraint: a
-  category by its kind and name, an instrument by its ticker, the one
-  `Unassigned` account by a fixed id, and a generated transaction by the pair of
-  the rule that wrote it and the day it fell on. CloudKit forbids unique attributes, so the
-  rule is enforced twice instead — by the draft before a write, and by
-  `StoreReconciler` afterwards, which folds a duplicate into the older row and
-  repoints everything naming it first, so no balance or history moves. Every
-  foreign key that names an account defaults to the `Unassigned` one, so a
-  record can always be counted somewhere rather than counted in a spending
-  total and in no balance at all.
-- `docs/architecture.html` draws every `@Model` with its fields and foreign
-  keys, then the components around the app — Apple frameworks, the one
-  third-party package, and the services still on the roadmap. Open it in any
-  browser; it is one self-contained file with no build step and no external
-  requests.
