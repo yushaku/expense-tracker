@@ -5,6 +5,7 @@ struct SavingsEditorForm: View {
 
     let accounts: [CashAccount]
     let isEditing: Bool
+    let termsLocked: Bool
     let validationError: SavingsFormError?
     let saveErrorMessage: LocalizedStringKey?
     let onDelete: () -> Void
@@ -17,6 +18,9 @@ struct SavingsEditorForm: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                     introduction
+                    if termsLocked {
+                        lockedTermsBanner
+                    }
                     detailsCard
                     termsCard
                     fundingCard
@@ -50,7 +54,7 @@ struct SavingsEditorForm: View {
                 Text("Lock money in, watch it grow")
                     .font(.title3.weight(.semibold))
 
-                Text("Interest is paid in full on the maturity date.")
+                Text("Projected interest assumes the book stays until maturity.")
                     .font(.subheadline)
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
@@ -86,6 +90,7 @@ struct SavingsEditorForm: View {
                         selection: $draft.openedAt,
                         accessibilityIdentifier: "savings-opened-at"
                     )
+                    .disabled(termsLocked)
                 }
             }
         }
@@ -172,6 +177,7 @@ struct SavingsEditorForm: View {
                 }
             }
         }
+        .disabled(termsLocked)
     }
 
     private var fundingCard: some View {
@@ -200,6 +206,20 @@ struct SavingsEditorForm: View {
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
         }
+        .disabled(termsLocked)
+    }
+
+    private var lockedTermsBanner: some View {
+        Label(
+            "Only the name can be changed after a withdrawal has been recorded.",
+            systemImage: "lock.fill"
+        )
+        .font(.subheadline)
+        .foregroundStyle(MonMonTheme.textSecondary)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(MonMonTheme.savings.opacity(0.12), in: RoundedRectangle(cornerRadius: 14))
+        .accessibilityIdentifier("savings-terms-locked")
     }
 
     private var deleteButton: some View {
@@ -372,6 +392,7 @@ struct SavingsEditorForm: View {
                         ),
                     ],
                     isEditing: isEditing,
+                    termsLocked: false,
                     validationError: validationError,
                     saveErrorMessage: saveErrorMessage,
                     onDelete: {}

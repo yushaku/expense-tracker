@@ -24,6 +24,7 @@ enum AccountBalanceAllocation {
     static func slices(
         accounts: [CashAccount],
         deposits: [SavingsDeposit],
+        withdrawals: [SavingsWithdrawal],
         holdings: [FundHolding],
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
@@ -41,6 +42,7 @@ enum AccountBalanceAllocation {
                         for: account,
                         deposits: deposits,
                         holdings: holdings,
+                        withdrawals: withdrawals,
                         transactions: transactions,
                         transfers: transfers,
                         debts: debts,

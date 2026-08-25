@@ -5,9 +5,9 @@ import SwiftUI
 /// the running total, and the editor sheet.
 struct SavingsSection: View {
     let deposits: [SavingsDeposit]
+    let withdrawals: [SavingsWithdrawal]
     let accounts: [CashAccount]
     let onAdd: () -> Void
-    let onEdit: (SavingsDeposit) -> Void
 
     var body: some View {
         if deposits.isEmpty {
@@ -47,7 +47,7 @@ struct SavingsSection: View {
     }
 
     private var projectedInterest: Decimal {
-        AssetSummary.totalProjectedInterest(of: deposits)
+        AssetSummary.totalProjectedInterest(of: deposits, withdrawals: withdrawals)
     }
 
     private var depositCountLabel: LocalizedStringKey {
@@ -124,19 +124,26 @@ struct SavingsSection: View {
                     .background(MonMonTheme.savings.opacity(0.16), in: Capsule())
             }
 
-            ForEach(deposits) { deposit in
-                Button {
-                    onEdit(deposit)
-                } label: {
+            ForEach(sortedDeposits) { deposit in
+                NavigationLink(value: SavingsDepositRoute(depositID: deposit.id)) {
                     SavingsDepositCard(
                         deposit: deposit,
-                        sourceAccountName: accountName(for: deposit)
+                        sourceAccountName: accountName(for: deposit),
+                        withdrawals: withdrawals
                     )
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("savings-\(deposit.id.uuidString)")
-                .accessibilityHint("Opens this savings book for editing")
+                .accessibilityHint("Opens this savings book")
             }
         }
+    }
+
+    private var sortedDeposits: [SavingsDeposit] {
+        SavingsWithdrawalSummary.sortedDeposits(
+            deposits,
+            withdrawals: withdrawals,
+            asOf: .now
+        )
     }
 }

@@ -657,6 +657,38 @@
         </div>
       </article>
 
+      <!-- ============ SavingsWithdrawal ============ -->
+      <article class="entity" id="SavingsWithdrawal" tabindex="0"
+               style="--e: var(--e-savings); grid-column: 3; grid-row: 1;">
+        <div class="e-head">
+          <div class="e-name">SavingsWithdrawal</div>
+          <div class="e-role">Dated partial withdrawal, early closure or maturity settlement</div>
+          <div class="e-file">MonMon/Savings/SavingsWithdrawal.swift</div>
+        </div>
+        <ul class="fields">
+          <li class="field key"><span class="fname">id</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge pk">PK</span></span></li>
+          <li class="field key" data-anchor="SavingsWithdrawal.depositID">
+            <span class="fname">depositID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span></span>
+          </li>
+          <li class="field"><span class="fname">principal</span><span class="ftype">Decimal</span></li>
+          <li class="field"><span class="fname">amountReceived</span><span class="ftype">Decimal</span></li>
+          <li class="field key" data-anchor="SavingsWithdrawal.destinationAccountID">
+            <span class="fname">destinationAccountID</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge fk">FK</span></span>
+          </li>
+          <li class="field"><span class="fname">withdrawnAt</span><span class="ftype">Date</span></li>
+          <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
+        </ul>
+        <div class="derived">
+          <div class="derived-label">Derived &mdash; computed, not stored</div>
+          <div class="derived-list">realizedInterest = amountReceived &minus; principal</div>
+        </div>
+      </article>
+
       <!-- ============ FundHolding ============ -->
       <article class="entity" id="FundHolding" tabindex="0"
                style="--e: var(--e-fund); grid-column: 2; grid-row: 2;">
@@ -1307,6 +1339,16 @@
       </p>
     </div>
     <div class="note">
+      <h3>Maturity does not move cash</h3>
+      <p>
+        A <code>SavingsDeposit</code> becoming mature is only a status change. Cash moves only
+        when the owner records a <code>SavingsWithdrawal</code>, using the amount the bank
+        actually paid. The original principal stays immutable; remaining principal and
+        realized interest are derived from dated withdrawals so historical net worth remains
+        reproducible.
+      </p>
+    </div>
+    <div class="note">
       <h3>Projected interest is never counted</h3>
       <p>
         <code>Debt.projectedInterest(asOf:)</code> is shown on a card and reaches no total,
@@ -1535,6 +1577,8 @@
 
     wire('erdStage', 'erdEdges', '.entity', [
       { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'SavingsDeposit', toAnchor: 'SavingsDeposit.sourceAccountID', label: '1 : 0..N', dashed: true },
+      { from: 'SavingsDeposit', to: 'SavingsWithdrawal', toAnchor: 'SavingsWithdrawal.depositID', label: '1 : 0..N', dashed: true },
+      { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'SavingsWithdrawal', toAnchor: 'SavingsWithdrawal.destinationAccountID', label: 'receives', dashed: false },
       { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'FundHolding', toAnchor: 'FundHolding.sourceAccountID', label: '1 : 0..N', dashed: true },
       { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'MoneyTransaction', toAnchor: 'MoneyTransaction.accountID', label: '1 : 0..N', dashed: false },
       { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'AccountTransfer', toAnchor: 'AccountTransfer.sourceAccountID', label: 'from', dashed: false },

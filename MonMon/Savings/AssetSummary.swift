@@ -1,20 +1,30 @@
 import Foundation
 
 enum AssetSummary {
-    static func totalPrincipal(of deposits: [SavingsDeposit]) -> Decimal {
+    static func totalPrincipal(
+        of deposits: [SavingsDeposit],
+        withdrawals: [SavingsWithdrawal]
+    ) -> Decimal {
         deposits.reduce(Decimal.zero) { total, deposit in
-            total + deposit.principal
+            total + deposit.remainingPrincipal(withdrawals: withdrawals)
         }
     }
 
-    static func totalProjectedInterest(of deposits: [SavingsDeposit]) -> Decimal {
+    static func totalProjectedInterest(
+        of deposits: [SavingsDeposit],
+        withdrawals: [SavingsWithdrawal]
+    ) -> Decimal {
         deposits.reduce(Decimal.zero) { total, deposit in
-            total + deposit.projectedInterest
+            total + deposit.projectedInterest(withdrawals: withdrawals)
         }
     }
 
-    static func totalMaturityValue(of deposits: [SavingsDeposit]) -> Decimal {
-        totalPrincipal(of: deposits) + totalProjectedInterest(of: deposits)
+    static func totalMaturityValue(
+        of deposits: [SavingsDeposit],
+        withdrawals: [SavingsWithdrawal]
+    ) -> Decimal {
+        totalPrincipal(of: deposits, withdrawals: withdrawals)
+            + totalProjectedInterest(of: deposits, withdrawals: withdrawals)
     }
 
     /// Spendable cash, plus deposited principal, plus what the fund holdings are
@@ -50,6 +60,7 @@ enum AssetSummary {
     static func netWorth(
         accounts: [CashAccount],
         deposits: [SavingsDeposit],
+        withdrawals: [SavingsWithdrawal],
         holdings: [FundHolding],
         instruments: [FundInstrument],
         transactions: [MoneyTransaction],
@@ -62,13 +73,14 @@ enum AssetSummary {
             of: accounts,
             deposits: deposits,
             holdings: holdings,
+            withdrawals: withdrawals,
             transactions: transactions,
             transfers: transfers,
             debts: debts,
             payments: payments,
             sales: sales
         )
-            + totalPrincipal(of: deposits)
+            + totalPrincipal(of: deposits, withdrawals: withdrawals)
             + FundSummary.totalMarketValue(
                 of: holdings,
                 instruments: instruments,
@@ -109,6 +121,7 @@ enum AssetHistory {
     static func points(
         accounts: [CashAccount],
         deposits: [SavingsDeposit],
+        withdrawals: [SavingsWithdrawal],
         holdings: [FundHolding],
         instruments: [FundInstrument],
         transactions: [MoneyTransaction],
@@ -123,6 +136,7 @@ enum AssetHistory {
             let earliestDate = earliestDate(
                 accounts: accounts,
                 deposits: deposits,
+                withdrawals: withdrawals,
                 holdings: holdings,
                 transactions: transactions,
                 transfers: transfers,
@@ -150,6 +164,7 @@ enum AssetHistory {
             // the bands and the line can never disagree about a month.
             let accounts = accounts.filter { $0.createdAt <= date }
             let deposits = deposits.filter { $0.openedAt <= date }
+            let withdrawals = withdrawals.filter { $0.withdrawnAt <= date }
             let holdings = holdings.filter { $0.boughtOn <= date }
             let transactions = transactions.filter { $0.occurredAt <= date }
             let transfers = transfers.filter { $0.occurredAt <= date }
@@ -162,6 +177,7 @@ enum AssetHistory {
                 netWorth: AssetSummary.netWorth(
                     accounts: accounts,
                     deposits: deposits,
+                    withdrawals: withdrawals,
                     holdings: holdings,
                     instruments: instruments,
                     transactions: transactions,
@@ -173,6 +189,7 @@ enum AssetHistory {
                 composition: AssetAllocation.amounts(
                     accounts: accounts,
                     deposits: deposits,
+                    withdrawals: withdrawals,
                     holdings: holdings,
                     instruments: instruments,
                     transactions: transactions,
@@ -188,6 +205,7 @@ enum AssetHistory {
     private static func earliestDate(
         accounts: [CashAccount],
         deposits: [SavingsDeposit],
+        withdrawals: [SavingsWithdrawal],
         holdings: [FundHolding],
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
@@ -197,6 +215,7 @@ enum AssetHistory {
     ) -> Date? {
         var dates = accounts.map(\.createdAt)
         dates.append(contentsOf: deposits.map(\.openedAt))
+        dates.append(contentsOf: withdrawals.map(\.withdrawnAt))
         dates.append(contentsOf: holdings.map(\.boughtOn))
         dates.append(contentsOf: transactions.map(\.occurredAt))
         dates.append(contentsOf: transfers.map(\.occurredAt))

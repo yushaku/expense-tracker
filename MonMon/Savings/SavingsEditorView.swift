@@ -34,6 +34,9 @@ struct SavingsEditorView: View {
     @Query(sort: \SavingsDeposit.createdAt, order: .forward)
     private var deposits: [SavingsDeposit]
 
+    @Query(sort: \SavingsWithdrawal.withdrawnAt, order: .reverse)
+    private var withdrawals: [SavingsWithdrawal]
+
     @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
     private var transactions: [MoneyTransaction]
 
@@ -88,6 +91,7 @@ struct SavingsEditorView: View {
                 draft: $draft,
                 accounts: accounts,
                 isEditing: mode.editedDeposit != nil,
+                termsLocked: termsLocked,
                 validationError: validationError,
                 saveErrorMessage: saveErrorMessage,
                 onDelete: { isConfirmingDelete = true }
@@ -121,7 +125,7 @@ struct SavingsEditorView: View {
 
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("Its principal returns to the linked account's available balance.")
+                Text(deleteConfirmationMessage)
             }
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
@@ -137,6 +141,24 @@ struct SavingsEditorView: View {
         return accounts.first { $0.id == sourceAccountID }
     }
 
+    private var editedDepositWithdrawals: [SavingsWithdrawal] {
+        guard let editedDeposit = mode.editedDeposit else { return [] }
+        return SavingsWithdrawalSummary.withdrawals(
+            for: editedDeposit,
+            withdrawals: withdrawals
+        )
+    }
+
+    private var termsLocked: Bool {
+        !editedDepositWithdrawals.isEmpty
+    }
+
+    private var deleteConfirmationMessage: LocalizedStringKey {
+        termsLocked
+            ? "The savings book and all of its withdrawal history will be deleted."
+            : "Its principal returns to the linked account's available balance."
+    }
+
     /// Spendable balance the draft may claim. When editing a deposit already
     /// funded by this account, its own principal is added back so re-saving an
     /// unchanged amount is not reported as an overdraft.
@@ -145,6 +167,7 @@ struct SavingsEditorView: View {
             for: account,
             deposits: deposits,
             holdings: holdings,
+            withdrawals: withdrawals,
             transactions: transactions,
             transfers: transfers,
             debts: debts,
@@ -169,10 +192,18 @@ struct SavingsEditorView: View {
 
         do {
             if let editedDeposit = mode.editedDeposit {
-                try draft.apply(
-                    to: editedDeposit,
-                    availableSourceBalance: availableSourceBalance
-                )
+                if termsLocked {
+                    let name = draft.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                    guard !name.isEmpty else {
+                        throw SavingsFormError.emptyName
+                    }
+                    editedDeposit.name = name
+                } else {
+                    try draft.apply(
+                        to: editedDeposit,
+                        availableSourceBalance: availableSourceBalance
+                    )
+                }
             } else {
                 let deposit = try draft.makeDeposit(
                     id: UUID(),
@@ -204,6 +235,7 @@ struct SavingsEditorView: View {
         }
 
         saveErrorMessage = nil
+        editedDepositWithdrawals.forEach(modelContext.delete)
         modelContext.delete(editedDeposit)
 
         do {

@@ -44,6 +44,7 @@ struct RecurringRulePersistenceTests {
             for: account,
             deposits: try context.fetch(FetchDescriptor<SavingsDeposit>()),
             holdings: try context.fetch(FetchDescriptor<FundHolding>()),
+            withdrawals: try context.fetch(FetchDescriptor<SavingsWithdrawal>()),
             transactions: try context.fetch(FetchDescriptor<MoneyTransaction>()),
             transfers: try context.fetch(FetchDescriptor<AccountTransfer>()),
             debts: try context.fetch(FetchDescriptor<Debt>()),

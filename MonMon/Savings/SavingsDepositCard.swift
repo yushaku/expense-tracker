@@ -5,6 +5,8 @@ struct SavingsDepositCard: View {
 
     let deposit: SavingsDeposit
     let sourceAccountName: String?
+    let withdrawals: [SavingsWithdrawal]
+    var asOf: Date = .now
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -23,6 +25,7 @@ struct SavingsDepositCard: View {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(MonMonTheme.border, lineWidth: 1)
         }
+        .opacity(status == .settled ? 0.68 : 1)
         .accessibilityElement(children: .combine)
     }
 
@@ -43,6 +46,13 @@ struct SavingsDepositCard: View {
                     .font(.headline)
                     .lineLimit(2)
 
+                Text(statusTitle)
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(statusColor)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 3)
+                    .background(statusColor.opacity(0.14), in: Capsule())
+
                 // A book funded from an account says which one. One that names
                 // no account says nothing: "no linked account" filled the line
                 // with the absence of a fact rather than with a fact.
@@ -56,13 +66,13 @@ struct SavingsDepositCard: View {
             Spacer(minLength: 12)
 
             VStack(alignment: .trailing, spacing: 3) {
-                Text(VNDCurrency.format(deposit.principal))
+                Text(VNDCurrency.format(deposit.remainingPrincipal(withdrawals: withdrawals)))
                     .font(.headline)
                     .monospacedDigit()
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
 
-                Text("PRINCIPAL")
+                Text("REMAINING")
                     .font(.caption2.weight(.semibold))
                     .tracking(0.5)
                     .foregroundStyle(MonMonTheme.textSecondary)
@@ -83,11 +93,11 @@ struct SavingsDepositCard: View {
             detail(title: "MATURES", value: maturityDescription)
             detail(
                 title: "INTEREST",
-                value: VNDCurrency.format(deposit.projectedInterest)
+                value: VNDCurrency.format(deposit.projectedInterest(withdrawals: withdrawals))
             )
             detail(
                 title: "AT MATURITY",
-                value: VNDCurrency.format(deposit.maturityValue)
+                value: VNDCurrency.format(deposit.maturityValue(withdrawals: withdrawals))
             )
         }
     }
@@ -117,6 +127,32 @@ struct SavingsDepositCard: View {
     private var maturityDescription: String {
         TransactionPeriod.day(deposit.maturityDate, in: locale)
     }
+
+    private var status: SavingsDepositStatus {
+        deposit.status(withdrawals: withdrawals, asOf: asOf)
+    }
+
+    private var statusTitle: LocalizedStringKey {
+        switch status {
+        case .active:
+            "ACTIVE"
+        case .matured:
+            "MATURED"
+        case .settled:
+            "SETTLED"
+        }
+    }
+
+    private var statusColor: Color {
+        switch status {
+        case .active:
+            MonMonTheme.savings
+        case .matured:
+            MonMonTheme.accent
+        case .settled:
+            MonMonTheme.textSecondary
+        }
+    }
 }
 
 #if DEBUG
@@ -133,7 +169,8 @@ struct SavingsDepositCard: View {
                         annualInterestRate: Decimal(string: "5.6") ?? 0,
                         termMonths: 6
                     ),
-                    sourceAccountName: "Techcombank"
+                    sourceAccountName: "Techcombank",
+                    withdrawals: []
                 )
 
                 SavingsDepositCard(
@@ -143,7 +180,8 @@ struct SavingsDepositCard: View {
                         annualInterestRate: Decimal(string: "6.15") ?? 0,
                         termMonths: 24
                     ),
-                    sourceAccountName: nil
+                    sourceAccountName: nil,
+                    withdrawals: []
                 )
             }
             .padding(20)

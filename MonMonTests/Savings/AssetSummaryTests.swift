@@ -78,9 +78,9 @@ final class AssetSummaryTests {
 
     @Test("No deposits total to zero")
     func emptyDepositsTotalZero() {
-        #expect(AssetSummary.totalPrincipal(of: []) == 0)
-        #expect(AssetSummary.totalProjectedInterest(of: []) == 0)
-        #expect(AssetSummary.totalMaturityValue(of: []) == 0)
+        #expect(AssetSummary.totalPrincipal(of: [], withdrawals: []) == 0)
+        #expect(AssetSummary.totalProjectedInterest(of: [], withdrawals: []) == 0)
+        #expect(AssetSummary.totalMaturityValue(of: [], withdrawals: []) == 0)
     }
 
     @Test("Multiple deposit principals add exactly")
@@ -91,7 +91,7 @@ final class AssetSummaryTests {
             makeDeposit(principal: 1_500_000),
         ]
 
-        #expect(AssetSummary.totalPrincipal(of: deposits) == 351_500_000)
+        #expect(AssetSummary.totalPrincipal(of: deposits, withdrawals: []) == 351_500_000)
     }
 
     @Test("Projected interest sums each deposit's own term")
@@ -102,7 +102,7 @@ final class AssetSummaryTests {
         ]
         let expected = deposits.reduce(Decimal.zero) { $0 + $1.projectedInterest }
 
-        #expect(AssetSummary.totalProjectedInterest(of: deposits) == expected)
+        #expect(AssetSummary.totalProjectedInterest(of: deposits, withdrawals: []) == expected)
         #expect(expected > 0)
     }
 
@@ -123,6 +123,7 @@ final class AssetSummaryTests {
                 for: account,
                 deposits: [unrelated],
                 holdings: [],
+                withdrawals: [],
                 transactions: [],
                 transfers: [],
                 debts: [],
@@ -147,6 +148,7 @@ final class AssetSummaryTests {
                 for: account,
                 deposits: [deposit],
                 holdings: [],
+                withdrawals: [],
                 transactions: [],
                 transfers: [],
                 debts: [],
@@ -171,6 +173,7 @@ final class AssetSummaryTests {
                 for: account,
                 deposits: deposits,
                 holdings: [],
+                withdrawals: [],
                 transactions: [],
                 transfers: [],
                 debts: [],
@@ -184,6 +187,7 @@ final class AssetSummaryTests {
                 of: [account],
                 deposits: deposits,
                 holdings: [],
+                withdrawals: [],
                 transactions: [],
                 transfers: [],
                 debts: [],
@@ -202,6 +206,7 @@ final class AssetSummaryTests {
             AssetSummary.netWorth(
                 accounts: [account],
                 deposits: [funded],
+                withdrawals: [],
                 holdings: [],
                 instruments: catalogue,
                 transactions: [],
@@ -223,6 +228,7 @@ final class AssetSummaryTests {
             AssetSummary.netWorth(
                 accounts: [account],
                 deposits: [external],
+                withdrawals: [],
                 holdings: [],
                 instruments: catalogue,
                 transactions: [],
@@ -254,6 +260,7 @@ final class AssetSummaryTests {
                 for: account,
                 deposits: [],
                 holdings: [holding],
+                withdrawals: [],
                 transactions: [],
                 transfers: [],
                 debts: [],
@@ -280,6 +287,7 @@ final class AssetSummaryTests {
                 for: account,
                 deposits: [deposit],
                 holdings: [holding],
+                withdrawals: [],
                 transactions: [],
                 transfers: [],
                 debts: [],
@@ -305,6 +313,7 @@ final class AssetSummaryTests {
             AssetSummary.netWorth(
                 accounts: [account],
                 deposits: [],
+                withdrawals: [],
                 holdings: [flat],
                 instruments: catalogue,
                 transactions: [],
@@ -329,6 +338,7 @@ final class AssetSummaryTests {
             AssetSummary.netWorth(
                 accounts: [account],
                 deposits: [],
+                withdrawals: [],
                 holdings: [gaining],
                 instruments: catalogue,
                 transactions: [],
@@ -354,6 +364,7 @@ final class AssetSummaryTests {
             AssetSummary.netWorth(
                 accounts: [account],
                 deposits: [],
+                withdrawals: [],
                 holdings: [external],
                 instruments: catalogue,
                 transactions: [],
@@ -405,6 +416,7 @@ final class AssetSummaryTests {
         let points = AssetHistory.points(
             accounts: [account],
             deposits: [],
+            withdrawals: [],
             holdings: [],
             instruments: [],
             transactions: [income, expense],
@@ -446,6 +458,7 @@ final class AssetSummaryTests {
         let points = AssetHistory.points(
             accounts: [account],
             deposits: [deposit],
+            withdrawals: [],
             holdings: [],
             instruments: [],
             transactions: [],
@@ -474,6 +487,7 @@ final class AssetSummaryTests {
         let points = AssetHistory.points(
             accounts: [futureAccount],
             deposits: [],
+            withdrawals: [],
             holdings: [],
             instruments: [],
             transactions: [],
@@ -513,6 +527,7 @@ final class AssetSummaryTests {
         let points = AssetHistory.points(
             accounts: [account],
             deposits: [deposit],
+            withdrawals: [],
             holdings: [],
             instruments: [],
             transactions: [],
@@ -568,6 +583,7 @@ final class AssetSummaryTests {
         let points = AssetHistory.points(
             accounts: [account],
             deposits: [],
+            withdrawals: [],
             holdings: [],
             instruments: [],
             transactions: [],

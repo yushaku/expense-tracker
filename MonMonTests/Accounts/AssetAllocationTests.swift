@@ -100,6 +100,7 @@ final class AssetAllocationTests {
         let slices = AssetAllocation.slices(
             accounts: [],
             deposits: [],
+            withdrawals: [],
             holdings: [],
             instruments: catalogue,
             transactions: [],
@@ -127,6 +128,7 @@ final class AssetAllocationTests {
         let slices = AssetAllocation.slices(
             accounts: [account],
             deposits: [deposit],
+            withdrawals: [],
             holdings: [holding],
             instruments: catalogue,
             transactions: [],
@@ -148,6 +150,7 @@ final class AssetAllocationTests {
         let slices = AssetAllocation.slices(
             accounts: [account],
             deposits: [],
+            withdrawals: [],
             holdings: [],
             instruments: catalogue,
             transactions: [],
@@ -170,6 +173,7 @@ final class AssetAllocationTests {
         let slices = AssetAllocation.slices(
             accounts: [account],
             deposits: [],
+            withdrawals: [],
             holdings: [],
             instruments: catalogue,
             transactions: transactions,
@@ -190,6 +194,7 @@ final class AssetAllocationTests {
         let slices = AssetAllocation.slices(
             accounts: [wallet, card],
             deposits: [],
+            withdrawals: [],
             holdings: [],
             instruments: catalogue,
             transactions: [],
@@ -201,6 +206,7 @@ final class AssetAllocationTests {
         let overdraft = AssetAllocation.overdraft(
             accounts: [wallet, card],
             deposits: [],
+            withdrawals: [],
             holdings: [],
             transactions: [],
             transfers: [],
@@ -232,6 +238,7 @@ final class AssetAllocationTests {
         let slices = AssetAllocation.slices(
             accounts: accounts,
             deposits: deposits,
+            withdrawals: [],
             holdings: holdings,
             instruments: catalogue,
             transactions: [],
@@ -243,6 +250,7 @@ final class AssetAllocationTests {
         let liabilities = AssetAllocation.liabilities(
             accounts: accounts,
             deposits: deposits,
+            withdrawals: [],
             holdings: holdings,
             transactions: [],
             transfers: [],
@@ -256,6 +264,7 @@ final class AssetAllocationTests {
                 == AssetSummary.netWorth(
                     accounts: accounts,
                     deposits: deposits,
+                    withdrawals: [],
                     holdings: holdings,
                     instruments: catalogue,
                     transactions: [],
@@ -289,6 +298,7 @@ final class AssetAllocationTests {
         let slices = AssetAllocation.slices(
             accounts: [account],
             deposits: [],
+            withdrawals: [],
             holdings: holdings,
             instruments: catalogue,
             transactions: [],
@@ -305,6 +315,7 @@ final class AssetAllocationTests {
                 == AssetSummary.netWorth(
                     accounts: [account],
                     deposits: [],
+                    withdrawals: [],
                     holdings: holdings,
                     instruments: catalogue,
                     transactions: [],
@@ -324,6 +335,7 @@ final class AssetAllocationTests {
             AssetAllocation.overdraft(
                 accounts: [account],
                 deposits: [],
+                withdrawals: [],
                 holdings: [],
                 transactions: [],
                 transfers: [],
@@ -342,6 +354,7 @@ final class AssetAllocationTests {
         let slices = AssetAllocation.liabilitySlices(
             accounts: [account],
             deposits: [],
+            withdrawals: [],
             holdings: [],
             transactions: [],
             transfers: [],
@@ -360,6 +373,7 @@ final class AssetAllocationTests {
         let slices = AssetAllocation.liabilitySlices(
             accounts: [makeAccount(openingBalance: 10_000_000)],
             deposits: [],
+            withdrawals: [],
             holdings: [],
             transactions: [],
             transfers: [],

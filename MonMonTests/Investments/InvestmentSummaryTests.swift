@@ -51,7 +51,9 @@ struct InvestmentSummaryTests {
     @Test("Nothing parked totals zero")
     func emptyTotalsZero() {
         #expect(
-            InvestmentSummary.total(deposits: [], holdings: [], instruments: [], sales: []) == 0)
+            InvestmentSummary.total(
+                deposits: [], withdrawals: [], holdings: [], instruments: [], sales: []
+            ) == 0)
     }
 
     @Test("Deposits alone total their principal, not their maturity value")
@@ -59,7 +61,9 @@ struct InvestmentSummaryTests {
         let deposits = [makeDeposit(principal: 100_000_000), makeDeposit(principal: 50_000_000)]
 
         #expect(
-            InvestmentSummary.total(deposits: deposits, holdings: [], instruments: [], sales: [])
+            InvestmentSummary.total(
+                deposits: deposits, withdrawals: [], holdings: [], instruments: [], sales: []
+            )
                 == 150_000_000
         )
     }
@@ -74,6 +78,7 @@ struct InvestmentSummaryTests {
         #expect(
             InvestmentSummary.total(
                 deposits: [],
+                withdrawals: [],
                 holdings: holdings,
                 instruments: [parked.instrument],
                 sales: []
@@ -89,6 +94,7 @@ struct InvestmentSummaryTests {
         #expect(
             InvestmentSummary.total(
                 deposits: deposits,
+                withdrawals: [],
                 holdings: [parked.holding],
                 instruments: [parked.instrument],
                 sales: []
@@ -109,6 +115,7 @@ struct InvestmentSummaryTests {
         #expect(
             InvestmentSummary.total(
                 deposits: [],
+                withdrawals: [],
                 holdings: [gold.holding],
                 instruments: [gold.instrument],
                 sales: []
@@ -135,6 +142,7 @@ struct InvestmentSummaryTests {
             of: [account],
             deposits: deposits,
             holdings: holdings,
+            withdrawals: [],
             transactions: [],
             transfers: [],
             debts: [],
@@ -144,6 +152,7 @@ struct InvestmentSummaryTests {
         let netWorth = AssetSummary.netWorth(
             accounts: [account],
             deposits: deposits,
+            withdrawals: [],
             holdings: holdings,
             instruments: instruments,
             transactions: [],
@@ -156,6 +165,7 @@ struct InvestmentSummaryTests {
         #expect(
             InvestmentSummary.total(
                 deposits: deposits,
+                withdrawals: [],
                 holdings: holdings,
                 instruments: instruments,
                 sales: []
