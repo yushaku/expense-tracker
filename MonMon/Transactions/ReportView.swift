@@ -27,10 +27,6 @@ struct ReportView: View {
     @State private var editorMode: TransactionEditorMode?
     @State private var isFiltering = false
 
-    /// Shared by the month swipe on the body and the swipe on each transaction
-    /// row, so one drag is acted on once.
-    @State private var swipeArbiter = HorizontalSwipeArbiter()
-
     /// One details sheet and one delete question for the whole list, rather
     /// than one of each per row.
     @State private var transactionActions = TransactionActions()
@@ -47,9 +43,7 @@ struct ReportView: View {
                     .ignoresSafeArea()
 
                 content
-                    .onMonthSwipe(perform: stepReportMonth)
             }
-            .environment(swipeArbiter)
             .compactRootNavigationTitle("Report")
             .accessibilityIdentifier("report")
             .safeAreaInset(edge: .top, spacing: 0) {
@@ -178,20 +172,6 @@ struct ReportView: View {
         TransactionPeriod.startOfMonth(for: query.range.start)
     }
 
-    private func stepReportMonth(_ steps: Int) {
-        guard
-            let moved = TransactionPeriod.calendar.date(
-                byAdding: .month,
-                value: steps,
-                to: reportMonth
-            )
-        else {
-            return
-        }
-
-        query.range = .month(containing: moved)
-    }
-
     /// Keep the selected month on the rail even when a custom range lies beyond
     /// the calendar picker's ordinary bounds.
     private var railMonths: [Date] {
@@ -238,7 +218,6 @@ struct ReportView: View {
                     filterChips
                 }
             }
-            .claimsHorizontalSwipes()
         }
     }
 

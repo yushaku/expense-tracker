@@ -25,10 +25,6 @@ struct TransactionListView: View {
     @State private var isShowingImportInbox = false
     @State private var isShowingAccounts = false
 
-    /// Shared by the month swipe on the body and the swipe on each transaction
-    /// row, so one drag is acted on once.
-    @State private var swipeArbiter = HorizontalSwipeArbiter()
-
     /// One details sheet and one delete question for the whole list, rather
     /// than one of each per row.
     @State private var transactionActions = TransactionActions()
@@ -77,9 +73,7 @@ struct TransactionListView: View {
                     .padding(.bottom, FloatingAddButton.contentInset)
                     .frame(maxWidth: .infinity)
                 }
-                .onMonthSwipe(perform: stepCalendarMonth)
             }
-            .environment(swipeArbiter)
             .overlay(alignment: .bottomTrailing) {
                 if !accounts.isEmpty {
                     FloatingAddButton(
