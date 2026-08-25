@@ -1,0 +1,184 @@
+/* Shared design system for MonMon's standalone documentation pages. */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; padding: 0; }
+
+:root {
+  color-scheme: light dark;
+
+  /* Typography */
+  --docs-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, system-ui, sans-serif;
+  --docs-mono: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas, monospace;
+  --docs-body-size: 16px;
+  --docs-body-line-height: 1.6;
+  --docs-type-2xs: 10px;
+  --docs-type-xs: 11px;
+  --docs-type-sm: 12px;
+  --docs-type-md: 14px;
+  --docs-type-lg: 18px;
+  --docs-type-xl: 20px;
+  --docs-title-size: clamp(30px, 4.8vw, 50px);
+  --docs-title-line-height: 1.08;
+  --docs-title-letter-spacing: -.035em;
+  --docs-section-size: clamp(23px, 3vw, 32px);
+  --docs-section-line-height: 1.18;
+  --docs-section-letter-spacing: -.024em;
+  --docs-label-size: var(--docs-type-xs);
+
+  /* Layout and spacing */
+  --docs-content-width: 1180px;
+  --docs-page-gutter: clamp(14px, 3vw, 24px);
+  --docs-page-padding-top: 40px;
+  --docs-page-padding-bottom: 64px;
+  --docs-section-gap: 56px;
+  --docs-grid-gap: 14px;
+  --docs-card-padding: 22px;
+  --docs-control-height: 38px;
+  --docs-space-1: 4px;
+  --docs-space-2: 8px;
+  --docs-space-3: 12px;
+  --docs-space-4: 16px;
+  --docs-space-5: 24px;
+  --docs-space-6: 32px;
+  --docs-space-7: 48px;
+  --docs-space-8: 64px;
+
+  /* Shape and depth */
+  --docs-radius-xs: 4px;
+  --docs-radius-sm: 8px;
+  --docs-radius-md: 12px;
+  --docs-radius-lg: 18px;
+  --docs-radius-pill: 999px;
+  --docs-shadow: 0 1px 2px rgba(18, 26, 36, .06), 0 8px 24px -12px rgba(18, 26, 36, .18);
+
+  /* Light semantic palette */
+  --docs-bg: #f2f5f3;
+  --docs-surface: #fbfcfb;
+  --docs-surface-2: #e9efec;
+  --docs-surface-3: #dfe7e3;
+  --docs-border: #cdd8d3;
+  --docs-border-strong: #adbcb5;
+  --docs-text: #141a18;
+  --docs-text-2: #454f4b;
+  --docs-muted: #68746e;
+  --docs-accent: #2f6f6a;
+  --docs-accent-soft: rgba(47, 111, 106, .11);
+  --docs-success: #2f7a52;
+  --docs-success-soft: rgba(47, 122, 82, .11);
+  --docs-info: #2f6f9f;
+  --docs-info-soft: rgba(47, 111, 159, .10);
+  --docs-warning: #9a6a12;
+  --docs-warning-soft: rgba(154, 106, 18, .11);
+  --docs-danger: #b04458;
+  --docs-danger-soft: rgba(176, 68, 88, .10);
+  --docs-edge: #9daba5;
+  --docs-focus: var(--docs-accent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --docs-bg: #0d1211;
+    --docs-surface: #151b19;
+    --docs-surface-2: #1c2320;
+    --docs-surface-3: #242d29;
+    --docs-border: #2a332f;
+    --docs-border-strong: #3b4640;
+    --docs-text: #e4eae7;
+    --docs-text-2: #a6b1ab;
+    --docs-muted: #7a8680;
+    --docs-accent: #6fd3c4;
+    --docs-accent-soft: rgba(111, 211, 196, .12);
+    --docs-success: #5fbd85;
+    --docs-success-soft: rgba(95, 189, 133, .12);
+    --docs-info: #72a9dd;
+    --docs-info-soft: rgba(114, 169, 221, .12);
+    --docs-warning: #d5a544;
+    --docs-warning-soft: rgba(213, 165, 68, .12);
+    --docs-danger: #e17c8f;
+    --docs-danger-soft: rgba(225, 124, 143, .12);
+    --docs-edge: #47534d;
+    --docs-shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px -14px rgba(0, 0, 0, .7);
+  }
+}
+
+:root[data-theme="dark"] {
+  --docs-bg: #0d1211;
+  --docs-surface: #151b19;
+  --docs-surface-2: #1c2320;
+  --docs-surface-3: #242d29;
+  --docs-border: #2a332f;
+  --docs-border-strong: #3b4640;
+  --docs-text: #e4eae7;
+  --docs-text-2: #a6b1ab;
+  --docs-muted: #7a8680;
+  --docs-accent: #6fd3c4;
+  --docs-accent-soft: rgba(111, 211, 196, .12);
+  --docs-success: #5fbd85;
+  --docs-success-soft: rgba(95, 189, 133, .12);
+  --docs-info: #72a9dd;
+  --docs-info-soft: rgba(114, 169, 221, .12);
+  --docs-warning: #d5a544;
+  --docs-warning-soft: rgba(213, 165, 68, .12);
+  --docs-danger: #e17c8f;
+  --docs-danger-soft: rgba(225, 124, 143, .12);
+  --docs-edge: #47534d;
+  --docs-shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px -14px rgba(0, 0, 0, .7);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-width: 320px;
+  font-family: var(--docs-sans);
+  font-size: var(--docs-body-size);
+  line-height: var(--docs-body-line-height);
+  background: var(--docs-bg);
+  color: var(--docs-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+img, svg, video { display: block; max-width: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+a { text-underline-offset: 3px; }
+
+h1 {
+  font-size: var(--docs-title-size);
+  line-height: var(--docs-title-line-height);
+  letter-spacing: var(--docs-title-letter-spacing);
+  text-wrap: balance;
+}
+
+h2 {
+  font-size: var(--docs-section-size);
+  line-height: var(--docs-section-line-height);
+  letter-spacing: var(--docs-section-letter-spacing);
+  text-wrap: balance;
+}
+
+:focus-visible {
+  outline: 3px solid var(--docs-focus);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+@media print {
+  :root {
+    color-scheme: light;
+    --docs-bg: #fff;
+    --docs-surface: #fff;
+    --docs-surface-2: #f1f3f2;
+    --docs-surface-3: #e7eae8;
+    --docs-border: #ccd2cf;
+    --docs-border-strong: #aeb8b3;
+    --docs-text: #202623;
+    --docs-text-2: #414a46;
+    --docs-muted: #68736e;
+    --docs-shadow: none;
+  }
+}
