@@ -4152,16 +4152,6 @@
         }
       }
     },
-    "No linked account": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Không có tài khoản liên kết"
-          }
-        }
-      }
-    },
     "No payments yet": {
       "localizations": {
         "vi": {

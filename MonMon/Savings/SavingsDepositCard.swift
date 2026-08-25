@@ -43,9 +43,14 @@ struct SavingsDepositCard: View {
                     .font(.headline)
                     .lineLimit(2)
 
-                Text(sourceDescription)
-                    .font(.subheadline)
-                    .foregroundStyle(MonMonTheme.textSecondary)
+                // A book funded from an account says which one. One that names
+                // no account says nothing: "no linked account" filled the line
+                // with the absence of a fact rather than with a fact.
+                if let sourceAccountName {
+                    Text("Funded from \(sourceAccountName)")
+                        .font(.subheadline)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                }
             }
 
             Spacer(minLength: 12)
@@ -102,14 +107,6 @@ struct SavingsDepositCard: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .multilineTextAlignment(.trailing)
-        }
-    }
-
-    private var sourceDescription: LocalizedStringKey {
-        if let sourceAccountName {
-            "Funded from \(sourceAccountName)"
-        } else {
-            "No linked account"
         }
     }
 
