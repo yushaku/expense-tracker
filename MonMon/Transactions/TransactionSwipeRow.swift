@@ -40,9 +40,10 @@ enum TransactionSwipeAction: Equatable {
     case delete
     case edit
 
-    /// How far the finger carries the row before letting go acts on it. Well
-    /// past a hesitant nudge, and short enough to reach without a second grab.
-    static let commitDistance: CGFloat = 120
+    /// How far the finger carries the row before letting go acts on it. Far
+    /// enough past a hesitant nudge to be meant, and near enough that a thumb
+    /// reaches it without stretching across the card.
+    static let commitDistance: CGFloat = 76
 
     static func aimed(by translation: CGFloat) -> Self? {
         if translation > 0 {
