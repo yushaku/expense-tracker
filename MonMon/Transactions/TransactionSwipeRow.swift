@@ -222,9 +222,17 @@ struct TransactionSwipeRow<Content: View>: View {
     private var rowGesture: some Gesture {
         DragGesture(minimumDistance: 12)
             .onChanged { value in
-                motion = motion.dragging(value.translation)
+                let moved = motion.dragging(value.translation)
 
-                if motion.axis == .horizontal {
+                // A drag reports every frame, and most of those frames leave
+                // the row exactly where it was: a scroll never moves it at
+                // all. Writing the state anyway would rebuild the card under
+                // the finger at the frame rate for nothing.
+                if moved != motion {
+                    motion = moved
+                }
+
+                if moved.axis == .horizontal {
                     arbiter?.claim()
                 }
             }

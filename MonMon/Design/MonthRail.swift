@@ -34,9 +34,15 @@ enum MonthRailSwipe {
 /// under the finger and steps a month. What is under the finger decides first,
 /// while it is still down, so it is the inner swipe that claims the drag and
 /// the month swipe that stands off.
+///
+/// The claim is deliberately kept out of the observation graph. It changes with
+/// every frame of a drag, and anything watching it would be redrawn at that
+/// rate — including the screen the finger is dragging across. Nothing is drawn
+/// from it: it is read by a gesture that is already running, to decide whether
+/// to act.
 @Observable
 final class HorizontalSwipeArbiter {
-    private(set) var isClaimed = false
+    @ObservationIgnored private(set) var isClaimed = false
 
     func claim() {
         isClaimed = true
@@ -71,19 +77,24 @@ private struct MonthSwipeGesture: ViewModifier {
     /// The claim is checked while the finger moves and remembered for the rest
     /// of the drag. Reading it only at the end would race the claimant
     /// releasing it, and whichever gesture ended first would decide the month.
-    @State private var isClaimed = false
+    ///
+    /// It is held in an object rather than in the state itself. This modifier
+    /// wraps the whole scrolling body of a screen, so writing to its state once
+    /// a frame would rebuild every card and row under the finger for the length
+    /// of the drag. Nothing here is drawn from what is remembered.
+    @State private var drag = MonthSwipeDrag()
 
     func body(content: Content) -> some View {
         content.simultaneousGesture(
             DragGesture(minimumDistance: 12)
                 .onChanged { _ in
                     if arbiter?.isClaimed == true {
-                        isClaimed = true
+                        drag.isClaimed = true
                     }
                 }
                 .onEnded { value in
-                    let wasClaimed = isClaimed || arbiter?.isClaimed == true
-                    isClaimed = false
+                    let wasClaimed = drag.isClaimed || arbiter?.isClaimed == true
+                    drag.isClaimed = false
 
                     guard
                         let offset = MonthRailSwipe.monthOffset(
@@ -98,6 +109,11 @@ private struct MonthSwipeGesture: ViewModifier {
                 }
         )
     }
+}
+
+/// Whether the drag now under way was claimed by something under the finger.
+private final class MonthSwipeDrag {
+    var isClaimed = false
 }
 
 private struct HorizontalSwipeClaim: ViewModifier {
