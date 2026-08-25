@@ -90,22 +90,22 @@ removal, but no commit control.
 
 **Acceptance criteria:**
 
-- [ ] Inbox rows show filename, received date, and formatted byte size without
+- [x] Inbox rows show filename, received date, and formatted byte size without
       showing content ids or paths.
-- [ ] Empty state explains how to export and Share a PDF to MonMon.
-- [ ] Preview shows bank, masked account suffix, period, completeness, candidate
+- [x] Empty state explains how to export and Share a PDF to MonMon.
+- [x] Preview shows bank, masked account suffix, period, completeness, candidate
       count, income/expense totals, notes, references, dates, direction, and page.
-- [ ] Issues and parse failures are visible through icon/text, not color alone.
-- [ ] Remove Statement is destructive, confirmed, and returns to the refreshed
+- [x] Issues and parse failures are visible through icon/text, not color alone.
+- [x] Remove Statement is destructive, confirmed, and returns to the refreshed
       list only after successful removal.
-- [ ] Controls meet 44-point targets and have stable accessibility identifiers.
+- [x] Controls meet 44-point targets and have stable accessibility identifiers.
 
 **Verification:**
 
-- [ ] iOS SDK compile succeeds after adding both screens.
-- [ ] Light/dark and English/Vietnamese strings compile with no missing catalogue
+- [x] iOS SDK compile succeeds after adding both screens.
+- [x] Light/dark and English/Vietnamese strings compile with no missing catalogue
       entries introduced by the task.
-- [ ] Code inspection confirms there is no SwiftData environment or commit path.
+- [x] Code inspection confirms there is no SwiftData environment or commit path.
 
 **Dependencies:** Task 2
 
@@ -127,19 +127,19 @@ back to the pending count.
 
 **Acceptance criteria:**
 
-- [ ] Toolbar opens Import Inbox when zero or more items exist.
-- [ ] A non-zero pending count produces a prominent one-tap banner above the
+- [x] Toolbar opens Import Inbox when zero or more items exist.
+- [x] A non-zero pending count produces a prominent one-tap banner above the
       spending overview.
-- [ ] Returning to MonMon after sharing refreshes without relaunching the app.
-- [ ] Lookup failure is visible and cannot masquerade as an empty inbox.
-- [ ] Closing the inbox after removal updates both toolbar accessibility text
+- [x] Returning to MonMon after sharing refreshes without relaunching the app.
+- [x] Lookup failure is visible and cannot masquerade as an empty inbox.
+- [x] Closing the inbox after removal updates both toolbar accessibility text
       and banner state.
 
 **Verification:**
 
-- [ ] Transaction list and import unit suites pass.
-- [ ] iOS SDK build passes without a Simulator runtime.
-- [ ] Accessibility identifiers cover toolbar, banner, inbox, rows, retry, and
+- [x] Transaction list and import unit suites pass.
+- [x] iOS SDK build passes without a Simulator runtime.
+- [x] Accessibility identifiers cover toolbar, banner, inbox, rows, retry, and
       removal confirmation.
 
 **Dependencies:** Task 3
@@ -154,10 +154,10 @@ back to the pending count.
 
 ## Checkpoint: UI
 
-- [ ] One pending statement is visible from Spending after foreground refresh.
-- [ ] Selecting it reaches parsed review or a safe retryable failure.
-- [ ] Confirmed removal refreshes every pending-state surface.
-- [ ] No Import, Save, Commit, account, category, duplicate, or transfer UI exists.
+- [x] One pending statement is visible from Spending after foreground refresh.
+- [x] Selecting it reaches parsed review or a safe retryable failure.
+- [x] Confirmed removal refreshes every pending-state surface.
+- [x] No Import, Save, Commit, account, category, duplicate, or transfer UI exists.
 
 ## Task 5: Clear gates and deploy to Yushaku
 

@@ -82,17 +82,17 @@ silently bypass that module.
 
 ### Phase 3: Owner-facing review flow
 
-- [ ] Task 3: Build the accessible inbox list and statement preview screens
-- [ ] Task 4: Integrate the pending banner, toolbar entry, scene-active refresh,
+- [x] Task 3: Build the accessible inbox list and statement preview screens
+- [x] Task 4: Integrate the pending banner, toolbar entry, scene-active refresh,
       and English/Vietnamese strings into Spending
 
 ### Checkpoint: UI
 
-- [ ] The already-staged PDF is discoverable from Spending.
-- [ ] Supported metadata, totals, candidates, and issues are visibly distinct.
-- [ ] Parse failures remain actionable; confirmed removal returns to the updated
+- [x] The already-staged PDF is discoverable from Spending.
+- [x] Supported metadata, totals, candidates, and issues are visibly distinct.
+- [x] Parse failures remain actionable; confirmed removal returns to the updated
       list.
-- [ ] No import/commit control or SwiftData mutation is present.
+- [x] No import/commit control or SwiftData mutation is present.
 
 ### Phase 4: Completion gates
 
