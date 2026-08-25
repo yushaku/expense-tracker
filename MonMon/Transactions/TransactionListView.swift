@@ -476,19 +476,15 @@ struct TransactionListView: View {
                     dayHeader(for: group)
 
                     ForEach(group.transactions) { transaction in
-                        Button {
+                        TransactionItem(
+                            transaction: transaction,
+                            category: category(for: transaction),
+                            account: account(for: transaction),
+                            showsDate: false,
+                            accessibilityIdentifier: "transaction-\(transaction.id.uuidString)"
+                        ) {
                             editorMode = .edit(transaction)
-                        } label: {
-                            TransactionCard(
-                                transaction: transaction,
-                                category: category(for: transaction),
-                                account: account(for: transaction),
-                                showsDate: false
-                            )
                         }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("transaction-\(transaction.id.uuidString)")
-                        .accessibilityHint("Opens the transaction editor.")
                     }
                 }
             }

@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// A quick read of one report result. Editing remains in the full editor; this
-/// sheet is deliberately read-only so a tap never changes money by accident.
+/// A quick read of one transaction list item. Editing remains in the full
+/// editor; this sheet is read-only so a tap never changes money by accident.
 struct TransactionDetailSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
@@ -63,7 +63,7 @@ struct TransactionDetailSheet: View {
                 Button("Delete", role: .destructive) {
                     delete()
                 }
-                .accessibilityIdentifier("confirm-delete-report-transaction")
+                .accessibilityIdentifier("confirm-delete-transaction-detail")
 
                 Button("Cancel", role: .cancel) {}
             } message: {
