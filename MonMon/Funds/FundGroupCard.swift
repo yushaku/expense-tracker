@@ -3,6 +3,8 @@ import SwiftUI
 /// One fund, however many times it was bought: total units, what the stack cost
 /// per unit on average, and where it stands against today's price.
 struct FundGroupCard: View {
+    @Environment(\.locale) private var locale
+
     let group: FundPositionGroup
     /// Passed in rather than read from the clock, so a preview and a test both
     /// get a stable answer for whether the price is stale.
@@ -134,9 +136,10 @@ struct FundGroupCard: View {
     /// nothing the ticker had not.
     private var subtitle: String {
         guard group.instrument != nil else {
-            return "Unknown instrument · \(group.positionCountLabel)"
+            let unknown = AppText.string("Unknown instrument", in: locale)
+            return "\(unknown) · \(group.positionCountLabel(in: locale))"
         }
 
-        return group.positionCountLabel
+        return group.positionCountLabel(in: locale)
     }
 }

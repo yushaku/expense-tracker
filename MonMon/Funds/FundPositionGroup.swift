@@ -115,8 +115,14 @@ struct FundPositionGroup: Identifiable {
         holdings.filter { $0.remainingUnits(sales: sales) > 0 }
     }
 
-    var positionCountLabel: String {
-        "\(holdings.count) positions"
+    /// How many purchases went into this stack, in the language on show. Takes
+    /// a locale rather than returning a `LocalizedStringKey`, because it lands
+    /// inside a longer sentence a card builds as a plain string.
+    func positionCountLabel(in locale: Locale) -> String {
+        String(
+            format: AppText.string("%lld positions", in: locale),
+            holdings.count
+        )
     }
 }
 

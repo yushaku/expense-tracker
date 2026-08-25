@@ -279,18 +279,27 @@ struct FundHoldingCard: View {
             ? GoldWeight.label(luong: remainingUnits) : UnitQuantity.format(remainingUnits)
     }
 
+    /// Built as a plain `String`, so every word in it has to be resolved here.
+    ///
+    /// `kind.displayName` is a `LocalizedStringKey`, and interpolating one of
+    /// those into a string does not look it up — it prints the key's debug
+    /// description, brackets and all. The kind therefore goes through
+    /// `displayName(in:)`, and the two words around it through `AppText`.
     private var subtitle: String {
         let bought = TransactionPeriod.day(holding.boughtOn, in: locale)
 
         guard let instrument else {
-            return "Unknown instrument · \(bought)"
+            return "\(AppText.string("Unknown instrument", in: locale)) · \(bought)"
         }
+
+        let kind = instrument.kind.displayName(in: locale)
 
         if let sourceAccountName {
-            return "\(instrument.kind.displayName) · \(bought) · from \(sourceAccountName)"
+            let from = AppText.string("from", in: locale)
+            return "\(kind) · \(bought) · \(from) \(sourceAccountName)"
         }
 
-        return "\(instrument.kind.displayName) · \(bought)"
+        return "\(kind) · \(bought)"
     }
 }
 
