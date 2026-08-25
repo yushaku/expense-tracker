@@ -25,6 +25,7 @@ struct ReportView: View {
     @State private var query = TransactionQuery(range: .year(containing: .now))
     @State private var breakdownKind: TransactionKind = .expense
     @State private var editorMode: TransactionEditorMode?
+    @State private var isSearching = false
     @State private var isFiltering = false
 
     /// Weekday first: over a run of days the name is what the eye picks out, and
@@ -44,11 +45,17 @@ struct ReportView: View {
             .accessibilityIdentifier("report")
             .searchable(
                 text: $query.text,
-                placement: .navigationBarDrawer(displayMode: .always),
+                isPresented: $isSearching,
+                placement: .navigationBarDrawer(displayMode: .automatic),
                 prompt: Text("Search notes, categories, amounts")
             )
+            .safeAreaInset(edge: .top, spacing: 0) {
+                monthRail
+            }
             .toolbar {
                 ToolbarItemGroup(placement: .primaryAction) {
+                    searchButton
+
                     filterButton
 
                     DateRangeFilterButton(
@@ -82,12 +89,14 @@ struct ReportView: View {
 
         return ScrollView {
             LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                SpendingOverviewCard(
-                    title: query.range.title(in: locale),
-                    income: TransactionSummary.totalIncome(of: results),
-                    expense: TransactionSummary.totalExpense(of: results),
-                    count: results.count
-                )
+                if !query.hasSearchText {
+                    SpendingOverviewCard(
+                        title: query.range.title(in: locale),
+                        income: TransactionSummary.totalIncome(of: results),
+                        expense: TransactionSummary.totalExpense(of: results),
+                        count: results.count
+                    )
+                }
 
                 if query.isNarrowed {
                     activeFilters
@@ -96,9 +105,11 @@ struct ReportView: View {
                 if results.isEmpty {
                     emptyState
                 } else {
-                    MonthlyFlowCard(months: TransactionSummary.byMonth(results))
+                    if !query.hasSearchText {
+                        MonthlyFlowCard(months: TransactionSummary.byMonth(results))
 
-                    NetTrendCard(points: TransactionSummary.runningNet(results))
+                        NetTrendCard(points: TransactionSummary.runningNet(results))
+                    }
 
                     CategoryBreakdownCard(
                         kind: $breakdownKind,
@@ -148,6 +159,60 @@ struct ReportView: View {
         query.range.contains(.now) ? .now : query.range.start
     }
 
+    /// The months either side of the report period, pinned under the navigation
+    /// bar so moving from a wider report to one month takes a single tap.
+    private var monthRail: some View {
+        MonthRail(months: railMonths, selection: reportMonth) { month in
+            query.range = .month(containing: month)
+        }
+        .background(MonMonTheme.canvas)
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(MonMonTheme.border)
+                .frame(height: 1)
+        }
+    }
+
+    /// A wider period is represented by its first month, matching the Spending
+    /// screen when its date filter is set to a year or a custom range.
+    private var reportMonth: Date {
+        TransactionPeriod.startOfMonth(for: query.range.start)
+    }
+
+    /// Keep the selected month on the rail even when a custom range lies beyond
+    /// the calendar picker's ordinary bounds.
+    private var railMonths: [Date] {
+        TransactionPeriod.months(
+            from: min(CalendarTheme.startMonth(), reportMonth),
+            through: max(CalendarTheme.endMonth(), reportMonth)
+        )
+    }
+
+    private var searchButton: some View {
+        Button {
+            isSearching = true
+        } label: {
+            ZStack(alignment: .topTrailing) {
+                Image(systemName: "magnifyingglass")
+                    .font(.footnote.weight(.bold))
+                    .foregroundStyle(MonMonTheme.accent)
+                    .frame(width: 30, height: 30)
+                    .background(MonMonTheme.accent.opacity(0.16), in: Circle())
+
+                if query.hasSearchText {
+                    Circle()
+                        .fill(MonMonTheme.accent)
+                        .frame(width: 8, height: 8)
+                        .accessibilityHidden(true)
+                }
+            }
+            .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Search transactions")
+        .accessibilityIdentifier("open-report-search")
+    }
+
     private var filterButton: some View {
         Button {
             isFiltering = true
@@ -161,7 +226,7 @@ struct ReportView: View {
 
                 // A filter left on from an earlier question is the easiest thing
                 // on this screen to forget, so the button says when one is.
-                if query.isNarrowed {
+                if query.hasStructuredFilters {
                     Circle()
                         .fill(MonMonTheme.accent)
                         .frame(width: 8, height: 8)

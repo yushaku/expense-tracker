@@ -49,7 +49,7 @@ struct ReportFilterSheet: View {
                     Button("Clear") {
                         clear()
                     }
-                    .disabled(!query.isNarrowed)
+                    .disabled(!query.hasStructuredFilters)
                     .accessibilityIdentifier("clear-report-filters")
                 }
 
@@ -66,9 +66,9 @@ struct ReportFilterSheet: View {
     }
 
     /// Clearing leaves the period alone: it is the one filter the screen is
-    /// never without, and it is changed from the toolbar rather than here.
+    /// never without. Search also stays untouched because it has its own
+    /// toolbar control beside this filter.
     private func clear() {
-        query.text = ""
         query.filter = .all
         query.categoryIDs = []
         query.accountIDs = []
