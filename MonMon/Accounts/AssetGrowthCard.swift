@@ -1,8 +1,28 @@
 import Charts
 import SwiftUI
 
+/// Which reading of the trend is on show: the one figure, or what it is made
+/// of.
+enum AssetTrendMode: String, CaseIterable, Identifiable {
+    case total
+    case composition
+
+    var id: String { rawValue }
+
+    var displayName: LocalizedStringKey {
+        switch self {
+        case .total:
+            "Total"
+        case .composition:
+            "Split"
+        }
+    }
+}
+
 struct AssetGrowthCard: View {
     let points: [AssetHistoryPoint]
+
+    @State private var mode: AssetTrendMode = .total
 
     private var currentPoint: AssetHistoryPoint? {
         points.last
@@ -17,12 +37,28 @@ struct AssetGrowthCard: View {
         VStack(alignment: .leading, spacing: 18) {
             header
             summary
-            chart
 
-            Text("Historical fund and gold values use current prices.")
+            SegmentedTabs(
+                label: "Trend reading",
+                selection: $mode,
+                options: AssetTrendMode.allCases,
+                title: \.displayName
+            )
+            .accessibilityIdentifier("net-worth-trend-mode")
+
+            switch mode {
+            case .total:
+                chart
+            case .composition:
+                compositionChart
+                compositionLegend
+            }
+
+            Text(caption)
                 .font(.caption)
                 .foregroundStyle(MonMonTheme.textMuted)
         }
+        .animation(.snappy(duration: 0.28), value: mode)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(24)
         .background {
@@ -130,6 +166,145 @@ struct AssetGrowthCard: View {
         .accessibilityHidden(true)
     }
 
+    /// The split is drawn from what is held, not from what it was worth at the
+    /// time: the store keeps no past prices, so a fund or gold band moves only
+    /// when units were bought or sold. Saying so under the chart is the only
+    /// honest way to draw it.
+    private var caption: LocalizedStringKey {
+        switch mode {
+        case .total:
+            "Historical fund and gold values use current prices."
+        case .composition:
+            """
+            Fund and gold bands are today's price applied to what was held, so \
+            they move when you buy or sell, not when the market does. Anything \
+            owed is the gap between the bands and the line.
+            """
+        }
+    }
+
+    /// The groups the assets split into, stacked oldest first, with the net
+    /// worth line over them. What is owed cannot be a band of assets, so it
+    /// shows as the gap between the top of the stack and the line.
+    private var compositionChart: some View {
+        Chart {
+            ForEach(points) { point in
+                ForEach(drawnComposition(of: point)) { slice in
+                    AreaMark(
+                        x: .value("Date", point.date),
+                        y: .value("Amount", slice.amount.chartValue),
+                        stacking: .standard
+                    )
+                    .interpolationMethod(.monotone)
+                    .foregroundStyle(by: .value("Group", slice.kind.rawValue))
+                }
+            }
+
+            ForEach(points) { point in
+                LineMark(
+                    x: .value("Date", point.date),
+                    y: .value("Net worth", point.netWorth.chartValue),
+                    series: .value("Group", "net")
+                )
+                .interpolationMethod(.monotone)
+                .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+                .foregroundStyle(MonMonTheme.textPrimary)
+            }
+        }
+        .chartForegroundStyleScale(
+            domain: drawnKinds.map(\.rawValue),
+            range: drawnKinds.map { $0.tint.opacity(0.75) }
+        )
+        .chartLegend(.hidden)
+        .chartXAxis {
+            AxisMarks(values: .automatic(desiredCount: 4)) { _ in
+                AxisGridLine()
+                    .foregroundStyle(MonMonTheme.border)
+                AxisTick()
+                    .foregroundStyle(MonMonTheme.border)
+                AxisValueLabel(format: .dateTime.month(.abbreviated))
+                    .foregroundStyle(MonMonTheme.textMuted)
+            }
+        }
+        .chartYAxis {
+            AxisMarks(position: .leading, values: .automatic(desiredCount: 4)) { value in
+                AxisGridLine()
+                    .foregroundStyle(MonMonTheme.border)
+                AxisValueLabel {
+                    if let amount = value.as(Double.self) {
+                        Text(VNDCurrency.format(amount))
+                    }
+                }
+                .foregroundStyle(MonMonTheme.textMuted)
+            }
+        }
+        .frame(height: 210)
+        // The legend below names every band and states what it is worth today,
+        // which is the reading of this chart that survives being read aloud.
+        .accessibilityHidden(true)
+    }
+
+    /// Names the bands, with what each is worth at the end of the run. A group
+    /// nobody holds is left out rather than drawn as a hairline.
+    private var compositionLegend: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 16) {
+                legendEntries
+            }
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 16) {
+                    legendEntries
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var legendEntries: some View {
+        ForEach(drawnKinds, id: \.self) { kind in
+            HStack(spacing: 7) {
+                RoundedRectangle(cornerRadius: 3, style: .continuous)
+                    .fill(kind.tint.opacity(0.75))
+                    .frame(width: 10, height: 10)
+                    .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(kind.displayName)
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(MonMonTheme.textSecondary)
+
+                    Text(VNDCurrency.format(currentAmount(of: kind)))
+                        .font(.caption.weight(.bold))
+                        .monospacedDigit()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+            }
+            .accessibilityElement(children: .combine)
+        }
+
+        Spacer(minLength: 0)
+    }
+
+    /// Only the groups something was ever held in, so a ledger of cash alone
+    /// draws one band rather than five, four of them flat on zero.
+    private var drawnKinds: [AssetAllocationSlice.Kind] {
+        AssetAllocationSlice.Kind.allCases.filter { kind in
+            points.contains { point in
+                point.composition.contains { $0.kind == kind && $0.amount > 0 }
+            }
+        }
+    }
+
+    private func drawnComposition(of point: AssetHistoryPoint) -> [AssetAllocationSlice] {
+        point.composition.filter { drawnKinds.contains($0.kind) }
+    }
+
+    private func currentAmount(of kind: AssetAllocationSlice.Kind) -> Decimal {
+        currentPoint?.composition.first { $0.kind == kind }?.amount ?? .zero
+    }
+
     private var changeLabel: LocalizedStringKey {
         let amount = change < 0 ? -change : change
         let sign = change > 0 ? "+" : change < 0 ? "−" : ""
@@ -169,26 +344,40 @@ private extension Decimal {
 }
 
 #if DEBUG
+    private extension AssetHistoryPoint {
+        /// A point in millions, spelled out so a preview reads as a shape rather
+        /// than as a wall of zeros.
+        static func preview(
+            _ timestamp: TimeInterval,
+            cash: Decimal,
+            savings: Decimal,
+            funds: Decimal,
+            gold: Decimal
+        ) -> Self {
+            let composition: [AssetAllocationSlice] = [
+                .init(kind: .cash, amount: cash * 1_000_000),
+                .init(kind: .savings, amount: savings * 1_000_000),
+                .init(kind: .funds, amount: funds * 1_000_000),
+                .init(kind: .gold, amount: gold * 1_000_000),
+                .init(kind: .lent, amount: 0),
+            ]
+
+            return AssetHistoryPoint(
+                date: Date(timeIntervalSince1970: timestamp),
+                netWorth: composition.reduce(Decimal.zero) { $0 + $1.amount },
+                composition: composition
+            )
+        }
+    }
+
     #Preview("Net worth trend") {
         ScrollView {
             AssetGrowthCard(
                 points: [
-                    AssetHistoryPoint(
-                        date: Date(timeIntervalSince1970: 1_704_067_200),
-                        netWorth: 420_000_000
-                    ),
-                    AssetHistoryPoint(
-                        date: Date(timeIntervalSince1970: 1_712_000_000),
-                        netWorth: 465_000_000
-                    ),
-                    AssetHistoryPoint(
-                        date: Date(timeIntervalSince1970: 1_719_900_000),
-                        netWorth: 448_000_000
-                    ),
-                    AssetHistoryPoint(
-                        date: Date(timeIntervalSince1970: 1_727_800_000),
-                        netWorth: 512_000_000
-                    ),
+                    .preview(1_704_067_200, cash: 120, savings: 200, funds: 80, gold: 20),
+                    .preview(1_712_000_000, cash: 140, savings: 200, funds: 100, gold: 25),
+                    .preview(1_719_900_000, cash: 118, savings: 210, funds: 95, gold: 25),
+                    .preview(1_727_800_000, cash: 160, savings: 230, funds: 92, gold: 30),
                 ]
             )
             .padding(20)

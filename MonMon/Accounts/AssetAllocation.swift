@@ -86,6 +86,88 @@ struct LiabilityAllocationSlice: Identifiable, Equatable {
 /// owner holds a claim to but cannot spend, and leaving it undrawn would put the
 /// ring and its centre figure out of step by exactly the amount lent.
 enum AssetAllocation {
+    /// What each group is worth, every group kept — a zero included — and always
+    /// in the same order.
+    ///
+    /// The ring drops the empty ones and sorts by size; a chart of the same
+    /// groups over time cannot, or its bands would swap places between one month
+    /// and the next. Both read this, so neither can drift from the other or from
+    /// `AssetSummary.netWorth`.
+    static func amounts(
+        accounts: [CashAccount],
+        deposits: [SavingsDeposit],
+        holdings: [FundHolding],
+        instruments: [FundInstrument],
+        transactions: [MoneyTransaction],
+        transfers: [AccountTransfer],
+        debts: [Debt],
+        payments: [DebtPayment],
+        sales: [FundSale]
+    ) -> [AssetAllocationSlice] {
+        AssetAllocationSlice.Kind.allCases.map { kind in
+            AssetAllocationSlice(
+                kind: kind,
+                amount: amount(
+                    of: kind,
+                    accounts: accounts,
+                    deposits: deposits,
+                    holdings: holdings,
+                    instruments: instruments,
+                    transactions: transactions,
+                    transfers: transfers,
+                    debts: debts,
+                    payments: payments,
+                    sales: sales
+                )
+            )
+        }
+    }
+
+    private static func amount(
+        of kind: AssetAllocationSlice.Kind,
+        accounts: [CashAccount],
+        deposits: [SavingsDeposit],
+        holdings: [FundHolding],
+        instruments: [FundInstrument],
+        transactions: [MoneyTransaction],
+        transfers: [AccountTransfer],
+        debts: [Debt],
+        payments: [DebtPayment],
+        sales: [FundSale]
+    ) -> Decimal {
+        switch kind {
+        case .cash:
+            positiveCash(
+                accounts: accounts,
+                deposits: deposits,
+                holdings: holdings,
+                transactions: transactions,
+                transfers: transfers,
+                debts: debts,
+                payments: payments,
+                sales: sales
+            )
+        case .savings:
+            AssetSummary.totalPrincipal(of: deposits)
+        case .funds:
+            FundSummary.totalMarketValue(
+                of: holdings,
+                instruments: instruments,
+                sales: sales,
+                kinds: [.fund, .etf]
+            )
+        case .gold:
+            FundSummary.totalMarketValue(
+                of: holdings,
+                instruments: instruments,
+                sales: sales,
+                kinds: [.gold]
+            )
+        case .lent:
+            DebtSummary.totalOutstanding(of: debts, payments: payments, direction: .lent)
+        }
+    }
+
     /// The wedges to draw, largest first, with empty groups dropped so the ring
     /// never carries a zero-width slice.
     static func slices(
@@ -99,56 +181,19 @@ enum AssetAllocation {
         payments: [DebtPayment],
         sales: [FundSale]
     ) -> [AssetAllocationSlice] {
-        let candidates = [
-            AssetAllocationSlice(
-                kind: .cash,
-                amount: positiveCash(
-                    accounts: accounts,
-                    deposits: deposits,
-                    holdings: holdings,
-                    transactions: transactions,
-                    transfers: transfers,
-                    debts: debts,
-                    payments: payments,
-                    sales: sales
-                )
-            ),
-            AssetAllocationSlice(
-                kind: .savings,
-                amount: AssetSummary.totalPrincipal(of: deposits)
-            ),
-            AssetAllocationSlice(
-                kind: .funds,
-                amount: FundSummary.totalMarketValue(
-                    of: holdings,
-                    instruments: instruments,
-                    sales: sales,
-                    kinds: [.fund, .etf]
-                )
-            ),
-            AssetAllocationSlice(
-                kind: .gold,
-                amount: FundSummary.totalMarketValue(
-                    of: holdings,
-                    instruments: instruments,
-                    sales: sales,
-                    kinds: [.gold]
-                )
-            ),
-            AssetAllocationSlice(
-                kind: .lent,
-                amount: DebtSummary.totalOutstanding(
-                    of: debts,
-                    payments: payments,
-                    direction: .lent
-                )
-            ),
-        ]
-
-        return
-            candidates
-            .filter { $0.amount > 0 }
-            .sorted { $0.amount > $1.amount }
+        amounts(
+            accounts: accounts,
+            deposits: deposits,
+            holdings: holdings,
+            instruments: instruments,
+            transactions: transactions,
+            transfers: transfers,
+            debts: debts,
+            payments: payments,
+            sales: sales
+        )
+        .filter { $0.amount > 0 }
+        .sorted { $0.amount > $1.amount }
     }
 
     /// Spendable cash across accounts that are not overdrawn.

@@ -82,6 +82,14 @@ enum AssetSummary {
 struct AssetHistoryPoint: Identifiable, Equatable {
     let date: Date
     let netWorth: Decimal
+    /// What the assets were split into on that date, every group kept and always
+    /// in the same order, so a chart of them keeps its bands in place from one
+    /// month to the next.
+    ///
+    /// These add up to more than `netWorth` whenever anything is owed: what is
+    /// borrowed and what is overdrawn are subtracted from the total but cannot
+    /// be drawn as a band of assets.
+    let composition: [AssetAllocationSlice]
 
     var id: Date { date }
 }
@@ -138,18 +146,40 @@ enum AssetHistory {
             through: asOf,
             calendar: calendar
         ).map { date in
-            AssetHistoryPoint(
+            // Every figure on a point comes from the same filtered records, so
+            // the bands and the line can never disagree about a month.
+            let accounts = accounts.filter { $0.createdAt <= date }
+            let deposits = deposits.filter { $0.openedAt <= date }
+            let holdings = holdings.filter { $0.boughtOn <= date }
+            let transactions = transactions.filter { $0.occurredAt <= date }
+            let transfers = transfers.filter { $0.occurredAt <= date }
+            let debts = debts.filter { $0.openedAt <= date }
+            let payments = payments.filter { $0.occurredAt <= date }
+            let sales = sales.filter { $0.soldAt <= date }
+
+            return AssetHistoryPoint(
                 date: date,
                 netWorth: AssetSummary.netWorth(
-                    accounts: accounts.filter { $0.createdAt <= date },
-                    deposits: deposits.filter { $0.openedAt <= date },
-                    holdings: holdings.filter { $0.boughtOn <= date },
+                    accounts: accounts,
+                    deposits: deposits,
+                    holdings: holdings,
                     instruments: instruments,
-                    transactions: transactions.filter { $0.occurredAt <= date },
-                    transfers: transfers.filter { $0.occurredAt <= date },
-                    debts: debts.filter { $0.openedAt <= date },
-                    payments: payments.filter { $0.occurredAt <= date },
-                    sales: sales.filter { $0.soldAt <= date }
+                    transactions: transactions,
+                    transfers: transfers,
+                    debts: debts,
+                    payments: payments,
+                    sales: sales
+                ),
+                composition: AssetAllocation.amounts(
+                    accounts: accounts,
+                    deposits: deposits,
+                    holdings: holdings,
+                    instruments: instruments,
+                    transactions: transactions,
+                    transfers: transfers,
+                    debts: debts,
+                    payments: payments,
+                    sales: sales
                 )
             )
         }

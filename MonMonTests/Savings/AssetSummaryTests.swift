@@ -487,4 +487,109 @@ final class AssetSummaryTests {
 
         #expect(points.isEmpty)
     }
+
+    @Test("A point splits into the same groups the ring draws, zeros kept")
+    func assetHistoryPointCarriesItsComposition() {
+        let account = CashAccount(
+            id: UUID(),
+            name: "Bank",
+            kind: .bank,
+            openingBalance: 100,
+            currencyCode: VNDCurrency.code,
+            createdAt: date(2024, 1, 10)
+        )
+        let deposit = SavingsDeposit(
+            id: UUID(),
+            name: "Deposit",
+            principal: 40,
+            annualInterestRate: 5,
+            termMonths: 12,
+            openedAt: date(2024, 2, 10),
+            currencyCode: VNDCurrency.code,
+            createdAt: date(2024, 2, 10),
+            sourceAccountID: account.id
+        )
+
+        let points = AssetHistory.points(
+            accounts: [account],
+            deposits: [deposit],
+            holdings: [],
+            instruments: [],
+            transactions: [],
+            transfers: [],
+            debts: [],
+            payments: [],
+            sales: [],
+            asOf: date(2024, 3, 15),
+            calendar: utcCalendar
+        )
+
+        let opening = try! #require(points.first)
+        let latest = try! #require(points.last)
+
+        // Every group is present on every point, in one order, so a chart of
+        // them never swaps a band between months.
+        #expect(opening.composition.map(\.kind) == AssetAllocationSlice.Kind.allCases)
+        #expect(latest.composition.map(\.kind) == AssetAllocationSlice.Kind.allCases)
+
+        #expect(amount(of: .cash, in: opening) == 100)
+        #expect(amount(of: .savings, in: opening) == 0)
+
+        // Funding the book moved the money without making any.
+        #expect(amount(of: .cash, in: latest) == 60)
+        #expect(amount(of: .savings, in: latest) == 40)
+        #expect(latest.netWorth == 100)
+    }
+
+    @Test("What is owed is the gap between the bands and the line")
+    func assetHistoryCompositionExcludesWhatIsOwed() {
+        let account = CashAccount(
+            id: UUID(),
+            name: "Bank",
+            kind: .bank,
+            openingBalance: 100,
+            currencyCode: VNDCurrency.code,
+            createdAt: date(2024, 1, 10)
+        )
+        let borrowed = Debt(
+            id: UUID(),
+            counterparty: "Bank",
+            direction: .borrowed,
+            principal: 30,
+            annualInterestRate: 0,
+            openedAt: date(2024, 1, 10),
+            dueDate: nil,
+            accountID: nil,
+            note: "",
+            currencyCode: VNDCurrency.code,
+            createdAt: date(2024, 1, 10)
+        )
+
+        let points = AssetHistory.points(
+            accounts: [account],
+            deposits: [],
+            holdings: [],
+            instruments: [],
+            transactions: [],
+            transfers: [],
+            debts: [borrowed],
+            payments: [],
+            sales: [],
+            asOf: date(2024, 2, 15),
+            calendar: utcCalendar
+        )
+
+        let latest = try! #require(points.last)
+        let banded = latest.composition.reduce(Decimal.zero) { $0 + $1.amount }
+
+        #expect(banded == 100)
+        #expect(latest.netWorth == 70)
+    }
+
+    private func amount(
+        of kind: AssetAllocationSlice.Kind,
+        in point: AssetHistoryPoint
+    ) -> Decimal {
+        point.composition.first { $0.kind == kind }?.amount ?? .zero
+    }
 }

@@ -7223,6 +7223,46 @@
           }
         }
       }
+    },
+    "Total": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tổng"
+          }
+        }
+      }
+    },
+    "Split": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cơ cấu"
+          }
+        }
+      }
+    },
+    "Trend reading": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cách đọc xu hướng"
+          }
+        }
+      }
+    },
+    "Fund and gold bands are today's price applied to what was held, so they move when you buy or sell, not when the market does. Anything owed is the gap between the bands and the line.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dải quỹ và vàng là giá hôm nay áp lên số đang giữ, nên chúng chỉ đổi khi bạn mua hoặc bán, không đổi theo thị trường. Phần nợ là khoảng cách giữa dải và đường."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
