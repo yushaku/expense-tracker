@@ -27,6 +27,10 @@ struct ReportView: View {
     @State private var editorMode: TransactionEditorMode?
     @State private var isFiltering = false
 
+    /// Shared by the month swipe on the body and the swipe on each transaction
+    /// row, so one drag is acted on once.
+    @State private var swipeArbiter = HorizontalSwipeArbiter()
+
     /// Weekday first: over a run of days the name is what the eye picks out, and
     /// the year is left to the period title above the list.
     private static let dayTemplate = Date.FormatStyle().weekday(.abbreviated).day().month(
@@ -41,6 +45,7 @@ struct ReportView: View {
                 content
                     .onMonthSwipe(perform: stepReportMonth)
             }
+            .environment(swipeArbiter)
             .compactRootNavigationTitle("Report")
             .accessibilityIdentifier("report")
             .safeAreaInset(edge: .top, spacing: 0) {

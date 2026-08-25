@@ -15,12 +15,60 @@ enum MonthRailSwipe {
     }
 }
 
+/// Which of the two horizontal swipes on a screen owns the finger.
+///
+/// A month swipe reads the whole scrolling body, and a transaction row reads
+/// itself; both are horizontal, so without a shared answer one drag is read
+/// twice and the screen both reveals a row action and steps a month. The row
+/// decides first, while the finger is still down, so it is the row that claims
+/// and the month swipe that stands off.
+@Observable
+final class HorizontalSwipeArbiter {
+    private(set) var isRowDragging = false
+
+    func claimRow() {
+        isRowDragging = true
+    }
+
+    func releaseRow() {
+        isRowDragging = false
+    }
+}
+
 extension View {
     func onMonthSwipe(perform action: @escaping (Int) -> Void) -> some View {
-        simultaneousGesture(
+        modifier(MonthSwipeGesture(action: action))
+    }
+}
+
+/// A drag on the body of a screen, read as a month step unless a transaction
+/// row claimed it first.
+private struct MonthSwipeGesture: ViewModifier {
+    @Environment(HorizontalSwipeArbiter.self) private var arbiter: HorizontalSwipeArbiter?
+
+    let action: (Int) -> Void
+
+    /// The claim is checked while the finger moves and remembered for the rest
+    /// of the drag. Reading it only at the end would race the row releasing its
+    /// own claim, and whichever gesture ended first would decide the month.
+    @State private var isClaimedByRow = false
+
+    func body(content: Content) -> some View {
+        content.simultaneousGesture(
             DragGesture(minimumDistance: 12)
+                .onChanged { _ in
+                    if arbiter?.isRowDragging == true {
+                        isClaimedByRow = true
+                    }
+                }
                 .onEnded { value in
-                    guard let offset = MonthRailSwipe.monthOffset(for: value.translation) else {
+                    let wasClaimed = isClaimedByRow || arbiter?.isRowDragging == true
+                    isClaimedByRow = false
+
+                    guard
+                        !wasClaimed,
+                        let offset = MonthRailSwipe.monthOffset(for: value.translation)
+                    else {
                         return
                     }
 

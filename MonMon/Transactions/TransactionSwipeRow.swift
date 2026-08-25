@@ -159,6 +159,10 @@ struct TransactionSwipeRow<Content: View>: View {
     let onDelete: () -> Void
     let content: Content
 
+    /// Set by the screen that also reads a month swipe, so the two horizontal
+    /// gestures do not both act on one drag.
+    @Environment(HorizontalSwipeArbiter.self) private var arbiter: HorizontalSwipeArbiter?
+
     @State private var motion = TransactionSwipeMotion()
 
     init(
@@ -251,12 +255,18 @@ struct TransactionSwipeRow<Content: View>: View {
         DragGesture(minimumDistance: 12)
             .onChanged { value in
                 motion = motion.dragging(value.translation)
+
+                if motion.axis == .horizontal {
+                    arbiter?.claimRow()
+                }
             }
             .onEnded { value in
                 let settledMotion =
                     motion
                     .dragging(value.translation)
                     .endingDrag()
+
+                arbiter?.releaseRow()
 
                 withAnimation(.snappy(duration: 0.25)) {
                     motion = settledMotion
