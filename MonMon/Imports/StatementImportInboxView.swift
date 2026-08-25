@@ -91,14 +91,14 @@ struct StatementImportInboxView: View {
                     .font(.subheadline)
                     .foregroundStyle(MonMonTheme.textSecondary)
 
-                ForEach(statements) { statement in
+                ForEach(Array(statements.enumerated()), id: \.element.id) { index, statement in
                     NavigationLink {
                         StatementImportPreviewView(inbox: inbox, staged: statement)
                     } label: {
                         statementRow(statement)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityIdentifier("import-statement-\(statement.id)")
+                    .accessibilityIdentifier("import-statement-\(index)")
                 }
             }
             .frame(maxWidth: MonMonTheme.maxContentWidth)

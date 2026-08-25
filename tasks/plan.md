@@ -101,8 +101,8 @@ silently bypass that module.
 ### Checkpoint: Complete
 
 - [ ] Approved spec success criteria are met.
-- [ ] Full macOS tests and recursive format lint pass.
-- [ ] Compile-only iOS SDK build passes without using a Simulator runtime.
+- [x] Full macOS tests and recursive format lint pass.
+- [x] Compile-only iOS SDK build passes without using a Simulator runtime.
 - [ ] Physical build, install, and launch succeed on `Yushaku`.
 - [ ] Owner performs hands-on inbox/preview/removal acceptance testing.
 - [ ] No real PDF, extracted statement content, local path, or generated output
@@ -136,12 +136,12 @@ silently bypass that module.
 
 ## Review Checklist
 
-- [ ] Scope matches the approved review-only spec.
-- [ ] New abstractions are justified by entitlement and async-test seams.
-- [ ] Accessibility labels do not rely on color or icon meaning alone.
-- [ ] Error messages contain no statement-derived values.
-- [ ] No unrelated transaction, parser, or storage behavior changed.
-- [ ] `import-reconciliation` is still required before commit controls.
+- [x] Scope matches the approved review-only spec.
+- [x] New abstractions are justified by entitlement and async-test seams.
+- [x] Accessibility labels do not rely on color or icon meaning alone.
+- [x] Error messages contain no statement-derived values.
+- [x] No unrelated transaction, parser, or storage behavior changed.
+- [x] `import-reconciliation` is still required before commit controls.
 
 ## Open Questions
 

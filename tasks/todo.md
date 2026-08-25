@@ -167,18 +167,18 @@ iPhone. Hand the actual inbox interaction to the owner.
 
 **Acceptance criteria:**
 
-- [ ] Full macOS tests pass.
-- [ ] Recursive Swift format lint passes.
-- [ ] Compile-only iOS SDK build passes.
+- [x] Full macOS tests pass.
+- [x] Recursive Swift format lint passes.
+- [x] Compile-only iOS SDK build passes.
 - [ ] Physical build, install, and launch succeed on `Yushaku`.
-- [ ] Git diff contains no real PDF, extracted data, local path, content hash,
+- [x] Git diff contains no real PDF, extracted data, local path, content hash,
       derived output, or unrelated edits.
 
 **Verification:**
 
-- [ ] `rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO test`
-- [ ] `rtk swift format lint --strict --recursive MonMon MonMonTests MonMonShareExtension`
-- [ ] `rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -sdk iphonesimulator -derivedDataPath /tmp/MonMonDerivedDataIOS CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=NO build`
+- [x] `rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO test`
+- [x] `rtk swift format lint --strict --recursive MonMon MonMonTests MonMonShareExtension`
+- [x] `rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -sdk iphonesimulator -derivedDataPath /tmp/MonMonDerivedDataIOS CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=NO build`
 - [ ] `rtk scripts/run-iphone.sh Yushaku`
 
 **Dependencies:** Task 4

@@ -143,7 +143,7 @@ struct TransactionListView: View {
             isShowingImportInbox = true
         } label: {
             ZStack(alignment: .topTrailing) {
-                Image(systemName: importInbox.pendingCount == 0 ? "tray" : "tray.full")
+                Image(systemName: hasPendingImports ? "tray.full" : "tray")
 
                 if let count = importInbox.pendingCount, count > 0 {
                     Text(count > 99 ? "99+" : "\(count)")
@@ -173,6 +173,10 @@ struct TransactionListView: View {
         case .idle, .loading:
             AppText.string("Import Inbox, checking for statements", in: locale)
         }
+    }
+
+    private var hasPendingImports: Bool {
+        (importInbox.pendingCount ?? 0) > 0
     }
 
     private var importStatusCard: some View {

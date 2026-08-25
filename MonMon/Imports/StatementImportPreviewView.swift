@@ -111,8 +111,10 @@ struct StatementImportPreviewView: View {
                     Text("Transactions")
                         .font(.title3.weight(.semibold))
 
-                    ForEach(statement.candidates) { candidate in
-                        candidateRow(candidate)
+                    ForEach(Array(statement.candidates.enumerated()), id: \.element.id) {
+                        index,
+                        candidate in
+                        candidateRow(candidate, index: index)
                     }
                 }
             }
@@ -225,7 +227,7 @@ struct StatementImportPreviewView: View {
         .accessibilityIdentifier("import-preview-issues")
     }
 
-    private func candidateRow(_ candidate: BankTransactionCandidate) -> some View {
+    private func candidateRow(_ candidate: BankTransactionCandidate, index: Int) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: candidate.kind.symbolName)
                 .font(.subheadline.weight(.semibold))
@@ -275,7 +277,7 @@ struct StatementImportPreviewView: View {
                 .stroke(MonMonTheme.border, lineWidth: 1)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("import-candidate-\(candidate.id)")
+        .accessibilityIdentifier("import-candidate-\(index)")
     }
 
     private var candidateDateFormat: Date.FormatStyle {
