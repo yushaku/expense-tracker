@@ -10,6 +10,7 @@ import SwiftUI
 /// list together and the two can never describe different transactions.
 struct ReportView: View {
     @Environment(\.locale) private var locale
+    @Environment(\.modelContext) private var modelContext
 
     @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
     private var transactions: [MoneyTransaction]
@@ -25,6 +26,10 @@ struct ReportView: View {
     @State private var query = TransactionQuery(range: .year(containing: .now))
     @State private var breakdownKind: TransactionKind = .expense
     @State private var editorMode: TransactionEditorMode?
+    @State private var selectedTransaction: MoneyTransaction?
+    @State private var transactionAwaitingEdit: MoneyTransaction?
+    @State private var transactionPendingDeletion: MoneyTransaction?
+    @State private var isShowingDeleteError = false
     @State private var isSearching = false
     @State private var isFiltering = false
 
@@ -46,7 +51,7 @@ struct ReportView: View {
             .searchable(
                 text: $query.text,
                 isPresented: $isSearching,
-                placement: .navigationBarDrawer(displayMode: .automatic),
+                placement: searchPlacement,
                 prompt: Text("Search notes, categories, amounts")
             )
             .safeAreaInset(edge: .top, spacing: 0) {
@@ -75,8 +80,46 @@ struct ReportView: View {
                     accounts: accounts
                 )
             }
+            .sheet(
+                item: $selectedTransaction,
+                onDismiss: presentPendingEditor
+            ) { transaction in
+                TransactionDetailSheet(
+                    transaction: transaction,
+                    category: category(for: transaction),
+                    account: account(for: transaction),
+                    onEdit: {
+                        transactionAwaitingEdit = transaction
+                        selectedTransaction = nil
+                    },
+                    onDelete: {
+                        try delete(transaction)
+                        selectedTransaction = nil
+                    }
+                )
+            }
             .sheet(item: $editorMode) { mode in
                 TransactionEditorView(mode: mode, defaultDate: defaultDate)
+            }
+            .confirmationDialog(
+                "Delete this transaction?",
+                isPresented: deleteConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Delete", role: .destructive) {
+                    deletePendingTransaction()
+                }
+                .accessibilityIdentifier("confirm-delete-report-transaction")
+
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Its account balance returns to what it was.")
+            }
+            .alert(
+                "Couldn’t delete this transaction. Try again.",
+                isPresented: $isShowingDeleteError
+            ) {
+                Button("OK", role: .cancel) {}
             }
             .tint(MonMonTheme.accent)
         }
@@ -126,6 +169,14 @@ struct ReportView: View {
             .padding(.bottom, 32)
             .frame(maxWidth: .infinity)
         }
+    }
+
+    private var searchPlacement: SearchFieldPlacement {
+        #if os(macOS)
+            .automatic
+        #else
+            .navigationBarDrawer(displayMode: .automatic)
+        #endif
     }
 
     private var results: [MoneyTransaction] {
@@ -387,19 +438,32 @@ struct ReportView: View {
                     dayHeader(for: group)
 
                     ForEach(group.transactions) { transaction in
-                        Button {
-                            editorMode = .edit(transaction)
-                        } label: {
-                            TransactionCard(
-                                transaction: transaction,
-                                category: category(for: transaction),
-                                account: account(for: transaction),
-                                showsDate: false
+                        TransactionSwipeRow(
+                            onEdit: {
+                                editorMode = .edit(transaction)
+                            },
+                            onDelete: {
+                                transactionPendingDeletion = transaction
+                            }
+                        ) {
+                            Button {
+                                selectedTransaction = transaction
+                            } label: {
+                                TransactionCard(
+                                    transaction: transaction,
+                                    category: category(for: transaction),
+                                    account: account(for: transaction),
+                                    showsDate: false
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityIdentifier(
+                                "report-transaction-\(transaction.id.uuidString)"
+                            )
+                            .accessibilityHint(
+                                "Opens transaction details. Swipe left to edit or right to delete."
                             )
                         }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("report-transaction-\(transaction.id.uuidString)")
-                        .accessibilityHint("Opens the transaction editor.")
                     }
                 }
             }
@@ -445,6 +509,51 @@ struct ReportView: View {
 
     private func account(for transaction: MoneyTransaction) -> CashAccount? {
         accounts.first { $0.id == transaction.accountID }
+    }
+
+    private var deleteConfirmation: Binding<Bool> {
+        Binding(
+            get: { transactionPendingDeletion != nil },
+            set: { isPresented in
+                if !isPresented {
+                    transactionPendingDeletion = nil
+                }
+            }
+        )
+    }
+
+    private func presentPendingEditor() {
+        guard let transaction = transactionAwaitingEdit else {
+            return
+        }
+
+        transactionAwaitingEdit = nil
+        editorMode = .edit(transaction)
+    }
+
+    private func deletePendingTransaction() {
+        guard let transaction = transactionPendingDeletion else {
+            return
+        }
+
+        do {
+            try delete(transaction)
+        } catch {
+            isShowingDeleteError = true
+        }
+
+        transactionPendingDeletion = nil
+    }
+
+    private func delete(_ transaction: MoneyTransaction) throws {
+        modelContext.delete(transaction)
+
+        do {
+            try modelContext.save()
+        } catch {
+            modelContext.rollback()
+            throw error
+        }
     }
 }
 
