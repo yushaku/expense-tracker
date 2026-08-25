@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="MonMon database schema and system components.">
+  <meta name="description" content="MonMon persistence schema, system components, and bank-statement import flow.">
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     * { margin: 0; padding: 0; }
@@ -11,7 +11,7 @@
     img, svg, video { display: block; max-width: 100%; }
     button, input, select, textarea { font: inherit; color: inherit; }
   </style>
-  <title>MonMon Schema</title>
+  <title>MonMon Architecture</title>
   <style>
     :root {
       --bg: #f2f5f3;
@@ -35,6 +35,7 @@
       --e-transfer: #2f7d9e;
       --e-debt: #8a5cc4;
       --e-recurring: #b06a2c;
+      --e-import: #347c73;
       --ok: #2f7a52;
       --warn: #9a6a12;
       --idle: #6d7a86;
@@ -65,6 +66,7 @@
         --e-transfer: #62b4d6;
         --e-debt: #b79be8;
         --e-recurring: #e0a06a;
+        --e-import: #70cbbd;
         --ok: #5fbd85;
         --warn: #d5a544;
         --idle: #8b98a4;
@@ -91,8 +93,9 @@
       --e-txn: #ee8399;
       --e-category: #86c46b;
       --e-transfer: #62b4d6;
-        --e-debt: #b79be8;
-        --e-recurring: #e0a06a;
+      --e-debt: #b79be8;
+      --e-recurring: #e0a06a;
+      --e-import: #70cbbd;
       --ok: #5fbd85;
       --warn: #d5a544;
       --idle: #8b98a4;
@@ -420,6 +423,65 @@
       word-break: break-word;
     }
 
+    /* ---- statement import sequence ---- */
+
+    .import-flow {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(168px, 1fr));
+      gap: 34px;
+      min-width: 1180px;
+      padding: 6px 2px 10px;
+      counter-reset: import-step;
+    }
+
+    .import-step {
+      position: relative;
+      counter-increment: import-step;
+      min-height: 168px;
+      padding: 42px 14px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--e-import);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .import-step::before {
+      content: counter(import-step, decimal-leading-zero);
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: var(--e-import);
+    }
+
+    .import-step:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: calc(100% + 8px);
+      width: 18px;
+      height: 8px;
+      border-top: 1.6px solid var(--edge);
+      border-right: 1.6px solid var(--edge);
+      transform: translateY(-50%) rotate(45deg);
+    }
+
+    .import-step h3 {
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.35;
+      color: var(--text);
+      margin-bottom: 7px;
+    }
+
+    .import-step p { font-size: 11.5px; color: var(--text-2); }
+    .import-step .n-meta { margin-top: 10px; }
+
     /* ---- edges ---- */
 
     .edge { transition: opacity .18s ease; }
@@ -498,15 +560,15 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">MonMon &middot; SwiftData persistence</div>
-    <h1>Database schema &amp; system components</h1>
+    <div class="eyebrow">MonMon &middot; persistence and data movement</div>
+    <h1>Architecture map</h1>
     <p class="lede">
-      Six <code>@Model</code> types backed by SwiftData (SQLite). Relationships are <strong>not</strong>
+      Eleven <code>@Model</code> types backed by SwiftData. Relationships are <strong>not</strong>
       declared with <code>@Relationship</code> &mdash; every association is a hand-stored
       <code>UUID</code> foreign key, resolved in Swift at read time
-      (<code>accounts.first { $0.id == someID }</code>). One seventh model is drawn dashed:
-      <code>FundInstrument</code> is specified, not built. Below the schema, what the app talks to:
-      Apple frameworks, a single third-party package, and the services still on the roadmap.
+      (<code>accounts.first { $0.id == someID }</code>). Below the schema: the device, iCloud,
+      market-data and share-extension boundaries, followed by the reviewed bank-statement
+      import path from a shared PDF to an atomic SwiftData save.
     </p>
   </header>
 
@@ -522,7 +584,6 @@
     <span class="item"><span class="badge pk">PK</span> primary key</span>
     <span class="item"><span class="badge fk">FK</span> foreign key (app-enforced only)</span>
     <span class="item"><span class="badge null">?</span> nullable</span>
-    <span class="item"><span class="chip spec">Spec drafted</span> not built yet</span>
     <span class="hint">Hover or focus an entity to trace its links</span>
   </div>
 
@@ -541,7 +602,7 @@
 
       <!-- ============ CashAccount (hub) ============ -->
       <article class="entity" id="CashAccount" tabindex="0"
-               style="--e: var(--e-account); grid-column: 1; grid-row: 1 / span 5; align-self: center;">
+               style="--e: var(--e-account); grid-column: 1; grid-row: 1 / span 6; align-self: center;">
         <div class="e-head">
           <div class="e-name">CashAccount</div>
           <div class="e-role">Cash, bank &amp; credit-card accounts &mdash; the hub every other record points at</div>
@@ -610,7 +671,9 @@
           <li class="field"><span class="fname">units</span><span class="ftype">Decimal</span></li>
           <li class="field"><span class="fname">averageCostPerUnit</span><span class="ftype">Decimal</span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
-          <li class="field key" data-anchor="FundHolding.instrumentID" style="border-style: dashed;">
+          <li class="field"><span class="fname">purchasedAt</span><span class="ftype">Date?</span>
+            <span class="badges"><span class="badge null">? &mdash; falls back to createdAt</span></span></li>
+          <li class="field key" data-anchor="FundHolding.instrumentID">
             <span class="fname">instrumentID</span><span class="ftype">UUID?</span>
             <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span></span>
           </li>
@@ -621,18 +684,17 @@
         </ul>
         <div class="derived">
           <div class="derived-label">Derived &mdash; computed, not stored</div>
-          <div class="derived-list">costBasis &middot; marketValue &middot; unrealizedProfitLoss &middot; returnPercent</div>
+          <div class="derived-list">boughtOn &middot; remainingUnits &middot; costBasis &middot; realized / unrealized P&amp;L &middot; marketValue</div>
         </div>
       </article>
 
-      <!-- ============ FundInstrument (drafted) ============ -->
-      <article class="entity unbuilt" id="FundInstrument" tabindex="0"
+      <!-- ============ FundInstrument ============ -->
+      <article class="entity" id="FundInstrument" tabindex="0"
                style="--e: var(--e-fund); grid-column: 3; grid-row: 2; align-self: center;">
         <div class="e-head">
           <div class="e-name">FundInstrument</div>
-          <div class="e-role">One row per tradable fund or ETF, owning the price a position is valued at</div>
-          <span class="chip spec">Spec drafted</span>
-          <div class="e-file">docs/SPEC-market-valuation.md</div>
+          <div class="e-role">One catalogue row per fund, ETF or gold product, owning its current quote</div>
+          <div class="e-file">MonMon/Funds/FundInstrument.swift</div>
         </div>
         <ul class="fields">
           <li class="field key" data-anchor="FundInstrument.id">
@@ -641,14 +703,16 @@
           </li>
           <li class="field">
             <span class="fname">symbol</span><span class="ftype">String</span>
-            <span class="badges"><span class="badge null">unique &mdash; enforced in the draft, not by @Attribute</span></span>
+            <span class="badges"><span class="badge null">unique &mdash; enforced by draft + reconciliation, not @Attribute</span></span>
           </li>
           <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">kind</span><span class="ftype">FundInstrumentKind</span>
-            <span class="badges"><span class="badge enum">enum: fund | etf</span></span>
+            <span class="badges"><span class="badge enum">enum: fund | etf | gold</span></span>
           </li>
           <li class="field"><span class="fname">currentPricePerUnit</span><span class="ftype">Decimal</span></li>
+          <li class="field"><span class="fname">askPricePerUnit</span><span class="ftype">Decimal</span>
+            <span class="badges"><span class="badge null">gold shop-sell side; zero otherwise</span></span></li>
           <li class="field">
             <span class="fname">priceAsOf</span><span class="ftype">Date</span>
             <span class="badges"><span class="badge null">trading day of the price</span></span>
@@ -659,7 +723,7 @@
           </li>
           <li class="field">
             <span class="fname">priceSource</span><span class="ftype">String</span>
-            <span class="badges"><span class="badge enum">manual | fmarket | vndirect</span></span>
+            <span class="badges"><span class="badge enum">manual | fmarket | vndirect | vangToday</span></span>
           </li>
           <li class="field"><span class="fname">autoQuoteEnabled</span><span class="ftype">Bool</span></li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
@@ -667,9 +731,41 @@
         </ul>
       </article>
 
+      <!-- ============ FundSale ============ -->
+      <article class="entity" id="FundSale" tabindex="0"
+               style="--e: var(--e-fund); grid-column: 3; grid-row: 3; align-self: center;">
+        <div class="e-head">
+          <div class="e-name">FundSale</div>
+          <div class="e-role">Dated units sold from one lot, with proceeds returned to cash</div>
+          <div class="e-file">MonMon/Funds/FundSale.swift</div>
+        </div>
+        <ul class="fields">
+          <li class="field key"><span class="fname">id</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge pk">PK</span></span></li>
+          <li class="field key" data-anchor="FundSale.holdingID">
+            <span class="fname">holdingID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span></span>
+          </li>
+          <li class="field"><span class="fname">units</span><span class="ftype">Decimal</span></li>
+          <li class="field"><span class="fname">pricePerUnit</span><span class="ftype">Decimal</span></li>
+          <li class="field key" data-anchor="FundSale.proceedsAccountID">
+            <span class="fname">proceedsAccountID</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+          </li>
+          <li class="field"><span class="fname">soldAt</span><span class="ftype">Date</span></li>
+          <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
+        </ul>
+        <div class="derived">
+          <div class="derived-label">Derived &mdash; computed, not stored</div>
+          <div class="derived-list">proceeds &middot; costBasis(costPerUnit:) &middot; realizedProfitLoss</div>
+        </div>
+      </article>
+
       <!-- ============ MoneyTransaction ============ -->
       <article class="entity" id="MoneyTransaction" tabindex="0"
-               style="--e: var(--e-txn); grid-column: 2; grid-row: 3;">
+               style="--e: var(--e-txn); grid-column: 2; grid-row: 4;">
         <div class="e-head">
           <div class="e-name">MoneyTransaction</div>
           <div class="e-role">Income &amp; expense entries that move an account balance</div>
@@ -702,6 +798,8 @@
           </li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
+          <li class="field"><span class="fname">sourceImportID</span><span class="ftype">String?</span>
+            <span class="badges"><span class="badge null">? &mdash; SHA-256 candidate provenance</span></span></li>
         </ul>
         <div class="derived">
           <div class="derived-label">Derived &mdash; computed, not stored</div>
@@ -711,7 +809,7 @@
 
       <!-- ============ AccountTransfer ============ -->
       <article class="entity" id="AccountTransfer" tabindex="0"
-               style="--e: var(--e-transfer); grid-column: 2; grid-row: 4;">
+               style="--e: var(--e-transfer); grid-column: 2; grid-row: 5;">
         <div class="e-head">
           <div class="e-name">AccountTransfer</div>
           <div class="e-role">Money moved between two of the owner's own accounts &mdash; no category, never spending</div>
@@ -736,6 +834,10 @@
           </li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
+          <li class="field"><span class="fname">sourceAccountImportID</span><span class="ftype">String?</span>
+            <span class="badges"><span class="badge null">? &mdash; provenance for source side</span></span></li>
+          <li class="field"><span class="fname">destinationAccountImportID</span><span class="ftype">String?</span>
+            <span class="badges"><span class="badge null">? &mdash; provenance for destination side</span></span></li>
         </ul>
         <div class="derived">
           <div class="derived-label">Derived &mdash; computed, not stored</div>
@@ -745,7 +847,7 @@
 
       <!-- ============ Debt ============ -->
       <article class="entity" id="Debt" tabindex="0"
-               style="--e: var(--e-debt); grid-column: 2; grid-row: 5;">
+               style="--e: var(--e-debt); grid-column: 2; grid-row: 6;">
         <div class="e-head">
           <div class="e-name">Debt</div>
           <div class="e-role">Money borrowed or lent out &mdash; no category, never spending</div>
@@ -785,7 +887,7 @@
 
       <!-- ============ DebtPayment ============ -->
       <article class="entity" id="DebtPayment" tabindex="0"
-               style="--e: var(--e-debt); grid-column: 3; grid-row: 5; align-self: center;">
+               style="--e: var(--e-debt); grid-column: 3; grid-row: 6; align-self: center;">
         <div class="e-head">
           <div class="e-name">DebtPayment</div>
           <div class="e-role">One payment against a debt &mdash; reads its direction from the parent</div>
@@ -819,7 +921,7 @@
 
       <!-- ============ TransactionCategory ============ -->
       <article class="entity" id="TransactionCategory" tabindex="0"
-               style="--e: var(--e-category); grid-column: 3; grid-row: 3; align-self: center;">
+               style="--e: var(--e-category); grid-column: 3; grid-row: 4; align-self: center;">
         <div class="e-head">
           <div class="e-name">TransactionCategory</div>
           <div class="e-role">Owner-managed income / expense categories</div>
@@ -843,7 +945,7 @@
 
       <!-- ============ RecurringRule ============ -->
       <article class="entity" id="RecurringRule" tabindex="0"
-               style="--e: var(--e-recurring); grid-column: 3; grid-row: 4; align-self: center;">
+               style="--e: var(--e-recurring); grid-column: 3; grid-row: 5; align-self: center;">
         <div class="e-head">
           <div class="e-name">RecurringRule</div>
           <div class="e-role">Money that comes back &mdash; an instruction, never a balance</div>
@@ -906,15 +1008,15 @@
   <div class="section-head">
     <h2>System components</h2>
     <p class="lede">
-      What the app is made of and what it talks to. The device column is the whole system
-      today: every record lives in one local SwiftData store, and the app opens no network
-      connection at all. Everything marked otherwise is roadmap, not running code.
+      Runtime and data boundaries in the shipping app. Financial records live in SwiftData
+      and mirror to the owner's private CloudKit database when sync is enabled. Shared PDFs
+      stay in the App Group inbox until review finishes; only instrument identifiers leave
+      the device for market quotes.
     </p>
   </div>
 
   <div class="legend">
     <span class="item"><span class="chip built">Built</span> shipping today</span>
-    <span class="item"><span class="chip spec">Spec drafted</span> contract written, no code</span>
     <span class="item"><span class="chip roadmap">Roadmap</span> named in the capability map only</span>
     <span class="item">
       <svg width="34" height="10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="var(--edge)" stroke-width="1.6"/></svg>
@@ -942,27 +1044,30 @@
           </div>
           <p class="n-desc">
             SwiftUI for one shared UI across iPhone and Mac, SwiftData over SQLite,
-            Swift Charts for the assets doughnut, LocalAuthentication for the app lock.
+            Swift Charts for the assets doughnut, LocalAuthentication for the app lock,
+            PDFKit for statement text extraction, and CryptoKit for content fingerprints.
           </p>
-          <div class="n-meta">SwiftUI · SwiftData · Charts · LocalAuthentication · Observation</div>
+          <div class="n-meta">SwiftUI · SwiftData · CloudKit · PDFKit · CryptoKit · Charts · LocalAuthentication · Observation</div>
         </div>
 
-        <div class="node unbuilt" id="sys-cloudkit" tabindex="0">
+        <div class="node" id="sys-cloudkit" tabindex="0">
           <div class="n-top">
             <span class="n-name">CloudKit private database</span>
-            <span class="chip roadmap">Roadmap</span>
+            <span class="chip built">Built</span>
           </div>
           <p class="n-desc">
-            The owner's own iCloud account, never a shared or public database.
-            Step 10 of 11 in the capability map; no entitlement file exists yet.
+            Optional SwiftData mirroring through the build's configured container:
+            <code>iCloud.monmon.dev</code> for Dev or <code>iCloud.monmon</code> for Prod. It is
+            enabled by default, owner-controlled in Settings, and applied when the app next
+            launches because the store configuration is fixed when its container opens.
           </p>
-          <div class="n-meta">module: icloud-sync</div>
+          <div class="n-meta">private database · mirroring events report observed sync state</div>
         </div>
       </section>
 
       <!-- ---------- Device ---------- -->
       <section class="zone" style="grid-column: 2; grid-row: 1;">
-        <span class="zone-label">On this device &mdash; iPhone &amp; Mac</span>
+        <span class="zone-label">On this device &mdash; app + extension</span>
 
         <div class="node" id="sys-app" tabindex="0">
           <div class="n-top">
@@ -972,9 +1077,35 @@
           <p class="n-desc">
             One multiplatform target. Shared SwiftUI screens, pure-Swift domain logic
             (<code>FundValuation</code>, <code>SavingsInterest</code>, <code>CashBalanceSummary</code>),
-            and typed drafts that validate every input before a model is written.
+            typed drafts, recurring generation, store reconciliation, and the reviewed
+            statement-import workflow.
           </p>
           <div class="n-meta">iOS 18+ · macOS 15+ · Swift 6, strict concurrency</div>
+        </div>
+
+        <div class="node" id="sys-share" tabindex="0">
+          <div class="n-top">
+            <span class="n-name">PDF Share Extension</span>
+            <span class="chip built">Built</span>
+          </div>
+          <p class="n-desc">
+            Accepts exactly one PDF, rejects files over 25 MB, fingerprints the bytes, and
+            stages the file plus manifest atomically. It never opens the SwiftData store.
+          </p>
+          <div class="n-meta">MonMonShareExtension · UIKit · UniformTypeIdentifiers</div>
+        </div>
+
+        <div class="node" id="sys-inbox" tabindex="0">
+          <div class="n-top">
+            <span class="n-name">App Group statement inbox</span>
+            <span class="chip built">Built</span>
+          </div>
+          <p class="n-desc">
+            A local handoff boundary shared by the extension and host app. Each ready item is
+            <code>ready/&lt;sha256&gt;/statement.pdf</code> plus a validated JSON manifest; completed
+            imports are removed only after the financial save succeeds.
+          </p>
+          <div class="n-meta">group.$(APP_BUNDLE_ID) · isolated per build flavour · no cloud sync</div>
         </div>
 
         <div class="node" id="sys-store" tabindex="0">
@@ -983,10 +1114,10 @@
             <span class="chip built">Built</span>
           </div>
           <p class="n-desc">
-            One <code>ModelContainer</code> holding all eight models. No CloudKit configuration,
-            so the file never leaves the device. Protected by the operating system's file
-            protection and an optional Face&nbsp;ID / Touch&nbsp;ID gate &mdash; not by encryption
-            the app performs itself.
+            One <code>ModelContainer</code> holding all eleven models. Writes from statement
+            import use a separate context with autosave disabled, re-check current store state,
+            then save once or roll back. The optional Face&nbsp;ID / Touch&nbsp;ID gate protects app
+            access; it is not application-level database encryption.
           </p>
           <div class="n-meta">MonMon/App/MonMonApp.swift</div>
         </div>
@@ -1009,27 +1140,26 @@
           <div class="n-meta">SPM · MIT · pinned v1.1.1</div>
         </div>
 
-        <div class="node unbuilt" id="sys-fmarket" tabindex="0">
+        <div class="node" id="sys-fmarket" tabindex="0">
           <div class="n-top">
             <span class="n-name">Fmarket API</span>
-            <span class="chip spec">Spec drafted</span>
+            <span class="chip built">Built</span>
           </div>
           <p class="n-desc">
-            Daily NAV for open-ended fund certificates. Undocumented public endpoint,
-            no authentication, no service level &mdash; hand entry stays as the fallback.
+            Catalogue and daily NAV for open-ended fund certificates. The public endpoint is
+            undocumented and unauthenticated; typed quotes remain available as fallback.
           </p>
           <div class="n-meta">api.fmarket.vn · module: market-valuation</div>
         </div>
 
-        <div class="node unbuilt" id="sys-vndirect" tabindex="0">
+        <div class="node" id="sys-vndirect" tabindex="0">
           <div class="n-top">
             <span class="n-name">VNDIRECT chart API</span>
-            <span class="chip spec">Spec drafted</span>
+            <span class="chip built">Built</span>
           </div>
           <p class="n-desc">
-            Closing price for ETFs listed on HOSE, quoted in thousands of đồng.
-            Same caveats: undocumented, unauthenticated, replaceable behind the
-            provider interface.
+            Symbol lookup and closing price for ETFs listed on HOSE, quoted in thousands of
+            đồng. It is replaceable behind the same typed provider and transport boundary.
           </p>
           <div class="n-meta">dchart-api.vndirect.com.vn · module: market-valuation</div>
         </div>
@@ -1040,7 +1170,7 @@
             <span class="chip built">Built</span>
           </div>
           <p class="n-desc">
-            Shop-buy and shop-sell quotes for physical gold in VND per lượng.
+            Catalogue plus shop-buy and shop-sell quotes for physical gold in VND per lượng.
             Undocumented and unauthenticated, so hand entry stays available and
             failed refreshes preserve the last known-good price.
           </p>
@@ -1053,13 +1183,65 @@
             <span class="chip roadmap">Roadmap</span>
           </div>
           <p class="n-desc">
-            A macOS server exposing synchronised records to AI clients. Read operations
+            A macOS server exposing synchronized records to AI clients. Read operations
             only &mdash; it can neither mutate a record nor execute a trade.
           </p>
-          <div class="n-meta">module: mcp-readonly · step 11 of 11</div>
+          <div class="n-meta">module: mcp-readonly</div>
         </div>
       </section>
     </div>
+  </div>
+
+  <!-- ==================== STATEMENT IMPORT ==================== -->
+
+  <div class="section-head">
+    <h2>Reviewed bank-statement import</h2>
+    <p class="lede">
+      A local, owner-confirmed sequence. Parsing and matching only prepare a review; no financial
+      model changes until every row has a resolution and the owner confirms the summary.
+    </p>
+  </div>
+
+  <div class="legend">
+    <span class="item"><span class="badge pk">SHA-256</span> stable file and row provenance</span>
+    <span class="item"><span class="badge req">atomic</span> one financial save or rollback</span>
+    <span class="item"><span class="badge fk">local</span> PDF bytes never leave the device</span>
+    <span class="hint">Scroll horizontally to follow the full sequence</span>
+  </div>
+
+  <div class="scroller" aria-label="Bank statement import sequence">
+    <ol class="import-flow">
+      <li class="import-step">
+        <h3>Share one PDF</h3>
+        <p>The owner exports a TPBank statement from a bank app or Files and shares exactly one PDF to MonMon.</p>
+        <div class="n-meta">external file → Share Extension</div>
+      </li>
+      <li class="import-step">
+        <h3>Validate and stage</h3>
+        <p>The extension checks the PDF signature and 25 MB limit, sanitizes its name, fingerprints its bytes, then atomically publishes a ready item.</p>
+        <div class="n-meta">StatementIntakeStore · content-addressed</div>
+      </li>
+      <li class="import-step">
+        <h3>Parse off-main</h3>
+        <p>The host app validates the manifest again, loads the bytes, and uses PDFKit to extract TPBank metadata, totals and normalized candidates.</p>
+        <div class="n-meta">StatementImportInboxService → TPBankPDFStatementParser</div>
+      </li>
+      <li class="import-step">
+        <h3>Reconcile current data</h3>
+        <p>Stable candidate fingerprints find exact imports first; amount, day, account and kind then surface possible transaction or transfer matches.</p>
+        <div class="n-meta">StatementImportReconciler · no writes</div>
+      </li>
+      <li class="import-step">
+        <h3>Owner resolves rows</h3>
+        <p>Each row becomes a new transaction, a new transfer, a link to an existing record, a skip, or already imported. Unresolved rows block commit.</p>
+        <div class="n-meta">StatementImportReview · account + category checks</div>
+      </li>
+      <li class="import-step">
+        <h3>Recheck, save, clean up</h3>
+        <p>A fresh context repeats reconciliation to reject stale reviews, saves all financial changes once, remembers the bank-account mapping, then removes the staged PDF.</p>
+        <div class="n-meta">CommitService → SwiftData → UserDefaults → inbox cleanup</div>
+      </li>
+    </ol>
   </div>
 
   <section class="notes">
@@ -1068,9 +1250,10 @@
       <p>
         No <code>@Relationship</code>, no cascade rules, no <code>@Attribute(.unique)</code>.
         The store will happily keep a <code>MoneyTransaction.accountID</code> pointing at a deleted
-        account. Deletion guards in the editors are what actually protect the data: an account
-        cannot go while it funds a deposit or holding, or while any transaction, transfer, debt
-        record or recurring rule still names it.
+        account. Editor guards stop an account deletion while any cash-moving record names it;
+        deleting a holding or debt removes its dependent sales or payments in the same save.
+        Instrument deletion deliberately leaves its positions visible but unpriced rather than
+        deleting the owner's history.
       </p>
     </div>
     <div class="note">
@@ -1134,12 +1317,13 @@
       </p>
     </div>
     <div class="note">
-      <h3>Why <code>debtID</code> is <em>not</em> nullable</h3>
+      <h3>Why <code>debtID</code> is operationally required</h3>
       <p>
         The opposite call to <code>categoryID</code>, and for a concrete reason: the direction
         that signs a payment lives on its parent debt, so an orphan is not untidy, it is
-        uncomputable. There is no <em>Unattached</em> to render, so the state is made
-        inexpressible and deleting a debt deletes its payments in the same save.
+        uncomputable. The stored UUID is optional only to satisfy CloudKit schema rules;
+        drafts require a debt, summaries skip malformed orphans, and deleting a debt deletes
+        its payments in the same save.
       </p>
     </div>
     <div class="note">
@@ -1162,9 +1346,9 @@
       </p>
     </div>
     <div class="note">
-      <h3><code>currencyCode</code> repeated 5&times;</h3>
+      <h3><code>currencyCode</code> repeated across 9 models</h3>
       <p>
-        Denormalised onto every entity, always written from <code>VNDCurrency.code</code>.
+        Denormalised onto every money-bearing entity, always written from <code>VNDCurrency.code</code>.
         Nothing enforces that related records share a currency. The fund split removed one
         copy: a holding no longer stores it and reads the instrument's instead.
       </p>
@@ -1178,26 +1362,36 @@
       </p>
     </div>
     <div class="note">
-      <h3>Only a ticker would leave</h3>
+      <h3>Market-quote privacy boundary</h3>
       <p>
-        The drafted market-data contract sends the fund or ETF symbol and nothing else &mdash;
-        no balance, no unit count, no cost basis, no account name. A provider would learn
-        that somebody asked about <code>FUEVFVND</code> and no more.
+        Quote requests send a fund or ETF symbol, or a gold product type code, and nothing
+        else &mdash; no balance, unit count, cost basis, or account name. A provider can learn
+        which quote was requested, but not whether the owner holds it or how much.
       </p>
     </div>
     <div class="note">
       <h3>One dependency, on purpose</h3>
       <p>
         Everything else is Apple's. A single pinned SwiftUI calendar view is the entire
-        third-party surface today, which is why the app currently has no network code,
-        no SDK, and no analytics.
+        linked third-party package. Market access uses three small first-party
+        <code>URLSession</code> providers behind one transport protocol; there is still no
+        analytics or vendor SDK.
+      </p>
+    </div>
+    <div class="note">
+      <h3>Import provenance, not ownership</h3>
+      <p>
+        A statement candidate's SHA-256 fingerprint is stored only after commit. Transactions
+        carry one <code>sourceImportID</code>; transfers carry one per account side so a later
+        statement from the other account can link the same transfer. These strings deduplicate
+        imports but do not point back to the staged PDF, which is deleted after success.
       </p>
     </div>
   </section>
 
   <footer>
-    6 entities built &middot; 1 drafted &middot; 7 foreign-key edges &middot; 0 declared SwiftData relationships
-    &nbsp;|&nbsp; 1 third-party package &middot; 0 network calls today
+    11 entities built &middot; 15 app-enforced foreign-key edges &middot; 0 declared SwiftData relationships
+    &nbsp;|&nbsp; private CloudKit mirroring &middot; 3 market providers &middot; 1 reviewed PDF import path
   </footer>
 </div>
 
@@ -1347,18 +1541,25 @@
       { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'AccountTransfer', toAnchor: 'AccountTransfer.destinationAccountID', label: 'to', dashed: false },
       { from: 'TransactionCategory', fromAnchor: 'TransactionCategory.id', to: 'MoneyTransaction', toAnchor: 'MoneyTransaction.categoryID', label: '1 : 0..N', dashed: true },
       { from: 'FundInstrument', fromAnchor: 'FundInstrument.id', to: 'FundHolding', toAnchor: 'FundHolding.instrumentID', label: '1 : 0..N', dashed: true },
+      { from: 'FundHolding', to: 'FundSale', toAnchor: 'FundSale.holdingID', label: '1 : 0..N', dashed: true },
+      { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'FundSale', toAnchor: 'FundSale.proceedsAccountID', label: 'proceeds', dashed: false },
       { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'RecurringRule', toAnchor: 'RecurringRule.accountID', label: '1 : 0..N', dashed: false },
       { from: 'TransactionCategory', fromAnchor: 'TransactionCategory.id', to: 'RecurringRule', toAnchor: 'RecurringRule.categoryID', label: '1 : 0..N', dashed: true },
-      { from: 'RecurringRule', fromAnchor: 'RecurringRule.id', to: 'MoneyTransaction', toAnchor: 'MoneyTransaction.sourceRuleID', label: 'generates', dashed: true }
+      { from: 'RecurringRule', fromAnchor: 'RecurringRule.id', to: 'MoneyTransaction', toAnchor: 'MoneyTransaction.sourceRuleID', label: 'generates', dashed: true },
+      { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'Debt', toAnchor: 'Debt.accountID', label: '1 : 0..N', dashed: true },
+      { from: 'Debt', to: 'DebtPayment', toAnchor: 'DebtPayment.debtID', label: '1 : 0..N', dashed: true },
+      { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'DebtPayment', toAnchor: 'DebtPayment.accountID', label: '1 : 0..N', dashed: false }
     ]);
 
     wire('sysStage', 'sysEdges', '.node', [
       { from: 'sys-app', to: 'sys-frameworks', label: 'links', dashed: false },
+      { from: 'sys-share', to: 'sys-inbox', label: 'PDF + manifest', dashed: false },
+      { from: 'sys-app', to: 'sys-inbox', label: 'review / remove', dashed: false },
       { from: 'sys-app', to: 'sys-store', label: 'reads / writes', dashed: false },
       { from: 'sys-app', to: 'sys-calendar', label: 'links · no network', dashed: false },
-      { from: 'sys-store', to: 'sys-cloudkit', label: 'all records', dashed: true },
-      { from: 'sys-app', to: 'sys-fmarket', label: 'ticker only', dashed: true },
-      { from: 'sys-app', to: 'sys-vndirect', label: 'ticker only', dashed: true },
+      { from: 'sys-store', to: 'sys-cloudkit', label: 'optional mirror', dashed: false },
+      { from: 'sys-app', to: 'sys-fmarket', label: 'ticker only', dashed: false },
+      { from: 'sys-app', to: 'sys-vndirect', label: 'ticker only', dashed: false },
       { from: 'sys-app', to: 'sys-vang-today', label: 'type code only', dashed: false },
       { from: 'sys-mcp', to: 'sys-store', label: 'read-only', dashed: true }
     ]);
