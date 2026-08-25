@@ -19,6 +19,8 @@ struct StatementImportPreviewView: View {
     private var defaultExpenseCategoryValue = ""
     @AppStorage(TransactionDefaults.incomeCategoryStorageKey)
     private var defaultIncomeCategoryValue = ""
+    @AppStorage(TransactionDefaults.accountStorageKey)
+    private var defaultAccountValue = ""
 
     @Bindable var inbox: StatementImportInbox
     let staged: StagedBankStatement
@@ -847,6 +849,10 @@ struct StatementImportPreviewView: View {
                     categories: categories,
                     kind: .income
                 )
+            ),
+            defaultAccountID: TransactionDefaults.resolveAccountID(
+                defaultAccountValue,
+                accounts: vndAccounts
             )
         )
         let mapping = StatementAccountMapping(defaults: .standard)

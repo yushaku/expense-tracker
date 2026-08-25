@@ -7,6 +7,23 @@ struct StatementImportReviewSnapshot: Equatable, Sendable {
     let transactions: [StatementImportTransactionSnapshot]
     let transfers: [StatementImportTransferSnapshot]
     let defaults: StatementImportCategoryDefaults
+    let defaultAccountID: UUID?
+
+    init(
+        accounts: [StatementImportAccountSnapshot],
+        categories: [StatementImportCategorySnapshot],
+        transactions: [StatementImportTransactionSnapshot],
+        transfers: [StatementImportTransferSnapshot],
+        defaults: StatementImportCategoryDefaults,
+        defaultAccountID: UUID? = nil
+    ) {
+        self.accounts = accounts
+        self.categories = categories
+        self.transactions = transactions
+        self.transfers = transfers
+        self.defaults = defaults
+        self.defaultAccountID = defaultAccountID
+    }
 }
 
 enum StatementImportReviewFailure: Equatable, Sendable {
@@ -65,10 +82,10 @@ final class StatementImportReview {
         self.snapshot = snapshot
         self.complete = complete
         cleanup = retryCleanup
-        statementAccountID = accountMapping.resolve(
-            bank: preview.statement.bank,
-            accountLastFour: preview.statement.accountLastFour,
-            accounts: snapshot.accounts
+        statementAccountID = Self.initialStatementAccountID(
+            for: preview.statement,
+            snapshot: snapshot,
+            accountMapping: accountMapping
         )
         rebuildRows(preserving: [:])
     }
@@ -161,10 +178,10 @@ final class StatementImportReview {
         staged = preview.staged
         statement = preview.statement
         self.snapshot = snapshot
-        statementAccountID = accountMapping.resolve(
-            bank: preview.statement.bank,
-            accountLastFour: preview.statement.accountLastFour,
-            accounts: snapshot.accounts
+        statementAccountID = Self.initialStatementAccountID(
+            for: preview.statement,
+            snapshot: snapshot,
+            accountMapping: accountMapping
         )
         phase = .reviewing
         rebuildRows(preserving: [:])
@@ -219,6 +236,25 @@ final class StatementImportReview {
             return
         }
         phase = succeeded ? .saved(report) : .cleanupNeeded(report)
+    }
+
+    private static func initialStatementAccountID(
+        for statement: ParsedBankStatement,
+        snapshot: StatementImportReviewSnapshot,
+        accountMapping: StatementAccountMapping
+    ) -> UUID? {
+        if let rememberedAccountID = accountMapping.resolve(
+            bank: statement.bank,
+            accountLastFour: statement.accountLastFour,
+            accounts: snapshot.accounts
+        ) {
+            return rememberedAccountID
+        }
+
+        guard let defaultAccountID = snapshot.defaultAccountID else { return nil }
+        return snapshot.accounts.first {
+            $0.id == defaultAccountID && $0.currencyCode == VNDCurrency.code
+        }?.id
     }
 
     private func rebuildRows(preserving choices: [String: ImportRowResolution]) {

@@ -56,7 +56,8 @@ Full gates + physical acceptance on Yushaku
 - Use the existing direction-specific category defaults, but no merchant rule
   or description-text inference.
 - Store the bank/account-suffix mapping in UserDefaults only after a successful
-  financial save. A stale id never falls back to a different account.
+  financial save. A stale mapping never selects an arbitrary account; import
+  falls back only to the current valid transaction default.
 - Give the commit service a dedicated `ModelContext`. It re-fetches and
   revalidates ids immediately before one save, so unrelated view edits cannot be
   rolled back and stale reconciliation cannot write.

@@ -258,8 +258,9 @@ without deleting them from review state. Parsed source facts stay read-only.
 
 **Acceptance criteria:**
 
-- [x] Current or remembered account appears above rows; missing account visibly
-      blocks commit without hiding parsed review.
+- [x] Remembered account appears above rows when available; otherwise the current
+      valid transaction default appears. Missing account visibly blocks commit
+      without hiding parsed review.
 - [x] Each row exposes its status and only the controls valid for its disposition
       and resolution; possible matches never preselect link or new.
 - [x] Full trailing swipe skips an eligible row, removes it from the active list,

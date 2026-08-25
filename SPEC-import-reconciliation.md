@@ -22,8 +22,8 @@ existing Import Inbox can gain editing and commit controls.
 1. One bank statement belongs to one `CashAccount`. The selection applies to all
    candidates in that statement.
 2. When both bank and account suffix are available, MonMon remembers the chosen
-   account locally by `bank + last four`. Missing or stale mappings require a new
-   explicit selection.
+   account locally by `bank + last four`. A valid mapping takes precedence;
+   otherwise the current valid transaction default account is preselected.
 3. A parsed candidate's existing SHA-256 id is its immutable source fingerprint.
    Financial records store only that fingerprint, never the PDF, statement id,
    source reference, or raw statement metadata as provenance.
@@ -169,7 +169,8 @@ transfer amount.
 ### Statement account
 
 - The preview adds one required account selector above candidate rows.
-- A valid remembered mapping preselects the account.
+- A valid remembered mapping preselects the account. Without one, the current
+  valid transaction default account is preselected.
 - Selecting an account stores or replaces the local mapping only after a
   successful commit. Cancelling review does not change defaults.
 - A missing account suffix never creates a broad bank-level mapping.

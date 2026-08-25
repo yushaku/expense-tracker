@@ -128,6 +128,74 @@ struct StatementImportReviewTests {
         )
     }
 
+    @Test("The transaction default account preselects an unmapped statement")
+    func defaultAccountPreselectsUnmappedStatement() throws {
+        let fixture = try makeFixture()
+        defer { fixture.removeDefaults() }
+        let review = StatementImportReview(
+            preview: preview(stagedID: "default-account"),
+            snapshot: snapshot(fixture.snapshot, defaultAccountID: fixture.firstAccountID),
+            accountMapping: fixture.mapping,
+            complete: { _, _ in .completed(StatementImportCommitReport()) },
+            retryCleanup: { _ in true }
+        )
+
+        #expect(review.statementAccountID == fixture.firstAccountID)
+        #expect(review.isCommitReady)
+    }
+
+    @Test("A remembered statement account takes precedence over the transaction default")
+    func rememberedAccountPrecedesDefaultAccount() throws {
+        let fixture = try makeFixture()
+        defer { fixture.removeDefaults() }
+        fixture.mapping.remember(
+            accountID: fixture.secondAccountID,
+            bank: .tpBank,
+            accountLastFour: "1234",
+            accounts: fixture.snapshot.accounts,
+            financialCommitSucceeded: true
+        )
+        let review = StatementImportReview(
+            preview: preview(stagedID: "remembered-account"),
+            snapshot: snapshot(fixture.snapshot, defaultAccountID: fixture.firstAccountID),
+            accountMapping: fixture.mapping,
+            complete: { _, _ in .completed(StatementImportCommitReport()) },
+            retryCleanup: { _ in true }
+        )
+
+        #expect(review.statementAccountID == fixture.secondAccountID)
+    }
+
+    @Test("A stale remembered account falls back to the current transaction default")
+    func staleRememberedAccountFallsBackToDefaultAccount() throws {
+        let fixture = try makeFixture()
+        defer { fixture.removeDefaults() }
+        fixture.mapping.remember(
+            accountID: fixture.secondAccountID,
+            bank: .tpBank,
+            accountLastFour: "1234",
+            accounts: fixture.snapshot.accounts,
+            financialCommitSucceeded: true
+        )
+        let currentSnapshot = StatementImportReviewSnapshot(
+            accounts: fixture.snapshot.accounts.filter { $0.id != fixture.secondAccountID },
+            categories: fixture.snapshot.categories,
+            transactions: fixture.snapshot.transactions,
+            transfers: fixture.snapshot.transfers,
+            defaults: fixture.snapshot.defaults,
+            defaultAccountID: fixture.firstAccountID
+        )
+        let review = StatementImportReview(
+            preview: preview(stagedID: "stale-remembered-account"),
+            snapshot: currentSnapshot,
+            accountMapping: fixture.mapping,
+            complete: { _, _ in .completed(StatementImportCommitReport()) },
+            retryCleanup: { _ in true }
+        )
+
+        #expect(review.statementAccountID == fixture.firstAccountID)
+    }
+
     @Test("Commit readiness requires complete input, a current account, and valid resolutions")
     func commitReadinessIsStrict() throws {
         let fixture = try makeFixture()
@@ -318,6 +386,20 @@ struct StatementImportReviewTests {
             secondAccountID: secondAccountID,
             expenseCategoryID: expenseCategoryID,
             incomeCategoryID: incomeCategoryID
+        )
+    }
+
+    private func snapshot(
+        _ snapshot: StatementImportReviewSnapshot,
+        defaultAccountID: UUID?
+    ) -> StatementImportReviewSnapshot {
+        StatementImportReviewSnapshot(
+            accounts: snapshot.accounts,
+            categories: snapshot.categories,
+            transactions: snapshot.transactions,
+            transfers: snapshot.transfers,
+            defaults: snapshot.defaults,
+            defaultAccountID: defaultAccountID
         )
     }
 
