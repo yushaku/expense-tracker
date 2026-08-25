@@ -159,9 +159,9 @@ struct AccountEditorView: View {
         let isEmpty =
             CashBalanceSummary.available(
                 for: editedAccount,
-            deposits: deposits,
-            holdings: holdings,
-            withdrawals: withdrawals,
+                deposits: deposits,
+                holdings: holdings,
+                withdrawals: withdrawals,
                 transactions: transactions,
                 transfers: transfers,
                 debts: debts,
@@ -170,7 +170,7 @@ struct AccountEditorView: View {
             ) == 0
 
         return isEmpty && transactionCount == 0 && transferCount == 0 && debtCount == 0
-            && recurringCount == 0 && saleCount == 0
+            && recurringCount == 0 && saleCount == 0 && withdrawalCount == 0
     }
 
     /// Sales that paid into this account. A closed position keeps its record
@@ -181,6 +181,14 @@ struct AccountEditorView: View {
         }
 
         return FundSaleSummary.count(for: editedAccount, sales: sales)
+    }
+
+    private var withdrawalCount: Int {
+        guard let editedAccount = mode.editedAccount else {
+            return 0
+        }
+
+        return SavingsWithdrawalSummary.count(for: editedAccount, withdrawals: withdrawals)
     }
 
     private var transactionCount: Int {
@@ -250,6 +258,11 @@ struct AccountEditorView: View {
 
         if saleCount > 0 {
             return "This account received \(saleCount) sales. Delete them first."
+        }
+
+        if withdrawalCount > 0 {
+            return
+                "This account received \(withdrawalCount) savings withdrawals. Delete them first."
         }
 
         return "Set the balance to 0 before deleting this account."

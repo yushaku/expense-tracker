@@ -97,6 +97,9 @@ struct InvestmentsScreen: View {
         .navigationDestination(for: FundGroupRoute.self) { route in
             FundGroupDetailView(route: route)
         }
+        .navigationDestination(for: SavingsDepositRoute.self) { route in
+            SavingsDepositDetailView(route: route)
+        }
         .navigationTitle("Investments")
         .accessibilityIdentifier("investments-list")
         .sheet(item: $editor) { mode in
@@ -215,8 +218,6 @@ struct InvestmentsScreen: View {
         case .savings:
             SavingsSection(deposits: deposits, withdrawals: withdrawals, accounts: accounts) {
                 add()
-            } onEdit: { deposit in
-                editor = .savings(.edit(deposit))
             }
         case .funds:
             FundSection(
@@ -286,19 +287,19 @@ struct InvestmentsScreen: View {
         NavigationStack {
             InvestmentsScreen()
         }
-            .modelContainer(PreviewData.populated)
-            .tint(MonMonTheme.accent)
-            .foregroundStyle(MonMonTheme.textPrimary)
-            .preferredColorScheme(MonMonTheme.colorScheme)
+        .modelContainer(PreviewData.populated)
+        .tint(MonMonTheme.accent)
+        .foregroundStyle(MonMonTheme.textPrimary)
+        .preferredColorScheme(MonMonTheme.colorScheme)
     }
 
     #Preview("Investments · empty state") {
         NavigationStack {
             InvestmentsScreen()
         }
-            .modelContainer(PreviewData.empty)
-            .tint(MonMonTheme.accent)
-            .foregroundStyle(MonMonTheme.textPrimary)
-            .preferredColorScheme(MonMonTheme.colorScheme)
+        .modelContainer(PreviewData.empty)
+        .tint(MonMonTheme.accent)
+        .foregroundStyle(MonMonTheme.textPrimary)
+        .preferredColorScheme(MonMonTheme.colorScheme)
     }
 #endif

@@ -248,6 +248,10 @@
 		S10000000000000000000211 /* SavingsWithdrawal.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000111 /* SavingsWithdrawal.swift */; };
 		S10000000000000000000212 /* SavingsWithdrawalSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000112 /* SavingsWithdrawalSummary.swift */; };
 		S10000000000000000000213 /* SavingsWithdrawalDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000113 /* SavingsWithdrawalDraft.swift */; };
+		S10000000000000000000214 /* SavingsWithdrawalEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000114 /* SavingsWithdrawalEditorForm.swift */; };
+		S10000000000000000000215 /* SavingsWithdrawalEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000115 /* SavingsWithdrawalEditorView.swift */; };
+		S10000000000000000000216 /* SavingsWithdrawalCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000116 /* SavingsWithdrawalCard.swift */; };
+		S10000000000000000000217 /* SavingsDepositDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000117 /* SavingsDepositDetailView.swift */; };
 		S10000000000000000000203 /* SavingsWithdrawalIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000103 /* SavingsWithdrawalIntegrationTests.swift */; };
 		B10000000000000000000201 /* BankStatementParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000101 /* BankStatementParsingTests.swift */; };
 		B10000000000000000000202 /* BankStatementParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000102 /* BankStatementParsing.swift */; };
@@ -554,6 +558,10 @@
 		S10000000000000000000111 /* SavingsWithdrawal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsWithdrawal.swift; sourceTree = "<group>"; };
 		S10000000000000000000112 /* SavingsWithdrawalSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsWithdrawalSummary.swift; sourceTree = "<group>"; };
 		S10000000000000000000113 /* SavingsWithdrawalDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsWithdrawalDraft.swift; sourceTree = "<group>"; };
+		S10000000000000000000114 /* SavingsWithdrawalEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsWithdrawalEditorForm.swift; sourceTree = "<group>"; };
+		S10000000000000000000115 /* SavingsWithdrawalEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsWithdrawalEditorView.swift; sourceTree = "<group>"; };
+		S10000000000000000000116 /* SavingsWithdrawalCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsWithdrawalCard.swift; sourceTree = "<group>"; };
+		S10000000000000000000117 /* SavingsDepositDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsDepositDetailView.swift; sourceTree = "<group>"; };
 		S10000000000000000000103 /* SavingsWithdrawalIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsWithdrawalIntegrationTests.swift; sourceTree = "<group>"; };
 		B10000000000000000000101 /* BankStatementParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankStatementParsingTests.swift; sourceTree = "<group>"; };
 		B10000000000000000000102 /* BankStatementParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankStatementParsing.swift; sourceTree = "<group>"; };
@@ -760,6 +768,10 @@
 		A00000000000000000000020 /* Savings */ = {
 			isa = PBXGroup;
 			children = (
+				S10000000000000000000117 /* SavingsDepositDetailView.swift */,
+				S10000000000000000000116 /* SavingsWithdrawalCard.swift */,
+				S10000000000000000000115 /* SavingsWithdrawalEditorView.swift */,
+				S10000000000000000000114 /* SavingsWithdrawalEditorForm.swift */,
 				S10000000000000000000113 /* SavingsWithdrawalDraft.swift */,
 				S10000000000000000000112 /* SavingsWithdrawalSummary.swift */,
 				S10000000000000000000111 /* SavingsWithdrawal.swift */,
@@ -1254,6 +1266,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				S10000000000000000000217 /* SavingsDepositDetailView.swift in Sources */,
+				S10000000000000000000216 /* SavingsWithdrawalCard.swift in Sources */,
+				S10000000000000000000215 /* SavingsWithdrawalEditorView.swift in Sources */,
+				S10000000000000000000214 /* SavingsWithdrawalEditorForm.swift in Sources */,
 				S10000000000000000000213 /* SavingsWithdrawalDraft.swift in Sources */,
 				S10000000000000000000212 /* SavingsWithdrawalSummary.swift in Sources */,
 				S10000000000000000000211 /* SavingsWithdrawal.swift in Sources */,

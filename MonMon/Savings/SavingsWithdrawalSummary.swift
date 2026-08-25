@@ -56,6 +56,40 @@ enum SavingsWithdrawalSummary {
     static func count(for account: CashAccount, withdrawals: [SavingsWithdrawal]) -> Int {
         withdrawals.filter { $0.destinationAccountID == account.id }.count
     }
+
+    /// Keeps the books needing attention at the top and completed history at
+    /// the bottom. Within a state, the nearest maturity date comes first.
+    static func sortedDeposits(
+        _ deposits: [SavingsDeposit],
+        withdrawals: [SavingsWithdrawal],
+        asOf: Date
+    ) -> [SavingsDeposit] {
+        deposits.sorted { lhs, rhs in
+            let lhsRank = rank(lhs.status(withdrawals: withdrawals, asOf: asOf))
+            let rhsRank = rank(rhs.status(withdrawals: withdrawals, asOf: asOf))
+
+            if lhsRank != rhsRank {
+                return lhsRank < rhsRank
+            }
+
+            if lhs.maturityDate != rhs.maturityDate {
+                return lhs.maturityDate < rhs.maturityDate
+            }
+
+            return lhs.createdAt < rhs.createdAt
+        }
+    }
+
+    private static func rank(_ status: SavingsDepositStatus) -> Int {
+        switch status {
+        case .matured:
+            0
+        case .active:
+            1
+        case .settled:
+            2
+        }
+    }
 }
 
 extension SavingsDeposit {

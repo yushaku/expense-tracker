@@ -11,6 +11,150 @@
         }
       }
     },
+    "ACTIVE": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "ĐANG HOẠT ĐỘNG" } } }
+    },
+    "A withdrawal needs an account to receive the money. Add one on the Home tab first.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mỗi lần rút cần một tài khoản nhận tiền. Hãy thêm tài khoản ở tab Trang chủ trước." } } }
+    },
+    "Amount received": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền thực nhận" } } }
+    },
+    "Amount received cannot be negative.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền thực nhận không được âm." } } }
+    },
+    "Choose the account that received the money.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn tài khoản đã nhận tiền." } } }
+    },
+    "Couldn’t delete this withdrawal. Try again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể xóa lần rút này. Hãy thử lại." } } }
+    },
+    "Couldn’t save this withdrawal. Try again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể lưu lần rút này. Hãy thử lại." } } }
+    },
+    "Delete this withdrawal?": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xóa lần rút này?" } } }
+    },
+    "Delete withdrawal": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xóa lần rút" } } }
+    },
+    "Edit withdrawal": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sửa lần rút" } } }
+    },
+    "Enter a valid principal amount.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập số tiền gốc hợp lệ." } } }
+    },
+    "Enter the amount the bank actually paid.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập số tiền ngân hàng thực tế đã trả." } } }
+    },
+    "Financial terms are locked because this book has withdrawal history.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Điều khoản tài chính đã khóa vì sổ này đã có lịch sử rút." } } }
+    },
+    "Interest received": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền lãi thực nhận" } } }
+    },
+    "Loss on withdrawal": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khoản hụt khi rút" } } }
+    },
+    "MATURED": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "ĐÃ ĐÁO HẠN" } } }
+    },
+    "MATURED — READY TO SETTLE": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "ĐÃ ĐÁO HẠN — SẴN SÀNG TẤT TOÁN" } } }
+    },
+    "Maturity estimate for the remaining book: %@.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ước tính đáo hạn cho phần sổ còn lại: %@." } } }
+    },
+    "No money has been withdrawn from this book yet.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sổ này chưa có lần rút tiền nào." } } }
+    },
+    "Only the name can be changed after a withdrawal has been recorded.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sau khi đã ghi nhận một lần rút, chỉ có thể đổi tên sổ." } } }
+    },
+    "Original principal": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền gốc ban đầu" } } }
+    },
+    "Principal withdrawn": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền gốc rút ra" } } }
+    },
+    "Principal withdrawn must be greater than zero.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền gốc rút ra phải lớn hơn 0." } } }
+    },
+    "PROJECTED INTEREST": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "LÃI DỰ KIẾN" } } }
+    },
+    "Projected interest assumes the book stays until maturity.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lãi dự kiến giả định sổ được giữ đến ngày đáo hạn." } } }
+    },
+    "REALIZED INTEREST": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "LÃI ĐÃ THỰC NHẬN" } } }
+    },
+    "Record what the bank actually paid into your account.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi lại số tiền ngân hàng thực tế đã trả vào tài khoản." } } }
+    },
+    "REMAINING": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "CÒN LẠI" } } }
+    },
+    "Remaining principal": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền gốc còn lại" } } }
+    },
+    "Settle": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tất toán" } } }
+    },
+    "Settle savings book": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tất toán sổ tiết kiệm" } } }
+    },
+    "Savings book unavailable": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không tìm thấy sổ tiết kiệm" } } }
+    },
+    "SETTLED": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "ĐÃ TẤT TOÁN" } } }
+    },
+    "That is more than the principal still deposited.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số này lớn hơn tiền gốc còn lại trong sổ." } } }
+    },
+    "The principal returns to the savings book and the received amount leaves the account.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền gốc sẽ trở lại sổ và số tiền thực nhận sẽ bị trừ khỏi tài khoản." } } }
+    },
+    "The savings book and all of its withdrawal history will be deleted.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sổ tiết kiệm và toàn bộ lịch sử rút của sổ sẽ bị xóa." } } }
+    },
+    "This savings book may have been deleted.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sổ tiết kiệm này có thể đã bị xóa." } } }
+    },
+    "This withdrawal no longer has a savings book.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lần rút này không còn liên kết với sổ tiết kiệm." } } }
+    },
+    "The selected account rises by the amount actually received.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tài khoản đã chọn sẽ tăng đúng bằng số tiền thực nhận." } } }
+    },
+    "Use maturity estimate": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dùng số ước tính đáo hạn" } } }
+    },
+    "Up to %@ remains available to withdraw.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Có thể rút tối đa %@." } } }
+    },
+    "Withdraw": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Rút tiền" } } }
+    },
+    "Withdraw all": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Rút toàn bộ" } } }
+    },
+    "Withdraw savings": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Rút tiền tiết kiệm" } } }
+    },
+    "Withdrawal date": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngày rút" } } }
+    },
+    "Withdrawal date cannot be before the book was opened.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngày rút không thể trước ngày mở sổ." } } }
+    },
+    "Withdrawal date cannot be in the future.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngày rút không thể ở tương lai." } } }
+    },
+    "Withdrawal history": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lịch sử rút tiền" } } }
+    },
     "All transactions are skipped.": {
       "localizations": {
         "vi": {

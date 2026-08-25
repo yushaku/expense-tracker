@@ -105,8 +105,12 @@ struct SavingsWithdrawalSummaryTests {
             createdAt: openedAt
         )
 
-        #expect(SavingsWithdrawalSummary.netFlow(for: destination, withdrawals: [withdrawal]) == 30_100_000)
+        #expect(
+            SavingsWithdrawalSummary.netFlow(for: destination, withdrawals: [withdrawal])
+                == 30_100_000)
         #expect(SavingsWithdrawalSummary.netFlow(for: other, withdrawals: [withdrawal]) == 0)
+        #expect(SavingsWithdrawalSummary.count(for: destination, withdrawals: [withdrawal]) == 1)
+        #expect(SavingsWithdrawalSummary.count(for: other, withdrawals: [withdrawal]) == 0)
     }
 
     @Test("Projected interest follows the principal still deposited")
@@ -125,5 +129,33 @@ struct SavingsWithdrawalSummaryTests {
         )
 
         #expect(deposit.projectedInterest(withdrawals: [withdrawal]) == expected)
+    }
+
+    @Test("Matured books lead, active books follow, and settled books stay last")
+    func depositsAreSortedForAction() {
+        let active = makeDeposit()
+        active.name = "Active"
+        active.termMonths = 24
+
+        let matured = makeDeposit()
+        matured.name = "Matured"
+        matured.termMonths = 1
+
+        let settled = makeDeposit()
+        settled.name = "Settled"
+        let settlement = makeWithdrawal(
+            from: settled,
+            principal: settled.principal,
+            received: settled.principal
+        )
+        let asOf = openedAt.addingTimeInterval(180 * 86_400)
+
+        let sorted = SavingsWithdrawalSummary.sortedDeposits(
+            [settled, active, matured],
+            withdrawals: [settlement],
+            asOf: asOf
+        )
+
+        #expect(sorted.map(\.name) == ["Matured", "Active", "Settled"])
     }
 }
