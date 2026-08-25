@@ -26,23 +26,23 @@ struct CloudSyncTests {
         return container.mainContext
     }
 
-    @Test("A store that was never switched keeps synchronising")
-    func defaultsToOn() {
+    @Test("A store that was never switched stays off the network")
+    func defaultsToOff() {
         let defaults = makeDefaults()
 
-        #expect(CloudSync.isEnabled(in: defaults))
-        #expect(CloudSync(defaults: defaults).isEnabled)
+        #expect(!CloudSync.isEnabled(in: defaults))
+        #expect(!CloudSync(defaults: defaults).isEnabled)
     }
 
-    @Test("Turning the switch off is remembered for the next launch")
-    func turningOffPersists() {
+    @Test("Turning the switch on is remembered for the next launch")
+    func turningOnPersists() {
         let defaults = makeDefaults()
         let sync = CloudSync(defaults: defaults)
 
-        sync.setEnabled(false)
+        sync.setEnabled(true)
 
-        #expect(!sync.isEnabled)
-        #expect(!CloudSync.isEnabled(in: defaults))
+        #expect(sync.isEnabled)
+        #expect(CloudSync.isEnabled(in: defaults))
     }
 
     @Test("Moving the switch asks for a relaunch, and moving it back stops asking")
@@ -50,10 +50,10 @@ struct CloudSyncTests {
         let sync = CloudSync(defaults: makeDefaults())
         #expect(!sync.needsRelaunch)
 
-        sync.setEnabled(false)
+        sync.setEnabled(true)
         #expect(sync.needsRelaunch)
 
-        sync.setEnabled(true)
+        sync.setEnabled(false)
         #expect(!sync.needsRelaunch)
     }
 
@@ -83,6 +83,7 @@ struct CloudSyncTests {
     @Test("Syncing without an iCloud account says so instead of waiting")
     func missingAccountIsReported() async throws {
         let sync = CloudSync(defaults: makeDefaults(), accountStatus: { .noAccount })
+        sync.setEnabled(true)
 
         await sync.syncNow(context: try makeContext())
 
@@ -94,6 +95,7 @@ struct CloudSyncTests {
     @Test("An event that lands during the wait ends it with an up-to-date line")
     func eventDuringTheWaitEndsIt() async throws {
         let sync = CloudSync(defaults: makeDefaults(), accountStatus: { .available })
+        sync.setEnabled(true)
         let context = try makeContext()
 
         let pressed = Task { await sync.syncNow(context: context) }
@@ -110,6 +112,7 @@ struct CloudSyncTests {
     @Test("A silent store ends the wait without claiming a sync happened")
     func silenceEndsTheWait() async throws {
         let sync = CloudSync(defaults: makeDefaults(), accountStatus: { .available })
+        sync.setEnabled(true)
         var clock = Date(timeIntervalSince1970: 0)
 
         // A hand-wound clock, so the timeout is proven without spending it.
@@ -126,7 +129,6 @@ struct CloudSyncTests {
     @Test("The switch being off makes the button a no-op")
     func syncingWhileOffDoesNothing() async throws {
         let sync = CloudSync(defaults: makeDefaults(), accountStatus: { .noAccount })
-        sync.setEnabled(false)
 
         await sync.syncNow(context: try makeContext())
 

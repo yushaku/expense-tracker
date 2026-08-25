@@ -79,10 +79,11 @@ final class CloudSync {
     /// annotation is what lets `deinit` hand it back.
     @ObservationIgnored nonisolated(unsafe) private var observer: (any NSObjectProtocol)?
 
-    /// Synchronisation is on unless the owner turned it off, because every store
-    /// written before this switch existed was already mirroring.
+    /// Synchronisation is off until the owner turns it on. Records leaving the
+    /// phone is the owner's call to make, not a default to be discovered after
+    /// the fact, and a store that never mirrors still keeps every record.
     static func isEnabled(in defaults: UserDefaults = .standard) -> Bool {
-        defaults.object(forKey: enabledKey) as? Bool ?? true
+        defaults.object(forKey: enabledKey) as? Bool ?? false
     }
 
     /// - Parameters:
