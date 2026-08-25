@@ -82,7 +82,8 @@ struct DebtNetWorthTests {
             transactions: [],
             transfers: [],
             debts: debts,
-            payments: payments
+            payments: payments,
+            sales: []
         )
     }
 
@@ -98,7 +99,8 @@ struct DebtNetWorthTests {
             transactions: [],
             transfers: [],
             debts: debts,
-            payments: payments
+            payments: payments,
+            sales: []
         )
     }
 
@@ -115,7 +117,8 @@ struct DebtNetWorthTests {
             transactions: [],
             transfers: [],
             debts: debts,
-            payments: payments
+            payments: payments,
+            sales: []
         )
     }
 
@@ -131,7 +134,8 @@ struct DebtNetWorthTests {
             transactions: [],
             transfers: [],
             debts: debts,
-            payments: payments
+            payments: payments,
+            sales: []
         )
     }
 
@@ -306,7 +310,8 @@ struct DebtNetWorthTests {
             transactions: [],
             transfers: [],
             debts: [debt],
-            payments: []
+            payments: [],
+            sales: []
         )
 
         // Two separate obligations, summed once each.
@@ -350,7 +355,8 @@ struct DebtNetWorthTests {
                 transactions: [],
                 transfers: [],
                 debts: debts,
-                payments: []
+                payments: [],
+                sales: []
             )
         }
 

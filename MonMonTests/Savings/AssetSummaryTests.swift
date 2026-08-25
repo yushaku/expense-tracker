@@ -126,7 +126,8 @@ final class AssetSummaryTests {
                 transactions: [],
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             )
                 == 148_900_000
         )
@@ -149,7 +150,8 @@ final class AssetSummaryTests {
                 transactions: [],
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             )
                 == 48_900_000
         )
@@ -172,7 +174,8 @@ final class AssetSummaryTests {
                 transactions: [],
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             )
                 == 8_900_000
         )
@@ -184,7 +187,8 @@ final class AssetSummaryTests {
                 transactions: [],
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             ) == 8_900_000
         )
     }
@@ -203,7 +207,8 @@ final class AssetSummaryTests {
                 transactions: [],
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             )
                 == 148_900_000
         )
@@ -223,7 +228,8 @@ final class AssetSummaryTests {
                 transactions: [],
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             )
                 == 398_900_000
         )
@@ -251,7 +257,8 @@ final class AssetSummaryTests {
                 transactions: [],
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             )
                 == 128_900_000
         )
@@ -276,7 +283,8 @@ final class AssetSummaryTests {
                 transactions: [],
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             ) == 28_900_000
         )
     }
@@ -302,7 +310,8 @@ final class AssetSummaryTests {
                 transactions: [],
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             )
                 == 148_900_000
         )
@@ -325,7 +334,8 @@ final class AssetSummaryTests {
                 transactions: [],
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             )
                 == 153_900_000
         )
@@ -349,7 +359,8 @@ final class AssetSummaryTests {
                 transactions: [],
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             )
                 == 173_900_000
         )
@@ -400,6 +411,7 @@ final class AssetSummaryTests {
             transfers: [],
             debts: [],
             payments: [],
+            sales: [],
             asOf: asOf,
             calendar: utcCalendar
         )
@@ -440,6 +452,7 @@ final class AssetSummaryTests {
             transfers: [],
             debts: [],
             payments: [],
+            sales: [],
             asOf: date(2024, 3, 15),
             calendar: utcCalendar
         )
@@ -467,6 +480,7 @@ final class AssetSummaryTests {
             transfers: [],
             debts: [],
             payments: [],
+            sales: [],
             asOf: date(2024, 3, 15),
             calendar: utcCalendar
         )

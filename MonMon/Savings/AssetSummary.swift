@@ -34,6 +34,14 @@ enum AssetSummary {
     /// that names no account moves this figure, and that is correct: stating a
     /// previously untracked obligation makes the owner poorer on paper.
     ///
+    /// Selling a position leaves this figure exactly where it was at the moment
+    /// of the sale, and that is the point of it. The lot keeps its original cost
+    /// subtracted from the spendable side, the proceeds are added back there,
+    /// and the market value drops by the units that went. At today's price those
+    /// three cancel; the difference only shows once the price moves again, on
+    /// whatever is still held. What was made is not lost, it has moved from an
+    /// unrealized gain to cash the owner is holding.
+    ///
     /// Money lent out counts at what is outstanding while a deposit counts at
     /// its principal. That is not an inconsistency: a deposit's principal sits
     /// untouched until maturity, whereas the repaid part of a loan has already
@@ -47,7 +55,8 @@ enum AssetSummary {
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
         debts: [Debt],
-        payments: [DebtPayment]
+        payments: [DebtPayment],
+        sales: [FundSale]
     ) -> Decimal {
         CashBalanceSummary.totalAvailable(
             of: accounts,
@@ -56,10 +65,15 @@ enum AssetSummary {
             transactions: transactions,
             transfers: transfers,
             debts: debts,
-            payments: payments
+            payments: payments,
+            sales: sales
         )
             + totalPrincipal(of: deposits)
-            + FundSummary.totalMarketValue(of: holdings, instruments: instruments)
+            + FundSummary.totalMarketValue(
+                of: holdings,
+                instruments: instruments,
+                sales: sales
+            )
             + DebtSummary.totalOutstanding(of: debts, payments: payments, direction: .lent)
             - DebtSummary.totalOutstanding(of: debts, payments: payments, direction: .borrowed)
     }
@@ -75,6 +89,12 @@ struct AssetHistoryPoint: Identifiable, Equatable {
 /// Reconstructs month-end net worth from the dated records the app already
 /// owns. Fund and gold positions use the catalogue's current price because the
 /// store does not retain historical quotes.
+///
+/// Sales are dated and filtered like every other record, so a month that ended
+/// before a position was closed still shows it held. That only works because a
+/// sale is written as its own record: had it shrunk the lot instead, every past
+/// month would silently be recomputed as though the position had never been
+/// that large.
 enum AssetHistory {
     private static let maximumMonthCount = 12
 
@@ -87,6 +107,7 @@ enum AssetHistory {
         transfers: [AccountTransfer],
         debts: [Debt],
         payments: [DebtPayment],
+        sales: [FundSale],
         asOf: Date,
         calendar: Calendar = .current
     ) -> [AssetHistoryPoint] {
@@ -98,7 +119,8 @@ enum AssetHistory {
                 transactions: transactions,
                 transfers: transfers,
                 debts: debts,
-                payments: payments
+                payments: payments,
+                sales: sales
             ),
             earliestDate <= asOf,
             let currentMonthStart = calendar.dateInterval(of: .month, for: asOf)?.start,
@@ -126,7 +148,8 @@ enum AssetHistory {
                     transactions: transactions.filter { $0.occurredAt <= date },
                     transfers: transfers.filter { $0.occurredAt <= date },
                     debts: debts.filter { $0.openedAt <= date },
-                    payments: payments.filter { $0.occurredAt <= date }
+                    payments: payments.filter { $0.occurredAt <= date },
+                    sales: sales.filter { $0.soldAt <= date }
                 )
             )
         }
@@ -139,7 +162,8 @@ enum AssetHistory {
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
         debts: [Debt],
-        payments: [DebtPayment]
+        payments: [DebtPayment],
+        sales: [FundSale]
     ) -> Date? {
         var dates = accounts.map(\.createdAt)
         dates.append(contentsOf: deposits.map(\.openedAt))
@@ -148,6 +172,7 @@ enum AssetHistory {
         dates.append(contentsOf: transfers.map(\.occurredAt))
         dates.append(contentsOf: debts.map(\.openedAt))
         dates.append(contentsOf: payments.map(\.occurredAt))
+        dates.append(contentsOf: sales.map(\.soldAt))
         return dates.min()
     }
 

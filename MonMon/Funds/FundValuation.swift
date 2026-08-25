@@ -26,6 +26,21 @@ enum FundValuation {
             - costBasis(units: units, averageCostPerUnit: averageCostPerUnit)
     }
 
+    /// What a sale actually made: proceeds minus what those units cost.
+    ///
+    /// The arithmetic matches `unrealizedProfitLoss`, and it stands apart on
+    /// purpose. One figure moves every time the market does and the other is
+    /// settled forever, so calling a closed position's profit "unrealized"
+    /// would say something false about it at every call site.
+    static func realizedProfitLoss(
+        units: Decimal,
+        costPerUnit: Decimal,
+        salePricePerUnit: Decimal
+    ) -> Decimal {
+        marketValue(units: units, pricePerUnit: salePricePerUnit)
+            - costBasis(units: units, averageCostPerUnit: costPerUnit)
+    }
+
     /// Unrealized return in percent. Zero when there is no cost basis to compare
     /// against, so a holding entered at a zero price never divides by zero.
     static func returnPercent(

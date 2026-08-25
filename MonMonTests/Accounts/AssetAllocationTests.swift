@@ -105,7 +105,8 @@ final class AssetAllocationTests {
             transactions: [],
             transfers: [],
             debts: [],
-            payments: []
+            payments: [],
+            sales: []
         )
 
         #expect(slices.isEmpty)
@@ -131,7 +132,8 @@ final class AssetAllocationTests {
             transactions: [],
             transfers: [],
             debts: [],
-            payments: []
+            payments: [],
+            sales: []
         )
 
         // 200.000.000 − 100.000.000 deposited − 20.000.000 invested = 80.000.000
@@ -151,7 +153,8 @@ final class AssetAllocationTests {
             transactions: [],
             transfers: [],
             debts: [],
-            payments: []
+            payments: [],
+            sales: []
         )
 
         #expect(slices.map(\.kind) == [.cash])
@@ -172,7 +175,8 @@ final class AssetAllocationTests {
             transactions: transactions,
             transfers: [],
             debts: [],
-            payments: []
+            payments: [],
+            sales: []
         )
 
         #expect(slices.first?.amount == 9_800_000)
@@ -191,7 +195,8 @@ final class AssetAllocationTests {
             transactions: [],
             transfers: [],
             debts: [],
-            payments: []
+            payments: [],
+            sales: []
         )
         let overdraft = AssetAllocation.overdraft(
             accounts: [wallet, card],
@@ -200,7 +205,8 @@ final class AssetAllocationTests {
             transactions: [],
             transfers: [],
             debts: [],
-            payments: []
+            payments: [],
+            sales: []
         )
 
         // The ring shows only what is held; the card is not netted off it.
@@ -231,7 +237,8 @@ final class AssetAllocationTests {
             transactions: [],
             transfers: [],
             debts: [],
-            payments: []
+            payments: [],
+            sales: []
         )
         let liabilities = AssetAllocation.liabilities(
             accounts: accounts,
@@ -240,7 +247,8 @@ final class AssetAllocationTests {
             transactions: [],
             transfers: [],
             debts: [],
-            payments: []
+            payments: [],
+            sales: []
         )
 
         #expect(
@@ -253,7 +261,8 @@ final class AssetAllocationTests {
                     transactions: [],
                     transfers: [],
                     debts: [],
-                    payments: []
+                    payments: [],
+                    sales: []
                 )
         )
     }
@@ -285,7 +294,8 @@ final class AssetAllocationTests {
             transactions: [],
             transfers: [],
             debts: [],
-            payments: []
+            payments: [],
+            sales: []
         )
 
         #expect(slices.first { $0.kind == .funds }?.amount == 25_000_000)
@@ -300,7 +310,8 @@ final class AssetAllocationTests {
                     transactions: [],
                     transfers: [],
                     debts: [],
-                    payments: []
+                    payments: [],
+                    sales: []
                 )
         )
     }
@@ -317,7 +328,8 @@ final class AssetAllocationTests {
                 transactions: [],
                 transfers: [],
                 debts: [],
-                payments: []
+                payments: [],
+                sales: []
             ) == 0
         )
     }
@@ -334,7 +346,8 @@ final class AssetAllocationTests {
             transactions: [],
             transfers: [],
             debts: [debt],
-            payments: []
+            payments: [],
+            sales: []
         )
 
         #expect(slices.map(\.kind) == [.borrowed, .overdraft])
@@ -351,7 +364,8 @@ final class AssetAllocationTests {
             transactions: [],
             transfers: [],
             debts: [],
-            payments: []
+            payments: [],
+            sales: []
         )
 
         #expect(slices.isEmpty)

@@ -40,6 +40,9 @@ struct FundEditorView: View {
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
+    @Query(sort: \FundSale.soldAt, order: .reverse)
+    private var sales: [FundSale]
+
     @Query(sort: \FundInstrument.symbol, order: .forward)
     private var instruments: [FundInstrument]
 
@@ -140,7 +143,7 @@ struct FundEditorView: View {
 
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("Its cost basis returns to the linked account's available balance.")
+                Text(deleteWarning)
             }
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
@@ -167,7 +170,8 @@ struct FundEditorView: View {
             transactions: transactions,
             transfers: transfers,
             debts: debts,
-            payments: payments
+            payments: payments,
+            sales: sales
         )
 
         if let editedHolding = mode.editedHolding,
@@ -237,12 +241,44 @@ struct FundEditorView: View {
         return converted
     }
 
+    /// Says what else goes. A lot that has been sold out of takes its sales
+    /// with it, and those moved money into an account — silently reversing that
+    /// would leave a balance the owner could not account for.
+    private var deleteWarning: LocalizedStringKey {
+        let count = soldRecords.count
+        guard count > 0 else {
+            return "Its cost basis returns to the linked account's available balance."
+        }
+
+        return """
+            Its \(count) sales go with it, so their proceeds leave the accounts they \
+            landed in and its cost basis returns to the account that funded it.
+            """
+    }
+
+    /// The sales out of the lot being edited. Deleting a lot deletes them for
+    /// the same reason deleting a debt deletes its payments: the cost a sale is
+    /// measured against lives on the lot, so an orphan is not untidy, it is
+    /// uncomputable.
+    private var soldRecords: [FundSale] {
+        guard let editedHolding = mode.editedHolding else {
+            return []
+        }
+
+        return FundSaleSummary.sales(for: editedHolding, sales: sales)
+    }
+
     private func delete() {
         guard let editedHolding = mode.editedHolding else {
             return
         }
 
         saveErrorMessage = nil
+
+        for sale in soldRecords {
+            modelContext.delete(sale)
+        }
+
         modelContext.delete(editedHolding)
 
         do {

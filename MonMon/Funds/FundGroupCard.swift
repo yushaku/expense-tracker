@@ -19,10 +19,24 @@ struct FundGroupCard: View {
 
             FundPriceStatusRow(instrument: group.instrument, asOf: asOf)
 
-            FundProfitLossRow(
-                profitLoss: group.unrealizedProfitLoss,
-                returnPercent: group.returnPercent
-            )
+            if !group.isFullyClosed {
+                FundProfitLossRow(
+                    kind: .unrealized,
+                    profitLoss: group.unrealizedProfitLoss,
+                    returnPercent: group.returnPercent
+                )
+            }
+
+            if group.hasSales {
+                FundProfitLossRow(
+                    kind: .realized,
+                    profitLoss: group.realizedProfitLoss,
+                    returnPercent: FundSaleSummary.totalRealizedReturnPercent(
+                        of: group.sales,
+                        holdings: group.holdings
+                    )
+                )
+            }
         }
         .fundCardBackground()
         .accessibilityElement(children: .combine)
@@ -41,9 +55,15 @@ struct FundGroupCard: View {
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(group.symbol)
-                    .font(.headline)
-                    .lineLimit(1)
+                HStack(spacing: 8) {
+                    Text(group.symbol)
+                        .font(.headline)
+                        .lineLimit(1)
+
+                    if group.isFullyClosed {
+                        FundClosedBadge()
+                    }
+                }
 
                 Text(subtitle)
                     .font(.subheadline)

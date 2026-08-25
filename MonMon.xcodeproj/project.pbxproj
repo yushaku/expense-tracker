@@ -208,6 +208,16 @@
 		A00000000000000000000F17 /* FundGroupDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F16 /* FundGroupDetailView.swift */; };
 		A00000000000000000000F21 /* FundPositionGroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F20 /* FundPositionGroupTests.swift */; };
 		B12345678901234567890101 /* AssetGrowthCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B12345678901234567890201 /* AssetGrowthCard.swift */; };
+		A00000000000000000002001 /* FundSale.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000001001 /* FundSale.swift */; };
+		A00000000000000000002002 /* FundSaleSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000001002 /* FundSaleSummary.swift */; };
+		A00000000000000000002003 /* FundSaleSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000001003 /* FundSaleSummaryTests.swift */; };
+		A00000000000000000002004 /* FundSaleDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000001004 /* FundSaleDraft.swift */; };
+		A00000000000000000002005 /* FundSaleEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000001005 /* FundSaleEditorForm.swift */; };
+		A00000000000000000002006 /* FundSaleEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000001006 /* FundSaleEditorView.swift */; };
+		A00000000000000000002007 /* FundSaleCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000001007 /* FundSaleCard.swift */; };
+		A00000000000000000002008 /* FundSaleDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000001008 /* FundSaleDraftTests.swift */; };
+		A00000000000000000002009 /* FundSaleNetWorthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000001009 /* FundSaleNetWorthTests.swift */; };
+		A0000000000000000000200A /* FundSalePersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000100A /* FundSalePersistenceTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -427,6 +437,16 @@
 		A00000000000000000000F16 /* FundGroupDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundGroupDetailView.swift; sourceTree = "<group>"; };
 		A00000000000000000000F20 /* FundPositionGroupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundPositionGroupTests.swift; sourceTree = "<group>"; };
 		B12345678901234567890201 /* AssetGrowthCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetGrowthCard.swift; sourceTree = "<group>"; };
+		A00000000000000000001001 /* FundSale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSale.swift; sourceTree = "<group>"; };
+		A00000000000000000001002 /* FundSaleSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSaleSummary.swift; sourceTree = "<group>"; };
+		A00000000000000000001003 /* FundSaleSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSaleSummaryTests.swift; sourceTree = "<group>"; };
+		A00000000000000000001004 /* FundSaleDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSaleDraft.swift; sourceTree = "<group>"; };
+		A00000000000000000001005 /* FundSaleEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSaleEditorForm.swift; sourceTree = "<group>"; };
+		A00000000000000000001006 /* FundSaleEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSaleEditorView.swift; sourceTree = "<group>"; };
+		A00000000000000000001007 /* FundSaleCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSaleCard.swift; sourceTree = "<group>"; };
+		A00000000000000000001008 /* FundSaleDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSaleDraftTests.swift; sourceTree = "<group>"; };
+		A00000000000000000001009 /* FundSaleNetWorthTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSaleNetWorthTests.swift; sourceTree = "<group>"; };
+		A0000000000000000000100A /* FundSalePersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSalePersistenceTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -623,6 +643,12 @@
 		A00000000000000000000022 /* Funds */ = {
 			isa = PBXGroup;
 			children = (
+				A00000000000000000001007 /* FundSaleCard.swift */,
+				A00000000000000000001006 /* FundSaleEditorView.swift */,
+				A00000000000000000001005 /* FundSaleEditorForm.swift */,
+				A00000000000000000001004 /* FundSaleDraft.swift */,
+				A00000000000000000001002 /* FundSaleSummary.swift */,
+				A00000000000000000001001 /* FundSale.swift */,
 				A00000000000000000000810 /* FundInstrument.swift */,
 				A00000000000000000000812 /* FundQuoteSource.swift */,
 				A00000000000000000000F03 /* FmarketLink.swift */,
@@ -661,6 +687,10 @@
 		A00000000000000000000023 /* Funds */ = {
 			isa = PBXGroup;
 			children = (
+				A0000000000000000000100A /* FundSalePersistenceTests.swift */,
+				A00000000000000000001009 /* FundSaleNetWorthTests.swift */,
+				A00000000000000000001008 /* FundSaleDraftTests.swift */,
+				A00000000000000000001003 /* FundSaleSummaryTests.swift */,
 				A00000000000000000000155 /* UnitQuantityTests.swift */,
 				A00000000000000000000156 /* FundValuationTests.swift */,
 				A00000000000000000000157 /* FundDraftTests.swift */,
@@ -975,6 +1005,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A00000000000000000002007 /* FundSaleCard.swift in Sources */,
+				A00000000000000000002006 /* FundSaleEditorView.swift in Sources */,
+				A00000000000000000002005 /* FundSaleEditorForm.swift in Sources */,
+				A00000000000000000002004 /* FundSaleDraft.swift in Sources */,
+				A00000000000000000002002 /* FundSaleSummary.swift in Sources */,
+				A00000000000000000002001 /* FundSale.swift in Sources */,
 				A00000000000000000000E10 /* TransactionDefaultsView.swift in Sources */,
 				A00000000000000000000E0F /* TransactionDefaultsCard.swift in Sources */,
 				A00000000000000000000E0E /* RecurringListView.swift in Sources */,
@@ -1123,6 +1159,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A0000000000000000000200A /* FundSalePersistenceTests.swift in Sources */,
+				A00000000000000000002009 /* FundSaleNetWorthTests.swift in Sources */,
+				A00000000000000000002008 /* FundSaleDraftTests.swift in Sources */,
+				A00000000000000000002003 /* FundSaleSummaryTests.swift in Sources */,
 				A00000000000000000000E0A /* RecurringSummaryTests.swift in Sources */,
 				A00000000000000000000E09 /* RecurringRulePersistenceTests.swift in Sources */,
 				A00000000000000000000E07 /* RecurringGeneratorTests.swift in Sources */,

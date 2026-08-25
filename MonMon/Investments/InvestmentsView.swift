@@ -30,6 +30,9 @@ struct InvestmentsView: View {
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
+    @Query(sort: \FundSale.soldAt, order: .reverse)
+    private var sales: [FundSale]
+
     @Query(sort: \FundInstrument.symbol, order: .forward)
     private var instruments: [FundInstrument]
 
@@ -113,13 +116,13 @@ struct InvestmentsView: View {
                 .font(.subheadline.weight(.medium))
 
                 Label(
-                    "Funds \(VNDCurrency.format(FundSummary.totalMarketValue(of: holdings, instruments: instruments, kinds: [.fund, .etf])))",
+                    "Funds \(VNDCurrency.format(FundSummary.totalMarketValue(of: holdings, instruments: instruments, sales: sales, kinds: [.fund, .etf])))",
                     systemImage: "chart.line.uptrend.xyaxis"
                 )
                 .font(.subheadline.weight(.medium))
 
                 Label(
-                    "Gold \(VNDCurrency.format(FundSummary.totalMarketValue(of: holdings, instruments: instruments, kinds: [.gold])))",
+                    "Gold \(VNDCurrency.format(FundSummary.totalMarketValue(of: holdings, instruments: instruments, sales: sales, kinds: [.gold])))",
                     systemImage: "seal.fill"
                 )
                 .font(.subheadline.weight(.medium))
@@ -143,7 +146,8 @@ struct InvestmentsView: View {
         InvestmentSummary.total(
             deposits: deposits,
             holdings: holdings,
-            instruments: instruments
+            instruments: instruments,
+            sales: sales
         )
     }
 
@@ -170,6 +174,7 @@ struct InvestmentsView: View {
             FundSection(
                 holdings: holdings,
                 instruments: instruments,
+                sales: sales,
                 kinds: [.fund, .etf],
                 sectionTitle: "Funds",
                 itemNameKey: "fund",
@@ -188,6 +193,7 @@ struct InvestmentsView: View {
             FundSection(
                 holdings: holdings,
                 instruments: instruments,
+                sales: sales,
                 kinds: [.gold],
                 sectionTitle: "Gold",
                 itemNameKey: "gold product",

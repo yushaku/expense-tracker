@@ -24,7 +24,7 @@ enum MonMonSchema {
     static var models: [any PersistentModel.Type] {
         [
             CashAccount.self, SavingsDeposit.self,
-            FundInstrument.self, FundHolding.self,
+            FundInstrument.self, FundHolding.self, FundSale.self,
             TransactionCategory.self, MoneyTransaction.self, AccountTransfer.self,
             Debt.self, DebtPayment.self,
             RecurringRule.self,

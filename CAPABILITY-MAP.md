@@ -31,11 +31,18 @@ MonMon is a private, Apple-platform personal asset manager. Each module below is
 `investment-tracking` is dropped as a trade ledger, not deferred.
 
 - The owner does not record individual buy/sell trades, so trade execution,
-  trade history, realized profit and loss, equities, and crypto have nobody to
-  serve.
+  trade history, equities, and crypto have nobody to serve.
+- Closing a position is the exception, and it arrived through
+  `fund-etf-holdings` rather than as a ledger. A `FundSale` records units
+  leaving one `FundHolding` at a price, into a named cash account, which settles
+  that lot's realized profit and loss. It buys no trade history: there is no
+  order, no fee, no counterparty, and a sale can only ever leave a lot the owner
+  already recorded buying.
 - Physical gold holdings are shipped through the existing catalogue-and-position
   shape: quantity and cost basis live on `FundHolding`, current shop-buy value
   lives on `FundInstrument`, and the Home allocation gives gold its own wedge.
+  Gold closes the same way funds do, at the shop's buy price the app already
+  holds.
 - A shared `Instrument` abstraction remains dropped. `FundInstrument` now covers
   funds, ETFs, and gold; renaming that established model would add migration and
   code churn without changing behavior.

@@ -19,6 +19,9 @@ struct AccountsScreen: View {
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
+    @Query(sort: \FundSale.soldAt, order: .reverse)
+    private var sales: [FundSale]
+
     @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
     private var transactions: [MoneyTransaction]
 
@@ -92,7 +95,8 @@ struct AccountsScreen: View {
                         transactions: transactions,
                         transfers: transfers,
                         debts: debts,
-                        payments: payments
+                        payments: payments,
+                        sales: sales
                     )
                 }
                 .buttonStyle(.plain)
@@ -285,7 +289,8 @@ struct AccountsScreen: View {
             transactions: transactions,
             transfers: transfers,
             debts: debts,
-            payments: payments
+            payments: payments,
+            sales: sales
         )
     }
 
@@ -297,7 +302,8 @@ struct AccountsScreen: View {
             transactions: transactions,
             transfers: transfers,
             debts: debts,
-            payments: payments
+            payments: payments,
+            sales: sales
         )
     }
 }

@@ -19,6 +19,9 @@ struct FundGroupDetailView: View {
     @Query(sort: \FundHolding.createdAt, order: .reverse)
     private var holdings: [FundHolding]
 
+    @Query(sort: \FundSale.soldAt, order: .reverse)
+    private var sales: [FundSale]
+
     @Query(sort: \FundInstrument.symbol, order: .forward)
     private var instruments: [FundInstrument]
 
@@ -26,6 +29,8 @@ struct FundGroupDetailView: View {
     private var accounts: [CashAccount]
 
     @State private var editorMode: FundEditorMode?
+    @State private var saleEditorMode: FundSaleEditorMode?
+    @State private var expandedSaleLots: Set<UUID> = []
 
     /// Passed in rather than read from the clock, so a preview and a test both
     /// get a stable answer for whether the price is stale.
@@ -54,11 +59,24 @@ struct FundGroupDetailView: View {
         }
         .navigationTitle(group.symbol)
         .accessibilityIdentifier("fund-group-\(group.id)")
+        .toolbar {
+            if group.units > 0 {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Close position", systemImage: "arrow.up.right.circle") {
+                        saleEditorMode = .closeGroup(instrumentID: route.instrumentID)
+                    }
+                    .accessibilityIdentifier("fund-group-close-position")
+                }
+            }
+        }
         .sheet(item: $editorMode) { mode in
             FundEditorView(
                 mode: mode,
                 kinds: group.instrument?.kind == .gold ? [.gold] : [.fund, .etf]
             )
+        }
+        .sheet(item: $saleEditorMode) { mode in
+            FundSaleEditorView(mode: mode)
         }
         .tint(MonMonTheme.accent)
     }
@@ -73,7 +91,8 @@ struct FundGroupDetailView: View {
                 instruments.first { $0.id == id }
             },
             instrumentID: route.instrumentID,
-            holdings: positions
+            holdings: positions,
+            sales: FundSaleSummary.sales(of: positions, sales: sales)
         )
     }
 
@@ -108,20 +127,96 @@ struct FundGroupDetailView: View {
             }
 
             ForEach(positions) { holding in
-                Button {
+                positionRow(holding)
+            }
+        }
+    }
+
+    /// A card with its actions beneath it rather than a card that is itself one
+    /// button.
+    ///
+    /// A position now has three things to do to it — edit, sell, read its sales
+    /// back — and a button inside a button swallows the inner tap in SwiftUI.
+    /// Naming each action costs a row of the screen and removes the guesswork.
+    private func positionRow(_ holding: FundHolding) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            FundHoldingCard(
+                holding: holding,
+                instrument: instruments.matching(holding),
+                sales: salesFor(holding),
+                sourceAccountName: accountName(for: holding),
+                asOf: asOf
+            )
+
+            HStack(spacing: 10) {
+                Button("Edit", systemImage: "pencil") {
                     editorMode = .edit(holding)
-                } label: {
-                    FundHoldingCard(
-                        holding: holding,
-                        instrument: instruments.matching(holding),
-                        sourceAccountName: accountName(for: holding),
-                        asOf: asOf
-                    )
                 }
                 .buttonStyle(.plain)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(MonMonTheme.accent)
                 .accessibilityIdentifier("fund-\(holding.id.uuidString)")
-                .accessibilityHint("Opens this position for editing")
+
+                if holding.remainingUnits(sales: sales) > 0 {
+                    Button("Sell", systemImage: "arrow.up.right") {
+                        saleEditorMode = .sell(holding)
+                    }
+                    .buttonStyle(.plain)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.funds)
+                    .accessibilityIdentifier("fund-sell-\(holding.id.uuidString)")
+                }
+
+                Spacer(minLength: 8)
+
+                if !salesFor(holding).isEmpty {
+                    Button {
+                        toggleSales(for: holding)
+                    } label: {
+                        Label(
+                            "\(salesFor(holding).count) sales",
+                            systemImage: expandedSaleLots.contains(holding.id)
+                                ? "chevron.up" : "chevron.down"
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .accessibilityIdentifier("fund-sales-\(holding.id.uuidString)")
+                }
             }
+            .padding(.horizontal, 4)
+
+            if expandedSaleLots.contains(holding.id) {
+                ForEach(salesFor(holding)) { sale in
+                    Button {
+                        saleEditorMode = .edit(sale)
+                    } label: {
+                        FundSaleCard(
+                            sale: sale,
+                            costPerUnit: holding.averageCostPerUnit,
+                            isGold: instruments.matching(holding)?.kind == .gold,
+                            proceedsAccountName: accountName(forID: sale.proceedsAccountID)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.leading, 16)
+                    .accessibilityIdentifier("fund-sale-\(sale.id.uuidString)")
+                    .accessibilityHint("Opens this sale for editing")
+                }
+            }
+        }
+    }
+
+    private func salesFor(_ holding: FundHolding) -> [FundSale] {
+        FundSaleSummary.sales(for: holding, sales: sales)
+    }
+
+    private func toggleSales(for holding: FundHolding) {
+        if expandedSaleLots.contains(holding.id) {
+            expandedSaleLots.remove(holding.id)
+        } else {
+            expandedSaleLots.insert(holding.id)
         }
     }
 
@@ -151,10 +246,10 @@ struct FundGroupDetailView: View {
     }
 
     private func accountName(for holding: FundHolding) -> String? {
-        guard let sourceAccountID = holding.sourceAccountID else {
-            return nil
-        }
+        holding.sourceAccountID.flatMap(accountName(forID:))
+    }
 
-        return accounts.first { $0.id == sourceAccountID }?.name
+    private func accountName(forID id: UUID) -> String? {
+        accounts.first { $0.id == id }?.name
     }
 }

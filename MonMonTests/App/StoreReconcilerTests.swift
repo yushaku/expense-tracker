@@ -244,7 +244,7 @@ struct StoreReconcilerTests {
         #expect(holding.instrumentID == survivor.id)
         // The position keeps its value rather than falling to nothing: it is
         // priced by the survivor now, not by a row that no longer exists.
-        #expect(holding.marketValue(in: [survivor]) == 3_000_000)
+        #expect(holding.marketValue(in: [survivor], sales: []) == 3_000_000)
     }
 
     @Test("Two different tickers are left alone")

@@ -85,7 +85,8 @@ struct DebtPaymentPersistenceTests {
             transactions: try context.fetch(FetchDescriptor<MoneyTransaction>()),
             transfers: [],
             debts: try context.fetch(FetchDescriptor<Debt>()),
-            payments: try context.fetch(FetchDescriptor<DebtPayment>())
+            payments: try context.fetch(FetchDescriptor<DebtPayment>()),
+            sales: []
         )
     }
 

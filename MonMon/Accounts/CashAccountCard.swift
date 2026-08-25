@@ -8,6 +8,7 @@ struct CashAccountCard: View {
     let transfers: [AccountTransfer]
     let debts: [Debt]
     let payments: [DebtPayment]
+    let sales: [FundSale]
 
     var body: some View {
         ViewThatFits(in: .horizontal) {
@@ -99,7 +100,8 @@ struct CashAccountCard: View {
             transactions: transactions,
             transfers: transfers,
             debts: debts,
-            payments: payments
+            payments: payments,
+            sales: sales
         )
     }
 
@@ -109,9 +111,16 @@ struct CashAccountCard: View {
         }
     }
 
+    /// What this account put into funds and gold that is still there.
+    ///
+    /// Counts the cost of the units still held rather than everything ever
+    /// bought: once a position is sold the money is no longer parked, it is back
+    /// in an account and already counted in the available balance above. Saying
+    /// otherwise would show the same đồng twice on one card.
     private var fundsAmount: Decimal {
         holdings.reduce(Decimal.zero) { total, holding in
-            holding.sourceAccountID == account.id ? total + holding.costBasis : total
+            holding.sourceAccountID == account.id
+                ? total + holding.remainingCostBasis(sales: sales) : total
         }
     }
 }
@@ -154,7 +163,8 @@ private extension CashAccountKind {
                     transactions: [],
                     transfers: [],
                     debts: [],
-                    payments: []
+                    payments: [],
+                    sales: []
                 )
 
                 CashAccountCard(
@@ -164,7 +174,8 @@ private extension CashAccountKind {
                     transactions: [],
                     transfers: [],
                     debts: [],
-                    payments: []
+                    payments: [],
+                    sales: []
                 )
 
                 CashAccountCard(
@@ -178,7 +189,8 @@ private extension CashAccountKind {
                     transactions: [],
                     transfers: [],
                     debts: [],
-                    payments: []
+                    payments: [],
+                    sales: []
                 )
 
                 CashAccountCard(
@@ -192,7 +204,8 @@ private extension CashAccountKind {
                     transactions: [],
                     transfers: [],
                     debts: [],
-                    payments: []
+                    payments: [],
+                    sales: []
                 )
             }
             .padding(20)

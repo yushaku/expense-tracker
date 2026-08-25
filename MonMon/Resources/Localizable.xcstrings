@@ -101,6 +101,36 @@
         }
       }
     },
+    "%@ still held across every open position in %@.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Còn nắm %@ trên mọi vị thế đang mở của %@."
+          }
+        }
+      }
+    },
+    "%@ still held after this sale.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Còn nắm %@ sau lệnh bán này."
+          }
+        }
+      }
+    },
+    "%@ still held in this position.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Còn nắm %@ trong vị thế này."
+          }
+        }
+      }
+    },
     "%@ still outstanding %@ %@.": {
       "localizations": {
         "vi": {
@@ -221,6 +251,16 @@
         }
       }
     },
+    "%lld sales": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld lệnh bán"
+          }
+        }
+      }
+    },
     "%lld transactions": {
       "localizations": {
         "vi": {
@@ -307,6 +347,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Một lần trả nợ cần có tài khoản. Hãy thêm tài khoản ở tab Trang chính trước."
+          }
+        }
+      }
+    },
+    "A sale needs an account to pay into. Add one on the Home tab first.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Một lệnh bán cần có tài khoản để nhận tiền. Hãy thêm tài khoản ở tab Trang chính trước."
           }
         }
       }
@@ -1031,12 +1081,32 @@
         }
       }
     },
+    "CLOSED": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ĐÃ ĐÓNG"
+          }
+        }
+      }
+    },
     "COST BASIS": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
             "value": "GIÁ VỐN"
+          }
+        }
+      }
+    },
+    "COST OF WHAT GOES": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIÁ VỐN PHẦN BÁN"
           }
         }
       }
@@ -1191,6 +1261,26 @@
         }
       }
     },
+    "Close position": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đóng vị thế"
+          }
+        }
+      }
+    },
+    "Close the whole position": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đóng toàn bộ vị thế"
+          }
+        }
+      }
+    },
     "Colour": {
       "localizations": {
         "vi": {
@@ -1287,6 +1377,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Không xoá được lịch lặp này. Thử lại."
+          }
+        }
+      }
+    },
+    "Couldn’t delete this sale. Try again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không xoá được lệnh bán này. Hãy thử lại."
           }
         }
       }
@@ -1411,6 +1511,16 @@
         }
       }
     },
+    "Couldn’t save this sale. Try again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không lưu được lệnh bán này. Hãy thử lại."
+          }
+        }
+      }
+    },
     "Couldn’t save this savings book. Try again.": {
       "localizations": {
         "vi": {
@@ -1477,6 +1587,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ngày"
+          }
+        }
+      }
+    },
+    "Date sold": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngày bán"
           }
         }
       }
@@ -1701,6 +1821,26 @@
         }
       }
     },
+    "Delete this sale": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xoá lệnh bán"
+          }
+        }
+      }
+    },
+    "Delete this sale?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xoá lệnh bán này?"
+          }
+        }
+      }
+    },
     "Delete this savings book?": {
       "localizations": {
         "vi": {
@@ -1901,6 +2041,16 @@
         }
       }
     },
+    "Edit sale": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sửa lệnh bán"
+          }
+        }
+      }
+    },
     "Edit savings book": {
       "localizations": {
         "vi": {
@@ -1967,6 +2117,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nhập tên cho sổ tiết kiệm này."
+          }
+        }
+      }
+    },
+    "Enter a price greater than zero.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập giá lớn hơn 0."
+          }
+        }
+      }
+    },
+    "Enter a quantity greater than zero.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập số lượng lớn hơn 0."
           }
         }
       }
@@ -2041,6 +2211,16 @@
         }
       }
     },
+    "Enter a valid price.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập giá hợp lệ."
+          }
+        }
+      }
+    },
     "Enter a valid principal.": {
       "localizations": {
         "vi": {
@@ -2067,6 +2247,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nhập khối lượng hợp lệ theo chỉ."
+          }
+        }
+      }
+    },
+    "Enter a valid weight.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập khối lượng hợp lệ."
           }
         }
       }
@@ -2211,6 +2401,16 @@
         }
       }
     },
+    "Every open position in this fund is sold at the price below.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mọi vị thế đang mở của quỹ này được bán ở mức giá bên dưới."
+          }
+        }
+      }
+    },
     "Every payment moves this account and lowers what is outstanding.": {
       "localizations": {
         "vi": {
@@ -2277,6 +2477,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Đang lấy dữ liệu…"
+          }
+        }
+      }
+    },
+    "Fill in a quantity and a price to see what this sale makes.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Điền số lượng và giá để xem lệnh bán này lời lỗ bao nhiêu."
+          }
+        }
+      }
+    },
+    "Filled in from the shop's buy price — what the shop pays you, not what it charges.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Điền sẵn theo giá tiệm mua vào — số tiệm trả cho bạn, không phải giá tiệm bán ra."
           }
         }
       }
@@ -2712,6 +2932,16 @@
         }
       }
     },
+    "Its %lld sales go with it, so their proceeds leave the accounts they landed in and its cost basis returns to the account that funded it.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kèm theo %lld lệnh bán của nó, nên tiền thu về rời khỏi các tài khoản đã nhận và giá vốn quay lại tài khoản đã cấp vốn."
+          }
+        }
+      }
+    },
     "Its account balance returns to what it was.": {
       "localizations": {
         "vi": {
@@ -3132,6 +3362,16 @@
         }
       }
     },
+    "Net worth does not move: the position turns into cash worth the same.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tài sản ròng không đổi: vị thế chuyển thành tiền mặt có giá trị tương đương."
+          }
+        }
+      }
+    },
     "New entries start as expenses on these values, and switching to income picks up the income one.": {
       "localizations": {
         "vi": {
@@ -3442,6 +3682,16 @@
         }
       }
     },
+    "Nothing left — this closes the position.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không còn gì — lệnh này đóng vị thế."
+          }
+        }
+      }
+    },
     "Nothing recorded": {
       "localizations": {
         "vi": {
@@ -3712,6 +3962,16 @@
         }
       }
     },
+    "Opens this sale for editing": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở lệnh bán này để sửa"
+          }
+        }
+      }
+    },
     "Opens this savings book for editing": {
       "localizations": {
         "vi": {
@@ -3792,6 +4052,16 @@
         }
       }
     },
+    "PROCEEDS": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TIỀN THU VỀ"
+          }
+        }
+      }
+    },
     "Paused": {
       "localizations": {
         "vi": {
@@ -3858,6 +4128,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Chọn một sản phẩm vàng, rồi nhập khối lượng theo chỉ."
+          }
+        }
+      }
+    },
+    "Pick the account the money lands in.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn tài khoản nhận tiền."
           }
         }
       }
@@ -4042,6 +4322,26 @@
         }
       }
     },
+    "Price per lượng": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giá mỗi lượng"
+          }
+        }
+      }
+    },
+    "Price per unit": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giá mỗi đơn vị"
+          }
+        }
+      }
+    },
     "Principal": {
       "localizations": {
         "vi": {
@@ -4088,6 +4388,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "LÃI SUẤT"
+          }
+        }
+      }
+    },
+    "REALIZED GAIN": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LÃI ĐÃ THỰC HIỆN"
+          }
+        }
+      }
+    },
+    "REALIZED LOSS": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LỖ ĐÃ THỰC HIỆN"
           }
         }
       }
@@ -4272,12 +4592,42 @@
         }
       }
     },
+    "SOLD UNITS": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ĐƠN VỊ ĐÃ BÁN"
+          }
+        }
+      }
+    },
+    "SOLD WEIGHT": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KHỐI LƯỢNG ĐÃ BÁN"
+          }
+        }
+      }
+    },
     "Salary": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
             "value": "Lương"
+          }
+        }
+      }
+    },
+    "Sale price per unit": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giá bán mỗi đơn vị"
           }
         }
       }
@@ -4378,6 +4728,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Chọn mọi %@ thuộc %@ này"
+          }
+        }
+      }
+    },
+    "Sell": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bán"
+          }
+        }
+      }
+    },
+    "Sell it all": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bán hết"
+          }
+        }
+      }
+    },
+    "Sell out of this position": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bán bớt vị thế này"
           }
         }
       }
@@ -4662,6 +5042,26 @@
         }
       }
     },
+    "That is more than is still held here.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhiều hơn số còn nắm ở đây."
+          }
+        }
+      }
+    },
+    "That is more than is still held.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhiều hơn số đang còn nắm."
+          }
+        }
+      }
+    },
     "That is more than is still owed on this debt.": {
       "localizations": {
         "vi": {
@@ -4812,6 +5212,16 @@
         }
       }
     },
+    "The units return to the position and the proceeds leave the account.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số lượng quay lại vị thế và tiền thu về rời khỏi tài khoản."
+          }
+        }
+      }
+    },
     "Theme": {
       "localizations": {
         "vi": {
@@ -4838,6 +5248,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tài khoản này tăng đúng số tiền đó."
+          }
+        }
+      }
+    },
+    "This account rises by the proceeds.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tài khoản này tăng đúng bằng tiền thu về."
           }
         }
       }
@@ -5022,6 +5442,16 @@
         }
       }
     },
+    "Units to sell": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số lượng bán"
+          }
+        }
+      }
+    },
     "Unknown account": {
       "localizations": {
         "vi": {
@@ -5154,6 +5584,16 @@
         }
       }
     },
+    "Weight": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khối lượng"
+          }
+        }
+      }
+    },
     "Weight (chỉ)": {
       "localizations": {
         "vi": {
@@ -5170,6 +5610,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Khối lượng phải lớn hơn 0."
+          }
+        }
+      }
+    },
+    "Weight to sell": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khối lượng bán"
+          }
+        }
+      }
+    },
+    "What is left keeps the same average cost it always had.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phần còn lại giữ nguyên giá vốn bình quân như cũ."
           }
         }
       }
@@ -5204,12 +5664,32 @@
         }
       }
     },
+    "What this makes": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lệnh này lời lỗ ra sao"
+          }
+        }
+      }
+    },
     "What you hold, what it is worth": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
             "value": "Bạn giữ gì, và nó đáng bao nhiêu"
+          }
+        }
+      }
+    },
+    "Where the money goes": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiền về đâu"
           }
         }
       }
@@ -5294,6 +5774,16 @@
         }
       }
     },
+    "You paid %@ per unit on average.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bạn đã mua bình quân %@ mỗi đơn vị."
+          }
+        }
+      }
+    },
     "between %@ and %@": {
       "localizations": {
         "vi": {
@@ -5320,6 +5810,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "thương hiệu"
+          }
+        }
+      }
+    },
+    "chỉ": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "chỉ"
           }
         }
       }
@@ -5390,6 +5890,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "trong %@"
+          }
+        }
+      }
+    },
+    "into": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vào"
           }
         }
       }
@@ -5490,6 +6000,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "lần chuyển khoản"
+          }
+        }
+      }
+    },
+    "units": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "đơn vị"
           }
         }
       }
