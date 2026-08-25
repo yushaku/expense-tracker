@@ -79,6 +79,7 @@
 		A00000000000000000000271 /* MoneyTransactionPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */; };
 		A00000000000000000000272 /* AssetAllocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000183 /* AssetAllocation.swift */; };
 		A00000000000000000000273 /* AssetAllocationCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000184 /* AssetAllocationCard.swift */; };
+		A00000000000000000000F31 /* AllocationDoughnut.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F30 /* AllocationDoughnut.swift */; };
 		A00000000000000000000274 /* AssetAllocationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000185 /* AssetAllocationTests.swift */; };
 		A00000000000000000000275 /* DateField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000186 /* DateField.swift */; };
 		A00000000000000000000276 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000187 /* AppTheme.swift */; };
@@ -308,6 +309,7 @@
 		A00000000000000000000182 /* MoneyTransactionPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoneyTransactionPersistenceTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000183 /* AssetAllocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocation.swift; sourceTree = "<group>"; };
 		A00000000000000000000184 /* AssetAllocationCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocationCard.swift; sourceTree = "<group>"; };
+		A00000000000000000000F30 /* AllocationDoughnut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllocationDoughnut.swift; sourceTree = "<group>"; };
 		A00000000000000000000185 /* AssetAllocationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetAllocationTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000186 /* DateField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateField.swift; sourceTree = "<group>"; };
 		A00000000000000000000187 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
@@ -608,6 +610,7 @@
 				A00000000000000000000801 /* SegmentedTabs.swift */,
 				A00000000000000000000193 /* Percentage.swift */,
 				A00000000000000000000198 /* CalendarTheme.swift */,
+				A00000000000000000000F30 /* AllocationDoughnut.swift */,
 			);
 			path = Design;
 			sourceTree = "<group>";
@@ -1047,6 +1050,7 @@
 				A00000000000000000000276 /* AppTheme.swift in Sources */,
 				A00000000000000000000275 /* DateField.swift in Sources */,
 				A00000000000000000000273 /* AssetAllocationCard.swift in Sources */,
+				A00000000000000000000F31 /* AllocationDoughnut.swift in Sources */,
 				B12345678901234567890101 /* AssetGrowthCard.swift in Sources */,
 				A00000000000000000000806 /* AccountBalanceAllocation.swift in Sources */,
 				A00000000000000000000808 /* AccountBalanceCard.swift in Sources */,

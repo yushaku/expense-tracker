@@ -2602,16 +2602,6 @@
         }
       }
     },
-    "Funds %@": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quỹ %@"
-          }
-        }
-      }
-    },
     "Getting it back": {
       "localizations": {
         "vi": {
@@ -2658,16 +2648,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vàng"
-          }
-        }
-      }
-    },
-    "Gold %@": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vàng %@"
           }
         }
       }
@@ -4662,16 +4642,6 @@
         }
       }
     },
-    "Savings %@": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tiết kiệm %@"
-          }
-        }
-      }
-    },
     "Savings book": {
       "localizations": {
         "vi": {
@@ -4688,6 +4658,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sổ tiết kiệm"
+          }
+        }
+      }
+    },
+    "Savings books, funds, and gold will be split up here.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sổ tiết kiệm, quỹ và vàng sẽ được chia ra ở đây."
           }
         }
       }
