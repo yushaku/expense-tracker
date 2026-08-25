@@ -60,6 +60,8 @@
 		A00000000000000000000252 /* CategoryPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000163 /* CategoryPalette.swift */; };
 		A00000000000000000000253 /* TransactionPeriod.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000164 /* TransactionPeriod.swift */; };
 		A00000000000000000000254 /* TransactionSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000165 /* TransactionSummary.swift */; };
+		A00000000000000000009004 /* NetTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000009104 /* NetTrendCard.swift */; };
+		A00000000000000000009003 /* MonthlyFlowCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000009103 /* MonthlyFlowCard.swift */; };
 		A00000000000000000009001 /* TransactionQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000009101 /* TransactionQuery.swift */; };
 		A00000000000000000000255 /* TransactionPeriodTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000166 /* TransactionPeriodTests.swift */; };
 		A00000000000000000000256 /* TransactionSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000167 /* TransactionSummaryTests.swift */; };
@@ -351,6 +353,8 @@
 		A00000000000000000000163 /* CategoryPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryPalette.swift; sourceTree = "<group>"; };
 		A00000000000000000000164 /* TransactionPeriod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionPeriod.swift; sourceTree = "<group>"; };
 		A00000000000000000000165 /* TransactionSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionSummary.swift; sourceTree = "<group>"; };
+		A00000000000000000009104 /* NetTrendCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetTrendCard.swift; sourceTree = "<group>"; };
+		A00000000000000000009103 /* MonthlyFlowCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyFlowCard.swift; sourceTree = "<group>"; };
 		A00000000000000000009101 /* TransactionQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionQuery.swift; sourceTree = "<group>"; };
 		A00000000000000000000166 /* TransactionPeriodTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionPeriodTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000167 /* TransactionSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionSummaryTests.swift; sourceTree = "<group>"; };
@@ -839,6 +843,8 @@
 				A00000000000000000000164 /* TransactionPeriod.swift */,
 				A00000000000000000000610 /* TransactionRange.swift */,
 				A00000000000000000000165 /* TransactionSummary.swift */,
+				A00000000000000000009104 /* NetTrendCard.swift */,
+				A00000000000000000009103 /* MonthlyFlowCard.swift */,
 				A00000000000000000009101 /* TransactionQuery.swift */,
 				A00000000000000000000168 /* CategoryDraft.swift */,
 				A00000000000000000000169 /* CategorySeed.swift */,
@@ -1285,6 +1291,8 @@
 				A00000000000000000000258 /* CategorySeed.swift in Sources */,
 				A00000000000000000000257 /* CategoryDraft.swift in Sources */,
 				A00000000000000000000254 /* TransactionSummary.swift in Sources */,
+				A00000000000000000009004 /* NetTrendCard.swift in Sources */,
+				A00000000000000000009003 /* MonthlyFlowCard.swift in Sources */,
 				A00000000000000000009001 /* TransactionQuery.swift in Sources */,
 				A00000000000000000000253 /* TransactionPeriod.swift in Sources */,
 				A00000000000000000000612 /* TransactionRange.swift in Sources */,
