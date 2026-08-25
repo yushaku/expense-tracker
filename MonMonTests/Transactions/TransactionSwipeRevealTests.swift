@@ -5,6 +5,42 @@ import Testing
 
 @Suite("Transaction report swipe actions")
 struct TransactionSwipeRevealTests {
+    @Test("Releasing an opening drag settles without returning to the closed position")
+    func openingDragSettlesFromFingerPosition() {
+        let dragging = TransactionSwipeMotion()
+            .dragging(CGSize(width: 70, height: 8))
+
+        #expect(dragging.displayedOffset == 70)
+
+        let settled = dragging.endingDrag()
+
+        #expect(settled.reveal == .delete)
+        #expect(settled.displayedOffset == TransactionSwipeReveal.actionWidth)
+    }
+
+    @Test("Releasing a closing drag settles without returning to the open position")
+    func closingDragSettlesFromFingerPosition() {
+        let dragging = TransactionSwipeMotion(reveal: .edit)
+            .dragging(CGSize(width: 70, height: 8))
+
+        #expect(dragging.displayedOffset == -14)
+
+        let settled = dragging.endingDrag()
+
+        #expect(settled.reveal == .none)
+        #expect(settled.displayedOffset == 0)
+    }
+
+    @Test("A horizontal drag keeps its axis when the finger moves diagonally")
+    func horizontalDragKeepsItsAxis() {
+        let dragging = TransactionSwipeMotion()
+            .dragging(CGSize(width: -20, height: 2))
+            .dragging(CGSize(width: -60, height: 70))
+
+        #expect(dragging.axis == .horizontal)
+        #expect(dragging.displayedOffset == -60)
+    }
+
     @Test("A stationary touch resolves only as a tap")
     func stationaryTouchResolvesAsTap() {
         #expect(

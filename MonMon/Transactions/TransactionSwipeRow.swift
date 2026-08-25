@@ -72,6 +72,85 @@ enum TransactionSwipeReveal: Equatable {
     }
 }
 
+enum TransactionSwipeAxis: Equatable {
+    case undecided
+    case horizontal
+    case vertical
+}
+
+/// Persistent motion state keeps the card at the finger's last position until
+/// the settling animation takes over. The drag axis is locked once recognized
+/// so a diagonal movement cannot repeatedly move and reset the card.
+struct TransactionSwipeMotion: Equatable {
+    let reveal: TransactionSwipeReveal
+    let dragOffset: CGFloat
+    let axis: TransactionSwipeAxis
+
+    init(
+        reveal: TransactionSwipeReveal = .none,
+        dragOffset: CGFloat = 0,
+        axis: TransactionSwipeAxis = .undecided
+    ) {
+        self.reveal = reveal
+        self.dragOffset = dragOffset
+        self.axis = axis
+    }
+
+    var displayedOffset: CGFloat {
+        min(
+            TransactionSwipeReveal.actionWidth,
+            max(-TransactionSwipeReveal.actionWidth, reveal.offset + dragOffset)
+        )
+    }
+
+    func dragging(_ translation: CGSize) -> Self {
+        switch axis {
+        case .undecided:
+            switch TransactionRowGestureIntent.resolved(after: translation) {
+            case .tap:
+                return self
+            case .scroll:
+                return Self(reveal: reveal, axis: .vertical)
+            case .swipe:
+                guard
+                    let horizontalTranslation = TransactionSwipeReveal.horizontalTranslation(
+                        in: translation
+                    )
+                else {
+                    return self
+                }
+
+                return Self(
+                    reveal: reveal,
+                    dragOffset: horizontalTranslation,
+                    axis: .horizontal
+                )
+            }
+        case .horizontal:
+            return Self(
+                reveal: reveal,
+                dragOffset: translation.width,
+                axis: .horizontal
+            )
+        case .vertical:
+            return self
+        }
+    }
+
+    func endingDrag() -> Self {
+        guard axis == .horizontal else {
+            return Self(reveal: reveal)
+        }
+
+        return Self(
+            reveal: TransactionSwipeReveal.resolved(
+                after: CGSize(width: dragOffset, height: 0),
+                from: reveal
+            )
+        )
+    }
+}
+
 /// Swipe actions for a card inside a `ScrollView`, where SwiftUI's native
 /// `swipeActions` modifier does not provide list-row behaviour.
 struct TransactionSwipeRow<Content: View>: View {
@@ -80,8 +159,7 @@ struct TransactionSwipeRow<Content: View>: View {
     let onDelete: () -> Void
     let content: Content
 
-    @State private var reveal = TransactionSwipeReveal.none
-    @GestureState private var dragTranslation = CGSize.zero
+    @State private var motion = TransactionSwipeMotion()
 
     init(
         onTap: @escaping () -> Void,
@@ -100,9 +178,12 @@ struct TransactionSwipeRow<Content: View>: View {
             actions
 
             content
-                .offset(x: displayedOffset)
                 .contentShape(Rectangle())
+                .onTapGesture {
+                    handleTap()
+                }
                 .simultaneousGesture(rowGesture)
+                .offset(x: motion.displayedOffset)
         }
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .accessibilityAddTraits(.isButton)
@@ -123,7 +204,7 @@ struct TransactionSwipeRow<Content: View>: View {
                 title: "Delete",
                 systemImage: "trash.fill",
                 tint: MonMonTheme.danger,
-                isAccessible: reveal == .delete
+                isAccessible: motion.reveal == .delete
             ) {
                 perform(onDelete)
             }
@@ -134,7 +215,7 @@ struct TransactionSwipeRow<Content: View>: View {
                 title: "Edit",
                 systemImage: "pencil",
                 tint: MonMonTheme.accent,
-                isAccessible: reveal == .edit
+                isAccessible: motion.reveal == .edit
             ) {
                 perform(onEdit)
             }
@@ -166,54 +247,27 @@ struct TransactionSwipeRow<Content: View>: View {
         .accessibilityHidden(!isAccessible)
     }
 
-    private var displayedOffset: CGFloat {
-        let horizontalDrag =
-            TransactionSwipeReveal.horizontalTranslation(in: dragTranslation) ?? 0
-
-        return min(
-            TransactionSwipeReveal.actionWidth,
-            max(-TransactionSwipeReveal.actionWidth, reveal.offset + horizontalDrag)
-        )
-    }
-
     private var rowGesture: some Gesture {
-        DragGesture(minimumDistance: 0)
-            .updating($dragTranslation) { value, state, _ in
-                guard
-                    let horizontalTranslation = TransactionSwipeReveal.horizontalTranslation(
-                        in: value.translation
-                    )
-                else {
-                    return
-                }
-
-                state = CGSize(width: horizontalTranslation, height: value.translation.height)
+        DragGesture(minimumDistance: 12)
+            .onChanged { value in
+                motion = motion.dragging(value.translation)
             }
             .onEnded { value in
-                finishGesture(value.translation)
-            }
-    }
+                let settledMotion =
+                    motion
+                    .dragging(value.translation)
+                    .endingDrag()
 
-    private func finishGesture(_ translation: CGSize) {
-        switch TransactionRowGestureIntent.resolved(after: translation) {
-        case .tap:
-            handleTap()
-        case .swipe:
-            withAnimation(.snappy(duration: 0.25)) {
-                reveal = TransactionSwipeReveal.resolved(
-                    after: translation,
-                    from: reveal
-                )
+                withAnimation(.snappy(duration: 0.25)) {
+                    motion = settledMotion
+                }
             }
-        case .scroll:
-            break
-        }
     }
 
     private func handleTap() {
-        guard reveal == .none else {
+        guard motion.reveal == .none else {
             withAnimation(.snappy(duration: 0.2)) {
-                reveal = .none
+                motion = TransactionSwipeMotion()
             }
             return
         }
@@ -223,7 +277,7 @@ struct TransactionSwipeRow<Content: View>: View {
 
     private func perform(_ action: () -> Void) {
         withAnimation(.snappy(duration: 0.2)) {
-            reveal = .none
+            motion = TransactionSwipeMotion()
         }
         action()
     }
