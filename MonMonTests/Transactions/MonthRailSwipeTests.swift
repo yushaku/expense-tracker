@@ -37,4 +37,54 @@ struct MonthRailSwipeTests {
         #expect(MonthRailSwipe.monthOffset(for: CGSize(width: -width, height: 0)) == nil)
         #expect(MonthRailSwipe.monthOffset(for: CGSize(width: width, height: 0)) == nil)
     }
+
+    @Test("A claimed drag does not change the month, however far it went")
+    func claimedDragIsIgnored() {
+        #expect(
+            MonthRailSwipe.monthOffset(
+                for: CGSize(width: -400, height: 0),
+                isClaimed: true
+            ) == nil
+        )
+    }
+
+    @Test("An unclaimed drag changes the month")
+    func unclaimedDragActs() {
+        #expect(
+            MonthRailSwipe.monthOffset(
+                for: CGSize(width: -400, height: 0),
+                isClaimed: false
+            ) == 1
+        )
+    }
+}
+
+@Suite("Horizontal swipe arbiter")
+struct HorizontalSwipeArbiterTests {
+    @Test("Nothing owns a drag until something claims it")
+    func startsUnclaimed() {
+        #expect(HorizontalSwipeArbiter().isClaimed == false)
+    }
+
+    @Test("A claim is held until it is released")
+    func claimIsHeldUntilReleased() {
+        let arbiter = HorizontalSwipeArbiter()
+
+        arbiter.claim()
+        #expect(arbiter.isClaimed)
+
+        arbiter.release()
+        #expect(arbiter.isClaimed == false)
+    }
+
+    @Test("Claiming twice still takes one release")
+    func repeatedClaimsNeedOneRelease() {
+        let arbiter = HorizontalSwipeArbiter()
+
+        arbiter.claim()
+        arbiter.claim()
+        arbiter.release()
+
+        #expect(arbiter.isClaimed == false)
+    }
 }

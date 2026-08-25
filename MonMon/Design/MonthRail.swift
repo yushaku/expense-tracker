@@ -10,8 +10,12 @@ enum MonthRailSwipe {
     /// a row reveal does before it will act.
     private static let horizontalDominance: CGFloat = 2
 
-    static func monthOffset(for translation: CGSize) -> Int? {
+    /// The month a drag across the body of a screen moves to, relative to the
+    /// one on show. A drag claimed by something under the finger moves to none:
+    /// one touch is acted on once, and the claimant was there first.
+    static func monthOffset(for translation: CGSize, isClaimed: Bool = false) -> Int? {
         guard
+            !isClaimed,
             abs(translation.width) >= minimumHorizontalDistance,
             abs(translation.width) > abs(translation.height) * horizontalDominance
         else {
@@ -82,8 +86,10 @@ private struct MonthSwipeGesture: ViewModifier {
                     isClaimed = false
 
                     guard
-                        !wasClaimed,
-                        let offset = MonthRailSwipe.monthOffset(for: value.translation)
+                        let offset = MonthRailSwipe.monthOffset(
+                            for: value.translation,
+                            isClaimed: wasClaimed
+                        )
                     else {
                         return
                     }
