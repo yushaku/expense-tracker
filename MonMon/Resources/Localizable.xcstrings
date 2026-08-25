@@ -1801,16 +1801,6 @@
         }
       }
     },
-    "Catppuccin Latte in light, Frappé in dark. System follows the device.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Catppuccin Latte cho nền sáng, Frappé cho nền tối. Theo hệ thống là theo cài đặt máy."
-          }
-        }
-      }
-    },
     "Change what repeats": {
       "localizations": {
         "vi": {
@@ -6240,16 +6230,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Những gì đã ghi vẫn giữ nguyên, và không số dư nào thay đổi."
-          }
-        }
-      }
-    },
-    "What the app is written in. System follows the device.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ngôn ngữ của ứng dụng. Theo hệ thống là theo cài đặt máy."
           }
         }
       }

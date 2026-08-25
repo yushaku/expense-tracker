@@ -60,12 +60,14 @@ struct SettingsView: View {
                 .labelsHidden()
                 .accessibilityIdentifier("theme-picker")
 
-                Text("Catppuccin Latte in light, Frappé in dark. System follows the device.")
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-
                 Divider()
                     .overlay(MonMonTheme.border)
+
+                // The card is headed Appearance, which the theme picker under it
+                // reads as. The language picker needs saying.
+                Text("Language")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textPrimary)
 
                 // Each language names itself, so the picker can be read whichever
                 // one is currently on show.
@@ -78,10 +80,6 @@ struct SettingsView: View {
                 .pickerStyle(.segmented)
                 .labelsHidden()
                 .accessibilityIdentifier("language-picker")
-
-                Text("What the app is written in. System follows the device.")
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
             }
         }
     }
