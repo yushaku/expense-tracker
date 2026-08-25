@@ -59,15 +59,7 @@ struct TransactionListView: View {
                                 range: range
                             )
 
-                            TransactionCalendarCard(
-                                month: calendarMonth,
-                                weeks: calendarWeeks,
-                                onStepMonth: stepCalendarMonth
-                            )
-
-                            if !visibleTransactions.isEmpty {
-                                transactionsSection
-                            }
+                            transactionsSection
                         }
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -270,9 +262,14 @@ struct TransactionListView: View {
     }
 
     /// Built from every transaction, not the ones in range: the grid covers a
-    /// whole month even when the period narrows to a single day inside it.
+    /// whole month even when the period narrows to a single day inside it. The
+    /// list filter still applies, so the grid shows the same direction the list
+    /// under it does.
     private var calendarWeeks: [TransactionCalendarWeek] {
-        TransactionCalendar.weeks(of: calendarMonth, transactions: transactions)
+        TransactionCalendar.weeks(
+            of: calendarMonth,
+            transactions: TransactionSummary.matching(listFilter, transactions: transactions)
+        )
     }
 
     /// Stepping the calendar is how an owner says "show me that month", so it
@@ -435,6 +432,9 @@ struct TransactionListView: View {
     /// Transactions run in date order, so the list breaks them at each day and
     /// heads the run with that date and what the day came to. The cards below a
     /// header drop their own date, which the header now carries.
+    ///
+    /// The calendar sits under the filter rather than above it, so one control
+    /// narrows the grid and the list together instead of only the list.
     private var transactionsSection: some View {
         VStack(alignment: .leading, spacing: 20) {
             HStack(spacing: 12) {
@@ -445,8 +445,8 @@ struct TransactionListView: View {
 
                 Spacer(minLength: 8)
 
-                // Narrows the list only. The card above still counts both
-                // directions, which is what the period is judged on.
+                // Narrows the grid and the list. The overview card above still
+                // counts both directions, which is what the period is judged on.
                 Picker("Show", selection: $listFilter) {
                     ForEach(TransactionListFilter.allCases) { filter in
                         Text(filter.displayName)
@@ -458,6 +458,12 @@ struct TransactionListView: View {
                 .frame(maxWidth: 210)
                 .accessibilityIdentifier("transaction-filter")
             }
+
+            TransactionCalendarCard(
+                month: calendarMonth,
+                weeks: calendarWeeks,
+                onStepMonth: stepCalendarMonth
+            )
 
             if filteredTransactions.isEmpty {
                 Text(emptyFilterNotice)
