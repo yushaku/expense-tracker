@@ -3872,16 +3872,6 @@
         }
       }
     },
-    "NET": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "RÒNG"
-          }
-        }
-      }
-    },
     "NET POSITION": {
       "localizations": {
         "vi": {

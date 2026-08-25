@@ -48,25 +48,17 @@ struct SpendingOverviewCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(24)
+        // The surface every other card on the screen sits on. A wash of the
+        // period's own colour set this one apart from its neighbours, which
+        // said the summary was a different kind of thing than the cards under
+        // it; the figure itself carries the colour instead.
         .background {
             RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .fill(MonMonTheme.hero)
-        }
-        // A wash of the period's own colour, strongest behind the figure it
-        // belongs to, so the card is read before it is read out.
-        .background {
-            RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [netTint.opacity(0.22), netTint.opacity(0.04)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .fill(MonMonTheme.surface)
         }
         .overlay {
             RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .stroke(netTint.opacity(0.28), lineWidth: 1)
+                .stroke(MonMonTheme.border, lineWidth: 1)
         }
         .animation(.snappy(duration: 0.28), value: netTint)
         .accessibilityIdentifier("spending-overview")
@@ -93,28 +85,24 @@ struct SpendingOverviewCard: View {
             .foregroundStyle(MonMonTheme.textSecondary)
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
-            .background(MonMonTheme.surface.opacity(0.7), in: Capsule())
+            .background(MonMonTheme.field, in: Capsule())
             .accessibilityLabel(countLabel)
     }
 
+    /// The one figure the card exists for, centred and large enough to be read
+    /// across a room. It needs no label: it sits under the period it belongs to,
+    /// carries its own sign, and wears the colour of what the period did.
     private var netAmount: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("NET")
-                .font(.caption2.weight(.semibold))
-                .tracking(0.8)
-                .foregroundStyle(MonMonTheme.textSecondary)
-
-            Text(signed(net))
-                .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.58)
-                .foregroundStyle(MonMonTheme.textPrimary)
-                .contentTransition(.numericText())
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(AppText.string("Net \(signed(net))", in: locale))
+        Text(signed(net))
+            .font(.system(size: 44, weight: .bold, design: .rounded))
+            .monospacedDigit()
+            .lineLimit(1)
+            .minimumScaleFactor(0.45)
+            .foregroundStyle(netTint)
+            .contentTransition(.numericText())
+            .frame(maxWidth: .infinity, alignment: .center)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(AppText.string("Net \(signed(net))", in: locale))
     }
 
     /// How much of the money that moved came in against how much went out. It
