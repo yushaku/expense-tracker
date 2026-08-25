@@ -1,12 +1,19 @@
 import SwiftUI
 
 enum MonthRailSwipe {
-    private static let minimumHorizontalDistance: CGFloat = 44
+    /// Well clear of the distance that opens a transaction row's actions, so
+    /// the two swipes are told apart by how far the finger travelled and not
+    /// only by which one claimed the drag first.
+    private static let minimumHorizontalDistance: CGFloat = 96
+
+    /// A month step moves the whole screen, so it asks for a flatter drag than
+    /// a row reveal does before it will act.
+    private static let horizontalDominance: CGFloat = 2
 
     static func monthOffset(for translation: CGSize) -> Int? {
         guard
             abs(translation.width) >= minimumHorizontalDistance,
-            abs(translation.width) > abs(translation.height)
+            abs(translation.width) > abs(translation.height) * horizontalDominance
         else {
             return nil
         }
