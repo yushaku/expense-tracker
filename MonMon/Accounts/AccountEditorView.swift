@@ -31,6 +31,9 @@ struct AccountEditorView: View {
     @Query(sort: \SavingsDeposit.createdAt, order: .forward)
     private var deposits: [SavingsDeposit]
 
+    @Query(sort: \SavingsWithdrawal.withdrawnAt, order: .reverse)
+    private var withdrawals: [SavingsWithdrawal]
+
     @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
     private var transactions: [MoneyTransaction]
 
@@ -156,8 +159,9 @@ struct AccountEditorView: View {
         let isEmpty =
             CashBalanceSummary.available(
                 for: editedAccount,
-                deposits: deposits,
-                holdings: holdings,
+            deposits: deposits,
+            holdings: holdings,
+            withdrawals: withdrawals,
                 transactions: transactions,
                 transfers: transfers,
                 debts: debts,

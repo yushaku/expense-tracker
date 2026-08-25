@@ -33,6 +33,7 @@ struct FundSaleNetWorthTests {
         AssetSummary.netWorth(
             accounts: [account],
             deposits: [],
+            withdrawals: [],
             holdings: holdings,
             instruments: instruments,
             transactions: [],
@@ -164,6 +165,7 @@ struct FundSaleNetWorthTests {
                 for: account,
                 deposits: [],
                 holdings: [holding],
+                withdrawals: [],
                 transactions: [],
                 transfers: [],
                 debts: [],
@@ -191,6 +193,7 @@ struct FundSaleNetWorthTests {
         #expect(
             InvestmentSummary.total(
                 deposits: [],
+                withdrawals: [],
                 holdings: [holding],
                 instruments: [instrument],
                 sales: []
@@ -199,6 +202,7 @@ struct FundSaleNetWorthTests {
         #expect(
             InvestmentSummary.total(
                 deposits: [],
+                withdrawals: [],
                 holdings: [holding],
                 instruments: [instrument],
                 sales: [sale]
@@ -249,6 +253,7 @@ struct FundSaleNetWorthTests {
         let points = AssetHistory.points(
             accounts: [account],
             deposits: [],
+            withdrawals: [],
             holdings: [holding],
             instruments: [instrument],
             transactions: [],

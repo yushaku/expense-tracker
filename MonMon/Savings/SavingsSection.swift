@@ -5,6 +5,7 @@ import SwiftUI
 /// the running total, and the editor sheet.
 struct SavingsSection: View {
     let deposits: [SavingsDeposit]
+    let withdrawals: [SavingsWithdrawal]
     let accounts: [CashAccount]
     let onAdd: () -> Void
     let onEdit: (SavingsDeposit) -> Void
@@ -47,7 +48,7 @@ struct SavingsSection: View {
     }
 
     private var projectedInterest: Decimal {
-        AssetSummary.totalProjectedInterest(of: deposits)
+        AssetSummary.totalProjectedInterest(of: deposits, withdrawals: withdrawals)
     }
 
     private var depositCountLabel: LocalizedStringKey {

@@ -34,6 +34,9 @@ struct DebtEditorView: View {
     @Query(sort: \SavingsDeposit.createdAt, order: .forward)
     private var deposits: [SavingsDeposit]
 
+    @Query(sort: \SavingsWithdrawal.withdrawnAt, order: .reverse)
+    private var withdrawals: [SavingsWithdrawal]
+
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
@@ -165,6 +168,7 @@ struct DebtEditorView: View {
             for: sourceAccount,
             deposits: deposits,
             holdings: holdings,
+            withdrawals: withdrawals,
             transactions: transactions,
             transfers: transfers,
             debts: debts,

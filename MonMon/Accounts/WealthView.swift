@@ -15,6 +15,9 @@ struct WealthView: View {
     @Query(sort: \SavingsDeposit.createdAt, order: .forward)
     private var deposits: [SavingsDeposit]
 
+    @Query(sort: \SavingsWithdrawal.withdrawnAt, order: .reverse)
+    private var withdrawals: [SavingsWithdrawal]
+
     @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
     private var transactions: [MoneyTransaction]
 
@@ -104,6 +107,7 @@ struct WealthView: View {
         AssetAllocation.slices(
             accounts: accounts,
             deposits: deposits,
+            withdrawals: withdrawals,
             holdings: holdings,
             instruments: instruments,
             transactions: transactions,
@@ -118,6 +122,7 @@ struct WealthView: View {
         AssetHistory.points(
             accounts: accounts,
             deposits: deposits,
+            withdrawals: withdrawals,
             holdings: holdings,
             instruments: instruments,
             transactions: transactions,
@@ -133,6 +138,7 @@ struct WealthView: View {
         AssetAllocation.liabilitySlices(
             accounts: accounts,
             deposits: deposits,
+            withdrawals: withdrawals,
             holdings: holdings,
             transactions: transactions,
             transfers: transfers,
@@ -227,6 +233,7 @@ struct WealthView: View {
                     CashAccountCard(
                         account: account,
                         deposits: deposits,
+                        withdrawals: withdrawals,
                         holdings: holdings,
                         transactions: transactions,
                         transfers: transfers,
@@ -361,7 +368,7 @@ struct WealthView: View {
     }
 
     private var savingsTotal: Decimal {
-        AssetSummary.totalPrincipal(of: deposits)
+        AssetSummary.totalPrincipal(of: deposits, withdrawals: withdrawals)
     }
 
     private var fundHoldings: [FundHolding] {
@@ -383,6 +390,7 @@ struct WealthView: View {
     private var investedTotal: Decimal {
         InvestmentSummary.total(
             deposits: deposits,
+            withdrawals: withdrawals,
             holdings: holdings,
             instruments: instruments,
             sales: sales

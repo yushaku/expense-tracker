@@ -31,6 +31,9 @@ struct InvestmentsScreen: View {
     @Query(sort: \SavingsDeposit.createdAt, order: .forward)
     private var deposits: [SavingsDeposit]
 
+    @Query(sort: \SavingsWithdrawal.withdrawnAt, order: .reverse)
+    private var withdrawals: [SavingsWithdrawal]
+
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
@@ -162,7 +165,7 @@ struct InvestmentsScreen: View {
         [
             AssetAllocationSlice(
                 kind: .savings,
-                amount: AssetSummary.totalPrincipal(of: deposits)
+                amount: AssetSummary.totalPrincipal(of: deposits, withdrawals: withdrawals)
             ),
             AssetAllocationSlice(
                 kind: .funds,
@@ -189,6 +192,7 @@ struct InvestmentsScreen: View {
     private var total: Decimal {
         InvestmentSummary.total(
             deposits: deposits,
+            withdrawals: withdrawals,
             holdings: holdings,
             instruments: instruments,
             sales: sales
@@ -209,7 +213,7 @@ struct InvestmentsScreen: View {
     private var selectedSection: some View {
         switch segment {
         case .savings:
-            SavingsSection(deposits: deposits, accounts: accounts) {
+            SavingsSection(deposits: deposits, withdrawals: withdrawals, accounts: accounts) {
                 add()
             } onEdit: { deposit in
                 editor = .savings(.edit(deposit))

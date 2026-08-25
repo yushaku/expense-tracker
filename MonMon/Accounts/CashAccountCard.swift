@@ -3,6 +3,7 @@ import SwiftUI
 struct CashAccountCard: View {
     let account: CashAccount
     let deposits: [SavingsDeposit]
+    let withdrawals: [SavingsWithdrawal]
     let holdings: [FundHolding]
     let transactions: [MoneyTransaction]
     let transfers: [AccountTransfer]
@@ -97,6 +98,7 @@ struct CashAccountCard: View {
             for: account,
             deposits: deposits,
             holdings: holdings,
+            withdrawals: withdrawals,
             transactions: transactions,
             transfers: transfers,
             debts: debts,
@@ -107,7 +109,8 @@ struct CashAccountCard: View {
 
     private var savingsAmount: Decimal {
         deposits.reduce(Decimal.zero) { total, deposit in
-            deposit.sourceAccountID == account.id ? total + deposit.principal : total
+            deposit.sourceAccountID == account.id
+                ? total + deposit.remainingPrincipal(withdrawals: withdrawals) : total
         }
     }
 
@@ -135,6 +138,7 @@ struct CashAccountCard: View {
                 CashAccountCard(
                     account: .preview(name: "Wallet", kind: .cash, openingBalance: 1_250_000),
                     deposits: [],
+                    withdrawals: [],
                     holdings: [],
                     transactions: [],
                     transfers: [],
@@ -146,6 +150,7 @@ struct CashAccountCard: View {
                 CashAccountCard(
                     account: .preview(name: "Techcombank", kind: .bank, openingBalance: 48_900_000),
                     deposits: [],
+                    withdrawals: [],
                     holdings: [],
                     transactions: [],
                     transfers: [],
@@ -161,6 +166,7 @@ struct CashAccountCard: View {
                         openingBalance: -5_200_000
                     ),
                     deposits: [],
+                    withdrawals: [],
                     holdings: [],
                     transactions: [],
                     transfers: [],
@@ -176,6 +182,7 @@ struct CashAccountCard: View {
                         openingBalance: 987_654_321_000
                     ),
                     deposits: [],
+                    withdrawals: [],
                     holdings: [],
                     transactions: [],
                     transfers: [],

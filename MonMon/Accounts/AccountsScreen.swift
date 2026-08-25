@@ -16,6 +16,9 @@ struct AccountsScreen: View {
     @Query(sort: \SavingsDeposit.createdAt, order: .forward)
     private var deposits: [SavingsDeposit]
 
+    @Query(sort: \SavingsWithdrawal.withdrawnAt, order: .reverse)
+    private var withdrawals: [SavingsWithdrawal]
+
     @Query(sort: \FundHolding.createdAt, order: .forward)
     private var holdings: [FundHolding]
 
@@ -91,6 +94,7 @@ struct AccountsScreen: View {
                     CashAccountCard(
                         account: account,
                         deposits: deposits,
+                        withdrawals: withdrawals,
                         holdings: holdings,
                         transactions: transactions,
                         transfers: transfers,
@@ -285,6 +289,7 @@ struct AccountsScreen: View {
         AccountBalanceAllocation.slices(
             accounts: accounts,
             deposits: deposits,
+            withdrawals: withdrawals,
             holdings: holdings,
             transactions: transactions,
             transfers: transfers,
@@ -298,6 +303,7 @@ struct AccountsScreen: View {
         AssetAllocation.overdraft(
             accounts: accounts,
             deposits: deposits,
+            withdrawals: withdrawals,
             holdings: holdings,
             transactions: transactions,
             transfers: transfers,

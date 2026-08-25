@@ -96,6 +96,7 @@ enum AssetAllocation {
     static func amounts(
         accounts: [CashAccount],
         deposits: [SavingsDeposit],
+        withdrawals: [SavingsWithdrawal],
         holdings: [FundHolding],
         instruments: [FundInstrument],
         transactions: [MoneyTransaction],
@@ -111,6 +112,7 @@ enum AssetAllocation {
                     of: kind,
                     accounts: accounts,
                     deposits: deposits,
+                    withdrawals: withdrawals,
                     holdings: holdings,
                     instruments: instruments,
                     transactions: transactions,
@@ -127,6 +129,7 @@ enum AssetAllocation {
         of kind: AssetAllocationSlice.Kind,
         accounts: [CashAccount],
         deposits: [SavingsDeposit],
+        withdrawals: [SavingsWithdrawal],
         holdings: [FundHolding],
         instruments: [FundInstrument],
         transactions: [MoneyTransaction],
@@ -140,6 +143,7 @@ enum AssetAllocation {
             positiveCash(
                 accounts: accounts,
                 deposits: deposits,
+                withdrawals: withdrawals,
                 holdings: holdings,
                 transactions: transactions,
                 transfers: transfers,
@@ -148,7 +152,7 @@ enum AssetAllocation {
                 sales: sales
             )
         case .savings:
-            AssetSummary.totalPrincipal(of: deposits)
+            AssetSummary.totalPrincipal(of: deposits, withdrawals: withdrawals)
         case .funds:
             FundSummary.totalMarketValue(
                 of: holdings,
@@ -173,6 +177,7 @@ enum AssetAllocation {
     static func slices(
         accounts: [CashAccount],
         deposits: [SavingsDeposit],
+        withdrawals: [SavingsWithdrawal],
         holdings: [FundHolding],
         instruments: [FundInstrument],
         transactions: [MoneyTransaction],
@@ -184,6 +189,7 @@ enum AssetAllocation {
         amounts(
             accounts: accounts,
             deposits: deposits,
+            withdrawals: withdrawals,
             holdings: holdings,
             instruments: instruments,
             transactions: transactions,
@@ -200,6 +206,7 @@ enum AssetAllocation {
     static func positiveCash(
         accounts: [CashAccount],
         deposits: [SavingsDeposit],
+        withdrawals: [SavingsWithdrawal],
         holdings: [FundHolding],
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
@@ -212,6 +219,7 @@ enum AssetAllocation {
                 for: account,
                 deposits: deposits,
                 holdings: holdings,
+                withdrawals: withdrawals,
                 transactions: transactions,
                 transfers: transfers,
                 debts: debts,
@@ -233,6 +241,7 @@ enum AssetAllocation {
     static func overdraft(
         accounts: [CashAccount],
         deposits: [SavingsDeposit],
+        withdrawals: [SavingsWithdrawal],
         holdings: [FundHolding],
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
@@ -245,6 +254,7 @@ enum AssetAllocation {
                 for: account,
                 deposits: deposits,
                 holdings: holdings,
+                withdrawals: withdrawals,
                 transactions: transactions,
                 transfers: transfers,
                 debts: debts,
@@ -263,6 +273,7 @@ enum AssetAllocation {
     static func liabilities(
         accounts: [CashAccount],
         deposits: [SavingsDeposit],
+        withdrawals: [SavingsWithdrawal],
         holdings: [FundHolding],
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
@@ -274,6 +285,7 @@ enum AssetAllocation {
             of: liabilitySlices(
                 accounts: accounts,
                 deposits: deposits,
+                withdrawals: withdrawals,
                 holdings: holdings,
                 transactions: transactions,
                 transfers: transfers,
@@ -288,6 +300,7 @@ enum AssetAllocation {
     static func liabilitySlices(
         accounts: [CashAccount],
         deposits: [SavingsDeposit],
+        withdrawals: [SavingsWithdrawal],
         holdings: [FundHolding],
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
@@ -309,6 +322,7 @@ enum AssetAllocation {
                 amount: overdraft(
                     accounts: accounts,
                     deposits: deposits,
+                    withdrawals: withdrawals,
                     holdings: holdings,
                     transactions: transactions,
                     transfers: transfers,

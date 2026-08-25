@@ -51,6 +51,7 @@ enum CashBalanceSummary {
         for account: CashAccount,
         deposits: [SavingsDeposit],
         holdings: [FundHolding],
+        withdrawals: [SavingsWithdrawal],
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
         debts: [Debt],
@@ -62,6 +63,7 @@ enum CashBalanceSummary {
             + TransferSummary.netFlow(for: account, transfers: transfers)
             + DebtSummary.netFlow(for: account, debts: debts, payments: payments)
             + FundSaleSummary.netFlow(for: account, sales: sales)
+            + SavingsWithdrawalSummary.netFlow(for: account, withdrawals: withdrawals)
             - fundedAmount(for: account, deposits: deposits, holdings: holdings)
     }
 
@@ -76,6 +78,7 @@ enum CashBalanceSummary {
         of accounts: [CashAccount],
         deposits: [SavingsDeposit],
         holdings: [FundHolding],
+        withdrawals: [SavingsWithdrawal],
         transactions: [MoneyTransaction],
         transfers: [AccountTransfer],
         debts: [Debt],
@@ -88,6 +91,7 @@ enum CashBalanceSummary {
                     for: account,
                     deposits: deposits,
                     holdings: holdings,
+                    withdrawals: withdrawals,
                     transactions: transactions,
                     transfers: transfers,
                     debts: debts,

@@ -6,11 +6,12 @@ enum InvestmentSummary {
     /// Home net-worth figure can never disagree about the parked money.
     static func total(
         deposits: [SavingsDeposit],
+        withdrawals: [SavingsWithdrawal],
         holdings: [FundHolding],
         instruments: [FundInstrument],
         sales: [FundSale]
     ) -> Decimal {
-        AssetSummary.totalPrincipal(of: deposits)
+        AssetSummary.totalPrincipal(of: deposits, withdrawals: withdrawals)
             + FundSummary.totalMarketValue(
                 of: holdings,
                 instruments: instruments,

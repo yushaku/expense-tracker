@@ -82,6 +82,7 @@ struct DebtPaymentPersistenceTests {
             for: account,
             deposits: [],
             holdings: [],
+            withdrawals: [],
             transactions: try context.fetch(FetchDescriptor<MoneyTransaction>()),
             transfers: [],
             debts: try context.fetch(FetchDescriptor<Debt>()),
