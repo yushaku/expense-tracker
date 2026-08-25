@@ -125,7 +125,11 @@ struct SavingsSection: View {
             }
 
             ForEach(sortedDeposits) { deposit in
-                NavigationLink(value: SavingsDepositRoute(depositID: deposit.id)) {
+                NavigationLink {
+                    SavingsDepositDetailView(
+                        route: SavingsDepositRoute(depositID: deposit.id)
+                    )
+                } label: {
                     SavingsDepositCard(
                         deposit: deposit,
                         sourceAccountName: accountName(for: deposit),
