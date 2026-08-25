@@ -110,7 +110,7 @@ Full gates + physical acceptance on Yushaku
 
 ### Phase 4: Owner-facing review and commit
 
-- [ ] Task 7: Add observable reconciliation and commit phases
+- [x] Task 7: Add observable reconciliation and commit phases
 - [ ] Task 8: Add account selection and focused row-resolution editor
 - [ ] Task 9: Add commit confirmation, results, cleanup retry, and count refresh
 

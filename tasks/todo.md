@@ -224,19 +224,19 @@ stale-preview protection.
 
 **Acceptance criteria:**
 
-- [ ] Selecting/changing statement account deterministically rebuilds rows and
+- [x] Selecting/changing statement account deterministically rebuilds rows and
       preserves only still-valid owner choices.
-- [ ] State distinguishes reviewing, committing, saved, cleanup-needed, and
+- [x] State distinguishes reviewing, committing, saved, cleanup-needed, and
       failed; stale tasks cannot overwrite another statement.
-- [ ] Commit readiness is true only for complete parser output and currently
+- [x] Commit readiness is true only for complete parser output and currently
       valid, fully resolved rows.
 
 **Verification:**
 
-- [ ] New state tests fail first for phase transitions, stale results, account
+- [x] New state tests fail first for phase transitions, stale results, account
       changes, retained choices, retry, and content-free failures.
-- [ ] Existing inbox-state tests remain green.
-- [ ] Swift 6 actor/sendability checks pass.
+- [x] Existing inbox-state tests remain green.
+- [x] Swift 6 actor/sendability checks pass.
 
 **Dependencies:** Task 6
 
