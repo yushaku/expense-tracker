@@ -2,7 +2,21 @@ import CryptoKit
 import Foundation
 
 enum StatementInboxConfiguration {
-    static let appGroupIdentifier = "group.com.sonlv.monmon.local.yushaku"
+    private static let appGroupInfoKey = "MonMonAppGroupIdentifier"
+
+    static var appGroupIdentifier: String? {
+        appGroupIdentifier(in: Bundle.main.infoDictionary ?? [:])
+    }
+
+    static func appGroupIdentifier(in infoDictionary: [String: Any]) -> String? {
+        guard
+            let identifier = infoDictionary[appGroupInfoKey] as? String,
+            !identifier.isEmpty
+        else {
+            return nil
+        }
+        return identifier
+    }
 }
 
 struct StagedBankStatement: Codable, Sendable, Equatable, Identifiable {

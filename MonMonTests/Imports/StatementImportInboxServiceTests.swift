@@ -6,6 +6,22 @@ import Testing
 
 @Suite("Statement import inbox service")
 struct StatementImportInboxServiceTests {
+    @Test("Configured App Group follows the build Info.plist")
+    func appGroupIdentifierFollowsBuildConfiguration() {
+        let expected = "group.com.sonlv.monmon.app"
+
+        #expect(
+            StatementInboxConfiguration.appGroupIdentifier(
+                in: ["MonMonAppGroupIdentifier": expected]
+            ) == expected
+        )
+    }
+
+    @Test("Missing App Group configuration has no development fallback")
+    func missingAppGroupIdentifierHasNoFallback() {
+        #expect(StatementInboxConfiguration.appGroupIdentifier(in: [:]) == nil)
+    }
+
     @Test("Pending statements preserve intake order and preview validated bytes")
     func listsAndPreviewsStatements() async throws {
         try await withTestDirectory { directory in

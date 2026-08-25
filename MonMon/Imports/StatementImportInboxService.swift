@@ -28,9 +28,11 @@ struct StatementImportInboxService: Sendable {
 
     static func live(
         containerURL: @escaping @Sendable () -> URL? = {
-            FileManager.default.containerURL(
-                forSecurityApplicationGroupIdentifier:
-                    StatementInboxConfiguration.appGroupIdentifier
+            guard let appGroupIdentifier = StatementInboxConfiguration.appGroupIdentifier else {
+                return nil
+            }
+            return FileManager.default.containerURL(
+                forSecurityApplicationGroupIdentifier: appGroupIdentifier
             )
         }
     ) throws -> StatementImportInboxService {
