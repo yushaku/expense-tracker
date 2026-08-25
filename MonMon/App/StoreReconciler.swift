@@ -5,7 +5,7 @@ import SwiftData
 ///
 /// ## Why the store needs this at all
 ///
-/// Three of this app's identities are unique by a rule the drafts enforce
+/// Several of this app's identities are unique by a rule the drafts enforce
 /// before a write: a category by its kind and name, an instrument by its
 /// ticker, the anchor account by its fixed id. None of them is unique by an
 /// `@Attribute(.unique)`, because CloudKit forbids those.
@@ -33,9 +33,11 @@ enum StoreReconciler {
         var instruments = 0
         var accounts = 0
         var transactions = 0
+        var transfers = 0
 
         var isEmpty: Bool {
             categories == 0 && instruments == 0 && accounts == 0 && transactions == 0
+                && transfers == 0
         }
     }
 
@@ -49,6 +51,8 @@ enum StoreReconciler {
         report.instruments = try foldInstruments(in: context)
         report.accounts = try foldAnchorAccounts(in: context)
         report.transactions = try foldGeneratedTransactions(in: context)
+        report.transactions += try foldImportedTransactions(in: context)
+        report.transfers = try foldImportedTransfers(in: context)
 
         if !report.isEmpty {
             try context.save()
@@ -190,6 +194,149 @@ enum StoreReconciler {
         }
 
         return folded
+    }
+
+    /// A candidate fingerprint is the cross-device identity of an imported
+    /// transaction. The immutable financial fields also have to agree: if two
+    /// records claim one source but point at different money movements, neither
+    /// is safe to discard. Owner-editable note and category do not participate;
+    /// oldest-wins settles those just like every other CloudKit fold.
+    private static func foldImportedTransactions(in context: ModelContext) throws -> Int {
+        let transactions = try context.fetch(FetchDescriptor<MoneyTransaction>())
+        let merges = DuplicateReconciler.merges(
+            in: transactions,
+            key: { transaction in
+                guard transaction.sourceRuleID == nil,
+                    let sourceID = transaction.sourceImportID.flatMap({
+                        ImportSourceID(rawValue: $0)
+                    })
+                else {
+                    return ""
+                }
+
+                return [
+                    sourceID.rawValue,
+                    transaction.kind.rawValue,
+                    decimalKey(transaction.amount),
+                    dateKey(transaction.occurredAt),
+                    transaction.accountID.uuidString,
+                    transaction.currencyCode,
+                ].joined(separator: "|")
+            },
+            createdAt: \.createdAt,
+            id: \.id
+        )
+
+        var folded = 0
+        for merge in merges {
+            for duplicate in merge.duplicates {
+                context.delete(duplicate)
+                folded += 1
+            }
+        }
+
+        return folded
+    }
+
+    private enum TransferImportSide {
+        case source
+        case destination
+
+        func fingerprint(of transfer: AccountTransfer) -> String? {
+            switch self {
+            case .source:
+                transfer.sourceAccountImportID
+            case .destination:
+                transfer.destinationAccountImportID
+            }
+        }
+
+        func oppositeFingerprint(of transfer: AccountTransfer) -> String? {
+            switch self {
+            case .source:
+                transfer.destinationAccountImportID
+            case .destination:
+                transfer.sourceAccountImportID
+            }
+        }
+
+        func setOppositeFingerprint(_ fingerprint: String, on transfer: AccountTransfer) {
+            switch self {
+            case .source:
+                transfer.destinationAccountImportID = fingerprint
+            case .destination:
+                transfer.sourceAccountImportID = fingerprint
+            }
+        }
+    }
+
+    /// Source and destination provenance are distinct identities. Folding one
+    /// side may discover the other side's fingerprint on a duplicate, so that
+    /// value is copied to the survivor before deletion. Different non-nil
+    /// opposite fingerprints are a conflict and leave the whole group alone.
+    private static func foldImportedTransfers(in context: ModelContext) throws -> Int {
+        try foldImportedTransfers(on: .source, in: context)
+            + foldImportedTransfers(on: .destination, in: context)
+    }
+
+    private static func foldImportedTransfers(
+        on side: TransferImportSide,
+        in context: ModelContext
+    ) throws -> Int {
+        let transfers = try context.fetch(FetchDescriptor<AccountTransfer>())
+        let merges = DuplicateReconciler.merges(
+            in: transfers,
+            key: { transfer in
+                guard let rawSourceID = side.fingerprint(of: transfer),
+                    let sourceID = ImportSourceID(rawValue: rawSourceID)
+                else {
+                    return ""
+                }
+
+                return [
+                    sourceID.rawValue,
+                    decimalKey(transfer.amount),
+                    dateKey(transfer.occurredAt),
+                    transfer.sourceAccountID.uuidString,
+                    transfer.destinationAccountID.uuidString,
+                    transfer.currencyCode,
+                ].joined(separator: "|")
+            },
+            createdAt: \.createdAt,
+            id: \.id
+        )
+
+        var folded = 0
+        for merge in merges {
+            let members = [merge.survivor] + merge.duplicates
+            let rawOppositeIDs = members.compactMap(side.oppositeFingerprint(of:))
+            let oppositeIDs = rawOppositeIDs.compactMap { ImportSourceID(rawValue: $0) }
+            guard oppositeIDs.count == rawOppositeIDs.count,
+                Set(oppositeIDs).count <= 1
+            else {
+                continue
+            }
+
+            if side.oppositeFingerprint(of: merge.survivor) == nil,
+                let oppositeID = oppositeIDs.first
+            {
+                side.setOppositeFingerprint(oppositeID.rawValue, on: merge.survivor)
+            }
+            for duplicate in merge.duplicates {
+                context.delete(duplicate)
+                folded += 1
+            }
+        }
+
+        return folded
+    }
+
+    private static func decimalKey(_ value: Decimal) -> String {
+        NSDecimalNumber(decimal: value).stringValue
+    }
+
+    private static func dateKey(_ value: Date) -> String {
+        String(value.timeIntervalSinceReferenceDate.bitPattern, radix: 16)
     }
 }
 

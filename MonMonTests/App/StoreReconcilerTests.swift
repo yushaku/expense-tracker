@@ -97,6 +97,9 @@ struct DuplicateReconcilerTests {
 struct StoreReconcilerTests {
     private let day0 = Date(timeIntervalSince1970: 1_700_000_000)
     private var day1: Date { day0.addingTimeInterval(86_400) }
+    private let importA = String(repeating: "a", count: 64)
+    private let importB = String(repeating: "b", count: 64)
+    private let importC = String(repeating: "c", count: 64)
 
     private func makeContainer() throws -> ModelContainer {
         try ModelContainer(
@@ -344,19 +347,44 @@ struct StoreReconcilerTests {
     private func generated(
         ruleID: UUID?,
         occurredAt: Date,
-        createdAt: Date
+        createdAt: Date,
+        sourceImportID: String? = nil,
+        amount: Decimal = 8_000_000
     ) -> MoneyTransaction {
         MoneyTransaction(
             id: UUID(),
             kind: .expense,
-            amount: 8_000_000,
+            amount: amount,
             occurredAt: occurredAt,
             note: "Rent",
             accountID: AccountSeed.unassignedID,
             categoryID: nil,
             sourceRuleID: ruleID,
             currencyCode: VNDCurrency.code,
-            createdAt: createdAt
+            createdAt: createdAt,
+            sourceImportID: sourceImportID
+        )
+    }
+
+    private func importedTransfer(
+        createdAt: Date,
+        sourceImportID: String? = nil,
+        destinationImportID: String? = nil,
+        amount: Decimal = 8_000_000,
+        sourceAccountID: UUID = AccountSeed.unassignedID,
+        destinationAccountID: UUID = UUID()
+    ) -> AccountTransfer {
+        AccountTransfer(
+            id: UUID(),
+            amount: amount,
+            occurredAt: day0,
+            note: "Synthetic transfer",
+            sourceAccountID: sourceAccountID,
+            destinationAccountID: destinationAccountID,
+            currencyCode: VNDCurrency.code,
+            createdAt: createdAt,
+            sourceAccountImportID: sourceImportID,
+            destinationAccountImportID: destinationImportID
         )
     }
 
@@ -444,5 +472,216 @@ struct StoreReconcilerTests {
 
         #expect(try StoreReconciler.reconcile(in: context).isEmpty)
         #expect(try context.fetchCount(FetchDescriptor<MoneyTransaction>()) == 2)
+    }
+
+    @Test("Imported transaction duplicates fold into the oldest record")
+    func importedTransactionDuplicatesFold() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let survivor = generated(
+            ruleID: nil,
+            occurredAt: day0,
+            createdAt: day0,
+            sourceImportID: importA
+        )
+        let duplicate = generated(
+            ruleID: nil,
+            occurredAt: day0,
+            createdAt: day1,
+            sourceImportID: importA
+        )
+        duplicate.note = "Edited on another device"
+        context.insert(duplicate)
+        context.insert(survivor)
+        try context.save()
+
+        let report = try StoreReconciler.reconcile(in: context)
+
+        #expect(report.transactions == 1)
+        let remaining = try context.fetch(FetchDescriptor<MoneyTransaction>())
+        #expect(remaining.map(\.id) == [survivor.id])
+    }
+
+    @Test("Invalid, recurring, and conflicting imported transactions stay independent")
+    func unsafeImportedTransactionsAreNotFolded() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let firstRecurring = rule(categoryID: nil, createdAt: day0)
+        let secondRecurring = rule(categoryID: nil, createdAt: day0)
+        context.insert(firstRecurring)
+        context.insert(secondRecurring)
+
+        for transaction in [
+            generated(
+                ruleID: nil,
+                occurredAt: day0,
+                createdAt: day0,
+                sourceImportID: "not-a-fingerprint"
+            ),
+            generated(
+                ruleID: nil,
+                occurredAt: day0,
+                createdAt: day1,
+                sourceImportID: "not-a-fingerprint"
+            ),
+            generated(
+                ruleID: firstRecurring.id,
+                occurredAt: day0,
+                createdAt: day0,
+                sourceImportID: importA
+            ),
+            generated(
+                ruleID: secondRecurring.id,
+                occurredAt: day0,
+                createdAt: day1,
+                sourceImportID: importA
+            ),
+            generated(
+                ruleID: nil,
+                occurredAt: day0,
+                createdAt: day0,
+                sourceImportID: importB,
+                amount: 100_000
+            ),
+            generated(
+                ruleID: nil,
+                occurredAt: day0,
+                createdAt: day1,
+                sourceImportID: importB,
+                amount: 200_000
+            ),
+        ] {
+            context.insert(transaction)
+        }
+        try context.save()
+
+        #expect(try StoreReconciler.reconcile(in: context).isEmpty)
+        #expect(try context.fetchCount(FetchDescriptor<MoneyTransaction>()) == 6)
+    }
+
+    @Test("Same-side transfer duplicates fold and preserve opposite provenance")
+    func sameSideTransferDuplicatesFold() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let destinationID = UUID()
+        let survivor = importedTransfer(
+            createdAt: day0,
+            sourceImportID: importA,
+            destinationAccountID: destinationID
+        )
+        let duplicate = importedTransfer(
+            createdAt: day1,
+            sourceImportID: importA,
+            destinationImportID: importB,
+            destinationAccountID: destinationID
+        )
+        context.insert(duplicate)
+        context.insert(survivor)
+        try context.save()
+
+        let report = try StoreReconciler.reconcile(in: context)
+
+        #expect(report.transfers == 1)
+        let remaining = try context.fetch(FetchDescriptor<AccountTransfer>())
+        #expect(remaining.map(\.id) == [survivor.id])
+        #expect(remaining.first?.destinationAccountImportID == importB)
+        #expect(try StoreReconciler.reconcile(in: context).isEmpty)
+    }
+
+    @Test("Destination-side transfer duplicates fold")
+    func destinationSideTransferDuplicatesFold() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let sourceID = UUID()
+        let destinationID = UUID()
+        let survivor = importedTransfer(
+            createdAt: day0,
+            destinationImportID: importA,
+            sourceAccountID: sourceID,
+            destinationAccountID: destinationID
+        )
+        context.insert(survivor)
+        context.insert(
+            importedTransfer(
+                createdAt: day1,
+                destinationImportID: importA,
+                sourceAccountID: sourceID,
+                destinationAccountID: destinationID
+            )
+        )
+        try context.save()
+
+        #expect(try StoreReconciler.reconcile(in: context).transfers == 1)
+        let remaining = try context.fetch(FetchDescriptor<AccountTransfer>())
+        #expect(remaining.map(\.id) == [survivor.id])
+    }
+
+    @Test("Opposite-side, nil, and conflicting transfers are not folded")
+    func unsafeTransfersAreNotFolded() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let sourceID = UUID()
+        let destinationID = UUID()
+        let conflictSourceID = UUID()
+        let conflictDestinationID = UUID()
+
+        for transfer in [
+            importedTransfer(
+                createdAt: day0,
+                sourceImportID: importA,
+                sourceAccountID: sourceID,
+                destinationAccountID: destinationID
+            ),
+            importedTransfer(
+                createdAt: day1,
+                destinationImportID: importA,
+                sourceAccountID: sourceID,
+                destinationAccountID: destinationID
+            ),
+            importedTransfer(
+                createdAt: day0,
+                sourceAccountID: sourceID,
+                destinationAccountID: destinationID
+            ),
+            importedTransfer(
+                createdAt: day1,
+                sourceAccountID: sourceID,
+                destinationAccountID: destinationID
+            ),
+            importedTransfer(
+                createdAt: day0,
+                sourceImportID: importB,
+                destinationImportID: importA,
+                sourceAccountID: conflictSourceID,
+                destinationAccountID: conflictDestinationID
+            ),
+            importedTransfer(
+                createdAt: day1,
+                sourceImportID: importB,
+                destinationImportID: importC,
+                sourceAccountID: conflictSourceID,
+                destinationAccountID: conflictDestinationID
+            ),
+            importedTransfer(
+                createdAt: day0,
+                sourceImportID: "not-a-fingerprint",
+                amount: 7_000_000,
+                sourceAccountID: sourceID,
+                destinationAccountID: destinationID
+            ),
+            importedTransfer(
+                createdAt: day1,
+                sourceImportID: "not-a-fingerprint",
+                amount: 7_000_000,
+                sourceAccountID: sourceID,
+                destinationAccountID: destinationID
+            ),
+        ] {
+            context.insert(transfer)
+        }
+        try context.save()
+
+        #expect(try StoreReconciler.reconcile(in: context).isEmpty)
+        #expect(try context.fetchCount(FetchDescriptor<AccountTransfer>()) == 8)
     }
 }

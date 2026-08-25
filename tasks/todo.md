@@ -43,17 +43,17 @@ records remain independent.
 
 **Acceptance criteria:**
 
-- [ ] Imported transaction duplicates keep the oldest record with UUID tie-break
+- [x] Imported transaction duplicates keep the oldest record with UUID tie-break
       and remove later records sharing the same non-nil fingerprint.
-- [ ] Transfers sharing source-side or destination-side provenance converge
+- [x] Transfers sharing source-side or destination-side provenance converge
       without grouping an opposite-side fingerprint or nil value.
-- [ ] Manual, recurring, conflicting, and unrelated records are not folded.
+- [x] Manual, recurring, conflicting, and unrelated records are not folded.
 
 **Verification:**
 
-- [ ] Focused `StoreReconcilerTests` fail first and pass after implementation.
-- [ ] Reconciliation is idempotent across two consecutive runs.
-- [ ] Full StoreReconciler and recurring suites remain green.
+- [x] Focused `StoreReconcilerTests` fail first and pass after implementation.
+- [x] Reconciliation is idempotent across two consecutive runs.
+- [x] Full StoreReconciler and recurring suites remain green.
 
 **Dependencies:** Task 1
 
@@ -66,12 +66,12 @@ records remain independent.
 
 ## Checkpoint: Provenance
 
-- [ ] Focused provenance, persistence, CloudSync, StoreReconciler, and recurring
+- [x] Focused provenance, persistence, CloudSync, StoreReconciler, and recurring
       suites pass.
-- [ ] Model schema compiles for macOS and iOS SDK.
-- [ ] No raw reference, note, filename, suffix, or PDF metadata is persisted as
+- [x] Model schema compiles for macOS and iOS SDK.
+- [x] No raw reference, note, filename, suffix, or PDF metadata is persisted as
       import provenance.
-- [ ] Commit Tasks 1 and 2 separately before proceeding.
+- [x] Commit Tasks 1 and 2 separately before proceeding.
 
 ## Task 3: Classify exact, possible, new, and unresolved candidates
 
