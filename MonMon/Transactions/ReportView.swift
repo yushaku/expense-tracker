@@ -226,6 +226,7 @@ struct ReportView: View {
                     filterChips
                 }
             }
+            .claimsHorizontalSwipes()
         }
     }
 

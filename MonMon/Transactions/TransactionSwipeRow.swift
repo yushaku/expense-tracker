@@ -257,7 +257,7 @@ struct TransactionSwipeRow<Content: View>: View {
                 motion = motion.dragging(value.translation)
 
                 if motion.axis == .horizontal {
-                    arbiter?.claimRow()
+                    arbiter?.claim()
                 }
             }
             .onEnded { value in
@@ -266,7 +266,7 @@ struct TransactionSwipeRow<Content: View>: View {
                     .dragging(value.translation)
                     .endingDrag()
 
-                arbiter?.releaseRow()
+                arbiter?.release()
 
                 withAnimation(.snappy(duration: 0.25)) {
                     motion = settledMotion

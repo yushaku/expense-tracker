@@ -22,23 +22,24 @@ enum MonthRailSwipe {
     }
 }
 
-/// Which of the two horizontal swipes on a screen owns the finger.
+/// Which horizontal swipe on a screen owns the finger.
 ///
-/// A month swipe reads the whole scrolling body, and a transaction row reads
-/// itself; both are horizontal, so without a shared answer one drag is read
-/// twice and the screen both reveals a row action and steps a month. The row
-/// decides first, while the finger is still down, so it is the row that claims
-/// and the month swipe that stands off.
+/// A month swipe reads the whole scrolling body, while a transaction row and a
+/// rail of filter chips each read themselves; all are horizontal, so without a
+/// shared answer one drag is read twice and the screen both acts on what is
+/// under the finger and steps a month. What is under the finger decides first,
+/// while it is still down, so it is the inner swipe that claims the drag and
+/// the month swipe that stands off.
 @Observable
 final class HorizontalSwipeArbiter {
-    private(set) var isRowDragging = false
+    private(set) var isClaimed = false
 
-    func claimRow() {
-        isRowDragging = true
+    func claim() {
+        isClaimed = true
     }
 
-    func releaseRow() {
-        isRowDragging = false
+    func release() {
+        isClaimed = false
     }
 }
 
@@ -46,31 +47,39 @@ extension View {
     func onMonthSwipe(perform action: @escaping (Int) -> Void) -> some View {
         modifier(MonthSwipeGesture(action: action))
     }
+
+    /// Marks a region that reads its own horizontal drags, so a swipe across it
+    /// is not also read as a month step. A transaction row claims the drag
+    /// itself, once it knows the drag is horizontal; this is for regions such
+    /// as a scrolling rail that have no such moment to hook.
+    func claimsHorizontalSwipes() -> some View {
+        modifier(HorizontalSwipeClaim())
+    }
 }
 
-/// A drag on the body of a screen, read as a month step unless a transaction
-/// row claimed it first.
+/// A drag on the body of a screen, read as a month step unless something under
+/// the finger claimed it first.
 private struct MonthSwipeGesture: ViewModifier {
     @Environment(HorizontalSwipeArbiter.self) private var arbiter: HorizontalSwipeArbiter?
 
     let action: (Int) -> Void
 
     /// The claim is checked while the finger moves and remembered for the rest
-    /// of the drag. Reading it only at the end would race the row releasing its
-    /// own claim, and whichever gesture ended first would decide the month.
-    @State private var isClaimedByRow = false
+    /// of the drag. Reading it only at the end would race the claimant
+    /// releasing it, and whichever gesture ended first would decide the month.
+    @State private var isClaimed = false
 
     func body(content: Content) -> some View {
         content.simultaneousGesture(
             DragGesture(minimumDistance: 12)
                 .onChanged { _ in
-                    if arbiter?.isRowDragging == true {
-                        isClaimedByRow = true
+                    if arbiter?.isClaimed == true {
+                        isClaimed = true
                     }
                 }
                 .onEnded { value in
-                    let wasClaimed = isClaimedByRow || arbiter?.isRowDragging == true
-                    isClaimedByRow = false
+                    let wasClaimed = isClaimed || arbiter?.isClaimed == true
+                    isClaimed = false
 
                     guard
                         !wasClaimed,
@@ -80,6 +89,26 @@ private struct MonthSwipeGesture: ViewModifier {
                     }
 
                     action(offset)
+                }
+        )
+    }
+}
+
+private struct HorizontalSwipeClaim: ViewModifier {
+    @Environment(HorizontalSwipeArbiter.self) private var arbiter: HorizontalSwipeArbiter?
+
+    func body(content: Content) -> some View {
+        content.simultaneousGesture(
+            DragGesture(minimumDistance: 12)
+                .onChanged { value in
+                    guard abs(value.translation.width) > abs(value.translation.height) else {
+                        return
+                    }
+
+                    arbiter?.claim()
+                }
+                .onEnded { _ in
+                    arbiter?.release()
                 }
         )
     }
