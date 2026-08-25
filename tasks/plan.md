@@ -71,14 +71,14 @@ silently bypass that module.
 
 ### Phase 2: Observable inbox state
 
-- [ ] Task 2: Add explicit list/preview phases, refresh/removal behavior, and
+- [x] Task 2: Add explicit list/preview phases, refresh/removal behavior, and
       stale-result protection with failing-first state tests
 
 ### Checkpoint: State
 
-- [ ] Empty, loading, loaded, and failed states are distinguishable.
-- [ ] A slow parse cannot overwrite a newer selection.
-- [ ] Viewing, retrying, and failing do not delete staged data.
+- [x] Empty, loading, loaded, and failed states are distinguishable.
+- [x] A slow parse cannot overwrite a newer selection.
+- [x] Viewing, retrying, and failing do not delete staged data.
 
 ### Phase 3: Owner-facing review flow
 

@@ -51,19 +51,19 @@ result when selection has changed.
 
 **Acceptance criteria:**
 
-- [ ] List state distinguishes idle/loading/loaded/failed, including a real
+- [x] List state distinguishes idle/loading/loaded/failed, including a real
       loaded-empty state.
-- [ ] Preview state distinguishes loading/loaded/failed for one staged id.
-- [ ] Retry leaves the staged item intact.
-- [ ] Successful removal refreshes pending state and clears only the matching
+- [x] Preview state distinguishes loading/loaded/failed for one staged id.
+- [x] Retry leaves the staged item intact.
+- [x] Successful removal refreshes pending state and clears only the matching
       selection.
-- [ ] An older async result cannot overwrite the currently selected preview.
+- [x] An older async result cannot overwrite the currently selected preview.
 
 **Verification:**
 
-- [ ] New state tests fail before implementation.
-- [ ] Focused state and service tests pass after every behavior increment.
-- [ ] Swift concurrency checks pass under the project's Swift 6 settings.
+- [x] New state tests fail before implementation.
+- [x] Focused state and service tests pass after every behavior increment.
+- [x] Swift concurrency checks pass under the project's Swift 6 settings.
 
 **Dependencies:** Task 1
 
@@ -77,9 +77,9 @@ result when selection has changed.
 
 ## Checkpoint: State
 
-- [ ] Phase transitions and safe errors are deterministic.
-- [ ] State logic has no direct filesystem, entitlement, PDFKit, or SwiftData use.
-- [ ] Viewing and failure paths never call removal.
+- [x] Phase transitions and safe errors are deterministic.
+- [x] State logic has no direct filesystem, entitlement, PDFKit, or SwiftData use.
+- [x] Viewing and failure paths never call removal.
 
 ## Task 3: Build the inbox list and parsed preview screens
 
