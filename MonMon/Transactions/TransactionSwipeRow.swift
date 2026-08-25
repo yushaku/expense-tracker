@@ -158,6 +158,9 @@ struct TransactionSwipeRow<Content: View>: View {
                 .offset(x: motion.displayedOffset)
         }
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .sensoryFeedback(.impact(weight: .light), trigger: motion.isCommitted) { _, isCommitted in
+            isCommitted
+        }
         .accessibilityAddTraits(.isButton)
         .accessibilityAction {
             onTap()
@@ -173,6 +176,11 @@ struct TransactionSwipeRow<Content: View>: View {
     /// What the swipe is heading towards, sitting still behind the moving row.
     /// It is decoration and never touched: the swipe itself is the action, so
     /// there is nothing here to tap.
+    ///
+    /// Until the row has been carried far enough, the colour is held back and
+    /// the mark is small: letting go here would do nothing, and the background
+    /// should not promise otherwise. Crossing the distance fills the colour in
+    /// and swells the mark, and the phone says so under the finger.
     @ViewBuilder
     private var background: some View {
         if let action = motion.aimedAction {
@@ -189,7 +197,8 @@ struct TransactionSwipeRow<Content: View>: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(tint(for: action))
+            .background(tint(for: action).opacity(motion.isCommitted ? 1 : 0.45))
+            .animation(.snappy(duration: 0.2), value: motion.isCommitted)
             .accessibilityHidden(true)
         }
     }
@@ -203,6 +212,7 @@ struct TransactionSwipeRow<Content: View>: View {
                 .font(.caption.weight(.semibold))
         }
         .foregroundStyle(.white)
+        .scaleEffect(motion.isCommitted ? 1 : 0.82)
     }
 
     private func tint(for action: TransactionSwipeAction) -> Color {
