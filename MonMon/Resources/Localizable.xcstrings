@@ -1,6 +1,626 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Action": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hành động"
+          }
+        }
+      }
+    },
+    "All transactions are skipped.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã bỏ qua tất cả giao dịch."
+          }
+        }
+      }
+    },
+    "Already imported": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã nhập"
+          }
+        }
+      }
+    },
+    "Choose an account to reconcile this statement.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn tài khoản để đối soát sao kê này."
+          }
+        }
+      }
+    },
+    "Choose how to handle this row.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn cách xử lý dòng này."
+          }
+        }
+      }
+    },
+    "Create transaction": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tạo giao dịch"
+          }
+        }
+      }
+    },
+    "Create transfer": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tạo chuyển khoản"
+          }
+        }
+      }
+    },
+    "Description": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mô tả"
+          }
+        }
+      }
+    },
+    "Link existing record": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liên kết bản ghi có sẵn"
+          }
+        }
+      }
+    },
+    "Link existing transaction": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liên kết giao dịch có sẵn"
+          }
+        }
+      }
+    },
+    "Link existing transfer": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liên kết chuyển khoản có sẵn"
+          }
+        }
+      }
+    },
+    "New transaction": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giao dịch mới"
+          }
+        }
+      }
+    },
+    "No record will be created. This row can appear again in another statement.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sẽ không tạo bản ghi. Dòng này có thể xuất hiện lại trong sao kê khác."
+          }
+        }
+      }
+    },
+    "Opens resolution options": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở các lựa chọn xử lý"
+          }
+        }
+      }
+    },
+    "Other account": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tài khoản còn lại"
+          }
+        }
+      }
+    },
+    "Page": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trang"
+          }
+        }
+      }
+    },
+    "Possible duplicate": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Có thể trùng lặp"
+          }
+        }
+      }
+    },
+    "Reference": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tham chiếu"
+          }
+        }
+      }
+    },
+    "Resolve transaction": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xử lý giao dịch"
+          }
+        }
+      }
+    },
+    "Selected": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã chọn"
+          }
+        }
+      }
+    },
+    "Skip": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bỏ qua"
+          }
+        }
+      }
+    },
+    "Skip this row": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bỏ qua dòng này"
+          }
+        }
+      }
+    },
+    "Skipped": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã bỏ qua"
+          }
+        }
+      }
+    },
+    "Source details": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chi tiết nguồn"
+          }
+        }
+      }
+    },
+    "Statement account": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tài khoản sao kê"
+          }
+        }
+      }
+    },
+    "This statement row will be linked to the existing record.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dòng sao kê này sẽ được liên kết với bản ghi có sẵn."
+          }
+        }
+      }
+    },
+    "Transaction": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giao dịch"
+          }
+        }
+      }
+    },
+    "Transaction skipped": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã bỏ qua giao dịch"
+          }
+        }
+      }
+    },
+    "Transfer": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyển khoản"
+          }
+        }
+      }
+    },
+    "Undo": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoàn tác"
+          }
+        }
+      }
+    },
+    "%lld transactions need attention.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld giao dịch cần xử lý."
+          }
+        }
+      }
+    },
+    "1 transaction needs attention.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 giao dịch cần xử lý."
+          }
+        }
+      }
+    },
+    "Already imported: %lld": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã nhập: %lld"
+          }
+        }
+      }
+    },
+    "Choose the statement account to continue.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn tài khoản sao kê để tiếp tục."
+          }
+        }
+      }
+    },
+    "Confirm statement import": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xác nhận nhập sao kê"
+          }
+        }
+      }
+    },
+    "Couldn’t save this review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể lưu lần duyệt này"
+          }
+        }
+      }
+    },
+    "Created transactions: %lld": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giao dịch đã tạo: %lld"
+          }
+        }
+      }
+    },
+    "Created transfers: %lld": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyển khoản đã tạo: %lld"
+          }
+        }
+      }
+    },
+    "Finish review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoàn tất duyệt"
+          }
+        }
+      }
+    },
+    "Finishing…": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang hoàn tất…"
+          }
+        }
+      }
+    },
+    "Import %lld records": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập %lld bản ghi"
+          }
+        }
+      }
+    },
+    "Import reviewed records": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập các bản ghi đã duyệt"
+          }
+        }
+      }
+    },
+    "Keep MonMon open until this finishes.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giữ MonMon mở cho đến khi hoàn tất."
+          }
+        }
+      }
+    },
+    "Linked records: %lld": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bản ghi đã liên kết: %lld"
+          }
+        }
+      }
+    },
+    "MonMon could not finish this import. No partial import was kept.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không thể hoàn tất lần nhập này. Không có dữ liệu nào được nhập dở dang."
+          }
+        }
+      }
+    },
+    "MonMon could not save the reviewed records. No partial import was kept.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không thể lưu các bản ghi đã duyệt. Không có dữ liệu nào được nhập dở dang."
+          }
+        }
+      }
+    },
+    "New transactions: %lld": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giao dịch mới: %lld"
+          }
+        }
+      }
+    },
+    "New transfers: %lld": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyển khoản mới: %lld"
+          }
+        }
+      }
+    },
+    "One or more choices are no longer valid. Review them before retrying.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Một hoặc nhiều lựa chọn không còn hợp lệ. Hãy kiểm tra trước khi thử lại."
+          }
+        }
+      }
+    },
+    "Records saved": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã lưu bản ghi"
+          }
+        }
+      }
+    },
+    "Records saved; statement cleanup needed": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã lưu bản ghi; cần dọn dẹp sao kê"
+          }
+        }
+      }
+    },
+    "Remove reviewed statement": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xóa sao kê đã đối soát"
+          }
+        }
+      }
+    },
+    "Remove reviewed statement?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xóa sao kê đã đối soát?"
+          }
+        }
+      }
+    },
+    "Resolve statement issues before importing.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xử lý các vấn đề của sao kê trước khi nhập."
+          }
+        }
+      }
+    },
+    "Retry cleanup": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thử dọn dẹp lại"
+          }
+        }
+      }
+    },
+    "Review invalid selections before importing.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiểm tra các lựa chọn không hợp lệ trước khi nhập."
+          }
+        }
+      }
+    },
+    "Saving reviewed records…": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang lưu các bản ghi đã duyệt…"
+          }
+        }
+      }
+    },
+    "Skipped: %lld": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã bỏ qua: %lld"
+          }
+        }
+      }
+    },
+    "Statement review complete": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã hoàn tất duyệt sao kê"
+          }
+        }
+      }
+    },
+    "Your choices are still here. Review them and try again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Các lựa chọn của bạn vẫn được giữ lại. Hãy kiểm tra và thử lại."
+          }
+        }
+      }
+    },
+    "Your financial records are safe. Retry removing the staged PDF; this will not create duplicates.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dữ liệu tài chính của bạn đã an toàn. Thử xóa lại PDF tạm; thao tác này sẽ không tạo bản ghi trùng."
+          }
+        }
+      }
+    },
+    "Your records changed while saving. Review the matches before retrying.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dữ liệu đã thay đổi trong lúc lưu. Hãy kiểm tra các kết quả khớp trước khi thử lại."
+          }
+        }
+      }
+    },
     "%/year": {
       "localizations": {
         "vi": {
@@ -5990,6 +6610,466 @@
           "stringUnit": {
             "state": "translated",
             "value": "đơn vị"
+          }
+        }
+      }
+    },
+    "%lld statements waiting for review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld sao kê đang chờ xem"
+          }
+        }
+      }
+    },
+    "%lld transactions ready for review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld giao dịch sẵn sàng để xem"
+          }
+        }
+      }
+    },
+    "1 statement waiting for review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 sao kê đang chờ xem"
+          }
+        }
+      }
+    },
+    "Account •••• %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tài khoản •••• %@"
+          }
+        }
+      }
+    },
+    "Checking shared statements…": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang kiểm tra sao kê đã chia sẻ…"
+          }
+        }
+      }
+    },
+    "Complete": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đầy đủ"
+          }
+        }
+      }
+    },
+    "Couldn’t read this statement": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không đọc được sao kê này"
+          }
+        }
+      }
+    },
+    "Export a PDF from your bank or Files, then share it to MonMon.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xuất PDF từ ứng dụng ngân hàng hoặc Tệp, rồi chia sẻ tới MonMon."
+          }
+        }
+      }
+    },
+    "Import Inbox": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hộp thư nhập liệu"
+          }
+        }
+      }
+    },
+    "Import Inbox unavailable": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không mở được Hộp thư nhập liệu"
+          }
+        }
+      }
+    },
+    "Import Inbox needs attention": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hộp thư nhập liệu cần kiểm tra"
+          }
+        }
+      }
+    },
+    "Import Inbox, %lld statements waiting": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hộp thư nhập liệu, %lld sao kê đang chờ"
+          }
+        }
+      }
+    },
+    "Import Inbox, 1 statement waiting": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hộp thư nhập liệu, 1 sao kê đang chờ"
+          }
+        }
+      }
+    },
+    "Import Inbox, checking for statements": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hộp thư nhập liệu, đang kiểm tra sao kê"
+          }
+        }
+      }
+    },
+    "MonMon cannot access its shared inbox. Check the installed app and try again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không truy cập được hộp thư dùng chung. Hãy kiểm tra ứng dụng đã cài rồi thử lại."
+          }
+        }
+      }
+    },
+    "MonMon cannot read this staged PDF. Share the original file again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không đọc được bản PDF đã nhận. Hãy chia sẻ lại file gốc."
+          }
+        }
+      }
+    },
+    "MonMon could not check the shared inbox. Open it to try again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không kiểm tra được hộp thư dùng chung. Hãy mở hộp thư để thử lại."
+          }
+        }
+      }
+    },
+    "MonMon could not read its local inbox. Please try again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không đọc được hộp thư cục bộ. Vui lòng thử lại."
+          }
+        }
+      }
+    },
+    "MonMon could not review this statement. Please try again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không thể xem sao kê này. Vui lòng thử lại."
+          }
+        }
+      }
+    },
+    "MonMon could not verify the account, currency, or statement period.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không xác minh được tài khoản, loại tiền hoặc kỳ sao kê."
+          }
+        }
+      }
+    },
+    "MonMon did not silently discard uncertain statement data.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không tự ý bỏ qua dữ liệu sao kê chưa chắc chắn."
+          }
+        }
+      }
+    },
+    "MonMon found no transaction rows in this statement.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không tìm thấy dòng giao dịch nào trong sao kê."
+          }
+        }
+      }
+    },
+    "Needs attention": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cần kiểm tra"
+          }
+        }
+      }
+    },
+    "No description": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không có diễn giải"
+          }
+        }
+      }
+    },
+    "No statements waiting": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không có sao kê chờ xử lý"
+          }
+        }
+      }
+    },
+    "Nothing is added to your records until you review a statement.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có gì được thêm vào sổ cho tới khi bạn xem sao kê."
+          }
+        }
+      }
+    },
+    "Opens statement review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở phần xem sao kê"
+          }
+        }
+      }
+    },
+    "Page %lld, row %lld: amount direction is ambiguous.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trang %lld, dòng %lld: chưa xác định được chiều tiền."
+          }
+        }
+      }
+    },
+    "Page %lld, row %lld: transaction data is invalid.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trang %lld, dòng %lld: dữ liệu giao dịch không hợp lệ."
+          }
+        }
+      }
+    },
+    "Parsed totals do not match the totals printed by the bank.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tổng đã đọc không khớp với tổng do ngân hàng in trên sao kê."
+          }
+        }
+      }
+    },
+    "Reading statement locally…": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang đọc sao kê trên thiết bị…"
+          }
+        }
+      }
+    },
+    "Received %@ · %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã nhận %@ · %@"
+          }
+        }
+      }
+    },
+    "Reference %@ · Page %lld": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mã tham chiếu %@ · Trang %lld"
+          }
+        }
+      }
+    },
+    "Remove Statement": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xoá sao kê"
+          }
+        }
+      }
+    },
+    "Remove this statement?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xoá sao kê này?"
+          }
+        }
+      }
+    },
+    "Review the bank statement locally. Nothing has been added yet.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xem sao kê ngay trên thiết bị. Chưa có gì được thêm vào sổ."
+          }
+        }
+      }
+    },
+    "Statement Review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xem sao kê"
+          }
+        }
+      }
+    },
+    "The bank changed this statement layout, so MonMon cannot read it safely.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngân hàng đã thay đổi bố cục sao kê nên MonMon chưa thể đọc an toàn."
+          }
+        }
+      }
+    },
+    "The staged PDF will be deleted. No financial records are affected.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bản PDF đã nhận sẽ bị xoá. Dữ liệu tài chính không bị ảnh hưởng."
+          }
+        }
+      }
+    },
+    "This bank statement format is not supported yet.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Định dạng sao kê ngân hàng này chưa được hỗ trợ."
+          }
+        }
+      }
+    },
+    "This PDF contains images instead of selectable text. OCR is not supported yet.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF này chứa hình ảnh thay vì văn bản có thể chọn. OCR chưa được hỗ trợ."
+          }
+        }
+      }
+    },
+    "This PDF is larger than 25 MB and cannot be reviewed.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF này lớn hơn 25 MB nên không thể xem."
+          }
+        }
+      }
+    },
+    "This PDF is password protected. Export an unlocked statement and share it again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF này được bảo vệ bằng mật khẩu. Hãy xuất sao kê không khoá rồi chia sẻ lại."
+          }
+        }
+      }
+    },
+    "This staged copy is damaged. Remove it and share the original PDF again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bản đã nhận bị hỏng. Hãy xoá và chia sẻ lại PDF gốc."
+          }
+        }
+      }
+    },
+    "This staged file is not a valid PDF. Remove it and share the original PDF again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File đã nhận không phải PDF hợp lệ. Hãy xoá và chia sẻ lại PDF gốc."
+          }
+        }
+      }
+    },
+    "Waiting for review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang chờ xem"
           }
         }
       }

@@ -20,6 +20,10 @@ final class AccountTransfer {
     var destinationAccountID: UUID = AccountSeed.unassignedID
     var currencyCode: String = VNDCurrency.code
     var createdAt: Date = Date(timeIntervalSince1970: 0)
+    /// Candidate fingerprints are stored per account side because a later
+    /// statement from the other account may reconcile against this transfer.
+    var sourceAccountImportID: String? = nil
+    var destinationAccountImportID: String? = nil
 
     init(
         id: UUID,
@@ -29,7 +33,9 @@ final class AccountTransfer {
         sourceAccountID: UUID,
         destinationAccountID: UUID,
         currencyCode: String,
-        createdAt: Date
+        createdAt: Date,
+        sourceAccountImportID: String? = nil,
+        destinationAccountImportID: String? = nil
     ) {
         self.id = id
         self.amount = amount
@@ -39,6 +45,8 @@ final class AccountTransfer {
         self.destinationAccountID = destinationAccountID
         self.currencyCode = currencyCode
         self.createdAt = createdAt
+        self.sourceAccountImportID = sourceAccountImportID
+        self.destinationAccountImportID = destinationAccountImportID
     }
 }
 

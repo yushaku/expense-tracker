@@ -99,11 +99,20 @@ struct TPBankPDFStatementParser: BankStatementParsing {
         pageIndex: Int,
         metadata: BankStatementMetadata
     ) throws -> (candidates: [BankTransactionCandidate], issues: [BankStatementIssue]) {
-        let layout = try columnLayout(on: page)
+        let layout: ColumnLayout
+        do {
+            layout = try columnLayout(on: page)
+        } catch BankStatementParserError.unrecognizedLayout {
+            guard containsTransactionTimestamp(on: page) else {
+                return ([], [])
+            }
+            throw BankStatementParserError.unrecognizedLayout
+        }
         let anchors = dateAnchors(on: page, in: layout.dateRange)
         let pageAmounts = positionedAmounts(
             on: page,
-            minimumX: layout.debitRange.lowerBound
+            minimumX: layout.debitRange.lowerBound,
+            maximumX: layout.creditRange.upperBound
         )
         var candidates: [BankTransactionCandidate] = []
         var issues: [BankStatementIssue] = []
@@ -174,6 +183,12 @@ struct TPBankPDFStatementParser: BankStatementParsing {
         return (candidates, issues)
     }
 
+    private func containsTransactionTimestamp(on page: PDFPage) -> Bool {
+        (page.string ?? "").components(separatedBy: .newlines).contains {
+            transactionDate(from: normalizedWhitespace($0)) != nil
+        }
+    }
+
     private func columnLayout(on page: PDFPage) throws -> ColumnLayout {
         let cropBox = page.bounds(for: .cropBox)
         let titles = ["Transaction Date", "Reference Number", "Explanation", "Debit", "Credit"]
@@ -184,14 +199,20 @@ struct TPBankPDFStatementParser: BankStatementParsing {
         let referenceBounds = headerBounds[1]
         let debitBounds = headerBounds[3]
         let creditBounds = headerBounds[4]
+        let balanceBounds = bounds(of: "Balance", on: page, closestToY: creditBounds.midY)
         let amountColumnWidth = cropBox.width * 0.10
         let debitStart = debitBounds.maxX - amountColumnWidth
         let amountSplit = (debitBounds.midX + creditBounds.midX) / 2
+        let creditEnd =
+            balanceBounds.flatMap {
+                $0.minX > creditBounds.maxX ? (creditBounds.midX + $0.midX) / 2 : nil
+            } ?? cropBox.maxX
         guard
             referenceBounds.minX < referenceBounds.maxX,
             referenceBounds.maxX < debitStart,
             debitStart < amountSplit,
-            amountSplit < cropBox.maxX
+            amountSplit < creditEnd,
+            creditEnd <= cropBox.maxX
         else {
             throw BankStatementParserError.unrecognizedLayout
         }
@@ -200,7 +221,7 @@ struct TPBankPDFStatementParser: BankStatementParsing {
             referenceRange: referenceBounds.minX...referenceBounds.maxX,
             explanationRange: referenceBounds.maxX...debitStart,
             debitRange: debitStart...amountSplit,
-            creditRange: amountSplit...cropBox.maxX,
+            creditRange: amountSplit...creditEnd,
             amountSplit: amountSplit,
             headerBottom: headerBounds.map(\.minY).min() ?? cropBox.maxY
         )
@@ -215,6 +236,24 @@ struct TPBankPDFStatementParser: BankStatementParsing {
             return nil
         }
         return selection.bounds(for: page)
+    }
+
+    private func bounds(of text: String, on page: PDFPage, closestToY targetY: CGFloat) -> CGRect? {
+        guard
+            let pageText = page.string,
+            let expression = try? NSRegularExpression(
+                pattern: NSRegularExpression.escapedPattern(for: text),
+                options: .caseInsensitive
+            )
+        else {
+            return nil
+        }
+        let range = NSRange(pageText.startIndex..., in: pageText)
+        return expression.matches(in: pageText, range: range).compactMap {
+            page.selection(for: $0.range)?.bounds(for: page)
+        }.min {
+            abs($0.midY - targetY) < abs($1.midY - targetY)
+        }
     }
 
     private func declaredTotals(in document: PDFDocument) -> BankStatementTotals? {
@@ -242,6 +281,7 @@ struct TPBankPDFStatementParser: BankStatementParsing {
             let totals = positionedAmounts(
                 on: page,
                 minimumX: layout.debitRange.lowerBound,
+                maximumX: layout.creditRange.upperBound,
                 allowsZero: true
             ).filter { yRange.contains($0.bounds.midY) }
             let debit = totals.filter { $0.bounds.midX < layout.amountSplit }
@@ -273,6 +313,7 @@ struct TPBankPDFStatementParser: BankStatementParsing {
     private func positionedAmounts(
         on page: PDFPage,
         minimumX: CGFloat,
+        maximumX: CGFloat,
         allowsZero: Bool = false
     ) -> [PositionedAmount] {
         guard
@@ -294,7 +335,7 @@ struct TPBankPDFStatementParser: BankStatementParsing {
                 return nil
             }
             let bounds = selection.bounds(for: page)
-            guard bounds.midX >= minimumX else {
+            guard bounds.midX >= minimumX, bounds.midX <= maximumX else {
                 return nil
             }
             return PositionedAmount(amount: value, bounds: bounds)
@@ -370,12 +411,12 @@ struct TPBankPDFStatementParser: BankStatementParsing {
     }
 
     private func transactionDate(from text: String) -> Date? {
-        let pattern = #"^\d{2}/\d{2}/\d{4} \d{2}:\d{2}(:\d{2})?$"#
+        let pattern = #"^\d{2}/\d{2}/\d{4}( \d{2}:\d{2}(:\d{2})?)?$"#
         guard text.range(of: pattern, options: .regularExpression) != nil
         else {
             return nil
         }
-        for format in ["dd/MM/yyyy HH:mm:ss", "dd/MM/yyyy HH:mm"] {
+        for format in ["dd/MM/yyyy HH:mm:ss", "dd/MM/yyyy HH:mm", "dd/MM/yyyy"] {
             let formatter = DateFormatter()
             formatter.calendar = Calendar(identifier: .gregorian)
             formatter.locale = Locale(identifier: "en_US_POSIX")

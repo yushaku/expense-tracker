@@ -3,6 +3,7 @@ import SwiftUI
 
 struct TransactionListView: View {
     @Environment(\.locale) private var locale
+    @Environment(\.scenePhase) private var scenePhase
 
     @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
     private var transactions: [MoneyTransaction]
@@ -20,6 +21,8 @@ struct TransactionListView: View {
     @State private var isManagingRecurring = false
     @State private var isEditingDefaults = false
     @State private var listFilter = TransactionListFilter.all
+    @State private var importInbox = StatementImportInbox.live()
+    @State private var isShowingImportInbox = false
 
     /// Weekday first: over a run of days the name is what the eye picks out,
     /// and the year is left to the period title above the list.
@@ -34,6 +37,10 @@ struct TransactionListView: View {
 
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+                        if showsImportStatus {
+                            importStatusCard
+                        }
+
                         SpendingOverviewCard(
                             title: range.title(in: locale),
                             income: income,
@@ -84,7 +91,9 @@ struct TransactionListView: View {
                 monthRail
             }
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
+                ToolbarItemGroup(placement: .primaryAction) {
+                    importInboxButton
+
                     DateRangeFilterButton(range: $range, systemImage: "calendar")
                 }
             }
@@ -108,8 +117,143 @@ struct TransactionListView: View {
             .sheet(isPresented: $isEditingDefaults) {
                 TransactionDefaultsView()
             }
+            .sheet(isPresented: $isShowingImportInbox) {
+                StatementImportInboxView(inbox: importInbox)
+            }
+            .task { await importInbox.refresh() }
+            .onChange(of: scenePhase) { _, phase in
+                guard phase == .active else {
+                    return
+                }
+                Task { await importInbox.refresh() }
+            }
             .tint(MonMonTheme.accent)
         }
+    }
+
+    private var showsImportStatus: Bool {
+        if case .failed = importInbox.listPhase {
+            return true
+        }
+        return (importInbox.pendingCount ?? 0) > 0
+    }
+
+    private var importInboxButton: some View {
+        Button {
+            isShowingImportInbox = true
+        } label: {
+            ZStack(alignment: .topTrailing) {
+                Image(systemName: hasPendingImports ? "tray.full" : "tray")
+
+                if let count = importInbox.pendingCount, count > 0 {
+                    Text(count > 99 ? "99+" : "\(count)")
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundStyle(MonMonTheme.onAccent)
+                        .padding(.horizontal, 3)
+                        .frame(minWidth: 13, minHeight: 13)
+                        .background(MonMonTheme.danger, in: Capsule())
+                        .offset(x: 8, y: -7)
+                        .accessibilityHidden(true)
+                }
+            }
+            .frame(width: 32, height: 32)
+        }
+        .accessibilityLabel(importInboxAccessibilityLabel)
+        .accessibilityIdentifier("open-import-inbox")
+    }
+
+    private var importInboxAccessibilityLabel: String {
+        switch importInbox.listPhase {
+        case .failed:
+            AppText.string("Import Inbox needs attention", in: locale)
+        case .loaded(let statements) where statements.count == 1:
+            AppText.string("Import Inbox, 1 statement waiting", in: locale)
+        case .loaded(let statements):
+            AppText.string("Import Inbox, \(statements.count) statements waiting", in: locale)
+        case .idle, .loading:
+            AppText.string("Import Inbox, checking for statements", in: locale)
+        }
+    }
+
+    private var hasPendingImports: Bool {
+        (importInbox.pendingCount ?? 0) > 0
+    }
+
+    private var importStatusCard: some View {
+        Button {
+            isShowingImportInbox = true
+        } label: {
+            HStack(spacing: 14) {
+                Image(
+                    systemName: importStatusIsFailure
+                        ? "exclamationmark.triangle.fill" : "tray.full.fill"
+                )
+                .font(.title3)
+                .foregroundStyle(importStatusIsFailure ? MonMonTheme.danger : MonMonTheme.bank)
+                .frame(width: 44, height: 44)
+                .background(
+                    (importStatusIsFailure ? MonMonTheme.danger : MonMonTheme.bank).opacity(0.16),
+                    in: RoundedRectangle(cornerRadius: 12)
+                )
+                .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(importStatusTitle)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(MonMonTheme.textPrimary)
+
+                    Text(importStatusMessage)
+                        .font(.caption)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                        .multilineTextAlignment(.leading)
+                }
+
+                Spacer(minLength: 8)
+
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textMuted)
+                    .accessibilityHidden(true)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, minHeight: 72, alignment: .leading)
+            .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 16))
+            .overlay {
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(
+                        importStatusIsFailure
+                            ? MonMonTheme.danger.opacity(0.5) : MonMonTheme.border,
+                        lineWidth: 1
+                    )
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("import-inbox-status")
+    }
+
+    private var importStatusIsFailure: Bool {
+        if case .failed = importInbox.listPhase {
+            return true
+        }
+        return false
+    }
+
+    private var importStatusTitle: LocalizedStringKey {
+        if importStatusIsFailure {
+            return "Import Inbox needs attention"
+        }
+        if importInbox.pendingCount == 1 {
+            return "1 statement waiting for review"
+        }
+        return "\(importInbox.pendingCount ?? 0) statements waiting for review"
+    }
+
+    private var importStatusMessage: LocalizedStringKey {
+        if importStatusIsFailure {
+            return "MonMon could not check the shared inbox. Open it to try again."
+        }
+        return "Review the bank statement locally. Nothing has been added yet."
     }
 
     /// Adding from a period that does not include today starts on its first
