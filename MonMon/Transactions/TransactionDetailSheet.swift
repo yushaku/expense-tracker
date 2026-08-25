@@ -79,7 +79,9 @@ struct TransactionDetailSheet: View {
             .foregroundStyle(MonMonTheme.textPrimary)
             .preferredColorScheme(MonMonTheme.colorScheme)
         }
-        .presentationDetents([.medium, .large])
+        // One height, so a drag downwards leaves in one motion rather than
+        // stopping halfway at a second one.
+        .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         .accessibilityIdentifier("transaction-details")
     }
