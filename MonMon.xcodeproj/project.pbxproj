@@ -161,6 +161,11 @@
 		B10000000000000000000203 /* TPBankPDFTestFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000103 /* TPBankPDFTestFixture.swift */; };
 		B10000000000000000000204 /* TPBankPDFStatementParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000104 /* TPBankPDFStatementParserTests.swift */; };
 		B10000000000000000000205 /* TPBankPDFStatementParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000105 /* TPBankPDFStatementParser.swift */; };
+		C10000000000000000000201 /* StatementIntakeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000101 /* StatementIntakeStore.swift */; };
+		C10000000000000000000202 /* StatementIntakeStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000102 /* StatementIntakeStoreTests.swift */; };
+		D10000000000000000000201 /* StatementIntakeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000101 /* StatementIntakeStore.swift */; };
+		D10000000000000000000202 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10000000000000000000102 /* ShareViewController.swift */; };
+		D10000000000000000000203 /* MonMonShareExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D10000000000000000000101 /* MonMonShareExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A00000000000000000000901 /* FundTestFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000900 /* FundTestFactory.swift */; };
 		A00000000000000000000903 /* FundInstrumentEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000902 /* FundInstrumentEditorView.swift */; };
 		A00000000000000000000905 /* FundInstrumentEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000904 /* FundInstrumentEditorForm.swift */; };
@@ -234,7 +239,28 @@
 			remoteGlobalIDString = A00000000000000000000001;
 			remoteInfo = MonMon;
 		};
+		D10000000000000000000602 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A00000000000000000000003 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D10000000000000000000001;
+			remoteInfo = MonMonShareExtension;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D10000000000000000000304 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				D10000000000000000000203 /* MonMonShareExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		33A69BFF303B567700432AF4 /* MonMon.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MonMon.entitlements; sourceTree = "<group>"; };
@@ -396,6 +422,12 @@
 		B10000000000000000000103 /* TPBankPDFTestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TPBankPDFTestFixture.swift; sourceTree = "<group>"; };
 		B10000000000000000000104 /* TPBankPDFStatementParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TPBankPDFStatementParserTests.swift; sourceTree = "<group>"; };
 		B10000000000000000000105 /* TPBankPDFStatementParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TPBankPDFStatementParser.swift; sourceTree = "<group>"; };
+		E10000000000000000000101 /* StatementIntakeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatementIntakeStore.swift; sourceTree = "<group>"; };
+		E10000000000000000000102 /* StatementIntakeStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatementIntakeStoreTests.swift; sourceTree = "<group>"; };
+		D10000000000000000000101 /* MonMonShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MonMonShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D10000000000000000000102 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		D10000000000000000000103 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D10000000000000000000104 /* MonMonShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MonMonShareExtension.entitlements; sourceTree = "<group>"; };
 		A00000000000000000000900 /* FundTestFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundTestFactory.swift; sourceTree = "<group>"; };
 		A00000000000000000000902 /* FundInstrumentEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentEditorView.swift; sourceTree = "<group>"; };
 		A00000000000000000000904 /* FundInstrumentEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentEditorForm.swift; sourceTree = "<group>"; };
@@ -477,6 +509,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D10000000000000000000302 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -486,6 +525,7 @@
 				A00000000000000000000011 /* Config */,
 				A00000000000000000000012 /* MonMon */,
 				A00000000000000000000015 /* MonMonTests */,
+				D10000000000000000000010 /* MonMonShareExtension */,
 				A00000000000000000000016 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -566,6 +606,7 @@
 			children = (
 				A00000000000000000000120 /* MonMon.app */,
 				A00000000000000000000121 /* MonMonTests.xctest */,
+				D10000000000000000000101 /* MonMonShareExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -919,6 +960,7 @@
 				B10000000000000000000101 /* BankStatementParsingTests.swift */,
 				B10000000000000000000103 /* TPBankPDFTestFixture.swift */,
 				B10000000000000000000104 /* TPBankPDFStatementParserTests.swift */,
+				E10000000000000000000102 /* StatementIntakeStoreTests.swift */,
 			);
 			path = Imports;
 			sourceTree = "<group>";
@@ -928,8 +970,19 @@
 			children = (
 				B10000000000000000000102 /* BankStatementParsing.swift */,
 				B10000000000000000000105 /* TPBankPDFStatementParser.swift */,
+				E10000000000000000000101 /* StatementIntakeStore.swift */,
 			);
 			path = Imports;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000010 /* MonMonShareExtension */ = {
+			isa = PBXGroup;
+			children = (
+				D10000000000000000000104 /* MonMonShareExtension.entitlements */,
+				D10000000000000000000103 /* Info.plist */,
+				D10000000000000000000102 /* ShareViewController.swift */,
+			);
+			path = MonMonShareExtension;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -942,10 +995,12 @@
 				A00000000000000000000301 /* Sources */,
 				A00000000000000000000302 /* Frameworks */,
 				A00000000000000000000303 /* Resources */,
+				D10000000000000000000304 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				D10000000000000000000601 /* PBXTargetDependency */,
 			);
 			name = MonMon;
 			packageProductDependencies = (
@@ -973,6 +1028,23 @@
 			productReference = A00000000000000000000121 /* MonMonTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		D10000000000000000000001 /* MonMonShareExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D10000000000000000000401 /* Build configuration list for PBXNativeTarget "MonMonShareExtension" */;
+			buildPhases = (
+				D10000000000000000000301 /* Sources */,
+				D10000000000000000000302 /* Frameworks */,
+				D10000000000000000000303 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MonMonShareExtension;
+			productName = MonMonShareExtension;
+			productReference = D10000000000000000000101 /* MonMonShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -989,6 +1061,9 @@
 					A00000000000000000000002 = {
 						CreatedOnToolsVersion = 26.6;
 						TestTargetID = A00000000000000000000001;
+					};
+					D10000000000000000000001 = {
+						CreatedOnToolsVersion = 26.6;
 					};
 				};
 			};
@@ -1011,6 +1086,7 @@
 			targets = (
 				A00000000000000000000001 /* MonMon */,
 				A00000000000000000000002 /* MonMonTests */,
+				D10000000000000000000001 /* MonMonShareExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -1026,6 +1102,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		A00000000000000000000306 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D10000000000000000000303 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1059,6 +1142,7 @@
 				A00000000000000000000E00 /* RecurrenceFrequency.swift in Sources */,
 				B10000000000000000000202 /* BankStatementParsing.swift in Sources */,
 				B10000000000000000000205 /* TPBankPDFStatementParser.swift in Sources */,
+				C10000000000000000000201 /* StatementIntakeStore.swift in Sources */,
 				A00000000000000000000287 /* CalendarTheme.swift in Sources */,
 				A00000000000000000000285 /* CategoryTransactionsView.swift in Sources */,
 				C10000000000000000000101 /* TransactionCalendar.swift in Sources */,
@@ -1208,6 +1292,7 @@
 				B10000000000000000000201 /* BankStatementParsingTests.swift in Sources */,
 				B10000000000000000000203 /* TPBankPDFTestFixture.swift in Sources */,
 				B10000000000000000000204 /* TPBankPDFStatementParserTests.swift in Sources */,
+				C10000000000000000000202 /* StatementIntakeStoreTests.swift in Sources */,
 				A00000000000000000000286 /* CategoryBreakdownTests.swift in Sources */,
 				A00000000000000000000280 /* AppLockTests.swift in Sources */,
 				C10000000000000000000109 /* AppLanguageTests.swift in Sources */,
@@ -1263,6 +1348,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D10000000000000000000301 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D10000000000000000000201 /* StatementIntakeStore.swift in Sources */,
+				D10000000000000000000202 /* ShareViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -1270,6 +1364,12 @@
 			isa = PBXTargetDependency;
 			target = A00000000000000000000001 /* MonMon */;
 			targetProxy = A00000000000000000000602 /* PBXContainerItemProxy */;
+		};
+		D10000000000000000000601 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilter = ios;
+			target = D10000000000000000000001 /* MonMonShareExtension */;
+			targetProxy = D10000000000000000000602 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1348,6 +1448,48 @@
 			};
 			name = Release;
 		};
+		D10000000000000000000501 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A00000000000000000000102 /* Debug.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = MonMonShareExtension/MonMonShareExtension.entitlements;
+				DEVELOPMENT_TEAM = VB5AW63GJ8;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MonMonShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sonlv.monmon.local.yushaku.ShareExtension;
+				PRODUCT_NAME = MonMonShareExtension;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+			};
+			name = Debug;
+		};
+		D10000000000000000000502 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A00000000000000000000103 /* Release.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = MonMonShareExtension/MonMonShareExtension.entitlements;
+				DEVELOPMENT_TEAM = VB5AW63GJ8;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MonMonShareExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sonlv.monmon.local.yushaku.ShareExtension;
+				PRODUCT_NAME = MonMonShareExtension;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1374,6 +1516,15 @@
 			buildConfigurations = (
 				A00000000000000000000505 /* Debug */,
 				A00000000000000000000506 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D10000000000000000000401 /* Build configuration list for PBXNativeTarget "MonMonShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D10000000000000000000501 /* Debug */,
+				D10000000000000000000502 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

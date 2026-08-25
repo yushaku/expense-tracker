@@ -63,7 +63,7 @@ rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -de
 Check Swift formatting:
 
 ```sh
-rtk swift format lint --strict --recursive MonMon MonMonTests
+rtk swift format lint --strict --recursive MonMon MonMonTests MonMonShareExtension
 ```
 
 ## Run on Mac

@@ -1,111 +1,103 @@
-# Implementation Plan: TPBank PDF Statement Parser
+# Implementation Plan: Statement Share Intake
 
 ## Overview
 
-Implement only the approved `bank-statement-parser` module. The increment reads
-TPBank text-based PDF bytes locally and returns deterministic transaction
-candidates plus explicit issues. It does not add a Share Extension, UI,
-persistence, duplicate detection, categories, or transfer matching.
+Implement only `statement-share-intake`: one PDF enters through the iOS share
+sheet, is validated and atomically staged in an App Group container, and becomes
+available to the containing app. Parsing UI, reconciliation, and persistence
+remain later modules.
 
 ## Dependency Graph
 
 ```text
-Typed parser contract and normalization
+Typed staging store + temporary-directory tests
     |
     v
-TPBank document recognition and metadata
+App Group entitlements + Share Extension target
     |
     v
-Coordinate-based transaction row extraction
+NSItemProvider adapter + safe extension result UI
     |
     v
-Multi-page assembly and totals reconciliation
-    |
-    v
-Quality gates and local real-format validation
+iOS build/signing + physical share-sheet validation
 ```
-
-The tasks are sequential because each slice extends the same contract, parser,
-and test fixture. No parallel work is planned.
 
 ## Architecture Decisions
 
-- The parser is a pure, synchronous boundary from `Data` to
-  `ParsedBankStatement`; it has no storage, UI, or network dependency.
-- TPBank detection uses document headings and table columns, never filenames.
-- PDFKit page-space selections and relative column bounds are authoritative;
-  `PDFPage.string` is not used as the table parser because its reading order can
-  differ from visual row order.
-- Amounts remain positive `Decimal` values and `TransactionKind` carries
-  direction, matching existing transaction models.
-- Document-level failures throw a closed error enum. Row-level uncertainty is
-  returned as issues so no readable row disappears silently.
-- Candidate identity is deterministic across repeated parsing but remains an
-  import-layer identifier, not a SwiftData identity.
-- Synthetic in-memory PDFs contain only fake values. The real statement stays
-  outside Git and is read only by an uncommitted local validation harness.
+- Core staging code is compiled into both targets and accepts an injected root
+  URL; only platform adapters resolve the App Group container.
+- A SHA-256 content id makes repeated delivery idempotent without exposing PDF
+  text or source metadata.
+- Fixed filenames live under a hash-named directory. The original filename is
+  display metadata only.
+- Partial directories are invisible to readers; one final same-volume move
+  publishes a complete PDF plus manifest.
+- The extension loads `UTType.pdf`, stages locally, completes the host request,
+  and never attempts to open the containing app.
+- `transaction-import-inbox` owns parsing presentation and final deletion.
 
 ## Task List
 
-### Phase 1: Contract foundation
+### Phase 1: Staging foundation
 
-- [x] Task 1: Define parser contract and normalization primitives
+- [x] Task 1: Define the staged-item contract and atomic inbox store
 
-### Checkpoint: Contract
+### Checkpoint: Store
 
-- [x] Contract tests pass before PDFKit parsing begins.
-- [x] App and test targets compile with the new Imports groups.
+- [x] Validation, idempotency, listing, corruption, and removal tests pass.
+- [x] No entitlement or UIKit dependency exists in the core store.
 
-### Phase 2: TPBank vertical slices
+### Phase 2: Share Extension
 
-- [x] Task 2: Recognize TPBank PDF and parse safe statement metadata
-- [x] Task 3: Parse visual transaction rows and wrapped explanations
-- [x] Task 4: Reconcile multi-page statements and expose uncertainty
+- [x] Task 2: Add App Group capabilities and an embedded extension target
+- [x] Task 3: Load one PDF provider and render safe progress/result states
 
-### Checkpoint: Parser
+### Checkpoint: Extension
 
-- [x] Synthetic one-page and three-page fixtures pass.
-- [x] Debit/credit totals reconcile exactly with `Decimal`.
-- [x] Error and issue paths prove that rows are never guessed or silently lost.
+- [x] Exact-one-PDF activation rule is present.
+- [x] App and extension compile with the shared staging implementation.
+- [x] Every success and failure exposes an explicit completion/cancellation action.
 
 ### Phase 3: Completion gates
 
-- [x] Task 5: Validate the real format locally and clear repository quality gates
+- [ ] Task 4: Clear automated gates and validate the share flow on `Yushaku`
 
 ### Checkpoint: Complete
 
-- [x] Approved spec success criteria are met.
-- [x] Full tests and format lint pass.
-- [x] Non-Simulator build passes.
-- [x] Build, install, and launch on physical iPhone `Yushaku` succeed.
-- [x] No real statement data, generated preview, debug output, or PDF exists in
+- [ ] Approved spec success criteria are met.
+- [x] Full tests, format lint, and iOS SDK build pass.
+- [ ] Physical build, install, launch, and one-PDF share invocation succeed.
+- [x] Invalid input leaves no ready item in automated store tests.
+- [x] No real PDF, statement content, local path, or generated output exists in
       the repository.
-- [x] Human reviews the completed parser before the next module begins.
+- [ ] Human reviews the intake checkpoint before `transaction-import-inbox`.
 
 ## Risks and Mitigations
 
 | Risk | Impact | Mitigation |
 |---|---|---|
-| PDFKit returns content in a different logical order from the visible table | High | Use selection bounds and relative column geometry; cover the page-2 style ordering in synthetic tests. |
-| A wrapped explanation is attached to the next transaction | High | Start rows only at a strict date-time cell and merge continuation lines within the table bounds until the next dated row. |
-| A debit is interpreted as credit or vice versa | High | Read each amount from its coordinate-defined column and require exactly one populated amount column. |
-| A row is skipped while the parser still reports success | High | Reconcile exact parsed debit/credit totals with the declared footer and keep `isComplete` false on any issue. |
-| Synthetic fixtures drift from the real TPBank layout | Medium | Generate multiple coordinate variants and perform a local, uncommitted validation against the supplied file. |
-| Sensitive statement data enters logs or Git | High | Never log extracted text; use fake fixtures; check the worktree for PDFs and known real values before completion. |
-| Manual Xcode project edits omit a source or test file | Medium | Add groups and build-phase entries in the first task, then compile at every checkpoint. |
-| PDFKit behavior differs between macOS tests and iOS | Medium | Keep parsing based on documented page coordinates, build both SDKs, and perform the required physical-device launch check. Actual file sharing is validated in `statement-share-intake`. |
+| App Group is not registered for the signing team | High | Use one documented identifier; fail clearly; register it once if automatic provisioning cannot. |
+| Host removes its temporary provider file | High | Copy and publish into the App Group before completing the request. |
+| App reads while extension writes | High | Readers inspect only atomically moved ready directories. |
+| Same statement is shared repeatedly | Medium | Use a complete-file SHA-256 id and return the existing ready item. |
+| Filename attempts path traversal | High | Store under fixed filenames; sanitize metadata to a bounded last path component. |
+| Extension exceeds memory or execution budget | High | Check file size before loading, cap at 25 MB, avoid parsing and network work. |
+| Extension code uses unavailable APIs | High | Keep target small, set application-extension-only, and build the embedded target for iOS. |
 
 ## Verification Strategy
 
-- Every behavior change begins with a failing Swift Testing case.
-- Run focused parser tests while iterating, then the full macOS suite at each
-  checkpoint.
-- Run `swift format lint`, the iPhone SDK build without a Simulator runtime, and
-  `scripts/run-iphone.sh Yushaku` before declaring the module complete.
-- Runtime/UI acceptance of sharing the actual PDF is intentionally deferred to
-  `statement-share-intake`; this module has no UI entry point.
+- Start each store behavior with a failing Swift Testing test.
+- Build the extension after target wiring before adding provider orchestration.
+- Test provider success/failure with fake `NSItemProvider` representations where
+  feasible; keep storage behavior in the independently tested core store.
+- Run full macOS tests, recursive format lint, compile-only iOS SDK build, then
+  `scripts/run-iphone.sh Yushaku`.
+- The owner performs the final share-sheet interaction with a local PDF; the
+  agent reports only build/install/launch status and the owner reports UI result.
 
 ## Open Questions
 
-- None. New TPBank layout variants update the approved spec before support is
-  broadened.
+- Physical signing is paused: Xcode has no signed-in developer account, the
+  current app profile lacks App Groups, and no extension profile exists. The
+  owner must register/enable the App Group and both bundle identifiers, then
+  rerun `scripts/run-iphone.sh Yushaku`.
