@@ -77,10 +77,6 @@ struct InvestmentsScreen: View {
                 .padding(.bottom, FloatingAddButton.contentInset)
                 .frame(maxWidth: .infinity)
             }
-            .swipeBetweenSegments(
-                selection: $segment,
-                options: InvestmentSegment.allCases
-            )
         }
         .overlay(alignment: .bottomTrailing) {
             // An empty list already offers its own prominent add button, so
