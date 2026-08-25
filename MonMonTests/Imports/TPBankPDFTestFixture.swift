@@ -9,6 +9,7 @@ enum TPBankPDFTestFixture {
         let noteLines: [String]
         let debit: String?
         let credit: String?
+        var balance: String? = nil
     }
 
     struct Totals {
@@ -19,6 +20,7 @@ enum TPBankPDFTestFixture {
     static func statement(
         includeColumns: Bool = true,
         includeMetadata: Bool = true,
+        includeBalance: Bool = false,
         rows: [Row] = [],
         declaredTotals: Totals? = nil,
         password: String? = nil
@@ -28,6 +30,7 @@ enum TPBankPDFTestFixture {
                 pageCells(
                     includeColumns: includeColumns,
                     includeMetadata: includeMetadata,
+                    includeBalance: includeBalance,
                     rows: rows,
                     declaredTotals: declaredTotals,
                     pageNumber: 1,
@@ -44,12 +47,37 @@ enum TPBankPDFTestFixture {
                 pageCells(
                     includeColumns: true,
                     includeMetadata: true,
+                    includeBalance: false,
                     rows: rows,
                     declaredTotals: index == pages.count - 1 ? declaredTotals : nil,
                     pageNumber: index + 1,
                     pageCount: pages.count
                 )
             }
+        )
+    }
+
+    static func statementWithFooterOnlyLastPage(rows: [Row], declaredTotals: Totals) -> Data {
+        pdf(
+            pages: [
+                pageCells(
+                    includeColumns: true,
+                    includeMetadata: true,
+                    includeBalance: false,
+                    rows: rows,
+                    declaredTotals: nil,
+                    pageNumber: 1,
+                    pageCount: 2
+                ),
+                [
+                    Cell(
+                        "Tong phat sinh / Total amount incurred: \(declaredTotals.debit) \(declaredTotals.credit)",
+                        x: 275,
+                        y: 760
+                    ),
+                    Cell("Page 2 / 2", x: 275, y: 30),
+                ],
+            ]
         )
     }
 
@@ -92,6 +120,7 @@ enum TPBankPDFTestFixture {
     private static func pageCells(
         includeColumns: Bool,
         includeMetadata: Bool,
+        includeBalance: Bool,
         rows: [Row],
         declaredTotals: Totals?,
         pageNumber: Int,
@@ -116,6 +145,9 @@ enum TPBankPDFTestFixture {
                 Cell("Debit", x: 460, y: 660),
                 Cell("Credit", x: 525, y: 660),
             ]
+            if includeBalance {
+                cells.append(Cell("Balance", x: 560, y: 660))
+            }
         }
         for (index, row) in rows.enumerated() {
             let y = 625 - CGFloat(index * 55)
@@ -146,6 +178,9 @@ enum TPBankPDFTestFixture {
         }
         if let credit = row.credit {
             cells.append(Cell(credit, x: 525, y: y))
+        }
+        if let balance = row.balance {
+            cells.append(Cell(balance, x: 560, y: y))
         }
         return cells
     }

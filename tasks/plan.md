@@ -96,16 +96,19 @@ silently bypass that module.
 
 ### Phase 4: Completion gates
 
-- [ ] Task 5: Run all automated gates and build/install/launch on `Yushaku`
+- [x] Task 5: Run all automated gates and build/install/launch on `Yushaku`
 
 ### Checkpoint: Complete
 
-- [ ] Approved spec success criteria are met.
+- [x] Approved spec success criteria are met.
 - [x] Full macOS tests and recursive format lint pass.
 - [x] Compile-only iOS SDK build passes without using a Simulator runtime.
-- [ ] Physical build, install, and launch succeed on `Yushaku`.
-- [ ] Owner performs hands-on inbox/preview/removal acceptance testing.
-- [ ] No real PDF, extracted statement content, local path, or generated output
+- [x] TPBank footer-only pages, running-balance columns, and date-only rows pass
+      parser regression tests.
+- [x] Physical build, install, and launch succeed on `Yushaku`.
+- [x] Owner opens the staged statement and reviews its parsed contents on
+      `Yushaku`.
+- [x] No real PDF, extracted statement content, local path, or generated output
       exists in the repository.
 
 ## Risks and Mitigations
@@ -126,7 +129,7 @@ silently bypass that module.
 - Follow TDD for service and state logic: add one failing behavior test, make it
   pass minimally, then refactor while green.
 - Reuse temporary-directory intake fixtures and synthetic parser output. Never
-  use `/Users/sonlv/Downloads/Trich_dan_sao_ke.pdf` in automated tests.
+  copy an owner-provided statement into the repository or automated tests.
 - Run focused import tests after Tasks 1 and 2.
 - Build the iOS target after project membership and again after UI integration.
 - Run full macOS tests, recursive format lint, and compile-only iOS SDK build

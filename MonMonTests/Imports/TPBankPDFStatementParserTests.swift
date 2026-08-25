@@ -162,6 +162,83 @@ struct TPBankPDFStatementParserTests {
         #expect(first.isComplete)
     }
 
+    @Test("A footer-only final page does not invalidate transaction pages")
+    func skipsFooterOnlyLastPage() throws {
+        let data = TPBankPDFTestFixture.statementWithFooterOnlyLastPage(
+            rows: [
+                .init(
+                    date: "02/05/2026 08:15:00",
+                    reference: "FAKE-FTR-01",
+                    noteLines: ["Synthetic expense"],
+                    debit: "125,000",
+                    credit: nil
+                )
+            ],
+            declaredTotals: .init(debit: "125,000", credit: "0")
+        )
+
+        let statement = try parser.parse(data)
+
+        #expect(statement.candidates.map(\.sourceReference) == ["FAKE-FTR-01"])
+        #expect(statement.declaredTotals == BankStatementTotals(debit: 125_000, credit: 0))
+        #expect(statement.isComplete)
+    }
+
+    @Test("Running balances are not mistaken for credit amounts")
+    func ignoresBalanceColumn() throws {
+        let data = TPBankPDFTestFixture.statement(
+            includeBalance: true,
+            rows: [
+                .init(
+                    date: "02/05/2026 08:15:00",
+                    reference: "FAKE-BAL-01",
+                    noteLines: ["Synthetic expense"],
+                    debit: "125,000",
+                    credit: nil,
+                    balance: "4,875,000"
+                )
+            ],
+            declaredTotals: .init(debit: "125,000", credit: "0")
+        )
+
+        let statement = try parser.parse(data)
+
+        #expect(statement.candidates.map(\.sourceReference) == ["FAKE-BAL-01"])
+        #expect(statement.candidates.map(\.amount) == [125_000])
+        #expect(statement.candidates.map(\.kind) == [.expense])
+        #expect(statement.isComplete)
+    }
+
+    @Test("A transaction with a date but no time uses the start of that day")
+    func parsesDateOnlyTransaction() throws {
+        let data = TPBankPDFTestFixture.statement(
+            rows: [
+                .init(
+                    date: "02/05/2026",
+                    reference: "FAKE-DATE-01",
+                    noteLines: ["Synthetic income"],
+                    debit: nil,
+                    credit: "125,000"
+                )
+            ],
+            declaredTotals: .init(debit: "0", credit: "125,000")
+        )
+
+        let statement = try parser.parse(data)
+        let candidate = try #require(statement.candidates.first)
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try #require(TimeZone(identifier: "Asia/Ho_Chi_Minh"))
+
+        #expect(
+            calendar.dateComponents(
+                [.year, .month, .day, .hour, .minute, .second],
+                from: candidate.occurredAt
+            ) == DateComponents(year: 2026, month: 5, day: 2, hour: 0, minute: 0, second: 0)
+        )
+        #expect(candidate.kind == .income)
+        #expect(statement.isComplete)
+    }
+
     @Test("A row with both amount columns is reported and makes totals incomplete")
     func reportsAmbiguousAmountRows() throws {
         let data = TPBankPDFTestFixture.statement(
