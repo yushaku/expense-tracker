@@ -132,12 +132,11 @@ struct FundGroupDetailView: View {
         }
     }
 
-    /// A card with its actions beneath it rather than a card that is itself one
-    /// button.
+    /// The card owns its own actions, so nothing here wraps it in a button.
     ///
-    /// A position now has three things to do to it — edit, sell, read its sales
-    /// back — and a button inside a button swallows the inner tap in SwiftUI.
-    /// Naming each action costs a row of the screen and removes the guesswork.
+    /// A button inside a button swallows the inner tap in SwiftUI, which is why
+    /// the whole card stopped being one: a position now has three things you can
+    /// do to it, and they belong on the card rather than floating under it.
     private func positionRow(_ holding: FundHolding) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             FundHoldingCard(
@@ -145,47 +144,13 @@ struct FundGroupDetailView: View {
                 instrument: instruments.matching(holding),
                 sales: salesFor(holding),
                 sourceAccountName: accountName(for: holding),
-                asOf: asOf
+                asOf: asOf,
+                onEdit: { editorMode = .edit(holding) },
+                onSell: { saleEditorMode = .sell(holding) },
+                onToggleSales: salesFor(holding).isEmpty
+                    ? nil : { toggleSales(for: holding) },
+                isShowingSales: expandedSaleLots.contains(holding.id)
             )
-
-            HStack(spacing: 10) {
-                Button("Edit", systemImage: "pencil") {
-                    editorMode = .edit(holding)
-                }
-                .buttonStyle(.plain)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(MonMonTheme.accent)
-                .accessibilityIdentifier("fund-\(holding.id.uuidString)")
-
-                if holding.remainingUnits(sales: sales) > 0 {
-                    Button("Sell", systemImage: "arrow.up.right") {
-                        saleEditorMode = .sell(holding)
-                    }
-                    .buttonStyle(.plain)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(MonMonTheme.funds)
-                    .accessibilityIdentifier("fund-sell-\(holding.id.uuidString)")
-                }
-
-                Spacer(minLength: 8)
-
-                if !salesFor(holding).isEmpty {
-                    Button {
-                        toggleSales(for: holding)
-                    } label: {
-                        Label(
-                            "\(salesFor(holding).count) sales",
-                            systemImage: expandedSaleLots.contains(holding.id)
-                                ? "chevron.up" : "chevron.down"
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(MonMonTheme.textSecondary)
-                    .accessibilityIdentifier("fund-sales-\(holding.id.uuidString)")
-                }
-            }
-            .padding(.horizontal, 4)
 
             if expandedSaleLots.contains(holding.id) {
                 ForEach(salesFor(holding)) { sale in

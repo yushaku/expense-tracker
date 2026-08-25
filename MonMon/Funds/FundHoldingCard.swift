@@ -20,7 +20,38 @@ struct FundHoldingCard: View {
     /// get a stable answer for whether the price is stale.
     var asOf: Date = .now
 
+    /// What can be done to this position, if anything.
+    ///
+    /// Optional so a card can still be shown where there is nothing to do with
+    /// it — a preview, or a screen that only reports. When none is given the
+    /// card loses its footer entirely rather than showing dead buttons.
+    var onEdit: (() -> Void)?
+    var onSell: (() -> Void)?
+    /// Opens or folds away the sales beneath the card. `nil` when this lot has
+    /// none, so the affordance never appears over an empty list.
+    var onToggleSales: (() -> Void)?
+    var isShowingSales = false
+
     var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            details
+                .accessibilityElement(children: .combine)
+
+            // The actions live inside the card rather than under it. A position
+            // and the things you can do to it are one object, and a row of
+            // buttons floating below the surface read as belonging to the list
+            // rather than to the card above them.
+            if hasActions {
+                Divider()
+                    .overlay(MonMonTheme.border)
+
+                actions
+            }
+        }
+        .fundCardBackground()
+    }
+
+    private var details: some View {
         VStack(alignment: .leading, spacing: 16) {
             header
 
@@ -53,8 +84,49 @@ struct FundHoldingCard: View {
                 )
             }
         }
-        .fundCardBackground()
-        .accessibilityElement(children: .combine)
+    }
+
+    private var hasActions: Bool {
+        onEdit != nil || onSell != nil || onToggleSales != nil
+    }
+
+    private var actions: some View {
+        HStack(spacing: 16) {
+            if let onEdit {
+                Button("Edit", systemImage: "pencil", action: onEdit)
+                    .buttonStyle(.plain)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.accent)
+                    .accessibilityIdentifier("fund-\(holding.id.uuidString)")
+            }
+
+            if let onSell, !isClosed {
+                Button("Sell", systemImage: "arrow.up.right", action: onSell)
+                    .buttonStyle(.plain)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.funds)
+                    .accessibilityIdentifier("fund-sell-\(holding.id.uuidString)")
+            }
+
+            Spacer(minLength: 8)
+
+            if let onToggleSales {
+                Button(action: onToggleSales) {
+                    Label(
+                        "\(saleCount) sales",
+                        systemImage: isShowingSales ? "chevron.up" : "chevron.down"
+                    )
+                }
+                .buttonStyle(.plain)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(MonMonTheme.textSecondary)
+                .accessibilityIdentifier("fund-sales-\(holding.id.uuidString)")
+            }
+        }
+    }
+
+    private var saleCount: Int {
+        FundSaleSummary.sales(for: holding, sales: sales).count
     }
 
     private var header: some View {
@@ -253,7 +325,9 @@ struct FundHoldingCard: View {
                     instrument: vesaf,
                     sales: [],
                     sourceAccountName: "Techcombank",
-                    asOf: vesaf.priceAsOf
+                    asOf: vesaf.priceAsOf,
+                    onEdit: {},
+                    onSell: {}
                 )
 
                 FundHoldingCard(
