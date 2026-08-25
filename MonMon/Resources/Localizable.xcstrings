@@ -701,16 +701,6 @@
         }
       }
     },
-    "%@ of what moved": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ số tiền đã dịch chuyển"
-          }
-        }
-      }
-    },
     "%@ outstanding after this payment.": {
       "localizations": {
         "vi": {
@@ -7240,6 +7230,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dải quỹ và vàng là giá hôm nay áp lên số đang giữ, nên chúng chỉ đổi khi bạn mua hoặc bán, không đổi theo thị trường. Phần nợ là khoảng cách giữa dải và đường."
+          }
+        }
+      }
+    },
+    "Income %@, expense %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thu %@, chi %@"
+          }
+        }
+      }
+    },
+    "Shows or hides the two shares.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hiện hoặc ẩn hai tỷ lệ."
           }
         }
       }
