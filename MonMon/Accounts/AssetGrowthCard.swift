@@ -23,6 +23,9 @@ struct AssetGrowthCard: View {
     let points: [AssetHistoryPoint]
 
     @State private var mode: AssetTrendMode = .total
+    /// The band the owner tapped in the legend, held by kind rather than by
+    /// index so a run that gains a group keeps the same one picked.
+    @State private var selectedKind: AssetAllocationSlice.Kind?
 
     private var currentPoint: AssetHistoryPoint? {
         points.last
@@ -30,7 +33,19 @@ struct AssetGrowthCard: View {
 
     private var change: Decimal {
         guard let first = points.first, let currentPoint else { return .zero }
-        return currentPoint.netWorth - first.netWorth
+
+        guard let selectedKind else {
+            return currentPoint.netWorth - first.netWorth
+        }
+
+        return amount(of: selectedKind, in: currentPoint) - amount(of: selectedKind, in: first)
+    }
+
+    private func amount(
+        of kind: AssetAllocationSlice.Kind,
+        in point: AssetHistoryPoint
+    ) -> Decimal {
+        point.composition.first { $0.kind == kind }?.amount ?? .zero
     }
 
     var body: some View {
@@ -59,6 +74,14 @@ struct AssetGrowthCard: View {
                 .foregroundStyle(MonMonTheme.textMuted)
         }
         .animation(.snappy(duration: 0.28), value: mode)
+        // A pick belongs to the bands on show; switching readings or gaining a
+        // group makes it point at something the eye is no longer on.
+        .onChange(of: mode) { _, _ in
+            selectedKind = nil
+        }
+        .onChange(of: drawnKinds) { _, _ in
+            selectedKind = nil
+        }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(24)
         .background {
@@ -89,13 +112,26 @@ struct AssetGrowthCard: View {
         }
     }
 
+    /// The figure the card is about. Picking a band swaps it for that band's
+    /// own, which is the question a tap on a stack is asking; nothing picked
+    /// leaves the net worth it always showed.
     private var summary: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
-            Text(VNDCurrency.format(currentPoint?.netWorth ?? .zero))
-                .font(.title2.weight(.bold))
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.65)
+            VStack(alignment: .leading, spacing: 2) {
+                if let selectedKind {
+                    Text(selectedKind.displayName)
+                        .font(.caption2.weight(.semibold))
+                        .tracking(0.6)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                }
+
+                Text(VNDCurrency.format(summaryAmount))
+                    .font(.title2.weight(.bold))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.65)
+                    .contentTransition(.numericText())
+            }
 
             Spacer(minLength: 8)
 
@@ -105,6 +141,14 @@ struct AssetGrowthCard: View {
                 .foregroundStyle(changeColor)
                 .accessibilityLabel(changeAccessibilityLabel)
         }
+    }
+
+    private var summaryAmount: Decimal {
+        guard let selectedKind else {
+            return currentPoint?.netWorth ?? .zero
+        }
+
+        return currentAmount(of: selectedKind)
     }
 
     private var chart: some View {
@@ -211,10 +255,13 @@ struct AssetGrowthCard: View {
                 .foregroundStyle(MonMonTheme.textPrimary)
             }
         }
+        // The picked band keeps its colour and the rest fade back, which is the
+        // only way a stack of five can be read one band at a time.
         .chartForegroundStyleScale(
             domain: drawnKinds.map(\.rawValue),
-            range: drawnKinds.map { $0.tint.opacity(0.75) }
+            range: drawnKinds.map { $0.tint.opacity(opacity(of: $0)) }
         )
+        .animation(.snappy(duration: 0.28), value: selectedKind)
         .chartLegend(.hidden)
         .chartXAxis {
             AxisMarks(values: .automatic(desiredCount: 4)) { _ in
@@ -244,28 +291,35 @@ struct AssetGrowthCard: View {
         .accessibilityHidden(true)
     }
 
-    /// Names the bands, with what each is worth at the end of the run. A group
-    /// nobody holds is left out rather than drawn as a hairline.
+    /// Names the bands, with what each is worth at the end of the run, and picks
+    /// one out of the stack when tapped. A group nobody holds is left out rather
+    /// than drawn as a hairline.
+    ///
+    /// The entries wrap rather than running off the edge: five groups and a
+    /// figure apiece never fit one phone-width row, and a legend that has to be
+    /// scrolled sideways is a legend half of which is never read.
     private var compositionLegend: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 16) {
-                legendEntries
-            }
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 16) {
-                    legendEntries
-                }
+        LazyVGrid(
+            columns: [GridItem(.adaptive(minimum: 132), spacing: 10, alignment: .leading)],
+            alignment: .leading,
+            spacing: 10
+        ) {
+            ForEach(drawnKinds, id: \.self) { kind in
+                legendEntry(kind)
             }
         }
     }
 
-    @ViewBuilder
-    private var legendEntries: some View {
-        ForEach(drawnKinds, id: \.self) { kind in
-            HStack(spacing: 7) {
+    private func legendEntry(_ kind: AssetAllocationSlice.Kind) -> some View {
+        Button {
+            withAnimation(.snappy(duration: 0.28)) {
+                // Tapping the band already picked puts the whole stack back.
+                selectedKind = selectedKind == kind ? nil : kind
+            }
+        } label: {
+            HStack(spacing: 8) {
                 RoundedRectangle(cornerRadius: 3, style: .continuous)
-                    .fill(kind.tint.opacity(0.75))
+                    .fill(kind.tint.opacity(isSelected(kind) ? 1 : 0.75))
                     .frame(width: 10, height: 10)
                     .accessibilityHidden(true)
 
@@ -280,11 +334,33 @@ struct AssetGrowthCard: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                 }
+
+                Spacer(minLength: 0)
             }
-            .accessibilityElement(children: .combine)
+            .opacity(selectedKind == nil || isSelected(kind) ? 1 : 0.4)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .background {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(isSelected(kind) ? kind.tint.opacity(0.14) : .clear)
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("trend-band-\(kind.rawValue)")
+        .accessibilityAddTraits(isSelected(kind) ? [.isSelected] : [])
+    }
+
+    private func isSelected(_ kind: AssetAllocationSlice.Kind) -> Bool {
+        selectedKind == kind
+    }
+
+    private func opacity(of kind: AssetAllocationSlice.Kind) -> Double {
+        guard let selectedKind else {
+            return 0.75
         }
 
-        Spacer(minLength: 0)
+        return selectedKind == kind ? 0.95 : 0.12
     }
 
     /// Only the groups something was ever held in, so a ledger of cash alone
@@ -302,7 +378,7 @@ struct AssetGrowthCard: View {
     }
 
     private func currentAmount(of kind: AssetAllocationSlice.Kind) -> Decimal {
-        currentPoint?.composition.first { $0.kind == kind }?.amount ?? .zero
+        currentPoint.map { amount(of: kind, in: $0) } ?? .zero
     }
 
     private var changeLabel: LocalizedStringKey {
