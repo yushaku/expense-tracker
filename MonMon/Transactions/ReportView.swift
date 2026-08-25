@@ -82,15 +82,6 @@ struct ReportView: View {
 
         return ScrollView {
             LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                if !query.hasSearchText {
-                    SpendingOverviewCard(
-                        title: query.range.title(in: locale),
-                        income: TransactionSummary.totalIncome(of: results),
-                        expense: TransactionSummary.totalExpense(of: results),
-                        count: results.count
-                    )
-                }
-
                 if query.isNarrowed {
                     activeFilters
                 }
@@ -99,8 +90,6 @@ struct ReportView: View {
                     emptyState
                 } else {
                     if !query.hasSearchText {
-                        MonthlyFlowCard(months: TransactionSummary.byMonth(results))
-
                         NetTrendCard(points: TransactionSummary.runningNet(results))
                     }
 
