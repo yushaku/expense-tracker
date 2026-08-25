@@ -174,6 +174,8 @@
 		F10000000000000000000206 /* StatementImportPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000106 /* StatementImportPreviewView.swift */; };
 		G10000000000000000000201 /* StatementImportProvenanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = G10000000000000000000101 /* StatementImportProvenanceTests.swift */; };
 		G10000000000000000000202 /* StatementImportProvenance.swift in Sources */ = {isa = PBXBuildFile; fileRef = G10000000000000000000102 /* StatementImportProvenance.swift */; };
+		G10000000000000000000203 /* StatementImportReconcilerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = G10000000000000000000103 /* StatementImportReconcilerTests.swift */; };
+		G10000000000000000000204 /* StatementImportReconciler.swift in Sources */ = {isa = PBXBuildFile; fileRef = G10000000000000000000104 /* StatementImportReconciler.swift */; };
 		A00000000000000000000901 /* FundTestFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000900 /* FundTestFactory.swift */; };
 		A00000000000000000000903 /* FundInstrumentEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000902 /* FundInstrumentEditorView.swift */; };
 		A00000000000000000000905 /* FundInstrumentEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000904 /* FundInstrumentEditorForm.swift */; };
@@ -444,6 +446,8 @@
 		F10000000000000000000106 /* StatementImportPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatementImportPreviewView.swift; sourceTree = "<group>"; };
 		G10000000000000000000101 /* StatementImportProvenanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatementImportProvenanceTests.swift; sourceTree = "<group>"; };
 		G10000000000000000000102 /* StatementImportProvenance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatementImportProvenance.swift; sourceTree = "<group>"; };
+		G10000000000000000000103 /* StatementImportReconcilerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatementImportReconcilerTests.swift; sourceTree = "<group>"; };
+		G10000000000000000000104 /* StatementImportReconciler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatementImportReconciler.swift; sourceTree = "<group>"; };
 		A00000000000000000000900 /* FundTestFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundTestFactory.swift; sourceTree = "<group>"; };
 		A00000000000000000000902 /* FundInstrumentEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentEditorView.swift; sourceTree = "<group>"; };
 		A00000000000000000000904 /* FundInstrumentEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentEditorForm.swift; sourceTree = "<group>"; };
@@ -980,6 +984,7 @@
 				F10000000000000000000101 /* StatementImportInboxServiceTests.swift */,
 				F10000000000000000000103 /* StatementImportInboxTests.swift */,
 				G10000000000000000000101 /* StatementImportProvenanceTests.swift */,
+				G10000000000000000000103 /* StatementImportReconcilerTests.swift */,
 			);
 			path = Imports;
 			sourceTree = "<group>";
@@ -995,6 +1000,7 @@
 				F10000000000000000000105 /* StatementImportInboxView.swift */,
 				F10000000000000000000106 /* StatementImportPreviewView.swift */,
 				G10000000000000000000102 /* StatementImportProvenance.swift */,
+				G10000000000000000000104 /* StatementImportReconciler.swift */,
 			);
 			path = Imports;
 			sourceTree = "<group>";
@@ -1151,6 +1157,7 @@
 				F10000000000000000000205 /* StatementImportInboxView.swift in Sources */,
 				F10000000000000000000206 /* StatementImportPreviewView.swift in Sources */,
 				G10000000000000000000202 /* StatementImportProvenance.swift in Sources */,
+				G10000000000000000000204 /* StatementImportReconciler.swift in Sources */,
 				A00000000000000000002007 /* FundSaleCard.swift in Sources */,
 				A00000000000000000002006 /* FundSaleEditorView.swift in Sources */,
 				A00000000000000000002005 /* FundSaleEditorForm.swift in Sources */,
@@ -1312,6 +1319,7 @@
 				F10000000000000000000201 /* StatementImportInboxServiceTests.swift in Sources */,
 				F10000000000000000000203 /* StatementImportInboxTests.swift in Sources */,
 				G10000000000000000000201 /* StatementImportProvenanceTests.swift in Sources */,
+				G10000000000000000000203 /* StatementImportReconcilerTests.swift in Sources */,
 				A0000000000000000000200A /* FundSalePersistenceTests.swift in Sources */,
 				A00000000000000000002009 /* FundSaleNetWorthTests.swift in Sources */,
 				A00000000000000000002008 /* FundSaleDraftTests.swift in Sources */,

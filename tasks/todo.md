@@ -81,19 +81,19 @@ returns explicit dispositions/resolutions without SwiftData, filesystem, or UI.
 
 **Acceptance criteria:**
 
-- [ ] Exact fingerprints identify the correct transaction or transfer side and
+- [x] Exact fingerprints identify the correct transaction or transfer side and
       become read-only already-imported rows.
-- [ ] Possible matches require the approved account/direction/amount/currency/
+- [x] Possible matches require the approved account/direction/amount/currency/
       local-day fields; note text is ignored and ambiguity stays unresolved.
-- [ ] New rows receive only valid same-direction category defaults; missing or
+- [x] New rows receive only valid same-direction category defaults; missing or
       stale inputs remain unresolved deterministically.
 
 **Verification:**
 
-- [ ] New reconciler suite fails before implementation and covers every exact,
+- [x] New reconciler suite fails before implementation and covers every exact,
       possible, ambiguous, new, invalid-default, and ordering case.
-- [ ] Focused parser and reconciler suites pass together.
-- [ ] Reconciler source imports no SwiftData, SwiftUI, App Group, or UserDefaults.
+- [x] Focused parser and reconciler suites pass together.
+- [x] Reconciler source imports no SwiftData, SwiftUI, App Group, or UserDefaults.
 
 **Dependencies:** Task 2
 

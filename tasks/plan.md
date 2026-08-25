@@ -84,7 +84,7 @@ Full gates + physical acceptance on Yushaku
 
 ### Phase 2: Pure reconciliation
 
-- [ ] Task 3: Classify exact, possible, new, and unresolved candidates
+- [x] Task 3: Classify exact, possible, new, and unresolved candidates
 - [ ] Task 4: Resolve and remember the statement account safely
 
 ### Checkpoint: Reconciliation
