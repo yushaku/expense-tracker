@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="MonMon persistence schema, system components, and bank-statement import flow.">
+  <meta name="description" content="MonMon persistence schema, savings lifecycle, system boundaries, and bank-statement import flow.">
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     * { margin: 0; padding: 0; }
@@ -482,6 +482,121 @@
     .import-step p { font-size: 11.5px; color: var(--text-2); }
     .import-step .n-meta { margin-top: 10px; }
 
+    /* ---- savings lifecycle ---- */
+
+    .lifecycle-panel {
+      margin-top: 18px;
+      padding: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    .state-track {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(118px, .48fr) minmax(180px, 1fr) minmax(118px, .48fr) minmax(180px, 1fr);
+      align-items: stretch;
+      gap: 12px;
+    }
+
+    .state-card {
+      --state: var(--e-savings);
+      min-height: 136px;
+      padding: 14px 15px;
+      border: 1px solid color-mix(in srgb, var(--state) 38%, var(--border));
+      border-left: 4px solid var(--state);
+      background: color-mix(in srgb, var(--state) 7%, var(--surface));
+    }
+
+    .state-card.matured { --state: var(--warn); }
+    .state-card.settled { --state: var(--idle); }
+
+    .state-name {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: var(--state);
+    }
+
+    .state-rule {
+      margin-top: 7px;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      color: var(--text-2);
+    }
+
+    .state-card p { margin-top: 8px; font-size: 12px; color: var(--text-2); }
+
+    .transition {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-align: center;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 10px;
+      line-height: 1.35;
+    }
+
+    .transition-arrow {
+      color: var(--e-savings);
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .state-caveat {
+      margin-top: 12px;
+      padding: 9px 11px;
+      border-left: 3px solid var(--e-savings);
+      background: var(--surface-2);
+      font-size: 12px;
+      color: var(--text-2);
+    }
+
+    .lifecycle-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .lifecycle-rule {
+      padding: 14px 15px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    .lifecycle-rule h3 {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      margin-bottom: 7px;
+    }
+
+    .lifecycle-rule p, .lifecycle-rule li {
+      font-size: 12px;
+      color: var(--text-2);
+    }
+
+    .lifecycle-rule ul { padding-left: 17px; }
+    .lifecycle-rule li + li { margin-top: 5px; }
+
+    .formula {
+      display: block;
+      margin-top: 7px;
+      padding: 7px 9px;
+      overflow-wrap: anywhere;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 10.5px;
+      color: var(--text);
+    }
+
     /* ---- edges ---- */
 
     .edge { transition: opacity .18s ease; }
@@ -550,6 +665,10 @@
       }
       .entity, .zone { grid-column: 1 !important; grid-row: auto !important; align-self: start !important; }
       .hint { margin-left: 0; }
+      .state-track { grid-template-columns: minmax(0, 1fr); }
+      .transition { min-height: 54px; }
+      .transition-arrow { transform: rotate(90deg); }
+      .lifecycle-grid { grid-template-columns: minmax(0, 1fr); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -567,8 +686,8 @@
       declared with <code>@Relationship</code> &mdash; every association is a hand-stored
       <code>UUID</code> foreign key, resolved in Swift at read time
       (<code>accounts.first { $0.id == someID }</code>). Below the schema: the device, iCloud,
-      market-data and share-extension boundaries, followed by the reviewed bank-statement
-      import path from a shared PDF to an atomic SwiftData save.
+      market-data and share-extension boundaries, the derived savings lifecycle, and the reviewed
+      bank-statement import path from a shared PDF to an atomic SwiftData save.
     </p>
   </header>
 
@@ -633,7 +752,7 @@
                style="--e: var(--e-savings); grid-column: 2; grid-row: 1;">
         <div class="e-head">
           <div class="e-name">SavingsDeposit</div>
-          <div class="e-role">Term deposits with maturity &amp; projected interest</div>
+          <div class="e-role">Immutable opening terms; live principal and status come from withdrawal history</div>
           <div class="e-file">MonMon/Savings/SavingsDeposit.swift</div>
         </div>
         <ul class="fields">
@@ -653,7 +772,7 @@
         </ul>
         <div class="derived">
           <div class="derived-label">Derived &mdash; computed, not stored</div>
-          <div class="derived-list">maturityDate &middot; termDayCount &middot; projectedInterest &middot; maturityValue</div>
+          <div class="derived-list">maturityDate &middot; termDayCount &middot; remainingPrincipal &middot; status &middot; projectedInterest(on remaining principal) &middot; maturityValue</div>
         </div>
       </article>
 
@@ -1035,6 +1154,101 @@
     </div>
   </div>
 
+  <!-- ==================== SAVINGS LIFECYCLE ==================== -->
+
+  <div class="section-head">
+    <h2>Savings lifecycle and cash accounting</h2>
+    <p class="lede">
+      A savings book has no stored status and no mutable balance. Its current state is derived
+      from the original <code>SavingsDeposit</code>, the clock, and the sum of its dated
+      <code>SavingsWithdrawal</code> records. That keeps partial withdrawal, early closure,
+      maturity settlement, and historical net worth on one accounting path.
+    </p>
+  </div>
+
+  <section class="lifecycle-panel" aria-label="Savings deposit lifecycle">
+    <div class="state-track">
+      <article class="state-card">
+        <div class="state-name">ACTIVE</div>
+        <div class="state-rule">remainingPrincipal &gt; 0<br>asOf &lt; maturityDate</div>
+        <p>The toolbar says <strong>Withdraw</strong>. A partial withdrawal reduces only the live principal.</p>
+      </article>
+
+      <div class="transition">
+        <span>clock reaches maturity</span>
+        <span class="transition-arrow" aria-hidden="true">&rarr;</span>
+        <span>no write · no cash</span>
+      </div>
+
+      <article class="state-card matured">
+        <div class="state-name">MATURED</div>
+        <div class="state-rule">remainingPrincipal &gt; 0<br>asOf &ge; maturityDate</div>
+        <p>The toolbar says <strong>Settle</strong>. The form pre-fills all remaining principal and an editable maturity estimate.</p>
+      </article>
+
+      <div class="transition">
+        <span>withdrawals exhaust principal</span>
+        <span class="transition-arrow" aria-hidden="true">&rarr;</span>
+        <span>one SwiftData save</span>
+      </div>
+
+      <article class="state-card settled">
+        <div class="state-name">SETTLED</div>
+        <div class="state-rule">remainingPrincipal &le; 0</div>
+        <p>No new withdrawal action is offered. The immutable terms and withdrawal history remain available.</p>
+      </article>
+    </div>
+
+    <p class="state-caveat">
+      A full withdrawal before maturity skips directly from <strong>ACTIVE</strong> to
+      <strong>SETTLED</strong>. Editing or deleting withdrawal history can reopen a settled book;
+      status is recomputed rather than persisted as a one-way flag.
+    </p>
+
+    <div class="lifecycle-grid">
+      <article class="lifecycle-rule">
+        <h3>One record shape for every exit</h3>
+        <ul>
+          <li>Partial withdrawal: principal is less than the remaining book.</li>
+          <li>Early full withdrawal: principal equals the remainder before maturity.</li>
+          <li>Maturity settlement: the same full withdrawal after maturity.</li>
+        </ul>
+        <span class="formula">0 &lt; withdrawal.principal &le; remainingPrincipal</span>
+      </article>
+
+      <article class="lifecycle-rule">
+        <h3>Cash moves by what the bank paid</h3>
+        <p>
+          Saving a withdrawal raises exactly one destination account by
+          <code>amountReceived</code>. It does not create a duplicate income transaction.
+        </p>
+        <span class="formula">destination cash += amountReceived</span>
+        <span class="formula">net-worth delta = amountReceived &minus; principal = realizedInterest</span>
+      </article>
+
+      <article class="lifecycle-rule">
+        <h3>Principal stays immutable</h3>
+        <p>
+          The deposit row never shrinks. Current principal and realized interest are reductions
+          over withdrawal history, so an earlier asset-history point can filter by date and replay
+          the same equations.
+        </p>
+        <span class="formula">remaining = deposit.principal &minus; &Sigma; withdrawal.principal</span>
+        <span class="formula">realized interest = &Sigma; (amountReceived &minus; principal)</span>
+      </article>
+
+      <article class="lifecycle-rule">
+        <h3>Navigation has explicit owners</h3>
+        <p>
+          <code>InvestmentSegment</code> changes only when a <code>SegmentedTabs</code> button is
+          pressed; the screen has no horizontal drag gesture. A savings row uses a direct
+          <code>NavigationLink</code> to a detail route keyed by deposit UUID, and the detail view
+          decides whether its action is Withdraw, Settle, or absent.
+        </p>
+      </article>
+    </div>
+  </section>
+
   <!-- ==================== SYSTEM COMPONENTS ==================== -->
 
   <div class="section-head">
@@ -1354,8 +1568,9 @@
         <code>Debt.projectedInterest(asOf:)</code> is shown on a card and reaches no total,
         exactly as <code>SavingsDeposit.projectedInterest</code> stays out of
         <code>AssetSummary.netWorth</code>. It is an estimate of what a rate implies, not a
-        đồng anyone has handed over. Interest actually paid is an ordinary expense, because
-        unlike the principal it really does leave the owner's money.
+        đồng anyone has handed over. Debt interest actually paid is an ordinary expense;
+        savings interest actually received reaches net worth through
+        <code>SavingsWithdrawal.amountReceived</code>, net of the principal removed from the book.
       </p>
     </div>
     <div class="note">
@@ -1388,7 +1603,7 @@
       </p>
     </div>
     <div class="note">
-      <h3><code>currencyCode</code> repeated across 9 models</h3>
+      <h3><code>currencyCode</code> repeated across 10 models</h3>
       <p>
         Denormalised onto every money-bearing entity, always written from <code>VNDCurrency.code</code>.
         Nothing enforces that related records share a currency. The fund split removed one
@@ -1432,7 +1647,7 @@
   </section>
 
   <footer>
-    11 entities built &middot; 15 app-enforced foreign-key edges &middot; 0 declared SwiftData relationships
+    11 entities built &middot; 17 app-enforced foreign-key edges &middot; 0 declared SwiftData relationships
     &nbsp;|&nbsp; private CloudKit mirroring &middot; 3 market providers &middot; 1 reviewed PDF import path
   </footer>
 </div>
