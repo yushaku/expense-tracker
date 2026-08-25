@@ -156,6 +156,11 @@
 		A00000000000000000000854 /* DebtPaymentDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000834 /* DebtPaymentDraftTests.swift */; };
 		A00000000000000000000855 /* DebtPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000835 /* DebtPersistenceTests.swift */; };
 		A00000000000000000000856 /* DebtPaymentPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000836 /* DebtPaymentPersistenceTests.swift */; };
+		B10000000000000000000201 /* BankStatementParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000101 /* BankStatementParsingTests.swift */; };
+		B10000000000000000000202 /* BankStatementParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000102 /* BankStatementParsing.swift */; };
+		B10000000000000000000203 /* TPBankPDFTestFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000103 /* TPBankPDFTestFixture.swift */; };
+		B10000000000000000000204 /* TPBankPDFStatementParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000104 /* TPBankPDFStatementParserTests.swift */; };
+		B10000000000000000000205 /* TPBankPDFStatementParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000105 /* TPBankPDFStatementParser.swift */; };
 		A00000000000000000000901 /* FundTestFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000900 /* FundTestFactory.swift */; };
 		A00000000000000000000903 /* FundInstrumentEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000902 /* FundInstrumentEditorView.swift */; };
 		A00000000000000000000905 /* FundInstrumentEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000904 /* FundInstrumentEditorForm.swift */; };
@@ -386,6 +391,11 @@
 		A00000000000000000000834 /* DebtPaymentDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPaymentDraftTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000835 /* DebtPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPersistenceTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000836 /* DebtPaymentPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPaymentPersistenceTests.swift; sourceTree = "<group>"; };
+		B10000000000000000000101 /* BankStatementParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankStatementParsingTests.swift; sourceTree = "<group>"; };
+		B10000000000000000000102 /* BankStatementParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankStatementParsing.swift; sourceTree = "<group>"; };
+		B10000000000000000000103 /* TPBankPDFTestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TPBankPDFTestFixture.swift; sourceTree = "<group>"; };
+		B10000000000000000000104 /* TPBankPDFStatementParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TPBankPDFStatementParserTests.swift; sourceTree = "<group>"; };
+		B10000000000000000000105 /* TPBankPDFStatementParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TPBankPDFStatementParser.swift; sourceTree = "<group>"; };
 		A00000000000000000000900 /* FundTestFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundTestFactory.swift; sourceTree = "<group>"; };
 		A00000000000000000000902 /* FundInstrumentEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentEditorView.swift; sourceTree = "<group>"; };
 		A00000000000000000000904 /* FundInstrumentEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentEditorForm.swift; sourceTree = "<group>"; };
@@ -506,6 +516,7 @@
 				A00000000000000000000028 /* Transfers */,
 				A00000000000000000000026 /* Settings */,
 				A00000000000000000000032 /* Debts */,
+				B10000000000000000000001 /* Imports */,
 			);
 			path = MonMon;
 			sourceTree = "<group>";
@@ -545,6 +556,7 @@
 				A00000000000000000000029 /* Transfers */,
 				A00000000000000000000027 /* Settings */,
 				A00000000000000000000033 /* Debts */,
+				B10000000000000000000002 /* Imports */,
 			);
 			path = MonMonTests;
 			sourceTree = "<group>";
@@ -901,6 +913,25 @@
 			path = Recurring;
 			sourceTree = "<group>";
 		};
+		B10000000000000000000002 /* Imports */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000101 /* BankStatementParsingTests.swift */,
+				B10000000000000000000103 /* TPBankPDFTestFixture.swift */,
+				B10000000000000000000104 /* TPBankPDFStatementParserTests.swift */,
+			);
+			path = Imports;
+			sourceTree = "<group>";
+		};
+		B10000000000000000000001 /* Imports */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000102 /* BankStatementParsing.swift */,
+				B10000000000000000000105 /* TPBankPDFStatementParser.swift */,
+			);
+			path = Imports;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1026,6 +1057,8 @@
 				A00000000000000000000E03 /* RecurringRule.swift in Sources */,
 				A00000000000000000000E01 /* RecurrenceSchedule.swift in Sources */,
 				A00000000000000000000E00 /* RecurrenceFrequency.swift in Sources */,
+				B10000000000000000000202 /* BankStatementParsing.swift in Sources */,
+				B10000000000000000000205 /* TPBankPDFStatementParser.swift in Sources */,
 				A00000000000000000000287 /* CalendarTheme.swift in Sources */,
 				A00000000000000000000285 /* CategoryTransactionsView.swift in Sources */,
 				C10000000000000000000101 /* TransactionCalendar.swift in Sources */,
@@ -1172,6 +1205,9 @@
 				A00000000000000000000E07 /* RecurringGeneratorTests.swift in Sources */,
 				A00000000000000000000E05 /* RecurringRuleDraftTests.swift in Sources */,
 				A00000000000000000000E02 /* RecurrenceScheduleTests.swift in Sources */,
+				B10000000000000000000201 /* BankStatementParsingTests.swift in Sources */,
+				B10000000000000000000203 /* TPBankPDFTestFixture.swift in Sources */,
+				B10000000000000000000204 /* TPBankPDFStatementParserTests.swift in Sources */,
 				A00000000000000000000286 /* CategoryBreakdownTests.swift in Sources */,
 				A00000000000000000000280 /* AppLockTests.swift in Sources */,
 				C10000000000000000000109 /* AppLanguageTests.swift in Sources */,
