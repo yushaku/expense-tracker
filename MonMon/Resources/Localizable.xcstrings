@@ -831,16 +831,6 @@
         }
       }
     },
-    "%lld months": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld tháng"
-          }
-        }
-      }
-    },
     "%lld positions": {
       "localizations": {
         "vi": {
@@ -7084,32 +7074,12 @@
         }
       }
     },
-    "Nothing to chart yet.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chưa có gì để vẽ."
-          }
-        }
-      }
-    },
     "A day or two of records draws no trend yet.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
             "value": "Một, hai ngày ghi chép thì chưa vẽ được xu hướng."
-          }
-        }
-      }
-    },
-    "MONTH BY MONTH": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "TỪNG THÁNG"
           }
         }
       }

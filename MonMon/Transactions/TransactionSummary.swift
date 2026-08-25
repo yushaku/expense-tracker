@@ -55,36 +55,6 @@ enum TransactionSummary {
         return transactions.filter { $0.kind == kind }
     }
 
-    /// What each month in a run of transactions took in and paid out, oldest
-    /// month first. Months with nothing recorded are kept, so a bar chart over
-    /// the result has no gaps where a quiet month was.
-    static func byMonth(_ transactions: [MoneyTransaction]) -> [TransactionMonthFlow] {
-        guard let earliest = transactions.map(\.occurredAt).min(),
-            let latest = transactions.map(\.occurredAt).max()
-        else {
-            return []
-        }
-
-        let months = Dictionary(grouping: transactions) { transaction in
-            TransactionPeriod.startOfMonth(for: transaction.occurredAt)
-        }
-
-        return TransactionPeriod.months(
-            from: TransactionPeriod.startOfMonth(for: earliest),
-            through: TransactionPeriod.startOfMonth(for: latest)
-        )
-        .map { month in
-            let inMonth = months[month] ?? []
-
-            return TransactionMonthFlow(
-                month: month,
-                income: totalIncome(of: inMonth),
-                expense: totalExpense(of: inMonth),
-                count: inMonth.count
-            )
-        }
-    }
-
     /// Money in hand as it ran up over the days that recorded anything, oldest
     /// first. Each point is every day up to and including it, so the line only
     /// ever tells one story: where the period had got to by then.
@@ -111,20 +81,6 @@ enum TransactionSummary {
         return days.keys.sorted(by: >).map { day in
             TransactionDayGroup(day: day, transactions: days[day] ?? [])
         }
-    }
-}
-
-/// One month of the ledger, for the bar the report draws over it.
-struct TransactionMonthFlow: Identifiable, Equatable {
-    let month: Date
-    let income: Decimal
-    let expense: Decimal
-    let count: Int
-
-    var id: Date { month }
-
-    var net: Decimal {
-        income - expense
     }
 }
 

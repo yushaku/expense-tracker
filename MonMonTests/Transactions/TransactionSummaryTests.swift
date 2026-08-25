@@ -271,46 +271,6 @@ struct TransactionSummaryTests {
         #expect(expense.first?.kind == .expense)
     }
 
-    @Test("Months run oldest first and keep the quiet ones in between")
-    func monthlyFlowKeepsEmptyMonths() {
-        let account = makeAccount()
-        let transactions = [
-            makeTransaction(
-                kind: .income,
-                amount: 5_000_000,
-                accountID: account.id,
-                occurredAt: date(2026, 1, 10)
-            ),
-            makeTransaction(
-                kind: .expense,
-                amount: 200_000,
-                accountID: account.id,
-                occurredAt: date(2026, 1, 20)
-            ),
-            makeTransaction(
-                kind: .expense,
-                amount: 300_000,
-                accountID: account.id,
-                occurredAt: date(2026, 3, 5)
-            ),
-        ]
-
-        let months = TransactionSummary.byMonth(transactions)
-
-        #expect(months.count == 3)
-        #expect(months.map(\.month) == [date(2026, 1, 1), date(2026, 2, 1), date(2026, 3, 1)])
-        #expect(months[0].income == 5_000_000)
-        #expect(months[0].expense == 200_000)
-        #expect(months[0].net == 4_800_000)
-        #expect(months[1].count == 0)
-        #expect(months[2].expense == 300_000)
-    }
-
-    @Test("An empty ledger charts no months")
-    func monthlyFlowOfNothingIsEmpty() {
-        #expect(TransactionSummary.byMonth([]).isEmpty)
-    }
-
     @Test("The running total adds each day to the ones before it")
     func runningNetAccumulatesForward() {
         let account = makeAccount()
