@@ -253,23 +253,26 @@ stale-preview protection.
 
 **Description:** Extend the statement preview with the required statement account
 selector, visible row statuses, and a focused editor for category/note,
-skip/new/link, or transfer account. Parsed source facts stay read-only.
+skip/new/link, or transfer account. A native trailing swipe skips non-exact rows
+without deleting them from review state. Parsed source facts stay read-only.
 
 **Acceptance criteria:**
 
-- [ ] Current or remembered account appears above rows; missing account visibly
+- [x] Current or remembered account appears above rows; missing account visibly
       blocks commit without hiding parsed review.
-- [ ] Each row exposes its status and only the controls valid for its disposition
+- [x] Each row exposes its status and only the controls valid for its disposition
       and resolution; possible matches never preselect link or new.
-- [ ] Source amount/direction/date/reference/page remain immutable and untrusted
+- [x] Full trailing swipe skips an eligible row, removes it from the active list,
+      and offers one-step undo without dropping it from the commit review.
+- [x] Source amount/direction/date/reference/page remain immutable and untrusted
       text never enters accessibility identifiers.
 
 **Verification:**
 
-- [ ] iOS SDK compiles after view, localization, and project wiring changes.
-- [ ] Code inspection covers 44-point targets, VoiceOver status, light/dark, and
+- [x] iOS SDK compiles after view, localization, and project wiring changes.
+- [x] Code inspection covers 44-point targets, VoiceOver status, light/dark, and
       English/Vietnamese strings.
-- [ ] No UI control writes SwiftData or removes staged files directly.
+- [x] No UI control writes SwiftData or removes staged files directly.
 
 **Dependencies:** Task 7
 
@@ -277,10 +280,12 @@ skip/new/link, or transfer account. Parsed source facts stay read-only.
 
 - `MonMon/Imports/StatementImportRowEditorView.swift`
 - `MonMon/Imports/StatementImportPreviewView.swift`
+- `MonMon/Imports/StatementImportReview.swift`
 - `MonMon/Resources/Localizable.xcstrings`
+- `MonMonTests/Imports/StatementImportReviewTests.swift`
 - `MonMon.xcodeproj/project.pbxproj`
 
-**Estimated scope:** Medium, four files
+**Estimated scope:** Medium, six files
 
 ## Task 9: Add commit confirmation, results, cleanup retry, and count refresh
 

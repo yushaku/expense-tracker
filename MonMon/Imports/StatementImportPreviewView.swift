@@ -1,14 +1,33 @@
+import SwiftData
 import SwiftUI
 
 struct StatementImportPreviewView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
+    @Environment(\.modelContext) private var modelContext
+
+    @Query(sort: \CashAccount.createdAt, order: .forward)
+    private var accounts: [CashAccount]
+    @Query(sort: \TransactionCategory.createdAt, order: .forward)
+    private var categories: [TransactionCategory]
+    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
+    private var transactions: [MoneyTransaction]
+    @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
+    private var transfers: [AccountTransfer]
+
+    @AppStorage(TransactionDefaults.categoryStorageKey)
+    private var defaultExpenseCategoryValue = ""
+    @AppStorage(TransactionDefaults.incomeCategoryStorageKey)
+    private var defaultIncomeCategoryValue = ""
 
     @Bindable var inbox: StatementImportInbox
     let staged: StagedBankStatement
 
     @State private var isConfirmingRemoval = false
     @State private var isRemoving = false
+    @State private var review: StatementImportReview?
+    @State private var editorSelection: RowEditorSelection?
+    @State private var lastSkipped: SkippedUndo?
 
     var body: some View {
         ZStack {
@@ -44,7 +63,26 @@ struct StatementImportPreviewView: View {
             Text("The staged PDF will be deleted. No financial records are affected.")
         }
         .task(id: staged.id) { await inbox.loadPreview(staged) }
-        .onDisappear { inbox.clearPreview() }
+        .sheet(item: $editorSelection) { selection in
+            if let review,
+                let rowIndex = review.rows.firstIndex(where: { $0.id == selection.id })
+            {
+                StatementImportRowEditorView(
+                    review: review,
+                    rowIndex: rowIndex,
+                    accounts: accounts,
+                    categories: categories,
+                    transactions: transactions,
+                    transfers: transfers
+                )
+            }
+        }
+        .onDisappear {
+            editorSelection = nil
+            lastSkipped = nil
+            review = nil
+            inbox.clearPreview()
+        }
         .accessibilityIdentifier("import-statement-preview")
     }
 
@@ -52,7 +90,11 @@ struct StatementImportPreviewView: View {
     private var content: some View {
         switch inbox.previewPhase {
         case .loaded(let preview) where preview.staged.id == staged.id:
-            previewContent(preview.statement)
+            if let review, review.staged.id == staged.id {
+                reviewContent(review)
+            } else {
+                progress.task { prepareReview(preview) }
+            }
         case .failed(let failedStaged, let failure) where failedStaged.id == staged.id:
             failureContent(failure)
         default:
@@ -98,31 +140,96 @@ struct StatementImportPreviewView: View {
         .accessibilityIdentifier("import-preview-error")
     }
 
-    private func previewContent(_ statement: ParsedBankStatement) -> some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                summaryCard(statement)
+    private func reviewContent(_ review: StatementImportReview) -> some View {
+        List {
+            summaryCard(review.statement)
+                .importReviewListRow(top: 16, bottom: 0)
 
-                if !statement.issues.isEmpty {
-                    issuesCard(statement.issues)
-                }
+            statementAccountCard(review)
+                .importReviewListRow(top: 12, bottom: 0)
 
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Transactions")
-                        .font(.title3.weight(.semibold))
+            if !review.statement.issues.isEmpty {
+                issuesCard(review.statement.issues)
+                    .importReviewListRow(top: 12, bottom: 0)
+            }
 
-                    ForEach(Array(statement.candidates.enumerated()), id: \.element.id) {
+            Section {
+                if review.visibleRows.isEmpty {
+                    Text("All transactions are skipped.")
+                        .font(.subheadline)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                        .frame(maxWidth: .infinity, minHeight: 68, alignment: .center)
+                        .importReviewListRow(top: 0, bottom: 16)
+                } else {
+                    ForEach(Array(review.visibleRows.enumerated()), id: \.element.id) {
                         index,
-                        candidate in
-                        candidateRow(candidate, index: index)
+                        row in
+                        candidateRow(row, index: index)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                if !row.disposition.isExact {
+                                    Button {
+                                        skip(row, in: review)
+                                    } label: {
+                                        Label("Skip", systemImage: "forward.end.fill")
+                                    }
+                                    .tint(MonMonTheme.danger)
+                                    .accessibilityIdentifier("skip-import-candidate-\(index)")
+                                }
+                            }
+                            .importReviewListRow(top: 0, bottom: 12)
                     }
                 }
+            } header: {
+                Text("Transactions")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textPrimary)
+                    .textCase(nil)
             }
-            .frame(maxWidth: MonMonTheme.maxContentWidth)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-            .frame(maxWidth: .infinity)
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .background(MonMonTheme.canvas)
+        .safeAreaInset(edge: .bottom) {
+            if let skipped = validUndo(in: review) {
+                undoBanner(skipped, in: review)
+            }
+        }
+    }
+
+    private func statementAccountCard(_ review: StatementImportReview) -> some View {
+        card {
+            VStack(alignment: .leading, spacing: 12) {
+                Label("Statement account", systemImage: "creditcard.fill")
+                    .font(.headline)
+
+                Picker(
+                    "Statement account",
+                    selection: Binding(
+                        get: { review.statementAccountID },
+                        set: { review.selectStatementAccount($0) }
+                    )
+                ) {
+                    Text("Choose").tag(nil as UUID?)
+                    ForEach(vndAccounts) { account in
+                        Text(account.name).tag(Optional(account.id))
+                    }
+                }
+                .pickerStyle(.menu)
+                .frame(minHeight: 44)
+                .accessibilityIdentifier("statement-import-account")
+
+                if review.statementAccountID == nil {
+                    Label(
+                        "Choose an account to reconcile this statement.",
+                        systemImage: "exclamationmark.circle.fill"
+                    )
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.danger)
+                    .accessibilityIdentifier("statement-import-account-required")
+                }
+            }
+        }
+        .accessibilityIdentifier("statement-import-account-card")
     }
 
     private func summaryCard(_ statement: ParsedBankStatement) -> some View {
@@ -227,57 +334,254 @@ struct StatementImportPreviewView: View {
         .accessibilityIdentifier("import-preview-issues")
     }
 
-    private func candidateRow(_ candidate: BankTransactionCandidate, index: Int) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: candidate.kind.symbolName)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(candidate.kind == .income ? MonMonTheme.gain : MonMonTheme.danger)
-                .frame(width: 36, height: 36)
-                .background(
-                    (candidate.kind == .income ? MonMonTheme.gain : MonMonTheme.danger).opacity(
-                        0.16),
-                    in: RoundedRectangle(cornerRadius: 10)
-                )
-                .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: 5) {
-                Text(candidate.note.isEmpty ? "No description" : candidate.note)
+    private func candidateRow(_ row: ReconciledImportRow, index: Int) -> some View {
+        let candidate = row.candidate
+        let status = rowStatus(row)
+        return Button {
+            editorSelection = RowEditorSelection(id: row.id)
+        } label: {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: candidate.kind.symbolName)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(MonMonTheme.textPrimary)
-
-                Text(candidate.occurredAt.formatted(candidateDateFormat))
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-
-                Text("Reference \(candidate.sourceReference) · Page \(candidate.sourcePage)")
-                    .font(.caption2)
-                    .foregroundStyle(MonMonTheme.textMuted)
-                    .textSelection(.enabled)
-            }
-
-            Spacer(minLength: 8)
-
-            VStack(alignment: .trailing, spacing: 4) {
-                Text("\(candidate.kind.signLabel)\(VNDCurrency.format(candidate.amount))")
-                    .font(.subheadline.weight(.semibold))
-                    .monospacedDigit()
                     .foregroundStyle(
                         candidate.kind == .income ? MonMonTheme.gain : MonMonTheme.danger
                     )
+                    .frame(width: 36, height: 36)
+                    .background(
+                        (candidate.kind == .income ? MonMonTheme.gain : MonMonTheme.danger)
+                            .opacity(0.16),
+                        in: RoundedRectangle(cornerRadius: 10)
+                    )
+                    .accessibilityHidden(true)
 
-                Text(candidate.kind.displayName)
-                    .font(.caption2)
-                    .foregroundStyle(MonMonTheme.textSecondary)
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(candidate.note.isEmpty ? "No description" : candidate.note)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(MonMonTheme.textPrimary)
+
+                    Label(status.title, systemImage: status.systemImage)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(status.tint)
+
+                    Text(candidate.occurredAt.formatted(candidateDateFormat))
+                        .font(.caption)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+
+                    Text("Reference \(candidate.sourceReference) · Page \(candidate.sourcePage)")
+                        .font(.caption2)
+                        .foregroundStyle(MonMonTheme.textMuted)
+                        .textSelection(.enabled)
+                }
+
+                Spacer(minLength: 8)
+
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text("\(candidate.kind.signLabel)\(VNDCurrency.format(candidate.amount))")
+                        .font(.subheadline.weight(.semibold))
+                        .monospacedDigit()
+                        .foregroundStyle(
+                            candidate.kind == .income ? MonMonTheme.gain : MonMonTheme.danger
+                        )
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(MonMonTheme.textMuted)
+                        .accessibilityHidden(true)
+                }
             }
+            .padding(14)
+            .frame(minHeight: 68)
+            .contentShape(Rectangle())
         }
-        .padding(14)
+        .buttonStyle(.plain)
         .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 16))
         .overlay {
             RoundedRectangle(cornerRadius: 16)
                 .stroke(MonMonTheme.border, lineWidth: 1)
         }
         .accessibilityElement(children: .combine)
+        .accessibilityHint("Opens resolution options")
         .accessibilityIdentifier("import-candidate-\(index)")
+    }
+
+    private func skip(_ row: ReconciledImportRow, in review: StatementImportReview) {
+        guard !row.disposition.isExact else { return }
+        lastSkipped = SkippedUndo(candidateID: row.id, previousResolution: row.resolution)
+        withAnimation {
+            review.setResolution(.skip, forCandidateID: row.id)
+        }
+    }
+
+    private func validUndo(in review: StatementImportReview) -> SkippedUndo? {
+        guard let lastSkipped,
+            let row = review.rows.first(where: { $0.id == lastSkipped.candidateID }),
+            case .skip = row.resolution
+        else {
+            return nil
+        }
+        return lastSkipped
+    }
+
+    private func undoBanner(
+        _ skipped: SkippedUndo,
+        in review: StatementImportReview
+    ) -> some View {
+        HStack(spacing: 12) {
+            Label("Transaction skipped", systemImage: "forward.end.circle.fill")
+                .font(.subheadline)
+
+            Spacer(minLength: 8)
+
+            Button("Undo") {
+                withAnimation {
+                    review.setResolution(
+                        skipped.previousResolution,
+                        forCandidateID: skipped.candidateID
+                    )
+                    lastSkipped = nil
+                }
+            }
+            .font(.subheadline.weight(.semibold))
+            .frame(minHeight: 44)
+            .accessibilityIdentifier("undo-skip-import-candidate")
+        }
+        .padding(.horizontal, 20)
+        .background(.ultraThinMaterial)
+        .accessibilityIdentifier("import-skip-undo-banner")
+    }
+
+    private var vndAccounts: [CashAccount] {
+        accounts.filter {
+            $0.currencyCode == VNDCurrency.code && $0.id != AccountSeed.unassignedID
+        }
+    }
+
+    private func rowStatus(_ row: ReconciledImportRow) -> RowStatus {
+        if row.disposition.isExact {
+            return RowStatus(
+                title: "Already imported",
+                systemImage: "checkmark.seal.fill",
+                tint: MonMonTheme.gain
+            )
+        }
+        switch row.resolution {
+        case .transaction:
+            return RowStatus(
+                title: "New transaction",
+                systemImage: "plus.circle.fill",
+                tint: MonMonTheme.bank
+            )
+        case .newTransfer:
+            return RowStatus(
+                title: "Transfer",
+                systemImage: "arrow.left.arrow.right.circle.fill",
+                tint: MonMonTheme.bank
+            )
+        case .linkTransaction, .linkTransfer:
+            return RowStatus(
+                title: "Link existing record",
+                systemImage: "link.circle.fill",
+                tint: MonMonTheme.bank
+            )
+        case .skip:
+            return RowStatus(
+                title: "Skipped",
+                systemImage: "forward.end.circle.fill",
+                tint: MonMonTheme.textSecondary
+            )
+        case .alreadyImported:
+            return RowStatus(
+                title: "Already imported",
+                systemImage: "checkmark.seal.fill",
+                tint: MonMonTheme.gain
+            )
+        case .unresolved:
+            let hasPossibleMatches: Bool
+            if case .possibleMatches = row.disposition {
+                hasPossibleMatches = true
+            } else {
+                hasPossibleMatches = false
+            }
+            return RowStatus(
+                title: hasPossibleMatches ? "Possible duplicate" : "Needs attention",
+                systemImage: "exclamationmark.circle.fill",
+                tint: MonMonTheme.danger
+            )
+        }
+    }
+
+    private func prepareReview(_ preview: StatementImportPreview) {
+        guard review?.staged != preview.staged || review?.statement != preview.statement else {
+            return
+        }
+        let snapshot = StatementImportReviewSnapshot(
+            accounts: vndAccounts.map {
+                StatementImportAccountSnapshot(id: $0.id, currencyCode: $0.currencyCode)
+            },
+            categories: categories.map {
+                StatementImportCategorySnapshot(id: $0.id, kind: $0.kind)
+            },
+            transactions: transactions.map {
+                StatementImportTransactionSnapshot(
+                    id: $0.id,
+                    kind: $0.kind,
+                    amount: $0.amount,
+                    occurredAt: $0.occurredAt,
+                    note: $0.note,
+                    accountID: $0.accountID,
+                    currencyCode: $0.currencyCode,
+                    sourceImportID: $0.sourceImportID
+                )
+            },
+            transfers: transfers.map {
+                StatementImportTransferSnapshot(
+                    id: $0.id,
+                    amount: $0.amount,
+                    occurredAt: $0.occurredAt,
+                    sourceAccountID: $0.sourceAccountID,
+                    destinationAccountID: $0.destinationAccountID,
+                    currencyCode: $0.currencyCode,
+                    sourceAccountImportID: $0.sourceAccountImportID,
+                    destinationAccountImportID: $0.destinationAccountImportID,
+                    note: $0.note
+                )
+            },
+            defaults: StatementImportCategoryDefaults(
+                expenseCategoryID: TransactionDefaults.resolveCategoryID(
+                    defaultExpenseCategoryValue,
+                    categories: categories,
+                    kind: .expense
+                ),
+                incomeCategoryID: TransactionDefaults.resolveCategoryID(
+                    defaultIncomeCategoryValue,
+                    categories: categories,
+                    kind: .income
+                )
+            )
+        )
+        let mapping = StatementAccountMapping(defaults: .standard)
+        let inboxService = try? StatementImportInboxService.live()
+        let commitService = StatementImportCommitService(container: modelContext.container)
+        lastSkipped = nil
+        review = StatementImportReview(
+            preview: preview,
+            snapshot: snapshot,
+            accountMapping: mapping,
+            complete: { request, staged in
+                guard let inboxService else {
+                    throw StatementImportCommitError.storeFailure
+                }
+                return try inboxService.completeImport(
+                    request,
+                    staged: staged,
+                    commitService: commitService,
+                    accountMapping: mapping
+                )
+            },
+            retryCleanup: { staged in
+                inboxService?.retryCleanup(staged) ?? false
+            }
+        )
     }
 
     private var candidateDateFormat: Date.FormatStyle {
@@ -327,5 +631,28 @@ struct StatementImportPreviewView: View {
                 dismiss()
             }
         }
+    }
+
+    private struct RowEditorSelection: Identifiable {
+        let id: String
+    }
+
+    private struct SkippedUndo {
+        let candidateID: String
+        let previousResolution: ImportRowResolution
+    }
+
+    private struct RowStatus {
+        let title: LocalizedStringKey
+        let systemImage: String
+        let tint: Color
+    }
+}
+
+private extension View {
+    func importReviewListRow(top: CGFloat, bottom: CGFloat) -> some View {
+        listRowInsets(EdgeInsets(top: top, leading: 20, bottom: bottom, trailing: 20))
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
     }
 }

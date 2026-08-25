@@ -71,6 +71,15 @@ final class StatementImportReview {
         StatementImportSummary(rows: rows)
     }
 
+    var visibleRows: [ReconciledImportRow] {
+        rows.filter {
+            if case .skip = $0.resolution {
+                return false
+            }
+            return true
+        }
+    }
+
     var isCommitReady: Bool {
         let canStartCommit: Bool
         switch phase {

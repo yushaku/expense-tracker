@@ -10,6 +10,28 @@ struct StatementImportReviewTests {
     private let importA = String(repeating: "a", count: 64)
     private let importB = String(repeating: "b", count: 64)
 
+    @Test("Skipped rows leave the active list and return when restored")
+    func skippedRowsAreHiddenUntilRestored() throws {
+        let fixture = try makeFixture()
+        defer { fixture.removeDefaults() }
+        let review = makeReview(fixture: fixture)
+        review.selectStatementAccount(fixture.firstAccountID)
+        let originalResolution = try #require(
+            review.rows.first { $0.id == importA }?.resolution
+        )
+
+        review.setResolution(.skip, forCandidateID: importA)
+
+        #expect(review.visibleRows.map(\.id) == [importB])
+        #expect(review.rows.count == 2)
+        #expect(review.summary.skippedCount == 1)
+
+        review.setResolution(originalResolution, forCandidateID: importA)
+
+        #expect(review.visibleRows.map(\.id) == [importA, importB])
+        #expect(review.summary.skippedCount == 0)
+    }
+
     @Test("Account changes preserve only choices valid in the rebuilt reconciliation")
     func accountChangesPreserveValidChoices() throws {
         let fixture = try makeFixture()

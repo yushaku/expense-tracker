@@ -111,17 +111,17 @@ Full gates + physical acceptance on Yushaku
 ### Phase 4: Owner-facing review and commit
 
 - [x] Task 7: Add observable reconciliation and commit phases
-- [ ] Task 8: Add account selection and focused row-resolution editor
+- [x] Task 8: Add account selection and focused row-resolution editor
 - [ ] Task 9: Add commit confirmation, results, cleanup retry, and count refresh
 
 ### Checkpoint: UI
 
 - [ ] Incomplete statements never expose an enabled commit action.
-- [ ] Every row announces New, Possible duplicate, Already imported, Transfer,
+- [x] Every row announces New, Possible duplicate, Already imported, Transfer,
       Skipped, or Needs attention without relying on color.
-- [ ] Commit readiness follows validated row state and current model snapshots.
+- [x] Commit readiness follows validated row state and current model snapshots.
 - [ ] Success and cleanup failure are visibly distinct and idempotent.
-- [ ] Accessibility identifiers contain no filename, suffix, reference, note,
+- [x] Accessibility identifiers contain no filename, suffix, reference, note,
       or import fingerprint.
 
 ### Phase 5: Completion gates

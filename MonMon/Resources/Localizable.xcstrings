@@ -1,6 +1,306 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Action": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hành động"
+          }
+        }
+      }
+    },
+    "All transactions are skipped.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã bỏ qua tất cả giao dịch."
+          }
+        }
+      }
+    },
+    "Already imported": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã nhập"
+          }
+        }
+      }
+    },
+    "Choose an account to reconcile this statement.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn tài khoản để đối soát sao kê này."
+          }
+        }
+      }
+    },
+    "Choose how to handle this row.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn cách xử lý dòng này."
+          }
+        }
+      }
+    },
+    "Create transaction": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tạo giao dịch"
+          }
+        }
+      }
+    },
+    "Create transfer": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tạo chuyển khoản"
+          }
+        }
+      }
+    },
+    "Description": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mô tả"
+          }
+        }
+      }
+    },
+    "Link existing record": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liên kết bản ghi có sẵn"
+          }
+        }
+      }
+    },
+    "Link existing transaction": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liên kết giao dịch có sẵn"
+          }
+        }
+      }
+    },
+    "Link existing transfer": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liên kết chuyển khoản có sẵn"
+          }
+        }
+      }
+    },
+    "New transaction": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giao dịch mới"
+          }
+        }
+      }
+    },
+    "No record will be created. This row can appear again in another statement.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sẽ không tạo bản ghi. Dòng này có thể xuất hiện lại trong sao kê khác."
+          }
+        }
+      }
+    },
+    "Opens resolution options": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở các lựa chọn xử lý"
+          }
+        }
+      }
+    },
+    "Other account": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tài khoản còn lại"
+          }
+        }
+      }
+    },
+    "Page": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trang"
+          }
+        }
+      }
+    },
+    "Possible duplicate": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Có thể trùng lặp"
+          }
+        }
+      }
+    },
+    "Reference": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tham chiếu"
+          }
+        }
+      }
+    },
+    "Resolve transaction": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xử lý giao dịch"
+          }
+        }
+      }
+    },
+    "Selected": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã chọn"
+          }
+        }
+      }
+    },
+    "Skip": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bỏ qua"
+          }
+        }
+      }
+    },
+    "Skip this row": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bỏ qua dòng này"
+          }
+        }
+      }
+    },
+    "Skipped": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã bỏ qua"
+          }
+        }
+      }
+    },
+    "Source details": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chi tiết nguồn"
+          }
+        }
+      }
+    },
+    "Statement account": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tài khoản sao kê"
+          }
+        }
+      }
+    },
+    "This statement row will be linked to the existing record.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dòng sao kê này sẽ được liên kết với bản ghi có sẵn."
+          }
+        }
+      }
+    },
+    "Transaction": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giao dịch"
+          }
+        }
+      }
+    },
+    "Transaction skipped": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã bỏ qua giao dịch"
+          }
+        }
+      }
+    },
+    "Transfer": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyển khoản"
+          }
+        }
+      }
+    },
+    "Undo": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoàn tác"
+          }
+        }
+      }
+    },
     "%/year": {
       "localizations": {
         "vi": {
