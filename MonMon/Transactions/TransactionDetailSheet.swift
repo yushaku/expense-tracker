@@ -36,6 +36,11 @@ struct TransactionDetailSheet: View {
                 .padding(.bottom, 20)
                 .frame(maxWidth: .infinity)
             }
+            // In a sheet, a scroll view that bounces eats the start of a drag
+            // downwards before the sheet begins to move, so leaving takes two
+            // pulls where it should take one. Content that already fits has
+            // nothing to scroll and so has no reason to bounce.
+            .scrollBounceBehavior(.basedOnSize)
             .background(MonMonTheme.canvas)
             .navigationTitle("Transaction details")
             #if os(iOS)
