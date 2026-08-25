@@ -25,7 +25,6 @@ struct ReportView: View {
     @State private var query = TransactionQuery(range: .year(containing: .now))
     @State private var breakdownKind: TransactionKind = .expense
     @State private var editorMode: TransactionEditorMode?
-    @State private var isSearching = false
     @State private var isFiltering = false
 
     /// Weekday first: over a run of days the name is what the eye picks out, and
@@ -44,20 +43,12 @@ struct ReportView: View {
             }
             .compactRootNavigationTitle("Report")
             .accessibilityIdentifier("report")
-            .searchable(
-                text: $query.text,
-                isPresented: $isSearching,
-                placement: .navigationBarDrawer(displayMode: .automatic),
-                prompt: Text("Search notes, categories, amounts")
-            )
             .safeAreaInset(edge: .top, spacing: 0) {
                 monthRail
             }
             .toolbar {
                 ToolbarItemGroup(placement: .primaryAction) {
                     searchButton
-
-                    filterButton
 
                     DateRangeFilterButton(
                         range: $query.range,
@@ -73,7 +64,8 @@ struct ReportView: View {
                 ReportFilterSheet(
                     query: $query,
                     categories: categories,
-                    accounts: accounts
+                    accounts: accounts,
+                    focusesSearchOnAppear: true
                 )
             }
             .sheet(item: $editorMode) { mode in
@@ -205,7 +197,7 @@ struct ReportView: View {
 
     private var searchButton: some View {
         Button {
-            isSearching = true
+            isFiltering = true
         } label: {
             ZStack(alignment: .topTrailing) {
                 Image(systemName: "magnifyingglass")
@@ -226,33 +218,6 @@ struct ReportView: View {
         .buttonStyle(.plain)
         .accessibilityLabel("Search transactions")
         .accessibilityIdentifier("open-report-search")
-    }
-
-    private var filterButton: some View {
-        Button {
-            isFiltering = true
-        } label: {
-            ZStack(alignment: .topTrailing) {
-                Image(systemName: "line.3.horizontal.decrease")
-                    .font(.footnote.weight(.bold))
-                    .foregroundStyle(MonMonTheme.accent)
-                    .frame(width: 30, height: 30)
-                    .background(MonMonTheme.accent.opacity(0.16), in: Circle())
-
-                // A filter left on from an earlier question is the easiest thing
-                // on this screen to forget, so the button says when one is.
-                if query.hasStructuredFilters {
-                    Circle()
-                        .fill(MonMonTheme.accent)
-                        .frame(width: 8, height: 8)
-                        .accessibilityHidden(true)
-                }
-            }
-            .contentShape(Circle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Filters")
-        .accessibilityIdentifier("open-report-filters")
     }
 
     /// What is narrowing the results, each one removable where it is read.
