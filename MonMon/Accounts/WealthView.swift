@@ -242,47 +242,142 @@ struct WealthView: View {
         }
     }
 
-    /// The way in to the savings books and holdings, worth what they are worth
-    /// today. The figure repeats the slice the allocation ring already draws, so
-    /// the row is a door rather than a new claim.
+    /// The three places parked money sits, each worth what it is worth today and
+    /// each a door into the list behind it. The figures repeat slices the
+    /// allocation ring already draws, so the rows are doors rather than new
+    /// claims.
     private var investmentsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                Text("Investments")
+                    .font(.title3.weight(.semibold))
+
+                Spacer(minLength: 8)
+
+                Text(VNDCurrency.format(investedTotal))
+                    .font(.subheadline.weight(.bold))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            }
+
+            investmentRow(
+                .savings,
+                title: "Savings",
+                systemImage: "building.columns.fill",
+                tint: MonMonTheme.savings,
+                amount: savingsTotal,
+                count: deposits.count
+            )
+
+            investmentRow(
+                .funds,
+                title: "Funds",
+                systemImage: "chart.line.uptrend.xyaxis",
+                tint: MonMonTheme.funds,
+                amount: fundsTotal,
+                count: fundHoldings.count
+            )
+
+            investmentRow(
+                .gold,
+                title: "Gold",
+                systemImage: "seal.fill",
+                tint: MonMonTheme.Hue.peach,
+                amount: goldTotal,
+                count: goldHoldings.count
+            )
+        }
+    }
+
+    private func investmentRow(
+        _ segment: InvestmentSegment,
+        title: LocalizedStringKey,
+        systemImage: String,
+        tint: Color,
+        amount: Decimal,
+        count: Int
+    ) -> some View {
         NavigationLink {
-            InvestmentsScreen()
+            InvestmentsScreen(segment: segment)
         } label: {
             HStack(spacing: 12) {
-                Image(systemName: "chart.line.uptrend.xyaxis")
+                Image(systemName: systemImage)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(MonMonTheme.funds)
+                    .foregroundStyle(tint)
                     .frame(width: 36, height: 36)
-                    .background(MonMonTheme.funds.opacity(0.16), in: RoundedRectangle(cornerRadius: 10))
+                    .background(tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 10))
                     .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Investments")
-                        .font(.title3.weight(.semibold))
+                    Text(title)
+                        .font(.subheadline.weight(.semibold))
                         .foregroundStyle(MonMonTheme.textPrimary)
 
-                    Text(VNDCurrency.format(investedTotal))
-                        .font(.subheadline.weight(.semibold))
-                        .monospacedDigit()
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
+                    Text(countLabel(count, for: segment))
+                        .font(.caption)
                         .foregroundStyle(MonMonTheme.textSecondary)
                 }
 
                 Spacer(minLength: 8)
 
-                Image(systemName: "chevron.right")
+                Text(VNDCurrency.format(amount))
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textMuted)
                     .accessibilityHidden(true)
             }
-            .frame(minHeight: 44)
-            .contentShape(Rectangle())
+            .padding(14)
+            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+            .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 16))
+            .overlay {
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(MonMonTheme.border, lineWidth: 1)
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 16))
         }
         .buttonStyle(.plain)
-        .accessibilityIdentifier("open-investments-screen")
+        .accessibilityIdentifier("open-investments-\(segment.rawValue)")
         .accessibilityHint("Opens the Investments screen.")
+    }
+
+    /// What a row counts is what its list holds, so the word follows the
+    /// segment rather than one plural covering three different things.
+    private func countLabel(_ count: Int, for segment: InvestmentSegment) -> LocalizedStringKey {
+        switch segment {
+        case .savings:
+            "\(count) books"
+        case .funds:
+            "\(count) holdings"
+        case .gold:
+            "\(count) products"
+        }
+    }
+
+    private var savingsTotal: Decimal {
+        AssetSummary.totalPrincipal(of: deposits)
+    }
+
+    private var fundHoldings: [FundHolding] {
+        FundSummary.holdings(holdings, in: instruments, matching: [.fund, .etf])
+    }
+
+    private var goldHoldings: [FundHolding] {
+        FundSummary.holdings(holdings, in: instruments, matching: [.gold])
+    }
+
+    private var fundsTotal: Decimal {
+        FundSummary.totalMarketValue(of: fundHoldings, instruments: instruments, sales: sales)
+    }
+
+    private var goldTotal: Decimal {
+        FundSummary.totalMarketValue(of: goldHoldings, instruments: instruments, sales: sales)
     }
 
     private var investedTotal: Decimal {

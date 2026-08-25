@@ -7193,6 +7193,36 @@
           }
         }
       }
+    },
+    "%lld books": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld sổ"
+          }
+        }
+      }
+    },
+    "%lld holdings": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld khoản"
+          }
+        }
+      }
+    },
+    "%lld products": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld sản phẩm"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

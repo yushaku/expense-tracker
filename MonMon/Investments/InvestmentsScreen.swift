@@ -45,8 +45,15 @@ struct InvestmentsScreen: View {
 
     @Environment(\.locale) private var locale
 
-    @State private var segment: InvestmentSegment = .savings
+    @State private var segment: InvestmentSegment
     @State private var editor: InvestmentEditorMode?
+
+    /// Which list is in front on arrival. The Wealth screen names all three
+    /// before pushing here, so landing on the one that was tapped saves the
+    /// owner repeating the choice on the picker.
+    init(segment: InvestmentSegment = .savings) {
+        _segment = State(initialValue: segment)
+    }
 
     var body: some View {
         ZStack {
