@@ -87,6 +87,31 @@ struct StatementImportInboxTests {
         #expect(await service.removedIDs() == [first.id])
     }
 
+    @Test("Completed review clears preview, refreshes counts, and exposes its report")
+    func completionRefreshesAllInboxState() async {
+        let first = Self.stagedStatement(id: "first")
+        let second = Self.stagedStatement(id: "second")
+        let report = StatementImportCommitReport(
+            createdTransactionCount: 1,
+            linkedCount: 1
+        )
+        let service = StubInboxService(pending: [first, second])
+        let inbox = StatementImportInbox(service: service)
+        await inbox.loadPreview(first)
+        await service.setPending([second])
+
+        await inbox.completeReview(first, report: report)
+
+        #expect(inbox.previewPhase == .idle)
+        #expect(inbox.listPhase == .loaded([second]))
+        #expect(inbox.pendingCount == 1)
+        #expect(inbox.completionReport == report)
+
+        inbox.clearCompletionReport()
+
+        #expect(inbox.completionReport == nil)
+    }
+
     private actor StubInboxService: StatementImportInboxServing {
         private var pending: [StagedBankStatement]
         private var listError: StatementIntakeError?

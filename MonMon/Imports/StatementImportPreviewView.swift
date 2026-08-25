@@ -28,6 +28,7 @@ struct StatementImportPreviewView: View {
     @State private var review: StatementImportReview?
     @State private var editorSelection: RowEditorSelection?
     @State private var lastSkipped: SkippedUndo?
+    @State private var commitConfirmation: StatementImportCommitConfirmation?
 
     var body: some View {
         ZStack {
@@ -37,6 +38,8 @@ struct StatementImportPreviewView: View {
             content
         }
         .navigationTitle("Statement Review")
+        .navigationBarBackButtonHidden(isReviewCommitting)
+        .interactiveDismissDisabled(isReviewCommitting)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button(role: .destructive) {
@@ -44,7 +47,7 @@ struct StatementImportPreviewView: View {
                 } label: {
                     Label("Remove Statement", systemImage: "trash")
                 }
-                .disabled(isRemoving)
+                .disabled(isRemoving || review?.isEditingAllowed == false)
                 .accessibilityIdentifier("remove-import-statement")
             }
         }
@@ -61,6 +64,33 @@ struct StatementImportPreviewView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("The staged PDF will be deleted. No financial records are affected.")
+        }
+        .confirmationDialog(
+            commitConfirmationTitle,
+            isPresented: isCommitConfirmationPresented,
+            titleVisibility: .visible
+        ) {
+            if let confirmation = commitConfirmation, let review {
+                if confirmation.removesReviewedStatement {
+                    Button("Remove reviewed statement", role: .destructive) {
+                        confirmCommit(review)
+                    }
+                    .accessibilityIdentifier("confirm-remove-reviewed-statement")
+                } else {
+                    Button(commitActionTitle(confirmation)) {
+                        confirmCommit(review)
+                    }
+                    .accessibilityIdentifier("confirm-import-statement")
+                }
+            }
+
+            Button("Cancel", role: .cancel) {
+                commitConfirmation = nil
+            }
+        } message: {
+            if let confirmation = commitConfirmation {
+                confirmationCounts(confirmation)
+            }
         }
         .task(id: staged.id) { await inbox.loadPreview(staged) }
         .sheet(item: $editorSelection) { selection in
@@ -80,6 +110,7 @@ struct StatementImportPreviewView: View {
         .onDisappear {
             editorSelection = nil
             lastSkipped = nil
+            commitConfirmation = nil
             review = nil
             inbox.clearPreview()
         }
@@ -153,6 +184,8 @@ struct StatementImportPreviewView: View {
                     .importReviewListRow(top: 12, bottom: 0)
             }
 
+            commitStatusCard(review)
+
             Section {
                 if review.visibleRows.isEmpty {
                     Text("All transactions are skipped.")
@@ -166,7 +199,7 @@ struct StatementImportPreviewView: View {
                         row in
                         candidateRow(row, index: index)
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                if !row.disposition.isExact {
+                                if !row.disposition.isExact && review.isEditingAllowed {
                                     Button {
                                         skip(row, in: review)
                                     } label: {
@@ -176,6 +209,7 @@ struct StatementImportPreviewView: View {
                                     .accessibilityIdentifier("skip-import-candidate-\(index)")
                                 }
                             }
+                            .disabled(!review.isEditingAllowed)
                             .importReviewListRow(top: 0, bottom: 12)
                     }
                 }
@@ -190,8 +224,11 @@ struct StatementImportPreviewView: View {
         .scrollContentBackground(.hidden)
         .background(MonMonTheme.canvas)
         .safeAreaInset(edge: .bottom) {
-            if let skipped = validUndo(in: review) {
-                undoBanner(skipped, in: review)
+            VStack(spacing: 0) {
+                if let skipped = validUndo(in: review), review.isEditingAllowed {
+                    undoBanner(skipped, in: review)
+                }
+                commitFooter(review)
             }
         }
     }
@@ -216,6 +253,7 @@ struct StatementImportPreviewView: View {
                 }
                 .pickerStyle(.menu)
                 .frame(minHeight: 44)
+                .disabled(!review.isEditingAllowed)
                 .accessibilityIdentifier("statement-import-account")
 
                 if review.statementAccountID == nil {
@@ -334,6 +372,75 @@ struct StatementImportPreviewView: View {
         .accessibilityIdentifier("import-preview-issues")
     }
 
+    @ViewBuilder
+    private func commitStatusCard(_ review: StatementImportReview) -> some View {
+        switch review.phase {
+        case .reviewing:
+            EmptyView()
+        case .committing:
+            card {
+                HStack(spacing: 12) {
+                    ProgressView()
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Saving reviewed records…")
+                            .font(.headline)
+                        Text("Keep MonMon open until this finishes.")
+                            .font(.caption)
+                            .foregroundStyle(MonMonTheme.textSecondary)
+                    }
+                }
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier("statement-import-saving")
+            .importReviewListRow(top: 12, bottom: 0)
+        case .saved:
+            card {
+                Label("Records saved", systemImage: "checkmark.circle.fill")
+                    .font(.headline)
+                    .foregroundStyle(MonMonTheme.gain)
+            }
+            .accessibilityIdentifier("statement-import-saved")
+            .importReviewListRow(top: 12, bottom: 0)
+        case .cleanupNeeded:
+            card {
+                VStack(alignment: .leading, spacing: 8) {
+                    Label(
+                        "Records saved; statement cleanup needed",
+                        systemImage: "exclamationmark.triangle.fill"
+                    )
+                    .font(.headline)
+                    .foregroundStyle(MonMonTheme.danger)
+
+                    Text(
+                        "Your financial records are safe. Retry removing the staged PDF; this will not create duplicates."
+                    )
+                    .font(.subheadline)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                }
+            }
+            .accessibilityIdentifier("statement-import-cleanup-needed")
+            .importReviewListRow(top: 12, bottom: 0)
+        case .failed(let failure):
+            card {
+                VStack(alignment: .leading, spacing: 8) {
+                    Label("Couldn’t save this review", systemImage: "xmark.circle.fill")
+                        .font(.headline)
+                        .foregroundStyle(MonMonTheme.danger)
+
+                    Text(reviewFailureMessage(failure))
+                        .font(.subheadline)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+
+                    Text("Your choices are still here. Review them and try again.")
+                        .font(.caption)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                }
+            }
+            .accessibilityIdentifier("statement-import-save-failed")
+            .importReviewListRow(top: 12, bottom: 0)
+        }
+    }
+
     private func candidateRow(_ row: ReconciledImportRow, index: Int) -> some View {
         let candidate = row.candidate
         let status = rowStatus(row)
@@ -450,6 +557,60 @@ struct StatementImportPreviewView: View {
         .accessibilityIdentifier("import-skip-undo-banner")
     }
 
+    private func commitFooter(_ review: StatementImportReview) -> some View {
+        VStack(spacing: 8) {
+            if let blocker = commitBlocker(review) {
+                Text(blocker)
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .accessibilityIdentifier("statement-import-commit-blocker")
+            }
+
+            switch review.phase {
+            case .cleanupNeeded:
+                Button {
+                    retryCleanup(review)
+                } label: {
+                    Label("Retry cleanup", systemImage: "arrow.clockwise")
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                }
+                .buttonStyle(.prominentAction)
+                .accessibilityIdentifier("retry-statement-cleanup")
+            case .committing, .saved:
+                Button {
+                } label: {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                        Text("Finishing…")
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                }
+                .buttonStyle(.prominentAction)
+                .disabled(true)
+                .accessibilityIdentifier("statement-import-finishing")
+            case .reviewing, .failed:
+                Button {
+                    commitConfirmation = review.commitConfirmation
+                } label: {
+                    Label(
+                        primaryCommitTitle(review.commitConfirmation),
+                        systemImage: primaryCommitSystemImage(review.commitConfirmation)
+                    )
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                }
+                .buttonStyle(.prominentAction)
+                .disabled(review.commitConfirmation == nil)
+                .accessibilityIdentifier("request-statement-import")
+            }
+        }
+        .frame(maxWidth: MonMonTheme.maxContentWidth)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity)
+        .background(.ultraThinMaterial)
+    }
+
     private var vndAccounts: [CashAccount] {
         accounts.filter {
             $0.currencyCode == VNDCurrency.code && $0.id != AccountSeed.unassignedID
@@ -508,6 +669,135 @@ struct StatementImportPreviewView: View {
                 tint: MonMonTheme.danger
             )
         }
+    }
+
+    private var isReviewCommitting: Bool {
+        guard let review, case .committing = review.phase else { return false }
+        return true
+    }
+
+    private var isCommitConfirmationPresented: Binding<Bool> {
+        Binding(
+            get: { commitConfirmation != nil },
+            set: { isPresented in
+                if !isPresented {
+                    commitConfirmation = nil
+                }
+            }
+        )
+    }
+
+    private var commitConfirmationTitle: LocalizedStringKey {
+        if commitConfirmation?.removesReviewedStatement == true {
+            return "Remove reviewed statement?"
+        }
+        return "Confirm statement import"
+    }
+
+    private func primaryCommitTitle(
+        _ confirmation: StatementImportCommitConfirmation?
+    ) -> LocalizedStringKey {
+        guard let confirmation else { return "Import reviewed records" }
+        if confirmation.removesReviewedStatement {
+            return "Remove reviewed statement"
+        }
+        if confirmation.recordCount == 0 {
+            return "Finish review"
+        }
+        return "Import \(confirmation.recordCount) records"
+    }
+
+    private func commitActionTitle(
+        _ confirmation: StatementImportCommitConfirmation
+    ) -> LocalizedStringKey {
+        confirmation.recordCount == 0
+            ? "Finish review"
+            : "Import \(confirmation.recordCount) records"
+    }
+
+    private func primaryCommitSystemImage(
+        _ confirmation: StatementImportCommitConfirmation?
+    ) -> String {
+        guard let confirmation else { return "square.and.arrow.down" }
+        if confirmation.removesReviewedStatement {
+            return "trash"
+        }
+        return confirmation.recordCount == 0 ? "checkmark.circle" : "square.and.arrow.down"
+    }
+
+    private func confirmationCounts(
+        _ confirmation: StatementImportCommitConfirmation
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("New transactions: \(confirmation.summary.newTransactionCount)")
+            Text("New transfers: \(confirmation.summary.newTransferCount)")
+            Text("Linked records: \(confirmation.summary.linkedCount)")
+            Text("Skipped: \(confirmation.summary.skippedCount)")
+            if confirmation.summary.alreadyImportedCount > 0 {
+                Text("Already imported: \(confirmation.summary.alreadyImportedCount)")
+            }
+        }
+    }
+
+    private func commitBlocker(_ review: StatementImportReview) -> LocalizedStringKey? {
+        switch review.phase {
+        case .committing, .saved, .cleanupNeeded:
+            return nil
+        case .reviewing, .failed:
+            break
+        }
+        if !review.statement.isComplete {
+            return "Resolve statement issues before importing."
+        }
+        if review.statementAccountID == nil {
+            return "Choose the statement account to continue."
+        }
+        if review.summary.unresolvedCount == 1 {
+            return "1 transaction needs attention."
+        }
+        if review.summary.unresolvedCount > 1 {
+            return "\(review.summary.unresolvedCount) transactions need attention."
+        }
+        if review.commitConfirmation == nil {
+            return "Review invalid selections before importing."
+        }
+        return nil
+    }
+
+    private func reviewFailureMessage(
+        _ failure: StatementImportReviewFailure
+    ) -> LocalizedStringKey {
+        switch failure {
+        case .invalidReview:
+            "One or more choices are no longer valid. Review them before retrying."
+        case .staleReview:
+            "Your records changed while saving. Review the matches before retrying."
+        case .storeFailure:
+            "MonMon could not save the reviewed records. No partial import was kept."
+        case .unknown:
+            "MonMon could not finish this import. No partial import was kept."
+        }
+    }
+
+    private func confirmCommit(_ review: StatementImportReview) {
+        commitConfirmation = nil
+        Task {
+            await review.commit()
+            await finishSavedReview(review)
+        }
+    }
+
+    private func retryCleanup(_ review: StatementImportReview) {
+        Task {
+            await review.retryCleanup()
+            await finishSavedReview(review)
+        }
+    }
+
+    private func finishSavedReview(_ review: StatementImportReview) async {
+        guard case .saved(let report) = review.phase else { return }
+        await inbox.completeReview(staged, report: report)
+        dismiss()
     }
 
     private func prepareReview(_ preview: StatementImportPreview) {

@@ -24,6 +24,12 @@ enum StatementImportReviewPhase: Equatable, Sendable {
     case failed(StatementImportReviewFailure)
 }
 
+struct StatementImportCommitConfirmation: Equatable, Sendable {
+    let summary: StatementImportSummary
+    let recordCount: Int
+    let removesReviewedStatement: Bool
+}
+
 @MainActor
 @Observable
 final class StatementImportReview {
@@ -80,6 +86,27 @@ final class StatementImportReview {
         }
     }
 
+    var commitConfirmation: StatementImportCommitConfirmation? {
+        guard isCommitReady else { return nil }
+        let summary = summary
+        return StatementImportCommitConfirmation(
+            summary: summary,
+            recordCount: summary.newTransactionCount
+                + summary.newTransferCount
+                + summary.linkedCount,
+            removesReviewedStatement: rows.allSatisfy(\.disposition.isExact)
+        )
+    }
+
+    var isEditingAllowed: Bool {
+        switch phase {
+        case .reviewing, .failed:
+            true
+        case .committing, .saved, .cleanupNeeded:
+            false
+        }
+    }
+
     var isCommitReady: Bool {
         let canStartCommit: Bool
         switch phase {
@@ -105,7 +132,7 @@ final class StatementImportReview {
     }
 
     func selectStatementAccount(_ accountID: UUID?) {
-        guard phase != .committing else { return }
+        guard isEditingAllowed else { return }
         let choices = Dictionary(uniqueKeysWithValues: rows.map { ($0.id, $0.resolution) })
         statementAccountID = accountID
         phase = .reviewing
@@ -114,7 +141,7 @@ final class StatementImportReview {
     }
 
     func setResolution(_ resolution: ImportRowResolution, forCandidateID candidateID: String) {
-        guard phase != .committing,
+        guard isEditingAllowed,
             let index = rows.firstIndex(where: { $0.id == candidateID }),
             !rows[index].disposition.isExact
         else {
@@ -144,6 +171,12 @@ final class StatementImportReview {
     }
 
     func commit() async {
+        switch phase {
+        case .committing, .saved, .cleanupNeeded:
+            return
+        case .reviewing, .failed:
+            break
+        }
         guard isCommitReady, let statementAccountID else {
             phase = .failed(.invalidReview)
             return

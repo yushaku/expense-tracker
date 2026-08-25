@@ -112,15 +112,15 @@ Full gates + physical acceptance on Yushaku
 
 - [x] Task 7: Add observable reconciliation and commit phases
 - [x] Task 8: Add account selection and focused row-resolution editor
-- [ ] Task 9: Add commit confirmation, results, cleanup retry, and count refresh
+- [x] Task 9: Add commit confirmation, results, cleanup retry, and count refresh
 
 ### Checkpoint: UI
 
-- [ ] Incomplete statements never expose an enabled commit action.
+- [x] Incomplete statements never expose an enabled commit action.
 - [x] Every row announces New, Possible duplicate, Already imported, Transfer,
       Skipped, or Needs attention without relying on color.
 - [x] Commit readiness follows validated row state and current model snapshots.
-- [ ] Success and cleanup failure are visibly distinct and idempotent.
+- [x] Success and cleanup failure are visibly distinct and idempotent.
 - [x] Accessibility identifiers contain no filename, suffix, reference, note,
       or import fingerprint.
 

@@ -25,6 +25,23 @@ struct StatementImportInboxView: View {
         }
         .tint(MonMonTheme.accent)
         .task { await inbox.refresh() }
+        .alert(
+            "Statement review complete",
+            isPresented: isCompletionPresented,
+            presenting: inbox.completionReport
+        ) { _ in
+            Button("Done") { inbox.clearCompletionReport() }
+                .accessibilityIdentifier("dismiss-statement-import-result")
+        } message: { report in
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Created transactions: \(report.createdTransactionCount)")
+                Text("Created transfers: \(report.createdTransferCount)")
+                Text("Linked records: \(report.linkedCount)")
+                if report.skippedCount > 0 {
+                    Text("Skipped: \(report.skippedCount)")
+                }
+            }
+        }
     }
 
     @ViewBuilder
@@ -49,6 +66,17 @@ struct StatementImportInboxView: View {
                 .foregroundStyle(MonMonTheme.textSecondary)
         }
         .accessibilityIdentifier("import-inbox-loading")
+    }
+
+    private var isCompletionPresented: Binding<Bool> {
+        Binding(
+            get: { inbox.completionReport != nil },
+            set: { isPresented in
+                if !isPresented {
+                    inbox.clearCompletionReport()
+                }
+            }
+        )
     }
 
     private var emptyState: some View {

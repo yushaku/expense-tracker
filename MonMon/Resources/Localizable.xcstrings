@@ -301,6 +301,326 @@
         }
       }
     },
+    "%lld transactions need attention.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld giao dịch cần xử lý."
+          }
+        }
+      }
+    },
+    "1 transaction needs attention.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 giao dịch cần xử lý."
+          }
+        }
+      }
+    },
+    "Already imported: %lld": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã nhập: %lld"
+          }
+        }
+      }
+    },
+    "Choose the statement account to continue.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn tài khoản sao kê để tiếp tục."
+          }
+        }
+      }
+    },
+    "Confirm statement import": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xác nhận nhập sao kê"
+          }
+        }
+      }
+    },
+    "Couldn’t save this review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể lưu lần duyệt này"
+          }
+        }
+      }
+    },
+    "Created transactions: %lld": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giao dịch đã tạo: %lld"
+          }
+        }
+      }
+    },
+    "Created transfers: %lld": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyển khoản đã tạo: %lld"
+          }
+        }
+      }
+    },
+    "Finish review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoàn tất duyệt"
+          }
+        }
+      }
+    },
+    "Finishing…": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang hoàn tất…"
+          }
+        }
+      }
+    },
+    "Import %lld records": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập %lld bản ghi"
+          }
+        }
+      }
+    },
+    "Import reviewed records": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập các bản ghi đã duyệt"
+          }
+        }
+      }
+    },
+    "Keep MonMon open until this finishes.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giữ MonMon mở cho đến khi hoàn tất."
+          }
+        }
+      }
+    },
+    "Linked records: %lld": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bản ghi đã liên kết: %lld"
+          }
+        }
+      }
+    },
+    "MonMon could not finish this import. No partial import was kept.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không thể hoàn tất lần nhập này. Không có dữ liệu nào được nhập dở dang."
+          }
+        }
+      }
+    },
+    "MonMon could not save the reviewed records. No partial import was kept.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không thể lưu các bản ghi đã duyệt. Không có dữ liệu nào được nhập dở dang."
+          }
+        }
+      }
+    },
+    "New transactions: %lld": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giao dịch mới: %lld"
+          }
+        }
+      }
+    },
+    "New transfers: %lld": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyển khoản mới: %lld"
+          }
+        }
+      }
+    },
+    "One or more choices are no longer valid. Review them before retrying.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Một hoặc nhiều lựa chọn không còn hợp lệ. Hãy kiểm tra trước khi thử lại."
+          }
+        }
+      }
+    },
+    "Records saved": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã lưu bản ghi"
+          }
+        }
+      }
+    },
+    "Records saved; statement cleanup needed": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã lưu bản ghi; cần dọn dẹp sao kê"
+          }
+        }
+      }
+    },
+    "Remove reviewed statement": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xóa sao kê đã đối soát"
+          }
+        }
+      }
+    },
+    "Remove reviewed statement?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xóa sao kê đã đối soát?"
+          }
+        }
+      }
+    },
+    "Resolve statement issues before importing.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xử lý các vấn đề của sao kê trước khi nhập."
+          }
+        }
+      }
+    },
+    "Retry cleanup": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thử dọn dẹp lại"
+          }
+        }
+      }
+    },
+    "Review invalid selections before importing.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiểm tra các lựa chọn không hợp lệ trước khi nhập."
+          }
+        }
+      }
+    },
+    "Saving reviewed records…": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang lưu các bản ghi đã duyệt…"
+          }
+        }
+      }
+    },
+    "Skipped: %lld": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã bỏ qua: %lld"
+          }
+        }
+      }
+    },
+    "Statement review complete": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã hoàn tất duyệt sao kê"
+          }
+        }
+      }
+    },
+    "Your choices are still here. Review them and try again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Các lựa chọn của bạn vẫn được giữ lại. Hãy kiểm tra và thử lại."
+          }
+        }
+      }
+    },
+    "Your financial records are safe. Retry removing the staged PDF; this will not create duplicates.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dữ liệu tài chính của bạn đã an toàn. Thử xóa lại PDF tạm; thao tác này sẽ không tạo bản ghi trùng."
+          }
+        }
+      }
+    },
+    "Your records changed while saving. Review the matches before retrying.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dữ liệu đã thay đổi trong lúc lưu. Hãy kiểm tra các kết quả khớp trước khi thử lại."
+          }
+        }
+      }
+    },
     "%/year": {
       "localizations": {
         "vi": {

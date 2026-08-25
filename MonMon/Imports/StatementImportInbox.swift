@@ -100,6 +100,7 @@ enum StatementInboxPreviewPhase: Sendable, Equatable {
 final class StatementImportInbox {
     private(set) var listPhase: StatementInboxListPhase
     private(set) var previewPhase: StatementInboxPreviewPhase = .idle
+    private(set) var completionReport: StatementImportCommitReport?
 
     private let service: (any StatementImportInboxServing)?
     private var selectedStatementID: String?
@@ -107,11 +108,13 @@ final class StatementImportInbox {
     init(service: any StatementImportInboxServing) {
         self.service = service
         listPhase = .idle
+        completionReport = nil
     }
 
     private init(startupFailure: StatementImportFailure) {
         service = nil
         listPhase = .failed(startupFailure)
+        completionReport = nil
     }
 
     static func live() -> StatementImportInbox {
@@ -196,5 +199,19 @@ final class StatementImportInbox {
             previewPhase = .failed(staged: staged, failure: .map(error))
             return false
         }
+    }
+
+    func completeReview(
+        _ staged: StagedBankStatement,
+        report: StatementImportCommitReport
+    ) async {
+        guard selectedStatementID == staged.id else { return }
+        clearPreview()
+        await refresh()
+        completionReport = report
+    }
+
+    func clearCompletionReport() {
+        completionReport = nil
     }
 }

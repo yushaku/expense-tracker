@@ -295,19 +295,19 @@ distinct saved-but-cleanup-needed retry path that refreshes all Inbox surfaces.
 
 **Acceptance criteria:**
 
-- [ ] Confirmation names transaction/transfer/link/skip counts and never source
+- [x] Confirmation names transaction/transfer/link/skip counts and never source
       values; incomplete/unresolved state cannot invoke commit.
-- [ ] Success removes the statement from navigation and refreshes Inbox/banner;
+- [x] Success removes the statement from navigation and refreshes Inbox/banner;
       all-exact review uses confirmed cleanup with no financial write.
-- [ ] Save failure retains choices; cleanup failure states records are saved and
+- [x] Save failure retains choices; cleanup failure states records are saved and
       offers idempotent retry without presenting import as failed.
 
 **Verification:**
 
-- [ ] State/service suites cover confirmation request, double-tap protection,
+- [x] State/service suites cover confirmation request, double-tap protection,
       success refresh, all-exact cleanup, save failure, and cleanup retry.
-- [ ] iOS SDK build passes and review confirms no direct SwiftData/filesystem UI.
-- [ ] Physical build/install/launch succeeds on `Yushaku`; owner interaction
+- [x] iOS SDK build passes and review confirms no direct SwiftData/filesystem UI.
+- [x] Physical build/install/launch succeeds on `Yushaku`; owner interaction
       remains the later acceptance checkpoint.
 
 **Dependencies:** Task 8
@@ -316,20 +316,22 @@ distinct saved-but-cleanup-needed retry path that refreshes all Inbox surfaces.
 
 - `MonMon/Imports/StatementImportPreviewView.swift`
 - `MonMon/Imports/StatementImportInboxView.swift`
-- `MonMon/Transactions/TransactionListView.swift`
+- `MonMon/Imports/StatementImportInbox.swift`
+- `MonMon/Imports/StatementImportReview.swift`
 - `MonMon/Resources/Localizable.xcstrings`
+- `MonMonTests/Imports/StatementImportInboxTests.swift`
 - `MonMonTests/Imports/StatementImportReviewTests.swift`
 
-**Estimated scope:** Medium, five files
+**Estimated scope:** Medium, seven files
 
 ## Checkpoint: UI
 
-- [ ] One complete statement can be fully resolved without leaving preview.
-- [ ] Exact, possible, transfer, skip, unresolved, saving, saved, and cleanup
+- [x] One complete statement can be fully resolved without leaving preview.
+- [x] Exact, possible, transfer, skip, unresolved, saving, saved, and cleanup
       states are accessible and visually distinct.
-- [ ] Financial records appear only after confirmed commit.
-- [ ] Pending-count surfaces refresh only after cleanup succeeds.
-- [ ] Commit Tasks 7, 8, and 9 separately.
+- [x] Financial records appear only after confirmed commit.
+- [x] Pending-count surfaces refresh only after cleanup succeeds.
+- [x] Commit Tasks 7, 8, and 9 separately.
 
 ## Task 10: Review, verify, deploy to Yushaku, and hand off acceptance
 

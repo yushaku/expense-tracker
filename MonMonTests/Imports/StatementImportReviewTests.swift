@@ -10,6 +10,64 @@ struct StatementImportReviewTests {
     private let importA = String(repeating: "a", count: 64)
     private let importB = String(repeating: "b", count: 64)
 
+    @Test("Commit confirmation is available only for a ready review and contains counts")
+    func commitConfirmationRequiresReadiness() throws {
+        let fixture = try makeFixture()
+        defer { fixture.removeDefaults() }
+        let review = makeReview(fixture: fixture)
+
+        #expect(review.commitConfirmation == nil)
+
+        review.selectStatementAccount(fixture.firstAccountID)
+        let confirmation = try #require(review.commitConfirmation)
+
+        #expect(confirmation.summary.newTransactionCount == 2)
+        #expect(confirmation.recordCount == 2)
+        #expect(!confirmation.removesReviewedStatement)
+
+        review.setResolution(.unresolved, forCandidateID: importA)
+
+        #expect(review.commitConfirmation == nil)
+    }
+
+    @Test("An all-exact review requests confirmed cleanup without financial records")
+    func allExactConfirmationRequestsCleanup() throws {
+        let fixture = try makeFixture()
+        defer { fixture.removeDefaults() }
+        let exactSnapshot = StatementImportReviewSnapshot(
+            accounts: fixture.snapshot.accounts,
+            categories: fixture.snapshot.categories,
+            transactions: [importA, importB].map {
+                StatementImportTransactionSnapshot(
+                    id: UUID(),
+                    kind: .expense,
+                    amount: 125_000,
+                    occurredAt: occurredAt,
+                    note: "Existing synthetic transaction",
+                    accountID: fixture.firstAccountID,
+                    currencyCode: VNDCurrency.code,
+                    sourceImportID: $0
+                )
+            },
+            transfers: [],
+            defaults: fixture.snapshot.defaults
+        )
+        let review = StatementImportReview(
+            preview: preview(stagedID: "all-exact"),
+            snapshot: exactSnapshot,
+            accountMapping: fixture.mapping,
+            complete: { _, _ in .completed(StatementImportCommitReport()) },
+            retryCleanup: { _ in true }
+        )
+        review.selectStatementAccount(fixture.firstAccountID)
+
+        let confirmation = try #require(review.commitConfirmation)
+
+        #expect(confirmation.recordCount == 0)
+        #expect(confirmation.summary.alreadyImportedCount == 2)
+        #expect(confirmation.removesReviewedStatement)
+    }
+
     @Test("Skipped rows leave the active list and return when restored")
     func skippedRowsAreHiddenUntilRestored() throws {
         let fixture = try makeFixture()
@@ -123,8 +181,45 @@ struct StatementImportReviewTests {
         await review.commit()
         #expect(review.phase == .cleanupNeeded(completion))
 
+        let savedRows = review.rows
+        let savedAccountID = review.statementAccountID
+        review.setResolution(.skip, forCandidateID: importA)
+        review.selectStatementAccount(fixture.secondAccountID)
+
+        #expect(review.rows == savedRows)
+        #expect(review.statementAccountID == savedAccountID)
+        #expect(review.phase == .cleanupNeeded(completion))
+
         await review.retryCleanup()
         #expect(review.phase == .saved(completion))
+    }
+
+    @Test("A second commit while saving is ignored")
+    func doubleCommitIsIgnored() async throws {
+        let fixture = try makeFixture()
+        defer { fixture.removeDefaults() }
+        let gate = CompletionGate()
+        let report = StatementImportCommitReport(createdTransactionCount: 2)
+        let review = StatementImportReview(
+            preview: preview(stagedID: "double-submit"),
+            snapshot: fixture.snapshot,
+            accountMapping: fixture.mapping,
+            complete: { _, _ in await gate.wait() },
+            retryCleanup: { _ in true }
+        )
+        review.selectStatementAccount(fixture.firstAccountID)
+
+        let firstCommit = Task { await review.commit() }
+        await waitUntilRequested(by: gate)
+        await review.commit()
+
+        #expect(await gate.requestCount == 1)
+        #expect(review.phase == .committing)
+
+        await gate.resolve(.completed(report))
+        await firstCommit.value
+
+        #expect(review.phase == .saved(report))
     }
 
     @Test("A stale completion cannot overwrite a replacement statement")
@@ -167,10 +262,12 @@ struct StatementImportReviewTests {
             retryCleanup: { _ in false }
         )
         review.selectStatementAccount(fixture.firstAccountID)
+        let choices = review.rows
 
         await review.commit()
 
         #expect(review.phase == .failed(.staleReview))
+        #expect(review.rows == choices)
     }
 
     private func makeReview(fixture: Fixture) -> StatementImportReview {
@@ -274,9 +371,11 @@ struct StatementImportReviewTests {
 
     private actor CompletionGate {
         private var continuation: CheckedContinuation<StatementImportCompletion, Never>?
+        private(set) var requestCount = 0
 
         func wait() async -> StatementImportCompletion {
-            await withCheckedContinuation { continuation = $0 }
+            requestCount += 1
+            return await withCheckedContinuation { continuation = $0 }
         }
 
         var isWaiting: Bool {
