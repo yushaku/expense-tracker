@@ -2,12 +2,23 @@ import SwiftData
 import SwiftUI
 
 /// Where the ledger is looked back over rather than added to: search words, a
-/// period, filters, the charts that answer them, and the transactions behind
-/// every figure.
+/// period, filters, the figures that answer them, and search results when words
+/// have been entered.
 ///
 /// The Spending screen is for recording today. This screen is for the question
 /// that comes later — where did it go — so one query drives the charts and the
-/// list together and the two can never describe different transactions.
+/// search results together and the two can never describe different
+/// transactions.
+struct ReportContentVisibility: Equatable {
+    let showsNetTrend: Bool
+    let showsTransactionList: Bool
+
+    init(query: TransactionQuery) {
+        showsNetTrend = !query.hasSearchText
+        showsTransactionList = query.hasSearchText
+    }
+}
+
 struct ReportView: View {
     @Environment(\.locale) private var locale
 
@@ -19,6 +30,8 @@ struct ReportView: View {
 
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
+
+    @State private var summaryMonth = TransactionPeriod.startOfMonth(for: .now)
 
     /// A year, not a month: the charts here are about a run of months, and a
     /// period narrower than one bar has nothing to trend.
@@ -63,6 +76,14 @@ struct ReportView: View {
             .navigationDestination(for: CategoryPeriod.self) { period in
                 CategoryTransactionsView(period: period)
             }
+            .navigationDestination(for: DayPeriod.self) { period in
+                DayTransactionsView(period: period)
+            }
+            .navigationDestination(for: AccountActivityRoute.self) { route in
+                if let account = account(route.accountID) {
+                    AccountActivityView(account: account)
+                }
+            }
             .sheet(isPresented: $isFiltering) {
                 ReportFilterSheet(
                     query: $query,
@@ -90,6 +111,8 @@ struct ReportView: View {
         // Every card below reads the same results, so they are worked out once
         // here rather than once per card.
         let results = self.results
+        let summaryTransactions = self.summaryTransactions
+        let visibility = ReportContentVisibility(query: query)
 
         return ScrollView {
             LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
@@ -97,10 +120,33 @@ struct ReportView: View {
                     activeFilters
                 }
 
+                SpendingOverviewCard(
+                    title: summaryRange.title(in: locale),
+                    income: TransactionSummary.totalIncome(of: summaryTransactions),
+                    expense: TransactionSummary.totalExpense(of: summaryTransactions),
+                    count: summaryTransactions.count
+                )
+                .accessibilityIdentifier("report-overview")
+
+                TransactionCalendarCard(
+                    month: summaryMonth,
+                    weeks: summaryCalendarWeeks,
+                    onStepMonth: stepSummaryMonth
+                )
+
+                AccountSpendingSection(
+                    monthTitle: summaryRange.title(in: locale),
+                    rows: AccountSpendingSummary.rows(
+                        accounts: accounts,
+                        transactions: summaryTransactions
+                    ),
+                    accounts: accounts
+                )
+
                 if results.isEmpty {
                     emptyState
                 } else {
-                    if !query.hasSearchText {
+                    if visibility.showsNetTrend {
                         NetTrendCard(points: TransactionSummary.runningNet(results))
                     }
 
@@ -110,7 +156,9 @@ struct ReportView: View {
                         range: query.range
                     )
 
-                    resultsSection(results)
+                    if visibility.showsTransactionList {
+                        resultsSection(results)
+                    }
                 }
             }
             .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -128,6 +176,31 @@ struct ReportView: View {
             categoryNames: categoryNames,
             accountNames: accountNames
         )
+    }
+
+    private var summaryRange: TransactionRange {
+        .month(containing: summaryMonth)
+    }
+
+    private var summaryTransactions: [MoneyTransaction] {
+        TransactionSummary.inRange(summaryRange, transactions: transactions)
+    }
+
+    private var summaryCalendarWeeks: [TransactionCalendarWeek] {
+        TransactionCalendar.weeks(
+            of: summaryMonth,
+            transactions: transactions
+        )
+    }
+
+    private func stepSummaryMonth(_ steps: Int) {
+        let calendar = TransactionPeriod.calendar
+
+        guard let moved = calendar.date(byAdding: .month, value: steps, to: summaryMonth) else {
+            return
+        }
+
+        summaryMonth = TransactionPeriod.startOfMonth(for: moved)
     }
 
     private var categoryNames: [UUID: String] {
@@ -152,11 +225,11 @@ struct ReportView: View {
         query.range.contains(.now) ? .now : query.range.start
     }
 
-    /// The months either side of the report period, pinned under the navigation
-    /// bar so moving from a wider report to one month takes a single tap.
+    /// The month summarized by the overview and account spending, kept separate
+    /// from the wider query that drives charts and search.
     private var monthRail: some View {
-        MonthRail(months: railMonths, selection: reportMonth) { month in
-            query.range = .month(containing: month)
+        MonthRail(months: railMonths, selection: summaryMonth) { month in
+            summaryMonth = TransactionPeriod.startOfMonth(for: month)
         }
         .background(MonMonTheme.canvas)
         .overlay(alignment: .bottom) {
@@ -166,18 +239,12 @@ struct ReportView: View {
         }
     }
 
-    /// A wider period is represented by its first month, matching the Spending
-    /// screen when its date filter is set to a year or a custom range.
-    private var reportMonth: Date {
-        TransactionPeriod.startOfMonth(for: query.range.start)
-    }
-
-    /// Keep the selected month on the rail even when a custom range lies beyond
-    /// the calendar picker's ordinary bounds.
+    /// Keep the selected summary month on the rail even when it lies beyond the
+    /// calendar picker's ordinary bounds.
     private var railMonths: [Date] {
         TransactionPeriod.months(
-            from: min(CalendarTheme.startMonth(), reportMonth),
-            through: max(CalendarTheme.endMonth(), reportMonth)
+            from: min(CalendarTheme.startMonth(), summaryMonth),
+            through: max(CalendarTheme.endMonth(), summaryMonth)
         )
     }
 
@@ -327,9 +394,9 @@ struct ReportView: View {
             : "Nothing recorded \(query.range.phrase(in: locale))."
     }
 
-    /// The transactions behind every figure above, broken at each day the way
-    /// the Spending screen breaks them, so a result read here reads the same as
-    /// it does where it was recorded.
+    /// Search results broken at each day the way the Spending screen breaks
+    /// transactions, so a result read here reads the same as it does where it
+    /// was recorded.
     private func resultsSection(_ results: [MoneyTransaction]) -> some View {
         VStack(alignment: .leading, spacing: 20) {
             HStack(spacing: 12) {
@@ -408,6 +475,9 @@ struct ReportView: View {
         accounts.first { $0.id == transaction.accountID }
     }
 
+    private func account(_ id: UUID) -> CashAccount? {
+        accounts.first { $0.id == id }
+    }
 }
 
 #if DEBUG

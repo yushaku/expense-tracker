@@ -3,8 +3,8 @@ import SwiftUI
 /// What a stretch of time came to: the net at the top, the split that produced
 /// it, and the two directions side by side.
 ///
-/// The card reads a period rather than owning one, so the Spending screen and a
-/// single day both put the same summary above their list.
+/// The card reads a period rather than owning one, so Report and a single day
+/// can put the same summary above the details they present.
 struct SpendingOverviewCard: View {
     @Environment(\.locale) private var locale
 

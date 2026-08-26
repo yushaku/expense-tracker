@@ -3,14 +3,13 @@ import SwiftUI
 /// A month at a glance: every day carries what it took in and what it paid out,
 /// and tapping one opens that day's transactions.
 ///
-/// The card owns no month of its own. The screen keeps the range, so stepping
-/// the calendar re-cuts that range to the month stepped to and the totals above
-/// the card keep meaning what the card is showing.
+/// The card owns no month of its own. The screen keeps the selected month, so
+/// stepping the calendar also updates the totals around it.
 struct TransactionCalendarCard: View {
     let month: Date
     let weeks: [TransactionCalendarWeek]
     /// Steps the month by ±1. Handed out rather than done here so the screen's
-    /// range and this grid can never disagree about which month is on show.
+    /// selection and this grid can never disagree about which month is on show.
     let onStepMonth: (Int) -> Void
 
     @Environment(\.locale) private var locale

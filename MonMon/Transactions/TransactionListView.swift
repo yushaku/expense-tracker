@@ -56,13 +56,6 @@ struct TransactionListView: View {
                             importStatusCard
                         }
 
-                        SpendingOverviewCard(
-                            title: range.title(in: locale),
-                            income: income,
-                            expense: expense,
-                            count: visibleTransactions.count
-                        )
-
                         if accounts.isEmpty {
                             noAccountState
                         } else {
@@ -352,35 +345,10 @@ struct TransactionListView: View {
         range.contains(.now) ? .now : range.start
     }
 
-    /// The month the calendar draws. It follows the period on show rather than
-    /// keeping a month of its own, so the grid and the totals above it can never
-    /// disagree about where the owner is looking.
-    private var calendarMonth: Date {
+    /// The month represented by the rail. It follows the period on show rather
+    /// than keeping a month of its own.
+    private var selectedMonth: Date {
         TransactionPeriod.startOfMonth(for: range.start)
-    }
-
-    /// Built from every transaction, not the ones in range: the grid covers a
-    /// whole month even when the period narrows to a single day inside it. The
-    /// list filter still applies, so the grid shows the same direction the list
-    /// under it does.
-    private var calendarWeeks: [TransactionCalendarWeek] {
-        TransactionCalendar.weeks(
-            of: calendarMonth,
-            transactions: TransactionSummary.matching(listFilter, transactions: transactions)
-        )
-    }
-
-    /// Stepping the calendar is how an owner says "show me that month", so it
-    /// re-cuts the period to the month it lands on rather than leaving the
-    /// figures above describing the month they stepped away from.
-    private func stepCalendarMonth(_ steps: Int) {
-        let calendar = TransactionPeriod.calendar
-
-        guard let moved = calendar.date(byAdding: .month, value: steps, to: calendarMonth) else {
-            return
-        }
-
-        range = .month(containing: moved)
     }
 
     private var visibleTransactions: [MoneyTransaction] {
@@ -504,7 +472,7 @@ struct TransactionListView: View {
     /// The months either side of the one on show, pinned under the navigation
     /// bar so a month is one tap away wherever the screen is scrolled to.
     private var monthRail: some View {
-        MonthRail(months: railMonths, selection: calendarMonth) { month in
+        MonthRail(months: railMonths, selection: selectedMonth) { month in
             range = .month(containing: month)
         }
         .background(MonMonTheme.canvas)
@@ -519,17 +487,9 @@ struct TransactionListView: View {
     /// show sits outside them, so the month being looked at is always on it.
     private var railMonths: [Date] {
         TransactionPeriod.months(
-            from: min(CalendarTheme.startMonth(), calendarMonth),
-            through: max(CalendarTheme.endMonth(), calendarMonth)
+            from: min(CalendarTheme.startMonth(), selectedMonth),
+            through: max(CalendarTheme.endMonth(), selectedMonth)
         )
-    }
-
-    private var income: Decimal {
-        TransactionSummary.totalIncome(of: visibleTransactions)
-    }
-
-    private var expense: Decimal {
-        TransactionSummary.totalExpense(of: visibleTransactions)
     }
 
     private func signed(_ amount: Decimal) -> String {
@@ -543,8 +503,6 @@ struct TransactionListView: View {
     /// heads the run with that date and what the day came to. The cards below a
     /// header drop their own date, which the header now carries.
     ///
-    /// The calendar sits under the filter rather than above it, so one control
-    /// narrows the grid and the list together instead of only the list.
     private var transactionsSection: some View {
         VStack(alignment: .leading, spacing: 20) {
             HStack(spacing: 12) {
@@ -555,8 +513,8 @@ struct TransactionListView: View {
 
                 Spacer(minLength: 8)
 
-                // Narrows the grid and the list. The overview card above still
-                // counts both directions, which is what the period is judged on.
+                // This affects the rows only. The period-wide figures live on
+                // Report and continue to count both directions.
                 Picker("Show", selection: $listFilter) {
                     ForEach(TransactionListFilter.allCases) { filter in
                         Text(filter.displayName)
@@ -568,12 +526,6 @@ struct TransactionListView: View {
                 .frame(maxWidth: 210)
                 .accessibilityIdentifier("transaction-filter")
             }
-
-            TransactionCalendarCard(
-                month: calendarMonth,
-                weeks: calendarWeeks,
-                onStepMonth: stepCalendarMonth
-            )
 
             if filteredTransactions.isEmpty {
                 Text(emptyFilterNotice)
