@@ -16,6 +16,26 @@ struct AppRouteTests {
         }
     }
 
+    @Test("Voice capture intent launches MonMon in the foreground")
+    func voiceCaptureIntentLaunchesInForeground() {
+        #expect(OpenVoiceCaptureIntent.openAppWhenRun)
+
+        if #available(iOS 26.0, macOS 26.0, *) {
+            #expect(OpenVoiceCaptureIntent.supportedModes == .foreground)
+        }
+    }
+
+    @Test("Voice capture intent preserves voice mode through the route")
+    func voiceCaptureIntentRequestsVoiceMode() async {
+        let route = AppRoute()
+        let appLock = AppLock(isLocked: false)
+        let dependency = QuickCaptureIntentDependency(appRoute: route, appLock: appLock)
+
+        await dependency.request(mode: .voice)
+
+        #expect(route.quickCaptureRequest?.mode == .voice)
+    }
+
     @Test("Quick capture intent waits behind the app lock")
     func quickCaptureIntentWaitsForUnlock() async {
         let route = AppRoute()
@@ -29,6 +49,21 @@ struct AppRouteTests {
         route.releaseQueuedQuickCapture(isLocked: false)
 
         #expect(route.quickCaptureRequestID != nil)
+    }
+
+    @Test("Locked voice capture keeps its mode until the app unlocks")
+    func lockedVoiceCaptureKeepsItsMode() async {
+        let route = AppRoute()
+        let appLock = AppLock(isLocked: true)
+        let dependency = QuickCaptureIntentDependency(appRoute: route, appLock: appLock)
+
+        await dependency.request(mode: .voice)
+
+        #expect(route.quickCaptureRequest == nil)
+
+        route.releaseQueuedQuickCapture(isLocked: false)
+
+        #expect(route.quickCaptureRequest?.mode == .voice)
     }
 
     @Test("Quick capture waits behind the app lock")

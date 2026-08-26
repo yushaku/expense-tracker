@@ -37,9 +37,9 @@ struct QuickCaptureIntentDependency: @unchecked Sendable {
         self.appLock = appLock
     }
 
-    func request() async {
+    func request(mode: QuickCaptureLaunchMode = .keyboard) async {
         await MainActor.run {
-            appRoute.requestQuickCapture(isLocked: appLock.isLocked)
+            appRoute.requestQuickCapture(mode: mode, isLocked: appLock.isLocked)
         }
     }
 }
@@ -58,8 +58,30 @@ struct OpenQuickCaptureIntent: AppIntent {
     }
 }
 
+struct OpenVoiceCaptureIntent: AppIntent {
+    static let title: LocalizedStringResource = "Open Voice Capture"
+    static let description = IntentDescription(
+        "Open MonMon, listen for one transaction, and place the transcript in Quick Capture."
+    )
+    static let authenticationPolicy: IntentAuthenticationPolicy = .alwaysAllowed
+    static let isDiscoverable = false
+    static var openAppWhenRun: Bool { true }
+
+    @Dependency private var dependency: QuickCaptureIntentDependency
+
+    func perform() async -> some IntentResult {
+        await dependency.request(mode: .voice)
+        return .result()
+    }
+}
+
 @available(iOS 26.0, macOS 26.0, *)
 extension OpenQuickCaptureIntent {
+    static var supportedModes: IntentModes { .foreground }
+}
+
+@available(iOS 26.0, macOS 26.0, *)
+extension OpenVoiceCaptureIntent {
     static var supportedModes: IntentModes { .foreground }
 }
 
