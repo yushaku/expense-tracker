@@ -567,7 +567,7 @@
             <div><span class="feature-code">CAP-04</span><h3>Siri / Action Button</h3></div>
             <span class="feature-status">Đã có MVP</span>
           </div>
-          <p class="feature-summary">Siri đã gọi App Shortcut, hỏi một câu nhập tự do như “50 nghìn ăn trưa tiền mặt” và lưu mà không cần mở app. Action Button có thể mở thẳng quick capture; voice template one-tap còn chờ URL iCloud thật.</p>
+          <p class="feature-summary">Hai App Shortcut “Ghi giao dịch” và “Ghi nhanh” được cài tự động cùng app. Siri hỏi một câu nhập tự do như “50 nghìn ăn trưa tiền mặt”; Action Button có thể mở thẳng quick capture mà không cần template tải thêm.</p>
           <dl class="feature-facts">
             <div class="feature-fact"><dt>Platform</dt><dd>Khả thi từ iOS 18</dd></div>
             <div class="feature-fact"><dt>Siri flow</dt><dd>Gọi + một câu trả lời</dd></div>
@@ -580,8 +580,7 @@
             <li class="todo-item done"><span class="todo-state">Đã có</span><span>Giao dịch rõ được confirm rồi commit; câu mơ hồ vào Needs Review nên không bị mất và chưa ảnh hưởng tổng tiền.</span></li>
             <li class="todo-item done"><span class="todo-state">Đã có</span><span><code>alwaysAllowed</code> cho capture nền; dialog khóa máy chỉ nói trạng thái chung, không đọc số dư hay chi tiết giao dịch.</span></li>
             <li class="todo-item done"><span class="todo-state">Đã có</span><span>Phrase, title, dialog và UI được localize tiếng Việt/Anh; quick capture dùng scheme riêng cho Dev/Prod và chờ App Lock mở trước khi hiện.</span></li>
-            <li class="todo-item done"><span class="todo-state">Đã có</span><span>Settings hướng dẫn gán Action Button và có nút cài voice template được bật bằng <code>VOICE_SHORTCUT_ID</code>.</span></li>
-            <li class="todo-item"><span class="todo-state">Todo</span><span>Publish iCloud Shortcut gồm Dictate Text → Record Transaction, rồi điền ID thật để bật nút cài one-tap.</span></li>
+            <li class="todo-item done"><span class="todo-state">Đã có</span><span>Settings giải thích hai shortcut được cài tự động và hướng dẫn gán “Ghi nhanh” cho Action Button.</span></li>
             <li class="todo-item"><span class="todo-state">Todo</span><span>Acceptance test Siri và Action Button khi khóa/mở máy trên iPhone vật lý; app không thể tự gán Action Button cho user.</span></li>
           </ul>
         </article>
@@ -678,8 +677,8 @@
           <thead><tr><th>Surface</th><th>Điểm vào đề xuất</th><th>Kết quả mặc định</th><th>Không nên hứa</th></tr></thead>
           <tbody>
             <tr><td>Siri</td><td><code>CaptureTransactionIntent(rawEntry)</code></td><td>Confirm và commit nếu đủ dữ liệu; còn lại lưu vào Needs Review.</td><td>Một câu activation luôn parse đúng mọi cách nói tiếng Việt.</td></tr>
-            <tr><td>Action Button</td><td>App Shortcut “Quick Capture” hoặc voice template</td><td>Mở form đã focus; template tùy chọn Dictate Text rồi gọi capture intent.</td><td>App tự gán nút hoặc iOS luôn cho dictation khi máy khóa.</td></tr>
-            <tr><td>Shortcuts / Spotlight</td><td>Cùng App Intent và preconfigured shortcut</td><td>Có ngay sau cài đặt; cho phép user ghép workflow riêng.</td><td>User không cần setup nếu muốn gán hardware button.</td></tr>
+            <tr><td>Action Button</td><td>App Shortcut “Quick Capture”</td><td>Mở form đã focus để nhập hoặc dùng dictation của bàn phím.</td><td>App tự gán nút hoặc tự bắt đầu dictation khi máy khóa.</td></tr>
+            <tr><td>Shortcuts / Spotlight</td><td>Cùng App Intent và preconfigured shortcut</td><td>Có ngay sau cài đặt; cho phép user ghép workflow riêng.</td><td>App vẫn không thể tự gán hardware button.</td></tr>
             <tr><td>Siri AI / iOS 27</td><td>Enhancement sau baseline</td><td>Cải thiện semantic matching khi OS/device/language hỗ trợ.</td><td>Dùng finance schema — hiện Apple chưa cung cấp domain này.</td></tr>
           </tbody>
         </table>
@@ -692,7 +691,7 @@
         <article class="siri-step"><h3>Commit hoặc review</h3><p>Dữ liệu đủ thành transaction; mơ hồ vào Needs Review và chưa tính totals.</p></article>
       </div>
 
-      <aside class="research-note"><strong>Trạng thái MVP:</strong> App Shortcut “Ghi giao dịch”, required text parameter, localization Việt/Anh, parser, persistence, Needs Review và quick capture đã có. Chưa làm Control Center control, interactive snippet nâng cao hay Siri AI schema work; voice template one-tap còn cần publish iCloud link và acceptance test trên iPhone vật lý.</aside>
+      <aside class="research-note"><strong>Trạng thái MVP:</strong> App Shortcut “Ghi giao dịch” và “Ghi nhanh”, localization Việt/Anh, parser, persistence, Needs Review cùng quick capture đã có. Không cần phát hành voice template riêng; chưa làm Control Center control, interactive snippet nâng cao hay Siri AI schema work.</aside>
     </section>
 
     <section aria-labelledby="routes-title">

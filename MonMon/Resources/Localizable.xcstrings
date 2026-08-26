@@ -61,16 +61,6 @@
         }
       }
     },
-    "Dictates one sentence and sends it to MonMon without opening the app. iOS may still ask you to unlock before dictation.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Đọc một câu và gửi vào MonMon mà không mở app. iOS vẫn có thể yêu cầu mở khóa trước khi nhập bằng giọng nói."
-          }
-        }
-      }
-    },
     "Every spoken transaction has been handled.": {
       "localizations": {
         "vi": {
@@ -97,26 +87,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ví dụ: 50k ăn trưa tiền mặt hôm qua"
-          }
-        }
-      }
-    },
-    "For voice-only capture, install the voice template above, then choose it instead.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Để chỉ nhập bằng giọng nói, hãy cài mẫu phía trên rồi chọn mẫu đó."
-          }
-        }
-      }
-    },
-    "Install voice shortcut": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cài phím tắt giọng nói"
           }
         }
       }
@@ -191,12 +161,12 @@
         }
       }
     },
-    "Optional voice shortcut": {
+    "Opens the focused entry form; a good choice for Action Button.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Phím tắt giọng nói tùy chọn"
+            "value": "Mở form đã focus; phù hợp để gán cho Nút tác vụ."
           }
         }
       }
@@ -351,12 +321,12 @@
         }
       }
     },
-    "Say “Siri, record a transaction in MonMon”, then answer with one sentence.": {
+    "Say “Siri, record a transaction in MonMon”, then answer “cafe 50k”.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nói “Siri, ghi giao dịch bằng MonMon”, rồi trả lời bằng một câu."
+            "value": "Nói “Siri, ghi giao dịch bằng MonMon”, rồi trả lời “cafe 50k”."
           }
         }
       }
@@ -371,12 +341,12 @@
         }
       }
     },
-    "Siri shortcut is ready": {
+    "They are installed automatically with MonMon—nothing else to download.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Phím tắt Siri đã sẵn sàng"
+            "value": "Hai phím tắt được cài tự động cùng MonMon—không cần tải thêm."
           }
         }
       }
@@ -391,12 +361,12 @@
         }
       }
     },
-    "The one-tap template has not been published yet.": {
+    "Two shortcuts are ready": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mẫu cài một chạm chưa được phát hành."
+            "value": "Hai phím tắt đã sẵn sàng"
           }
         }
       }

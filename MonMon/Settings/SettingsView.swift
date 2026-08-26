@@ -117,55 +117,52 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 sectionHeader("Siri & Action Button", systemImage: "waveform.badge.mic")
 
-                Label("Siri shortcut is ready", systemImage: "checkmark.circle.fill")
+                Label("Two shortcuts are ready", systemImage: "checkmark.circle.fill")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(MonMonTheme.accent)
 
-                Text("Say “Siri, record a transaction in MonMon”, then answer with one sentence.")
+                Text("They are installed automatically with MonMon—nothing else to download.")
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
 
                 Divider()
                     .overlay(MonMonTheme.border)
 
-                Text("Optional voice shortcut")
-                    .font(.subheadline.weight(.semibold))
-
-                Text(
-                    "Dictates one sentence and sends it to MonMon without opening the app. iOS may still ask you to unlock before dictation."
+                shortcutRow(
+                    title: "Record Transaction",
+                    detail: "Say “Siri, record a transaction in MonMon”, then answer “cafe 50k”.",
+                    systemImage: "waveform"
                 )
-                .font(.caption)
-                .foregroundStyle(MonMonTheme.textSecondary)
 
-                voiceShortcutInstallationButton
-
-                if VoiceShortcutConfiguration.bundledInstallationURL == nil {
-                    Text("The one-tap template has not been published yet.")
-                        .font(.caption2)
-                        .foregroundStyle(MonMonTheme.textMuted)
-                }
+                shortcutRow(
+                    title: "Quick Capture",
+                    detail: "Opens the focused entry form; a good choice for Action Button.",
+                    systemImage: "square.and.pencil"
+                )
 
                 actionButtonInstructions
             }
         }
     }
 
-    @ViewBuilder
-    private var voiceShortcutInstallationButton: some View {
-        if let url = VoiceShortcutConfiguration.bundledInstallationURL {
-            Link(destination: url) {
-                Label("Install voice shortcut", systemImage: "square.and.arrow.down")
+    private func shortcutRow(
+        title: LocalizedStringKey,
+        detail: LocalizedStringKey,
+        systemImage: String
+    ) -> some View {
+        Label {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textPrimary)
+
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
             }
-            .buttonStyle(.prominentAction)
-            .accessibilityIdentifier("install-voice-shortcut")
-        } else {
-            Button {
-            } label: {
-                Label("Install voice shortcut", systemImage: "square.and.arrow.down")
-            }
-            .buttonStyle(.prominentAction)
-            .disabled(true)
-            .accessibilityIdentifier("install-voice-shortcut")
+        } icon: {
+            Image(systemName: systemImage)
+                .foregroundStyle(MonMonTheme.accent)
         }
     }
 
@@ -176,11 +173,6 @@ struct SettingsView: View {
 
             instructionRow(number: 1, text: "Open Settings → Action Button → Shortcut.")
             instructionRow(number: 2, text: "Choose MonMon → Quick Capture.")
-            instructionRow(
-                number: 3,
-                text:
-                    "For voice-only capture, install the voice template above, then choose it instead."
-            )
         }
         .padding(.top, 2)
     }
