@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		S10000000000000000000208 /* AppShortcuts.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000108 /* AppShortcuts.xcstrings */; };
+		S10000000000000000000206 /* TransactionCaptureIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000106 /* TransactionCaptureIntent.swift */; };
+		S10000000000000000000207 /* MonMonAppShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000107 /* MonMonAppShortcuts.swift */; };
 		S10000000000000000000203 /* PendingTransactionCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000103 /* PendingTransactionCapture.swift */; };
 		S10000000000000000000204 /* TransactionCaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000104 /* TransactionCaptureService.swift */; };
 		S10000000000000000000205 /* TransactionCaptureServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000105 /* TransactionCaptureServiceTests.swift */; };
@@ -301,6 +304,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		S10000000000000000000108 /* AppShortcuts.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = AppShortcuts.xcstrings; sourceTree = "<group>"; };
+		S10000000000000000000106 /* TransactionCaptureIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureIntent.swift; sourceTree = "<group>"; };
+		S10000000000000000000107 /* MonMonAppShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonMonAppShortcuts.swift; sourceTree = "<group>"; };
 		S10000000000000000000103 /* PendingTransactionCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingTransactionCapture.swift; sourceTree = "<group>"; };
 		S10000000000000000000104 /* TransactionCaptureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureService.swift; sourceTree = "<group>"; };
 		S10000000000000000000105 /* TransactionCaptureServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureServiceTests.swift; sourceTree = "<group>"; };
@@ -643,6 +649,8 @@
 		A00000000000000000000013 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				S10000000000000000000106 /* TransactionCaptureIntent.swift */,
+				S10000000000000000000107 /* MonMonAppShortcuts.swift */,
 				A00000000000000000000816 /* MonMonSchema.swift */,
 				A00000000000000000000A07 /* StoreReconciler.swift */,
 				A00000000000000000000A05 /* DuplicateReconciler.swift */,
@@ -656,6 +664,7 @@
 		A00000000000000000000014 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				S10000000000000000000108 /* AppShortcuts.xcstrings */,
 				A00000000000000000000113 /* Assets.xcassets */,
 				C10000000000000000000008 /* Localizable.xcstrings */,
 			);
@@ -1213,6 +1222,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				S10000000000000000000208 /* AppShortcuts.xcstrings in Resources */,
 				A00000000000000000000204 /* Assets.xcassets in Resources */,
 				C10000000000000000000108 /* Localizable.xcstrings in Resources */,
 			);
@@ -1239,6 +1249,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				S10000000000000000000206 /* TransactionCaptureIntent.swift in Sources */,
+				S10000000000000000000207 /* MonMonAppShortcuts.swift in Sources */,
 				S10000000000000000000203 /* PendingTransactionCapture.swift in Sources */,
 				S10000000000000000000204 /* TransactionCaptureService.swift in Sources */,
 				S10000000000000000000201 /* TransactionCaptureParser.swift in Sources */,
