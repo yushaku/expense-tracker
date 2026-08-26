@@ -9,7 +9,7 @@ struct MonMonAppShortcuts: AppShortcutsProvider {
                 "Add a transaction in \(.applicationName)",
             ],
             shortTitle: "Record Transaction",
-            systemImageName: "mic.fill"
+            systemImageName: "square.and.pencil"
         )
 
         AppShortcut(

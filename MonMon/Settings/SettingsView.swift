@@ -132,7 +132,7 @@ struct SettingsView: View {
                 shortcutRow(
                     title: "Record Transaction",
                     detail: "Say “Siri, record a transaction in MonMon”, then answer “cafe 50k”.",
-                    systemImage: "waveform"
+                    systemImage: "square.and.pencil"
                 )
 
                 shortcutRow(
