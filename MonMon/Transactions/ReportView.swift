@@ -155,10 +155,6 @@ struct ReportView: View {
                 if results.isEmpty {
                     emptyState
                 } else {
-                    if visibility.showsNetTrend {
-                        NetTrendCard(points: TransactionSummary.runningNet(results))
-                    }
-
                     CategoryBreakdownCard(
                         kind: $breakdownKind,
                         slices: breakdownSlices(of: results),
@@ -167,6 +163,10 @@ struct ReportView: View {
 
                     if visibility.showsTransactionList {
                         resultsSection(results)
+                    }
+
+                    if visibility.showsNetTrend {
+                        NetTrendCard(points: TransactionSummary.runningNet(results))
                     }
                 }
             }
