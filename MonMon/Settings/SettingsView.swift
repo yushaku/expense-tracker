@@ -22,6 +22,7 @@ struct SettingsView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                         appearanceCard
+                        voiceCaptureCard
                         instrumentsCard
                         securityCard
                         backupCard
@@ -108,6 +109,94 @@ struct SettingsView: View {
                         .accessibilityIdentifier("biometric-lock-error")
                 }
             }
+        }
+    }
+
+    private var voiceCaptureCard: some View {
+        card {
+            VStack(alignment: .leading, spacing: 12) {
+                sectionHeader("Siri & Action Button", systemImage: "waveform.badge.mic")
+
+                Label("Siri shortcut is ready", systemImage: "checkmark.circle.fill")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.accent)
+
+                Text("Say “Siri, record a transaction in MonMon”, then answer with one sentence.")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+
+                Divider()
+                    .overlay(MonMonTheme.border)
+
+                Text("Optional voice shortcut")
+                    .font(.subheadline.weight(.semibold))
+
+                Text(
+                    "Dictates one sentence and sends it to MonMon without opening the app. iOS may still ask you to unlock before dictation."
+                )
+                .font(.caption)
+                .foregroundStyle(MonMonTheme.textSecondary)
+
+                voiceShortcutInstallationButton
+
+                if VoiceShortcutConfiguration.bundledInstallationURL == nil {
+                    Text("The one-tap template has not been published yet.")
+                        .font(.caption2)
+                        .foregroundStyle(MonMonTheme.textMuted)
+                }
+
+                actionButtonInstructions
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var voiceShortcutInstallationButton: some View {
+        if let url = VoiceShortcutConfiguration.bundledInstallationURL {
+            Link(destination: url) {
+                Label("Install voice shortcut", systemImage: "square.and.arrow.down")
+            }
+            .buttonStyle(.prominentAction)
+            .accessibilityIdentifier("install-voice-shortcut")
+        } else {
+            Button {
+            } label: {
+                Label("Install voice shortcut", systemImage: "square.and.arrow.down")
+            }
+            .buttonStyle(.prominentAction)
+            .disabled(true)
+            .accessibilityIdentifier("install-voice-shortcut")
+        }
+    }
+
+    private var actionButtonInstructions: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Use with Action Button")
+                .font(.subheadline.weight(.semibold))
+
+            instructionRow(number: 1, text: "Open Settings → Action Button → Shortcut.")
+            instructionRow(number: 2, text: "Choose MonMon → Quick Capture.")
+            instructionRow(
+                number: 3,
+                text:
+                    "For voice-only capture, install the voice template above, then choose it instead."
+            )
+        }
+        .padding(.top, 2)
+    }
+
+    private func instructionRow(number: Int, text: LocalizedStringKey) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            Text(number.formatted())
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(MonMonTheme.onAccent)
+                .frame(width: 22, height: 22)
+                .background(MonMonTheme.accent, in: Circle())
+                .accessibilityHidden(true)
+
+            Text(text)
+                .font(.caption)
+                .foregroundStyle(MonMonTheme.textSecondary)
         }
     }
 

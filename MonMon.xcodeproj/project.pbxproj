@@ -10,6 +10,8 @@
 		S10000000000000000000210 /* AppRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000110 /* AppRoute.swift */; };
 		S10000000000000000000211 /* QuickTransactionCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000111 /* QuickTransactionCaptureView.swift */; };
 		S10000000000000000000212 /* AppRouteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000112 /* AppRouteTests.swift */; };
+		S10000000000000000000213 /* VoiceShortcutConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000113 /* VoiceShortcutConfiguration.swift */; };
+		S10000000000000000000214 /* VoiceShortcutConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000114 /* VoiceShortcutConfigurationTests.swift */; };
 		S10000000000000000000209 /* PendingTransactionCaptureListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000109 /* PendingTransactionCaptureListView.swift */; };
 		S10000000000000000000208 /* AppShortcuts.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000108 /* AppShortcuts.xcstrings */; };
 		S10000000000000000000206 /* TransactionCaptureIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000106 /* TransactionCaptureIntent.swift */; };
@@ -311,6 +313,8 @@
 		S10000000000000000000110 /* AppRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRoute.swift; sourceTree = "<group>"; };
 		S10000000000000000000111 /* QuickTransactionCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickTransactionCaptureView.swift; sourceTree = "<group>"; };
 		S10000000000000000000112 /* AppRouteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouteTests.swift; sourceTree = "<group>"; };
+		S10000000000000000000113 /* VoiceShortcutConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceShortcutConfiguration.swift; sourceTree = "<group>"; };
+		S10000000000000000000114 /* VoiceShortcutConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceShortcutConfigurationTests.swift; sourceTree = "<group>"; };
 		S10000000000000000000109 /* PendingTransactionCaptureListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingTransactionCaptureListView.swift; sourceTree = "<group>"; };
 		S10000000000000000000108 /* AppShortcuts.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = AppShortcuts.xcstrings; sourceTree = "<group>"; };
 		S10000000000000000000106 /* TransactionCaptureIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureIntent.swift; sourceTree = "<group>"; };
@@ -930,6 +934,7 @@
 		A00000000000000000000026 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				S10000000000000000000113 /* VoiceShortcutConfiguration.swift */,
 				A00000000000000000000188 /* AppLock.swift */,
 				A00000000000000000000970 /* CloudSync.swift */,
 				A00000000000000000000189 /* LockScreenView.swift */,
@@ -941,6 +946,7 @@
 		A00000000000000000000027 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				S10000000000000000000114 /* VoiceShortcutConfigurationTests.swift */,
 				A00000000000000000000191 /* AppLockTests.swift */,
 				C10000000000000000000009 /* AppLanguageTests.swift */,
 				C1000000000000000000000A /* LanguageResolutionTests.swift */,
@@ -1261,6 +1267,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				S10000000000000000000213 /* VoiceShortcutConfiguration.swift in Sources */,
 				S10000000000000000000210 /* AppRoute.swift in Sources */,
 				S10000000000000000000211 /* QuickTransactionCaptureView.swift in Sources */,
 				S10000000000000000000209 /* PendingTransactionCaptureListView.swift in Sources */,
@@ -1442,6 +1449,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				S10000000000000000000214 /* VoiceShortcutConfigurationTests.swift in Sources */,
 				S10000000000000000000212 /* AppRouteTests.swift in Sources */,
 				S10000000000000000000205 /* TransactionCaptureServiceTests.swift in Sources */,
 				S10000000000000000000202 /* TransactionCaptureParserTests.swift in Sources */,

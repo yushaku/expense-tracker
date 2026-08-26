@@ -19,6 +19,8 @@
 	<string>$(ICLOUD_CONTAINER_ID)</string>
 	<key>MonMonQuickCaptureURLScheme</key>
 	<string>$(QUICK_CAPTURE_URL_SCHEME)</string>
+	<key>MonMonVoiceShortcutID</key>
+	<string>$(VOICE_SHORTCUT_ID)</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
