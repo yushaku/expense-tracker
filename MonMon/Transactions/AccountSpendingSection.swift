@@ -5,51 +5,51 @@ struct AccountActivityRoute: Hashable {
 }
 
 struct AccountSpendingSection: View {
+    @Environment(\.locale) private var locale
+
     let monthTitle: String
     let rows: [AccountSpendingRow]
     let accounts: [CashAccount]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 18) {
             header
 
-            VStack(spacing: 0) {
-                if rows.isEmpty {
-                    emptyState
-                } else {
-                    ForEach(Array(rows.enumerated()), id: \.element.id) { index, row in
-                        if let account = account(row.accountID) {
-                            NavigationLink(value: AccountActivityRoute(accountID: account.id)) {
-                                accountRow(account, spending: row.amount)
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityIdentifier(
-                                "report-account-spending-\(account.id.uuidString)"
-                            )
-                            .accessibilityHint("Shows all activity for this account.")
+            if displayRows.isEmpty {
+                emptyState
+            } else {
+                AllocationDoughnut(
+                    context: monthTitle,
+                    items: doughnutItems,
+                    totalLabel: TransactionKind.expense.displayName(in: locale),
+                    showsLegend: false
+                )
 
-                            if index < rows.count - 1 {
-                                Divider()
-                                    .overlay(MonMonTheme.border)
-                                    .padding(.leading, 68)
-                            }
-                        }
-                    }
-                }
+                Divider()
+                    .overlay(MonMonTheme.border)
+
+                accountRows
             }
-            .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 16))
-            .overlay {
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(MonMonTheme.border, lineWidth: 1)
-            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(24)
+        .background {
+            RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
+                .fill(MonMonTheme.surface)
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
+                .stroke(MonMonTheme.border, lineWidth: 1)
         }
         .accessibilityIdentifier("report-account-spending")
     }
 
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
-            Text("Spending by account")
-                .font(.title3.weight(.semibold))
+            Label("BY ACCOUNT", systemImage: "chart.pie.fill")
+                .font(.caption.weight(.semibold))
+                .tracking(0.8)
+                .foregroundStyle(MonMonTheme.textSecondary)
 
             Spacer(minLength: 8)
 
@@ -63,62 +63,120 @@ struct AccountSpendingSection: View {
     }
 
     private var emptyState: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "wallet.bifold")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(MonMonTheme.textMuted)
-                .accessibilityHidden(true)
-
-            Text("No spending recorded this month.")
-                .font(.subheadline)
-                .foregroundStyle(MonMonTheme.textSecondary)
-
-            Spacer(minLength: 0)
-        }
-        .padding(16)
-        .accessibilityIdentifier("report-account-spending-empty")
+        Text("No spending recorded this month.")
+            .font(.subheadline)
+            .foregroundStyle(MonMonTheme.textSecondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 8)
+            .accessibilityIdentifier("report-account-spending-empty")
     }
 
-    private func accountRow(_ account: CashAccount, spending: Decimal) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: account.kind.iconName)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(account.kind.tint)
-                .frame(width: 40, height: 40)
-                .background(account.kind.tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 12))
+    private var accountRows: some View {
+        VStack(spacing: 10) {
+            ForEach(displayRows) { row in
+                NavigationLink(value: AccountActivityRoute(accountID: row.account.id)) {
+                    accountRow(row)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier(
+                    "report-account-spending-\(row.account.id.uuidString)"
+                )
+                .accessibilityHint("Shows all activity for this account.")
+            }
+        }
+    }
+
+    private func accountRow(_ row: AccountSpendingDisplayRow) -> some View {
+        HStack(spacing: 14) {
+            Image(systemName: row.account.kind.iconName)
+                .font(.footnote.weight(.bold))
+                .foregroundStyle(row.tint)
+                .frame(width: 34, height: 34)
+                .background(row.tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 10))
                 .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(account.name)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(row.account.name)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(MonMonTheme.textPrimary)
                     .lineLimit(1)
 
-                Text(account.kind.displayName)
+                Text(countLabel(row.summary))
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
 
             Spacer(minLength: 8)
 
-            Text(VNDCurrency.format(spending))
-                .font(.subheadline.weight(.bold))
-                .monospacedDigit()
-                .foregroundStyle(MonMonTheme.textPrimary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(VNDCurrency.format(row.summary.amount))
+                    .font(.subheadline.weight(.semibold))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+
+                Text(Percentage.label(of: row.summary.amount, in: total))
+                    .font(.caption)
+                    .monospacedDigit()
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            }
 
             Image(systemName: "chevron.right")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(MonMonTheme.textMuted)
                 .accessibilityHidden(true)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
+        .padding(.vertical, 4)
         .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(
+            """
+            \(row.account.name), \(VNDCurrency.format(row.summary.amount)), \
+            \(Percentage.label(of: row.summary.amount, in: total)), \
+            \(countLabel(row.summary))
+            """
+        )
     }
 
-    private func account(_ id: UUID) -> CashAccount? {
-        accounts.first { $0.id == id }
+    private var total: Decimal {
+        rows.reduce(Decimal.zero) { $0 + $1.amount }
     }
+
+    private var displayRows: [AccountSpendingDisplayRow] {
+        rows.compactMap { summary in
+            guard let accountIndex = accounts.firstIndex(where: { $0.id == summary.accountID })
+            else {
+                return nil
+            }
+
+            return AccountSpendingDisplayRow(
+                account: accounts[accountIndex],
+                summary: summary,
+                tint: AccountPalette.tint(at: accountIndex)
+            )
+        }
+    }
+
+    private var doughnutItems: [AllocationDoughnutItem] {
+        displayRows.map { row in
+            AllocationDoughnutItem(
+                id: row.account.id.uuidString,
+                name: row.account.name,
+                amount: row.summary.amount,
+                tint: row.tint,
+                symbolName: row.account.kind.iconName
+            )
+        }
+    }
+
+    private func countLabel(_ row: AccountSpendingRow) -> String {
+        AppText.string("\(row.count) transactions", in: locale)
+    }
+}
+
+private struct AccountSpendingDisplayRow: Identifiable {
+    let account: CashAccount
+    let summary: AccountSpendingRow
+    let tint: Color
+
+    var id: UUID { account.id }
 }

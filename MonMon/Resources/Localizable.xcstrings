@@ -11,6 +11,16 @@
         }
       }
     },
+    "BY ACCOUNT": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "THEO TÀI KHOẢN"
+          }
+        }
+      }
+    },
     "No activity recorded for this account.": {
       "localizations": {
         "vi": {
@@ -37,16 +47,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Xem toàn bộ hoạt động của tài khoản này."
-          }
-        }
-      }
-    },
-    "Spending by account": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chi tiêu theo tài khoản"
           }
         }
       }

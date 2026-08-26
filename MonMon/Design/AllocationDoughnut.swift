@@ -17,6 +17,8 @@ struct AllocationDoughnut: View {
     /// What the legend says each wedge is a share *of*, read out by VoiceOver.
     let context: String
     let items: [AllocationDoughnutItem]
+    let totalLabel: String
+    let showsLegend: Bool
 
     /// The wedge the owner tapped, held by id rather than by index so a card
     /// that reorders or refreshes its parts keeps the same one picked.
@@ -29,18 +31,36 @@ struct AllocationDoughnut: View {
         items.reduce(Decimal.zero) { $0 + $1.amount }
     }
 
-    var body: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(alignment: .center, spacing: 24) {
-                doughnut
-                legend
-            }
+    init(
+        context: String,
+        items: [AllocationDoughnutItem],
+        totalLabel: String = "TOTAL",
+        showsLegend: Bool = true
+    ) {
+        self.context = context
+        self.items = items
+        self.totalLabel = totalLabel
+        self.showsLegend = showsLegend
+    }
 
-            VStack(alignment: .leading, spacing: 20) {
-                doughnut
-                    .frame(maxWidth: .infinity)
-                legend
+    @ViewBuilder
+    var body: some View {
+        if showsLegend {
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .center, spacing: 24) {
+                    doughnut
+                    legend
+                }
+
+                VStack(alignment: .leading, spacing: 20) {
+                    doughnut
+                        .frame(maxWidth: .infinity)
+                    legend
+                }
             }
+        } else {
+            doughnut
+                .frame(maxWidth: .infinity)
         }
     }
 
@@ -123,7 +143,7 @@ struct AllocationDoughnut: View {
             .transition(.opacity.combined(with: .scale(scale: 0.9)))
         } else {
             VStack(spacing: 2) {
-                Text("TOTAL")
+                Text(totalLabel.uppercased())
                     .font(.caption2.weight(.semibold))
                     .tracking(0.6)
                     .foregroundStyle(MonMonTheme.textSecondary)

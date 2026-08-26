@@ -84,11 +84,13 @@ struct AccountReportSummaryTests {
                 == [
                     AccountSpendingRow(
                         accountID: bank.id,
-                        amount: 400_000
+                        amount: 400_000,
+                        count: 1
                     ),
                     AccountSpendingRow(
                         accountID: wallet.id,
-                        amount: 150_000
+                        amount: 150_000,
+                        count: 2
                     ),
                 ]
         )

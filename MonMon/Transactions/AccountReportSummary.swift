@@ -3,6 +3,7 @@ import Foundation
 struct AccountSpendingRow: Identifiable, Equatable {
     let accountID: UUID
     let amount: Decimal
+    let count: Int
 
     var id: UUID { accountID }
 }
@@ -15,9 +16,11 @@ enum AccountSpendingSummary {
         transactions: [MoneyTransaction]
     ) -> [AccountSpendingRow] {
         var totals: [UUID: Decimal] = [:]
+        var counts: [UUID: Int] = [:]
 
         for transaction in transactions where transaction.kind == .expense {
             totals[transaction.accountID, default: .zero] += transaction.amount
+            counts[transaction.accountID, default: 0] += 1
         }
 
         return accounts.enumerated()
@@ -30,7 +33,8 @@ enum AccountSpendingSummary {
                     index,
                     AccountSpendingRow(
                         accountID: account.id,
-                        amount: total
+                        amount: total,
+                        count: counts[account.id, default: 0]
                     )
                 )
             }
