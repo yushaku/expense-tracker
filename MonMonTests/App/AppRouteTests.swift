@@ -101,3 +101,37 @@ struct AppRouteTests {
         #expect(route.quickCaptureRequestID == nil)
     }
 }
+
+@Suite("Voice transcript buffer")
+struct VoiceTranscriptBufferTests {
+    @Test("A newer volatile result replaces the earlier guess")
+    func volatileResultIsReplaced() {
+        var buffer = VoiceTranscriptBuffer()
+
+        buffer.receive("cafe", isFinal: false)
+        buffer.receive("cafe năm mươi nghìn", isFinal: false)
+
+        #expect(buffer.text == "cafe năm mươi nghìn")
+    }
+
+    @Test("Finalized text is preserved while the next phrase is still changing")
+    func finalizedTextPrecedesTheNextGuess() {
+        var buffer = VoiceTranscriptBuffer()
+
+        buffer.receive("cafe 50k", isFinal: true)
+        buffer.receive("tiền", isFinal: false)
+        buffer.receive("tiền mặt", isFinal: false)
+
+        #expect(buffer.text == "cafe 50k tiền mặt")
+    }
+
+    @Test("Blank speech results never create extra whitespace")
+    func blankResultsAreIgnored() {
+        var buffer = VoiceTranscriptBuffer()
+
+        buffer.receive("  cafe 50k  ", isFinal: true)
+        buffer.receive("   ", isFinal: false)
+
+        #expect(buffer.text == "cafe 50k")
+    }
+}

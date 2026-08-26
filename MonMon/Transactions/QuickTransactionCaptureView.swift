@@ -6,11 +6,17 @@ struct QuickTransactionCaptureView: View {
     @Environment(\.locale) private var locale
     @Environment(\.modelContext) private var modelContext
 
+    private let launchMode: QuickCaptureLaunchMode
+
     @State private var rawEntry = ""
     @State private var preparedCapture: ParsedTransactionCapture?
     @State private var isConfirming = false
     @State private var errorMessage: LocalizedStringKey?
     @FocusState private var isEntryFocused: Bool
+
+    init(launchMode: QuickCaptureLaunchMode = .keyboard) {
+        self.launchMode = launchMode
+    }
 
     var body: some View {
         NavigationStack {
@@ -56,7 +62,7 @@ struct QuickTransactionCaptureView: View {
             } message: {
                 Text(confirmationMessage)
             }
-            .task { isEntryFocused = true }
+            .task { isEntryFocused = launchMode == .keyboard }
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
             .preferredColorScheme(MonMonTheme.colorScheme)
@@ -85,6 +91,10 @@ struct QuickTransactionCaptureView: View {
 
     private var entryCard: some View {
         VStack(alignment: .leading, spacing: 14) {
+            if launchMode == .voice {
+                VoiceTransactionCaptureSection(transcript: $rawEntry)
+            }
+
             TextField("What did you spend or receive?", text: $rawEntry, axis: .vertical)
                 .textFieldStyle(.plain)
                 .lineLimit(3...6)

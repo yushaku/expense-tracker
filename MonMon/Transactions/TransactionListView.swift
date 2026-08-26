@@ -29,6 +29,7 @@ struct TransactionListView: View {
     @State private var isShowingImportInbox = false
     @State private var isShowingCaptureInbox = false
     @State private var isShowingQuickCapture = false
+    @State private var quickCaptureLaunchMode: QuickCaptureLaunchMode = .keyboard
 
     /// Weekday first: over a run of days the name is what the eye picks out,
     /// and the year is left to the period title above the list.
@@ -126,7 +127,7 @@ struct TransactionListView: View {
                 PendingTransactionCaptureListView()
             }
             .sheet(isPresented: $isShowingQuickCapture) {
-                QuickTransactionCaptureView()
+                QuickTransactionCaptureView(launchMode: quickCaptureLaunchMode)
             }
             .task { await importInbox.refresh() }
             .onChange(of: scenePhase) { _, phase in
@@ -135,20 +136,21 @@ struct TransactionListView: View {
                 }
                 Task { await importInbox.refresh() }
             }
-            .onChange(of: appRoute.quickCaptureRequestID) { _, requestID in
-                presentQuickCaptureIfNeeded(requestID)
+            .onChange(of: appRoute.quickCaptureRequest) { _, request in
+                presentQuickCaptureIfNeeded(request)
             }
             .onAppear {
-                presentQuickCaptureIfNeeded(appRoute.quickCaptureRequestID)
+                presentQuickCaptureIfNeeded(appRoute.quickCaptureRequest)
             }
             .tint(MonMonTheme.accent)
         }
     }
 
-    private func presentQuickCaptureIfNeeded(_ requestID: UUID?) {
-        guard requestID != nil, !isShowingQuickCapture else {
+    private func presentQuickCaptureIfNeeded(_ request: QuickCaptureRequest?) {
+        guard let request, !isShowingQuickCapture else {
             return
         }
+        quickCaptureLaunchMode = request.mode
         isShowingQuickCapture = true
         appRoute.consumeQuickCapture()
     }
