@@ -18,13 +18,13 @@ struct TransactionListView: View {
     @Query(sort: \PendingTransactionCapture.createdAt, order: .reverse)
     private var pendingCaptures: [PendingTransactionCapture]
 
-    @State private var range = TransactionRange.month(containing: .now)
+    @State private var query = TransactionQuery(range: .month(containing: .now))
     @State private var editorMode: TransactionEditorMode?
     @State private var breakdownKind: TransactionKind = .expense
     @State private var isManagingCategories = false
     @State private var isManagingRecurring = false
     @State private var isEditingDefaults = false
-    @State private var listFilter = TransactionListFilter.all
+    @State private var isFiltering = false
     @State private var importInbox = StatementImportInbox.live()
     @State private var isShowingImportInbox = false
     @State private var isShowingAccounts = false
@@ -56,6 +56,14 @@ struct TransactionListView: View {
                             importStatusCard
                         }
 
+                        if query.isNarrowed {
+                            TransactionFilterChips(
+                                query: $query,
+                                categories: categories,
+                                accounts: accounts
+                            )
+                        }
+
                         if accounts.isEmpty {
                             noAccountState
                         } else {
@@ -64,7 +72,7 @@ struct TransactionListView: View {
                             CategoryBreakdownCard(
                                 kind: $breakdownKind,
                                 slices: breakdownSlices,
-                                range: range
+                                range: query.range
                             )
 
                             transactionsSection
@@ -94,7 +102,14 @@ struct TransactionListView: View {
                 ToolbarItemGroup(placement: .primaryAction) {
                     importInboxButton
 
-                    DateRangeFilterButton(range: $range, systemImage: "calendar")
+                    TransactionSearchButton(
+                        isActive: query.hasSearchText,
+                        accessibilityIdentifier: "open-spending-search"
+                    ) {
+                        isFiltering = true
+                    }
+
+                    DateRangeFilterButton(range: $query.range, systemImage: "calendar")
                 }
             }
             .navigationDestination(for: CategoryPeriod.self) { period in
@@ -110,6 +125,15 @@ struct TransactionListView: View {
             .accessibilityIdentifier("spending-list")
             .sheet(item: $editorMode) { mode in
                 TransactionEditorView(mode: mode, defaultDate: defaultDate)
+            }
+            .sheet(isPresented: $isFiltering) {
+                ReportFilterSheet(
+                    query: $query,
+                    categories: categories,
+                    accounts: accounts,
+                    focusesSearchOnAppear: true,
+                    identifierPrefix: "spending-"
+                )
             }
             .transactionActions(
                 transactionActions,
@@ -342,24 +366,52 @@ struct TransactionListView: View {
     /// Adding from a period that does not include today starts on its first
     /// day, so the new entry lands where the owner is looking.
     private var defaultDate: Date {
-        range.contains(.now) ? .now : range.start
+        query.range.contains(.now) ? .now : query.range.start
     }
 
     /// The month represented by the rail. It follows the period on show rather
     /// than keeping a month of its own.
     private var selectedMonth: Date {
-        TransactionPeriod.startOfMonth(for: range.start)
+        TransactionPeriod.startOfMonth(for: query.range.start)
     }
 
     private var visibleTransactions: [MoneyTransaction] {
-        TransactionSummary.inRange(range, transactions: transactions)
+        TransactionSearch.results(
+            of: query,
+            transactions: transactions,
+            categoryNames: categoryNames,
+            accountNames: accountNames
+        )
+    }
+
+    private var categoryNames: [UUID: String] {
+        Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0.name) })
+    }
+
+    private var accountNames: [UUID: String] {
+        Dictionary(uniqueKeysWithValues: accounts.map { ($0.id, $0.name) })
     }
 
     private var breakdownSlices: [CategoryBreakdownSlice] {
         CategoryBreakdown.slices(
             of: breakdownKind,
-            transactions: visibleTransactions,
+            transactions: breakdownTransactions,
             categories: categories
+        )
+    }
+
+    /// The category card owns its income/expense choice. Search, category, and
+    /// account filters still narrow it, while the rows' direction picker does
+    /// not override the card's own choice.
+    private var breakdownTransactions: [MoneyTransaction] {
+        var breakdownQuery = query
+        breakdownQuery.filter = .all
+
+        return TransactionSearch.results(
+            of: breakdownQuery,
+            transactions: transactions,
+            categoryNames: categoryNames,
+            accountNames: accountNames
         )
     }
 
@@ -473,7 +525,7 @@ struct TransactionListView: View {
     /// bar so a month is one tap away wherever the screen is scrolled to.
     private var monthRail: some View {
         MonthRail(months: railMonths, selection: selectedMonth) { month in
-            range = .month(containing: month)
+            query.range = .month(containing: month)
         }
         .background(MonMonTheme.canvas)
         .overlay(alignment: .bottom) {
@@ -515,7 +567,7 @@ struct TransactionListView: View {
 
                 // This affects the rows only. The period-wide figures live on
                 // Report and continue to count both directions.
-                Picker("Show", selection: $listFilter) {
+                Picker("Show", selection: $query.filter) {
                     ForEach(TransactionListFilter.allCases) { filter in
                         Text(filter.displayName)
                             .tag(filter)
@@ -527,7 +579,7 @@ struct TransactionListView: View {
                 .accessibilityIdentifier("transaction-filter")
             }
 
-            if filteredTransactions.isEmpty {
+            if visibleTransactions.isEmpty {
                 Text(emptyFilterNotice)
                     .font(.subheadline)
                     .foregroundStyle(MonMonTheme.textSecondary)
@@ -551,21 +603,14 @@ struct TransactionListView: View {
         }
     }
 
-    private var filteredTransactions: [MoneyTransaction] {
-        TransactionSummary.matching(listFilter, transactions: visibleTransactions)
-    }
-
     private var dayGroups: [TransactionDayGroup] {
-        TransactionSummary.byDay(filteredTransactions)
+        TransactionSummary.byDay(visibleTransactions)
     }
 
     private var emptyFilterNotice: LocalizedStringKey {
-        guard let kind = listFilter.kind else {
-            return "Nothing recorded \(range.phrase(in: locale))."
-        }
-
-        return
-            "No \(kind.displayName(in: locale).lowercased()) recorded \(range.phrase(in: locale))."
+        query.isNarrowed
+            ? "Nothing matches what you are looking for."
+            : "Nothing recorded \(query.range.phrase(in: locale))."
     }
 
     private func dayHeader(for group: TransactionDayGroup) -> some View {

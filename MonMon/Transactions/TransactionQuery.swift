@@ -1,11 +1,11 @@
 import Foundation
 
-/// What the report screen is asking of the ledger: some words to look for, a
+/// What a transaction screen is asking of the ledger: some words to look for, a
 /// slice of time, a direction, and the categories and accounts worth keeping.
 ///
 /// An empty set means "every one of them" rather than "none": a filter the owner
-/// has not touched narrows nothing. The same query drives the charts and the
-/// list under them, so the two can never describe different transactions.
+/// has not touched narrows nothing. A screen can use the same query for every
+/// transaction-backed section, so its figures and rows stay in sync.
 struct TransactionQuery: Equatable {
     var text: String = ""
     var range: TransactionRange
