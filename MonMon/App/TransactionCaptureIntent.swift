@@ -33,22 +33,39 @@ enum TransactionCaptureIntentError: Error, LocalizedError, Sendable {
     }
 }
 
+struct QuickCaptureIntentDependency: @unchecked Sendable {
+    private let appRoute: AppRoute
+    private let appLock: AppLock
+
+    init(appRoute: AppRoute, appLock: AppLock) {
+        self.appRoute = appRoute
+        self.appLock = appLock
+    }
+
+    func request() async {
+        await MainActor.run {
+            appRoute.requestQuickCapture(isLocked: appLock.isLocked)
+        }
+    }
+}
+
 struct OpenQuickCaptureIntent: AppIntent {
     static let title: LocalizedStringResource = "Open Quick Capture"
     static let description = IntentDescription("Open MonMon ready for one natural-language entry.")
     static let authenticationPolicy: IntentAuthenticationPolicy = .alwaysAllowed
+    static var openAppWhenRun: Bool { true }
 
-    func perform() async throws -> some IntentResult & OpensIntent {
-        guard
-            let scheme = Bundle.main.object(forInfoDictionaryKey: "MonMonQuickCaptureURLScheme")
-                as? String,
-            let url = URL(string: "\(scheme)://quick-capture")
-        else {
-            throw TransactionCaptureIntentError.unavailable
-        }
+    @Dependency private var dependency: QuickCaptureIntentDependency
 
-        return .result(opensIntent: OpenURLIntent(url))
+    func perform() async -> some IntentResult {
+        await dependency.request()
+        return .result()
     }
+}
+
+@available(iOS 26.0, macOS 26.0, *)
+extension OpenQuickCaptureIntent {
+    static var supportedModes: IntentModes { .foreground }
 }
 
 struct CaptureTransactionIntent: AppIntent {

@@ -6,12 +6,17 @@ import SwiftUI
 @main
 struct MonMonApp: App {
     private let container: ModelContainer
-    @State private var appLock = AppLock()
-    @State private var appRoute = AppRoute()
+    @State private var appLock: AppLock
+    @State private var appRoute: AppRoute
     @State private var cloudSync = CloudSync()
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
+        let appLock = AppLock()
+        let appRoute = AppRoute()
+        _appLock = State(initialValue: appLock)
+        _appRoute = State(initialValue: appRoute)
+
         let modelContainer: ModelContainer
         do {
             modelContainer = try ModelContainer(
@@ -25,6 +30,9 @@ struct MonMonApp: App {
 
         AppDependencyManager.shared.add(
             dependency: TransactionCaptureIntentDependency(container: modelContainer)
+        )
+        AppDependencyManager.shared.add(
+            dependency: QuickCaptureIntentDependency(appRoute: appRoute, appLock: appLock)
         )
 
         AccountSeed.seedDefaultBankIfNeeded(in: modelContainer.mainContext)
