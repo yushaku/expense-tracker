@@ -2,6 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct TransactionListView: View {
+    @Environment(AppRoute.self) private var appRoute
     @Environment(\.locale) private var locale
     @Environment(\.scenePhase) private var scenePhase
 
@@ -14,15 +15,25 @@ struct TransactionListView: View {
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
 
-    @State private var range = TransactionRange.month(containing: .now)
+    @Query(sort: \PendingTransactionCapture.createdAt, order: .reverse)
+    private var pendingCaptures: [PendingTransactionCapture]
+
+    @State private var query = TransactionQuery(range: .month(containing: .now))
     @State private var editorMode: TransactionEditorMode?
     @State private var breakdownKind: TransactionKind = .expense
     @State private var isManagingCategories = false
     @State private var isManagingRecurring = false
     @State private var isEditingDefaults = false
-    @State private var listFilter = TransactionListFilter.all
+    @State private var isFiltering = false
     @State private var importInbox = StatementImportInbox.live()
     @State private var isShowingImportInbox = false
+    @State private var isShowingAccounts = false
+
+    /// One details sheet and one delete question for the whole list, rather
+    /// than one of each per row.
+    @State private var transactionActions = TransactionActions()
+    @State private var isShowingCaptureInbox = false
+    @State private var isShowingQuickCapture = false
 
     /// Weekday first: over a run of days the name is what the eye picks out,
     /// and the year is left to the period title above the list.
@@ -37,16 +48,21 @@ struct TransactionListView: View {
 
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+                        if !pendingCaptures.isEmpty {
+                            pendingCaptureStatusCard
+                        }
+
                         if showsImportStatus {
                             importStatusCard
                         }
 
-                        SpendingOverviewCard(
-                            title: range.title(in: locale),
-                            income: income,
-                            expense: expense,
-                            count: visibleTransactions.count
-                        )
+                        if query.isNarrowed {
+                            TransactionFilterChips(
+                                query: $query,
+                                categories: categories,
+                                accounts: accounts
+                            )
+                        }
 
                         if accounts.isEmpty {
                             noAccountState
@@ -56,7 +72,7 @@ struct TransactionListView: View {
                             CategoryBreakdownCard(
                                 kind: $breakdownKind,
                                 slices: breakdownSlices,
-                                range: range
+                                range: query.range
                             )
 
                             transactionsSection
@@ -86,7 +102,14 @@ struct TransactionListView: View {
                 ToolbarItemGroup(placement: .primaryAction) {
                     importInboxButton
 
-                    DateRangeFilterButton(range: $range, systemImage: "calendar")
+                    TransactionSearchButton(
+                        isActive: query.hasSearchText,
+                        accessibilityIdentifier: "open-spending-search"
+                    ) {
+                        isFiltering = true
+                    }
+
+                    DateRangeFilterButton(range: $query.range, systemImage: "calendar")
                 }
             }
             .navigationDestination(for: CategoryPeriod.self) { period in
@@ -95,11 +118,31 @@ struct TransactionListView: View {
             .navigationDestination(for: DayPeriod.self) { period in
                 DayTransactionsView(period: period)
             }
+            .navigationDestination(isPresented: $isShowingAccounts) {
+                AccountsScreen()
+            }
             .compactRootNavigationTitle("Spending")
             .accessibilityIdentifier("spending-list")
             .sheet(item: $editorMode) { mode in
                 TransactionEditorView(mode: mode, defaultDate: defaultDate)
             }
+            .sheet(isPresented: $isFiltering) {
+                ReportFilterSheet(
+                    query: $query,
+                    categories: categories,
+                    accounts: accounts,
+                    focusesSearchOnAppear: true,
+                    identifierPrefix: "spending-"
+                )
+            }
+            .transactionActions(
+                transactionActions,
+                category: category(for:),
+                account: account(for:),
+                onEdit: { transaction in
+                    editorMode = .edit(transaction)
+                }
+            )
             .sheet(isPresented: $isManagingCategories) {
                 CategoryListView()
             }
@@ -112,6 +155,12 @@ struct TransactionListView: View {
             .sheet(isPresented: $isShowingImportInbox) {
                 StatementImportInboxView(inbox: importInbox)
             }
+            .sheet(isPresented: $isShowingCaptureInbox) {
+                PendingTransactionCaptureListView()
+            }
+            .sheet(isPresented: $isShowingQuickCapture) {
+                QuickTransactionCaptureView()
+            }
             .task { await importInbox.refresh() }
             .onChange(of: scenePhase) { _, phase in
                 guard phase == .active else {
@@ -119,8 +168,74 @@ struct TransactionListView: View {
                 }
                 Task { await importInbox.refresh() }
             }
+            .onChange(of: appRoute.quickCaptureRequestID) { _, requestID in
+                presentQuickCaptureIfNeeded(requestID)
+            }
+            .onAppear {
+                presentQuickCaptureIfNeeded(appRoute.quickCaptureRequestID)
+            }
             .tint(MonMonTheme.accent)
         }
+    }
+
+    private func presentQuickCaptureIfNeeded(_ requestID: UUID?) {
+        guard requestID != nil, !isShowingQuickCapture else {
+            return
+        }
+        isShowingQuickCapture = true
+        appRoute.consumeQuickCapture()
+    }
+
+    private var pendingCaptureStatusCard: some View {
+        Button {
+            isShowingCaptureInbox = true
+        } label: {
+            HStack(spacing: 14) {
+                Image(systemName: "waveform.badge.exclamationmark")
+                    .font(.title3)
+                    .foregroundStyle(MonMonTheme.credit)
+                    .frame(width: 44, height: 44)
+                    .background(
+                        MonMonTheme.credit.opacity(0.16),
+                        in: RoundedRectangle(cornerRadius: 12)
+                    )
+                    .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(pendingCaptureTitle)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(MonMonTheme.textPrimary)
+
+                    Text("Finish the details before these entries affect your totals.")
+                        .font(.caption)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                        .multilineTextAlignment(.leading)
+                }
+
+                Spacer(minLength: 8)
+
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textMuted)
+                    .accessibilityHidden(true)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, minHeight: 72, alignment: .leading)
+            .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 16))
+            .overlay {
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(MonMonTheme.credit.opacity(0.5), lineWidth: 1)
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("capture-inbox-status")
+    }
+
+    private var pendingCaptureTitle: LocalizedStringKey {
+        pendingCaptures.count == 1
+            ? "1 spoken transaction needs review"
+            : "\(pendingCaptures.count) spoken transactions need review"
     }
 
     private var showsImportStatus: Bool {
@@ -251,49 +366,52 @@ struct TransactionListView: View {
     /// Adding from a period that does not include today starts on its first
     /// day, so the new entry lands where the owner is looking.
     private var defaultDate: Date {
-        range.contains(.now) ? .now : range.start
+        query.range.contains(.now) ? .now : query.range.start
     }
 
-    /// The month the calendar draws. It follows the period on show rather than
-    /// keeping a month of its own, so the grid and the totals above it can never
-    /// disagree about where the owner is looking.
-    private var calendarMonth: Date {
-        TransactionPeriod.startOfMonth(for: range.start)
-    }
-
-    /// Built from every transaction, not the ones in range: the grid covers a
-    /// whole month even when the period narrows to a single day inside it. The
-    /// list filter still applies, so the grid shows the same direction the list
-    /// under it does.
-    private var calendarWeeks: [TransactionCalendarWeek] {
-        TransactionCalendar.weeks(
-            of: calendarMonth,
-            transactions: TransactionSummary.matching(listFilter, transactions: transactions)
-        )
-    }
-
-    /// Stepping the calendar is how an owner says "show me that month", so it
-    /// re-cuts the period to the month it lands on rather than leaving the
-    /// figures above describing the month they stepped away from.
-    private func stepCalendarMonth(_ steps: Int) {
-        let calendar = TransactionPeriod.calendar
-
-        guard let moved = calendar.date(byAdding: .month, value: steps, to: calendarMonth) else {
-            return
-        }
-
-        range = .month(containing: moved)
+    /// The month represented by the rail. It follows the period on show rather
+    /// than keeping a month of its own.
+    private var selectedMonth: Date {
+        TransactionPeriod.startOfMonth(for: query.range.start)
     }
 
     private var visibleTransactions: [MoneyTransaction] {
-        TransactionSummary.inRange(range, transactions: transactions)
+        TransactionSearch.results(
+            of: query,
+            transactions: transactions,
+            categoryNames: categoryNames,
+            accountNames: accountNames
+        )
+    }
+
+    private var categoryNames: [UUID: String] {
+        Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0.name) })
+    }
+
+    private var accountNames: [UUID: String] {
+        Dictionary(uniqueKeysWithValues: accounts.map { ($0.id, $0.name) })
     }
 
     private var breakdownSlices: [CategoryBreakdownSlice] {
         CategoryBreakdown.slices(
             of: breakdownKind,
-            transactions: visibleTransactions,
+            transactions: breakdownTransactions,
             categories: categories
+        )
+    }
+
+    /// The category card owns its income/expense choice. Search, category, and
+    /// account filters still narrow it, while the rows' direction picker does
+    /// not override the card's own choice.
+    private var breakdownTransactions: [MoneyTransaction] {
+        var breakdownQuery = query
+        breakdownQuery.filter = .all
+
+        return TransactionSearch.results(
+            of: breakdownQuery,
+            transactions: transactions,
+            categoryNames: categoryNames,
+            accountNames: accountNames
         )
     }
 
@@ -302,7 +420,7 @@ struct TransactionListView: View {
     /// starts on. They sit above the breakdown because each one changes what it
     /// shows, and none of them belongs on the floating add button.
     private var quickActions: some View {
-        // Three labelled buttons crowd an iPhone in one row, so the labels drop
+        // Four labelled buttons crowd an iPhone in one row, so the labels drop
         // below the icons before the row wraps.
         ViewThatFits(in: .horizontal) {
             HStack(spacing: 10) {
@@ -342,6 +460,18 @@ struct TransactionListView: View {
             accessibilityIdentifier: "manage-transaction-defaults"
         ) {
             isEditingDefaults = true
+        }
+
+        // The one that pushes rather than opening a sheet: accounts are a screen
+        // of their own, and reaching them from the Wealth tab is two taps from
+        // where the money is being recorded.
+        quickAction(
+            "Accounts",
+            systemImage: "wallet.bifold.fill",
+            isStacked: isStacked,
+            accessibilityIdentifier: "open-accounts"
+        ) {
+            isShowingAccounts = true
         }
     }
 
@@ -394,8 +524,8 @@ struct TransactionListView: View {
     /// The months either side of the one on show, pinned under the navigation
     /// bar so a month is one tap away wherever the screen is scrolled to.
     private var monthRail: some View {
-        MonthRail(months: railMonths, selection: calendarMonth) { month in
-            range = .month(containing: month)
+        MonthRail(months: railMonths, selection: selectedMonth) { month in
+            query.range = .month(containing: month)
         }
         .background(MonMonTheme.canvas)
         .overlay(alignment: .bottom) {
@@ -409,17 +539,9 @@ struct TransactionListView: View {
     /// show sits outside them, so the month being looked at is always on it.
     private var railMonths: [Date] {
         TransactionPeriod.months(
-            from: min(CalendarTheme.startMonth(), calendarMonth),
-            through: max(CalendarTheme.endMonth(), calendarMonth)
+            from: min(CalendarTheme.startMonth(), selectedMonth),
+            through: max(CalendarTheme.endMonth(), selectedMonth)
         )
-    }
-
-    private var income: Decimal {
-        TransactionSummary.totalIncome(of: visibleTransactions)
-    }
-
-    private var expense: Decimal {
-        TransactionSummary.totalExpense(of: visibleTransactions)
     }
 
     private func signed(_ amount: Decimal) -> String {
@@ -433,8 +555,6 @@ struct TransactionListView: View {
     /// heads the run with that date and what the day came to. The cards below a
     /// header drop their own date, which the header now carries.
     ///
-    /// The calendar sits under the filter rather than above it, so one control
-    /// narrows the grid and the list together instead of only the list.
     private var transactionsSection: some View {
         VStack(alignment: .leading, spacing: 20) {
             HStack(spacing: 12) {
@@ -445,9 +565,9 @@ struct TransactionListView: View {
 
                 Spacer(minLength: 8)
 
-                // Narrows the grid and the list. The overview card above still
-                // counts both directions, which is what the period is judged on.
-                Picker("Show", selection: $listFilter) {
+                // This affects the rows only. The period-wide figures live on
+                // Report and continue to count both directions.
+                Picker("Show", selection: $query.filter) {
                     ForEach(TransactionListFilter.allCases) { filter in
                         Text(filter.displayName)
                             .tag(filter)
@@ -459,13 +579,7 @@ struct TransactionListView: View {
                 .accessibilityIdentifier("transaction-filter")
             }
 
-            TransactionCalendarCard(
-                month: calendarMonth,
-                weeks: calendarWeeks,
-                onStepMonth: stepCalendarMonth
-            )
-
-            if filteredTransactions.isEmpty {
+            if visibleTransactions.isEmpty {
                 Text(emptyFilterNotice)
                     .font(.subheadline)
                     .foregroundStyle(MonMonTheme.textSecondary)
@@ -476,40 +590,27 @@ struct TransactionListView: View {
                     dayHeader(for: group)
 
                     ForEach(group.transactions) { transaction in
-                        Button {
-                            editorMode = .edit(transaction)
-                        } label: {
-                            TransactionCard(
-                                transaction: transaction,
-                                category: category(for: transaction),
-                                account: account(for: transaction),
-                                showsDate: false
-                            )
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("transaction-\(transaction.id.uuidString)")
-                        .accessibilityHint("Opens the transaction editor.")
+                        TransactionItem(
+                            transaction: transaction,
+                            category: category(for: transaction),
+                            account: account(for: transaction),
+                            showsDate: false,
+                            accessibilityIdentifier: "transaction-\(transaction.id.uuidString)"
+                        )
                     }
                 }
             }
         }
     }
 
-    private var filteredTransactions: [MoneyTransaction] {
-        TransactionSummary.matching(listFilter, transactions: visibleTransactions)
-    }
-
     private var dayGroups: [TransactionDayGroup] {
-        TransactionSummary.byDay(filteredTransactions)
+        TransactionSummary.byDay(visibleTransactions)
     }
 
     private var emptyFilterNotice: LocalizedStringKey {
-        guard let kind = listFilter.kind else {
-            return "Nothing recorded \(range.phrase(in: locale))."
-        }
-
-        return
-            "No \(kind.displayName(in: locale).lowercased()) recorded \(range.phrase(in: locale))."
+        query.isNarrowed
+            ? "Nothing matches what you are looking for."
+            : "Nothing recorded \(query.range.phrase(in: locale))."
     }
 
     private func dayHeader(for group: TransactionDayGroup) -> some View {

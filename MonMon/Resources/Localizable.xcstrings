@@ -1,6 +1,456 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "All activity": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tất cả hoạt động"
+          }
+        }
+      }
+    },
+    "BY ACCOUNT": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "THEO TÀI KHOẢN"
+          }
+        }
+      }
+    },
+    "No activity recorded for this account.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có hoạt động nào được ghi nhận cho tài khoản này."
+          }
+        }
+      }
+    },
+    "No spending recorded this month.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa ghi nhận chi tiêu trong tháng này."
+          }
+        }
+      }
+    },
+    "Shows all activity for this account.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xem toàn bộ hoạt động của tài khoản này."
+          }
+        }
+      }
+    },
+    "%lld spoken transactions need review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld giao dịch bằng giọng nói cần xem lại"
+          }
+        }
+      }
+    },
+    "1 spoken transaction needs review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 giao dịch bằng giọng nói cần xem lại"
+          }
+        }
+      }
+    },
+    "Amount missing": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thiếu số tiền"
+          }
+        }
+      }
+    },
+    "Add Dictate Text.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm Đọc chính tả."
+          }
+        }
+      }
+    },
+    "Add MonMon → Record Transaction, then set Transaction to Dictated Text.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm MonMon → Ghi giao dịch, rồi đặt Giao dịch thành Văn bản được đọc chính tả."
+          }
+        }
+      }
+    },
+    "Combine Dictate Text with MonMon so one tap starts listening.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghép Đọc chính tả với MonMon để một lần chạm bắt đầu nghe."
+          }
+        }
+      }
+    },
+    "Create one-tap voice capture": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tạo ghi giọng nói một chạm"
+          }
+        }
+      }
+    },
+    "Couldn’t save that entry. Try again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể lưu nội dung này. Hãy thử lại."
+          }
+        }
+      }
+    },
+    "Couldn’t understand that entry. Try again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa hiểu nội dung này. Hãy thử lại."
+          }
+        }
+      }
+    },
+    "Every spoken transaction has been handled.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mọi giao dịch bằng giọng nói đã được xử lý."
+          }
+        }
+      }
+    },
+    "Finish the details before these entries affect your totals.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoàn tất thông tin trước khi các mục này ảnh hưởng đến tổng tiền."
+          }
+        }
+      }
+    },
+    "For example: 50k lunch cash yesterday": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ví dụ: 50k ăn trưa tiền mặt hôm qua"
+          }
+        }
+      }
+    },
+    "Missing details will stay in Needs review.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thông tin còn thiếu sẽ được giữ trong mục Cần xem lại."
+          }
+        }
+      }
+    },
+    "MonMon couldn’t record that transaction. Open the app and check your defaults.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không thể ghi giao dịch đó. Hãy mở app và kiểm tra thiết lập mặc định."
+          }
+        }
+      }
+    },
+    "Needs review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cần xem lại"
+          }
+        }
+      }
+    },
+    "Nothing to review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không có gì cần xem lại"
+          }
+        }
+      }
+    },
+    "Open MonMon ready for one natural-language entry.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở MonMon sẵn sàng nhận một câu nhập tự nhiên."
+          }
+        }
+      }
+    },
+    "Open Quick Capture": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở ghi nhanh"
+          }
+        }
+      }
+    },
+    "Name it Voice Capture and tap it whenever you want to record.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đặt tên là Ghi bằng giọng nói và chạm vào mỗi khi muốn ghi."
+          }
+        }
+      }
+    },
+    "Open Shortcuts and tap +.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở Phím tắt và chạm dấu +."
+          }
+        }
+      }
+    },
+    "Opens the focused entry form when voice is not convenient.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở form đã focus khi không tiện dùng giọng nói."
+          }
+        }
+      }
+    },
+    "Quick Capture": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi nhanh"
+          }
+        }
+      }
+    },
+    "Quick capture": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi nhanh"
+          }
+        }
+      }
+    },
+    "Record %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi %@"
+          }
+        }
+      }
+    },
+    "Record Transaction": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi giao dịch"
+          }
+        }
+      }
+    },
+    "Record an expense or income from one natural-language sentence.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi một khoản chi hoặc thu từ một câu nói tự nhiên."
+          }
+        }
+      }
+    },
+    "Review & save": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiểm tra & lưu"
+          }
+        }
+      }
+    },
+    "Review %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xem lại %@"
+          }
+        }
+      }
+    },
+    "Save for review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lưu để xem lại"
+          }
+        }
+      }
+    },
+    "Save for review?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lưu để xem lại?"
+          }
+        }
+      }
+    },
+    "Save this transaction?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lưu giao dịch này?"
+          }
+        }
+      }
+    },
+    "Save transaction": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lưu giao dịch"
+          }
+        }
+      }
+    },
+    "Saved in MonMon.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã lưu trong MonMon."
+          }
+        }
+      }
+    },
+    "Saved for review in MonMon. Nothing was added to totals.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã lưu để xem lại trong MonMon. Chưa cộng vào tổng tiền."
+          }
+        }
+      }
+    },
+    "Say it naturally": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cứ nói tự nhiên"
+          }
+        }
+      }
+    },
+    "Say “Siri, record a transaction in MonMon”, then answer “cafe 50k”.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nói “Siri, ghi giao dịch bằng MonMon”, rồi trả lời “cafe 50k”."
+          }
+        }
+      }
+    },
+    "Siri & Shortcuts": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siri & Phím tắt"
+          }
+        }
+      }
+    },
+    "They are installed automatically with MonMon—nothing else to download.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hai phím tắt được cài tự động cùng MonMon—không cần tải thêm."
+          }
+        }
+      }
+    },
+    "Two shortcuts are ready": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hai phím tắt đã sẵn sàng"
+          }
+        }
+      }
+    },
+    "What did you spend or receive?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bạn đã chi hoặc nhận khoản gì?"
+          }
+        }
+      }
+    },
     "Action": {
       "localizations": {
         "vi": {
@@ -10,6 +460,150 @@
           }
         }
       }
+    },
+    "ACTIVE": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "ĐANG HOẠT ĐỘNG" } } }
+    },
+    "A withdrawal needs an account to receive the money. Add one on the Home tab first.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mỗi lần rút cần một tài khoản nhận tiền. Hãy thêm tài khoản ở tab Trang chủ trước." } } }
+    },
+    "Amount received": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền thực nhận" } } }
+    },
+    "Amount received cannot be negative.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền thực nhận không được âm." } } }
+    },
+    "Choose the account that received the money.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn tài khoản đã nhận tiền." } } }
+    },
+    "Couldn’t delete this withdrawal. Try again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể xóa lần rút này. Hãy thử lại." } } }
+    },
+    "Couldn’t save this withdrawal. Try again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể lưu lần rút này. Hãy thử lại." } } }
+    },
+    "Delete this withdrawal?": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xóa lần rút này?" } } }
+    },
+    "Delete withdrawal": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xóa lần rút" } } }
+    },
+    "Edit withdrawal": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sửa lần rút" } } }
+    },
+    "Enter a valid principal amount.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập số tiền gốc hợp lệ." } } }
+    },
+    "Enter the amount the bank actually paid.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập số tiền ngân hàng thực tế đã trả." } } }
+    },
+    "Financial terms are locked because this book has withdrawal history.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Điều khoản tài chính đã khóa vì sổ này đã có lịch sử rút." } } }
+    },
+    "Interest received": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền lãi thực nhận" } } }
+    },
+    "Loss on withdrawal": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khoản hụt khi rút" } } }
+    },
+    "MATURED": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "ĐÃ ĐÁO HẠN" } } }
+    },
+    "MATURED — READY TO SETTLE": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "ĐÃ ĐÁO HẠN — SẴN SÀNG TẤT TOÁN" } } }
+    },
+    "Maturity estimate for the remaining book: %@.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ước tính đáo hạn cho phần sổ còn lại: %@." } } }
+    },
+    "No money has been withdrawn from this book yet.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sổ này chưa có lần rút tiền nào." } } }
+    },
+    "Only the name can be changed after a withdrawal has been recorded.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sau khi đã ghi nhận một lần rút, chỉ có thể đổi tên sổ." } } }
+    },
+    "Original principal": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền gốc ban đầu" } } }
+    },
+    "Principal withdrawn": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền gốc rút ra" } } }
+    },
+    "Principal withdrawn must be greater than zero.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền gốc rút ra phải lớn hơn 0." } } }
+    },
+    "PROJECTED INTEREST": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "LÃI DỰ KIẾN" } } }
+    },
+    "Projected interest assumes the book stays until maturity.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lãi dự kiến giả định sổ được giữ đến ngày đáo hạn." } } }
+    },
+    "REALIZED INTEREST": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "LÃI ĐÃ THỰC NHẬN" } } }
+    },
+    "Record what the bank actually paid into your account.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi lại số tiền ngân hàng thực tế đã trả vào tài khoản." } } }
+    },
+    "REMAINING": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "CÒN LẠI" } } }
+    },
+    "Remaining principal": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền gốc còn lại" } } }
+    },
+    "Settle": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tất toán" } } }
+    },
+    "Settle savings book": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tất toán sổ tiết kiệm" } } }
+    },
+    "Savings book unavailable": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không tìm thấy sổ tiết kiệm" } } }
+    },
+    "SETTLED": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "ĐÃ TẤT TOÁN" } } }
+    },
+    "That is more than the principal still deposited.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số này lớn hơn tiền gốc còn lại trong sổ." } } }
+    },
+    "The principal returns to the savings book and the received amount leaves the account.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền gốc sẽ trở lại sổ và số tiền thực nhận sẽ bị trừ khỏi tài khoản." } } }
+    },
+    "The savings book and all of its withdrawal history will be deleted.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sổ tiết kiệm và toàn bộ lịch sử rút của sổ sẽ bị xóa." } } }
+    },
+    "This savings book may have been deleted.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sổ tiết kiệm này có thể đã bị xóa." } } }
+    },
+    "This withdrawal no longer has a savings book.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lần rút này không còn liên kết với sổ tiết kiệm." } } }
+    },
+    "The selected account rises by the amount actually received.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tài khoản đã chọn sẽ tăng đúng bằng số tiền thực nhận." } } }
+    },
+    "Use maturity estimate": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dùng số ước tính đáo hạn" } } }
+    },
+    "Up to %@ remains available to withdraw.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Có thể rút tối đa %@." } } }
+    },
+    "Withdraw": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Rút tiền" } } }
+    },
+    "Withdraw all": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Rút toàn bộ" } } }
+    },
+    "Withdraw savings": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Rút tiền tiết kiệm" } } }
+    },
+    "Withdrawal date": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngày rút" } } }
+    },
+    "Withdrawal date cannot be before the book was opened.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngày rút không thể trước ngày mở sổ." } } }
+    },
+    "Withdrawal date cannot be in the future.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngày rút không thể ở tương lai." } } }
+    },
+    "Withdrawal history": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lịch sử rút tiền" } } }
     },
     "All transactions are skipped.": {
       "localizations": {
@@ -267,6 +861,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Giao dịch"
+          }
+        }
+      }
+    },
+    "Transaction details": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chi tiết giao dịch"
           }
         }
       }
@@ -701,16 +1305,6 @@
         }
       }
     },
-    "%@ of what moved": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ số tiền đã dịch chuyển"
-          }
-        }
-      }
-    },
     "%@ outstanding after this payment.": {
       "localizations": {
         "vi": {
@@ -837,16 +1431,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld khoản nợ"
-          }
-        }
-      }
-    },
-    "%lld months": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld tháng"
           }
         }
       }
@@ -3872,16 +4456,6 @@
         }
       }
     },
-    "NET": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "RÒNG"
-          }
-        }
-      }
-    },
     "NET POSITION": {
       "localizations": {
         "vi": {
@@ -4148,6 +4722,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Chưa có khoản nợ"
+          }
+        }
+      }
+    },
+    "No note": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không có ghi chú"
           }
         }
       }
@@ -4488,6 +5072,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mở phần sửa giao dịch."
+          }
+        }
+      }
+    },
+    "Opens transaction details. Swipe left to edit or right to delete.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở chi tiết giao dịch. Vuốt trái để sửa hoặc vuốt phải để xoá."
           }
         }
       }
@@ -7104,32 +7698,12 @@
         }
       }
     },
-    "Nothing to chart yet.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chưa có gì để vẽ."
-          }
-        }
-      }
-    },
     "A day or two of records draws no trend yet.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
             "value": "Một, hai ngày ghi chép thì chưa vẽ được xu hướng."
-          }
-        }
-      }
-    },
-    "MONTH BY MONTH": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "TỪNG THÁNG"
           }
         }
       }
@@ -7250,6 +7824,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dải quỹ và vàng là giá hôm nay áp lên số đang giữ, nên chúng chỉ đổi khi bạn mua hoặc bán, không đổi theo thị trường. Phần nợ là khoảng cách giữa dải và đường."
+          }
+        }
+      }
+    },
+    "Income %@, expense %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thu %@, chi %@"
+          }
+        }
+      }
+    },
+    "Shows or hides the two shares.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hiện hoặc ẩn hai tỷ lệ."
           }
         }
       }

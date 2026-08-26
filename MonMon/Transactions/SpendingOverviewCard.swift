@@ -3,8 +3,8 @@ import SwiftUI
 /// What a stretch of time came to: the net at the top, the split that produced
 /// it, and the two directions side by side.
 ///
-/// The card reads a period rather than owning one, so the Spending screen and a
-/// single day both put the same summary above their list.
+/// The card reads a period rather than owning one, so Report and a single day
+/// can put the same summary above the details they present.
 struct SpendingOverviewCard: View {
     @Environment(\.locale) private var locale
 
@@ -14,6 +14,11 @@ struct SpendingOverviewCard: View {
     let income: Decimal
     let expense: Decimal
     let count: Int
+
+    /// Whether the bar is spelling out its two shares. Off by default: the bar
+    /// already says which way the period leaned, and the figures beside it say
+    /// by how much. The percentages are the third reading, asked for by a tap.
+    @State private var isShowingShares = false
 
     private var net: Decimal {
         income - expense
@@ -48,25 +53,17 @@ struct SpendingOverviewCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(24)
+        // The surface every other card on the screen sits on. A wash of the
+        // period's own colour set this one apart from its neighbours, which
+        // said the summary was a different kind of thing than the cards under
+        // it; the figure itself carries the colour instead.
         .background {
             RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .fill(MonMonTheme.hero)
-        }
-        // A wash of the period's own colour, strongest behind the figure it
-        // belongs to, so the card is read before it is read out.
-        .background {
-            RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [netTint.opacity(0.22), netTint.opacity(0.04)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .fill(MonMonTheme.surface)
         }
         .overlay {
             RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .stroke(netTint.opacity(0.28), lineWidth: 1)
+                .stroke(MonMonTheme.border, lineWidth: 1)
         }
         .animation(.snappy(duration: 0.28), value: netTint)
         .accessibilityIdentifier("spending-overview")
@@ -93,83 +90,124 @@ struct SpendingOverviewCard: View {
             .foregroundStyle(MonMonTheme.textSecondary)
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
-            .background(MonMonTheme.surface.opacity(0.7), in: Capsule())
+            .background(MonMonTheme.field, in: Capsule())
             .accessibilityLabel(countLabel)
     }
 
+    /// The one figure the card exists for, centred and large enough to be read
+    /// across a room. It needs no label: it sits under the period it belongs to,
+    /// carries its own sign, and wears the colour of what the period did.
     private var netAmount: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("NET")
-                .font(.caption2.weight(.semibold))
-                .tracking(0.8)
-                .foregroundStyle(MonMonTheme.textSecondary)
-
-            Text(signed(net))
-                .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.58)
-                .foregroundStyle(MonMonTheme.textPrimary)
-                .contentTransition(.numericText())
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(AppText.string("Net \(signed(net))", in: locale))
+        Text(signed(net))
+            .font(.system(size: 44, weight: .bold, design: .rounded))
+            .monospacedDigit()
+            .lineLimit(1)
+            .minimumScaleFactor(0.45)
+            .foregroundStyle(netTint)
+            .contentTransition(.numericText())
+            .frame(maxWidth: .infinity, alignment: .center)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(AppText.string("Net \(signed(net))", in: locale))
     }
 
     /// How much of the money that moved came in against how much went out. It
-    /// says in one glance what two figures otherwise have to be compared to say.
+    /// says in one glance what two figures otherwise have to be compared to say,
+    /// and a tap makes it say it in numbers.
     private var splitBar: some View {
-        GeometryReader { geometry in
-            let width = geometry.size.width
-            let incomeWidth = width * share(of: income)
+        VStack(spacing: 8) {
+            GeometryReader { geometry in
+                let width = geometry.size.width
+                let incomeWidth = width * share(of: income)
 
-            ZStack(alignment: .leading) {
-                Capsule()
-                    .fill(MonMonTheme.danger.opacity(flow == 0 ? 0.18 : 0.85))
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(MonMonTheme.danger.opacity(flow == 0 ? 0.18 : 0.85))
 
-                Capsule()
-                    .fill(MonMonTheme.gain)
-                    .frame(width: max(0, min(width, incomeWidth)))
+                    Capsule()
+                        .fill(MonMonTheme.gain)
+                        .frame(width: max(0, min(width, incomeWidth)))
+                }
+            }
+            .frame(height: isShowingShares ? 12 : 8)
+
+            if isShowingShares {
+                shareRow
             }
         }
-        .frame(height: 8)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            withAnimation(.snappy(duration: 0.28)) {
+                isShowingShares.toggle()
+            }
+        }
         .animation(.snappy(duration: 0.3), value: share(of: income))
-        .accessibilityHidden(true)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(splitAccessibilityLabel)
+        .accessibilityHint("Shows or hides the two shares.")
+        .accessibilityIdentifier("spending-split")
+    }
+
+    /// The two shares, each under its own end of the bar.
+    private var shareRow: some View {
+        HStack(spacing: 8) {
+            Text(sharePercent(of: income))
+                .foregroundStyle(MonMonTheme.gain)
+
+            Spacer(minLength: 8)
+
+            Text(sharePercent(of: expense))
+                .foregroundStyle(MonMonTheme.danger)
+        }
+        .font(.caption2.weight(.bold))
+        .monospacedDigit()
+        .lineLimit(1)
+        .contentTransition(.numericText())
+        .transition(.opacity.combined(with: .move(edge: .top)))
+    }
+
+    private var splitAccessibilityLabel: String {
+        guard flow > 0 else {
+            return AppText.string("Nothing recorded", in: locale)
+        }
+
+        return AppText.string(
+            "Income \(sharePercent(of: income)), expense \(sharePercent(of: expense))",
+            in: locale
+        )
+    }
+
+    private func sharePercent(of amount: Decimal) -> String {
+        flow > 0 ? Percentage.label(of: amount, in: flow) : "0%"
     }
 
     private func directionTile(_ kind: TransactionKind, amount: Decimal) -> some View {
         let tint = kind == .income ? MonMonTheme.gain : MonMonTheme.danger
 
-        return VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                Image(systemName: kind.symbolName)
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(tint)
-                    .frame(width: 22, height: 22)
-                    .background(tint.opacity(0.18), in: Circle())
-
-                Text(kind.displayName)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(MonMonTheme.textSecondary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-            }
-
+        return HStack(spacing: 8) {
             Text(VNDCurrency.format(amount))
-                .font(.title3.weight(.bold))
+                .font(.subheadline.weight(.bold))
                 .monospacedDigit()
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
                 .foregroundStyle(MonMonTheme.textPrimary)
 
-            Text(shareLabel(of: amount))
-                .font(.caption2.weight(.medium))
-                .foregroundStyle(MonMonTheme.textMuted)
+            Spacer(minLength: 4)
+
+            Text(kind.displayName)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(MonMonTheme.textSecondary)
                 .lineLimit(1)
+                .minimumScaleFactor(0.8)
+
+            Image(systemName: kind.symbolName)
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(tint)
+                .frame(width: 22, height: 22)
+                .background(tint.opacity(0.18), in: Circle())
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
         .background {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(MonMonTheme.surface.opacity(0.75))
@@ -180,10 +218,7 @@ struct SpendingOverviewCard: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
-            """
-            \(kind.displayName(in: locale)) \(VNDCurrency.format(amount)), \
-            \(shareLabel(of: amount))
-            """
+            "\(kind.displayName(in: locale)) \(VNDCurrency.format(amount))"
         )
     }
 
@@ -202,14 +237,6 @@ struct SpendingOverviewCard: View {
         }
 
         return CGFloat(truncating: NSDecimalNumber(decimal: amount / flow))
-    }
-
-    private func shareLabel(of amount: Decimal) -> String {
-        guard flow > 0 else {
-            return AppText.string("Nothing recorded", in: locale)
-        }
-
-        return AppText.string("\(Percentage.label(of: amount, in: flow)) of what moved", in: locale)
     }
 
     /// A count reads as a whole sentence rather than a number glued to a word:

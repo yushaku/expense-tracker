@@ -202,4 +202,22 @@ struct TransactionSearchTests {
         #expect(byAccount.hasStructuredFilters)
         #expect(!byDirection.hasSearchText)
     }
+
+    @Test("Report shows transaction rows only while searching")
+    func reportTransactionListVisibility() {
+        var query = januaryQuery
+
+        #expect(ReportContentVisibility(query: query).showsNetTrend)
+        #expect(!ReportContentVisibility(query: query).showsTransactionList)
+
+        query.filter = .income
+
+        #expect(ReportContentVisibility(query: query).showsNetTrend)
+        #expect(!ReportContentVisibility(query: query).showsTransactionList)
+
+        query.text = "salary"
+
+        #expect(!ReportContentVisibility(query: query).showsNetTrend)
+        #expect(ReportContentVisibility(query: query).showsTransactionList)
+    }
 }

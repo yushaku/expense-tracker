@@ -7,6 +7,7 @@ APP_BUNDLE_ID = com.sonlv.monmon.app
 ICLOUD_CONTAINER_ID = iCloud.monmon
 APP_DISPLAY_NAME = MonMon
 APP_ICON_NAME = AppIcon
+QUICK_CAPTURE_URL_SCHEME = monmon
 // Development, not production, because this build is signed with a development
 // profile: the account holds no Apple Distribution certificate, and a
 // development profile carries the development value. Flip this to production at

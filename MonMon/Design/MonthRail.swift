@@ -38,6 +38,7 @@ struct MonthRail: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 6)
             }
+            .scrollDisabled(true)
             .onAppear {
                 scroll(to: selection, in: proxy, animated: false)
             }

@@ -23,9 +23,10 @@ enum MonMonSchema {
     /// two can never drift apart.
     static var models: [any PersistentModel.Type] {
         [
-            CashAccount.self, SavingsDeposit.self,
+            CashAccount.self, SavingsDeposit.self, SavingsWithdrawal.self,
             FundInstrument.self, FundHolding.self, FundSale.self,
-            TransactionCategory.self, MoneyTransaction.self, AccountTransfer.self,
+            TransactionCategory.self, MoneyTransaction.self, PendingTransactionCapture.self,
+            AccountTransfer.self,
             Debt.self, DebtPayment.self,
             RecurringRule.self,
         ]

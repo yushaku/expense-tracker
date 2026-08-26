@@ -1,0 +1,36 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+	"Open quick capture in ${applicationName}" : {
+	  "localizations" : {
+		"vi" : {
+		  "stringUnit" : {
+			"state" : "translated",
+			"value" : "Mở ghi nhanh trong ${applicationName}"
+		  }
+		}
+	  }
+	},
+    "Add a transaction in ${applicationName}" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thêm giao dịch trong ${applicationName}"
+          }
+        }
+      }
+    },
+    "Record a transaction in ${applicationName}" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ghi giao dịch bằng ${applicationName}"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -77,6 +77,7 @@ struct DebtNetWorthTests {
         AssetSummary.netWorth(
             accounts: accounts,
             deposits: [],
+            withdrawals: [],
             holdings: [],
             instruments: [],
             transactions: [],
@@ -96,6 +97,7 @@ struct DebtNetWorthTests {
             for: account,
             deposits: [],
             holdings: [],
+            withdrawals: [],
             transactions: [],
             transfers: [],
             debts: debts,
@@ -112,6 +114,7 @@ struct DebtNetWorthTests {
         AssetAllocation.slices(
             accounts: accounts,
             deposits: [],
+            withdrawals: [],
             holdings: [],
             instruments: [],
             transactions: [],
@@ -130,6 +133,7 @@ struct DebtNetWorthTests {
         AssetAllocation.liabilities(
             accounts: accounts,
             deposits: [],
+            withdrawals: [],
             holdings: [],
             transactions: [],
             transfers: [],
@@ -306,6 +310,7 @@ struct DebtNetWorthTests {
         let overdraft = AssetAllocation.overdraft(
             accounts: accounts,
             deposits: [],
+            withdrawals: [],
             holdings: [],
             transactions: [],
             transfers: [],
@@ -351,6 +356,7 @@ struct DebtNetWorthTests {
             AssetAllocation.positiveCash(
                 accounts: [bank],
                 deposits: [],
+                withdrawals: [],
                 holdings: [],
                 transactions: [],
                 transfers: [],

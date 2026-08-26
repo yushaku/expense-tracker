@@ -1,9 +1,9 @@
 import SwiftData
 import SwiftUI
 
-/// Everything the owner has, in one picture: what it is all worth over time,
-/// how it splits between cash, savings, funds, gold and what is lent out, then
-/// the accounts and the debts themselves.
+/// Everything the owner has, in one picture: how it splits between cash,
+/// savings, funds, gold and what is lent out, then the accounts and the debts
+/// themselves.
 ///
 /// The detail behind each part lives one push in — the Accounts screen, the
 /// Investments screen, a debt and its payments — so this screen stays a summary
@@ -14,6 +14,9 @@ struct WealthView: View {
 
     @Query(sort: \SavingsDeposit.createdAt, order: .forward)
     private var deposits: [SavingsDeposit]
+
+    @Query(sort: \SavingsWithdrawal.withdrawnAt, order: .reverse)
+    private var withdrawals: [SavingsWithdrawal]
 
     @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
     private var transactions: [MoneyTransaction]
@@ -47,10 +50,6 @@ struct WealthView: View {
 
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                        if !historyPoints.isEmpty {
-                            AssetGrowthCard(points: historyPoints)
-                        }
-
                         if !allocationSlices.isEmpty || !liabilitySlices.isEmpty {
                             AssetAllocationCard(
                                 slices: allocationSlices,
@@ -104,6 +103,7 @@ struct WealthView: View {
         AssetAllocation.slices(
             accounts: accounts,
             deposits: deposits,
+            withdrawals: withdrawals,
             holdings: holdings,
             instruments: instruments,
             transactions: transactions,
@@ -114,25 +114,11 @@ struct WealthView: View {
         )
     }
 
-    private var historyPoints: [AssetHistoryPoint] {
-        AssetHistory.points(
-            accounts: accounts,
-            deposits: deposits,
-            holdings: holdings,
-            instruments: instruments,
-            transactions: transactions,
-            transfers: transfers,
-            debts: debts,
-            payments: payments,
-            sales: sales,
-            asOf: .now
-        )
-    }
-
     private var liabilitySlices: [LiabilityAllocationSlice] {
         AssetAllocation.liabilitySlices(
             accounts: accounts,
             deposits: deposits,
+            withdrawals: withdrawals,
             holdings: holdings,
             transactions: transactions,
             transfers: transfers,
@@ -227,6 +213,7 @@ struct WealthView: View {
                     CashAccountCard(
                         account: account,
                         deposits: deposits,
+                        withdrawals: withdrawals,
                         holdings: holdings,
                         transactions: transactions,
                         transfers: transfers,
@@ -361,7 +348,7 @@ struct WealthView: View {
     }
 
     private var savingsTotal: Decimal {
-        AssetSummary.totalPrincipal(of: deposits)
+        AssetSummary.totalPrincipal(of: deposits, withdrawals: withdrawals)
     }
 
     private var fundHoldings: [FundHolding] {
@@ -383,6 +370,7 @@ struct WealthView: View {
     private var investedTotal: Decimal {
         InvestmentSummary.total(
             deposits: deposits,
+            withdrawals: withdrawals,
             holdings: holdings,
             instruments: instruments,
             sales: sales

@@ -1,19 +1,36 @@
 import SwiftData
 import SwiftUI
 
-/// The parts of a report query that do not fit in a toolbar: which direction,
-/// which categories, and which accounts the results are cut down to.
-///
-/// The period and the search words stay on the screen behind this, where they
-/// are changed most often. What is picked here is what the owner sets once and
-/// reads several answers through.
+/// A transaction query behind one compact toolbar: search words, direction,
+/// categories, and accounts. Search lives here rather than occupying the
+/// screen header; opening from its toolbar icon puts the keyboard straight in
+/// the field, while opening from the filter icon leaves the whole sheet ready.
 struct ReportFilterSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @FocusState private var isSearchFocused: Bool
 
     @Binding var query: TransactionQuery
 
     let categories: [TransactionCategory]
     let accounts: [CashAccount]
+    let focusesSearchOnAppear: Bool
+    let identifierPrefix: String
+
+    private let selectionColumns = [GridItem(.adaptive(minimum: 140), spacing: 10)]
+
+    init(
+        query: Binding<TransactionQuery>,
+        categories: [TransactionCategory],
+        accounts: [CashAccount],
+        focusesSearchOnAppear: Bool = false,
+        identifierPrefix: String = "report-"
+    ) {
+        _query = query
+        self.categories = categories
+        self.accounts = accounts
+        self.focusesSearchOnAppear = focusesSearchOnAppear
+        self.identifierPrefix = identifierPrefix
+    }
 
     var body: some View {
         #if os(macOS)
@@ -32,6 +49,7 @@ struct ReportFilterSheet: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+                        searchCard
                         directionCard
                         categoriesCard
                         accountsCard
@@ -42,15 +60,23 @@ struct ReportFilterSheet: View {
                     .frame(maxWidth: .infinity)
                 }
             }
-            .navigationTitle("Filters")
-            .accessibilityIdentifier("report-filters")
+            .navigationTitle("Search & Filters")
+            .accessibilityIdentifier("\(identifierPrefix)filters")
+            .task {
+                guard focusesSearchOnAppear else {
+                    return
+                }
+
+                await Task.yield()
+                isSearchFocused = true
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Clear") {
                         clear()
                     }
-                    .disabled(!query.hasStructuredFilters)
-                    .accessibilityIdentifier("clear-report-filters")
+                    .disabled(!query.isNarrowed)
+                    .accessibilityIdentifier("clear-\(identifierPrefix)filters")
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
@@ -66,12 +92,53 @@ struct ReportFilterSheet: View {
     }
 
     /// Clearing leaves the period alone: it is the one filter the screen is
-    /// never without. Search also stays untouched because it has its own
-    /// toolbar control beside this filter.
+    /// never without, and the date controls change it outside this sheet.
     private func clear() {
+        query.text = ""
         query.filter = .all
         query.categoryIDs = []
         query.accountIDs = []
+    }
+
+    private var searchCard: some View {
+        card {
+            VStack(alignment: .leading, spacing: 14) {
+                sectionHeader("Search", systemImage: "magnifyingglass")
+
+                HStack(spacing: 10) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundStyle(MonMonTheme.textMuted)
+                        .accessibilityHidden(true)
+
+                    TextField("Notes, categories, amounts", text: $query.text)
+                        .focused($isSearchFocused)
+                        .submitLabel(.search)
+                        .onSubmit {
+                            dismiss()
+                        }
+                        .accessibilityIdentifier("\(identifierPrefix)search-field")
+
+                    if query.hasSearchText {
+                        Button {
+                            query.text = ""
+                            isSearchFocused = true
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(MonMonTheme.textMuted)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Clear search")
+                    }
+                }
+                .padding(.horizontal, 14)
+                .frame(minHeight: 46)
+                .background(MonMonTheme.field, in: RoundedRectangle(cornerRadius: 12))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(MonMonTheme.border, lineWidth: 1)
+                }
+            }
+        }
     }
 
     private var directionCard: some View {
@@ -85,7 +152,7 @@ struct ReportFilterSheet: View {
                     options: TransactionListFilter.allCases,
                     title: \.displayName
                 )
-                .accessibilityIdentifier("report-direction")
+                .accessibilityIdentifier("\(identifierPrefix)direction")
             }
         }
     }
@@ -98,15 +165,17 @@ struct ReportFilterSheet: View {
                 if categories.isEmpty {
                     emptyNotice("No categories yet.")
                 } else {
-                    ForEach(categories) { category in
-                        toggleRow(
-                            name: category.name,
-                            symbolName: CategoryPalette.symbolName(category.symbolName),
-                            tint: CategoryPalette.color(named: category.colorName),
-                            isOn: query.categoryIDs.contains(category.id),
-                            identifier: "report-category-\(category.id.uuidString)"
-                        ) {
-                            toggle(category.id, in: &query.categoryIDs)
+                    LazyVGrid(columns: selectionColumns, alignment: .leading, spacing: 10) {
+                        ForEach(categories) { category in
+                            toggleRow(
+                                name: category.name,
+                                symbolName: CategoryPalette.symbolName(category.symbolName),
+                                tint: CategoryPalette.color(named: category.colorName),
+                                isOn: query.categoryIDs.contains(category.id),
+                                identifier: "\(identifierPrefix)category-\(category.id.uuidString)"
+                            ) {
+                                toggle(category.id, in: &query.categoryIDs)
+                            }
                         }
                     }
                 }
@@ -122,15 +191,17 @@ struct ReportFilterSheet: View {
                 if accounts.isEmpty {
                     emptyNotice("No accounts yet.")
                 } else {
-                    ForEach(accounts) { account in
-                        toggleRow(
-                            name: account.name,
-                            symbolName: account.kind.iconName,
-                            tint: account.kind.tint,
-                            isOn: query.accountIDs.contains(account.id),
-                            identifier: "report-account-\(account.id.uuidString)"
-                        ) {
-                            toggle(account.id, in: &query.accountIDs)
+                    LazyVGrid(columns: selectionColumns, alignment: .leading, spacing: 10) {
+                        ForEach(accounts) { account in
+                            toggleRow(
+                                name: account.name,
+                                symbolName: account.kind.iconName,
+                                tint: account.kind.tint,
+                                isOn: query.accountIDs.contains(account.id),
+                                identifier: "\(identifierPrefix)account-\(account.id.uuidString)"
+                            ) {
+                                toggle(account.id, in: &query.accountIDs)
+                            }
                         }
                     }
                 }
@@ -177,7 +248,18 @@ struct ReportFilterSheet: View {
                     .foregroundStyle(isOn ? MonMonTheme.accent : MonMonTheme.textMuted)
                     .accessibilityHidden(true)
             }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .frame(minHeight: 44)
+            .background(
+                isOn ? MonMonTheme.accent.opacity(0.14) : MonMonTheme.field,
+                in: RoundedRectangle(cornerRadius: 12)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isOn ? MonMonTheme.accent : MonMonTheme.border, lineWidth: 1)
+            }
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

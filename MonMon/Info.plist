@@ -2,10 +2,23 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>$(APP_BUNDLE_ID).quick-capture</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>$(QUICK_CAPTURE_URL_SCHEME)</string>
+			</array>
+		</dict>
+	</array>
 	<key>MonMonAppGroupIdentifier</key>
 	<string>$(APP_GROUP_ID)</string>
 	<key>MonMonCloudKitContainer</key>
 	<string>$(ICLOUD_CONTAINER_ID)</string>
+	<key>MonMonQuickCaptureURLScheme</key>
+	<string>$(QUICK_CAPTURE_URL_SCHEME)</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

@@ -4,6 +4,7 @@ import SwiftUI
 enum TransactionEditorMode: Identifiable {
     case add
     case edit(MoneyTransaction)
+    case review(PendingTransactionCapture)
 
     var id: String {
         switch self {
@@ -11,6 +12,8 @@ enum TransactionEditorMode: Identifiable {
             "add"
         case .edit(let transaction):
             transaction.id.uuidString
+        case .review(let capture):
+            "review-\(capture.id.uuidString)"
         }
     }
 
@@ -20,7 +23,20 @@ enum TransactionEditorMode: Identifiable {
             nil
         case .edit(let transaction):
             transaction
+        case .review:
+            nil
         }
+    }
+
+    var pendingCapture: PendingTransactionCapture? {
+        guard case .review(let capture) = self else {
+            return nil
+        }
+        return capture
+    }
+
+    var canDelete: Bool {
+        editedTransaction != nil || pendingCapture != nil
     }
 }
 
@@ -57,6 +73,8 @@ struct TransactionEditorView: View {
             _draft = State(initialValue: TransactionDraft(occurredAt: defaultDate))
         case .edit(let transaction):
             _draft = State(initialValue: TransactionDraft(transaction: transaction))
+        case .review(let capture):
+            _draft = State(initialValue: capture.draft)
         }
     }
 
@@ -75,14 +93,12 @@ struct TransactionEditorView: View {
                 draft: $draft,
                 accounts: accounts,
                 categories: categories,
-                isEditing: mode.editedTransaction != nil,
+                isEditing: mode.canDelete,
                 validationError: validationError,
                 saveErrorMessage: saveErrorMessage,
                 onDelete: { isConfirmingDelete = true }
             )
-            .navigationTitle(
-                mode.editedTransaction == nil ? "Add transaction" : "Edit transaction"
-            )
+            .navigationTitle(navigationTitle)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -100,7 +116,7 @@ struct TransactionEditorView: View {
                 }
             }
             .confirmationDialog(
-                "Delete this transaction?",
+                deleteConfirmationTitle,
                 isPresented: $isConfirmingDelete,
                 titleVisibility: .visible
             ) {
@@ -111,7 +127,7 @@ struct TransactionEditorView: View {
 
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("Its account balance returns to what it was.")
+                Text(deleteConfirmationMessage)
             }
             .onChange(of: draft.kind) { _, _ in
                 applyDefaultCategoryIfDirectionChanged()
@@ -131,6 +147,11 @@ struct TransactionEditorView: View {
         }
 
         didApplyDefaults = true
+        if mode.pendingCapture != nil {
+            applyMissingDefaults()
+            return
+        }
+
         TransactionDefaults.apply(
             accountValue: defaultTransactionAccountValue,
             categoryValue: defaultTransactionCategoryValue,
@@ -138,6 +159,23 @@ struct TransactionEditorView: View {
             categories: categories,
             to: &draft
         )
+    }
+
+    private func applyMissingDefaults() {
+        if draft.accountID == nil {
+            draft.accountID = TransactionDefaults.resolveAccountID(
+                defaultTransactionAccountValue,
+                accounts: accounts
+            )
+        }
+        if draft.categoryID == nil {
+            draft.categoryID = TransactionDefaults.categoryID(
+                for: draft.kind,
+                expenseValue: defaultTransactionCategoryValue,
+                incomeValue: defaultTransactionIncomeCategoryValue,
+                categories: categories
+            )
+        }
     }
 
     /// Switching between income and expense strands a category from the other
@@ -171,6 +209,9 @@ struct TransactionEditorView: View {
             } else {
                 let transaction = try draft.makeTransaction(id: UUID(), createdAt: .now)
                 modelContext.insert(transaction)
+                if let pendingCapture = mode.pendingCapture {
+                    modelContext.delete(pendingCapture)
+                }
             }
         } catch let error as TransactionFormError {
             validationError = error
@@ -190,12 +231,15 @@ struct TransactionEditorView: View {
     }
 
     private func delete() {
-        guard let editedTransaction = mode.editedTransaction else {
+        if let editedTransaction = mode.editedTransaction {
+            modelContext.delete(editedTransaction)
+        } else if let pendingCapture = mode.pendingCapture {
+            modelContext.delete(pendingCapture)
+        } else {
             return
         }
 
         saveErrorMessage = nil
-        modelContext.delete(editedTransaction)
 
         do {
             try modelContext.save()
@@ -204,5 +248,22 @@ struct TransactionEditorView: View {
             modelContext.rollback()
             saveErrorMessage = "Couldn’t delete this transaction. Try again."
         }
+    }
+
+    private var navigationTitle: LocalizedStringKey {
+        if mode.pendingCapture != nil {
+            return "Review transaction"
+        }
+        return mode.editedTransaction == nil ? "Add transaction" : "Edit transaction"
+    }
+
+    private var deleteConfirmationTitle: LocalizedStringKey {
+        mode.pendingCapture == nil ? "Delete this transaction?" : "Delete this capture?"
+    }
+
+    private var deleteConfirmationMessage: LocalizedStringKey {
+        mode.pendingCapture == nil
+            ? "Its account balance returns to what it was."
+            : "The spoken entry will be discarded without changing totals."
     }
 }

@@ -94,6 +94,7 @@ struct MoneyTransactionPersistenceTests {
                 for: account,
                 deposits: [],
                 holdings: [],
+                withdrawals: [],
                 transactions: transactions,
                 transfers: [],
                 debts: [],
@@ -134,6 +135,7 @@ struct MoneyTransactionPersistenceTests {
                 for: account,
                 deposits: [],
                 holdings: [],
+                withdrawals: [],
                 transactions: transactions,
                 transfers: [],
                 debts: [],
@@ -161,8 +163,7 @@ struct MoneyTransactionPersistenceTests {
         context.insert(transaction)
         try context.save()
 
-        context.delete(transaction)
-        try context.save()
+        try TransactionDeletion.delete(transaction, from: context)
 
         let transactions = try context.fetch(FetchDescriptor<MoneyTransaction>())
 
@@ -172,6 +173,7 @@ struct MoneyTransactionPersistenceTests {
                 for: account,
                 deposits: [],
                 holdings: [],
+                withdrawals: [],
                 transactions: transactions,
                 transfers: [],
                 debts: [],
