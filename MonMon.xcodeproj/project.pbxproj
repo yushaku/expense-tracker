@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		S10000000000000000000203 /* PendingTransactionCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000103 /* PendingTransactionCapture.swift */; };
+		S10000000000000000000204 /* TransactionCaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000104 /* TransactionCaptureService.swift */; };
+		S10000000000000000000205 /* TransactionCaptureServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000105 /* TransactionCaptureServiceTests.swift */; };
 		S10000000000000000000201 /* TransactionCaptureParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000101 /* TransactionCaptureParser.swift */; };
 		S10000000000000000000202 /* TransactionCaptureParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000102 /* TransactionCaptureParserTests.swift */; };
 		33A69BFF303AE3A900432AF4 /* MijickCalendarView in Frameworks */ = {isa = PBXBuildFile; productRef = 33A69BFE303AE3A900432AF4 /* MijickCalendarView */; };
@@ -298,6 +301,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		S10000000000000000000103 /* PendingTransactionCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingTransactionCapture.swift; sourceTree = "<group>"; };
+		S10000000000000000000104 /* TransactionCaptureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureService.swift; sourceTree = "<group>"; };
+		S10000000000000000000105 /* TransactionCaptureServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureServiceTests.swift; sourceTree = "<group>"; };
 		S10000000000000000000101 /* TransactionCaptureParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureParser.swift; sourceTree = "<group>"; };
 		S10000000000000000000102 /* TransactionCaptureParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureParserTests.swift; sourceTree = "<group>"; };
 		33A69BFF303B567700432AF4 /* MonMon.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MonMon.entitlements; sourceTree = "<group>"; };
@@ -842,6 +848,8 @@
 		A00000000000000000000024 /* Transactions */ = {
 			isa = PBXGroup;
 			children = (
+				S10000000000000000000103 /* PendingTransactionCapture.swift */,
+				S10000000000000000000104 /* TransactionCaptureService.swift */,
 				S10000000000000000000101 /* TransactionCaptureParser.swift */,
 				A00000000000000000000D12 /* TransactionDefaultsView.swift */,
 				A00000000000000000000D11 /* TransactionDefaultsCard.swift */,
@@ -882,6 +890,7 @@
 		A00000000000000000000025 /* Transactions */ = {
 			isa = PBXGroup;
 			children = (
+				S10000000000000000000105 /* TransactionCaptureServiceTests.swift */,
 				S10000000000000000000102 /* TransactionCaptureParserTests.swift */,
 				A00000000000000000000166 /* TransactionPeriodTests.swift */,
 				A00000000000000000000611 /* TransactionRangeTests.swift */,
@@ -1230,6 +1239,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				S10000000000000000000203 /* PendingTransactionCapture.swift in Sources */,
+				S10000000000000000000204 /* TransactionCaptureService.swift in Sources */,
 				S10000000000000000000201 /* TransactionCaptureParser.swift in Sources */,
 				F10000000000000000000202 /* StatementImportInboxService.swift in Sources */,
 				F10000000000000000000204 /* StatementImportInbox.swift in Sources */,
@@ -1404,6 +1415,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				S10000000000000000000205 /* TransactionCaptureServiceTests.swift in Sources */,
 				S10000000000000000000202 /* TransactionCaptureParserTests.swift in Sources */,
 				F10000000000000000000201 /* StatementImportInboxServiceTests.swift in Sources */,
 				F10000000000000000000203 /* StatementImportInboxTests.swift in Sources */,
