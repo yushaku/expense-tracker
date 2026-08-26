@@ -19,10 +19,6 @@
 	<string>$(ICLOUD_CONTAINER_ID)</string>
 	<key>MonMonQuickCaptureURLScheme</key>
 	<string>$(QUICK_CAPTURE_URL_SCHEME)</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>MonMon uses the microphone to turn one spoken transaction into text on this device.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>MonMon transcribes one spoken transaction entirely on this device for Quick Capture.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
