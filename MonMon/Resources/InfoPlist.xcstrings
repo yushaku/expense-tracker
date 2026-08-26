@@ -1,0 +1,38 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "NSMicrophoneUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon uses the microphone to transcribe one transaction into Quick Capture on this device."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon dùng micrô để chuyển một giao dịch thành nội dung Ghi nhanh ngay trên thiết bị."
+          }
+        }
+      }
+    },
+    "NSSpeechRecognitionUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon transcribes one spoken transaction into Quick Capture on this device."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon chuyển một giao dịch được nói thành nội dung Ghi nhanh ngay trên thiết bị."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

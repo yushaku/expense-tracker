@@ -11,6 +11,16 @@
 		}
 	  }
 	},
+    "Start voice capture in ${applicationName}" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bắt đầu ghi bằng giọng nói trong ${applicationName}"
+          }
+        }
+      }
+    },
     "Add a transaction in ${applicationName}" : {
       "localizations" : {
         "vi" : {

@@ -118,7 +118,7 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 sectionHeader("Siri & Shortcuts", systemImage: "waveform.badge.mic")
 
-                Label("Two shortcuts are ready", systemImage: "checkmark.circle.fill")
+                Label("Three shortcuts are ready", systemImage: "checkmark.circle.fill")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(MonMonTheme.accent)
 
@@ -132,7 +132,7 @@ struct SettingsView: View {
                 shortcutRow(
                     title: "Record Transaction",
                     detail: "Say “Siri, record a transaction in MonMon”, then answer “cafe 50k”.",
-                    systemImage: "waveform"
+                    systemImage: "square.and.pencil"
                 )
 
                 shortcutRow(
@@ -141,7 +141,20 @@ struct SettingsView: View {
                     systemImage: "square.and.pencil"
                 )
 
-                voiceShortcutInstructions
+                shortcutRow(
+                    title: "Voice Capture",
+                    detail: voiceCaptureDetail,
+                    systemImage: "waveform"
+                )
+
+                Text(voiceCaptureRequirement)
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+
+                ShortcutsLink()
+                    .shortcutsLinkStyle(.automaticOutline)
+                    .accessibilityIdentifier("open-monmon-shortcuts")
+                    .padding(.top, 2)
             }
         }
     }
@@ -167,47 +180,12 @@ struct SettingsView: View {
         }
     }
 
-    private var voiceShortcutInstructions: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Create one-tap voice capture")
-                .font(.subheadline.weight(.semibold))
-
-            Text("Combine Dictate Text with MonMon so one tap starts listening.")
-                .font(.caption)
-                .foregroundStyle(MonMonTheme.textSecondary)
-
-            instructionRow(number: 1, text: "Open Shortcuts and tap +.")
-            instructionRow(number: 2, text: "Add Dictate Text.")
-            instructionRow(
-                number: 3,
-                text: "Add MonMon → Record Transaction, then set Transaction to Dictated Text."
-            )
-            instructionRow(
-                number: 4,
-                text: "Name it Voice Capture and tap it whenever you want to record."
-            )
-
-            ShortcutsLink()
-                .shortcutsLinkStyle(.automaticOutline)
-                .accessibilityIdentifier("open-monmon-shortcuts")
-                .padding(.top, 2)
-        }
-        .padding(.top, 2)
+    private var voiceCaptureRequirement: LocalizedStringKey {
+        "Review or edit the transcript before saving. Voice Capture requires iOS 26."
     }
 
-    private func instructionRow(number: Int, text: LocalizedStringKey) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 10) {
-            Text(number.formatted())
-                .font(.caption2.weight(.bold))
-                .foregroundStyle(MonMonTheme.onAccent)
-                .frame(width: 22, height: 22)
-                .background(MonMonTheme.accent, in: Circle())
-                .accessibilityHidden(true)
-
-            Text(text)
-                .font(.caption)
-                .foregroundStyle(MonMonTheme.textSecondary)
-        }
+    private var voiceCaptureDetail: LocalizedStringKey {
+        "Tap once to open Quick Capture and start private, on-device listening."
     }
 
     private var instrumentsCard: some View {
