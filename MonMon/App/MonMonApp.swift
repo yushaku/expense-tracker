@@ -1,3 +1,4 @@
+import AppIntents
 import Foundation
 import SwiftData
 import SwiftUI
@@ -5,26 +6,41 @@ import SwiftUI
 @main
 struct MonMonApp: App {
     private let container: ModelContainer
-    @State private var appLock = AppLock()
+    @State private var appLock: AppLock
+    @State private var appRoute: AppRoute
     @State private var cloudSync = CloudSync()
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
+        let appLock = AppLock()
+        let appRoute = AppRoute()
+        _appLock = State(initialValue: appLock)
+        _appRoute = State(initialValue: appRoute)
+
+        let modelContainer: ModelContainer
         do {
-            container = try ModelContainer(
+            modelContainer = try ModelContainer(
                 for: Schema(MonMonSchema.models),
                 configurations: Self.modelConfiguration
             )
         } catch {
             fatalError("Model container failed: \(error)")
         }
+        container = modelContainer
 
-        AccountSeed.seedDefaultBankIfNeeded(in: container.mainContext)
-        AccountSeed.ensureUnassignedExists(in: container.mainContext)
-        CategorySeed.seedIfEmpty(in: container.mainContext)
+        AppDependencyManager.shared.add(
+            dependency: TransactionCaptureIntentDependency(container: modelContainer)
+        )
+        AppDependencyManager.shared.add(
+            dependency: QuickCaptureIntentDependency(appRoute: appRoute, appLock: appLock)
+        )
+
+        AccountSeed.seedDefaultBankIfNeeded(in: modelContainer.mainContext)
+        AccountSeed.ensureUnassignedExists(in: modelContainer.mainContext)
+        CategorySeed.seedIfEmpty(in: modelContainer.mainContext)
 
         do {
-            try StoreReconciler.reconcile(in: container.mainContext)
+            try StoreReconciler.reconcile(in: modelContainer.mainContext)
         } catch {
             // A store that opened is worth showing. A duplicate that survives
             // renders as two rows the owner can merge by hand, which is worse
@@ -35,7 +51,7 @@ struct MonMonApp: App {
         do {
             // After reconciling, so a rule that arrived twice has been folded
             // into one before either copy is asked what it owes.
-            try RecurringGenerator.generate(in: container.mainContext)
+            try RecurringGenerator.generate(in: modelContainer.mainContext)
         } catch {
             // The same bargain: an entry the owner adds by hand is a smaller
             // loss than a launch that does not happen.
@@ -62,6 +78,7 @@ struct MonMonApp: App {
         WindowGroup {
             ContentView()
                 .environment(appLock)
+                .environment(appRoute)
                 .environment(cloudSync)
                 .task { cloudSync.startObserving() }
                 // Duplicates arrive when synchronisation lands, which is after

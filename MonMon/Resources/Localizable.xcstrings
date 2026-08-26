@@ -1,6 +1,406 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%lld spoken transactions need review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld giao dịch bằng giọng nói cần xem lại"
+          }
+        }
+      }
+    },
+    "1 spoken transaction needs review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 giao dịch bằng giọng nói cần xem lại"
+          }
+        }
+      }
+    },
+    "Amount missing": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thiếu số tiền"
+          }
+        }
+      }
+    },
+    "Add Dictate Text.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm Đọc chính tả."
+          }
+        }
+      }
+    },
+    "Add MonMon → Record Transaction, then set Transaction to Dictated Text.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm MonMon → Ghi giao dịch, rồi đặt Giao dịch thành Văn bản được đọc chính tả."
+          }
+        }
+      }
+    },
+    "Combine Dictate Text with MonMon so one tap starts listening.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghép Đọc chính tả với MonMon để một lần chạm bắt đầu nghe."
+          }
+        }
+      }
+    },
+    "Create one-tap voice capture": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tạo ghi giọng nói một chạm"
+          }
+        }
+      }
+    },
+    "Couldn’t save that entry. Try again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể lưu nội dung này. Hãy thử lại."
+          }
+        }
+      }
+    },
+    "Couldn’t understand that entry. Try again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa hiểu nội dung này. Hãy thử lại."
+          }
+        }
+      }
+    },
+    "Every spoken transaction has been handled.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mọi giao dịch bằng giọng nói đã được xử lý."
+          }
+        }
+      }
+    },
+    "Finish the details before these entries affect your totals.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoàn tất thông tin trước khi các mục này ảnh hưởng đến tổng tiền."
+          }
+        }
+      }
+    },
+    "For example: 50k lunch cash yesterday": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ví dụ: 50k ăn trưa tiền mặt hôm qua"
+          }
+        }
+      }
+    },
+    "Missing details will stay in Needs review.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thông tin còn thiếu sẽ được giữ trong mục Cần xem lại."
+          }
+        }
+      }
+    },
+    "MonMon couldn’t record that transaction. Open the app and check your defaults.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không thể ghi giao dịch đó. Hãy mở app và kiểm tra thiết lập mặc định."
+          }
+        }
+      }
+    },
+    "Needs review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cần xem lại"
+          }
+        }
+      }
+    },
+    "Nothing to review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không có gì cần xem lại"
+          }
+        }
+      }
+    },
+    "Open MonMon ready for one natural-language entry.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở MonMon sẵn sàng nhận một câu nhập tự nhiên."
+          }
+        }
+      }
+    },
+    "Open Quick Capture": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở ghi nhanh"
+          }
+        }
+      }
+    },
+    "Name it Voice Capture and tap it whenever you want to record.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đặt tên là Ghi bằng giọng nói và chạm vào mỗi khi muốn ghi."
+          }
+        }
+      }
+    },
+    "Open Shortcuts and tap +.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở Phím tắt và chạm dấu +."
+          }
+        }
+      }
+    },
+    "Opens the focused entry form when voice is not convenient.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở form đã focus khi không tiện dùng giọng nói."
+          }
+        }
+      }
+    },
+    "Quick Capture": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi nhanh"
+          }
+        }
+      }
+    },
+    "Quick capture": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi nhanh"
+          }
+        }
+      }
+    },
+    "Record %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi %@"
+          }
+        }
+      }
+    },
+    "Record Transaction": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi giao dịch"
+          }
+        }
+      }
+    },
+    "Record an expense or income from one natural-language sentence.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi một khoản chi hoặc thu từ một câu nói tự nhiên."
+          }
+        }
+      }
+    },
+    "Review & save": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiểm tra & lưu"
+          }
+        }
+      }
+    },
+    "Review %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xem lại %@"
+          }
+        }
+      }
+    },
+    "Save for review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lưu để xem lại"
+          }
+        }
+      }
+    },
+    "Save for review?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lưu để xem lại?"
+          }
+        }
+      }
+    },
+    "Save this transaction?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lưu giao dịch này?"
+          }
+        }
+      }
+    },
+    "Save transaction": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lưu giao dịch"
+          }
+        }
+      }
+    },
+    "Saved in MonMon.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã lưu trong MonMon."
+          }
+        }
+      }
+    },
+    "Saved for review in MonMon. Nothing was added to totals.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã lưu để xem lại trong MonMon. Chưa cộng vào tổng tiền."
+          }
+        }
+      }
+    },
+    "Say it naturally": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cứ nói tự nhiên"
+          }
+        }
+      }
+    },
+    "Say “Siri, record a transaction in MonMon”, then answer “cafe 50k”.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nói “Siri, ghi giao dịch bằng MonMon”, rồi trả lời “cafe 50k”."
+          }
+        }
+      }
+    },
+    "Siri & Shortcuts": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siri & Phím tắt"
+          }
+        }
+      }
+    },
+    "They are installed automatically with MonMon—nothing else to download.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hai phím tắt được cài tự động cùng MonMon—không cần tải thêm."
+          }
+        }
+      }
+    },
+    "Two shortcuts are ready": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hai phím tắt đã sẵn sàng"
+          }
+        }
+      }
+    },
+    "What did you spend or receive?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bạn đã chi hoặc nhận khoản gì?"
+          }
+        }
+      }
+    },
     "Action": {
       "localizations": {
         "vi": {

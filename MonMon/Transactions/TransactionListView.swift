@@ -2,6 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct TransactionListView: View {
+    @Environment(AppRoute.self) private var appRoute
     @Environment(\.locale) private var locale
     @Environment(\.scenePhase) private var scenePhase
 
@@ -13,6 +14,9 @@ struct TransactionListView: View {
 
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
+
+    @Query(sort: \PendingTransactionCapture.createdAt, order: .reverse)
+    private var pendingCaptures: [PendingTransactionCapture]
 
     @State private var range = TransactionRange.month(containing: .now)
     @State private var editorMode: TransactionEditorMode?
@@ -28,6 +32,8 @@ struct TransactionListView: View {
     /// One details sheet and one delete question for the whole list, rather
     /// than one of each per row.
     @State private var transactionActions = TransactionActions()
+    @State private var isShowingCaptureInbox = false
+    @State private var isShowingQuickCapture = false
 
     /// Weekday first: over a run of days the name is what the eye picks out,
     /// and the year is left to the period title above the list.
@@ -42,6 +48,10 @@ struct TransactionListView: View {
 
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+                        if !pendingCaptures.isEmpty {
+                            pendingCaptureStatusCard
+                        }
+
                         if showsImportStatus {
                             importStatusCard
                         }
@@ -128,6 +138,12 @@ struct TransactionListView: View {
             .sheet(isPresented: $isShowingImportInbox) {
                 StatementImportInboxView(inbox: importInbox)
             }
+            .sheet(isPresented: $isShowingCaptureInbox) {
+                PendingTransactionCaptureListView()
+            }
+            .sheet(isPresented: $isShowingQuickCapture) {
+                QuickTransactionCaptureView()
+            }
             .task { await importInbox.refresh() }
             .onChange(of: scenePhase) { _, phase in
                 guard phase == .active else {
@@ -135,8 +151,74 @@ struct TransactionListView: View {
                 }
                 Task { await importInbox.refresh() }
             }
+            .onChange(of: appRoute.quickCaptureRequestID) { _, requestID in
+                presentQuickCaptureIfNeeded(requestID)
+            }
+            .onAppear {
+                presentQuickCaptureIfNeeded(appRoute.quickCaptureRequestID)
+            }
             .tint(MonMonTheme.accent)
         }
+    }
+
+    private func presentQuickCaptureIfNeeded(_ requestID: UUID?) {
+        guard requestID != nil, !isShowingQuickCapture else {
+            return
+        }
+        isShowingQuickCapture = true
+        appRoute.consumeQuickCapture()
+    }
+
+    private var pendingCaptureStatusCard: some View {
+        Button {
+            isShowingCaptureInbox = true
+        } label: {
+            HStack(spacing: 14) {
+                Image(systemName: "waveform.badge.exclamationmark")
+                    .font(.title3)
+                    .foregroundStyle(MonMonTheme.credit)
+                    .frame(width: 44, height: 44)
+                    .background(
+                        MonMonTheme.credit.opacity(0.16),
+                        in: RoundedRectangle(cornerRadius: 12)
+                    )
+                    .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(pendingCaptureTitle)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(MonMonTheme.textPrimary)
+
+                    Text("Finish the details before these entries affect your totals.")
+                        .font(.caption)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                        .multilineTextAlignment(.leading)
+                }
+
+                Spacer(minLength: 8)
+
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textMuted)
+                    .accessibilityHidden(true)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, minHeight: 72, alignment: .leading)
+            .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 16))
+            .overlay {
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(MonMonTheme.credit.opacity(0.5), lineWidth: 1)
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("capture-inbox-status")
+    }
+
+    private var pendingCaptureTitle: LocalizedStringKey {
+        pendingCaptures.count == 1
+            ? "1 spoken transaction needs review"
+            : "\(pendingCaptures.count) spoken transactions need review"
     }
 
     private var showsImportStatus: Bool {
