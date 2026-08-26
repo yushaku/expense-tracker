@@ -44,6 +44,38 @@ struct TransactionCaptureServiceTests {
         #expect(pending.first?.issues.contains(.missingAmount) == true)
     }
 
+    @Test("The intent commits a ready entry in one step")
+    func intentCommitsReadyEntryImmediately() async throws {
+        let fixture = try makeFixture()
+        let dependency = TransactionCaptureIntentDependency(
+            container: fixture.container,
+            defaults: fixture.defaults
+        )
+
+        let result = try await dependency.record("50k ăn trưa")
+        let context = ModelContext(fixture.container)
+
+        #expect(result.disposition == .transaction)
+        #expect(try context.fetch(FetchDescriptor<MoneyTransaction>()).count == 1)
+        #expect(try context.fetch(FetchDescriptor<PendingTransactionCapture>()).isEmpty)
+    }
+
+    @Test("The intent stages an uncertain entry in one step")
+    func intentStagesUncertainEntryImmediately() async throws {
+        let fixture = try makeFixture()
+        let dependency = TransactionCaptureIntentDependency(
+            container: fixture.container,
+            defaults: fixture.defaults
+        )
+
+        let result = try await dependency.record("ăn trưa tiền mặt")
+        let context = ModelContext(fixture.container)
+
+        #expect(result.disposition == .pendingReview)
+        #expect(try context.fetch(FetchDescriptor<MoneyTransaction>()).isEmpty)
+        #expect(try context.fetch(FetchDescriptor<PendingTransactionCapture>()).count == 1)
+    }
+
     @Test("A stale prepared capture is rejected before writing")
     func stalePreparedCaptureIsRejected() throws {
         let fixture = try makeFixture()
@@ -100,6 +132,7 @@ struct TransactionCaptureServiceTests {
         return Fixture(
             container: container,
             service: TransactionCaptureService(container: container, defaults: defaults),
+            defaults: defaults,
             accountID: accountID,
             categoryID: categoryID
         )
@@ -108,6 +141,7 @@ struct TransactionCaptureServiceTests {
     private struct Fixture {
         let container: ModelContainer
         let service: TransactionCaptureService
+        let defaults: UserDefaults
         let accountID: UUID
         let categoryID: UUID
     }

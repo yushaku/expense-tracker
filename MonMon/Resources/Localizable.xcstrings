@@ -281,16 +281,6 @@
         }
       }
     },
-    "Save this transaction in MonMon?": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lưu giao dịch này trong MonMon?"
-          }
-        }
-      }
-    },
     "Saved in MonMon.": {
       "localizations": {
         "vi": {
@@ -347,16 +337,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hai phím tắt được cài tự động cùng MonMon—không cần tải thêm."
-          }
-        }
-      }
-    },
-    "Some details are unclear. Save it for review?": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Một số thông tin chưa rõ. Lưu lại để xem sau?"
           }
         }
       }

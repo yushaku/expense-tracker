@@ -4,25 +4,20 @@ import SwiftData
 
 struct TransactionCaptureIntentDependency: @unchecked Sendable {
     private let container: ModelContainer
+    private let defaults: UserDefaults
 
-    init(container: ModelContainer) {
+    init(container: ModelContainer, defaults: UserDefaults = .standard) {
         self.container = container
+        self.defaults = defaults
     }
 
-    func prepare(_ rawText: String) async throws -> ParsedTransactionCapture {
+    func record(_ rawText: String) async throws -> TransactionCaptureCommitResult {
         try await MainActor.run {
-            try TransactionCaptureService(container: container).prepare(rawText)
+            let service = TransactionCaptureService(container: container, defaults: defaults)
+            let capture = try service.prepare(rawText)
+            return try service.commit(capture)
         }
     }
-
-    func commit(
-        _ capture: ParsedTransactionCapture
-    ) async throws -> TransactionCaptureCommitResult {
-        try await MainActor.run {
-            try TransactionCaptureService(container: container).commit(capture)
-        }
-    }
-
 }
 
 enum TransactionCaptureIntentError: Error, LocalizedError, Sendable {
@@ -90,21 +85,7 @@ struct CaptureTransactionIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         do {
-            let capture = try await dependency.prepare(rawEntry)
-
-            if capture.isReady {
-                try await requestConfirmation(
-                    actionName: .add,
-                    dialog: "Save this transaction in MonMon?"
-                )
-            } else {
-                try await requestConfirmation(
-                    actionName: .add,
-                    dialog: "Some details are unclear. Save it for review?"
-                )
-            }
-
-            let result = try await dependency.commit(capture)
+            let result = try await dependency.record(rawEntry)
             switch result.disposition {
             case .transaction:
                 return .result(dialog: "Saved in MonMon.")

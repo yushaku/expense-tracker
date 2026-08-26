@@ -577,9 +577,9 @@
           <ul class="todo-list">
             <li class="todo-item done"><span class="todo-state">Đã có</span><span><code>CaptureTransactionIntent</code>, <code>OpenQuickCaptureIntent</code> và <code>AppShortcutsProvider</code> cho Siri, Spotlight và Shortcuts.</span></li>
             <li class="todo-item done"><span class="todo-state">Đã có</span><span>Một parameter <code>rawEntry</code>; parser hiểu số VND, ngày tương đối, account/category và dùng default khi phù hợp.</span></li>
-            <li class="todo-item done"><span class="todo-state">Đã có</span><span>Giao dịch rõ được confirm rồi commit; câu mơ hồ vào Needs Review nên không bị mất và chưa ảnh hưởng tổng tiền.</span></li>
-            <li class="todo-item done"><span class="todo-state">Đã có</span><span><code>alwaysAllowed</code> cho capture nền; dialog khóa máy chỉ nói trạng thái chung, không đọc số dư hay chi tiết giao dịch.</span></li>
-            <li class="todo-item done"><span class="todo-state">Đã có</span><span>Phrase, title, dialog và UI được localize tiếng Việt/Anh; quick capture dùng scheme riêng cho Dev/Prod và chờ App Lock mở trước khi hiện.</span></li>
+            <li class="todo-item done"><span class="todo-state">Đã có</span><span>Giao dịch rõ được lưu ngay không hỏi xác nhận lần hai; câu mơ hồ vào Needs Review nên không bị mất và chưa ảnh hưởng tổng tiền.</span></li>
+            <li class="todo-item done"><span class="todo-state">Đã có</span><span><code>alwaysAllowed</code> cho capture nền; result khóa máy chỉ nói trạng thái chung, không đọc số dư hay chi tiết giao dịch.</span></li>
+            <li class="todo-item done"><span class="todo-state">Đã có</span><span>Phrase, title, dialog và UI được localize tiếng Việt/Anh; quick capture mở app bằng foreground intent và chờ App Lock mở trước khi hiện.</span></li>
             <li class="todo-item done"><span class="todo-state">Đã có</span><span>Settings giải thích hai shortcut được cài tự động và hướng dẫn gán “Ghi nhanh” cho Action Button.</span></li>
             <li class="todo-item"><span class="todo-state">Todo</span><span>Acceptance test Siri và Action Button khi khóa/mở máy trên iPhone vật lý; app không thể tự gán Action Button cho user.</span></li>
           </ul>
@@ -655,9 +655,9 @@
           <h3>Privacy khi thiết bị đang khóa</h3>
           <ul>
             <li><code>CaptureTransactionIntent</code> chọn rõ <code>alwaysAllowed</code>, nên có thể nhận câu nói và lưu nền khi thiết bị khóa.</li>
-            <li>Confirmation và result chỉ nói trạng thái chung; không đọc số dư, merchant, account, category hay raw entry trên Lock Screen.</li>
+            <li>Result chỉ nói trạng thái chung; không đọc số dư, merchant, account, category hay raw entry trên Lock Screen.</li>
             <li>Giao dịch mơ hồ chỉ vào Needs Review và chưa ảnh hưởng totals; mở UI review vẫn đi qua AppLock.</li>
-            <li>Quick-capture deep link được queue nếu app đang khóa và chỉ mở form sau khi xác thực. <a class="inline-source" href="https://developer.apple.com/documentation/appintents/appintent/authenticationpolicy">Apple: authentication policy</a></li>
+            <li>Quick-capture request được queue nếu app đang khóa và chỉ mở form sau khi xác thực. <a class="inline-source" href="https://developer.apple.com/documentation/appintents/appintent/authenticationpolicy">Apple: authentication policy</a></li>
           </ul>
         </article>
 
@@ -667,7 +667,7 @@
             <li><code>TransactionCaptureIntentDependency</code> đưa ModelContainer vào intent và giới hạn SwiftData access trên MainActor.</li>
             <li><code>TransactionCaptureService</code> dùng chung parser/default resolver cho Siri và quick-capture UI.</li>
             <li><code>PendingTransactionCapture</code> giữ nguyên raw voice khi thiếu amount/account/category; user review và commit sau.</li>
-            <li>Khoảng trống còn lại: publish iCloud template và thêm invocation ID/dedupe cho trường hợp Siri retry.</li>
+            <li>Khoảng trống còn lại: thêm invocation ID/dedupe cho trường hợp Siri retry.</li>
           </ul>
         </article>
       </div>
@@ -676,7 +676,7 @@
         <table>
           <thead><tr><th>Surface</th><th>Điểm vào đề xuất</th><th>Kết quả mặc định</th><th>Không nên hứa</th></tr></thead>
           <tbody>
-            <tr><td>Siri</td><td><code>CaptureTransactionIntent(rawEntry)</code></td><td>Confirm và commit nếu đủ dữ liệu; còn lại lưu vào Needs Review.</td><td>Một câu activation luôn parse đúng mọi cách nói tiếng Việt.</td></tr>
+            <tr><td>Siri</td><td><code>CaptureTransactionIntent(rawEntry)</code></td><td>Lưu ngay nếu đủ dữ liệu; còn lại tự đưa vào Needs Review.</td><td>Một câu activation luôn parse đúng mọi cách nói tiếng Việt.</td></tr>
             <tr><td>Action Button</td><td>App Shortcut “Quick Capture”</td><td>Mở form đã focus để nhập hoặc dùng dictation của bàn phím.</td><td>App tự gán nút hoặc tự bắt đầu dictation khi máy khóa.</td></tr>
             <tr><td>Shortcuts / Spotlight</td><td>Cùng App Intent và preconfigured shortcut</td><td>Có ngay sau cài đặt; cho phép user ghép workflow riêng.</td><td>App vẫn không thể tự gán hardware button.</td></tr>
             <tr><td>Siri AI / iOS 27</td><td>Enhancement sau baseline</td><td>Cải thiện semantic matching khi OS/device/language hỗ trợ.</td><td>Dùng finance schema — hiện Apple chưa cung cấp domain này.</td></tr>
@@ -687,7 +687,7 @@
       <div class="siri-flow" aria-label="Luồng Siri và Action Button đề xuất">
         <article class="siri-step"><h3>Invoke</h3><p>Siri, Spotlight, Shortcuts hoặc Action Button gọi cùng capability.</p></article>
         <article class="siri-step"><h3>Parse + defaults</h3><p>Tách amount, kind, date, account và category; giữ nguyên raw text.</p></article>
-        <article class="siri-step"><h3>Confirm chung</h3><p>Không đọc chi tiết nhạy cảm trên Lock Screen; user xác nhận trước khi lưu.</p></article>
+        <article class="siri-step"><h3>Lưu tự động</h3><p>Không hỏi xác nhận lần hai; result không đọc chi tiết nhạy cảm trên Lock Screen.</p></article>
         <article class="siri-step"><h3>Commit hoặc review</h3><p>Dữ liệu đủ thành transaction; mơ hồ vào Needs Review và chưa tính totals.</p></article>
       </div>
 
