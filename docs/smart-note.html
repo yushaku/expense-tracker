@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Ghi chú các tính năng MonMon đã có để nhập giao dịch và xem báo cáo nhanh hơn.">
+  <meta name="description" content="Hướng dẫn sử dụng MonMon để ghi giao dịch nhanh, xử lý mục cần xem lại, nhập sao kê và xem báo cáo.">
   <link rel="stylesheet" href="assets/monmon-docs.css">
-  <title>MonMon — Features nhập và xem giao dịch nhanh</title>
+  <title>MonMon — Hướng dẫn ghi giao dịch nhanh</title>
   <style>
     .page {
       width: min(1040px, calc(100% - var(--docs-page-gutter) - var(--docs-page-gutter)));
@@ -14,6 +14,7 @@
     }
 
     a { color: var(--docs-accent); }
+    code { padding: 2px 6px; background: var(--docs-surface-2); border-radius: var(--docs-radius-xs); font-family: var(--docs-mono); font-size: .9em; }
 
     .hero {
       display: grid;
@@ -22,7 +23,7 @@
       align-items: end;
     }
 
-    .eyebrow, .label, .status, .step, .meta dt {
+    .eyebrow, .label, .step-label, .meta dt {
       font-family: var(--docs-mono);
       font-size: var(--docs-type-xs);
       letter-spacing: .08em;
@@ -31,7 +32,7 @@
 
     .eyebrow { margin-bottom: var(--docs-space-2); color: var(--docs-accent); }
     h1 { max-width: 760px; }
-    .lede { max-width: 720px; margin-top: var(--docs-space-3); color: var(--docs-text-2); font-size: var(--docs-type-lg); }
+    .lede { max-width: 740px; margin-top: var(--docs-space-3); color: var(--docs-text-2); font-size: var(--docs-type-lg); }
 
     .meta {
       display: grid;
@@ -47,7 +48,7 @@
     .meta dt { color: var(--docs-muted); }
     .meta dd { color: var(--docs-text-2); font-size: var(--docs-type-md); }
 
-    .promise {
+    .recommendation {
       display: grid;
       grid-template-columns: 8px minmax(0, 1fr);
       gap: var(--docs-space-4);
@@ -58,11 +59,23 @@
       border-radius: var(--docs-radius-lg);
     }
 
-    .promise-mark { border-radius: var(--docs-radius-pill); background: var(--docs-accent); }
-    .promise h2 { margin-bottom: var(--docs-space-1); color: var(--docs-accent); font-size: var(--docs-type-md); }
-    .promise p { max-width: 820px; font-size: clamp(17px, 2vw, 21px); line-height: 1.45; }
+    .recommendation-mark { border-radius: var(--docs-radius-pill); background: var(--docs-accent); }
+    .recommendation h2 { margin-bottom: var(--docs-space-1); color: var(--docs-accent); font-size: var(--docs-type-md); }
+    .recommendation p { max-width: 850px; font-size: clamp(17px, 2vw, 21px); line-height: 1.45; }
 
-    section { margin-top: var(--docs-section-gap); }
+    .toc {
+      margin-top: var(--docs-space-5);
+      padding: var(--docs-space-4);
+      background: var(--docs-surface-2);
+      border-radius: var(--docs-radius-md);
+    }
+
+    .toc .label { color: var(--docs-muted); }
+    .toc ul { display: flex; flex-wrap: wrap; gap: var(--docs-space-2); margin-top: var(--docs-space-2); list-style: none; }
+    .toc a { display: inline-flex; min-height: 34px; align-items: center; padding: 5px 10px; background: var(--docs-surface); border: 1px solid var(--docs-border); border-radius: var(--docs-radius-pill); color: var(--docs-text-2); font-size: var(--docs-type-md); text-decoration: none; }
+    .toc a:hover { border-color: var(--docs-accent); color: var(--docs-accent); }
+
+    section { margin-top: var(--docs-section-gap); scroll-margin-top: var(--docs-space-4); }
 
     .section-head {
       display: grid;
@@ -72,16 +85,21 @@
       margin-bottom: var(--docs-space-2);
     }
 
-    .section-head .step { color: var(--docs-muted); }
-    .section-copy { max-width: 720px; margin: 0 0 var(--docs-space-5) 54px; color: var(--docs-text-2); }
+    .section-head .step-label { color: var(--docs-muted); }
+    .section-copy { max-width: 740px; margin: 0 0 var(--docs-space-5) 54px; color: var(--docs-text-2); }
 
-    .capture-grid, .workflow-grid, .report-grid {
+    .setup-list, .guide-steps {
+      list-style: none;
+      counter-reset: guide-step;
+    }
+
+    .setup-list {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: var(--docs-grid-gap);
     }
 
-    .card {
+    .setup-list > li, .guide {
       min-width: 0;
       padding: var(--docs-card-padding);
       background: var(--docs-surface);
@@ -90,55 +108,32 @@
       box-shadow: var(--docs-shadow);
     }
 
-    .card-head {
-      display: flex;
-      justify-content: space-between;
-      gap: var(--docs-space-3);
-      align-items: flex-start;
-      margin-bottom: var(--docs-space-3);
-    }
-
-    .card h3 { font-size: var(--docs-type-xl); line-height: 1.3; }
-    .card p { color: var(--docs-text-2); }
-
-    .status {
-      flex: none;
-      padding: 4px 8px;
-      color: var(--docs-success);
-      background: var(--docs-success-soft);
-      border-radius: var(--docs-radius-pill);
-      font-weight: 700;
-    }
-
-    .facts { display: grid; gap: var(--docs-space-2); margin-top: var(--docs-space-4); list-style: none; }
-    .facts li { position: relative; padding-left: 18px; color: var(--docs-text-2); font-size: var(--docs-type-md); }
-    .facts li::before { content: ""; position: absolute; top: .65em; left: 2px; width: 6px; height: 6px; border-radius: 50%; background: var(--docs-accent); }
-    code { padding: 1px 5px; background: var(--docs-surface-2); border-radius: var(--docs-radius-xs); font-family: var(--docs-mono); font-size: .9em; }
-
-    .workflow {
+    .setup-list > li {
+      counter-increment: guide-step;
       display: grid;
-      grid-template-columns: 44px minmax(0, 1fr);
+      grid-template-columns: 38px minmax(0, 1fr);
       gap: var(--docs-space-3);
       align-content: start;
     }
 
-    .workflow-number {
+    .setup-list > li::before, .guide-steps > li::before {
+      content: counter(guide-step, decimal-leading-zero);
       display: grid;
-      width: 38px;
-      height: 38px;
+      width: 34px;
+      height: 34px;
       place-items: center;
       color: var(--docs-accent);
       background: var(--docs-accent-soft);
       border-radius: 50%;
       font-family: var(--docs-mono);
-      font-size: var(--docs-type-sm);
+      font-size: var(--docs-type-xs);
       font-weight: 750;
     }
 
-    .workflow h3 { margin-bottom: var(--docs-space-1); }
-    .example { margin-top: var(--docs-space-3); padding-top: var(--docs-space-3); border-top: 1px solid var(--docs-border); color: var(--docs-muted); font-size: var(--docs-type-md); }
+    .setup-list h3 { margin-bottom: var(--docs-space-1); font-size: var(--docs-type-lg); }
+    .setup-list p { color: var(--docs-text-2); font-size: var(--docs-type-md); }
 
-    .feature-strip {
+    .choice-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       border: 1px solid var(--docs-border);
@@ -147,13 +142,103 @@
       background: var(--docs-surface);
     }
 
-    .feature-strip article { padding: var(--docs-space-4); border-right: 1px solid var(--docs-border); }
-    .feature-strip article:last-child { border-right: 0; }
-    .feature-strip h3 { margin-bottom: var(--docs-space-1); font-size: var(--docs-type-md); }
-    .feature-strip p { color: var(--docs-text-2); font-size: var(--docs-type-md); }
+    .choice {
+      display: grid;
+      align-content: start;
+      gap: var(--docs-space-2);
+      padding: var(--docs-space-4);
+      border-right: 1px solid var(--docs-border);
+      color: inherit;
+      text-decoration: none;
+    }
 
-    .report-card { display: grid; gap: var(--docs-space-2); }
-    .report-card .label { color: var(--docs-muted); }
+    .choice:last-child { border-right: 0; }
+    .choice:hover { background: var(--docs-accent-soft); }
+    .choice .label { color: var(--docs-accent); }
+    .choice h3 { font-size: var(--docs-type-lg); }
+    .choice p { color: var(--docs-text-2); font-size: var(--docs-type-md); }
+
+    .guide-list { display: grid; gap: var(--docs-space-4); }
+    .guide { scroll-margin-top: var(--docs-space-4); }
+
+    .guide-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--docs-space-4);
+      align-items: start;
+      padding-bottom: var(--docs-space-4);
+      border-bottom: 1px solid var(--docs-border);
+    }
+
+    .guide-head .label { display: block; margin-bottom: var(--docs-space-1); color: var(--docs-accent); }
+    .guide-head h3 { font-size: var(--docs-type-xl); }
+    .guide-head p { max-width: 690px; margin-top: var(--docs-space-1); color: var(--docs-text-2); }
+
+    .badge {
+      padding: 5px 9px;
+      color: var(--docs-success);
+      background: var(--docs-success-soft);
+      border-radius: var(--docs-radius-pill);
+      font-family: var(--docs-mono);
+      font-size: var(--docs-type-xs);
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .guide-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, .46fr);
+      gap: var(--docs-space-5);
+      margin-top: var(--docs-space-4);
+    }
+
+    .guide-steps { display: grid; gap: var(--docs-space-3); }
+    .guide-steps > li { counter-increment: guide-step; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: var(--docs-space-3); align-items: start; }
+    .guide-steps strong { display: block; margin-bottom: 2px; }
+    .guide-steps p { color: var(--docs-text-2); font-size: var(--docs-type-md); }
+
+    .side-note {
+      align-self: start;
+      padding: var(--docs-space-4);
+      background: var(--docs-surface-2);
+      border-radius: var(--docs-radius-md);
+    }
+
+    .side-note h4 { margin-bottom: var(--docs-space-2); font-size: var(--docs-type-md); }
+    .side-note ul { display: grid; gap: var(--docs-space-2); padding-left: 18px; color: var(--docs-text-2); font-size: var(--docs-type-md); }
+    .side-note p { color: var(--docs-text-2); font-size: var(--docs-type-md); }
+    .side-note p + p { margin-top: var(--docs-space-2); }
+
+    .outcome {
+      margin-top: var(--docs-space-4);
+      padding: var(--docs-space-3) var(--docs-space-4);
+      color: var(--docs-text-2);
+      background: var(--docs-success-soft);
+      border-radius: var(--docs-radius-md);
+      font-size: var(--docs-type-md);
+    }
+
+    .outcome strong { color: var(--docs-success); }
+
+    .routine {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border: 1px solid var(--docs-border);
+      border-radius: var(--docs-radius-lg);
+      overflow: hidden;
+      background: var(--docs-surface);
+    }
+
+    .routine article { padding: var(--docs-card-padding); border-right: 1px solid var(--docs-border); }
+    .routine article:last-child { border-right: 0; }
+    .routine .label { color: var(--docs-muted); }
+    .routine h3 { margin: var(--docs-space-1) 0; font-size: var(--docs-type-lg); }
+    .routine p { color: var(--docs-text-2); font-size: var(--docs-type-md); }
+
+    .help-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--docs-grid-gap); }
+    .help-card { padding: var(--docs-space-4); background: var(--docs-surface); border: 1px solid var(--docs-border); border-radius: var(--docs-radius-md); }
+    .help-card h3 { margin-bottom: var(--docs-space-1); font-size: var(--docs-type-md); }
+    .help-card p { color: var(--docs-text-2); font-size: var(--docs-type-md); }
 
     .boundary {
       padding: var(--docs-space-5);
@@ -168,28 +253,37 @@
 
     footer { margin-top: var(--docs-section-gap); padding-top: var(--docs-space-4); border-top: 1px solid var(--docs-border); color: var(--docs-muted); font-size: var(--docs-type-md); }
 
-    @media (max-width: 760px) {
-      .hero { grid-template-columns: 1fr; align-items: start; }
-      .meta { max-width: 360px; }
-      .feature-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .feature-strip article:nth-child(2) { border-right: 0; }
-      .feature-strip article:nth-child(-n+2) { border-bottom: 1px solid var(--docs-border); }
+    @media (max-width: 820px) {
+      .choice-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .choice:nth-child(2) { border-right: 0; }
+      .choice:nth-child(-n+2) { border-bottom: 1px solid var(--docs-border); }
+      .guide-body { grid-template-columns: 1fr; }
+      .routine { grid-template-columns: 1fr; }
+      .routine article { border-right: 0; border-bottom: 1px solid var(--docs-border); }
+      .routine article:last-child { border-bottom: 0; }
     }
 
-    @media (max-width: 560px) {
+    @media (max-width: 620px) {
       .page { padding-top: var(--docs-space-5); }
-      .capture-grid, .workflow-grid, .report-grid { grid-template-columns: 1fr; }
+      .hero { grid-template-columns: 1fr; align-items: start; }
+      .meta { max-width: 360px; }
+      .setup-list, .help-grid { grid-template-columns: 1fr; }
       .section-copy { margin-left: 0; }
-      .feature-strip { grid-template-columns: 1fr; }
-      .feature-strip article, .feature-strip article:nth-child(2) { border-right: 0; border-bottom: 1px solid var(--docs-border); }
-      .feature-strip article:last-child { border-bottom: 0; }
-      .promise { padding: var(--docs-space-4); }
+      .guide-head { grid-template-columns: 1fr; }
+      .badge { width: fit-content; }
+      .recommendation { padding: var(--docs-space-4); }
+    }
+
+    @media (max-width: 460px) {
+      .choice-grid { grid-template-columns: 1fr; }
+      .choice, .choice:nth-child(2) { border-right: 0; border-bottom: 1px solid var(--docs-border); }
+      .choice:last-child { border-bottom: 0; }
     }
 
     @media print {
       .page { width: 100%; padding: 0; }
-      .card, .promise, .feature-strip, .boundary { box-shadow: none; break-inside: avoid; }
-      .docs-nav { display: none; }
+      .docs-nav, .toc { display: none; }
+      .setup-list > li, .guide, .routine, .boundary { box-shadow: none; break-inside: avoid; }
     }
   </style>
 </head>
@@ -198,7 +292,7 @@
     <nav class="docs-nav" aria-label="Tài liệu MonMon">
       <a class="docs-nav-brand" href="smart-note.html">MonMon Docs</a>
       <ul class="docs-nav-list">
-        <li><a href="smart-note.html" aria-current="page">Features đã có</a></li>
+        <li><a href="smart-note.html" aria-current="page">Hướng dẫn sử dụng</a></li>
         <li><a href="bank-transaction-auto-note-research.html">Nghiên cứu</a></li>
         <li><a href="architecture.html">Architecture</a></li>
       </ul>
@@ -206,150 +300,293 @@
 
     <header class="hero">
       <div>
-        <p class="eyebrow">MonMon / Feature note</p>
-        <h1>Nhập nhanh, xem tiền rõ hơn</h1>
-        <p class="lede">Những tính năng đang có để giảm thao tác ghi giao dịch, giữ lại dữ liệu chưa rõ và đi từ capture đến báo cáo nhanh hơn.</p>
+        <p class="eyebrow">MonMon / Hướng dẫn người dùng</p>
+        <h1>Ghi giao dịch ít nhất, vẫn không bỏ sót</h1>
+        <p class="lede">Từ thiết lập ban đầu đến dùng Siri, Action Button, nhập sao kê và xem báo cáo. Bạn không cần biết MonMon hoạt động kỹ thuật ra sao để làm theo.</p>
       </div>
       <dl class="meta">
-        <div><dt>Loại tài liệu</dt><dd>Living feature note</dd></div>
-        <div><dt>Trạng thái</dt><dd>Theo code hiện tại</dd></div>
+        <div><dt>Dành cho</dt><dd>Người dùng iPhone</dd></div>
+        <div><dt>Thiết lập ban đầu</dt><dd>Khoảng 5 phút</dd></div>
         <div><dt>Cập nhật</dt><dd>26.08.2026</dd></div>
       </dl>
     </header>
 
-    <aside class="promise">
-      <div class="promise-mark" aria-hidden="true"></div>
+    <aside class="recommendation">
+      <div class="recommendation-mark" aria-hidden="true"></div>
       <div>
-        <h2>Nguyên tắc vận hành</h2>
-        <p>Capture trước, làm rõ sau. Câu nhập đủ dữ liệu được lưu ngay; dữ liệu mơ hồ vào Needs Review thay vì bị mất hoặc bị đoán sai vào báo cáo.</p>
+        <h2>Cách dùng hiệu quả nhất</h2>
+        <p>Đặt tài khoản và danh mục mặc định một lần; ghi ngay bằng Siri hoặc Action Button; cuối kỳ nhập sao kê TPBank để kiểm tra những khoản có thể đã bỏ sót.</p>
       </div>
     </aside>
 
-    <section aria-labelledby="capture-title">
+    <nav class="toc" aria-label="Nội dung hướng dẫn">
+      <span class="label">Đi nhanh tới</span>
+      <ul>
+        <li><a href="#setup">Thiết lập ban đầu</a></li>
+        <li><a href="#capture">Ghi giao dịch</a></li>
+        <li><a href="#review">Cần xem lại</a></li>
+        <li><a href="#statement">Nhập sao kê</a></li>
+        <li><a href="#recurring">Khoản lặp lại</a></li>
+        <li><a href="#report">Xem báo cáo</a></li>
+      </ul>
+    </nav>
+
+    <section id="setup" aria-labelledby="setup-title">
       <div class="section-head">
-        <span class="step">01</span>
-        <h2 id="capture-title">Các cách nhập đang dùng được</h2>
+        <span class="step-label">01</span>
+        <h2 id="setup-title">Thiết lập một lần trước khi dùng</h2>
       </div>
-      <p class="section-copy">Mỗi điểm vào phục vụ một hoàn cảnh khác nhau nhưng dùng chung parser, default và chính sách review.</p>
+      <p class="section-copy">Làm đủ bốn bước này để những câu ngắn như “cafe 50k” vẫn có thể trở thành giao dịch hoàn chỉnh.</p>
 
-      <div class="capture-grid">
-        <article class="card">
-          <div class="card-head"><h3>Siri · Ghi giao dịch</h3><span class="status">Live</span></div>
-          <p>Nói activation phrase, trả lời một câu tự nhiên. Nếu đủ amount và context, MonMon lưu ngay mà không hỏi xác nhận lần hai và không cần mở app.</p>
-          <ul class="facts">
-            <li>Ví dụ raw entry: <code>cafe 50k</code>.</li>
-            <li>App Shortcut có sau khi cài app, không cần tải file Shortcut.</li>
-            <li>Khi khóa máy, Siri chỉ trả kết quả chung, không đọc chi tiết nhạy cảm.</li>
-          </ul>
+      <ol class="setup-list">
+        <li>
+          <div><h3>Kiểm tra tài khoản</h3><p>Mở tab <strong>Chi tiêu</strong>. Hãy chắc chắn bạn đã có tài khoản sẽ dùng để ghi nhận tiền, ví dụ Tiền mặt hoặc TPBank.</p></div>
+        </li>
+        <li>
+          <div><h3>Chuẩn bị danh mục</h3><p>Tại tab <strong>Chi tiêu</strong>, chọn <strong>Danh mục</strong>. Giữ lại hoặc tạo các nhóm bạn thường dùng như Ăn uống, Di chuyển và Lương.</p></div>
+        </li>
+        <li>
+          <div><h3>Đặt giá trị mặc định</h3><p>Tại tab <strong>Chi tiêu</strong>, chọn <strong>Mặc định</strong>, rồi chọn Tài khoản, Danh mục chi và Danh mục thu. MonMon sẽ dùng chúng khi câu nhập không nói rõ.</p></div>
+        </li>
+        <li>
+          <div><h3>Kiểm tra shortcut</h3><p>Mở tab <strong>Cài đặt → Siri &amp; Nút tác vụ</strong>. Khi thấy “Hai phím tắt đã sẵn sàng”, bạn không cần tải hay cài thêm file Shortcut.</p></div>
+        </li>
+      </ol>
+
+      <p class="outcome"><strong>Sau bước này:</strong> MonMon biết giao dịch mới nên dùng tài khoản và danh mục nào khi bạn chỉ nói nội dung cùng số tiền.</p>
+    </section>
+
+    <section aria-labelledby="choose-title">
+      <div class="section-head">
+        <span class="step-label">02</span>
+        <h2 id="choose-title">Chọn cách nhập phù hợp với bạn</h2>
+      </div>
+      <p class="section-copy">Bạn không cần dùng tất cả. Chọn một cách cho hằng ngày và dùng sao kê như lớp kiểm tra cuối kỳ.</p>
+
+      <div class="choice-grid">
+        <a class="choice" href="#siri"><span class="label">Nhanh nhất</span><h3>Siri</h3><p>Nói một câu, không mở app và không xác nhận lần hai khi dữ liệu đã đủ.</p></a>
+        <a class="choice" href="#action-button"><span class="label">Yên tĩnh hơn</span><h3>Action Button</h3><p>Bấm nút để mở thẳng form nhập nhanh, phù hợp nơi ồn hoặc không tiện nói.</p></a>
+        <a class="choice" href="#manual"><span class="label">Kiểm soát đầy đủ</span><h3>Nhập trong app</h3><p>Điền từng trường khi giao dịch phức tạp hoặc cần chỉnh ngày, tài khoản, danh mục.</p></a>
+        <a class="choice" href="#statement"><span class="label">Không bỏ sót</span><h3>Sao kê PDF</h3><p>Nhập theo kỳ để đối chiếu những khoản chưa được ghi ngay lúc phát sinh.</p></a>
+      </div>
+    </section>
+
+    <section id="capture" aria-labelledby="capture-title">
+      <div class="section-head">
+        <span class="step-label">03</span>
+        <h2 id="capture-title">Hướng dẫn ghi giao dịch</h2>
+      </div>
+      <p class="section-copy">Ba cách dưới đây đều dùng các giá trị mặc định đã thiết lập. Ghi càng rõ số tiền và nội dung, bạn càng ít phải sửa lại.</p>
+
+      <div class="guide-list">
+        <article class="guide" id="siri">
+          <header class="guide-head">
+            <div><span class="label">Cách 1 · Không cần mở app</span><h3>Ghi bằng Siri</h3><p>Phù hợp ngay sau khi thanh toán, khi đang đi đường hoặc tay đang bận.</p></div>
+            <span class="badge">Tự lưu nếu đủ</span>
+          </header>
+          <div class="guide-body">
+            <ol class="guide-steps">
+              <li><div><strong>Gọi shortcut</strong><p>Nói: “Siri, ghi giao dịch bằng MonMon”. Nếu dùng bản dev, hãy nói đúng tên app là “MonMon Dev”.</p></div></li>
+              <li><div><strong>Trả lời một câu</strong><p>Khi Siri hỏi bạn đã chi hoặc nhận gì, nói cả số tiền và nội dung, ví dụ: <code>cafe 50k</code>.</p></div></li>
+              <li><div><strong>Nghe kết quả</strong><p>Nếu dữ liệu đủ, Siri báo đã lưu trong MonMon. Bạn không phải xác nhận lần thứ hai và không cần mở app.</p></div></li>
+            </ol>
+            <aside class="side-note">
+              <h4>Cách nói dễ hiểu</h4>
+              <ul>
+                <li><code>50k ăn trưa</code></li>
+                <li><code>35 nghìn cafe tiền mặt</code></li>
+                <li><code>thu 1,2 triệu lương TPBank hôm qua</code></li>
+              </ul>
+            </aside>
+          </div>
+          <p class="outcome"><strong>Kết quả:</strong> câu rõ được lưu vào giao dịch; câu thiếu số tiền, tài khoản hoặc danh mục được giữ trong <strong>Cần xem lại</strong> và chưa ảnh hưởng tổng tiền.</p>
         </article>
 
-        <article class="card">
-          <div class="card-head"><h3>Ghi nhanh · Action Button</h3><span class="status">Live</span></div>
-          <p>User tự gán App Shortcut “Ghi nhanh” cho Action Button. Action mở MonMon ở foreground và đưa thẳng tới form nhập tự nhiên đã focus.</p>
-          <ul class="facts">
-            <li>Không dùng custom URL scheme nên Shortcuts không chặn launch.</li>
-            <li>Nếu App Lock đang bật, route chờ user mở khóa app rồi mới hiện form.</li>
-            <li>Apple không cho app tự gán Action Button thay user.</li>
-          </ul>
+        <article class="guide" id="action-button">
+          <header class="guide-head">
+            <div><span class="label">Cách 2 · Một nút mở form</span><h3>Ghi nhanh bằng Action Button</h3><p>Phù hợp khi không muốn nói với Siri hoặc muốn nhìn lại số tiền trước khi lưu.</p></div>
+            <span class="badge">Thiết lập một lần</span>
+          </header>
+          <div class="guide-body">
+            <ol class="guide-steps">
+              <li><div><strong>Gán nút</strong><p>Mở <strong>Cài đặt iPhone → Nút tác vụ → Phím tắt</strong>.</p></div></li>
+              <li><div><strong>Chọn action</strong><p>Chọn <strong>MonMon → Ghi nhanh</strong>. App không thể tự gán nút thay bạn.</p></div></li>
+              <li><div><strong>Dùng hằng ngày</strong><p>Nhấn giữ Action Button. MonMon mở thẳng màn hình <strong>Ghi nhanh</strong> với ô nhập đã sẵn sàng.</p></div></li>
+              <li><div><strong>Kiểm tra và lưu</strong><p>Nhập một câu như <code>50k ăn trưa tiền mặt hôm qua</code>, chọn <strong>Kiểm tra &amp; lưu</strong>, rồi xác nhận <strong>Lưu giao dịch</strong> hoặc <strong>Lưu để xem lại</strong>.</p></div></li>
+            </ol>
+            <aside class="side-note">
+              <h4>Nếu đang bật khóa app</h4>
+              <p>MonMon sẽ chờ bạn mở khóa bằng Face ID hoặc Touch ID rồi mới hiện form Ghi nhanh. Dữ liệu không bị đưa ra ngoài màn hình khóa.</p>
+            </aside>
+          </div>
         </article>
 
-        <article class="card">
-          <div class="card-head"><h3>Quick Add trong app</h3><span class="status">Live</span></div>
-          <p>Mở form nhập nhanh từ giao diện giao dịch, gõ một dòng hoặc chỉnh field trước khi lưu. Default giúp bỏ qua các lựa chọn lặp lại.</p>
-          <ul class="facts">
-            <li>Dùng cùng parser với Siri để cách hiểu số tiền và nội dung nhất quán.</li>
-            <li>Default account và category được áp dụng khi câu nhập không nêu rõ.</li>
-            <li>Có thể chuyển sang form đầy đủ khi cần sửa nhiều field.</li>
-          </ul>
-        </article>
-
-        <article class="card">
-          <div class="card-head"><h3>Share sao kê TPBank PDF</h3><span class="status">Live</span></div>
-          <p>Share file PDF có text layer vào MonMon, chọn account, xem preview và commit qua Import Inbox. Đây là lớp đối soát định kỳ để tìm giao dịch bị miss.</p>
-          <ul class="facts">
-            <li>Staging tách file vừa nhận khỏi dữ liệu giao dịch chính.</li>
-            <li>Fingerprint nhận diện exact duplicate và hỗ trợ transfer candidate.</li>
-            <li>User xem lại trước khi dữ liệu được đưa vào ledger.</li>
-          </ul>
+        <article class="guide" id="manual">
+          <header class="guide-head">
+            <div><span class="label">Cách 3 · Điền từng trường</span><h3>Thêm giao dịch trong app</h3><p>Dùng khi cần chọn chính xác loại thu/chi, ngày, tài khoản, danh mục hoặc ghi chú.</p></div>
+            <span class="badge">Đầy đủ nhất</span>
+          </header>
+          <div class="guide-body">
+            <ol class="guide-steps">
+              <li><div><strong>Mở tab Chi tiêu</strong><p>Nhấn nút nổi <strong>Thêm giao dịch</strong> ở góc dưới bên phải.</p></div></li>
+              <li><div><strong>Điền thông tin</strong><p>Chọn thu hoặc chi, nhập số tiền và chỉnh ngày, tài khoản, danh mục, ghi chú nếu cần.</p></div></li>
+              <li><div><strong>Lưu</strong><p>Kiểm tra lại rồi lưu. Lần mở sau, form tiếp tục bắt đầu từ các giá trị trong <strong>Mặc định</strong>.</p></div></li>
+            </ol>
+            <aside class="side-note">
+              <h4>Khi nào nên dùng?</h4>
+              <p>Dùng form đầy đủ cho giao dịch có ngày khác hôm nay, cần ghi chú dài, hoặc cần phân loại khác với mặc định.</p>
+            </aside>
+          </div>
         </article>
       </div>
     </section>
 
-    <section aria-labelledby="workflow-title">
+    <section id="review" aria-labelledby="review-title">
       <div class="section-head">
-        <span class="step">02</span>
-        <h2 id="workflow-title">Ba workflow ít thao tác nhất</h2>
+        <span class="step-label">04</span>
+        <h2 id="review-title">Hoàn tất các mục “Cần xem lại”</h2>
       </div>
-      <p class="section-copy">Chọn cách theo thời điểm: nói ngay, bấm một nút, hoặc đối soát một lần cuối kỳ.</p>
+      <p class="section-copy">MonMon giữ lại câu nói chưa đủ dữ liệu thay vì bỏ mất hoặc tự đoán. Những mục này chưa được tính vào tổng thu chi.</p>
 
-      <div class="workflow-grid">
-        <article class="card workflow">
-          <span class="workflow-number">01</span>
-          <div><h3>Vừa trả tiền</h3><p>Gọi Siri → nói “cafe 50k” → giao dịch được lưu hoặc đưa vào Needs Review.</p><p class="example">Nhanh nhất khi tay đang bận và câu nhập đã rõ.</p></div>
-        </article>
-        <article class="card workflow">
-          <span class="workflow-number">02</span>
-          <div><h3>Không muốn gọi Siri</h3><p>Bấm Action Button → nhập một dòng trong quick capture → lưu.</p><p class="example">Ổn định hơn trong môi trường ồn hoặc khi cần xem lại trước khi lưu.</p></div>
-        </article>
-        <article class="card workflow">
-          <span class="workflow-number">03</span>
-          <div><h3>Cuối kỳ ngân hàng</h3><p>Share TPBank PDF → map account → preview → import các dòng hợp lệ.</p><p class="example">Lớp “không miss” cho những giao dịch không được capture realtime.</p></div>
-        </article>
-        <article class="card workflow">
-          <span class="workflow-number">04</span>
-          <div><h3>Dữ liệu chưa đủ</h3><p>Mở Needs Review → bổ sung amount, account hoặc category → commit.</p><p class="example">Raw entry vẫn được giữ nguyên nên không phải nhớ và nhập lại từ đầu.</p></div>
-        </article>
+      <article class="guide">
+        <header class="guide-head">
+          <div><span class="label">Hộp chờ an toàn</span><h3>Sửa khi bạn có thời gian</h3><p>Bạn không phải xử lý ngay lúc đang thanh toán, nhưng nên dọn danh sách định kỳ.</p></div>
+          <span class="badge">Chưa tính tổng</span>
+        </header>
+        <div class="guide-body">
+          <ol class="guide-steps">
+            <li><div><strong>Mở tab Chi tiêu</strong><p>Nếu có mục chờ, một thẻ thông báo giao dịch bằng giọng nói cần xem lại sẽ xuất hiện ở đầu màn hình.</p></div></li>
+            <li><div><strong>Mở Cần xem lại</strong><p>Chạm vào thẻ, rồi chọn câu nhập bạn muốn hoàn tất. Nội dung gốc vẫn còn nguyên để bạn nhớ giao dịch nào.</p></div></li>
+            <li><div><strong>Bổ sung phần còn thiếu</strong><p>Nhập số tiền hoặc chọn tài khoản, danh mục cần thiết, sau đó lưu giao dịch.</p></div></li>
+          </ol>
+          <aside class="side-note"><h4>Thói quen tốt</h4><p>Mở <strong>Cần xem lại</strong> một lần mỗi tối hoặc trước khi xem báo cáo tuần. Khi danh sách trống, tổng tiền mới phản ánh đầy đủ các capture bằng giọng nói.</p></aside>
+        </div>
+      </article>
+    </section>
+
+    <section id="statement" aria-labelledby="statement-title">
+      <div class="section-head">
+        <span class="step-label">05</span>
+        <h2 id="statement-title">Nhập sao kê TPBank PDF để không bỏ sót</h2>
+      </div>
+      <p class="section-copy">Đây là bước đối chiếu cuối kỳ, không phải việc phải làm mỗi ngày. Hiện MonMon hỗ trợ sao kê TPBank PDF có thể chọn/copy được chữ.</p>
+
+      <article class="guide">
+        <header class="guide-head">
+          <div><span class="label">Một lần mỗi kỳ</span><h3>Share, kiểm tra rồi mới nhập</h3><p>MonMon không đưa gì vào sổ giao dịch cho đến khi bạn hoàn tất màn hình xem lại sao kê.</p></div>
+          <span class="badge">Có chống trùng</span>
+        </header>
+        <div class="guide-body">
+          <ol class="guide-steps">
+            <li><div><strong>Lấy file sao kê</strong><p>Xuất sao kê TPBank dạng PDF và lưu vào ứng dụng Tệp. Không dùng ảnh chụp hoặc PDF scan không có lớp chữ.</p></div></li>
+            <li><div><strong>Share vào MonMon</strong><p>Mở file trong Tệp, chọn <strong>Chia sẻ → MonMon</strong>. File sẽ được đưa vào <strong>Hộp thư nhập liệu</strong>.</p></div></li>
+            <li><div><strong>Mở file đang chờ</strong><p>Quay lại tab <strong>Chi tiêu</strong>, chạm biểu tượng khay ở góc trên hoặc thẻ thông báo sao kê đang chờ.</p></div></li>
+            <li><div><strong>Chọn tài khoản</strong><p>Mở sao kê, chọn đúng tài khoản MonMon tương ứng với tài khoản trong file.</p></div></li>
+            <li><div><strong>Xem từng dòng</strong><p>Kiểm tra tổng thu, tổng chi và các mục cần chú ý. Mở một dòng để đổi giữa giao dịch, chuyển khoản hoặc bỏ qua; cũng có thể vuốt để bỏ qua.</p></div></li>
+            <li><div><strong>Xác nhận nhập</strong><p>Lưu phần đã xem lại và giữ MonMon mở cho đến khi hoàn tất. Màn hình kết quả cho biết số giao dịch, chuyển khoản, bản ghi đã liên kết và mục bị bỏ qua.</p></div></li>
+          </ol>
+          <aside class="side-note">
+            <h4>Tránh ghi trùng</h4>
+            <p>Nếu một giao dịch đã được nhập bằng Siri hoặc thủ công, MonMon sẽ cố gắng nhận diện bản ghi trùng trong sao kê để liên kết thay vì tạo thêm.</p>
+            <p>Vẫn nên đọc phần <strong>Cần kiểm tra</strong> trước khi xác nhận.</p>
+          </aside>
+        </div>
+      </article>
+    </section>
+
+    <section id="recurring" aria-labelledby="recurring-title">
+      <div class="section-head">
+        <span class="step-label">06</span>
+        <h2 id="recurring-title">Tự tạo các khoản lặp lại</h2>
+      </div>
+      <p class="section-copy">Dùng cho tiền thuê nhà, thuê bao, lương hoặc khoản cố định để không phải nhập lại cùng một nội dung mỗi kỳ.</p>
+
+      <article class="guide">
+        <header class="guide-head">
+          <div><span class="label">Tự động theo lịch</span><h3>Tạo một quy tắc Lặp lại</h3><p>MonMon sinh giao dịch theo chu kỳ từ thông tin bạn đã đặt.</p></div>
+          <span class="badge">Giảm nhập lại</span>
+        </header>
+        <div class="guide-body">
+          <ol class="guide-steps">
+            <li><div><strong>Mở danh sách quy tắc</strong><p>Tại tab <strong>Chi tiêu</strong>, chọn <strong>Lặp lại</strong>, rồi nhấn dấu cộng <strong>Thêm lịch lặp</strong>.</p></div></li>
+            <li><div><strong>Nhập giao dịch mẫu</strong><p>Chọn loại thu/chi, số tiền, tài khoản, danh mục, ngày bắt đầu và chu kỳ.</p></div></li>
+            <li><div><strong>Lưu và theo dõi</strong><p>Lịch đang hoạt động xuất hiện ở phần trên; lịch tạm dừng nằm trong nhóm <strong>Tạm dừng</strong>. Bạn có thể mở lại để sửa hoặc đổi trạng thái.</p></div></li>
+          </ol>
+          <aside class="side-note"><h4>Nên dùng cho</h4><ul><li>Tiền thuê nhà hằng tháng</li><li>Gói dịch vụ định kỳ</li><li>Lương hoặc trợ cấp đều đặn</li></ul></aside>
+        </div>
+      </article>
+    </section>
+
+    <section id="report" aria-labelledby="report-title">
+      <div class="section-head">
+        <span class="step-label">07</span>
+        <h2 id="report-title">Xem báo cáo và tìm lại giao dịch</h2>
+      </div>
+      <p class="section-copy">Tab Báo cáo dùng cùng một bộ giao dịch cho số tổng, biểu đồ, phân loại và danh sách nên các con số luôn mô tả cùng phạm vi.</p>
+
+      <article class="guide">
+        <header class="guide-head">
+          <div><span class="label">Từ tổng quan đến chi tiết</span><h3>Trả lời “tiền đã đi đâu?”</h3><p>Chọn thời gian trước, sau đó thu hẹp bằng tìm kiếm hoặc bộ lọc.</p></div>
+          <span class="badge">Ngày · tháng · năm</span>
+        </header>
+        <div class="guide-body">
+          <ol class="guide-steps">
+            <li><div><strong>Mở tab Báo cáo</strong><p>Mặc định bạn thấy báo cáo theo năm, gồm tổng thu, tổng chi, dòng tiền theo tháng, xu hướng và phân bổ danh mục.</p></div></li>
+            <li><div><strong>Chọn khoảng thời gian</strong><p>Dùng thanh tháng hoặc nút lịch để xem ngày, tháng, năm hay khoảng ngày tùy chọn.</p></div></li>
+            <li><div><strong>Tìm nhanh</strong><p>Nhấn tìm kiếm và nhập ghi chú, tên danh mục hoặc số tiền, ví dụ <code>cafe</code> hay <code>50000</code>.</p></div></li>
+            <li><div><strong>Lọc chính xác</strong><p>Mở <strong>Bộ lọc</strong> để chọn chiều thu/chi, một hay nhiều danh mục và tài khoản.</p></div></li>
+            <li><div><strong>Đi vào chi tiết</strong><p>Chạm một danh mục hoặc kỳ thời gian để xem đúng các giao dịch tạo nên con số đó.</p></div></li>
+          </ol>
+          <aside class="side-note"><h4>Nếu số liệu có vẻ thiếu</h4><p>Quay lại tab <strong>Chi tiêu</strong>, xử lý hết mục <strong>Cần xem lại</strong> và kiểm tra <strong>Hộp thư nhập liệu</strong>. Các mục chưa hoàn tất không được tính vào báo cáo.</p></aside>
+        </div>
+      </article>
+    </section>
+
+    <section aria-labelledby="routine-title">
+      <div class="section-head">
+        <span class="step-label">08</span>
+        <h2 id="routine-title">Routine đề xuất để vừa lười vừa không miss</h2>
+      </div>
+      <p class="section-copy">Một nhịp dùng đơn giản giúp giảm nhập tay mà vẫn giữ báo cáo đáng tin cậy.</p>
+
+      <div class="routine">
+        <article><span class="label">Ngay khi phát sinh</span><h3>5–10 giây</h3><p>Dùng Siri cho câu rõ; dùng Action Button nếu đang ở nơi ồn hoặc muốn nhìn lại trước khi lưu.</p></article>
+        <article><span class="label">Cuối ngày hoặc cuối tuần</span><h3>1–2 phút</h3><p>Mở <strong>Cần xem lại</strong>, bổ sung các mục còn thiếu và kiểm tra những giao dịch quan trọng.</p></article>
+        <article><span class="label">Cuối kỳ sao kê</span><h3>Một lần</h3><p>Share TPBank PDF, xử lý Hộp thư nhập liệu và xem Báo cáo sau khi đối chiếu xong.</p></article>
       </div>
     </section>
 
-    <section aria-labelledby="friction-title">
+    <section aria-labelledby="help-title">
       <div class="section-head">
-        <span class="step">03</span>
-        <h2 id="friction-title">Những lớp giảm thao tác phía sau</h2>
+        <span class="step-label">09</span>
+        <h2 id="help-title">Khi tính năng không hoạt động như mong đợi</h2>
       </div>
-      <p class="section-copy">Các capability dùng chung giúp mọi điểm vào nhanh hơn mà vẫn giữ an toàn dữ liệu.</p>
-
-      <div class="feature-strip">
-        <article><h3>Natural text parser</h3><p>Hiểu amount VND, ngày tương đối, thu/chi, account và category từ một câu.</p></article>
-        <article><h3>Transaction defaults</h3><p>Đặt account và category mặc định riêng cho giao dịch thu hoặc chi.</p></article>
-        <article><h3>Needs Review</h3><p>Giữ capture mơ hồ ngoài totals cho tới khi user hoàn tất dữ liệu.</p></article>
-        <article><h3>Recurring rules</h3><p>Tạo các giao dịch lặp lại thay cho việc nhập lại cùng một khoản mỗi kỳ.</p></article>
-      </div>
-    </section>
-
-    <section aria-labelledby="report-title">
-      <div class="section-head">
-        <span class="step">04</span>
-        <h2 id="report-title">Đi từ giao dịch đến báo cáo nhanh</h2>
-      </div>
-      <p class="section-copy">Sau khi capture, cùng dữ liệu có thể được đổi góc nhìn mà không phải tạo báo cáo thủ công.</p>
-
-      <div class="report-grid">
-        <article class="card report-card"><span class="label">Overview</span><h3>Thu, chi và số giao dịch</h3><p>Spending Overview tóm tắt dòng tiền của khoảng thời gian đang chọn.</p></article>
-        <article class="card report-card"><span class="label">Time</span><h3>Ngày, tháng, năm hoặc custom range</h3><p>Date range và month rail giúp chuyển kỳ báo cáo ngay trên danh sách.</p></article>
-        <article class="card report-card"><span class="label">Category</span><h3>Chi tiêu theo nhóm</h3><p>Category Breakdown cho biết tiền đi đâu và cho phép drill-down vào giao dịch.</p></article>
-        <article class="card report-card"><span class="label">Find</span><h3>Tìm theo nội dung và số tiền</h3><p>Search hỗ trợ note, category, amount và filter có cấu trúc để truy lại giao dịch.</p></article>
+      <div class="help-grid">
+        <article class="help-card"><h3>Siri không gọi đúng MonMon</h3><p>Mở ứng dụng Phím tắt, tìm MonMon hoặc MonMon Dev và kiểm tra action <strong>Ghi giao dịch</strong>. Khi nói, dùng đúng tên app đang cài.</p></article>
+        <article class="help-card"><h3>Câu nào cũng vào Cần xem lại</h3><p>Kiểm tra <strong>Chi tiêu → Mặc định</strong> và nói rõ số tiền. Tài khoản hoặc danh mục mặc định bị thiếu sẽ khiến câu ngắn chưa đủ để lưu.</p></article>
+        <article class="help-card"><h3>Action Button chỉ mở app</h3><p>Vào lại <strong>Cài đặt iPhone → Nút tác vụ → Phím tắt</strong> và chắc chắn action được chọn là <strong>MonMon → Ghi nhanh</strong>.</p></article>
+        <article class="help-card"><h3>Sao kê không xuất hiện</h3><p>Đảm bảo file là TPBank PDF có lớp chữ, sau đó share lại từ ứng dụng Tệp. Mở tab Chi tiêu và chạm biểu tượng khay để tải lại Hộp thư nhập liệu.</p></article>
       </div>
     </section>
 
     <section aria-labelledby="boundary-title">
       <div class="section-head">
-        <span class="step">05</span>
-        <h2 id="boundary-title">Giới hạn hiện tại</h2>
+        <span class="step-label">10</span>
+        <h2 id="boundary-title">Những gì MonMon chưa tự làm</h2>
       </div>
       <div class="boundary">
-        <h3>Không nên hiểu “đã có” thành “đã phủ mọi giao dịch”</h3>
+        <h3>“Nhập nhanh” chưa có nghĩa là tự lấy mọi giao dịch ngân hàng</h3>
         <ul>
-          <li>Statement import hiện hỗ trợ TPBank PDF có text layer; CSV, scan PDF và ngân hàng khác chưa thuộc flow này.</li>
-          <li>Screenshot/receipt OCR, Apple Pay Automation và Notification Automation chưa phải capability đang chạy trong app.</li>
-          <li>Siri vẫn cần activation phrase; câu nói mơ hồ được giữ để review thay vì tự đoán.</li>
-          <li>Siri và Action Button vẫn cần acceptance test trên iPhone vật lý cho cả trạng thái khóa và mở máy.</li>
+          <li>Sao kê hiện hỗ trợ TPBank PDF có lớp chữ; CSV, PDF scan và ngân hàng khác chưa được hỗ trợ.</li>
+          <li>MonMon chưa tự đọc screenshot/receipt, Apple Pay hoặc notification của ứng dụng ngân hàng.</li>
+          <li>Action Button cần user tự gán trong Cài đặt iPhone.</li>
+          <li>Giao dịch mơ hồ cần user hoàn tất trước khi xuất hiện trong tổng thu chi và báo cáo.</li>
         </ul>
-        <p>Xem đánh giá khả thi, rủi ro và TODO tại <a href="bank-transaction-auto-note-research.html">Nghiên cứu tự động ghi giao dịch</a>.</p>
+        <p>Các hướng chưa triển khai được đánh giá riêng tại <a href="bank-transaction-auto-note-research.html">Nghiên cứu tự động ghi giao dịch</a>.</p>
       </div>
     </section>
 
-    <footer>Feature note phản ánh repository ngày 26.08.2026. Đây là tài liệu trạng thái sản phẩm; các ý tưởng và việc chưa làm được giữ riêng trong trang research.</footer>
+    <footer>Hướng dẫn phản ánh tính năng và nhãn giao diện trong repository ngày 26.08.2026. Bản dev có tên “MonMon Dev”, vì vậy câu gọi Siri phải dùng đúng tên này.</footer>
   </main>
 </body>
 </html>
