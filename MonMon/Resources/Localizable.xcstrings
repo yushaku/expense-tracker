@@ -1,6 +1,56 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "All activity": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tất cả hoạt động"
+          }
+        }
+      }
+    },
+    "No activity recorded for this account.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có hoạt động nào được ghi nhận cho tài khoản này."
+          }
+        }
+      }
+    },
+    "No spending recorded this month.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa ghi nhận chi tiêu trong tháng này."
+          }
+        }
+      }
+    },
+    "Shows all activity for this account.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xem toàn bộ hoạt động của tài khoản này."
+          }
+        }
+      }
+    },
+    "Spending by account": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chi tiêu theo tài khoản"
+          }
+        }
+      }
+    },
     "%lld spoken transactions need review": {
       "localizations": {
         "vi": {

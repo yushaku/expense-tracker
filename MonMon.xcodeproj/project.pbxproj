@@ -74,11 +74,15 @@
 		A00000000000000000000254 /* TransactionSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000165 /* TransactionSummary.swift */; };
 		A00000000000000000009006 /* ReportFilterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000009106 /* ReportFilterSheet.swift */; };
 		A00000000000000000009005 /* ReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000009105 /* ReportView.swift */; };
+		R20000000000000000000101 /* AccountReportSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = R20000000000000000000001 /* AccountReportSummary.swift */; };
+		R20000000000000000000102 /* AccountSpendingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = R20000000000000000000002 /* AccountSpendingSection.swift */; };
+		R20000000000000000000103 /* AccountActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = R20000000000000000000003 /* AccountActivityView.swift */; };
 		A00000000000000000009004 /* NetTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000009104 /* NetTrendCard.swift */; };
 		A00000000000000000009001 /* TransactionQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000009101 /* TransactionQuery.swift */; };
 		A00000000000000000000255 /* TransactionPeriodTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000166 /* TransactionPeriodTests.swift */; };
 		A00000000000000000000256 /* TransactionSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000167 /* TransactionSummaryTests.swift */; };
 		A00000000000000000009002 /* TransactionSearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000009102 /* TransactionSearchTests.swift */; };
+		R20000000000000000000104 /* AccountReportSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = R20000000000000000000004 /* AccountReportSummaryTests.swift */; };
 		A00000000000000000000257 /* CategoryDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000168 /* CategoryDraft.swift */; };
 		A00000000000000000000258 /* CategorySeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000169 /* CategorySeed.swift */; };
 		A00000000000000000000259 /* CategoryEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000170 /* CategoryEditorForm.swift */; };
@@ -394,11 +398,15 @@
 		A00000000000000000000165 /* TransactionSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionSummary.swift; sourceTree = "<group>"; };
 		A00000000000000000009106 /* ReportFilterSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportFilterSheet.swift; sourceTree = "<group>"; };
 		A00000000000000000009105 /* ReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportView.swift; sourceTree = "<group>"; };
+		R20000000000000000000001 /* AccountReportSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountReportSummary.swift; sourceTree = "<group>"; };
+		R20000000000000000000002 /* AccountSpendingSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSpendingSection.swift; sourceTree = "<group>"; };
+		R20000000000000000000003 /* AccountActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountActivityView.swift; sourceTree = "<group>"; };
 		A00000000000000000009104 /* NetTrendCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetTrendCard.swift; sourceTree = "<group>"; };
 		A00000000000000000009101 /* TransactionQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionQuery.swift; sourceTree = "<group>"; };
 		A00000000000000000000166 /* TransactionPeriodTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionPeriodTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000167 /* TransactionSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionSummaryTests.swift; sourceTree = "<group>"; };
 		A00000000000000000009102 /* TransactionSearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionSearchTests.swift; sourceTree = "<group>"; };
+		R20000000000000000000004 /* AccountReportSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountReportSummaryTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000168 /* CategoryDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryDraft.swift; sourceTree = "<group>"; };
 		A00000000000000000000169 /* CategorySeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySeed.swift; sourceTree = "<group>"; };
 		A00000000000000000000170 /* CategoryEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryEditorForm.swift; sourceTree = "<group>"; };
@@ -918,6 +926,9 @@
 				A00000000000000000000165 /* TransactionSummary.swift */,
 				A00000000000000000009106 /* ReportFilterSheet.swift */,
 				A00000000000000000009105 /* ReportView.swift */,
+				R20000000000000000000001 /* AccountReportSummary.swift */,
+				R20000000000000000000002 /* AccountSpendingSection.swift */,
+				R20000000000000000000003 /* AccountActivityView.swift */,
 				A00000000000000000009104 /* NetTrendCard.swift */,
 				A00000000000000000009101 /* TransactionQuery.swift */,
 				A00000000000000000000168 /* CategoryDraft.swift */,
@@ -954,6 +965,7 @@
 				A00000000000000000000611 /* TransactionRangeTests.swift */,
 				A00000000000000000000167 /* TransactionSummaryTests.swift */,
 				A00000000000000000009102 /* TransactionSearchTests.swift */,
+				R20000000000000000000004 /* AccountReportSummaryTests.swift */,
 				C10000000000000000000004 /* TransactionCalendarTests.swift */,
 				A00000000000000000000174 /* CategoryDraftTests.swift */,
 				A00000000000000000000175 /* TransactionCategoryPersistenceTests.swift */,
@@ -1393,6 +1405,9 @@
 				A00000000000000000000254 /* TransactionSummary.swift in Sources */,
 				A00000000000000000009006 /* ReportFilterSheet.swift in Sources */,
 				A00000000000000000009005 /* ReportView.swift in Sources */,
+				R20000000000000000000101 /* AccountReportSummary.swift in Sources */,
+				R20000000000000000000102 /* AccountSpendingSection.swift in Sources */,
+				R20000000000000000000103 /* AccountActivityView.swift in Sources */,
 				A00000000000000000009004 /* NetTrendCard.swift in Sources */,
 				A00000000000000000009001 /* TransactionQuery.swift in Sources */,
 				A00000000000000000000253 /* TransactionPeriod.swift in Sources */,
@@ -1530,6 +1545,7 @@
 				A00000000000000000000263 /* CategoryDraftTests.swift in Sources */,
 				A00000000000000000000256 /* TransactionSummaryTests.swift in Sources */,
 				A00000000000000000009002 /* TransactionSearchTests.swift in Sources */,
+				R20000000000000000000104 /* AccountReportSummaryTests.swift in Sources */,
 				C10000000000000000000104 /* TransactionCalendarTests.swift in Sources */,
 				A00000000000000000000255 /* TransactionPeriodTests.swift in Sources */,
 				A00000000000000000000613 /* TransactionRangeTests.swift in Sources */,

@@ -31,6 +31,8 @@ struct ReportView: View {
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
 
+    @State private var summaryMonth = TransactionPeriod.startOfMonth(for: .now)
+
     /// A year, not a month: the charts here are about a run of months, and a
     /// period narrower than one bar has nothing to trend.
     @State private var query = TransactionQuery(range: .year(containing: .now))
@@ -74,6 +76,11 @@ struct ReportView: View {
             .navigationDestination(for: CategoryPeriod.self) { period in
                 CategoryTransactionsView(period: period)
             }
+            .navigationDestination(for: AccountActivityRoute.self) { route in
+                if let account = account(route.accountID) {
+                    AccountActivityView(account: account)
+                }
+            }
             .sheet(isPresented: $isFiltering) {
                 ReportFilterSheet(
                     query: $query,
@@ -101,6 +108,7 @@ struct ReportView: View {
         // Every card below reads the same results, so they are worked out once
         // here rather than once per card.
         let results = self.results
+        let summaryTransactions = self.summaryTransactions
         let visibility = ReportContentVisibility(query: query)
 
         return ScrollView {
@@ -110,12 +118,21 @@ struct ReportView: View {
                 }
 
                 SpendingOverviewCard(
-                    title: query.range.title(in: locale),
-                    income: TransactionSummary.totalIncome(of: results),
-                    expense: TransactionSummary.totalExpense(of: results),
-                    count: results.count
+                    title: summaryRange.title(in: locale),
+                    income: TransactionSummary.totalIncome(of: summaryTransactions),
+                    expense: TransactionSummary.totalExpense(of: summaryTransactions),
+                    count: summaryTransactions.count
                 )
                 .accessibilityIdentifier("report-overview")
+
+                AccountSpendingSection(
+                    monthTitle: summaryRange.title(in: locale),
+                    rows: AccountSpendingSummary.rows(
+                        accounts: accounts,
+                        transactions: summaryTransactions
+                    ),
+                    accounts: accounts
+                )
 
                 if results.isEmpty {
                     emptyState
@@ -152,6 +169,14 @@ struct ReportView: View {
         )
     }
 
+    private var summaryRange: TransactionRange {
+        .month(containing: summaryMonth)
+    }
+
+    private var summaryTransactions: [MoneyTransaction] {
+        TransactionSummary.inRange(summaryRange, transactions: transactions)
+    }
+
     private var categoryNames: [UUID: String] {
         Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0.name) })
     }
@@ -174,11 +199,11 @@ struct ReportView: View {
         query.range.contains(.now) ? .now : query.range.start
     }
 
-    /// The months either side of the report period, pinned under the navigation
-    /// bar so moving from a wider report to one month takes a single tap.
+    /// The month summarized by the overview and account spending, kept separate
+    /// from the wider query that drives charts and search.
     private var monthRail: some View {
-        MonthRail(months: railMonths, selection: reportMonth) { month in
-            query.range = .month(containing: month)
+        MonthRail(months: railMonths, selection: summaryMonth) { month in
+            summaryMonth = TransactionPeriod.startOfMonth(for: month)
         }
         .background(MonMonTheme.canvas)
         .overlay(alignment: .bottom) {
@@ -188,18 +213,12 @@ struct ReportView: View {
         }
     }
 
-    /// A wider period is represented by its first month, matching the Spending
-    /// screen when its date filter is set to a year or a custom range.
-    private var reportMonth: Date {
-        TransactionPeriod.startOfMonth(for: query.range.start)
-    }
-
-    /// Keep the selected month on the rail even when a custom range lies beyond
-    /// the calendar picker's ordinary bounds.
+    /// Keep the selected summary month on the rail even when it lies beyond the
+    /// calendar picker's ordinary bounds.
     private var railMonths: [Date] {
         TransactionPeriod.months(
-            from: min(CalendarTheme.startMonth(), reportMonth),
-            through: max(CalendarTheme.endMonth(), reportMonth)
+            from: min(CalendarTheme.startMonth(), summaryMonth),
+            through: max(CalendarTheme.endMonth(), summaryMonth)
         )
     }
 
