@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		S10000000000000000000201 /* TransactionCaptureParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000101 /* TransactionCaptureParser.swift */; };
+		S10000000000000000000202 /* TransactionCaptureParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000102 /* TransactionCaptureParserTests.swift */; };
 		33A69BFF303AE3A900432AF4 /* MijickCalendarView in Frameworks */ = {isa = PBXBuildFile; productRef = 33A69BFE303AE3A900432AF4 /* MijickCalendarView */; };
 		A00000000000000000000201 /* MonMonApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000110 /* MonMonApp.swift */; };
 		A00000000000000000000203 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000112 /* ContentView.swift */; };
@@ -296,6 +298,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		S10000000000000000000101 /* TransactionCaptureParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureParser.swift; sourceTree = "<group>"; };
+		S10000000000000000000102 /* TransactionCaptureParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureParserTests.swift; sourceTree = "<group>"; };
 		33A69BFF303B567700432AF4 /* MonMon.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MonMon.entitlements; sourceTree = "<group>"; };
 		33DE4088303D787400918EDF /* MonMonDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MonMonDebug.entitlements; sourceTree = "<group>"; };
 		A00000000000000000000101 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
@@ -838,6 +842,7 @@
 		A00000000000000000000024 /* Transactions */ = {
 			isa = PBXGroup;
 			children = (
+				S10000000000000000000101 /* TransactionCaptureParser.swift */,
 				A00000000000000000000D12 /* TransactionDefaultsView.swift */,
 				A00000000000000000000D11 /* TransactionDefaultsCard.swift */,
 				A00000000000000000000160 /* TransactionKind.swift */,
@@ -877,6 +882,7 @@
 		A00000000000000000000025 /* Transactions */ = {
 			isa = PBXGroup;
 			children = (
+				S10000000000000000000102 /* TransactionCaptureParserTests.swift */,
 				A00000000000000000000166 /* TransactionPeriodTests.swift */,
 				A00000000000000000000611 /* TransactionRangeTests.swift */,
 				A00000000000000000000167 /* TransactionSummaryTests.swift */,
@@ -1224,6 +1230,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				S10000000000000000000201 /* TransactionCaptureParser.swift in Sources */,
 				F10000000000000000000202 /* StatementImportInboxService.swift in Sources */,
 				F10000000000000000000204 /* StatementImportInbox.swift in Sources */,
 				F10000000000000000000205 /* StatementImportInboxView.swift in Sources */,
@@ -1397,6 +1404,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				S10000000000000000000202 /* TransactionCaptureParserTests.swift in Sources */,
 				F10000000000000000000201 /* StatementImportInboxServiceTests.swift in Sources */,
 				F10000000000000000000203 /* StatementImportInboxTests.swift in Sources */,
 				G10000000000000000000201 /* StatementImportProvenanceTests.swift in Sources */,
