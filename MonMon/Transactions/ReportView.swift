@@ -2,12 +2,23 @@ import SwiftData
 import SwiftUI
 
 /// Where the ledger is looked back over rather than added to: search words, a
-/// period, filters, the charts that answer them, and the transactions behind
-/// every figure.
+/// period, filters, the figures that answer them, and search results when words
+/// have been entered.
 ///
 /// The Spending screen is for recording today. This screen is for the question
 /// that comes later — where did it go — so one query drives the charts and the
-/// list together and the two can never describe different transactions.
+/// search results together and the two can never describe different
+/// transactions.
+struct ReportContentVisibility: Equatable {
+    let showsNetTrend: Bool
+    let showsTransactionList: Bool
+
+    init(query: TransactionQuery) {
+        showsNetTrend = !query.hasSearchText
+        showsTransactionList = query.hasSearchText
+    }
+}
+
 struct ReportView: View {
     @Environment(\.locale) private var locale
 
@@ -90,6 +101,7 @@ struct ReportView: View {
         // Every card below reads the same results, so they are worked out once
         // here rather than once per card.
         let results = self.results
+        let visibility = ReportContentVisibility(query: query)
 
         return ScrollView {
             LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
@@ -97,10 +109,18 @@ struct ReportView: View {
                     activeFilters
                 }
 
+                SpendingOverviewCard(
+                    title: query.range.title(in: locale),
+                    income: TransactionSummary.totalIncome(of: results),
+                    expense: TransactionSummary.totalExpense(of: results),
+                    count: results.count
+                )
+                .accessibilityIdentifier("report-overview")
+
                 if results.isEmpty {
                     emptyState
                 } else {
-                    if !query.hasSearchText {
+                    if visibility.showsNetTrend {
                         NetTrendCard(points: TransactionSummary.runningNet(results))
                     }
 
@@ -110,7 +130,9 @@ struct ReportView: View {
                         range: query.range
                     )
 
-                    resultsSection(results)
+                    if visibility.showsTransactionList {
+                        resultsSection(results)
+                    }
                 }
             }
             .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -327,9 +349,9 @@ struct ReportView: View {
             : "Nothing recorded \(query.range.phrase(in: locale))."
     }
 
-    /// The transactions behind every figure above, broken at each day the way
-    /// the Spending screen breaks them, so a result read here reads the same as
-    /// it does where it was recorded.
+    /// Search results broken at each day the way the Spending screen breaks
+    /// transactions, so a result read here reads the same as it does where it
+    /// was recorded.
     private func resultsSection(_ results: [MoneyTransaction]) -> some View {
         VStack(alignment: .leading, spacing: 20) {
             HStack(spacing: 12) {

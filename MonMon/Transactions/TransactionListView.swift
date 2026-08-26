@@ -56,13 +56,6 @@ struct TransactionListView: View {
                             importStatusCard
                         }
 
-                        SpendingOverviewCard(
-                            title: range.title(in: locale),
-                            income: income,
-                            expense: expense,
-                            count: visibleTransactions.count
-                        )
-
                         if accounts.isEmpty {
                             noAccountState
                         } else {
@@ -524,14 +517,6 @@ struct TransactionListView: View {
         )
     }
 
-    private var income: Decimal {
-        TransactionSummary.totalIncome(of: visibleTransactions)
-    }
-
-    private var expense: Decimal {
-        TransactionSummary.totalExpense(of: visibleTransactions)
-    }
-
     private func signed(_ amount: Decimal) -> String {
         let magnitude = amount < 0 ? -amount : amount
         let sign = amount < 0 ? "−" : "+"
@@ -555,8 +540,8 @@ struct TransactionListView: View {
 
                 Spacer(minLength: 8)
 
-                // Narrows the grid and the list. The overview card above still
-                // counts both directions, which is what the period is judged on.
+                // This affects the calendar and rows only. The period-wide
+                // figures live on Report and continue to count both directions.
                 Picker("Show", selection: $listFilter) {
                     ForEach(TransactionListFilter.allCases) { filter in
                         Text(filter.displayName)
