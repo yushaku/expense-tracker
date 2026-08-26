@@ -1,6 +1,426 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%lld spoken transactions need review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld giao dịch bằng giọng nói cần xem lại"
+          }
+        }
+      }
+    },
+    "1 spoken transaction needs review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 giao dịch bằng giọng nói cần xem lại"
+          }
+        }
+      }
+    },
+    "Amount missing": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thiếu số tiền"
+          }
+        }
+      }
+    },
+    "Choose MonMon → Quick Capture.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn MonMon → Ghi nhanh."
+          }
+        }
+      }
+    },
+    "Couldn’t save that entry. Try again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể lưu nội dung này. Hãy thử lại."
+          }
+        }
+      }
+    },
+    "Couldn’t understand that entry. Try again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa hiểu nội dung này. Hãy thử lại."
+          }
+        }
+      }
+    },
+    "Dictates one sentence and sends it to MonMon without opening the app. iOS may still ask you to unlock before dictation.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đọc một câu và gửi vào MonMon mà không mở app. iOS vẫn có thể yêu cầu mở khóa trước khi nhập bằng giọng nói."
+          }
+        }
+      }
+    },
+    "Every spoken transaction has been handled.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mọi giao dịch bằng giọng nói đã được xử lý."
+          }
+        }
+      }
+    },
+    "Finish the details before these entries affect your totals.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoàn tất thông tin trước khi các mục này ảnh hưởng đến tổng tiền."
+          }
+        }
+      }
+    },
+    "For example: 50k lunch cash yesterday": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ví dụ: 50k ăn trưa tiền mặt hôm qua"
+          }
+        }
+      }
+    },
+    "For voice-only capture, install the voice template above, then choose it instead.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Để chỉ nhập bằng giọng nói, hãy cài mẫu phía trên rồi chọn mẫu đó."
+          }
+        }
+      }
+    },
+    "Install voice shortcut": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cài phím tắt giọng nói"
+          }
+        }
+      }
+    },
+    "Missing details will stay in Needs review.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thông tin còn thiếu sẽ được giữ trong mục Cần xem lại."
+          }
+        }
+      }
+    },
+    "MonMon couldn’t record that transaction. Open the app and check your defaults.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không thể ghi giao dịch đó. Hãy mở app và kiểm tra thiết lập mặc định."
+          }
+        }
+      }
+    },
+    "Needs review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cần xem lại"
+          }
+        }
+      }
+    },
+    "Nothing to review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không có gì cần xem lại"
+          }
+        }
+      }
+    },
+    "Open MonMon ready for one natural-language entry.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở MonMon sẵn sàng nhận một câu nhập tự nhiên."
+          }
+        }
+      }
+    },
+    "Open Quick Capture": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở ghi nhanh"
+          }
+        }
+      }
+    },
+    "Open Settings → Action Button → Shortcut.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở Cài đặt → Nút tác vụ → Phím tắt."
+          }
+        }
+      }
+    },
+    "Optional voice shortcut": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phím tắt giọng nói tùy chọn"
+          }
+        }
+      }
+    },
+    "Quick Capture": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi nhanh"
+          }
+        }
+      }
+    },
+    "Quick capture": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi nhanh"
+          }
+        }
+      }
+    },
+    "Record %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi %@"
+          }
+        }
+      }
+    },
+    "Record Transaction": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi giao dịch"
+          }
+        }
+      }
+    },
+    "Record an expense or income from one natural-language sentence.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi một khoản chi hoặc thu từ một câu nói tự nhiên."
+          }
+        }
+      }
+    },
+    "Review & save": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiểm tra & lưu"
+          }
+        }
+      }
+    },
+    "Review %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xem lại %@"
+          }
+        }
+      }
+    },
+    "Save for review": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lưu để xem lại"
+          }
+        }
+      }
+    },
+    "Save for review?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lưu để xem lại?"
+          }
+        }
+      }
+    },
+    "Save this transaction?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lưu giao dịch này?"
+          }
+        }
+      }
+    },
+    "Save transaction": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lưu giao dịch"
+          }
+        }
+      }
+    },
+    "Save this transaction in MonMon?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lưu giao dịch này trong MonMon?"
+          }
+        }
+      }
+    },
+    "Saved in MonMon.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã lưu trong MonMon."
+          }
+        }
+      }
+    },
+    "Saved for review in MonMon. Nothing was added to totals.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã lưu để xem lại trong MonMon. Chưa cộng vào tổng tiền."
+          }
+        }
+      }
+    },
+    "Say it naturally": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cứ nói tự nhiên"
+          }
+        }
+      }
+    },
+    "Say “Siri, record a transaction in MonMon”, then answer with one sentence.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nói “Siri, ghi giao dịch bằng MonMon”, rồi trả lời bằng một câu."
+          }
+        }
+      }
+    },
+    "Siri & Action Button": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siri & Nút tác vụ"
+          }
+        }
+      }
+    },
+    "Siri shortcut is ready": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phím tắt Siri đã sẵn sàng"
+          }
+        }
+      }
+    },
+    "Some details are unclear. Save it for review?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Một số thông tin chưa rõ. Lưu lại để xem sau?"
+          }
+        }
+      }
+    },
+    "The one-tap template has not been published yet.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mẫu cài một chạm chưa được phát hành."
+          }
+        }
+      }
+    },
+    "Use with Action Button": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dùng với Nút tác vụ"
+          }
+        }
+      }
+    },
+    "What did you spend or receive?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bạn đã chi hoặc nhận khoản gì?"
+          }
+        }
+      }
+    },
     "Action": {
       "localizations": {
         "vi": {

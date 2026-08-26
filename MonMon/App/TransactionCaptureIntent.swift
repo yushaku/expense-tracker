@@ -23,35 +23,6 @@ struct TransactionCaptureIntentDependency: @unchecked Sendable {
         }
     }
 
-    func presentation(for capture: ParsedTransactionCapture) async throws
-        -> TransactionCaptureIntentPresentation
-    {
-        try await MainActor.run {
-            let context = ModelContext(container)
-            let accounts = try context.fetch(FetchDescriptor<CashAccount>())
-            let categories = try context.fetch(FetchDescriptor<TransactionCategory>())
-            let locale = AppLanguage.stored.locale
-
-            return TransactionCaptureIntentPresentation(
-                amount: capture.amount.map(VNDCurrency.format) ?? "Unknown amount",
-                kind: capture.kind.displayName(in: locale),
-                account: accounts.first { $0.id == capture.accountID }?.name ?? "Unknown account",
-                category: categories.first { $0.id == capture.categoryID }?.name
-                    ?? "Unknown category",
-                date: capture.occurredAt.formatted(
-                    Date.FormatStyle(date: .abbreviated, time: .omitted).locale(locale)
-                )
-            )
-        }
-    }
-}
-
-struct TransactionCaptureIntentPresentation: Equatable, Sendable {
-    let amount: String
-    let kind: String
-    let account: String
-    let category: String
-    let date: String
 }
 
 enum TransactionCaptureIntentError: Error, LocalizedError, Sendable {
@@ -103,29 +74,23 @@ struct CaptureTransactionIntent: AppIntent {
     func perform() async throws -> some IntentResult & ProvidesDialog {
         do {
             let capture = try await dependency.prepare(rawEntry)
-            let presentation = try await dependency.presentation(for: capture)
 
             if capture.isReady {
-                let confirmationDialog: IntentDialog =
-                    """
-                    Add \(presentation.kind) \(presentation.amount) to \(presentation.category), \
-                    from \(presentation.account), on \(presentation.date)?
-                    """
                 try await requestConfirmation(
                     actionName: .add,
-                    dialog: confirmationDialog
+                    dialog: "Save this transaction in MonMon?"
                 )
             } else {
                 try await requestConfirmation(
                     actionName: .add,
-                    dialog: "Some details are unclear. Save “\(capture.rawText)” for review?"
+                    dialog: "Some details are unclear. Save it for review?"
                 )
             }
 
             let result = try await dependency.commit(capture)
             switch result.disposition {
             case .transaction:
-                return .result(dialog: "Saved \(presentation.amount) in MonMon.")
+                return .result(dialog: "Saved in MonMon.")
             case .pendingReview:
                 return .result(dialog: "Saved for review in MonMon. Nothing was added to totals.")
             }

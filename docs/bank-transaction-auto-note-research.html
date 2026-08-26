@@ -562,12 +562,12 @@
           </ul>
         </article>
 
-        <article class="capture-feature" data-status="missing">
+        <article class="capture-feature" data-status="partial">
           <div class="feature-header">
             <div><span class="feature-code">CAP-04</span><h3>Siri / Action Button</h3></div>
-            <span class="feature-status">Chưa làm</span>
+            <span class="feature-status">Đã có MVP</span>
           </div>
-          <p class="feature-summary">Siri gọi App Shortcut rồi hỏi một câu nhập tự do như “50 nghìn ăn trưa tiền mặt”. Action Button mở thẳng quick capture hoặc chạy cùng shortcut sau khi user gán trong Settings.</p>
+          <p class="feature-summary">Siri đã gọi App Shortcut, hỏi một câu nhập tự do như “50 nghìn ăn trưa tiền mặt” và lưu mà không cần mở app. Action Button có thể mở thẳng quick capture; voice template one-tap còn chờ URL iCloud thật.</p>
           <dl class="feature-facts">
             <div class="feature-fact"><dt>Platform</dt><dd>Khả thi từ iOS 18</dd></div>
             <div class="feature-fact"><dt>Siri flow</dt><dd>Gọi + một câu trả lời</dd></div>
@@ -575,13 +575,14 @@
           </dl>
           <h4 class="todo-heading">Implementation checklist</h4>
           <ul class="todo-list">
-            <li class="todo-item"><span class="todo-state">Todo</span><span>Tạo custom <code>CaptureTransactionIntent</code> và <code>AppShortcutsProvider</code>; Apple hiện chưa có finance app schema.</span></li>
-            <li class="todo-item"><span class="todo-state">Todo</span><span>Chỉ yêu cầu một parameter <code>rawEntry</code>; account, kind và category lấy từ default/rule trước khi hỏi thêm.</span></li>
-            <li class="todo-item"><span class="todo-state">Todo</span><span>Stage raw entry trước; parse “50k”, “50 nghìn”, “một triệu hai” và không bỏ mất câu nói khi category còn mơ hồ.</span></li>
-            <li class="todo-item"><span class="todo-state">Todo</span><span>Tách stage-only intent có thể chạy khi khóa máy khỏi thao tác review/commit cần authentication.</span></li>
-            <li class="todo-item"><span class="todo-state">Todo</span><span>Localize title, dialog và phrase bằng <code>AppShortcuts.xcstrings</code> cho tiếng Việt/Anh.</span></li>
-            <li class="todo-item"><span class="todo-state">Todo</span><span>Trả confirmation/result snippet ngắn; không đọc số dư hoặc chi tiết nhạy cảm trên Lock Screen.</span></li>
-            <li class="todo-item"><span class="todo-state">Todo</span><span>Thêm <code>SiriTipView</code>/<code>ShortcutsLink</code>; test Siri và Action Button trên iPhone vật lý khi khóa/mở máy.</span></li>
+            <li class="todo-item done"><span class="todo-state">Đã có</span><span><code>CaptureTransactionIntent</code>, <code>OpenQuickCaptureIntent</code> và <code>AppShortcutsProvider</code> cho Siri, Spotlight và Shortcuts.</span></li>
+            <li class="todo-item done"><span class="todo-state">Đã có</span><span>Một parameter <code>rawEntry</code>; parser hiểu số VND, ngày tương đối, account/category và dùng default khi phù hợp.</span></li>
+            <li class="todo-item done"><span class="todo-state">Đã có</span><span>Giao dịch rõ được confirm rồi commit; câu mơ hồ vào Needs Review nên không bị mất và chưa ảnh hưởng tổng tiền.</span></li>
+            <li class="todo-item done"><span class="todo-state">Đã có</span><span><code>alwaysAllowed</code> cho capture nền; dialog khóa máy chỉ nói trạng thái chung, không đọc số dư hay chi tiết giao dịch.</span></li>
+            <li class="todo-item done"><span class="todo-state">Đã có</span><span>Phrase, title, dialog và UI được localize tiếng Việt/Anh; quick capture dùng scheme riêng cho Dev/Prod và chờ App Lock mở trước khi hiện.</span></li>
+            <li class="todo-item done"><span class="todo-state">Đã có</span><span>Settings hướng dẫn gán Action Button và có nút cài voice template được bật bằng <code>VOICE_SHORTCUT_ID</code>.</span></li>
+            <li class="todo-item"><span class="todo-state">Todo</span><span>Publish iCloud Shortcut gồm Dictate Text → Record Transaction, rồi điền ID thật để bật nút cài one-tap.</span></li>
+            <li class="todo-item"><span class="todo-state">Todo</span><span>Acceptance test Siri và Action Button khi khóa/mở máy trên iPhone vật lý; app không thể tự gán Action Button cho user.</span></li>
           </ul>
         </article>
 
@@ -621,7 +622,7 @@
         <span class="section-index">02</span>
         <h2 id="siri-research-title">Siri / Action Button — nghiên cứu khả thi</h2>
       </div>
-      <p class="section-copy">Đối chiếu repository với App Intents và Human Interface Guidelines hiện tại của Apple. MonMon đang target iOS 18.0, chưa có App Intent, và luồng form hiện yêu cầu amount, account cùng category trước khi lưu.</p>
+      <p class="section-copy">Đối chiếu repository với App Intents và Human Interface Guidelines hiện tại của Apple. MonMon target iOS 18.0 và hiện đã có capture intent, App Shortcuts, parser VND, pending review cùng quick-capture route.</p>
 
       <aside class="research-verdict">
         <div>
@@ -654,20 +655,20 @@
         <article class="research-panel">
           <h3>Privacy khi thiết bị đang khóa</h3>
           <ul>
-            <li><code>AppIntent.authenticationPolicy</code> mặc định cho phép chạy khi máy khóa; AppLock hiện chỉ che UI, không tự bảo vệ background intent.</li>
-            <li>Stage-only intent có thể append raw candidate và trả “Đã ghi nhận”, không đọc số dư hay nói lại merchant.</li>
-            <li>Review, sửa hoặc commit MoneyTransaction dùng policy cần authentication và mới hiện thông tin chi tiết.</li>
-            <li>Policy phải được chọn rõ trong code; không dựa vào overlay của <code>ContentView</code>. <a class="inline-source" href="https://developer.apple.com/documentation/appintents/appintent/authenticationpolicy">Apple: authentication policy</a></li>
+            <li><code>CaptureTransactionIntent</code> chọn rõ <code>alwaysAllowed</code>, nên có thể nhận câu nói và lưu nền khi thiết bị khóa.</li>
+            <li>Confirmation và result chỉ nói trạng thái chung; không đọc số dư, merchant, account, category hay raw entry trên Lock Screen.</li>
+            <li>Giao dịch mơ hồ chỉ vào Needs Review và chưa ảnh hưởng totals; mở UI review vẫn đi qua AppLock.</li>
+            <li>Quick-capture deep link được queue nếu app đang khóa và chỉ mở form sau khi xác thực. <a class="inline-source" href="https://developer.apple.com/documentation/appintents/appintent/authenticationpolicy">Apple: authentication policy</a></li>
           </ul>
         </article>
 
         <article class="research-panel">
-          <h3>Khoảng trống trong code hiện tại</h3>
+          <h3>Nền đã triển khai</h3>
           <ul>
-            <li><code>MonMonApp</code> giữ ModelContainer private; intent cần store dependency dùng chung thay vì tự chạm main context tùy ý.</li>
-            <li><code>TransactionDraft.validate()</code> bắt buộc category, nên raw voice chưa hoàn chỉnh cần vào unified Capture Candidate/Import Inbox.</li>
-            <li>Parser VND và default resolver nên là service thuần để UI, Siri, OCR và statement cùng gọi.</li>
-            <li>Thêm provenance + invocation ID để một Siri retry không tạo giao dịch trùng.</li>
+            <li><code>TransactionCaptureIntentDependency</code> đưa ModelContainer vào intent và giới hạn SwiftData access trên MainActor.</li>
+            <li><code>TransactionCaptureService</code> dùng chung parser/default resolver cho Siri và quick-capture UI.</li>
+            <li><code>PendingTransactionCapture</code> giữ nguyên raw voice khi thiếu amount/account/category; user review và commit sau.</li>
+            <li>Khoảng trống còn lại: publish iCloud template và thêm invocation ID/dedupe cho trường hợp Siri retry.</li>
           </ul>
         </article>
       </div>
@@ -676,8 +677,8 @@
         <table>
           <thead><tr><th>Surface</th><th>Điểm vào đề xuất</th><th>Kết quả mặc định</th><th>Không nên hứa</th></tr></thead>
           <tbody>
-            <tr><td>Siri</td><td><code>CaptureTransactionIntent(rawEntry)</code></td><td>Stage ngay; confirm nếu đủ dữ liệu, còn lại vào review.</td><td>Một câu activation luôn parse đúng mọi cách nói tiếng Việt.</td></tr>
-            <tr><td>Action Button</td><td>App Shortcut “Ghi Chi Tiêu”</td><td>Mở quick capture hoặc snippet, giữ context hiện tại khi có thể.</td><td>App tự gán nút hoặc nút luôn khởi động voice dictation.</td></tr>
+            <tr><td>Siri</td><td><code>CaptureTransactionIntent(rawEntry)</code></td><td>Confirm và commit nếu đủ dữ liệu; còn lại lưu vào Needs Review.</td><td>Một câu activation luôn parse đúng mọi cách nói tiếng Việt.</td></tr>
+            <tr><td>Action Button</td><td>App Shortcut “Quick Capture” hoặc voice template</td><td>Mở form đã focus; template tùy chọn Dictate Text rồi gọi capture intent.</td><td>App tự gán nút hoặc iOS luôn cho dictation khi máy khóa.</td></tr>
             <tr><td>Shortcuts / Spotlight</td><td>Cùng App Intent và preconfigured shortcut</td><td>Có ngay sau cài đặt; cho phép user ghép workflow riêng.</td><td>User không cần setup nếu muốn gán hardware button.</td></tr>
             <tr><td>Siri AI / iOS 27</td><td>Enhancement sau baseline</td><td>Cải thiện semantic matching khi OS/device/language hỗ trợ.</td><td>Dùng finance schema — hiện Apple chưa cung cấp domain này.</td></tr>
           </tbody>
@@ -686,12 +687,12 @@
 
       <div class="siri-flow" aria-label="Luồng Siri và Action Button đề xuất">
         <article class="siri-step"><h3>Invoke</h3><p>Siri, Spotlight, Shortcuts hoặc Action Button gọi cùng capability.</p></article>
-        <article class="siri-step"><h3>Stage first</h3><p>Ghi raw text, locale, timestamp, source và invocation ID trước khi parse.</p></article>
-        <article class="siri-step"><h3>Parse + defaults</h3><p>Tách amount/note; áp account/category default và đánh confidence.</p></article>
-        <article class="siri-step"><h3>Confirm hoặc review</h3><p>Dữ liệu đủ thì xác nhận gọn; mơ hồ vẫn được giữ trong Inbox.</p></article>
+        <article class="siri-step"><h3>Parse + defaults</h3><p>Tách amount, kind, date, account và category; giữ nguyên raw text.</p></article>
+        <article class="siri-step"><h3>Confirm chung</h3><p>Không đọc chi tiết nhạy cảm trên Lock Screen; user xác nhận trước khi lưu.</p></article>
+        <article class="siri-step"><h3>Commit hoặc review</h3><p>Dữ liệu đủ thành transaction; mơ hồ vào Needs Review và chưa tính totals.</p></article>
       </div>
 
-      <aside class="research-note"><strong>Đề xuất MVP:</strong> ship một App Shortcut “Ghi Chi Tiêu”, một required text parameter, Vietnamese/English localization và stage-first persistence. Chưa làm Control Center control, interactive snippet nâng cao hay Siri AI schema work cho tới khi flow cơ bản đạt tỷ lệ capture thành công trên iPhone vật lý.</aside>
+      <aside class="research-note"><strong>Trạng thái MVP:</strong> App Shortcut “Ghi giao dịch”, required text parameter, localization Việt/Anh, parser, persistence, Needs Review và quick capture đã có. Chưa làm Control Center control, interactive snippet nâng cao hay Siri AI schema work; voice template one-tap còn cần publish iCloud link và acceptance test trên iPhone vật lý.</aside>
     </section>
 
     <section aria-labelledby="routes-title">
