@@ -1,9 +1,9 @@
 import SwiftData
 import SwiftUI
 
-/// The report query behind one compact toolbar: search words, direction,
+/// A transaction query behind one compact toolbar: search words, direction,
 /// categories, and accounts. Search lives here rather than occupying the
-/// report header; opening from its toolbar icon puts the keyboard straight in
+/// screen header; opening from its toolbar icon puts the keyboard straight in
 /// the field, while opening from the filter icon leaves the whole sheet ready.
 struct ReportFilterSheet: View {
     @Environment(\.dismiss) private var dismiss
@@ -14,6 +14,7 @@ struct ReportFilterSheet: View {
     let categories: [TransactionCategory]
     let accounts: [CashAccount]
     let focusesSearchOnAppear: Bool
+    let identifierPrefix: String
 
     private let selectionColumns = [GridItem(.adaptive(minimum: 140), spacing: 10)]
 
@@ -21,12 +22,14 @@ struct ReportFilterSheet: View {
         query: Binding<TransactionQuery>,
         categories: [TransactionCategory],
         accounts: [CashAccount],
-        focusesSearchOnAppear: Bool = false
+        focusesSearchOnAppear: Bool = false,
+        identifierPrefix: String = "report-"
     ) {
         _query = query
         self.categories = categories
         self.accounts = accounts
         self.focusesSearchOnAppear = focusesSearchOnAppear
+        self.identifierPrefix = identifierPrefix
     }
 
     var body: some View {
@@ -58,7 +61,7 @@ struct ReportFilterSheet: View {
                 }
             }
             .navigationTitle("Search & Filters")
-            .accessibilityIdentifier("report-filters")
+            .accessibilityIdentifier("\(identifierPrefix)filters")
             .task {
                 guard focusesSearchOnAppear else {
                     return
@@ -73,7 +76,7 @@ struct ReportFilterSheet: View {
                         clear()
                     }
                     .disabled(!query.isNarrowed)
-                    .accessibilityIdentifier("clear-report-filters")
+                    .accessibilityIdentifier("clear-\(identifierPrefix)filters")
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
@@ -88,8 +91,8 @@ struct ReportFilterSheet: View {
         }
     }
 
-    /// Clearing leaves the period alone: it is the one filter the report is
-    /// never without, and the calendar changes it outside this sheet.
+    /// Clearing leaves the period alone: it is the one filter the screen is
+    /// never without, and the date controls change it outside this sheet.
     private func clear() {
         query.text = ""
         query.filter = .all
@@ -113,7 +116,7 @@ struct ReportFilterSheet: View {
                         .onSubmit {
                             dismiss()
                         }
-                        .accessibilityIdentifier("report-search-field")
+                        .accessibilityIdentifier("\(identifierPrefix)search-field")
 
                     if query.hasSearchText {
                         Button {
@@ -149,7 +152,7 @@ struct ReportFilterSheet: View {
                     options: TransactionListFilter.allCases,
                     title: \.displayName
                 )
-                .accessibilityIdentifier("report-direction")
+                .accessibilityIdentifier("\(identifierPrefix)direction")
             }
         }
     }
@@ -169,7 +172,7 @@ struct ReportFilterSheet: View {
                                 symbolName: CategoryPalette.symbolName(category.symbolName),
                                 tint: CategoryPalette.color(named: category.colorName),
                                 isOn: query.categoryIDs.contains(category.id),
-                                identifier: "report-category-\(category.id.uuidString)"
+                                identifier: "\(identifierPrefix)category-\(category.id.uuidString)"
                             ) {
                                 toggle(category.id, in: &query.categoryIDs)
                             }
@@ -195,7 +198,7 @@ struct ReportFilterSheet: View {
                                 symbolName: account.kind.iconName,
                                 tint: account.kind.tint,
                                 isOn: query.accountIDs.contains(account.id),
-                                identifier: "report-account-\(account.id.uuidString)"
+                                identifier: "\(identifierPrefix)account-\(account.id.uuidString)"
                             ) {
                                 toggle(account.id, in: &query.accountIDs)
                             }
