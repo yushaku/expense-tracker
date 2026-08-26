@@ -2,6 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct TransactionListView: View {
+    @Environment(AppRoute.self) private var appRoute
     @Environment(\.locale) private var locale
     @Environment(\.scenePhase) private var scenePhase
 
@@ -27,6 +28,7 @@ struct TransactionListView: View {
     @State private var importInbox = StatementImportInbox.live()
     @State private var isShowingImportInbox = false
     @State private var isShowingCaptureInbox = false
+    @State private var isShowingQuickCapture = false
 
     /// Weekday first: over a run of days the name is what the eye picks out,
     /// and the year is left to the period title above the list.
@@ -123,6 +125,9 @@ struct TransactionListView: View {
             .sheet(isPresented: $isShowingCaptureInbox) {
                 PendingTransactionCaptureListView()
             }
+            .sheet(isPresented: $isShowingQuickCapture) {
+                QuickTransactionCaptureView()
+            }
             .task { await importInbox.refresh() }
             .onChange(of: scenePhase) { _, phase in
                 guard phase == .active else {
@@ -130,8 +135,22 @@ struct TransactionListView: View {
                 }
                 Task { await importInbox.refresh() }
             }
+            .onChange(of: appRoute.quickCaptureRequestID) { _, requestID in
+                presentQuickCaptureIfNeeded(requestID)
+            }
+            .onAppear {
+                presentQuickCaptureIfNeeded(appRoute.quickCaptureRequestID)
+            }
             .tint(MonMonTheme.accent)
         }
+    }
+
+    private func presentQuickCaptureIfNeeded(_ requestID: UUID?) {
+        guard requestID != nil, !isShowingQuickCapture else {
+            return
+        }
+        isShowingQuickCapture = true
+        appRoute.consumeQuickCapture()
     }
 
     private var pendingCaptureStatusCard: some View {

@@ -42,6 +42,7 @@ enum RootTab: String, CaseIterable, Identifiable {
 }
 
 struct RootTabView: View {
+    @Environment(AppRoute.self) private var appRoute
     @State private var selection: RootTab = .spending
 
     #if os(macOS)
@@ -49,14 +50,22 @@ struct RootTabView: View {
     #endif
 
     var body: some View {
-        #if os(macOS)
-            // macOS renders a `TabView` as a segmented control pinned to the top
-            // of the window, which reads as a header. The bar below puts the
-            // same destinations where the iPhone keeps them.
-            bottomBarLayout
-        #else
-            nativeTabs
-        #endif
+        Group {
+            #if os(macOS)
+                // macOS renders a `TabView` as a segmented control pinned to the top
+                // of the window, which reads as a header. The bar below puts the
+                // same destinations where the iPhone keeps them.
+                bottomBarLayout
+            #else
+                nativeTabs
+            #endif
+        }
+        .onChange(of: appRoute.quickCaptureRequestID) { _, requestID in
+            guard requestID != nil else {
+                return
+            }
+            selection = .spending
+        }
     }
 
     #if os(macOS)
@@ -210,6 +219,7 @@ extension View {
 #if DEBUG
     #Preview("Tabs · spending") {
         RootTabView()
+            .environment(AppRoute())
             .modelContainer(PreviewData.populated)
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)

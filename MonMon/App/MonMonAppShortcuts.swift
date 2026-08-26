@@ -11,6 +11,13 @@ struct MonMonAppShortcuts: AppShortcutsProvider {
             shortTitle: "Record Transaction",
             systemImageName: "mic.fill"
         )
+
+        AppShortcut(
+            intent: OpenQuickCaptureIntent(),
+            phrases: ["Open quick capture in \(.applicationName)"],
+            shortTitle: "Quick Capture",
+            systemImageName: "square.and.pencil"
+        )
     }
 
     static let shortcutTileColor: ShortcutTileColor = .orange

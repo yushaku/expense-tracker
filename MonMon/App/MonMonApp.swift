@@ -7,6 +7,7 @@ import SwiftUI
 struct MonMonApp: App {
     private let container: ModelContainer
     @State private var appLock = AppLock()
+    @State private var appRoute = AppRoute()
     @State private var cloudSync = CloudSync()
     @Environment(\.scenePhase) private var scenePhase
 
@@ -69,6 +70,7 @@ struct MonMonApp: App {
         WindowGroup {
             ContentView()
                 .environment(appLock)
+                .environment(appRoute)
                 .environment(cloudSync)
                 .task { cloudSync.startObserving() }
                 // Duplicates arrive when synchronisation lands, which is after

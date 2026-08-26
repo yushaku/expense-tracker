@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		S10000000000000000000210 /* AppRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000110 /* AppRoute.swift */; };
+		S10000000000000000000211 /* QuickTransactionCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000111 /* QuickTransactionCaptureView.swift */; };
+		S10000000000000000000212 /* AppRouteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000112 /* AppRouteTests.swift */; };
 		S10000000000000000000209 /* PendingTransactionCaptureListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000109 /* PendingTransactionCaptureListView.swift */; };
 		S10000000000000000000208 /* AppShortcuts.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000108 /* AppShortcuts.xcstrings */; };
 		S10000000000000000000206 /* TransactionCaptureIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000106 /* TransactionCaptureIntent.swift */; };
@@ -305,6 +308,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		S10000000000000000000110 /* AppRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRoute.swift; sourceTree = "<group>"; };
+		S10000000000000000000111 /* QuickTransactionCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickTransactionCaptureView.swift; sourceTree = "<group>"; };
+		S10000000000000000000112 /* AppRouteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouteTests.swift; sourceTree = "<group>"; };
 		S10000000000000000000109 /* PendingTransactionCaptureListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingTransactionCaptureListView.swift; sourceTree = "<group>"; };
 		S10000000000000000000108 /* AppShortcuts.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = AppShortcuts.xcstrings; sourceTree = "<group>"; };
 		S10000000000000000000106 /* TransactionCaptureIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureIntent.swift; sourceTree = "<group>"; };
@@ -651,6 +657,7 @@
 		A00000000000000000000013 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				S10000000000000000000110 /* AppRoute.swift */,
 				S10000000000000000000106 /* TransactionCaptureIntent.swift */,
 				S10000000000000000000107 /* MonMonAppShortcuts.swift */,
 				A00000000000000000000816 /* MonMonSchema.swift */,
@@ -859,6 +866,7 @@
 		A00000000000000000000024 /* Transactions */ = {
 			isa = PBXGroup;
 			children = (
+				S10000000000000000000111 /* QuickTransactionCaptureView.swift */,
 				S10000000000000000000109 /* PendingTransactionCaptureListView.swift */,
 				S10000000000000000000103 /* PendingTransactionCapture.swift */,
 				S10000000000000000000104 /* TransactionCaptureService.swift */,
@@ -1022,6 +1030,7 @@
 		A00000000000000000000A09 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				S10000000000000000000112 /* AppRouteTests.swift */,
 				A00000000000000000000A0A /* StoreReconcilerTests.swift */,
 			);
 			path = App;
@@ -1252,6 +1261,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				S10000000000000000000210 /* AppRoute.swift in Sources */,
+				S10000000000000000000211 /* QuickTransactionCaptureView.swift in Sources */,
 				S10000000000000000000209 /* PendingTransactionCaptureListView.swift in Sources */,
 				S10000000000000000000206 /* TransactionCaptureIntent.swift in Sources */,
 				S10000000000000000000207 /* MonMonAppShortcuts.swift in Sources */,
@@ -1431,6 +1442,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				S10000000000000000000212 /* AppRouteTests.swift in Sources */,
 				S10000000000000000000205 /* TransactionCaptureServiceTests.swift in Sources */,
 				S10000000000000000000202 /* TransactionCaptureParserTests.swift in Sources */,
 				F10000000000000000000201 /* StatementImportInboxServiceTests.swift in Sources */,

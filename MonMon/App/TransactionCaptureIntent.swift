@@ -62,6 +62,24 @@ enum TransactionCaptureIntentError: Error, LocalizedError, Sendable {
     }
 }
 
+struct OpenQuickCaptureIntent: AppIntent {
+    static let title: LocalizedStringResource = "Open Quick Capture"
+    static let description = IntentDescription("Open MonMon ready for one natural-language entry.")
+    static let authenticationPolicy: IntentAuthenticationPolicy = .alwaysAllowed
+
+    func perform() async throws -> some IntentResult & OpensIntent {
+        guard
+            let scheme = Bundle.main.object(forInfoDictionaryKey: "MonMonQuickCaptureURLScheme")
+                as? String,
+            let url = URL(string: "\(scheme)://quick-capture")
+        else {
+            throw TransactionCaptureIntentError.unavailable
+        }
+
+        return .result(opensIntent: OpenURLIntent(url))
+    }
+}
+
 struct CaptureTransactionIntent: AppIntent {
     static let title: LocalizedStringResource = "Record Transaction"
     static let description = IntentDescription(
