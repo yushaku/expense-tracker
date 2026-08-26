@@ -76,6 +76,9 @@ struct ReportView: View {
             .navigationDestination(for: CategoryPeriod.self) { period in
                 CategoryTransactionsView(period: period)
             }
+            .navigationDestination(for: DayPeriod.self) { period in
+                DayTransactionsView(period: period)
+            }
             .navigationDestination(for: AccountActivityRoute.self) { route in
                 if let account = account(route.accountID) {
                     AccountActivityView(account: account)
@@ -124,6 +127,12 @@ struct ReportView: View {
                     count: summaryTransactions.count
                 )
                 .accessibilityIdentifier("report-overview")
+
+                TransactionCalendarCard(
+                    month: summaryMonth,
+                    weeks: summaryCalendarWeeks,
+                    onStepMonth: stepSummaryMonth
+                )
 
                 AccountSpendingSection(
                     monthTitle: summaryRange.title(in: locale),
@@ -175,6 +184,23 @@ struct ReportView: View {
 
     private var summaryTransactions: [MoneyTransaction] {
         TransactionSummary.inRange(summaryRange, transactions: transactions)
+    }
+
+    private var summaryCalendarWeeks: [TransactionCalendarWeek] {
+        TransactionCalendar.weeks(
+            of: summaryMonth,
+            transactions: transactions
+        )
+    }
+
+    private func stepSummaryMonth(_ steps: Int) {
+        let calendar = TransactionPeriod.calendar
+
+        guard let moved = calendar.date(byAdding: .month, value: steps, to: summaryMonth) else {
+            return
+        }
+
+        summaryMonth = TransactionPeriod.startOfMonth(for: moved)
     }
 
     private var categoryNames: [UUID: String] {
