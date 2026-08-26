@@ -1,3 +1,4 @@
+import AppIntents
 import SwiftData
 import SwiftUI
 
@@ -115,7 +116,7 @@ struct SettingsView: View {
     private var voiceCaptureCard: some View {
         card {
             VStack(alignment: .leading, spacing: 12) {
-                sectionHeader("Siri & Action Button", systemImage: "waveform.badge.mic")
+                sectionHeader("Siri & Shortcuts", systemImage: "waveform.badge.mic")
 
                 Label("Two shortcuts are ready", systemImage: "checkmark.circle.fill")
                     .font(.subheadline.weight(.semibold))
@@ -136,11 +137,11 @@ struct SettingsView: View {
 
                 shortcutRow(
                     title: "Quick Capture",
-                    detail: "Opens the focused entry form; a good choice for Action Button.",
+                    detail: "Opens the focused entry form when voice is not convenient.",
                     systemImage: "square.and.pencil"
                 )
 
-                actionButtonInstructions
+                voiceShortcutInstructions
             }
         }
     }
@@ -166,13 +167,30 @@ struct SettingsView: View {
         }
     }
 
-    private var actionButtonInstructions: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Use with Action Button")
+    private var voiceShortcutInstructions: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Create one-tap voice capture")
                 .font(.subheadline.weight(.semibold))
 
-            instructionRow(number: 1, text: "Open Settings → Action Button → Shortcut.")
-            instructionRow(number: 2, text: "Choose MonMon → Quick Capture.")
+            Text("Combine Dictate Text with MonMon so one tap starts listening.")
+                .font(.caption)
+                .foregroundStyle(MonMonTheme.textSecondary)
+
+            instructionRow(number: 1, text: "Open Shortcuts and tap +.")
+            instructionRow(number: 2, text: "Add Dictate Text.")
+            instructionRow(
+                number: 3,
+                text: "Add MonMon → Record Transaction, then set Transaction to Dictated Text."
+            )
+            instructionRow(
+                number: 4,
+                text: "Name it Voice Capture and tap it whenever you want to record."
+            )
+
+            ShortcutsLink()
+                .shortcutsLinkStyle(.automaticOutline)
+                .accessibilityIdentifier("open-monmon-shortcuts")
+                .padding(.top, 2)
         }
         .padding(.top, 2)
     }

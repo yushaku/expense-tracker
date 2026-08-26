@@ -31,12 +31,42 @@
         }
       }
     },
-    "Choose MonMon → Quick Capture.": {
+    "Add Dictate Text.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Chọn MonMon → Ghi nhanh."
+            "value": "Thêm Đọc chính tả."
+          }
+        }
+      }
+    },
+    "Add MonMon → Record Transaction, then set Transaction to Dictated Text.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm MonMon → Ghi giao dịch, rồi đặt Giao dịch thành Văn bản được đọc chính tả."
+          }
+        }
+      }
+    },
+    "Combine Dictate Text with MonMon so one tap starts listening.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghép Đọc chính tả với MonMon để một lần chạm bắt đầu nghe."
+          }
+        }
+      }
+    },
+    "Create one-tap voice capture": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tạo ghi giọng nói một chạm"
           }
         }
       }
@@ -151,22 +181,32 @@
         }
       }
     },
-    "Open Settings → Action Button → Shortcut.": {
+    "Name it Voice Capture and tap it whenever you want to record.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mở Cài đặt → Nút tác vụ → Phím tắt."
+            "value": "Đặt tên là Ghi bằng giọng nói và chạm vào mỗi khi muốn ghi."
           }
         }
       }
     },
-    "Opens the focused entry form; a good choice for Action Button.": {
+    "Open Shortcuts and tap +.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mở form đã focus; phù hợp để gán cho Nút tác vụ."
+            "value": "Mở Phím tắt và chạm dấu +."
+          }
+        }
+      }
+    },
+    "Opens the focused entry form when voice is not convenient.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở form đã focus khi không tiện dùng giọng nói."
           }
         }
       }
@@ -321,12 +361,12 @@
         }
       }
     },
-    "Siri & Action Button": {
+    "Siri & Shortcuts": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Siri & Nút tác vụ"
+            "value": "Siri & Phím tắt"
           }
         }
       }
@@ -347,16 +387,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hai phím tắt đã sẵn sàng"
-          }
-        }
-      }
-    },
-    "Use with Action Button": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dùng với Nút tác vụ"
           }
         }
       }
