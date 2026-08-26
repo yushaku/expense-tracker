@@ -31,6 +31,46 @@
         }
       }
     },
+    "Add Dictate Text.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm Đọc chính tả."
+          }
+        }
+      }
+    },
+    "Add MonMon → Record Transaction, then set Transaction to Dictated Text.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm MonMon → Ghi giao dịch, rồi đặt Giao dịch thành Văn bản được đọc chính tả."
+          }
+        }
+      }
+    },
+    "Combine Dictate Text with MonMon so one tap starts listening.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghép Đọc chính tả với MonMon để một lần chạm bắt đầu nghe."
+          }
+        }
+      }
+    },
+    "Create one-tap voice capture": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tạo ghi giọng nói một chạm"
+          }
+        }
+      }
+    },
     "Couldn’t save that entry. Try again.": {
       "localizations": {
         "vi": {
@@ -137,6 +177,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mở ghi nhanh"
+          }
+        }
+      }
+    },
+    "Name it Voice Capture and tap it whenever you want to record.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đặt tên là Ghi bằng giọng nói và chạm vào mỗi khi muốn ghi."
+          }
+        }
+      }
+    },
+    "Open Shortcuts and tap +.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở Phím tắt và chạm dấu +."
           }
         }
       }
@@ -316,17 +376,17 @@
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Các phím tắt được cài tự động cùng MonMon—không cần tải thêm."
+            "value": "Hai phím tắt được cài tự động cùng MonMon—không cần tải thêm."
           }
         }
       }
     },
-    "Three shortcuts are ready": {
+    "Two shortcuts are ready": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ba phím tắt đã sẵn sàng"
+            "value": "Hai phím tắt đã sẵn sàng"
           }
         }
       }
@@ -7593,87 +7653,6 @@
           }
         }
       }
-    },
-    "Allow microphone access, then return and try again.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Cho phép dùng micrô, sau đó quay lại và thử lại." } } }
-    },
-    "Finishing transcript": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang hoàn tất nội dung" } } }
-    },
-    "iPhone is downloading Apple’s on-device language model.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "iPhone đang tải mô hình ngôn ngữ on-device của Apple." } } }
-    },
-    "Listen again": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nghe lại" } } }
-    },
-    "Listening…": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang nghe…" } } }
-    },
-    "Microphone access is off": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Quyền dùng micrô đang tắt" } } }
-    },
-    "MonMon is starting private, on-device transcription.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "MonMon đang khởi động nhận dạng giọng nói riêng tư trên thiết bị." } } }
-    },
-    "On-device voice capture requires iOS 26. Type the transaction below instead.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi giọng nói trên thiết bị cần iOS 26. Bạn có thể nhập giao dịch bên dưới." } } }
-    },
-    "Open microphone settings": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mở cài đặt micrô" } } }
-    },
-    "Open MonMon, listen for one transaction, and place the transcript in Quick Capture.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mở MonMon, nghe một giao dịch và điền nội dung vào Ghi nhanh." } } }
-    },
-    "Open Voice Capture": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mở ghi bằng giọng nói" } } }
-    },
-    "Preparing microphone": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang chuẩn bị micrô" } } }
-    },
-    "Preparing on-device language": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang chuẩn bị ngôn ngữ trên thiết bị" } } }
-    },
-    "Ready to listen": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sẵn sàng nghe" } } }
-    },
-    "Review or edit the text below before saving.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Kiểm tra hoặc sửa nội dung bên dưới trước khi lưu." } } }
-    },
-    "Review or edit the transcript before saving. Voice Capture requires iOS 26.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Kiểm tra hoặc sửa nội dung trước khi lưu. Ghi bằng giọng nói cần iOS 26." } } }
-    },
-    "Say one transaction, for example: cafe 50k.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nói một giao dịch, ví dụ: cafe 50k." } } }
-    },
-    "Stop listening": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dừng nghe" } } }
-    },
-    "Tap Listen again when you are ready.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chạm Nghe lại khi bạn sẵn sàng." } } }
-    },
-    "Tap once to open Quick Capture and start private, on-device listening.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chạm một lần để mở Ghi nhanh và bắt đầu nghe riêng tư trên thiết bị." } } }
-    },
-    "The final words will appear below.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Những từ cuối sẽ xuất hiện bên dưới." } } }
-    },
-    "This language is not available on device": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngôn ngữ này chưa có trên thiết bị" } } }
-    },
-    "Transcript added": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã điền nội dung" } } }
-    },
-    "Type below or tap Listen again. Audio was not uploaded.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập bên dưới hoặc chạm Nghe lại. Âm thanh không được tải lên." } } }
-    },
-    "Type the transaction below instead. Audio was not uploaded.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bạn có thể nhập giao dịch bên dưới. Âm thanh không được tải lên." } } }
-    },
-    "Voice Capture": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi bằng giọng nói" } } }
-    },
-    "Voice capture isn’t available": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể ghi bằng giọng nói" } } }
     }
   },
   "version": "1.0"

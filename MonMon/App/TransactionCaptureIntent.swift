@@ -64,6 +64,7 @@ struct OpenVoiceCaptureIntent: AppIntent {
         "Open MonMon, listen for one transaction, and place the transcript in Quick Capture."
     )
     static let authenticationPolicy: IntentAuthenticationPolicy = .alwaysAllowed
+    static let isDiscoverable = false
     static var openAppWhenRun: Bool { true }
 
     @Dependency private var dependency: QuickCaptureIntentDependency

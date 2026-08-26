@@ -14,7 +14,6 @@
 		S10000000000000000000212 /* AppRouteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000112 /* AppRouteTests.swift */; };
 		S10000000000000000000209 /* PendingTransactionCaptureListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000109 /* PendingTransactionCaptureListView.swift */; };
 		S10000000000000000000208 /* AppShortcuts.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000108 /* AppShortcuts.xcstrings */; };
-		V10000000000000000000203 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = V10000000000000000000103 /* InfoPlist.xcstrings */; };
 		S10000000000000000000206 /* TransactionCaptureIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000106 /* TransactionCaptureIntent.swift */; };
 		S10000000000000000000207 /* MonMonAppShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000107 /* MonMonAppShortcuts.swift */; };
 		S10000000000000000000203 /* PendingTransactionCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = S10000000000000000000103 /* PendingTransactionCapture.swift */; };
@@ -313,7 +312,6 @@
 /* Begin PBXFileReference section */
 		V10000000000000000000101 /* VoiceTransactionCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceTransactionCapture.swift; sourceTree = "<group>"; };
 		V10000000000000000000102 /* VoiceTransactionCaptureSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceTransactionCaptureSection.swift; sourceTree = "<group>"; };
-		V10000000000000000000103 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		S10000000000000000000110 /* AppRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRoute.swift; sourceTree = "<group>"; };
 		S10000000000000000000111 /* QuickTransactionCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickTransactionCaptureView.swift; sourceTree = "<group>"; };
 		S10000000000000000000112 /* AppRouteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouteTests.swift; sourceTree = "<group>"; };
@@ -681,7 +679,6 @@
 			children = (
 				S10000000000000000000108 /* AppShortcuts.xcstrings */,
 				A00000000000000000000113 /* Assets.xcassets */,
-				V10000000000000000000103 /* InfoPlist.xcstrings */,
 				C10000000000000000000008 /* Localizable.xcstrings */,
 			);
 			path = Resources;
@@ -1245,7 +1242,6 @@
 			files = (
 				S10000000000000000000208 /* AppShortcuts.xcstrings in Resources */,
 				A00000000000000000000204 /* Assets.xcassets in Resources */,
-				V10000000000000000000203 /* InfoPlist.xcstrings in Resources */,
 				C10000000000000000000108 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

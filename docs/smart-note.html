@@ -321,7 +321,7 @@
           <div><h3>Đặt giá trị mặc định</h3><p>Tại tab <strong>Chi tiêu</strong>, chọn <strong>Mặc định</strong>, rồi chọn Tài khoản, Danh mục chi và Danh mục thu. MonMon sẽ dùng chúng khi câu nhập không nói rõ.</p></div>
         </li>
         <li>
-          <div><h3>Kiểm tra phím tắt của MonMon</h3><p>Mở tab <strong>Cài đặt → Siri &amp; Phím tắt</strong>. Khi thấy “Ba phím tắt đã sẵn sàng”, bạn có thể dùng ngay <strong>Ghi giao dịch</strong>, <strong>Ghi nhanh</strong> và <strong>Ghi bằng giọng nói</strong>; không cần tự tạo workflow.</p></div>
+          <div><h3>Kiểm tra action của MonMon</h3><p>Mở tab <strong>Cài đặt → Siri &amp; Phím tắt</strong>. Khi thấy “Hai phím tắt đã sẵn sàng”, action <strong>Ghi giao dịch</strong> đã sẵn sàng để ghép với Đọc chính tả.</p></div>
         </li>
       </ol>
 
@@ -337,7 +337,7 @@
 
       <div class="choice-grid">
         <a class="choice" href="#siri"><span class="label">Nhanh nhất</span><h3>Siri</h3><p>Nói một câu, không mở app và không xác nhận lần hai khi dữ liệu đã đủ.</p></a>
-        <a class="choice" href="#voice-shortcut"><span class="label">Một chạm, một câu</span><h3>Shortcut giọng nói</h3><p>Chạm tile, nói nội dung giao dịch, kiểm tra transcript rồi lưu trong Ghi nhanh.</p></a>
+        <a class="choice" href="#voice-shortcut"><span class="label">Một chạm, một câu</span><h3>Shortcut giọng nói</h3><p>Chạm tile, nói nội dung giao dịch và để MonMon lưu ngay khi Đọc chính tả kết thúc.</p></a>
         <a class="choice" href="#manual"><span class="label">Kiểm soát đầy đủ</span><h3>Nhập trong app</h3><p>Điền từng trường khi giao dịch phức tạp hoặc cần chỉnh ngày, tài khoản, danh mục.</p></a>
         <a class="choice" href="#statement"><span class="label">Không bỏ sót</span><h3>Sao kê PDF</h3><p>Nhập theo kỳ để đối chiếu những khoản chưa được ghi ngay lúc phát sinh.</p></a>
       </div>
@@ -376,23 +376,24 @@
 
         <article class="guide" id="voice-shortcut">
           <header class="guide-head">
-            <div><span class="label">Cách 2 · Một chạm bắt đầu nghe</span><h3>Dùng shortcut “Ghi bằng giọng nói”</h3><p>Phù hợp khi muốn bỏ câu gọi Siri: chạm shortcut, nói “cafe 50k” và kiểm tra nội dung trước khi lưu.</p></div>
-            <span class="badge">Có sẵn khi cài app</span>
+            <div><span class="label">Cách 2 · Một chạm bắt đầu nghe</span><h3>Tạo shortcut “Ghi bằng giọng nói”</h3><p>Phù hợp khi muốn bỏ câu gọi Siri: chạm shortcut, nói “cafe 50k”, rồi MonMon tự lưu.</p></div>
+            <span class="badge">Thiết lập một lần</span>
           </header>
           <div class="guide-body">
             <ol class="guide-steps">
-              <li><div><strong>Mở Phím tắt</strong><p>Trong ứng dụng Phím tắt, cuộn đến MonMon hoặc MonMon Dev. Shortcut <strong>Ghi bằng giọng nói</strong> xuất hiện tự động sau khi cài app.</p></div></li>
-              <li><div><strong>Chạm một lần</strong><p>Chạm <strong>Ghi bằng giọng nói</strong>. MonMon mở màn hình Ghi nhanh và tự bắt đầu nghe; bạn không cần gọi Siri hay thêm action Đọc chính tả.</p></div></li>
-              <li><div><strong>Nói giao dịch</strong><p>Nói một câu ngắn như <code>cafe 50k</code>. Transcript xuất hiện trực tiếp trong ô nhập. Nhấn <strong>Dừng nghe</strong> khi xong; MonMon cũng tự dừng sau tối đa 15 giây.</p></div></li>
-              <li><div><strong>Kiểm tra rồi lưu</strong><p>Sửa transcript nếu cần, chọn <strong>Kiểm tra &amp; lưu</strong>, xem dữ liệu MonMon đã hiểu và lưu giao dịch.</p></div></li>
+              <li><div><strong>Mở Phím tắt</strong><p>Trong MonMon, mở <strong>Cài đặt → Siri &amp; Phím tắt</strong> và chạm nút mở Phím tắt; sau đó nhấn dấu <strong>+</strong> để tạo shortcut mới.</p></div></li>
+              <li><div><strong>Thêm Đọc chính tả</strong><p>Tìm action <strong>Đọc chính tả</strong> (<span lang="en">Dictate Text</span>) và đặt nó ở bước đầu tiên.</p></div></li>
+              <li><div><strong>Thêm action MonMon</strong><p>Thêm <strong>MonMon → Ghi giao dịch</strong>. Tại trường <strong>Giao dịch</strong>, chọn biến <strong>Văn bản được đọc chính tả</strong> từ bước trước.</p></div></li>
+              <li><div><strong>Đặt tên</strong><p>Đặt tên shortcut là <strong>Ghi bằng giọng nói</strong>, rồi nhấn Xong.</p></div></li>
+              <li><div><strong>Dùng hằng ngày</strong><p>Chạm shortcut, nói <code>cafe 50k</code> và dừng nói. Khi Đọc chính tả hoàn tất, nội dung được chuyển thẳng cho MonMon và lưu ngay nếu đủ dữ liệu.</p></div></li>
             </ol>
             <aside class="side-note">
               <h4>Lần chạy đầu tiên</h4>
-              <p>iPhone sẽ hỏi quyền dùng micrô. Hãy cho phép để MonMon nghe câu giao dịch. Tính năng cần iOS 26; ở phiên bản iOS cũ hơn, Ghi nhanh vẫn mở để bạn nhập tay.</p>
-              <p>Âm thanh được chuyển thành chữ ngay trên iPhone, không được ghi thành file hoặc tải lên server. Bạn luôn nhìn thấy và có thể sửa transcript trước khi lưu.</p>
+              <p>iPhone có thể hỏi quyền dùng Đọc chính tả và quyền chạy action của MonMon. Hãy cho phép để những lần sau chỉ còn một lần chạm và một câu nói.</p>
+              <p>Nếu câu thiếu dữ liệu, MonMon giữ nó trong <strong>Cần xem lại</strong> thay vì đoán.</p>
             </aside>
           </div>
-          <p class="outcome"><strong>Kết quả:</strong> shortcut bỏ toàn bộ đoạn gọi và hỏi lại của Siri. Flow hằng ngày chỉ còn: chạm tile → nói giao dịch → kiểm tra transcript → lưu.</p>
+          <p class="outcome"><strong>Kết quả:</strong> shortcut bỏ toàn bộ đoạn gọi và hỏi lại của Siri. Flow hằng ngày chỉ còn: chạm tile → nói giao dịch → lưu.</p>
         </article>
 
         <article class="guide" id="manual">
@@ -538,7 +539,7 @@
       <div class="help-grid">
         <article class="help-card"><h3>Siri không gọi đúng MonMon</h3><p>Mở ứng dụng Phím tắt, tìm MonMon hoặc MonMon Dev và kiểm tra action <strong>Ghi giao dịch</strong>. Khi nói, dùng đúng tên app đang cài.</p></article>
         <article class="help-card"><h3>Câu nào cũng vào Cần xem lại</h3><p>Kiểm tra <strong>Chi tiêu → Mặc định</strong> và nói rõ số tiền. Tài khoản hoặc danh mục mặc định bị thiếu sẽ khiến câu ngắn chưa đủ để lưu.</p></article>
-        <article class="help-card"><h3>Shortcut không tự bắt đầu nghe</h3><p>Kiểm tra iPhone đang dùng iOS 26 và đã cho MonMon quyền dùng micrô. Nếu đã từ chối quyền, mở <strong>Cài đặt iPhone → MonMon → Micrô</strong>, bật lại rồi chạy <strong>Ghi bằng giọng nói</strong>.</p></article>
+        <article class="help-card"><h3>Shortcut không tự bắt đầu nghe</h3><p>Mở shortcut để sửa và chắc chắn <strong>Đọc chính tả</strong> là action đầu tiên; <strong>Ghi giao dịch</strong> phải nhận biến Văn bản được đọc chính tả.</p></article>
         <article class="help-card"><h3>Sao kê không xuất hiện</h3><p>Đảm bảo file là TPBank PDF có lớp chữ, sau đó share lại từ ứng dụng Tệp. Mở tab Chi tiêu và chạm biểu tượng khay để tải lại Hộp thư nhập liệu.</p></article>
       </div>
     </section>
@@ -553,7 +554,7 @@
         <ul>
           <li>Sao kê hiện hỗ trợ TPBank PDF có lớp chữ; CSV, PDF scan và ngân hàng khác chưa được hỗ trợ.</li>
           <li>MonMon chưa tự đọc screenshot/receipt, Apple Pay hoặc notification của ứng dụng ngân hàng.</li>
-          <li>Shortcut giọng nói có sẵn khi cài app, nhưng cần mở MonMon để hiển thị transcript và cho phép bạn kiểm tra trước khi lưu; tính năng nhận giọng nói cần iOS 26.</li>
+          <li>Shortcut giọng nói cần user tạo một lần trong ứng dụng Phím tắt; MonMon không thể âm thầm cài một workflow nhiều action.</li>
           <li>Giao dịch mơ hồ cần user hoàn tất trước khi xuất hiện trong tổng thu chi và báo cáo.</li>
         </ul>
         <p>Các hướng chưa triển khai được đánh giá riêng tại <a href="bank-transaction-auto-note-research.html">Nghiên cứu tự động ghi giao dịch</a>.</p>

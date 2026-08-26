@@ -9,7 +9,7 @@ struct MonMonAppShortcuts: AppShortcutsProvider {
                 "Add a transaction in \(.applicationName)",
             ],
             shortTitle: "Record Transaction",
-            systemImageName: "square.and.pencil"
+            systemImageName: "mic.fill"
         )
 
         AppShortcut(
@@ -18,15 +18,6 @@ struct MonMonAppShortcuts: AppShortcutsProvider {
             shortTitle: "Quick Capture",
             systemImageName: "square.and.pencil"
         )
-
-        #if os(iOS)
-            AppShortcut(
-                intent: OpenVoiceCaptureIntent(),
-                phrases: ["Start voice capture in \(.applicationName)"],
-                shortTitle: "Voice Capture",
-                systemImageName: "waveform"
-            )
-        #endif
     }
 
     static let shortcutTileColor: ShortcutTileColor = .orange
