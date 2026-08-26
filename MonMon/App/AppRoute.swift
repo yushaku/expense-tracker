@@ -1,39 +1,17 @@
 import Foundation
 import Observation
 
-enum QuickCaptureLaunchMode: Equatable, Sendable {
-    case keyboard
-    case voice
-}
-
-struct QuickCaptureRequest: Equatable, Identifiable, Sendable {
-    let id: UUID
-    let mode: QuickCaptureLaunchMode
-
-    init(id: UUID = UUID(), mode: QuickCaptureLaunchMode) {
-        self.id = id
-        self.mode = mode
-    }
-}
-
 @MainActor
 @Observable
 final class AppRoute {
-    private(set) var quickCaptureRequest: QuickCaptureRequest?
-    private var queuedQuickCaptureMode: QuickCaptureLaunchMode?
+    private(set) var quickCaptureRequestID: UUID?
+    private var hasQueuedQuickCapture = false
 
-    var quickCaptureRequestID: UUID? {
-        quickCaptureRequest?.id
-    }
-
-    func requestQuickCapture(
-        mode: QuickCaptureLaunchMode = .keyboard,
-        isLocked: Bool
-    ) {
+    func requestQuickCapture(isLocked: Bool) {
         if isLocked {
-            queuedQuickCaptureMode = mode
+            hasQueuedQuickCapture = true
         } else {
-            quickCaptureRequest = QuickCaptureRequest(mode: mode)
+            quickCaptureRequestID = UUID()
         }
     }
 
@@ -43,21 +21,21 @@ final class AppRoute {
             return false
         }
 
-        requestQuickCapture(mode: .keyboard, isLocked: isLocked)
+        requestQuickCapture(isLocked: isLocked)
         return true
     }
 
     func releaseQueuedQuickCapture(isLocked: Bool) {
-        guard let mode = queuedQuickCaptureMode, !isLocked else {
+        guard hasQueuedQuickCapture, !isLocked else {
             return
         }
 
-        queuedQuickCaptureMode = nil
-        quickCaptureRequest = QuickCaptureRequest(mode: mode)
+        hasQueuedQuickCapture = false
+        quickCaptureRequestID = UUID()
     }
 
     func consumeQuickCapture() {
-        quickCaptureRequest = nil
+        quickCaptureRequestID = nil
     }
 
     private static func isQuickCaptureURL(_ url: URL) -> Bool {
