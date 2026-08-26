@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Ghi chú các tính năng MonMon đã có để nhập giao dịch và xem báo cáo nhanh hơn.">
+  <link rel="stylesheet" href="assets/monmon-docs.css">
+  <title>MonMon — Features nhập và xem giao dịch nhanh</title>
+  <style>
+    .page {
+      width: min(1040px, calc(100% - var(--docs-page-gutter) - var(--docs-page-gutter)));
+      margin: 0 auto;
+      padding: var(--docs-page-padding-top) 0 var(--docs-page-padding-bottom);
+    }
+
+    a { color: var(--docs-accent); }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 220px;
+      gap: var(--docs-space-6);
+      align-items: end;
+    }
+
+    .eyebrow, .label, .status, .step, .meta dt {
+      font-family: var(--docs-mono);
+      font-size: var(--docs-type-xs);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow { margin-bottom: var(--docs-space-2); color: var(--docs-accent); }
+    h1 { max-width: 760px; }
+    .lede { max-width: 720px; margin-top: var(--docs-space-3); color: var(--docs-text-2); font-size: var(--docs-type-lg); }
+
+    .meta {
+      display: grid;
+      gap: var(--docs-space-3);
+      padding: var(--docs-space-4);
+      background: var(--docs-surface);
+      border: 1px solid var(--docs-border);
+      border-radius: var(--docs-radius-md);
+      box-shadow: var(--docs-shadow);
+    }
+
+    .meta div { display: grid; gap: 2px; }
+    .meta dt { color: var(--docs-muted); }
+    .meta dd { color: var(--docs-text-2); font-size: var(--docs-type-md); }
+
+    .promise {
+      display: grid;
+      grid-template-columns: 8px minmax(0, 1fr);
+      gap: var(--docs-space-4);
+      margin-top: var(--docs-space-6);
+      padding: var(--docs-space-5);
+      background: var(--docs-surface);
+      border: 1px solid var(--docs-border);
+      border-radius: var(--docs-radius-lg);
+    }
+
+    .promise-mark { border-radius: var(--docs-radius-pill); background: var(--docs-accent); }
+    .promise h2 { margin-bottom: var(--docs-space-1); color: var(--docs-accent); font-size: var(--docs-type-md); }
+    .promise p { max-width: 820px; font-size: clamp(17px, 2vw, 21px); line-height: 1.45; }
+
+    section { margin-top: var(--docs-section-gap); }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      gap: var(--docs-space-3);
+      align-items: baseline;
+      margin-bottom: var(--docs-space-2);
+    }
+
+    .section-head .step { color: var(--docs-muted); }
+    .section-copy { max-width: 720px; margin: 0 0 var(--docs-space-5) 54px; color: var(--docs-text-2); }
+
+    .capture-grid, .workflow-grid, .report-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--docs-grid-gap);
+    }
+
+    .card {
+      min-width: 0;
+      padding: var(--docs-card-padding);
+      background: var(--docs-surface);
+      border: 1px solid var(--docs-border);
+      border-radius: var(--docs-radius-lg);
+      box-shadow: var(--docs-shadow);
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--docs-space-3);
+      align-items: flex-start;
+      margin-bottom: var(--docs-space-3);
+    }
+
+    .card h3 { font-size: var(--docs-type-xl); line-height: 1.3; }
+    .card p { color: var(--docs-text-2); }
+
+    .status {
+      flex: none;
+      padding: 4px 8px;
+      color: var(--docs-success);
+      background: var(--docs-success-soft);
+      border-radius: var(--docs-radius-pill);
+      font-weight: 700;
+    }
+
+    .facts { display: grid; gap: var(--docs-space-2); margin-top: var(--docs-space-4); list-style: none; }
+    .facts li { position: relative; padding-left: 18px; color: var(--docs-text-2); font-size: var(--docs-type-md); }
+    .facts li::before { content: ""; position: absolute; top: .65em; left: 2px; width: 6px; height: 6px; border-radius: 50%; background: var(--docs-accent); }
+    code { padding: 1px 5px; background: var(--docs-surface-2); border-radius: var(--docs-radius-xs); font-family: var(--docs-mono); font-size: .9em; }
+
+    .workflow {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr);
+      gap: var(--docs-space-3);
+      align-content: start;
+    }
+
+    .workflow-number {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      color: var(--docs-accent);
+      background: var(--docs-accent-soft);
+      border-radius: 50%;
+      font-family: var(--docs-mono);
+      font-size: var(--docs-type-sm);
+      font-weight: 750;
+    }
+
+    .workflow h3 { margin-bottom: var(--docs-space-1); }
+    .example { margin-top: var(--docs-space-3); padding-top: var(--docs-space-3); border-top: 1px solid var(--docs-border); color: var(--docs-muted); font-size: var(--docs-type-md); }
+
+    .feature-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      border: 1px solid var(--docs-border);
+      border-radius: var(--docs-radius-lg);
+      overflow: hidden;
+      background: var(--docs-surface);
+    }
+
+    .feature-strip article { padding: var(--docs-space-4); border-right: 1px solid var(--docs-border); }
+    .feature-strip article:last-child { border-right: 0; }
+    .feature-strip h3 { margin-bottom: var(--docs-space-1); font-size: var(--docs-type-md); }
+    .feature-strip p { color: var(--docs-text-2); font-size: var(--docs-type-md); }
+
+    .report-card { display: grid; gap: var(--docs-space-2); }
+    .report-card .label { color: var(--docs-muted); }
+
+    .boundary {
+      padding: var(--docs-space-5);
+      background: var(--docs-warning-soft);
+      border: 1px solid color-mix(in srgb, var(--docs-warning) 35%, transparent);
+      border-radius: var(--docs-radius-lg);
+    }
+
+    .boundary h3 { margin-bottom: var(--docs-space-2); font-size: var(--docs-type-lg); }
+    .boundary ul { display: grid; gap: var(--docs-space-2); padding-left: 20px; color: var(--docs-text-2); }
+    .boundary p { margin-top: var(--docs-space-3); color: var(--docs-text-2); }
+
+    footer { margin-top: var(--docs-section-gap); padding-top: var(--docs-space-4); border-top: 1px solid var(--docs-border); color: var(--docs-muted); font-size: var(--docs-type-md); }
+
+    @media (max-width: 760px) {
+      .hero { grid-template-columns: 1fr; align-items: start; }
+      .meta { max-width: 360px; }
+      .feature-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .feature-strip article:nth-child(2) { border-right: 0; }
+      .feature-strip article:nth-child(-n+2) { border-bottom: 1px solid var(--docs-border); }
+    }
+
+    @media (max-width: 560px) {
+      .page { padding-top: var(--docs-space-5); }
+      .capture-grid, .workflow-grid, .report-grid { grid-template-columns: 1fr; }
+      .section-copy { margin-left: 0; }
+      .feature-strip { grid-template-columns: 1fr; }
+      .feature-strip article, .feature-strip article:nth-child(2) { border-right: 0; border-bottom: 1px solid var(--docs-border); }
+      .feature-strip article:last-child { border-bottom: 0; }
+      .promise { padding: var(--docs-space-4); }
+    }
+
+    @media print {
+      .page { width: 100%; padding: 0; }
+      .card, .promise, .feature-strip, .boundary { box-shadow: none; break-inside: avoid; }
+      .docs-nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <nav class="docs-nav" aria-label="Tài liệu MonMon">
+      <a class="docs-nav-brand" href="smart-note.html">MonMon Docs</a>
+      <ul class="docs-nav-list">
+        <li><a href="smart-note.html" aria-current="page">Features đã có</a></li>
+        <li><a href="bank-transaction-auto-note-research.html">Nghiên cứu</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
+      </ul>
+    </nav>
+
+    <header class="hero">
+      <div>
+        <p class="eyebrow">MonMon / Feature note</p>
+        <h1>Nhập nhanh, xem tiền rõ hơn</h1>
+        <p class="lede">Những tính năng đang có để giảm thao tác ghi giao dịch, giữ lại dữ liệu chưa rõ và đi từ capture đến báo cáo nhanh hơn.</p>
+      </div>
+      <dl class="meta">
+        <div><dt>Loại tài liệu</dt><dd>Living feature note</dd></div>
+        <div><dt>Trạng thái</dt><dd>Theo code hiện tại</dd></div>
+        <div><dt>Cập nhật</dt><dd>26.08.2026</dd></div>
+      </dl>
+    </header>
+
+    <aside class="promise">
+      <div class="promise-mark" aria-hidden="true"></div>
+      <div>
+        <h2>Nguyên tắc vận hành</h2>
+        <p>Capture trước, làm rõ sau. Câu nhập đủ dữ liệu được lưu ngay; dữ liệu mơ hồ vào Needs Review thay vì bị mất hoặc bị đoán sai vào báo cáo.</p>
+      </div>
+    </aside>
+
+    <section aria-labelledby="capture-title">
+      <div class="section-head">
+        <span class="step">01</span>
+        <h2 id="capture-title">Các cách nhập đang dùng được</h2>
+      </div>
+      <p class="section-copy">Mỗi điểm vào phục vụ một hoàn cảnh khác nhau nhưng dùng chung parser, default và chính sách review.</p>
+
+      <div class="capture-grid">
+        <article class="card">
+          <div class="card-head"><h3>Siri · Ghi giao dịch</h3><span class="status">Live</span></div>
+          <p>Nói activation phrase, trả lời một câu tự nhiên. Nếu đủ amount và context, MonMon lưu ngay mà không hỏi xác nhận lần hai và không cần mở app.</p>
+          <ul class="facts">
+            <li>Ví dụ raw entry: <code>cafe 50k</code>.</li>
+            <li>App Shortcut có sau khi cài app, không cần tải file Shortcut.</li>
+            <li>Khi khóa máy, Siri chỉ trả kết quả chung, không đọc chi tiết nhạy cảm.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <div class="card-head"><h3>Ghi nhanh · Action Button</h3><span class="status">Live</span></div>
+          <p>User tự gán App Shortcut “Ghi nhanh” cho Action Button. Action mở MonMon ở foreground và đưa thẳng tới form nhập tự nhiên đã focus.</p>
+          <ul class="facts">
+            <li>Không dùng custom URL scheme nên Shortcuts không chặn launch.</li>
+            <li>Nếu App Lock đang bật, route chờ user mở khóa app rồi mới hiện form.</li>
+            <li>Apple không cho app tự gán Action Button thay user.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <div class="card-head"><h3>Quick Add trong app</h3><span class="status">Live</span></div>
+          <p>Mở form nhập nhanh từ giao diện giao dịch, gõ một dòng hoặc chỉnh field trước khi lưu. Default giúp bỏ qua các lựa chọn lặp lại.</p>
+          <ul class="facts">
+            <li>Dùng cùng parser với Siri để cách hiểu số tiền và nội dung nhất quán.</li>
+            <li>Default account và category được áp dụng khi câu nhập không nêu rõ.</li>
+            <li>Có thể chuyển sang form đầy đủ khi cần sửa nhiều field.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <div class="card-head"><h3>Share sao kê TPBank PDF</h3><span class="status">Live</span></div>
+          <p>Share file PDF có text layer vào MonMon, chọn account, xem preview và commit qua Import Inbox. Đây là lớp đối soát định kỳ để tìm giao dịch bị miss.</p>
+          <ul class="facts">
+            <li>Staging tách file vừa nhận khỏi dữ liệu giao dịch chính.</li>
+            <li>Fingerprint nhận diện exact duplicate và hỗ trợ transfer candidate.</li>
+            <li>User xem lại trước khi dữ liệu được đưa vào ledger.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="workflow-title">
+      <div class="section-head">
+        <span class="step">02</span>
+        <h2 id="workflow-title">Ba workflow ít thao tác nhất</h2>
+      </div>
+      <p class="section-copy">Chọn cách theo thời điểm: nói ngay, bấm một nút, hoặc đối soát một lần cuối kỳ.</p>
+
+      <div class="workflow-grid">
+        <article class="card workflow">
+          <span class="workflow-number">01</span>
+          <div><h3>Vừa trả tiền</h3><p>Gọi Siri → nói “cafe 50k” → giao dịch được lưu hoặc đưa vào Needs Review.</p><p class="example">Nhanh nhất khi tay đang bận và câu nhập đã rõ.</p></div>
+        </article>
+        <article class="card workflow">
+          <span class="workflow-number">02</span>
+          <div><h3>Không muốn gọi Siri</h3><p>Bấm Action Button → nhập một dòng trong quick capture → lưu.</p><p class="example">Ổn định hơn trong môi trường ồn hoặc khi cần xem lại trước khi lưu.</p></div>
+        </article>
+        <article class="card workflow">
+          <span class="workflow-number">03</span>
+          <div><h3>Cuối kỳ ngân hàng</h3><p>Share TPBank PDF → map account → preview → import các dòng hợp lệ.</p><p class="example">Lớp “không miss” cho những giao dịch không được capture realtime.</p></div>
+        </article>
+        <article class="card workflow">
+          <span class="workflow-number">04</span>
+          <div><h3>Dữ liệu chưa đủ</h3><p>Mở Needs Review → bổ sung amount, account hoặc category → commit.</p><p class="example">Raw entry vẫn được giữ nguyên nên không phải nhớ và nhập lại từ đầu.</p></div>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="friction-title">
+      <div class="section-head">
+        <span class="step">03</span>
+        <h2 id="friction-title">Những lớp giảm thao tác phía sau</h2>
+      </div>
+      <p class="section-copy">Các capability dùng chung giúp mọi điểm vào nhanh hơn mà vẫn giữ an toàn dữ liệu.</p>
+
+      <div class="feature-strip">
+        <article><h3>Natural text parser</h3><p>Hiểu amount VND, ngày tương đối, thu/chi, account và category từ một câu.</p></article>
+        <article><h3>Transaction defaults</h3><p>Đặt account và category mặc định riêng cho giao dịch thu hoặc chi.</p></article>
+        <article><h3>Needs Review</h3><p>Giữ capture mơ hồ ngoài totals cho tới khi user hoàn tất dữ liệu.</p></article>
+        <article><h3>Recurring rules</h3><p>Tạo các giao dịch lặp lại thay cho việc nhập lại cùng một khoản mỗi kỳ.</p></article>
+      </div>
+    </section>
+
+    <section aria-labelledby="report-title">
+      <div class="section-head">
+        <span class="step">04</span>
+        <h2 id="report-title">Đi từ giao dịch đến báo cáo nhanh</h2>
+      </div>
+      <p class="section-copy">Sau khi capture, cùng dữ liệu có thể được đổi góc nhìn mà không phải tạo báo cáo thủ công.</p>
+
+      <div class="report-grid">
+        <article class="card report-card"><span class="label">Overview</span><h3>Thu, chi và số giao dịch</h3><p>Spending Overview tóm tắt dòng tiền của khoảng thời gian đang chọn.</p></article>
+        <article class="card report-card"><span class="label">Time</span><h3>Ngày, tháng, năm hoặc custom range</h3><p>Date range và month rail giúp chuyển kỳ báo cáo ngay trên danh sách.</p></article>
+        <article class="card report-card"><span class="label">Category</span><h3>Chi tiêu theo nhóm</h3><p>Category Breakdown cho biết tiền đi đâu và cho phép drill-down vào giao dịch.</p></article>
+        <article class="card report-card"><span class="label">Find</span><h3>Tìm theo nội dung và số tiền</h3><p>Search hỗ trợ note, category, amount và filter có cấu trúc để truy lại giao dịch.</p></article>
+      </div>
+    </section>
+
+    <section aria-labelledby="boundary-title">
+      <div class="section-head">
+        <span class="step">05</span>
+        <h2 id="boundary-title">Giới hạn hiện tại</h2>
+      </div>
+      <div class="boundary">
+        <h3>Không nên hiểu “đã có” thành “đã phủ mọi giao dịch”</h3>
+        <ul>
+          <li>Statement import hiện hỗ trợ TPBank PDF có text layer; CSV, scan PDF và ngân hàng khác chưa thuộc flow này.</li>
+          <li>Screenshot/receipt OCR, Apple Pay Automation và Notification Automation chưa phải capability đang chạy trong app.</li>
+          <li>Siri vẫn cần activation phrase; câu nói mơ hồ được giữ để review thay vì tự đoán.</li>
+          <li>Siri và Action Button vẫn cần acceptance test trên iPhone vật lý cho cả trạng thái khóa và mở máy.</li>
+        </ul>
+        <p>Xem đánh giá khả thi, rủi ro và TODO tại <a href="bank-transaction-auto-note-research.html">Nghiên cứu tự động ghi giao dịch</a>.</p>
+      </div>
+    </section>
+
+    <footer>Feature note phản ánh repository ngày 26.08.2026. Đây là tài liệu trạng thái sản phẩm; các ý tưởng và việc chưa làm được giữ riêng trong trang research.</footer>
+  </main>
+</body>
+</html>

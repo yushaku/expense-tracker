@@ -144,6 +144,45 @@ button, input, select, textarea { font: inherit; color: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 a { text-underline-offset: 3px; }
 
+.docs-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--docs-space-4);
+  margin-bottom: var(--docs-space-6);
+  padding-bottom: var(--docs-space-3);
+  border-bottom: 1px solid var(--docs-border);
+}
+
+.docs-nav-brand {
+  color: var(--docs-text);
+  font-weight: 750;
+  letter-spacing: -.02em;
+  text-decoration: none;
+}
+
+.docs-nav-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--docs-space-2);
+  list-style: none;
+}
+
+.docs-nav-list a {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: var(--docs-radius-pill);
+  color: var(--docs-text-2);
+  font-size: var(--docs-type-md);
+  text-decoration: none;
+}
+
+.docs-nav-list a:hover { background: var(--docs-surface-2); color: var(--docs-text); }
+.docs-nav-list a[aria-current="page"] { background: var(--docs-accent-soft); color: var(--docs-accent); font-weight: 700; }
+
 h1 {
   font-size: var(--docs-title-size);
   line-height: var(--docs-title-line-height);
@@ -165,6 +204,11 @@ h2 {
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+}
+
+@media (max-width: 560px) {
+  .docs-nav { align-items: flex-start; }
+  .docs-nav-list { justify-content: flex-start; }
 }
 
 @media print {

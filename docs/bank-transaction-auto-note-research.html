@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Feature map và TODO cho các cách đưa giao dịch vào MonMon mà không cần nhập tay hằng ngày.">
+  <meta name="description" content="Nghiên cứu khả thi, rủi ro và hướng triển khai cho các cách tự động đưa giao dịch vào MonMon.">
   <link rel="stylesheet" href="assets/monmon-docs.css">
-  <title>MonMon — Transaction Capture Features</title>
+  <title>MonMon — Nghiên cứu tự động ghi giao dịch</title>
   <style>
     :root {
       --surface: var(--docs-surface);
@@ -463,17 +463,25 @@
 </head>
 <body>
   <main class="page">
+    <nav class="docs-nav" aria-label="Tài liệu MonMon">
+      <a class="docs-nav-brand" href="smart-note.html">MonMon Docs</a>
+      <ul class="docs-nav-list">
+        <li><a href="smart-note.html">Features đã có</a></li>
+        <li><a href="bank-transaction-auto-note-research.html" aria-current="page">Nghiên cứu</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
+      </ul>
+    </nav>
     <header class="masthead">
       <div>
-        <p class="kicker">MonMon / Feature map + product research</p>
+        <p class="kicker">MonMon / Product research</p>
         <h1>Transaction capture không cần nhập tay mỗi ngày</h1>
-        <p class="lede">Mô tả năm nguồn đưa giao dịch vào MonMon, trạng thái code hiện tại và checklist cho các phần chưa được thực hiện.</p>
+        <p class="lede">Đánh giá năm nguồn đưa giao dịch vào MonMon, giới hạn nền tảng, rủi ro dữ liệu và những câu hỏi còn phải kiểm chứng trước khi mở rộng.</p>
       </div>
       <aside class="stamp" aria-label="Phạm vi nghiên cứu">
         <strong>Phạm vi</strong>
         Việt Nam · iPhone<br>
         Cập nhật 26.08.2026<br>
-        Feature inventory
+        Research brief
       </aside>
     </header>
 
@@ -488,13 +496,13 @@
     <section aria-labelledby="features-title">
       <div class="section-head">
         <span class="section-index">01</span>
-        <h2 id="features-title">Feature inventory &amp; TODO</h2>
+        <h2 id="features-title">Các hướng capture cần nghiên cứu</h2>
       </div>
-      <p class="section-copy">Bốn feature capture mới chưa được thực hiện; import sao kê PDF đã có nền nhưng CSV và độ phủ nhiều ngân hàng vẫn còn thiếu. Khi in, toàn bộ feature luôn được hiển thị.</p>
+      <p class="section-copy">Đây là bản đồ cơ hội và câu hỏi mở, không phải changelog của app. Những gì đã chạy được được ghi riêng tại <a href="smart-note.html">Features đã có</a>. Khi in, toàn bộ hướng nghiên cứu luôn được hiển thị.</p>
       <div class="feature-controls" role="group" aria-label="Lọc feature theo trạng thái">
         <button class="feature-filter" type="button" data-feature-filter="all" aria-pressed="true">Tất cả</button>
-        <button class="feature-filter" type="button" data-feature-filter="missing" aria-pressed="false">Chưa làm</button>
-        <button class="feature-filter" type="button" data-feature-filter="partial" aria-pressed="false">Đang có nền</button>
+        <button class="feature-filter" type="button" data-feature-filter="missing" aria-pressed="false">Cần adapter</button>
+        <button class="feature-filter" type="button" data-feature-filter="partial" aria-pressed="false">Khả thi</button>
         <button class="feature-filter" type="button" data-feature-filter="blocked" aria-pressed="false">Phụ thuộc OS</button>
       </div>
 
@@ -510,7 +518,7 @@
             <div class="feature-fact"><dt>Coverage</dt><dd>Push có đủ dữ liệu</dd></div>
             <div class="feature-fact"><dt>Daily flow</dt><dd>Zero-touch</dd></div>
           </dl>
-          <h4 class="todo-heading">Implementation checklist</h4>
+          <h4 class="todo-heading">Cần kiểm chứng / triển khai</h4>
           <ul class="todo-list">
             <li class="todo-item os-gate"><span class="todo-state">OS gate</span><span>Chờ iOS 27 final và kiểm chứng notification payload trên iPhone vật lý.</span></li>
             <li class="todo-item"><span class="todo-state">Todo</span><span>Tạo App Intent nhận raw notification, source app, received date và account hint.</span></li>
@@ -531,7 +539,7 @@
             <div class="feature-fact"><dt>Coverage</dt><dd>Wallet tap</dd></div>
             <div class="feature-fact"><dt>Daily flow</dt><dd>Zero-touch</dd></div>
           </dl>
-          <h4 class="todo-heading">Implementation checklist</h4>
+          <h4 class="todo-heading">Cần kiểm chứng / triển khai</h4>
           <ul class="todo-list">
             <li class="todo-item"><span class="todo-state">Todo</span><span>Tạo App Intent nhận amount, merchant, card hint và transaction date.</span></li>
             <li class="todo-item"><span class="todo-state">Todo</span><span>Map card Wallet sang CashAccount và cung cấp Shortcut template “Run Immediately”.</span></li>
@@ -552,9 +560,8 @@
             <div class="feature-fact"><dt>Coverage</dt><dd>Ảnh rõ chữ</dd></div>
             <div class="feature-fact"><dt>Privacy</dt><dd>On-device</dd></div>
           </dl>
-          <h4 class="todo-heading">Implementation checklist</h4>
+          <h4 class="todo-heading">Cần kiểm chứng / triển khai</h4>
           <ul class="todo-list">
-            <li class="todo-item done"><span class="todo-state">Đã có</span><span>Share Extension và staging store hiện đã đưa PDF vào Import Inbox.</span></li>
             <li class="todo-item"><span class="todo-state">Todo</span><span>Mở rộng intake nhận HEIC, JPEG, PNG và screenshot từ Photos.</span></li>
             <li class="todo-item"><span class="todo-state">Todo</span><span>Dùng Vision OCR on-device; giữ layout/bounding boxes để đọc receipt.</span></li>
             <li class="todo-item"><span class="todo-state">Todo</span><span>Tạo parser cho payment-success screenshot và receipt tổng quát.</span></li>
@@ -565,22 +572,19 @@
         <article class="capture-feature" data-status="partial">
           <div class="feature-header">
             <div><span class="feature-code">CAP-04</span><h3>Siri / Action Button</h3></div>
-            <span class="feature-status">Đã có MVP</span>
+            <span class="feature-status">Khả thi</span>
           </div>
-          <p class="feature-summary">Hai App Shortcut “Ghi giao dịch” và “Ghi nhanh” được cài tự động cùng app. Siri hỏi một câu nhập tự do như “50 nghìn ăn trưa tiền mặt”; Action Button có thể mở thẳng quick capture mà không cần template tải thêm.</p>
+          <p class="feature-summary">App Shortcuts có thể cung cấp một lệnh nhập tự do cho Siri và một điểm vào foreground để user tự gán Action Button, không cần phát hành file Shortcut riêng.</p>
           <dl class="feature-facts">
             <div class="feature-fact"><dt>Platform</dt><dd>Khả thi từ iOS 18</dd></div>
             <div class="feature-fact"><dt>Siri flow</dt><dd>Gọi + một câu trả lời</dd></div>
             <div class="feature-fact"><dt>Button setup</dt><dd>Một lần trong Settings</dd></div>
           </dl>
-          <h4 class="todo-heading">Implementation checklist</h4>
+          <h4 class="todo-heading">Kết luận nghiên cứu</h4>
           <ul class="todo-list">
-            <li class="todo-item done"><span class="todo-state">Đã có</span><span><code>CaptureTransactionIntent</code>, <code>OpenQuickCaptureIntent</code> và <code>AppShortcutsProvider</code> cho Siri, Spotlight và Shortcuts.</span></li>
-            <li class="todo-item done"><span class="todo-state">Đã có</span><span>Một parameter <code>rawEntry</code>; parser hiểu số VND, ngày tương đối, account/category và dùng default khi phù hợp.</span></li>
-            <li class="todo-item done"><span class="todo-state">Đã có</span><span>Giao dịch rõ được lưu ngay không hỏi xác nhận lần hai; câu mơ hồ vào Needs Review nên không bị mất và chưa ảnh hưởng tổng tiền.</span></li>
-            <li class="todo-item done"><span class="todo-state">Đã có</span><span><code>alwaysAllowed</code> cho capture nền; result khóa máy chỉ nói trạng thái chung, không đọc số dư hay chi tiết giao dịch.</span></li>
-            <li class="todo-item done"><span class="todo-state">Đã có</span><span>Phrase, title, dialog và UI được localize tiếng Việt/Anh; quick capture mở app bằng foreground intent và chờ App Lock mở trước khi hiện.</span></li>
-            <li class="todo-item done"><span class="todo-state">Đã có</span><span>Settings giải thích hai shortcut được cài tự động và hướng dẫn gán “Ghi nhanh” cho Action Button.</span></li>
+            <li class="todo-item"><span class="todo-state">Finding</span><span>App Shortcut xuất hiện sau khi cài app; user không cần tải thêm template Shortcut.</span></li>
+            <li class="todo-item"><span class="todo-state">Finding</span><span>Siri phù hợp với một parameter text tự do; giao dịch đủ dữ liệu có thể lưu nền mà không cần mở app.</span></li>
+            <li class="todo-item"><span class="todo-state">Finding</span><span>App không thể tự gán Action Button và không nên hứa tự bật dictation khi máy khóa.</span></li>
             <li class="todo-item"><span class="todo-state">Todo</span><span>Acceptance test Siri và Action Button khi khóa/mở máy trên iPhone vật lý; app không thể tự gán Action Button cho user.</span></li>
           </ul>
         </article>
@@ -588,18 +592,16 @@
         <article class="capture-feature statement" data-status="partial">
           <div class="feature-header">
             <div><span class="feature-code">CAP-05</span><h3>PDF / CSV Statement</h3></div>
-            <span class="feature-status">Đang có nền</span>
+            <span class="feature-status">Khả thi</span>
           </div>
-          <p class="feature-summary">Lớp “không miss”: statement định kỳ đối chiếu các nguồn realtime. MonMon đã stage, parse, preview và reconcile TPBank PDF có text layer; CSV và các ngân hàng khác chưa được thực hiện.</p>
+          <p class="feature-summary">Lớp “không miss”: statement định kỳ đối chiếu các nguồn realtime. PDF có text layer là điểm bắt đầu thực dụng; CSV giúp mở rộng ngân hàng nhưng cần nhận diện dialect và schema.</p>
           <dl class="feature-facts">
             <div class="feature-fact"><dt>User effort</dt><dd>Một share/kỳ</dd></div>
             <div class="feature-fact"><dt>Coverage</dt><dd>Ledger source</dd></div>
-            <div class="feature-fact"><dt>Current</dt><dd>TPBank PDF</dd></div>
+            <div class="feature-fact"><dt>Ưu tiên</dt><dd>PDF text + CSV</dd></div>
           </dl>
-          <h4 class="todo-heading">Implementation checklist</h4>
+          <h4 class="todo-heading">Cần kiểm chứng / mở rộng</h4>
           <ul class="todo-list">
-            <li class="todo-item done"><span class="todo-state">Đã có</span><span>Share Extension, staging, TPBank PDF parser, account mapping, preview và Import Inbox.</span></li>
-            <li class="todo-item done"><span class="todo-state">Đã có</span><span>Fingerprint provenance, exact duplicate reconciliation và transfer candidate handling.</span></li>
             <li class="todo-item"><span class="todo-state">Todo</span><span>Mở rộng intake nhận CSV với MIME/extension validation và size limit.</span></li>
             <li class="todo-item"><span class="todo-state">Todo</span><span>Tạo CSV dialect detector: delimiter, encoding, headers, decimal và date format.</span></li>
             <li class="todo-item"><span class="todo-state">Todo</span><span>Thêm parser fixtures cho các ngân hàng ưu tiên qua cùng parser contract.</span></li>
@@ -621,7 +623,7 @@
         <span class="section-index">02</span>
         <h2 id="siri-research-title">Siri / Action Button — nghiên cứu khả thi</h2>
       </div>
-      <p class="section-copy">Đối chiếu repository với App Intents và Human Interface Guidelines hiện tại của Apple. MonMon target iOS 18.0 và hiện đã có capture intent, App Shortcuts, parser VND, pending review cùng quick-capture route.</p>
+      <p class="section-copy">Đối chiếu hướng sản phẩm với App Intents và Human Interface Guidelines hiện tại của Apple. Mục tiêu là baseline chạy bằng API chuẩn từ iOS 18, không phụ thuộc Siri AI.</p>
 
       <aside class="research-verdict">
         <div>
@@ -662,12 +664,12 @@
         </article>
 
         <article class="research-panel">
-          <h3>Nền đã triển khai</h3>
+          <h3>Ràng buộc thiết kế</h3>
           <ul>
-            <li><code>TransactionCaptureIntentDependency</code> đưa ModelContainer vào intent và giới hạn SwiftData access trên MainActor.</li>
-            <li><code>TransactionCaptureService</code> dùng chung parser/default resolver cho Siri và quick-capture UI.</li>
-            <li><code>PendingTransactionCapture</code> giữ nguyên raw voice khi thiếu amount/account/category; user review và commit sau.</li>
-            <li>Khoảng trống còn lại: thêm invocation ID/dedupe cho trường hợp Siri retry.</li>
+            <li>Siri và quick capture phải dùng chung parser/default policy để kết quả không lệch nhau.</li>
+            <li>Raw voice cần được giữ lại khi thiếu amount/account/category để user sửa thay vì nhập lại.</li>
+            <li>Invocation cần idempotency hoặc dedupe vì Siri có thể retry sau timeout.</li>
+            <li>Mọi UI review vẫn phải đi qua App Lock; result trên Lock Screen chỉ nói trạng thái chung.</li>
           </ul>
         </article>
       </div>
@@ -691,7 +693,7 @@
         <article class="siri-step"><h3>Commit hoặc review</h3><p>Dữ liệu đủ thành transaction; mơ hồ vào Needs Review và chưa tính totals.</p></article>
       </div>
 
-      <aside class="research-note"><strong>Trạng thái MVP:</strong> App Shortcut “Ghi giao dịch” và “Ghi nhanh”, localization Việt/Anh, parser, persistence, Needs Review cùng quick capture đã có. Không cần phát hành voice template riêng; chưa làm Control Center control, interactive snippet nâng cao hay Siri AI schema work.</aside>
+      <aside class="research-note"><strong>Quyết định nghiên cứu:</strong> không cần phát hành voice template riêng. App Shortcut là baseline; Control Center control, interactive snippet nâng cao và Siri AI chỉ nên được đánh giá sau khi flow cơ bản qua acceptance test trên thiết bị thật.</aside>
     </section>
 
     <section aria-labelledby="routes-title">
@@ -881,7 +883,7 @@
       </div>
     </section>
 
-    <footer>Feature status dựa trên repository ngày 26.08.2026. Platform capability cần được xác nhận lại trên iOS final và iPhone vật lý trước khi triển khai.</footer>
+    <footer>Nghiên cứu cập nhật 26.08.2026. Platform capability cần được xác nhận lại trên iOS final và iPhone vật lý trước khi triển khai. Xem <a href="smart-note.html">Features đã có</a> để biết trạng thái app hiện tại.</footer>
   </main>
 
   <script>
