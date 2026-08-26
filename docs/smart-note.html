@@ -16,14 +16,9 @@
     a { color: var(--docs-accent); }
     code { padding: 2px 6px; background: var(--docs-surface-2); border-radius: var(--docs-radius-xs); font-family: var(--docs-mono); font-size: .9em; }
 
-    .hero {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 220px;
-      gap: var(--docs-space-6);
-      align-items: end;
-    }
+    .hero { max-width: 840px; }
 
-    .eyebrow, .label, .step-label, .meta dt {
+    .eyebrow, .label, .step-label {
       font-family: var(--docs-mono);
       font-size: var(--docs-type-xs);
       letter-spacing: .08em;
@@ -33,20 +28,6 @@
     .eyebrow { margin-bottom: var(--docs-space-2); color: var(--docs-accent); }
     h1 { max-width: 760px; }
     .lede { max-width: 740px; margin-top: var(--docs-space-3); color: var(--docs-text-2); font-size: var(--docs-type-lg); }
-
-    .meta {
-      display: grid;
-      gap: var(--docs-space-3);
-      padding: var(--docs-space-4);
-      background: var(--docs-surface);
-      border: 1px solid var(--docs-border);
-      border-radius: var(--docs-radius-md);
-      box-shadow: var(--docs-shadow);
-    }
-
-    .meta div { display: grid; gap: 2px; }
-    .meta dt { color: var(--docs-muted); }
-    .meta dd { color: var(--docs-text-2); font-size: var(--docs-type-md); }
 
     .recommendation {
       display: grid;
@@ -265,8 +246,6 @@
 
     @media (max-width: 620px) {
       .page { padding-top: var(--docs-space-5); }
-      .hero { grid-template-columns: 1fr; align-items: start; }
-      .meta { max-width: 360px; }
       .setup-list, .help-grid { grid-template-columns: 1fr; }
       .section-copy { margin-left: 0; }
       .guide-head { grid-template-columns: 1fr; }
@@ -299,16 +278,9 @@
     </nav>
 
     <header class="hero">
-      <div>
-        <p class="eyebrow">MonMon / Hướng dẫn người dùng</p>
-        <h1>Ghi giao dịch ít nhất, vẫn không bỏ sót</h1>
-        <p class="lede">Từ thiết lập ban đầu đến dùng Siri, Action Button, nhập sao kê và xem báo cáo. Bạn không cần biết MonMon hoạt động kỹ thuật ra sao để làm theo.</p>
-      </div>
-      <dl class="meta">
-        <div><dt>Dành cho</dt><dd>Người dùng iPhone</dd></div>
-        <div><dt>Thiết lập ban đầu</dt><dd>Khoảng 5 phút</dd></div>
-        <div><dt>Cập nhật</dt><dd>26.08.2026</dd></div>
-      </dl>
+      <p class="eyebrow">MonMon / Hướng dẫn người dùng</p>
+      <h1>Ghi giao dịch ít nhất, vẫn không bỏ sót</h1>
+      <p class="lede">Từ thiết lập ban đầu đến dùng Siri, Action Button, nhập sao kê và xem báo cáo. Bạn không cần biết MonMon hoạt động kỹ thuật ra sao để làm theo.</p>
     </header>
 
     <aside class="recommendation">
