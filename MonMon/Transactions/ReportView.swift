@@ -449,6 +449,9 @@ struct ReportView: View {
         accounts.first { $0.id == transaction.accountID }
     }
 
+    private func account(_ id: UUID) -> CashAccount? {
+        accounts.first { $0.id == id }
+    }
 }
 
 #if DEBUG

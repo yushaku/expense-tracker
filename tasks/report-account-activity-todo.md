@@ -6,21 +6,18 @@
       deterministic ties with unit tests.
 - [x] Add a pure account-spending summary using the already-selected monthly
       transactions.
-- [ ] Verify focused summary tests (blocked by the existing macOS-only
-      `ShortcutsLink` compile error in `SettingsView`).
+- [x] Verify focused summary tests on `Yushaku`.
 
 ## Task 2: Build account activity ordering
 
 - [x] Cover account income/expense plus incoming and
       outgoing transfers while excluding unrelated records.
 - [x] Add one newest-first activity projection with a stable tie-break.
-- [ ] Verify focused activity and transfer tests (same existing macOS compile
-      blocker).
+- [x] Verify focused activity and transfer tests on `Yushaku`.
 
 ## Checkpoint: Foundation
 
-- [ ] New tests and existing transaction/transfer summaries pass (blocked before
-      test execution by the existing macOS compile error).
+- [x] New account summary and activity tests pass on `Yushaku` (4/4).
 - [x] Domain files import no SwiftUI.
 
 ## Task 3: Integrate Report and account detail UI
@@ -33,9 +30,10 @@
 
 ## Task 4: Verify and commit
 
-- [ ] Run focused and available full unit tests (attempted; blocked by the
-      existing macOS compile error before tests execute).
+- [x] Run focused unit tests on `Yushaku` (4/4); the full macOS suite remains
+      blocked by the existing `ShortcutsLink` compile error in `SettingsView`.
 - [x] Run recursive Swift format lint and diff checks.
 - [x] Review correctness, simplicity, accessibility, security, and performance.
 - [x] Commit to `feat/report-income-overview`; do not push or merge.
-- [x] Do not build, install, or launch on `Yushaku` before merge into `dev`.
+- [x] Build, install, and launch on `Yushaku` only after the owner explicitly
+      requested it.
