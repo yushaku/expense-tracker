@@ -95,7 +95,7 @@ struct StatementImportPreviewView: View {
             }
         }
         .task(id: staged.id) { await inbox.loadPreview(staged) }
-        .sheet(item: $editorSelection) { selection in
+        .appSheet(item: $editorSelection) { selection in
             if let review,
                 let rowIndex = review.rows.firstIndex(where: { $0.id == selection.id })
             {

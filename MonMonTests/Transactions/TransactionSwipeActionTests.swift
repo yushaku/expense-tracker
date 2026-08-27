@@ -1,5 +1,4 @@
 import CoreGraphics
-import SwiftUI
 import Testing
 
 @testable import MonMon
@@ -116,13 +115,5 @@ struct TransactionSwipeActionTests {
                 moving: CGSize(width: -70, height: 8)
             )
         )
-    }
-}
-
-@Suite("Transaction sheet presentation")
-struct TransactionSheetPresentationTests {
-    @Test("A swipe prioritizes dismissing the sheet over scrolling its content")
-    func swipePrioritizesSheetDismissal() {
-        #expect(TransactionSheetPresentation.contentInteraction == .resizes)
     }
 }

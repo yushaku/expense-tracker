@@ -60,7 +60,7 @@ struct TransferListView: View {
                     }
                 }
             }
-            .sheet(item: $editorMode) { mode in
+            .appSheet(item: $editorMode) { mode in
                 TransferEditorView(mode: mode)
             }
             .tint(MonMonTheme.accent)

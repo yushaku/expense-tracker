@@ -63,7 +63,7 @@ struct CategoryTransactionsView: View {
         }
         .navigationTitle(categoryName)
         .accessibilityIdentifier("category-transactions")
-        .sheet(item: $editorMode) { mode in
+        .appSheet(item: $editorMode) { mode in
             TransactionEditorView(mode: mode)
         }
         .tint(MonMonTheme.accent)

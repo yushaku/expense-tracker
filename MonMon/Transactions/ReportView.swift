@@ -89,7 +89,7 @@ struct ReportView: View {
                     AccountActivityView(account: account)
                 }
             }
-            .sheet(isPresented: $isFiltering) {
+            .appSheet(isPresented: $isFiltering) {
                 ReportFilterSheet(
                     query: $query,
                     categories: categories,
@@ -97,7 +97,7 @@ struct ReportView: View {
                     focusesSearchOnAppear: true
                 )
             }
-            .sheet(item: $editorMode) { mode in
+            .appSheet(item: $editorMode) { mode in
                 TransactionEditorView(mode: mode, defaultDate: defaultDate)
             }
             .transactionActions(

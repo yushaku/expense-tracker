@@ -124,7 +124,7 @@ struct FundEditorView: View {
                     .accessibilityIdentifier("save-fund")
                 }
             }
-            .sheet(isPresented: $isAddingInstrument) {
+            .appSheet(isPresented: $isAddingInstrument) {
                 if isGold {
                     FundCatalogueImportView(
                         title: "Add Gold from vang.today",

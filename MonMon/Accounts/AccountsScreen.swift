@@ -68,10 +68,10 @@ struct AccountsScreen: View {
         }
         .navigationTitle("Accounts")
         .accessibilityIdentifier("accounts-screen")
-        .sheet(item: $accountEditorMode) { mode in
+        .appSheet(item: $accountEditorMode) { mode in
             AccountEditorView(mode: mode)
         }
-        .sheet(item: $transferEditorMode) { mode in
+        .appSheet(item: $transferEditorMode) { mode in
             TransferEditorView(mode: mode)
         }
         .tint(MonMonTheme.accent)

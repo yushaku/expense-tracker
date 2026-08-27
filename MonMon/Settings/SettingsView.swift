@@ -38,7 +38,7 @@ struct SettingsView: View {
             .compactRootNavigationTitle("Settings")
             .accessibilityIdentifier("settings")
             .tint(MonMonTheme.accent)
-            .sheet(item: $instrumentScope) { scope in
+            .appSheet(item: $instrumentScope) { scope in
                 FundInstrumentListView(scope: scope)
             }
         }
