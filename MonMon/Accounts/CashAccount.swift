@@ -316,18 +316,18 @@ final class CashAccount {
         static let populated: ModelContainer = {
             let wallet = CashAccount.preview(
                 name: "Wallet",
-                kind: .cash,
+                kind: .normal,
                 openingBalance: 1_250_000
             )
             let techcombank = CashAccount.preview(
                 name: "Techcombank",
-                kind: .bank,
+                kind: .normal,
                 openingBalance: 148_900_000,
                 createdOffset: 60
             )
             let emergency = CashAccount.preview(
                 name: "Emergency fund",
-                kind: .bank,
+                kind: .normal,
                 openingBalance: 120_000_000,
                 createdOffset: 120
             )

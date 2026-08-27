@@ -158,7 +158,7 @@ struct CashAccountCard: View {
 
             VStack(spacing: 16) {
                 CashAccountCard(
-                    account: .preview(name: "Wallet", kind: .cash, openingBalance: 1_250_000),
+                    account: .preview(name: "Wallet", kind: .normal, openingBalance: 1_250_000),
                     deposits: [],
                     withdrawals: [],
                     holdings: [],
@@ -170,7 +170,11 @@ struct CashAccountCard: View {
                 )
 
                 CashAccountCard(
-                    account: .preview(name: "Techcombank", kind: .bank, openingBalance: 48_900_000),
+                    account: .preview(
+                        name: "Techcombank",
+                        kind: .normal,
+                        openingBalance: 48_900_000
+                    ),
                     deposits: [],
                     withdrawals: [],
                     holdings: [],
@@ -201,7 +205,7 @@ struct CashAccountCard: View {
                 CashAccountCard(
                     account: .preview(
                         name: "Very long account name that wraps to two lines",
-                        kind: .bank,
+                        kind: .normal,
                         openingBalance: 987_654_321_000
                     ),
                     deposits: [],

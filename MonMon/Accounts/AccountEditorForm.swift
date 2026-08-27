@@ -345,13 +345,17 @@ struct AccountEditorForm: View {
 
     #Preview("Form · filled") {
         AccountEditorFormPreview(
-            draft: AccountDraft(name: "Techcombank", kind: .bank, openingBalanceText: "48.900.000")
+            draft: AccountDraft(
+                name: "Techcombank",
+                kind: .normal,
+                openingBalanceText: "48.900.000"
+            )
         )
     }
 
     #Preview("Form · edit deletable") {
         AccountEditorFormPreview(
-            draft: AccountDraft(name: "Old wallet", kind: .cash, openingBalanceText: "0"),
+            draft: AccountDraft(name: "Old wallet", kind: .normal, openingBalanceText: "0"),
             isEditing: true,
             canDelete: true
         )
@@ -372,7 +376,7 @@ struct AccountEditorForm: View {
 
     #Preview("Form · errors") {
         AccountEditorFormPreview(
-            draft: AccountDraft(name: "", kind: .cash, openingBalanceText: "-10"),
+            draft: AccountDraft(name: "", kind: .normal, openingBalanceText: "-10"),
             validationError: .negativeOpeningBalance,
             saveErrorMessage: "Couldn’t save this account. Try again."
         )

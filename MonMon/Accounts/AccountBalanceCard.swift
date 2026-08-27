@@ -213,13 +213,13 @@ private extension Decimal {
                     AccountBalanceSlice(
                         accountID: UUID(),
                         name: "Techcombank",
-                        kind: .bank,
+                        kind: .normal,
                         amount: 42_000_000
                     ),
                     AccountBalanceSlice(
                         accountID: UUID(),
                         name: "Wallet",
-                        kind: .cash,
+                        kind: .normal,
                         amount: 3_500_000
                     ),
                 ],
