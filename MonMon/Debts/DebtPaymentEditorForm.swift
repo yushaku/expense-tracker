@@ -169,7 +169,7 @@ struct DebtPaymentEditorForm: View {
     private var accountCard: some View {
         card {
             VStack(alignment: .leading, spacing: 18) {
-                sectionHeader("Cash account", systemImage: "arrow.left.arrow.right")
+                sectionHeader("Account", systemImage: "arrow.left.arrow.right")
 
                 if accounts.isEmpty {
                     Text("A payment needs an account. Add one on the Home tab first.")

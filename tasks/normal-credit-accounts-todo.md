@@ -35,7 +35,7 @@ Files: `CashBalanceSummary.swift`, `CashBalanceSummaryTests.swift`,
 - [x] Write failing tests for restoring an old account record without a credit
       limit and round-tripping a new Credit limit.
 - [x] Export, validate, create, and update the optional backup credit-limit field;
-      validate it as non-negative when present.
+      validate it as non-negative and Credit-only when present.
 - [x] Prove legacy `cash`/`bank` backup kinds restore as Normal and new exports use
       `normal`.
 - [x] Run focused backup tests.
@@ -46,34 +46,34 @@ Files: `MonMonBackupDocument.swift`, `MonMonBackupService.swift`,
 
 ## Task 4: Convert production account-kind consumers
 
-- [ ] Replace typed Cash/Bank production and preview references with Normal without
+- [x] Replace typed Cash/Bank production and preview references with Normal without
       changing unrelated asset-allocation `.cash` cases.
-- [ ] Update seed/default-account matching and capture behavior to the canonical
+- [x] Update seed/default-account matching and capture behavior to the canonical
       Normal kind.
-- [ ] Compile and run relevant seed, transaction, and account tests; commit.
+- [x] Compile and run relevant seed, transaction, and account tests; commit.
 
 Files are split into reviewable groups across Accounts, Transactions, Savings,
 Funds, and Transfers; no group exceeds five files.
 
 ## Task 5: Convert test fixtures by domain
 
-- [ ] Convert Accounts/Transactions/App fixtures and run their focused suites.
-- [ ] Convert Savings/Funds fixtures and run their focused suites.
-- [ ] Convert Debts/Transfers/Imports/Backup/Recurring fixtures and run their
+- [x] Convert Accounts/Transactions/App fixtures and run their focused suites.
+- [x] Convert Savings/Funds fixtures and run their focused suites.
+- [x] Convert Debts/Transfers/Imports/Backup/Recurring fixtures and run their
       focused suites.
-- [ ] Commit each domain group after its focused verification.
+- [x] Commit each domain group after its focused verification.
 
 Each domain group is limited to five files where practical; mechanical fixture
 files may be grouped only when they share the same compile-only kind replacement.
 
 ## Task 6: Remove migration adapters and finish verification
 
-- [ ] Prove repository source has no CashAccountKind Cash/Bank consumers or stale
+- [x] Prove repository source has no CashAccountKind Cash/Bank consumers or stale
       Cash/Bank account-type UI copy, then remove temporary aliases.
-- [ ] Run code-quality and simplification review; make only scoped corrections.
-- [ ] Run full macOS tests, recursive format lint, macOS build, and generic iOS
+- [x] Run code-quality and simplification review; make only scoped corrections.
+- [x] Run full macOS tests, recursive format lint, macOS build, and generic iOS
       device build.
-- [ ] Review the staged diff for owner data, secrets, generated output, and unrelated
+- [x] Review the staged diff for owner data, secrets, generated output, and unrelated
       edits; commit and report the branch without merging, pushing, or installing.
 
 Files: `CashAccountKind.swift`, spec/plan/task status, plus review-only corrections.

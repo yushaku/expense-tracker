@@ -43,11 +43,6 @@ enum CashAccountKind: Codable, CaseIterable, RawRepresentable {
         try container.encode(rawValue)
     }
 
-    // Temporary source adapters keep intermediate migration commits compiling.
-    // They are removed after every production and test consumer uses `.normal`.
-    static let cash = Self.normal
-    static let bank = Self.normal
-
     var displayNameKey: String {
         switch self {
         case .normal:
@@ -66,7 +61,7 @@ enum CashAccountKind: Codable, CaseIterable, RawRepresentable {
     }
 
     /// Credit cards carry what you owe, so their balance is allowed to go below
-    /// zero. Cash and bank accounts cannot.
+    /// zero. Normal accounts cannot.
     var allowsNegativeBalance: Bool {
         self == .credit
     }

@@ -218,7 +218,7 @@ struct AccountsScreen: View {
         placeholder(
             symbol: "wallet.bifold.fill",
             title: "No accounts yet",
-            message: "Add cash and bank accounts to see how your money is spread across them."
+            message: "Add normal accounts to see how your money is spread across them."
         ) {
             Button("Add Account", systemImage: "plus") {
                 accountEditorMode = .add

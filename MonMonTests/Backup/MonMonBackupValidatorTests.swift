@@ -112,6 +112,19 @@ struct MonMonBackupValidatorTests {
         }
     }
 
+    @Test("A Normal account cannot carry borrowing capacity")
+    func normalAccountCreditLimitIsRejected() throws {
+        var payload = MonMonBackupPayload.empty
+        var record = account(id: accountID)
+        record.kind = CashAccountKind.normal.rawValue
+        record.creditLimit = "1"
+        payload.accounts = [record]
+
+        #expect(throws: MonMonBackupValidationError.invalidPayload) {
+            try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
+        }
+    }
+
     @Test("Missing required account references and impossible transfers are rejected")
     func referenceFailures() throws {
         var payload = MonMonBackupPayload.empty

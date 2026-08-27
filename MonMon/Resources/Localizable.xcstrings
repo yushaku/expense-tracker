@@ -2015,12 +2015,12 @@
         }
       }
     },
-    "Add cash and bank accounts to see everything in one calm overview.": {
+    "Add normal accounts to see how your money is spread across them.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Thêm tài khoản tiền mặt và ngân hàng để xem tất cả trong một bảng gọn gàng."
+            "value": "Thêm tài khoản thông thường để xem tiền của bạn đang được phân bổ như thế nào."
           }
         }
       }

@@ -48,12 +48,12 @@ struct CashBalanceSummaryTests {
         #expect(CashBalanceSummary.total(of: [account]) == Decimal(1_250_000))
     }
 
-    @Test("Cash and bank balances add without floating-point conversion")
+    @Test("Normal account balances add without floating-point conversion")
     func multipleAccountBalancesAddExactly() {
-        let cash = makeAccount(kind: .normal, openingBalance: Decimal(1_250_000))
-        let bank = makeAccount(kind: .normal, openingBalance: Decimal(8_750_000))
+        let wallet = makeAccount(kind: .normal, openingBalance: Decimal(1_250_000))
+        let savings = makeAccount(kind: .normal, openingBalance: Decimal(8_750_000))
 
-        #expect(CashBalanceSummary.total(of: [cash, bank]) == Decimal(10_000_000))
+        #expect(CashBalanceSummary.total(of: [wallet, savings]) == Decimal(10_000_000))
     }
 
     @Test("Recorded income raises the available balance and expense lowers it")

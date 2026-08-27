@@ -265,7 +265,7 @@ struct DebtEditorForm: View {
     private var accountCard: some View {
         card {
             VStack(alignment: .leading, spacing: 18) {
-                sectionHeader("Cash account", systemImage: "arrow.left.arrow.right")
+                sectionHeader("Account", systemImage: "arrow.left.arrow.right")
 
                 if accounts.isEmpty {
                     Text("Add an account on the Home tab to record where the money went.")
