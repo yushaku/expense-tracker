@@ -98,7 +98,7 @@ struct MonMonBackupServiceTests {
             CashAccount(
                 id: UUID(),
                 name: "Old account",
-                kind: .cash,
+                kind: .normal,
                 openingBalance: 99,
                 currencyCode: VNDCurrency.code,
                 createdAt: instant.addingTimeInterval(-100)
@@ -164,7 +164,7 @@ struct MonMonBackupServiceTests {
             CashAccount(
                 id: oldID,
                 name: "Old",
-                kind: .cash,
+                kind: .normal,
                 openingBalance: 1,
                 currencyCode: VNDCurrency.code,
                 createdAt: instant
@@ -206,7 +206,7 @@ struct MonMonBackupServiceTests {
             CashAccount(
                 id: oldID,
                 name: "Old",
-                kind: .cash,
+                kind: .normal,
                 openingBalance: 1,
                 currencyCode: VNDCurrency.code,
                 createdAt: instant
@@ -334,7 +334,7 @@ struct MonMonBackupServiceTests {
             CashAccount(
                 id: walletID,
                 name: "Wallet",
-                kind: .cash,
+                kind: .normal,
                 openingBalance: 500,
                 currencyCode: VNDCurrency.code,
                 createdAt: instant.addingTimeInterval(1)

@@ -106,7 +106,7 @@ struct TransactionCaptureServiceTests {
             CashAccount(
                 id: accountID,
                 name: "TPBank",
-                kind: .bank,
+                kind: .normal,
                 openingBalance: 0,
                 currencyCode: VNDCurrency.code,
                 createdAt: now

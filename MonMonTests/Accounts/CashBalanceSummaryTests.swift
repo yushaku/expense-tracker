@@ -43,15 +43,15 @@ struct CashBalanceSummaryTests {
 
     @Test("One account contributes its exact opening balance")
     func oneAccountHasItsOpeningBalance() {
-        let account = makeAccount(kind: .cash, openingBalance: Decimal(1_250_000))
+        let account = makeAccount(kind: .normal, openingBalance: Decimal(1_250_000))
 
         #expect(CashBalanceSummary.total(of: [account]) == Decimal(1_250_000))
     }
 
     @Test("Cash and bank balances add without floating-point conversion")
     func multipleAccountBalancesAddExactly() {
-        let cash = makeAccount(kind: .cash, openingBalance: Decimal(1_250_000))
-        let bank = makeAccount(kind: .bank, openingBalance: Decimal(8_750_000))
+        let cash = makeAccount(kind: .normal, openingBalance: Decimal(1_250_000))
+        let bank = makeAccount(kind: .normal, openingBalance: Decimal(8_750_000))
 
         #expect(CashBalanceSummary.total(of: [cash, bank]) == Decimal(10_000_000))
     }
@@ -184,7 +184,7 @@ struct CashBalanceSummaryTests {
         CashAccount(
             id: UUID(),
             name: "Account",
-            kind: .cash,
+            kind: .normal,
             openingBalance: openingBalance,
             currencyCode: VNDCurrency.code,
             createdAt: fixedDate

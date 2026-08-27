@@ -24,7 +24,7 @@ struct MoneyTransactionPersistenceTests {
         CashAccount(
             id: UUID(),
             name: "Wallet",
-            kind: .cash,
+            kind: .normal,
             openingBalance: openingBalance,
             currencyCode: VNDCurrency.code,
             createdAt: occurredAt

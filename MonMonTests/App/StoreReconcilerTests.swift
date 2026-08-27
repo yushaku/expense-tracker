@@ -271,7 +271,7 @@ struct StoreReconcilerTests {
                 CashAccount(
                     id: AccountSeed.unassignedID,
                     name: AccountSeed.unassignedName,
-                    kind: .cash,
+                    kind: .normal,
                     openingBalance: .zero,
                     currencyCode: VNDCurrency.code,
                     createdAt: createdAt
@@ -297,7 +297,7 @@ struct StoreReconcilerTests {
                 CashAccount(
                     id: UUID(),
                     name: name,
-                    kind: .bank,
+                    kind: .normal,
                     openingBalance: 1_000_000,
                     currencyCode: VNDCurrency.code,
                     createdAt: day0
