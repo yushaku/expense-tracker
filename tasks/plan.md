@@ -1,202 +1,96 @@
-# Implementation Plan: Import Reconciliation and Commit
+# Implementation Plan: Full Backup and Restore
 
-## Overview
+## Outcome
 
-Implement the approved `import-reconciliation` module behind the existing Import
-Inbox. A complete parsed statement gains account assignment, conservative
-duplicate and transfer matching, per-row resolution, and one failure-safe commit
-that writes SwiftData provenance before removing the staged PDF.
-
-The work remains sequential because the schema, pure contracts, persistence
-service, observable state, and UI depend on one another. Every increment uses
-synthetic candidates and in-memory stores; no owner statement enters Git or test
-output.
+Implement the approved `full-backup-restore` specification as a versioned JSON
+snapshot that covers every SwiftData model and the approved logical preferences.
+Restore is an explicit, previewed, authoritative replacement by UUID. Before any
+store mutation, MonMon writes one private recovery snapshot that can be restored
+from Settings.
 
 ## Dependency Graph
 
 ```text
-Validated import id + optional model provenance
+Portable document contract + canonical scalar encoding
     |
     v
-CloudKit duplicate folding in StoreReconciler
+Pure validation + checksum + restore preview
     |
     v
-Pure candidate matching + row resolutions
-    |                    |
-    |                    +--> remembered statement-account mapping
-    v
-Dedicated-context transaction commit/linking
+SwiftData snapshot export + preferences
     |
     v
-Transfer commit/linking + staged cleanup recovery
+Recovery snapshot + transactional replacement restore
     |
     v
-Main-actor reconciliation/commit state
+Settings UI + file importer/exporter + app-lock gate
     |
     v
-Row editor UI --> commit summary/result UI
-    |
-    v
-Full gates + physical acceptance on Yushaku
+Review, full gates, owner-directed merge and iPhone validation
 ```
 
 ## Architecture Decisions
 
-- Introduce one validated `ImportSourceID` value type for lowercase SHA-256
-  fingerprints. Models persist its raw string only after validation.
-- Add optional provenance fields to `MoneyTransaction` and `AccountTransfer`
-  with default `nil`, preserving manual, recurring, and existing records while
-  allowing lightweight private-CloudKit migration.
-- Extend `StoreReconciler` separately from import commit. It is the eventual
-  consistency guard for two devices that imported the same source while offline.
-- Keep matching free of SwiftData and SwiftUI. Immutable snapshots of accounts,
-  categories, transactions, and transfers cross into a pure reconciler.
-- Keep exact matches read-only. A possible transaction or transfer begins
-  unresolved and always needs an owner decision.
-- Use the existing direction-specific category defaults, but no merchant rule
-  or description-text inference.
-- Store the bank/account-suffix mapping in UserDefaults only after a successful
-  financial save. A stale mapping never selects an arbitrary account; import
-  falls back only to the current valid transaction default.
-- Give the commit service a dedicated `ModelContext`. It re-fetches and
-  revalidates ids immediately before one save, so unrelated view edits cannot be
-  rolled back and stale reconciliation cannot write.
-- Financial save precedes staged cleanup. A cleanup failure leaves the PDF and
-  exposes retry; exact provenance prevents a repeated financial write.
-- Model row review as explicit status and resolution enums. The UI never infers
-  commit readiness from counts or colors.
-- Keep parsed amount, direction, timestamp, reference, and page immutable.
-  Editable output is limited to category, resulting note, skip/link choice, and
-  transfer account.
+- Use ordinary UTF-8 JSON and `UTType.json`; do not add CSV, encryption, merge,
+  or database-file copying.
+- Represent UUIDs as lowercase strings, Decimal values as canonical base-10
+  strings, dates as UTC ISO-8601 with fractional seconds, and enums as raw
+  strings.
+- Compute SHA-256 over a canonical, sorted-key encoding of `payload` only.
+- Keep document decoding and validation free of SwiftData and SwiftUI.
+- Use a dedicated `ModelContext` with autosave disabled. Restore updates rows by
+  UUID, inserts missing rows, deletes rows absent from the snapshot, and saves
+  once; failures roll back.
+- Write the pre-restore snapshot atomically under Application Support. On iOS,
+  add complete file protection. If this write fails, restore does not start.
+- Restore preferences only after the financial save succeeds.
+- Treat imported JSON as untrusted. Reject files over 100 MB, unknown format or
+  version, invalid scalar/enum values, duplicate IDs, dangling required
+  references, invalid provenance hashes, non-finite/negative-invalid values,
+  and checksum mismatch before creating a context that writes.
+- The checksum detects damage, not malicious authorship; UI copy must not imply
+  authenticity or encryption.
 
-## Task List
+## Increment Strategy
 
-### Phase 1: Provenance foundation
+1. Fix the pre-existing macOS `ShortcutsLink` compile blocker separately.
+2. Add the portable document contract and canonical codec with failing tests.
+3. Add pure validator and preview tests.
+4. Add full snapshot export and preference capture with in-memory-store tests.
+5. Add recovery snapshot and authoritative restore with rollback tests.
+6. Add accessible Settings UI, import/export presentation, warnings, and app-lock
+   authentication.
+7. Run security/quality review, simplify, and execute all non-Simulator gates.
 
-- [x] Task 1: Add validated import provenance to transaction and transfer models
-- [x] Task 2: Fold duplicate imported records after CloudKit convergence
+Every increment is a reviewable commit. No merge, push, or physical-device run
+occurs without a new explicit owner request.
 
-### Checkpoint: Provenance
+## Security Threat Model
 
-- [x] Optional-field migration opens existing and in-memory stores.
-- [x] Invalid hashes cannot enter an import write path.
-- [x] Manual and recurring records are untouched by import reconciliation.
-- [x] Same-side imported duplicates converge deterministically.
-
-### Phase 2: Pure reconciliation
-
-- [x] Task 3: Classify exact, possible, new, and unresolved candidates
-- [x] Task 4: Resolve and remember the statement account safely
-
-### Checkpoint: Reconciliation
-
-- [x] Matching uses account, direction, exact Decimal amount, currency, and
-      Vietnam local day only.
-- [x] Notes never influence matching.
-- [x] Possible and ambiguous matches remain explicit owner decisions.
-- [x] Defaults never resolve to stale or wrong-direction records.
-
-### Phase 3: Atomic financial commit
-
-- [x] Task 5: Commit and link ordinary transactions idempotently
-- [x] Task 6: Commit/link transfers and recover staged cleanup failures
-
-### Checkpoint: Persistence
-
-- [x] One invalid row prevents every financial/provenance write.
-- [x] Repeating a request cannot create a second record for one fingerprint.
-- [x] Historical transfers bypass today's balance restriction but retain all
-      other `TransferDraft` validation.
-- [x] PDF removal happens only after a successful save and is safely retryable.
-
-### Phase 4: Owner-facing review and commit
-
-- [x] Task 7: Add observable reconciliation and commit phases
-- [x] Task 8: Add account selection and focused row-resolution editor
-- [x] Task 9: Add commit confirmation, results, cleanup retry, and count refresh
-
-### Checkpoint: UI
-
-- [x] Incomplete statements never expose an enabled commit action.
-- [x] Every row announces New, Possible duplicate, Already imported, Transfer,
-      Skipped, or Needs attention without relying on color.
-- [x] Commit readiness follows validated row state and current model snapshots.
-- [x] Success and cleanup failure are visibly distinct and idempotent.
-- [x] Accessibility identifiers contain no filename, suffix, reference, note,
-      or import fingerprint.
-
-### Phase 5: Completion gates
-
-- [ ] Task 10: Review, verify, deploy to `Yushaku`, and hand off acceptance
-
-### Checkpoint: Complete
-
-- [ ] Approved spec and plan acceptance criteria are met.
-- [ ] Full macOS tests and recursive Swift format lint pass.
-- [ ] Compile-only iOS SDK build passes without running a Simulator.
-- [ ] Physical build, install, and launch succeed on `Yushaku`.
-- [ ] Owner imports the staged statement and verifies resulting records.
-- [ ] No real statement, raw provenance, local path, generated output, or
-      unrelated edit exists in the diff.
-
-## Increment and Commit Strategy
-
-Each task lands as one tested save-point commit. Tasks 5 and 6 may touch the same
-service and test files but remain separate because transaction writes can ship
-and be reviewed independently of transfer-side linking and filesystem cleanup.
-UI tasks do not begin until the persistence checkpoint is green.
-
-Expected commit sequence:
-
-1. `feat: add bank import provenance`
-2. `fix: reconcile duplicate bank imports`
-3. `feat: classify statement import candidates`
-4. `feat: remember statement account mapping`
-5. `feat: commit reconciled bank transactions`
-6. `feat: commit and link bank transfers`
-7. `feat: model statement reconciliation state`
-8. `feat: add statement row reconciliation editor`
-9. `feat: commit reviewed bank statements`
-10. Verification/docs commit only if the checklist changes after acceptance.
-
-## Risks and Mitigations
-
-| Risk | Impact | Mitigation |
+| Threat | Boundary | Mitigation |
 |---|---|---|
-| Optional provenance fields fail against an existing CloudKit store | High | Add defaults, avoid uniqueness annotations, run old-record and CloudSync schema tests before service work. |
-| Two devices import the same candidate while offline | High | Revalidate before save and fold shared non-nil fingerprints deterministically on launch/foreground. |
-| Same-day equal amounts create false duplicate suggestions | High | Suggestions never auto-link; require same account/direction/currency and explicit owner choice. |
-| Linking mutates a record that changed after preview | High | Dedicated context re-fetches and repeats eligibility checks immediately before save. |
-| Transfer is counted as income/expense | High | Create `AccountTransfer`, never paired `MoneyTransaction`; cover balance and Spending totals in persistence tests. |
-| Save succeeds but staged deletion fails | High | Save provenance first, return cleanup-needed state, and make cleanup independently retryable. |
-| Stale UserDefaults mapping selects the wrong account | High | Key by bank plus suffix, validate current account id/currency, and never use bank-only fallback. |
-| Large statement makes row editing sluggish | Medium | Pure reconciliation is one pass over candidates with indexed fingerprints; keep row editors focused and lazy. |
-| Source data leaks through errors or accessibility | High | Closed error mapping and static/index identifiers; inspect staged diff for references, hashes, paths, and fixtures. |
+| Oversized or deeply malformed JSON exhausts memory | Imported file | Check resource size before reading; hard cap at 100 MB; decode once |
+| Corrupted/tampered snapshot silently changes data | Document | Canonical payload SHA-256 and strict validation before writes |
+| Partial destructive restore loses current data | Persistence | Private recovery snapshot, dedicated context, one save, rollback |
+| Plaintext backup leaks financial data | Exported file | Explicit warning, no sensitive logs, protected private recovery file |
+| Invalid references leave unusable records | Payload graph | Validate IDs, duplicates, enums, provenance, and required references |
+| Restore bypasses enabled app lock | Settings action | Reuse app-lock authentication before restore confirmation |
 
-## Verification Strategy
+## Completion Gates
 
-- Follow failing-test-first TDD for every domain and persistence behavior.
-- Use synthetic 64-character fingerprints, candidates, accounts, and categories.
-- Use in-memory `ModelContainer` tests for migration defaults, atomic commit,
-  idempotency, balance effects, and reconciliation after duplicate sync.
-- Inject UserDefaults suite names and cleanup/save seams; never mutate owner
-  defaults or App Group data in unit tests.
-- Run focused suites at every task and the full test suite at each checkpoint.
-- Run recursive format lint and compile-only iOS SDK build before physical work.
-- After every relevant UI/app increment, run `rtk scripts/run-iphone.sh Yushaku`;
-  report build/install/launch only. The owner owns hands-on acceptance.
+- Focused contract, validator, export, restore, and UI-state tests pass.
+- Full macOS unit tests pass.
+- Recursive Swift format lint passes.
+- Compile-only iOS SDK build passes without a Simulator.
+- Diff contains no real owner data, backup output, paths, hashes, or unrelated
+  changes.
+- Physical iPhone validation remains pending until the owner asks to merge the
+  branch into `dev`.
 
-## Review Checklist
+## Official Sources
 
-- [x] Schema changes are optional, defaulted, private, and migration-safe.
-- [ ] Matching behavior exactly follows the approved conservative fields.
-- [ ] Possible matches never become automatic decisions.
-- [ ] Dedicated-context save and cleanup ordering match the spec.
-- [ ] Repeated and interrupted commits are idempotent.
-- [ ] Existing manual, recurring, transaction, transfer, parser, and inbox flows
-      retain their behavior.
-- [ ] No dependency, background task, OCR, CSV, or other-bank scope is added.
+- Apple `ModelContext`: https://developer.apple.com/documentation/swiftdata/modelcontext
+- Apple `fileImporter`: https://developer.apple.com/documentation/swiftui/view/fileimporter%28ispresented%3Aallowedcontenttypes%3Aoncompletion%3A%29
+- Apple Application Support directory: https://developer.apple.com/documentation/foundation/url/applicationsupportdirectory
+- Apple atomic/protected data writing: https://developer.apple.com/documentation/foundation/nsdata/writingoptions/completefileprotection
 
-## Open Questions
-
-None. The owner approved this implementation plan before Task 1 began.
