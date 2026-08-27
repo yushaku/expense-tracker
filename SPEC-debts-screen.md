@@ -3,11 +3,12 @@
 ## Objective
 
 Move debt records and debt-management actions out of `WealthView` into the
-existing dedicated `DebtListView`. Wealth remains a summary and shows only the
-current outstanding amount borrowed and the current outstanding amount lent.
-The summary opens the Debts screen, where the owner can browse debts, add a
-debt, open a debt, and manage its payments. The Debts screen visualizes the
-current borrowed-versus-lent ratio with one doughnut chart.
+existing dedicated `DebtListView`. Wealth remains a summary and shows the
+current outstanding amount borrowed and the current outstanding amount lent in
+two separate cards. Each card opens the corresponding tab on the Debts screen,
+where the owner can browse debts, add a debt, open a debt, and manage its
+payments. The Debts screen visualizes the current borrowed-versus-lent ratio
+with one doughnut chart above the tabs.
 
 ## Tech Stack
 
@@ -44,9 +45,9 @@ navigation pattern already used by Wealth:
 
 ```swift
 NavigationLink {
-    DebtListView()
+    DebtListView(direction: .borrowed)
 } label: {
-    debtSummaryCard
+    borrowedSummaryCard
 }
 .buttonStyle(.plain)
 ```
@@ -84,22 +85,23 @@ accessibility label, identifier, and hint.
 - Wealth shows no individual debt cards and no add-debt control.
 - Wealth shows exactly two debt values: total outstanding borrowed and total
   outstanding lent, including zero values when a direction has no open balance.
-- The Wealth debt summary is one accessible navigation target that pushes a
-  screen titled “Debts”.
+- Each Wealth debt card is an accessible navigation target that pushes a screen
+  titled “Debts” with the matching Borrowed or Lent tab selected.
 - The Debts screen shows one accessible doughnut whose positive slices are the
   total outstanding borrowed and total outstanding lent amounts. Its legend
   conveys names, amounts, and percentages without relying on colour.
 - If both outstanding totals are zero, the Debts screen shows a zero-balance
   summary instead of an empty or invalid doughnut.
-- The Debts screen retains the net position, grouped debt records, empty states,
-  and add-debt action.
+- The Debts screen retains the net position, direction-specific records, empty
+  states, and add-debt action. Switching tabs does not change the global ratio
+  chart.
 - A debt row opens `DebtDetailView`, and existing edit/payment flows remain
   available.
 - Full macOS tests, Swift format lint, and non-Simulator Debug build pass.
 
 ## Open Questions
 
-None. The Wealth summary will be one card containing the two requested values,
-the Debts screen will be pushed within Wealth's existing navigation stack, and
-the doughnut will compare current outstanding balances rather than original
+None. Wealth uses separate Borrowed and Lent cards, the Debts screen is pushed
+within Wealth's existing navigation stack with the corresponding tab selected,
+and the doughnut compares current outstanding balances rather than original
 principal amounts.

@@ -221,6 +221,15 @@ struct DebtSummaryTests {
 
     // MARK: - Totals
 
+    @Test("Debt lists only include the selected direction")
+    func debtsMatchSelectedDirection() {
+        let borrowed = makeDebt(direction: .borrowed)
+        let lent = makeDebt(direction: .lent)
+
+        #expect(DebtSummary.matching([borrowed, lent], direction: .borrowed) == [borrowed])
+        #expect(DebtSummary.matching([borrowed, lent], direction: .lent) == [lent])
+    }
+
     @Test("Totals are counted per direction")
     func totalsSplitByDirection() {
         let wallet = makeAccount()
