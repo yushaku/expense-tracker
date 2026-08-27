@@ -87,27 +87,62 @@ struct AccountsScreen: View {
                 add: { accountEditorMode = .add }
             )
 
-            ForEach(accounts) { account in
-                Button {
-                    accountEditorMode = .edit(account)
-                } label: {
-                    CashAccountCard(
-                        account: account,
-                        deposits: deposits,
-                        withdrawals: withdrawals,
-                        holdings: holdings,
-                        transactions: transactions,
-                        transfers: transfers,
-                        debts: debts,
-                        payments: payments,
-                        sales: sales
-                    )
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("accounts-screen-account-\(account.id.uuidString)")
-                .accessibilityHint("Opens the account editor.")
+            ForEach(CashAccountKind.allCases, id: \.rawValue) { kind in
+                accountGroup(kind)
             }
         }
+    }
+
+    private func accountGroup(_ kind: CashAccountKind) -> some View {
+        let groupedAccounts = accounts.filter { $0.kind == kind }
+
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Image(systemName: kind.iconName)
+                    .foregroundStyle(kind.tint)
+                    .accessibilityHidden(true)
+
+                Text(kind.displayName)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textPrimary)
+
+                Text(groupedAccounts.count.formatted())
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(kind.tint)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(kind.tint.opacity(0.16), in: Capsule())
+
+                Spacer(minLength: 0)
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier("accounts-screen-group-\(kind.rawValue)")
+
+            ForEach(groupedAccounts) { account in
+                accountRow(account)
+            }
+        }
+    }
+
+    private func accountRow(_ account: CashAccount) -> some View {
+        Button {
+            accountEditorMode = .edit(account)
+        } label: {
+            CashAccountCard(
+                account: account,
+                deposits: deposits,
+                withdrawals: withdrawals,
+                holdings: holdings,
+                transactions: transactions,
+                transfers: transfers,
+                debts: debts,
+                payments: payments,
+                sales: sales
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("accounts-screen-account-\(account.id.uuidString)")
+        .accessibilityHint("Opens the account editor.")
     }
 
     /// Transfers live here rather than only behind the Home toolbar because they
