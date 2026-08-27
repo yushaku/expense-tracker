@@ -146,7 +146,7 @@ struct FundHoldingPersistenceTests {
         let account = CashAccount(
             id: UUID(),
             name: "Techcombank",
-            kind: .bank,
+            kind: .normal,
             openingBalance: 148_900_000,
             currencyCode: VNDCurrency.code,
             createdAt: referenceDate

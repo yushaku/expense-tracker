@@ -14,7 +14,7 @@ final class AssetSummaryTests {
         CashAccount(
             id: UUID(),
             name: "Techcombank",
-            kind: .bank,
+            kind: .normal,
             openingBalance: openingBalance,
             currencyCode: VNDCurrency.code,
             createdAt: openedAt
@@ -382,7 +382,7 @@ final class AssetSummaryTests {
         let account = CashAccount(
             id: UUID(),
             name: "Wallet",
-            kind: .cash,
+            kind: .normal,
             openingBalance: 100,
             currencyCode: VNDCurrency.code,
             createdAt: date(2024, 1, 10)
@@ -438,7 +438,7 @@ final class AssetSummaryTests {
         let account = CashAccount(
             id: UUID(),
             name: "Bank",
-            kind: .bank,
+            kind: .normal,
             openingBalance: 100,
             currencyCode: VNDCurrency.code,
             createdAt: date(2024, 1, 10)
@@ -478,7 +478,7 @@ final class AssetSummaryTests {
         let futureAccount = CashAccount(
             id: UUID(),
             name: "Future",
-            kind: .bank,
+            kind: .normal,
             openingBalance: 100,
             currencyCode: VNDCurrency.code,
             createdAt: date(2024, 4, 1)
@@ -507,7 +507,7 @@ final class AssetSummaryTests {
         let account = CashAccount(
             id: UUID(),
             name: "Bank",
-            kind: .bank,
+            kind: .normal,
             openingBalance: 100,
             currencyCode: VNDCurrency.code,
             createdAt: date(2024, 1, 10)
@@ -561,7 +561,7 @@ final class AssetSummaryTests {
         let account = CashAccount(
             id: UUID(),
             name: "Bank",
-            kind: .bank,
+            kind: .normal,
             openingBalance: 100,
             currencyCode: VNDCurrency.code,
             createdAt: date(2024, 1, 10)

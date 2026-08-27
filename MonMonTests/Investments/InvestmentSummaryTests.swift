@@ -11,7 +11,7 @@ struct InvestmentSummaryTests {
         CashAccount(
             id: UUID(),
             name: "Techcombank",
-            kind: .bank,
+            kind: .normal,
             openingBalance: openingBalance,
             currencyCode: VNDCurrency.code,
             createdAt: openedAt

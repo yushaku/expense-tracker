@@ -17,7 +17,7 @@ struct FundSaleNetWorthTests {
         CashAccount(
             id: UUID(),
             name: "Techcombank",
-            kind: .bank,
+            kind: .normal,
             openingBalance: openingBalance,
             currencyCode: VNDCurrency.code,
             createdAt: openedAt
@@ -141,7 +141,7 @@ struct FundSaleNetWorthTests {
         let wallet = CashAccount(
             id: UUID(),
             name: "Wallet",
-            kind: .cash,
+            kind: .normal,
             openingBalance: 0,
             currencyCode: VNDCurrency.code,
             createdAt: openedAt
@@ -225,7 +225,7 @@ struct FundSaleNetWorthTests {
         let account = CashAccount(
             id: UUID(),
             name: "Techcombank",
-            kind: .bank,
+            kind: .normal,
             openingBalance: 50_000_000,
             currencyCode: VNDCurrency.code,
             createdAt: date(2026, 1, 1)
