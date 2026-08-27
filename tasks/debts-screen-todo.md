@@ -21,8 +21,8 @@ Files: `MonMon/Accounts/WealthView.swift`
 
 ## Task 3: Review and verification
 
-- [ ] Run the full macOS unit suite.
-- [ ] Run recursive Swift format lint.
-- [ ] Run the non-Simulator Debug build.
-- [ ] Review correctness, readability, architecture, security, and performance.
-- [ ] Commit on `feat/debts-screen`; do not merge, push, or install on iPhone.
+- [x] Run the full macOS unit suite.
+- [x] Run recursive Swift format lint.
+- [x] Run the non-Simulator Debug build.
+- [x] Review correctness, readability, architecture, security, and performance.
+- [x] Commit on `feat/debts-screen`; do not merge, push, or install on iPhone.
