@@ -65,9 +65,9 @@ Files: `MonMon/Backup/BackupRestoreView.swift`,
 
 ## Task 6: Review and verification
 
-- [ ] Run code-quality, simplification, and security review.
-- [ ] Run focused and full macOS tests.
-- [ ] Run recursive Swift format lint.
-- [ ] Run compile-only iOS SDK build.
-- [ ] Commit final review-only corrections and report branch status.
-- [ ] Do not merge, push, or install on iPhone without explicit owner request.
+- [x] Run code-quality, simplification, and security review.
+- [x] Run focused and full macOS tests.
+- [x] Run recursive Swift format lint.
+- [x] Run compile-only iOS SDK build.
+- [x] Commit final review-only corrections and report branch status.
+- [x] Do not merge, push, or install on iPhone without explicit owner request.
