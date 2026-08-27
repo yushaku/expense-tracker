@@ -102,7 +102,7 @@ struct FundSaleSummaryTests {
         let account = CashAccount(
             id: UUID(),
             name: "Techcombank",
-            kind: .bank,
+            kind: .normal,
             openingBalance: 0,
             currencyCode: VNDCurrency.code,
             createdAt: FundTestFactory.referenceDate
@@ -110,7 +110,7 @@ struct FundSaleSummaryTests {
         let elsewhere = CashAccount(
             id: UUID(),
             name: "Cash",
-            kind: .cash,
+            kind: .normal,
             openingBalance: 0,
             currencyCode: VNDCurrency.code,
             createdAt: FundTestFactory.referenceDate

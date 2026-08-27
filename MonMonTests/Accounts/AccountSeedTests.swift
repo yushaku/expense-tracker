@@ -46,7 +46,7 @@ struct AccountSeedTests {
         #expect(accounts.count == 1)
         #expect(bank.id == AccountSeed.defaultBankID)
         #expect(bank.name == "Bank")
-        #expect(bank.kind == .bank)
+        #expect(bank.kind == .normal)
         #expect(bank.openingBalance == .zero)
     }
 
@@ -59,7 +59,7 @@ struct AccountSeedTests {
             CashAccount(
                 id: UUID(),
                 name: "Wallet",
-                kind: .cash,
+                kind: .normal,
                 openingBalance: .zero,
                 currencyCode: VNDCurrency.code,
                 createdAt: referenceDate
@@ -149,7 +149,7 @@ struct AccountSeedTests {
             CashAccount(
                 id: UUID(),
                 name: "Techcombank",
-                kind: .bank,
+                kind: .normal,
                 openingBalance: 148_900_000,
                 currencyCode: VNDCurrency.code,
                 createdAt: referenceDate
@@ -198,7 +198,7 @@ struct AccountSeedTests {
         let other = CashAccount(
             id: UUID(),
             name: "Wallet",
-            kind: .cash,
+            kind: .normal,
             openingBalance: .zero,
             currencyCode: VNDCurrency.code,
             createdAt: referenceDate

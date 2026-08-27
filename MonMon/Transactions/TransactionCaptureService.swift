@@ -91,7 +91,7 @@ struct TransactionCaptureService {
 
         return TransactionCaptureContext(
             accounts: accounts.map {
-                CaptureAccount(id: $0.id, name: $0.name, isCash: $0.kind == .cash)
+                CaptureAccount(id: $0.id, name: $0.name, isCash: $0.kind == .normal)
             },
             categories: categories.map {
                 CaptureCategory(

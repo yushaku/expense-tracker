@@ -32,6 +32,20 @@ struct MonMonBackupServiceTests {
         let validated = try MonMonBackupValidator.validate(document, expectedFlavour: .dev)
 
         #expect(validated.payload.accounts.count == 2)
+        let credit = try #require(
+            validated.payload.accounts.first {
+                $0.id == MonMonBackupScalar.uuid(fixture.bankID)
+            }
+        )
+        #expect(credit.kind == "credit")
+        #expect(credit.creditLimit == "20000")
+        let normal = try #require(
+            validated.payload.accounts.first {
+                $0.id == MonMonBackupScalar.uuid(fixture.walletID)
+            }
+        )
+        #expect(normal.kind == "normal")
+        #expect(normal.creditLimit == "0")
         #expect(validated.payload.savingsDeposits.count == 1)
         #expect(validated.payload.savingsWithdrawals.count == 1)
         #expect(validated.payload.fundInstruments.count == 1)
@@ -84,7 +98,7 @@ struct MonMonBackupServiceTests {
             CashAccount(
                 id: UUID(),
                 name: "Old account",
-                kind: .cash,
+                kind: .normal,
                 openingBalance: 99,
                 currencyCode: VNDCurrency.code,
                 createdAt: instant.addingTimeInterval(-100)
@@ -103,6 +117,12 @@ struct MonMonBackupServiceTests {
 
         #expect(report.restoredRecordCount == 14)
         #expect(try destination.mainContext.fetchCount(FetchDescriptor<CashAccount>()) == 2)
+        let restoredCredit = try #require(
+            destination.mainContext.fetch(FetchDescriptor<CashAccount>()).first {
+                $0.id == fixture.bankID
+            }
+        )
+        #expect(restoredCredit.creditLimit == 20_000)
         #expect(try destination.mainContext.fetchCount(FetchDescriptor<MoneyTransaction>()) == 1)
         #expect(try destination.mainContext.fetchCount(FetchDescriptor<RecurringRule>()) == 1)
         #expect(
@@ -144,7 +164,7 @@ struct MonMonBackupServiceTests {
             CashAccount(
                 id: oldID,
                 name: "Old",
-                kind: .cash,
+                kind: .normal,
                 openingBalance: 1,
                 currencyCode: VNDCurrency.code,
                 createdAt: instant
@@ -186,7 +206,7 @@ struct MonMonBackupServiceTests {
             CashAccount(
                 id: oldID,
                 name: "Old",
-                kind: .cash,
+                kind: .normal,
                 openingBalance: 1,
                 currencyCode: VNDCurrency.code,
                 createdAt: instant
@@ -205,6 +225,57 @@ struct MonMonBackupServiceTests {
         }
         #expect(
             try destination.mainContext.fetch(FetchDescriptor<CashAccount>()).single?.id == oldID)
+    }
+
+    @Test("Restoring a legacy account clears any previous Credit limit")
+    func legacyAccountDefaultsCreditLimitToZero() throws {
+        let id = UUID()
+        var payload = MonMonBackupPayload.empty
+        payload.accounts = [
+            MonMonBackupPayload.AccountRecord(
+                id: MonMonBackupScalar.uuid(id),
+                name: "Legacy Bank",
+                kind: "bank",
+                openingBalance: "1000",
+                currencyCode: VNDCurrency.code,
+                createdAt: MonMonBackupScalar.date(instant)
+            )
+        ]
+        let incoming = try MonMonBackupDocument.make(
+            payload: payload,
+            exportedAt: instant,
+            appVersion: "1.0",
+            flavour: .dev
+        )
+        let validated = try MonMonBackupValidator.validate(incoming, expectedFlavour: .dev)
+
+        let destination = try makeContainer()
+        destination.mainContext.insert(
+            CashAccount(
+                id: id,
+                name: "Existing Credit",
+                kind: .credit,
+                openingBalance: -500,
+                creditLimit: 10_000,
+                currencyCode: VNDCurrency.code,
+                createdAt: instant
+            )
+        )
+        try destination.mainContext.save()
+        let recoveryURL = temporaryRecoveryURL()
+        defer { try? FileManager.default.removeItem(at: recoveryURL) }
+
+        _ = try service(
+            container: destination,
+            defaults: makeDefaults(),
+            recoveryURL: recoveryURL
+        ).restore(validated)
+
+        let restored = try #require(
+            destination.mainContext.fetch(FetchDescriptor<CashAccount>()).single
+        )
+        #expect(restored.kind == .normal)
+        #expect(restored.creditLimit == 0)
     }
 
     private func makeContainer() throws -> ModelContainer {
@@ -252,8 +323,9 @@ struct MonMonBackupServiceTests {
             CashAccount(
                 id: bankID,
                 name: "Bank",
-                kind: .bank,
+                kind: .credit,
                 openingBalance: 10_000,
+                creditLimit: 20_000,
                 currencyCode: VNDCurrency.code,
                 createdAt: instant
             )
@@ -262,7 +334,7 @@ struct MonMonBackupServiceTests {
             CashAccount(
                 id: walletID,
                 name: "Wallet",
-                kind: .cash,
+                kind: .normal,
                 openingBalance: 500,
                 currencyCode: VNDCurrency.code,
                 createdAt: instant.addingTimeInterval(1)
@@ -433,12 +505,13 @@ struct MonMonBackupServiceTests {
             )
         )
         try context.save()
-        return FixtureIDs(bankID: bankID, categoryID: categoryID)
+        return FixtureIDs(bankID: bankID, walletID: walletID, categoryID: categoryID)
     }
 }
 
 private struct FixtureIDs {
     let bankID: UUID
+    let walletID: UUID
     let categoryID: UUID
 }
 

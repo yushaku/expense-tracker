@@ -1,6 +1,13 @@
 import Foundation
 
 enum CashBalanceSummary {
+    /// A credit card's limit is borrowing capacity, not owner cash. The ledger
+    /// balance is negative while money is owed, so adding it to the limit gives
+    /// the amount still available without changing any wealth calculation.
+    static func availableCredit(limit: Decimal, currentBalance: Decimal) -> Decimal {
+        max(.zero, limit + currentBalance)
+    }
+
     static func total(of accounts: [CashAccount]) -> Decimal {
         accounts.reduce(Decimal.zero) { total, account in
             total + account.openingBalance
@@ -99,5 +106,33 @@ enum CashBalanceSummary {
                     sales: sales
                 )
         }
+    }
+
+    /// The same ledger total scoped to one account kind. Wealth uses this to
+    /// present Normal money separately from Credit balances without changing
+    /// how either balance is derived.
+    static func totalAvailable(
+        of accounts: [CashAccount],
+        matching kind: CashAccountKind,
+        deposits: [SavingsDeposit],
+        holdings: [FundHolding],
+        withdrawals: [SavingsWithdrawal],
+        transactions: [MoneyTransaction],
+        transfers: [AccountTransfer],
+        debts: [Debt],
+        payments: [DebtPayment],
+        sales: [FundSale]
+    ) -> Decimal {
+        totalAvailable(
+            of: accounts.filter { $0.kind == kind },
+            deposits: deposits,
+            holdings: holdings,
+            withdrawals: withdrawals,
+            transactions: transactions,
+            transfers: transfers,
+            debts: debts,
+            payments: payments,
+            sales: sales
+        )
     }
 }

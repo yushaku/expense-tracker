@@ -5,8 +5,9 @@ import SwiftData
 final class CashAccount {
     var id: UUID = UUID()
     var name: String = ""
-    var kind: CashAccountKind = CashAccountKind.cash
+    var kind: CashAccountKind = CashAccountKind.normal
     var openingBalance: Decimal = Decimal.zero
+    var creditLimit: Decimal = Decimal.zero
     var currencyCode: String = VNDCurrency.code
     var createdAt: Date = Date(timeIntervalSince1970: 0)
 
@@ -15,6 +16,7 @@ final class CashAccount {
         name: String,
         kind: CashAccountKind,
         openingBalance: Decimal,
+        creditLimit: Decimal = .zero,
         currencyCode: String,
         createdAt: Date
     ) {
@@ -22,6 +24,7 @@ final class CashAccount {
         self.name = name
         self.kind = kind
         self.openingBalance = openingBalance
+        self.creditLimit = creditLimit
         self.currencyCode = currencyCode
         self.createdAt = createdAt
     }
@@ -33,6 +36,7 @@ final class CashAccount {
             name: String,
             kind: CashAccountKind,
             openingBalance: Decimal,
+            creditLimit: Decimal = .zero,
             createdOffset: TimeInterval = 0
         ) -> CashAccount {
             CashAccount(
@@ -40,6 +44,7 @@ final class CashAccount {
                 name: name,
                 kind: kind,
                 openingBalance: openingBalance,
+                creditLimit: creditLimit,
                 currencyCode: VNDCurrency.code,
                 createdAt: Date(timeIntervalSince1970: 1_700_000_000 + createdOffset)
             )
@@ -311,18 +316,18 @@ final class CashAccount {
         static let populated: ModelContainer = {
             let wallet = CashAccount.preview(
                 name: "Wallet",
-                kind: .cash,
+                kind: .normal,
                 openingBalance: 1_250_000
             )
             let techcombank = CashAccount.preview(
                 name: "Techcombank",
-                kind: .bank,
+                kind: .normal,
                 openingBalance: 148_900_000,
                 createdOffset: 60
             )
             let emergency = CashAccount.preview(
                 name: "Emergency fund",
-                kind: .bank,
+                kind: .normal,
                 openingBalance: 120_000_000,
                 createdOffset: 120
             )

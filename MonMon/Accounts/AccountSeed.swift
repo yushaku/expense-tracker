@@ -71,7 +71,7 @@ enum AccountSeed {
 
         let accounts = (try? context.fetch(FetchDescriptor<CashAccount>())) ?? []
         let alreadyExists = accounts.contains {
-            $0.id == defaultBankID || $0.name == defaultBankName && $0.kind == .bank
+            $0.id == defaultBankID || $0.name == defaultBankName && $0.kind == .normal
         }
         guard !alreadyExists else {
             defaults.set(true, forKey: defaultBankSeedKey)
@@ -81,7 +81,7 @@ enum AccountSeed {
         let account = CashAccount(
             id: defaultBankID,
             name: AppText.string(key: defaultBankName, in: locale),
-            kind: .bank,
+            kind: .normal,
             openingBalance: .zero,
             currencyCode: VNDCurrency.code,
             createdAt: createdAt
@@ -125,7 +125,7 @@ enum AccountSeed {
         let account = CashAccount(
             id: unassignedID,
             name: AppText.string(key: unassignedName, in: locale),
-            kind: .cash,
+            kind: .normal,
             openingBalance: .zero,
             currencyCode: VNDCurrency.code,
             createdAt: createdAt

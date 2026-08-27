@@ -12,7 +12,7 @@ struct SavingsWithdrawalIntegrationTests {
         CashAccount(
             id: UUID(),
             name: "Bank",
-            kind: .bank,
+            kind: .normal,
             openingBalance: openingBalance,
             currencyCode: VNDCurrency.code,
             createdAt: openedAt

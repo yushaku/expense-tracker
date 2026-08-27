@@ -196,8 +196,15 @@ private struct PayloadChecker {
     mutating func validate() throws {
         try validateUniqueRecords(payload.accounts) { record in
             try scalarIDAndDate(record.id, record.createdAt)
-            try require(CashAccountKind(rawValue: record.kind) != nil)
+            guard let kind = CashAccountKind(rawValue: record.kind) else {
+                throw MonMonBackupValidationError.invalidPayload
+            }
             _ = try MonMonBackupScalar.parseDecimal(record.openingBalance)
+            if let creditLimit = record.creditLimit {
+                let parsedLimit = try MonMonBackupScalar.parseDecimal(creditLimit)
+                try require(parsedLimit >= .zero)
+                try require(kind == .credit || parsedLimit == .zero)
+            }
             try currency(record.currencyCode)
         }
         try validateUniqueRecords(payload.categories) { record in

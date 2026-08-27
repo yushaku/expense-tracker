@@ -203,6 +203,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         var name: String
         var kind: String
         var openingBalance: String
+        var creditLimit: String? = nil
         var currencyCode: String
         var createdAt: String
     }

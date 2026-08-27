@@ -17,7 +17,7 @@ struct AccountReportSummaryTests {
         CashAccount(
             id: UUID(),
             name: name,
-            kind: .bank,
+            kind: .normal,
             openingBalance: 0,
             currencyCode: VNDCurrency.code,
             createdAt: createdAt

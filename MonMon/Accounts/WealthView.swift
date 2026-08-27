@@ -106,16 +106,22 @@ struct WealthView: View {
         VStack(alignment: .leading, spacing: 12) {
             sectionHeader("Accounts")
 
-            summaryNavigationRow(
-                title: "Total balance",
-                amount: accountsTotal,
-                systemImage: "wallet.bifold.fill",
-                tint: MonMonTheme.accent,
-                accessibilityIdentifier: "open-accounts-screen",
-                accessibilityHint: "Opens the Accounts screen."
-            ) {
-                AccountsScreen()
+            ForEach(CashAccountKind.allCases, id: \.rawValue) { kind in
+                accountRow(kind)
             }
+        }
+    }
+
+    private func accountRow(_ kind: CashAccountKind) -> some View {
+        summaryNavigationRow(
+            title: kind.displayName,
+            amount: accountsTotal(kind),
+            systemImage: kind.iconName,
+            tint: kind.tint,
+            accessibilityIdentifier: "open-accounts-\(kind.rawValue)",
+            accessibilityHint: "Opens the Accounts screen."
+        ) {
+            AccountsScreen()
         }
     }
 
@@ -185,9 +191,10 @@ struct WealthView: View {
         .accessibilityHint(accessibilityHint)
     }
 
-    private var accountsTotal: Decimal {
+    private func accountsTotal(_ kind: CashAccountKind) -> Decimal {
         CashBalanceSummary.totalAvailable(
             of: accounts,
+            matching: kind,
             deposits: deposits,
             holdings: holdings,
             withdrawals: withdrawals,

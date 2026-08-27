@@ -4,21 +4,26 @@ enum AccountFormError: Error, Equatable {
     case emptyName
     case invalidOpeningBalance
     case negativeOpeningBalance
+    case invalidCreditLimit
+    case negativeCreditLimit
 }
 
 struct AccountDraft: Equatable {
     var name: String
     var kind: CashAccountKind
     var openingBalanceText: String
+    var creditLimitText: String
 
     init(
         name: String = "",
-        kind: CashAccountKind = .cash,
-        openingBalanceText: String = ""
+        kind: CashAccountKind = .normal,
+        openingBalanceText: String = "",
+        creditLimitText: String = ""
     ) {
         self.name = name
         self.kind = kind
         self.openingBalanceText = openingBalanceText
+        self.creditLimitText = creditLimitText
     }
 
     /// Seeds the editor with an existing account. The balance is formatted with
@@ -28,13 +33,15 @@ struct AccountDraft: Equatable {
         self.init(
             name: account.name,
             kind: account.kind,
-            openingBalanceText: VNDCurrency.formatPlain(account.openingBalance)
+            openingBalanceText: VNDCurrency.formatPlain(account.openingBalance),
+            creditLimitText: VNDCurrency.formatPlain(account.creditLimit)
         )
     }
 
     private struct ValidatedValues {
         let name: String
         let openingBalance: Decimal
+        let creditLimit: Decimal
     }
 
     private func validate() throws -> ValidatedValues {
@@ -51,7 +58,24 @@ struct AccountDraft: Equatable {
             throw AccountFormError.negativeOpeningBalance
         }
 
-        return ValidatedValues(name: trimmedName, openingBalance: openingBalance)
+        let creditLimit: Decimal
+        if kind == .credit {
+            guard let parsedLimit = VNDCurrency.parse(creditLimitText) else {
+                throw AccountFormError.invalidCreditLimit
+            }
+            guard parsedLimit >= 0 else {
+                throw AccountFormError.negativeCreditLimit
+            }
+            creditLimit = parsedLimit
+        } else {
+            creditLimit = .zero
+        }
+
+        return ValidatedValues(
+            name: trimmedName,
+            openingBalance: openingBalance,
+            creditLimit: creditLimit
+        )
     }
 
     func makeAccount(id: UUID, createdAt: Date) throws -> CashAccount {
@@ -62,6 +86,7 @@ struct AccountDraft: Equatable {
             name: values.name,
             kind: kind,
             openingBalance: values.openingBalance,
+            creditLimit: values.creditLimit,
             currencyCode: VNDCurrency.code,
             createdAt: createdAt
         )
@@ -75,5 +100,6 @@ struct AccountDraft: Equatable {
         account.name = values.name
         account.kind = kind
         account.openingBalance = values.openingBalance
+        account.creditLimit = values.creditLimit
     }
 }

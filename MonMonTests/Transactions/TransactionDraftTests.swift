@@ -31,7 +31,7 @@ struct TransactionDraftTests {
         let bank = CashAccount(
             id: AccountSeed.defaultBankID,
             name: "Bank",
-            kind: .bank,
+            kind: .normal,
             openingBalance: .zero,
             currencyCode: VNDCurrency.code,
             createdAt: occurredAt
@@ -64,7 +64,7 @@ struct TransactionDraftTests {
         let bank = CashAccount(
             id: AccountSeed.defaultBankID,
             name: "Bank",
-            kind: .bank,
+            kind: .normal,
             openingBalance: .zero,
             currencyCode: VNDCurrency.code,
             createdAt: occurredAt
@@ -72,7 +72,7 @@ struct TransactionDraftTests {
         let wallet = CashAccount(
             id: UUID(),
             name: "Wallet",
-            kind: .cash,
+            kind: .normal,
             openingBalance: .zero,
             currencyCode: VNDCurrency.code,
             createdAt: occurredAt

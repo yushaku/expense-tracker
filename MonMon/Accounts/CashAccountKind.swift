@@ -1,16 +1,52 @@
 import SwiftUI
 
-enum CashAccountKind: String, Codable, CaseIterable {
-    case cash
-    case bank
+enum CashAccountKind: Codable, CaseIterable, RawRepresentable {
+    case normal
     case credit
+
+    typealias RawValue = String
+
+    init?(rawValue: String) {
+        switch rawValue {
+        case "normal", "cash", "bank":
+            self = .normal
+        case "credit":
+            self = .credit
+        default:
+            return nil
+        }
+    }
+
+    var rawValue: String {
+        switch self {
+        case .normal:
+            "normal"
+        case .credit:
+            "credit"
+        }
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawValue = try container.decode(String.self)
+        guard let value = Self(rawValue: rawValue) else {
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Unknown account kind: \(rawValue)"
+            )
+        }
+        self = value
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
 
     var displayNameKey: String {
         switch self {
-        case .cash:
-            "Cash"
-        case .bank:
-            "Bank"
+        case .normal:
+            "Normal"
         case .credit:
             "Credit"
         }
@@ -25,7 +61,7 @@ enum CashAccountKind: String, Codable, CaseIterable {
     }
 
     /// Credit cards carry what you owe, so their balance is allowed to go below
-    /// zero. Cash and bank accounts cannot.
+    /// zero. Normal accounts cannot.
     var allowsNegativeBalance: Bool {
         self == .credit
     }
@@ -38,10 +74,8 @@ extension CashAccountKind {
     /// the same account differently.
     var iconName: String {
         switch self {
-        case .cash:
-            "banknote.fill"
-        case .bank:
-            "building.columns.fill"
+        case .normal:
+            "wallet.bifold.fill"
         case .credit:
             "creditcard.fill"
         }
@@ -49,10 +83,8 @@ extension CashAccountKind {
 
     var tint: Color {
         switch self {
-        case .cash:
+        case .normal:
             MonMonTheme.accent
-        case .bank:
-            MonMonTheme.bank
         case .credit:
             MonMonTheme.credit
         }

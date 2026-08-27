@@ -14,7 +14,7 @@ final class AssetAllocationTests {
         CashAccount(
             id: UUID(),
             name: "Account",
-            kind: .cash,
+            kind: .normal,
             openingBalance: openingBalance,
             currencyCode: VNDCurrency.code,
             createdAt: fixedDate

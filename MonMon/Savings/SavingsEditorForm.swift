@@ -384,10 +384,10 @@ struct SavingsEditorForm: View {
                 SavingsEditorForm(
                     draft: $draft,
                     accounts: [
-                        .preview(name: "Wallet", kind: .cash, openingBalance: 1_250_000),
+                        .preview(name: "Wallet", kind: .normal, openingBalance: 1_250_000),
                         .preview(
                             name: "Techcombank",
-                            kind: .bank,
+                            kind: .normal,
                             openingBalance: 148_900_000
                         ),
                     ],

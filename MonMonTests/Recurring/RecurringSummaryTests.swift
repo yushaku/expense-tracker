@@ -47,7 +47,7 @@ struct RecurringSummaryTests {
         CashAccount(
             id: UUID(),
             name: "Wallet",
-            kind: .cash,
+            kind: .normal,
             openingBalance: .zero,
             currencyCode: VNDCurrency.code,
             createdAt: Date(timeIntervalSince1970: 0)

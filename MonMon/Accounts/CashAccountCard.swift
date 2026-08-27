@@ -73,6 +73,21 @@ struct CashAccountCard: View {
                 .tracking(0.5)
                 .foregroundStyle(MonMonTheme.textSecondary)
 
+            if account.kind == .credit {
+                Text(VNDCurrency.format(availableCredit))
+                    .font(.subheadline.weight(.semibold))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .foregroundStyle(MonMonTheme.credit)
+                    .padding(.top, 5)
+
+                Text("AVAILABLE CREDIT")
+                    .font(.caption2.weight(.semibold))
+                    .tracking(0.5)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            }
+
             if savingsAmount > 0 {
                 Text("In savings \(VNDCurrency.format(savingsAmount))")
                     .font(.caption)
@@ -107,6 +122,13 @@ struct CashAccountCard: View {
         )
     }
 
+    private var availableCredit: Decimal {
+        CashBalanceSummary.availableCredit(
+            limit: account.creditLimit,
+            currentBalance: availableBalance
+        )
+    }
+
     private var savingsAmount: Decimal {
         deposits.reduce(Decimal.zero) { total, deposit in
             deposit.sourceAccountID == account.id
@@ -136,7 +158,7 @@ struct CashAccountCard: View {
 
             VStack(spacing: 16) {
                 CashAccountCard(
-                    account: .preview(name: "Wallet", kind: .cash, openingBalance: 1_250_000),
+                    account: .preview(name: "Wallet", kind: .normal, openingBalance: 1_250_000),
                     deposits: [],
                     withdrawals: [],
                     holdings: [],
@@ -148,7 +170,11 @@ struct CashAccountCard: View {
                 )
 
                 CashAccountCard(
-                    account: .preview(name: "Techcombank", kind: .bank, openingBalance: 48_900_000),
+                    account: .preview(
+                        name: "Techcombank",
+                        kind: .normal,
+                        openingBalance: 48_900_000
+                    ),
                     deposits: [],
                     withdrawals: [],
                     holdings: [],
@@ -163,7 +189,8 @@ struct CashAccountCard: View {
                     account: .preview(
                         name: "Visa credit",
                         kind: .credit,
-                        openingBalance: -5_200_000
+                        openingBalance: -5_200_000,
+                        creditLimit: 20_000_000
                     ),
                     deposits: [],
                     withdrawals: [],
@@ -178,7 +205,7 @@ struct CashAccountCard: View {
                 CashAccountCard(
                     account: .preview(
                         name: "Very long account name that wraps to two lines",
-                        kind: .bank,
+                        kind: .normal,
                         openingBalance: 987_654_321_000
                     ),
                     deposits: [],

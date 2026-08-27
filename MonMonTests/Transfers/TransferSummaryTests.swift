@@ -14,7 +14,7 @@ struct TransferSummaryTests {
 
     private func makeAccount(
         name: String = "Wallet",
-        kind: CashAccountKind = .cash,
+        kind: CashAccountKind = .normal,
         openingBalance: Decimal = 0
     ) -> CashAccount {
         CashAccount(
@@ -53,7 +53,7 @@ struct TransferSummaryTests {
     @Test("A transfer lowers one account and raises the other")
     func netFlowSplitsBothWays() {
         let wallet = makeAccount(name: "Wallet")
-        let bank = makeAccount(name: "Bank", kind: .bank)
+        let bank = makeAccount(name: "Bank", kind: .normal)
         let transfers = [makeTransfer(amount: 2_000_000, from: bank, to: wallet)]
 
         #expect(TransferSummary.netFlow(for: bank, transfers: transfers) == -2_000_000)
@@ -63,8 +63,8 @@ struct TransferSummaryTests {
     @Test("An account untouched by a transfer does not move")
     func untouchedAccountsStayPut() {
         let wallet = makeAccount(name: "Wallet")
-        let bank = makeAccount(name: "Bank", kind: .bank)
-        let other = makeAccount(name: "Other", kind: .bank)
+        let bank = makeAccount(name: "Bank", kind: .normal)
+        let other = makeAccount(name: "Other", kind: .normal)
         let transfers = [makeTransfer(amount: 2_000_000, from: bank, to: wallet)]
 
         #expect(TransferSummary.netFlow(for: other, transfers: transfers) == 0)
@@ -73,7 +73,7 @@ struct TransferSummaryTests {
     @Test("Transfers in both directions net out")
     func oppositeTransfersCancel() {
         let wallet = makeAccount(name: "Wallet")
-        let bank = makeAccount(name: "Bank", kind: .bank)
+        let bank = makeAccount(name: "Bank", kind: .normal)
         let transfers = [
             makeTransfer(amount: 2_000_000, from: bank, to: wallet),
             makeTransfer(amount: 500_000, from: wallet, to: bank),
@@ -87,8 +87,8 @@ struct TransferSummaryTests {
     @Test("Both ends of a transfer count towards the account that owns them")
     func countCoversBothEnds() {
         let wallet = makeAccount(name: "Wallet")
-        let bank = makeAccount(name: "Bank", kind: .bank)
-        let other = makeAccount(name: "Other", kind: .bank)
+        let bank = makeAccount(name: "Bank", kind: .normal)
+        let other = makeAccount(name: "Other", kind: .normal)
         let transfers = [
             makeTransfer(amount: 2_000_000, from: bank, to: wallet),
             makeTransfer(amount: 500_000, from: wallet, to: bank),
@@ -102,7 +102,7 @@ struct TransferSummaryTests {
     @Test("Only the transfers inside the range are kept")
     func rangeFiltersByDate() {
         let wallet = makeAccount(name: "Wallet")
-        let bank = makeAccount(name: "Bank", kind: .bank)
+        let bank = makeAccount(name: "Bank", kind: .normal)
         let transfers = [
             makeTransfer(
                 amount: 1_000_000,
@@ -130,7 +130,7 @@ struct TransferSummaryTests {
     @Test("A transfer moves a balance without changing the total")
     func balancesMoveButTheTotalHolds() {
         let wallet = makeAccount(name: "Wallet", openingBalance: 1_000_000)
-        let bank = makeAccount(name: "Bank", kind: .bank, openingBalance: 10_000_000)
+        let bank = makeAccount(name: "Bank", kind: .normal, openingBalance: 10_000_000)
         let accounts = [wallet, bank]
         let transfers = [makeTransfer(amount: 2_000_000, from: bank, to: wallet)]
 
@@ -178,7 +178,7 @@ struct TransferSummaryTests {
     @Test("A transfer leaves net worth exactly where it was")
     func netWorthIgnoresTransfers() {
         let wallet = makeAccount(name: "Wallet", openingBalance: 1_000_000)
-        let bank = makeAccount(name: "Bank", kind: .bank, openingBalance: 10_000_000)
+        let bank = makeAccount(name: "Bank", kind: .normal, openingBalance: 10_000_000)
         let accounts = [wallet, bank]
         let transfers = [makeTransfer(amount: 2_000_000, from: bank, to: wallet)]
 
@@ -214,7 +214,7 @@ struct TransferSummaryTests {
     @Test("An account can be transferred into the red only where that is allowed")
     func transfersCanOverdrawACreditCard() {
         let card = makeAccount(name: "Visa", kind: .credit, openingBalance: 0)
-        let bank = makeAccount(name: "Bank", kind: .bank, openingBalance: 10_000_000)
+        let bank = makeAccount(name: "Bank", kind: .normal, openingBalance: 10_000_000)
         let transfers = [makeTransfer(amount: 3_000_000, from: card, to: bank)]
 
         #expect(

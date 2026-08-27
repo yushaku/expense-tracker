@@ -218,7 +218,7 @@ struct FundPriceRefresherTests {
         let account = CashAccount(
             id: UUID(),
             name: "Techcombank",
-            kind: .bank,
+            kind: .normal,
             openingBalance: 100_000_000,
             currencyCode: VNDCurrency.code,
             createdAt: startOfAsOf

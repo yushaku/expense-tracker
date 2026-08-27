@@ -22,7 +22,7 @@ struct AccountTransferPersistenceTests {
 
     private func makeAccount(
         name: String,
-        kind: CashAccountKind = .bank,
+        kind: CashAccountKind = .normal,
         openingBalance: Decimal
     ) -> CashAccount {
         CashAccount(
@@ -40,7 +40,7 @@ struct AccountTransferPersistenceTests {
         let container = try makeContainer()
         let context = ModelContext(container)
         let bank = makeAccount(name: "Techcombank", openingBalance: 10_000_000)
-        let wallet = makeAccount(name: "Wallet", kind: .cash, openingBalance: 0)
+        let wallet = makeAccount(name: "Wallet", kind: .normal, openingBalance: 0)
         context.insert(bank)
         context.insert(wallet)
 
@@ -74,7 +74,7 @@ struct AccountTransferPersistenceTests {
         let container = try makeContainer()
         let context = ModelContext(container)
         let bank = makeAccount(name: "Techcombank", openingBalance: 10_000_000)
-        let wallet = makeAccount(name: "Wallet", kind: .cash, openingBalance: 1_000_000)
+        let wallet = makeAccount(name: "Wallet", kind: .normal, openingBalance: 1_000_000)
         context.insert(bank)
         context.insert(wallet)
 
@@ -144,7 +144,7 @@ struct AccountTransferPersistenceTests {
         let container = try makeContainer()
         let context = ModelContext(container)
         let bank = makeAccount(name: "Techcombank", openingBalance: 10_000_000)
-        let wallet = makeAccount(name: "Wallet", kind: .cash, openingBalance: 1_000_000)
+        let wallet = makeAccount(name: "Wallet", kind: .normal, openingBalance: 1_000_000)
         context.insert(bank)
         context.insert(wallet)
 
@@ -191,7 +191,7 @@ struct AccountTransferPersistenceTests {
         let container = try makeContainer()
         let context = ModelContext(container)
         let bank = makeAccount(name: "Techcombank", openingBalance: 10_000_000)
-        let wallet = makeAccount(name: "Wallet", kind: .cash, openingBalance: 0)
+        let wallet = makeAccount(name: "Wallet", kind: .normal, openingBalance: 0)
         context.insert(bank)
         context.insert(wallet)
 
@@ -242,7 +242,7 @@ struct AccountTransferPersistenceTests {
         let container = try makeContainer()
         let context = ModelContext(container)
         let bank = makeAccount(name: "Techcombank", openingBalance: 10_000_000)
-        let wallet = makeAccount(name: "Wallet", kind: .cash, openingBalance: 0)
+        let wallet = makeAccount(name: "Wallet", kind: .normal, openingBalance: 0)
         context.insert(bank)
         context.insert(wallet)
 

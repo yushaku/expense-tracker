@@ -21,6 +21,10 @@ struct AccountEditorForm: View {
                     accountDetailsCard
                     openingBalanceCard
 
+                    if draft.kind == .credit {
+                        creditLimitCard
+                    }
+
                     if let saveErrorMessage {
                         errorBanner(saveErrorMessage)
                     }
@@ -173,6 +177,40 @@ struct AccountEditorForm: View {
         }
     }
 
+    private var creditLimitCard: some View {
+        card {
+            VStack(alignment: .leading, spacing: 14) {
+                sectionHeader("Credit limit", systemImage: "creditcard.fill")
+
+                HStack(spacing: 12) {
+                    Text("₫")
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(MonMonTheme.credit)
+
+                    creditLimitTextField
+                        .textFieldStyle(.plain)
+                        .font(.system(.title2, design: .rounded, weight: .semibold))
+                        .monospacedDigit()
+                        .multilineTextAlignment(.trailing)
+                        .accessibilityLabel("Credit limit")
+                }
+                .padding(16)
+                .background(
+                    MonMonTheme.field,
+                    in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                )
+
+                if let creditLimitErrorMessage {
+                    validationMessage(creditLimitErrorMessage, id: "credit-limit-error")
+                }
+
+                Text("VND · Maximum amount available to borrow.")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            }
+        }
+    }
+
     @ViewBuilder
     private var balanceTextField: some View {
         #if os(iOS)
@@ -186,6 +224,18 @@ struct AccountEditorForm: View {
         #else
             TextField("0", text: $draft.openingBalanceText)
                 .accessibilityIdentifier("opening-balance")
+        #endif
+    }
+
+    @ViewBuilder
+    private var creditLimitTextField: some View {
+        #if os(iOS)
+            TextField("0", text: $draft.creditLimitText)
+                .keyboardType(.numberPad)
+                .accessibilityIdentifier("credit-limit")
+        #else
+            TextField("0", text: $draft.creditLimitText)
+                .accessibilityIdentifier("credit-limit")
         #endif
     }
 
@@ -248,6 +298,17 @@ struct AccountEditorForm: View {
             nil
         }
     }
+
+    private var creditLimitErrorMessage: LocalizedStringKey? {
+        switch validationError {
+        case .invalidCreditLimit:
+            "Enter a valid credit limit."
+        case .negativeCreditLimit:
+            "Credit limit cannot be negative."
+        default:
+            nil
+        }
+    }
 }
 
 #if DEBUG
@@ -284,13 +345,17 @@ struct AccountEditorForm: View {
 
     #Preview("Form · filled") {
         AccountEditorFormPreview(
-            draft: AccountDraft(name: "Techcombank", kind: .bank, openingBalanceText: "48.900.000")
+            draft: AccountDraft(
+                name: "Techcombank",
+                kind: .normal,
+                openingBalanceText: "48.900.000"
+            )
         )
     }
 
     #Preview("Form · edit deletable") {
         AccountEditorFormPreview(
-            draft: AccountDraft(name: "Old wallet", kind: .cash, openingBalanceText: "0"),
+            draft: AccountDraft(name: "Old wallet", kind: .normal, openingBalanceText: "0"),
             isEditing: true,
             canDelete: true
         )
@@ -301,7 +366,8 @@ struct AccountEditorForm: View {
             draft: AccountDraft(
                 name: "Visa credit",
                 kind: .credit,
-                openingBalanceText: "-5.200.000"
+                openingBalanceText: "-5.200.000",
+                creditLimitText: "20.000.000"
             ),
             isEditing: true,
             deleteBlockedReason: "Set the balance to 0 before deleting this account."
@@ -310,7 +376,7 @@ struct AccountEditorForm: View {
 
     #Preview("Form · errors") {
         AccountEditorFormPreview(
-            draft: AccountDraft(name: "", kind: .cash, openingBalanceText: "-10"),
+            draft: AccountDraft(name: "", kind: .normal, openingBalanceText: "-10"),
             validationError: .negativeOpeningBalance,
             saveErrorMessage: "Couldn’t save this account. Try again."
         )

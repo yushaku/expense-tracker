@@ -188,10 +188,8 @@ enum AccountPalette {
 private extension CashAccountKind {
     var legendSymbolName: String {
         switch self {
-        case .cash:
-            "banknote.fill"
-        case .bank:
-            "building.columns.fill"
+        case .normal:
+            "wallet.bifold.fill"
         case .credit:
             "creditcard.fill"
         }
@@ -215,13 +213,13 @@ private extension Decimal {
                     AccountBalanceSlice(
                         accountID: UUID(),
                         name: "Techcombank",
-                        kind: .bank,
+                        kind: .normal,
                         amount: 42_000_000
                     ),
                     AccountBalanceSlice(
                         accountID: UUID(),
                         name: "Wallet",
-                        kind: .cash,
+                        kind: .normal,
                         amount: 3_500_000
                     ),
                 ],

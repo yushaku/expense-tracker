@@ -91,7 +91,7 @@ struct SavingsWithdrawalSummaryTests {
         let destination = CashAccount(
             id: destinationID,
             name: "Wallet",
-            kind: .cash,
+            kind: .normal,
             openingBalance: 0,
             currencyCode: VNDCurrency.code,
             createdAt: openedAt
@@ -99,7 +99,7 @@ struct SavingsWithdrawalSummaryTests {
         let other = CashAccount(
             id: UUID(),
             name: "Bank",
-            kind: .bank,
+            kind: .normal,
             openingBalance: 0,
             currencyCode: VNDCurrency.code,
             createdAt: openedAt

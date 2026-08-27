@@ -6,6 +6,36 @@ import Testing
 @Suite("Cash balance summary")
 @MainActor
 struct CashBalanceSummaryTests {
+    @Test("Available Credit subtracts debt from the card limit")
+    func availableCreditSubtractsDebt() {
+        #expect(
+            CashBalanceSummary.availableCredit(
+                limit: 20_000_000,
+                currentBalance: -5_200_000
+            ) == 14_800_000
+        )
+    }
+
+    @Test("Available Credit never reports a negative amount")
+    func availableCreditStopsAtZero() {
+        #expect(
+            CashBalanceSummary.availableCredit(
+                limit: 20_000_000,
+                currentBalance: -25_000_000
+            ) == 0
+        )
+    }
+
+    @Test("A positive card balance increases Available Credit")
+    func overpaymentIncreasesAvailableCredit() {
+        #expect(
+            CashBalanceSummary.availableCredit(
+                limit: 20_000_000,
+                currentBalance: 1_000_000
+            ) == 21_000_000
+        )
+    }
+
     @Test("An empty account list has a zero total")
     func emptyListHasZeroTotal() {
         #expect(CashBalanceSummary.total(of: []) == 0)
@@ -13,17 +43,17 @@ struct CashBalanceSummaryTests {
 
     @Test("One account contributes its exact opening balance")
     func oneAccountHasItsOpeningBalance() {
-        let account = makeAccount(kind: .cash, openingBalance: Decimal(1_250_000))
+        let account = makeAccount(kind: .normal, openingBalance: Decimal(1_250_000))
 
         #expect(CashBalanceSummary.total(of: [account]) == Decimal(1_250_000))
     }
 
-    @Test("Cash and bank balances add without floating-point conversion")
+    @Test("Normal account balances add without floating-point conversion")
     func multipleAccountBalancesAddExactly() {
-        let cash = makeAccount(kind: .cash, openingBalance: Decimal(1_250_000))
-        let bank = makeAccount(kind: .bank, openingBalance: Decimal(8_750_000))
+        let wallet = makeAccount(kind: .normal, openingBalance: Decimal(1_250_000))
+        let savings = makeAccount(kind: .normal, openingBalance: Decimal(8_750_000))
 
-        #expect(CashBalanceSummary.total(of: [cash, bank]) == Decimal(10_000_000))
+        #expect(CashBalanceSummary.total(of: [wallet, savings]) == Decimal(10_000_000))
     }
 
     @Test("Recorded income raises the available balance and expense lowers it")
@@ -83,6 +113,31 @@ struct CashBalanceSummaryTests {
                 sales: []
             ) == 9_600_000
         )
+    }
+
+    @Test("Available totals split Normal and Credit accounts")
+    func availableTotalsSplitByKind() {
+        let normal = makeUniqueAccount(kind: .normal, openingBalance: 10_000_000)
+        let credit = makeUniqueAccount(kind: .credit, openingBalance: -2_000_000)
+        let accounts = [credit, normal]
+
+        func total(for kind: CashAccountKind) -> Decimal {
+            CashBalanceSummary.totalAvailable(
+                of: accounts,
+                matching: kind,
+                deposits: [],
+                holdings: [],
+                withdrawals: [],
+                transactions: [],
+                transfers: [],
+                debts: [],
+                payments: [],
+                sales: []
+            )
+        }
+
+        #expect(total(for: .normal) == 10_000_000)
+        #expect(total(for: .credit) == -2_000_000)
     }
 
     @Test("Spending past the balance is allowed and reports a negative figure")
@@ -150,11 +205,14 @@ struct CashBalanceSummaryTests {
 
     private let fixedDate = Date(timeIntervalSince1970: 1_700_000_000)
 
-    private func makeUniqueAccount(openingBalance: Decimal) -> CashAccount {
+    private func makeUniqueAccount(
+        kind: CashAccountKind = .normal,
+        openingBalance: Decimal
+    ) -> CashAccount {
         CashAccount(
             id: UUID(),
             name: "Account",
-            kind: .cash,
+            kind: kind,
             openingBalance: openingBalance,
             currencyCode: VNDCurrency.code,
             createdAt: fixedDate
