@@ -38,7 +38,9 @@ existing Import Inbox can gain editing and commit controls.
 7. The SwiftData commit succeeds before the staged statement is removed. If
    filesystem cleanup fails, provenance makes reopening and cleanup idempotent.
 8. Import provenance syncs with the same private CloudKit store as its financial
-   record. It contains hashes only and is never displayed, logged, or exported.
+   record. It contains hashes only and is never displayed or logged. The only
+   export boundary allowed to carry it is an owner-created full backup, so a
+   restored record still prevents the same statement row being imported twice.
 
 ## Domain Contract
 
