@@ -107,4 +107,32 @@ enum CashBalanceSummary {
                 )
         }
     }
+
+    /// The same ledger total scoped to one account kind. Wealth uses this to
+    /// present Normal money separately from Credit balances without changing
+    /// how either balance is derived.
+    static func totalAvailable(
+        of accounts: [CashAccount],
+        matching kind: CashAccountKind,
+        deposits: [SavingsDeposit],
+        holdings: [FundHolding],
+        withdrawals: [SavingsWithdrawal],
+        transactions: [MoneyTransaction],
+        transfers: [AccountTransfer],
+        debts: [Debt],
+        payments: [DebtPayment],
+        sales: [FundSale]
+    ) -> Decimal {
+        totalAvailable(
+            of: accounts.filter { $0.kind == kind },
+            deposits: deposits,
+            holdings: holdings,
+            withdrawals: withdrawals,
+            transactions: transactions,
+            transfers: transfers,
+            debts: debts,
+            payments: payments,
+            sales: sales
+        )
+    }
 }

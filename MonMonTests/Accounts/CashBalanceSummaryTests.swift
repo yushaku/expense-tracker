@@ -115,6 +115,31 @@ struct CashBalanceSummaryTests {
         )
     }
 
+    @Test("Available totals split Normal and Credit accounts")
+    func availableTotalsSplitByKind() {
+        let normal = makeUniqueAccount(kind: .normal, openingBalance: 10_000_000)
+        let credit = makeUniqueAccount(kind: .credit, openingBalance: -2_000_000)
+        let accounts = [credit, normal]
+
+        func total(for kind: CashAccountKind) -> Decimal {
+            CashBalanceSummary.totalAvailable(
+                of: accounts,
+                matching: kind,
+                deposits: [],
+                holdings: [],
+                withdrawals: [],
+                transactions: [],
+                transfers: [],
+                debts: [],
+                payments: [],
+                sales: []
+            )
+        }
+
+        #expect(total(for: .normal) == 10_000_000)
+        #expect(total(for: .credit) == -2_000_000)
+    }
+
     @Test("Spending past the balance is allowed and reports a negative figure")
     func flowMayDriveTheBalanceNegative() {
         let account = makeUniqueAccount(openingBalance: 100_000)
@@ -180,11 +205,14 @@ struct CashBalanceSummaryTests {
 
     private let fixedDate = Date(timeIntervalSince1970: 1_700_000_000)
 
-    private func makeUniqueAccount(openingBalance: Decimal) -> CashAccount {
+    private func makeUniqueAccount(
+        kind: CashAccountKind = .normal,
+        openingBalance: Decimal
+    ) -> CashAccount {
         CashAccount(
             id: UUID(),
             name: "Account",
-            kind: .normal,
+            kind: kind,
             openingBalance: openingBalance,
             currencyCode: VNDCurrency.code,
             createdAt: fixedDate
