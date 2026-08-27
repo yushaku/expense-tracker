@@ -325,7 +325,7 @@ struct StatementImportCompletionTests {
             CashAccount(
                 id: accountID,
                 name: "Synthetic bank",
-                kind: .bank,
+                kind: .normal,
                 openingBalance: 1_000_000,
                 currencyCode: VNDCurrency.code,
                 createdAt: occurredAt

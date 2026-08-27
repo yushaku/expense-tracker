@@ -17,7 +17,7 @@ struct DebtNetWorthTests {
 
     private func makeAccount(
         name: String = "Bank",
-        kind: CashAccountKind = .bank,
+        kind: CashAccountKind = .normal,
         openingBalance: Decimal = 0
     ) -> CashAccount {
         CashAccount(
@@ -222,7 +222,7 @@ struct DebtNetWorthTests {
 
     @Test("Borrowing into one account and repaying from another leaves net worth alone")
     func repayingFromAnotherAccountDoesNotMoveNetWorth() {
-        let wallet = makeAccount(name: "Wallet", kind: .cash, openingBalance: 40_000_000)
+        let wallet = makeAccount(name: "Wallet", kind: .normal, openingBalance: 40_000_000)
         let bank = makeAccount(openingBalance: 100_000_000)
         let debt = makeDebt(principal: 50_000_000, account: wallet)
         let payments = [makePayment(50_000_000, on: debt, from: bank)]
@@ -327,7 +327,7 @@ struct DebtNetWorthTests {
 
     @Test("The ring total minus what is owed still equals net worth")
     func ringMinusLiabilitiesIsNetWorth() {
-        let wallet = makeAccount(name: "Wallet", kind: .cash, openingBalance: 60_000_000)
+        let wallet = makeAccount(name: "Wallet", kind: .normal, openingBalance: 60_000_000)
         let card = makeAccount(name: "Visa", kind: .credit, openingBalance: -5_000_000)
         let accounts = [wallet, card]
         let debts = [

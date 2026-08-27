@@ -14,7 +14,7 @@ struct DebtSummaryTests {
 
     private func makeAccount(
         name: String = "Wallet",
-        kind: CashAccountKind = .cash,
+        kind: CashAccountKind = .normal,
         openingBalance: Decimal = 0
     ) -> CashAccount {
         CashAccount(
@@ -167,7 +167,7 @@ struct DebtSummaryTests {
     @Test("A debt moves no account but the one it names")
     func otherAccountsAreUntouched() {
         let wallet = makeAccount(name: "Wallet")
-        let bank = makeAccount(name: "Bank", kind: .bank)
+        let bank = makeAccount(name: "Bank", kind: .normal)
         let debt = makeDebt(principal: 10_000_000, account: wallet)
         let payments = [makePayment(2_000_000, on: debt, from: wallet)]
 
@@ -196,7 +196,7 @@ struct DebtSummaryTests {
     @Test("A debt repaid from a different account moves both and leaves the pair unchanged")
     func repaymentFromAnotherAccountMovesBoth() {
         let wallet = makeAccount(name: "Wallet")
-        let bank = makeAccount(name: "Bank", kind: .bank)
+        let bank = makeAccount(name: "Bank", kind: .normal)
         let debt = makeDebt(principal: 10_000_000, account: wallet)
         let payments = [makePayment(10_000_000, on: debt, from: bank)]
 

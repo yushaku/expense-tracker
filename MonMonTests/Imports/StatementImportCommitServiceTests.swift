@@ -413,7 +413,7 @@ struct StatementImportCommitServiceTests {
             CashAccount(
                 id: accountID,
                 name: "Synthetic bank",
-                kind: .bank,
+                kind: .normal,
                 openingBalance: 1_000_000,
                 currencyCode: VNDCurrency.code,
                 createdAt: occurredAt
@@ -424,7 +424,7 @@ struct StatementImportCommitServiceTests {
             CashAccount(
                 id: otherAccountID,
                 name: "Synthetic wallet",
-                kind: .cash,
+                kind: .normal,
                 openingBalance: 0,
                 currencyCode: VNDCurrency.code,
                 createdAt: occurredAt

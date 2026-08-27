@@ -23,7 +23,7 @@ struct DebtPaymentPersistenceTests {
 
     private func makeAccount(
         name: String,
-        kind: CashAccountKind = .bank,
+        kind: CashAccountKind = .normal,
         openingBalance: Decimal
     ) -> CashAccount {
         CashAccount(
