@@ -50,6 +50,19 @@ dev variant with `swift scripts/make-dev-appicon.swift` rather than editing
 
 
 
+## SwiftUI
+
+The app's UI is SwiftUI. The `swiftui-expert-skill` in `.claude/skills/` carries
+the reference material for it.
+
+- Use `swiftui-expert-skill` whenever you write, review, or refactor SwiftUI
+code in this repository. Its `references/latest-apis.md` is the check against
+reaching for a deprecated API.
+- Follow its correctness checklist before you call SwiftUI work done. Those are
+bugs, not preferences.
+- Adopt Liquid Glass only when the user asks for it, and gate iOS 26+ APIs with
+`#available` and a fallback.
+
 <!-- CODEGRAPH_START -->
 
 ## CodeGraph
