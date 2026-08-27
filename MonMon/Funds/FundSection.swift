@@ -225,7 +225,11 @@ struct FundSection: View {
             }
 
             ForEach(groups) { group in
-                NavigationLink(value: FundGroupRoute(instrumentID: group.instrumentID)) {
+                NavigationLink {
+                    FundGroupDetailView(
+                        route: FundGroupRoute(instrumentID: group.instrumentID)
+                    )
+                } label: {
                     FundGroupCard(group: group)
                 }
                 .buttonStyle(.plain)
