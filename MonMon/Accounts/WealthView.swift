@@ -40,7 +40,6 @@ struct WealthView: View {
     private var payments: [DebtPayment]
 
     @State private var editorMode: AccountEditorMode?
-    @State private var debtEditorMode: DebtEditorMode?
 
     var body: some View {
         NavigationStack {
@@ -86,14 +85,8 @@ struct WealthView: View {
             }
             .compactRootNavigationTitle("Wealth")
             .accessibilityIdentifier("wealth")
-            .navigationDestination(for: DebtRoute.self) { route in
-                DebtDetailView(route: route)
-            }
             .sheet(item: $editorMode) { mode in
                 AccountEditorView(mode: mode)
-            }
-            .sheet(item: $debtEditorMode) { mode in
-                DebtEditorView(mode: mode)
             }
             .tint(MonMonTheme.accent)
         }
@@ -379,79 +372,84 @@ struct WealthView: View {
 
     private var debtsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 10) {
-                Text("Debts")
-                    .font(.title3.weight(.semibold))
+            Text("Debts")
+                .font(.title3.weight(.semibold))
 
-                Text(debts.count.formatted())
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(MonMonTheme.accent)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(MonMonTheme.accent.opacity(0.16), in: Capsule())
+            NavigationLink {
+                DebtListView()
+            } label: {
+                HStack(spacing: 14) {
+                    VStack(spacing: 12) {
+                        debtSummaryRow(
+                            direction: .borrowed,
+                            amount: outstandingDebtTotal(.borrowed),
+                            tint: MonMonTheme.credit
+                        )
 
-                Spacer(minLength: 8)
+                        Divider()
+                            .overlay(MonMonTheme.border)
 
-                Button {
-                    debtEditorMode = .add
-                } label: {
-                    Image(systemName: "plus")
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(MonMonTheme.onAccent)
-                        .frame(width: 32, height: 32)
-                        .background(MonMonTheme.accent, in: Circle())
-                        .contentShape(Circle())
-                }
-                .buttonStyle(.plain)
-                .disabled(accounts.isEmpty)
-                .opacity(accounts.isEmpty ? 0.4 : 1)
-                .accessibilityLabel("Add Debt")
-                .accessibilityIdentifier("home-add-debt")
-            }
-
-            if debts.isEmpty {
-                Text(
-                    accounts.isEmpty
-                        ? "Add an account before recording debt."
-                        : "No debts recorded."
-                )
-                .font(.subheadline)
-                .foregroundStyle(MonMonTheme.textSecondary)
-                .padding(.vertical, 8)
-            } else {
-                ForEach(sortedDebts) { debt in
-                    NavigationLink(value: DebtRoute(debtID: debt.id)) {
-                        debtCard(for: debt)
+                        debtSummaryRow(
+                            direction: .lent,
+                            amount: outstandingDebtTotal(.lent),
+                            tint: MonMonTheme.lent
+                        )
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("home-debt-\(debt.id.uuidString)")
-                    .accessibilityHint("Opens the debt and its payments.")
+                    .frame(maxWidth: .infinity)
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(MonMonTheme.textMuted)
+                        .accessibilityHidden(true)
                 }
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 16))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(MonMonTheme.border, lineWidth: 1)
+                }
+                .contentShape(RoundedRectangle(cornerRadius: 16))
+                .accessibilityElement(children: .combine)
             }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("open-debts-screen")
+            .accessibilityHint("Opens the Debts screen.")
         }
     }
 
-    private var sortedDebts: [Debt] {
-        DebtSummary.sortedForDisplay(debts, payments: payments)
+    private func debtSummaryRow(
+        direction: DebtDirection,
+        amount: Decimal,
+        tint: Color
+    ) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: direction.symbolName)
+                .font(.footnote.weight(.bold))
+                .foregroundStyle(tint)
+                .frame(width: 34, height: 34)
+                .background(tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 10))
+                .accessibilityHidden(true)
+
+            Text(direction.displayName)
+                .font(.subheadline.weight(.semibold))
+
+            Spacer(minLength: 8)
+
+            Text(VNDCurrency.format(amount))
+                .font(.subheadline.weight(.semibold))
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
     }
 
-    private func debtCard(for debt: Debt) -> some View {
-        let asOf = Date.now
-
-        return DebtCard(
-            debt: debt,
-            outstanding: DebtSummary.outstanding(for: debt, payments: payments),
-            paid: DebtSummary.paid(for: debt, payments: payments),
-            progress: DebtSummary.progress(for: debt, payments: payments),
-            accountName: accountName(debt.accountID),
-            isOverdue: DebtSummary.isOverdue(debt, payments: payments, asOf: asOf),
-            projectedInterest: debt.projectedInterest(asOf: asOf)
+    private func outstandingDebtTotal(_ direction: DebtDirection) -> Decimal {
+        DebtSummary.totalOutstanding(
+            of: debts,
+            payments: payments,
+            direction: direction
         )
-    }
-
-    private func accountName(_ id: UUID?) -> String? {
-        guard let id else { return nil }
-        return accounts.first { $0.id == id }?.name
     }
 }
 
