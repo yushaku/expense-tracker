@@ -16,6 +16,7 @@ MonMon is a private, Apple-platform personal asset manager. Each module below is
 12. `statement-share-intake`
 13. `import-reconciliation`
 14. `transaction-import-inbox`
+15. `full-backup-restore`
 
 ## Initiative-wide boundaries
 
@@ -25,6 +26,9 @@ MonMon is a private, Apple-platform personal asset manager. Each module below is
 - Market-data providers remain replaceable behind a typed interface.
 - Bank statements are parsed on-device. Raw statement files are never uploaded,
   added to CloudKit, or committed to the repository.
+- Full backups are owner-created JSON snapshots. They contain persisted records
+  and logical preferences, but never staged statement files, device-security
+  settings, or CloudKit runtime state.
 - TPBank text-based PDF is the first supported statement format. Additional
   banks and CSV formats extend the parser contract instead of creating separate
   import pipelines.
