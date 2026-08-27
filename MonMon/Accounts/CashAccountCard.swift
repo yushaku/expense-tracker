@@ -73,6 +73,21 @@ struct CashAccountCard: View {
                 .tracking(0.5)
                 .foregroundStyle(MonMonTheme.textSecondary)
 
+            if account.kind == .credit {
+                Text(VNDCurrency.format(availableCredit))
+                    .font(.subheadline.weight(.semibold))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .foregroundStyle(MonMonTheme.credit)
+                    .padding(.top, 5)
+
+                Text("AVAILABLE CREDIT")
+                    .font(.caption2.weight(.semibold))
+                    .tracking(0.5)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            }
+
             if savingsAmount > 0 {
                 Text("In savings \(VNDCurrency.format(savingsAmount))")
                     .font(.caption)
@@ -104,6 +119,13 @@ struct CashAccountCard: View {
             debts: debts,
             payments: payments,
             sales: sales
+        )
+    }
+
+    private var availableCredit: Decimal {
+        CashBalanceSummary.availableCredit(
+            limit: account.creditLimit,
+            currentBalance: availableBalance
         )
     }
 
@@ -163,7 +185,8 @@ struct CashAccountCard: View {
                     account: .preview(
                         name: "Visa credit",
                         kind: .credit,
-                        openingBalance: -5_200_000
+                        openingBalance: -5_200_000,
+                        creditLimit: 20_000_000
                     ),
                     deposits: [],
                     withdrawals: [],

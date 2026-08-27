@@ -1,6 +1,66 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "AVAILABLE CREDIT": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CÓ THỂ DÙNG"
+          }
+        }
+      }
+    },
+    "Credit limit": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hạn mức tín dụng"
+          }
+        }
+      }
+    },
+    "Credit limit cannot be negative.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hạn mức tín dụng không thể âm."
+          }
+        }
+      }
+    },
+    "Enter a valid credit limit.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập hạn mức tín dụng hợp lệ."
+          }
+        }
+      }
+    },
+    "Normal": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thông thường"
+          }
+        }
+      }
+    },
+    "VND · Maximum amount available to borrow.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VND · Số tiền tối đa có thể vay."
+          }
+        }
+      }
+    },
     "Add money owed to you to track repayments and the outstanding balance.": {
       "localizations": {
         "vi": {

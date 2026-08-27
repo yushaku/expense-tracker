@@ -6,6 +6,36 @@ import Testing
 @Suite("Cash balance summary")
 @MainActor
 struct CashBalanceSummaryTests {
+    @Test("Available Credit subtracts debt from the card limit")
+    func availableCreditSubtractsDebt() {
+        #expect(
+            CashBalanceSummary.availableCredit(
+                limit: 20_000_000,
+                currentBalance: -5_200_000
+            ) == 14_800_000
+        )
+    }
+
+    @Test("Available Credit never reports a negative amount")
+    func availableCreditStopsAtZero() {
+        #expect(
+            CashBalanceSummary.availableCredit(
+                limit: 20_000_000,
+                currentBalance: -25_000_000
+            ) == 0
+        )
+    }
+
+    @Test("A positive card balance increases Available Credit")
+    func overpaymentIncreasesAvailableCredit() {
+        #expect(
+            CashBalanceSummary.availableCredit(
+                limit: 20_000_000,
+                currentBalance: 1_000_000
+            ) == 21_000_000
+        )
+    }
+
     @Test("An empty account list has a zero total")
     func emptyListHasZeroTotal() {
         #expect(CashBalanceSummary.total(of: []) == 0)

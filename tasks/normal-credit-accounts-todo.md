@@ -15,20 +15,20 @@ Files: `CashAccountKind.swift`, `CashAccount.swift`, `AccountDraft.swift`,
 
 ## Task 2: Present available credit end to end
 
-- [ ] Write a failing pure test for available-credit arithmetic and edge cases.
-- [ ] Add the conditional credit-limit editor field with validation copy and
+- [x] Write a failing pure test for available-credit arithmetic and edge cases.
+- [x] Add the conditional credit-limit editor field with validation copy and
       accessibility identifiers.
-- [ ] Show current balance and derived available credit on Credit account cards;
+- [x] Show current balance and derived available credit on Credit account cards;
       leave Normal cards on the existing available-balance presentation.
-- [ ] Run focused account tests, format lint for touched files, and commit.
+- [x] Run focused account tests and format lint for touched files.
 
 Files: `CashBalanceSummary.swift`, `CashBalanceSummaryTests.swift`,
 `AccountEditorForm.swift`, `CashAccountCard.swift`, `Localizable.xcstrings`.
 
 ## Checkpoint: Account behavior
 
-- [ ] Focused account suites pass.
-- [ ] Normal and Credit presentation compiles against the existing design system.
+- [x] Focused account suites pass.
+- [x] Normal and Credit presentation compiles against the existing design system.
 
 ## Task 3: Preserve backup compatibility
 

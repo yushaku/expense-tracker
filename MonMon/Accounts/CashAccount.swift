@@ -36,6 +36,7 @@ final class CashAccount {
             name: String,
             kind: CashAccountKind,
             openingBalance: Decimal,
+            creditLimit: Decimal = .zero,
             createdOffset: TimeInterval = 0
         ) -> CashAccount {
             CashAccount(
@@ -43,6 +44,7 @@ final class CashAccount {
                 name: name,
                 kind: kind,
                 openingBalance: openingBalance,
+                creditLimit: creditLimit,
                 currencyCode: VNDCurrency.code,
                 createdAt: Date(timeIntervalSince1970: 1_700_000_000 + createdOffset)
             )
