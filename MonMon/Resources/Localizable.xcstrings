@@ -1,6 +1,86 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Add money owed to you to track repayments and the outstanding balance.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm khoản người khác nợ bạn để theo dõi các lần trả và số dư còn lại."
+          }
+        }
+      }
+    },
+    "Add money you owe to track repayments and the outstanding balance.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm khoản bạn đang nợ để theo dõi các lần trả và số dư còn lại."
+          }
+        }
+      }
+    },
+    "Debt direction": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loại khoản nợ"
+          }
+        }
+      }
+    },
+    "No borrowed debts": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có khoản đi vay"
+          }
+        }
+      }
+    },
+    "No lent debts": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có khoản cho vay"
+          }
+        }
+      }
+    },
+    "Opens borrowed debts.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở danh sách khoản đi vay."
+          }
+        }
+      }
+    },
+    "Opens lent debts.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở danh sách khoản cho vay."
+          }
+        }
+      }
+    },
+    "Total balance": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tổng số dư"
+          }
+        }
+      }
+    },
     "All activity": {
       "localizations": {
         "vi": {

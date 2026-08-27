@@ -72,6 +72,10 @@ enum DebtSummary {
         }
     }
 
+    static func matching(_ debts: [Debt], direction: DebtDirection) -> [Debt] {
+        debts.filter { $0.direction == direction }
+    }
+
     /// What is still owed one way. The figure `AssetSummary.netWorth` and the
     /// Home doughnut use — never `totalDue`, so projected interest stays out of
     /// both.
