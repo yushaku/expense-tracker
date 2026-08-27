@@ -31,10 +31,10 @@ Files: `MonMon/Backup/MonMonBackupValidator.swift`,
 
 ## Task 3: Export the complete current store
 
-- [ ] Start with an in-memory-store test containing every model type.
-- [ ] Fetch all records using a dedicated context and map every stored field.
-- [ ] Capture only approved logical preferences, including statement mappings.
-- [ ] Prove export does not mutate the store or owner defaults.
+- [x] Start with an in-memory-store test containing every model type.
+- [x] Fetch all records using a dedicated context and map every stored field.
+- [x] Capture only approved logical preferences, including statement mappings.
+- [x] Prove export does not mutate the store or owner defaults.
 
 Files: `MonMon/Backup/MonMonBackupService.swift`,
 `MonMonTests/Backup/MonMonBackupServiceTests.swift`,
@@ -42,12 +42,12 @@ Files: `MonMon/Backup/MonMonBackupService.swift`,
 
 ## Task 4: Restore authoritatively with recovery
 
-- [ ] Start with replacement, insertion, deletion, preference, recovery, and
+- [x] Start with replacement, insertion, deletion, preference, recovery, and
       rollback tests.
-- [ ] Create the protected/atomic recovery snapshot before any mutation.
-- [ ] Update/insert/delete all model types by UUID and save once.
-- [ ] Restore preferences only after store save; expose recovery availability.
-- [ ] Prove failed validation/recovery/save leaves current data untouched.
+- [x] Create the protected/atomic recovery snapshot before any mutation.
+- [x] Update/insert/delete all model types by UUID and save once.
+- [x] Restore preferences only after store save; expose recovery availability.
+- [x] Prove failed validation/recovery/save leaves current data untouched.
 
 Files: service and service tests from Task 3.
 
