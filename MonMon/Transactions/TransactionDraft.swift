@@ -36,7 +36,7 @@ enum TransactionDefaults {
         if value.isEmpty {
             return accounts.first { $0.id == AccountSeed.defaultBankID }?.id
                 ?? accounts.first {
-                    $0.name == AccountSeed.defaultBankName && $0.kind == .bank
+                    $0.name == AccountSeed.defaultBankName && $0.kind == .normal
                 }?.id
         }
 

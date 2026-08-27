@@ -92,10 +92,10 @@ struct TransferCard: View {
 
 #if DEBUG
     #Preview("Transfer cards") {
-        let wallet = CashAccount.preview(name: "Wallet", kind: .cash, openingBalance: 1_250_000)
+        let wallet = CashAccount.preview(name: "Wallet", kind: .normal, openingBalance: 1_250_000)
         let bank = CashAccount.preview(
             name: "Techcombank",
-            kind: .bank,
+            kind: .normal,
             openingBalance: 48_900_000,
             createdOffset: 60
         )
