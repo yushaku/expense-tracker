@@ -6,11 +6,13 @@ Move debt records and debt-management actions out of `WealthView` into the
 existing dedicated `DebtListView`. Wealth remains a summary and shows only the
 current outstanding amount borrowed and the current outstanding amount lent.
 The summary opens the Debts screen, where the owner can browse debts, add a
-debt, open a debt, and manage its payments.
+debt, open a debt, and manage its payments. The Debts screen visualizes the
+current borrowed-versus-lent ratio with one doughnut chart.
 
 ## Tech Stack
 
 - Swift 6 and SwiftUI for navigation and presentation.
+- Swift Charts through the existing `AllocationDoughnut` component.
 - SwiftData `@Query` for debts, payments, and accounts.
 - Swift Testing for financial summary behavior.
 - Existing MonMon theme, card, editor, and detail components; no dependency or
@@ -31,6 +33,8 @@ debt, open a debt, and manage its payments.
 - `MonMon/Debts/DebtListView.swift`: the dedicated debt-management screen.
 - `MonMon/Debts/DebtDetailView.swift`: one debt and its payments.
 - `MonMon/Debts/DebtSummary.swift`: canonical outstanding-balance calculations.
+- `MonMon/Design/AllocationDoughnut.swift`: the shared accessible ratio chart;
+  no new chart implementation.
 - `MonMonTests/Debts/`: debt calculation and persistence tests.
 
 ## Code Style
@@ -54,7 +58,11 @@ accessibility label, identifier, and hint.
 ## Testing Strategy
 
 - Retain `DebtSummary.totalOutstanding` as the single source for both Wealth
-  totals and cover its direction/payment behavior with existing unit tests.
+  totals and the doughnut slices, and cover its direction/payment behavior with
+  existing unit tests.
+- Reuse the tested `AllocationDoughnut` selection and percentage behavior;
+  create only positive-value slices so zero balances never produce an invalid
+  sector.
 - Compile the navigation and toolbar changes through the full macOS test suite.
 - Run recursive format lint and a non-Simulator Debug build.
 - After the branch is reviewed and merged into `dev`, the owner validates on the
@@ -64,8 +72,8 @@ accessibility label, identifier, and hint.
 ## Boundaries
 
 - Always: show outstanding balances after payments, preserve add/detail/payment
-  flows on the Debts screen, and keep Wealth limited to the two requested debt
-  figures.
+  flows on the Debts screen, show the borrowed-versus-lent doughnut there, and
+  keep Wealth limited to the two requested debt figures.
 - Ask first: changing the debt data model, calculation semantics, editor fields,
   or whether DebtList should be modal instead of pushed.
 - Never: delete debt data, add dependencies, merge to `dev`/`main`, push, or run
@@ -78,13 +86,20 @@ accessibility label, identifier, and hint.
   outstanding lent, including zero values when a direction has no open balance.
 - The Wealth debt summary is one accessible navigation target that pushes a
   screen titled “Debts”.
-- The Debts screen shows the existing net position, grouped debt records, empty
-  states, and add-debt action.
+- The Debts screen shows one accessible doughnut whose positive slices are the
+  total outstanding borrowed and total outstanding lent amounts. Its legend
+  conveys names, amounts, and percentages without relying on colour.
+- If both outstanding totals are zero, the Debts screen shows a zero-balance
+  summary instead of an empty or invalid doughnut.
+- The Debts screen retains the net position, grouped debt records, empty states,
+  and add-debt action.
 - A debt row opens `DebtDetailView`, and existing edit/payment flows remain
   available.
 - Full macOS tests, Swift format lint, and non-Simulator Debug build pass.
 
 ## Open Questions
 
-None. The summary will be one card containing the two requested values, and the
-Debts screen will be pushed within Wealth's existing navigation stack.
+None. The Wealth summary will be one card containing the two requested values,
+the Debts screen will be pushed within Wealth's existing navigation stack, and
+the doughnut will compare current outstanding balances rather than original
+principal amounts.
