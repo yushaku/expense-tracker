@@ -30,7 +30,7 @@ struct MonMonBackupDocumentTests {
             payload: payload,
             exportedAt: instant,
             appVersion: "1.2.3",
-            flavor: "dev"
+            flavour: .dev
         )
         let data = try MonMonBackupCodec.encode(document)
         let decoded = try MonMonBackupCodec.decode(data)
@@ -57,13 +57,13 @@ struct MonMonBackupDocumentTests {
             payload: firstPayload,
             exportedAt: instant,
             appVersion: "1",
-            flavor: "dev"
+            flavour: .dev
         )
         let second = try MonMonBackupDocument.make(
             payload: secondPayload,
             exportedAt: instant,
             appVersion: "1",
-            flavor: "dev"
+            flavour: .dev
         )
 
         #expect(try MonMonBackupCodec.encode(first) == MonMonBackupCodec.encode(second))

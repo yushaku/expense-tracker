@@ -63,7 +63,7 @@ struct MonMonBackupDocument: Codable, Equatable, Sendable {
     var formatVersion: Int
     var exportedAt: String
     var appVersion: String
-    var flavor: String
+    var flavour: MonMonBackupFlavour
     var payload: MonMonBackupPayload
     var payloadSHA256: String
 
@@ -71,7 +71,7 @@ struct MonMonBackupDocument: Codable, Equatable, Sendable {
         payload: MonMonBackupPayload,
         exportedAt: Date,
         appVersion: String,
-        flavor: String
+        flavour: MonMonBackupFlavour
     ) throws -> MonMonBackupDocument {
         let sortedPayload = payload.sorted()
         return MonMonBackupDocument(
@@ -79,7 +79,7 @@ struct MonMonBackupDocument: Codable, Equatable, Sendable {
             formatVersion: currentVersion,
             exportedAt: MonMonBackupScalar.date(exportedAt),
             appVersion: appVersion,
-            flavor: flavor,
+            flavour: flavour,
             payload: sortedPayload,
             payloadSHA256: try MonMonBackupCodec.payloadSHA256(sortedPayload)
         )

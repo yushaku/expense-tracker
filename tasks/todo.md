@@ -20,11 +20,11 @@ Files: `MonMon/Backup/MonMonBackupDocument.swift`,
 
 ## Task 2: Validate imported snapshots before writes
 
-- [ ] Start with failing format, version, checksum, scalar, enum, duplicate-ID,
+- [x] Start with failing format, version, checksum, scalar, enum, duplicate-ID,
       provenance, and reference-integrity tests.
-- [ ] Return a content-safe restore preview containing record counts and export
+- [x] Return a content-safe restore preview containing record counts and export
       metadata, never raw financial fields.
-- [ ] Enforce the 100 MB input cap before decoding.
+- [x] Enforce the 100 MB input cap before decoding.
 
 Files: `MonMon/Backup/MonMonBackupValidator.swift`,
 `MonMonTests/Backup/MonMonBackupValidatorTests.swift`, project file.
