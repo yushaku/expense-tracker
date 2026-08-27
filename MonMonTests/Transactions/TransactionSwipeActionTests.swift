@@ -98,4 +98,22 @@ struct TransactionSwipeActionTests {
             ) == .scroll
         )
     }
+
+    @Test("The row swipe recognizer yields vertical movement to scrolling")
+    func verticalMovementIsNotCapturedAsARowSwipe() {
+        #expect(
+            TransactionRowGestureIntent.shouldCaptureSwipe(
+                moving: CGSize(width: 8, height: 70)
+            ) == false
+        )
+    }
+
+    @Test("The row swipe recognizer keeps horizontal movement")
+    func horizontalMovementIsCapturedAsARowSwipe() {
+        #expect(
+            TransactionRowGestureIntent.shouldCaptureSwipe(
+                moving: CGSize(width: -70, height: 8)
+            )
+        )
+    }
 }

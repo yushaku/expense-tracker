@@ -1,5 +1,9 @@
 import SwiftUI
 
+#if os(iOS)
+    import UIKit
+#endif
+
 /// One touch resolves to exactly one intent. This keeps a horizontal swipe from
 /// falling through to the row's detail action when the finger lifts.
 enum TransactionRowGestureIntent: Equatable {
@@ -28,6 +32,13 @@ enum TransactionRowGestureIntent: Equatable {
         }
 
         return translation.width
+    }
+
+    /// A row only owns movement that is already clearly horizontal. Returning
+    /// false lets the enclosing scroll view's pan recognizer take a vertical
+    /// drag, matching the gesture arbitration of native list swipe actions.
+    static func shouldCaptureSwipe(moving movement: CGSize) -> Bool {
+        horizontalTranslation(in: movement) != nil
     }
 }
 
@@ -122,6 +133,59 @@ struct TransactionSwipeMotion: Equatable {
     }
 }
 
+#if os(iOS)
+    /// Bridges the row swipe to UIKit so a vertical pan can fail before it takes
+    /// the touch away from the enclosing SwiftUI `ScrollView`.
+    private struct TransactionHorizontalSwipeGesture: UIGestureRecognizerRepresentable {
+        let onChanged: (CGSize) -> Void
+        let onEnded: (CGSize) -> Void
+
+        func makeCoordinator(converter: CoordinateSpaceConverter) -> Coordinator {
+            Coordinator()
+        }
+
+        func makeUIGestureRecognizer(context: Context) -> UIPanGestureRecognizer {
+            let recognizer = UIPanGestureRecognizer()
+            recognizer.delegate = context.coordinator
+            return recognizer
+        }
+
+        func handleUIGestureRecognizerAction(
+            _ recognizer: UIPanGestureRecognizer,
+            context _: Context
+        ) {
+            let point = recognizer.translation(in: recognizer.view)
+            let translation = CGSize(width: point.x, height: point.y)
+
+            switch recognizer.state {
+            case .began, .changed:
+                onChanged(translation)
+            case .ended:
+                onEnded(translation)
+            case .cancelled, .failed:
+                onEnded(.zero)
+            case .possible:
+                break
+            @unknown default:
+                onEnded(.zero)
+            }
+        }
+
+        final class Coordinator: NSObject, UIGestureRecognizerDelegate {
+            func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+                guard let pan = gestureRecognizer as? UIPanGestureRecognizer else {
+                    return false
+                }
+
+                let velocity = pan.velocity(in: pan.view)
+                return TransactionRowGestureIntent.shouldCaptureSwipe(
+                    moving: CGSize(width: velocity.x, height: velocity.y)
+                )
+            }
+        }
+    }
+#endif
+
 /// Swipe actions for a card inside a `ScrollView`, where SwiftUI's native
 /// `swipeActions` modifier does not provide list-row behaviour.
 struct TransactionSwipeRow<Content: View>: View {
@@ -148,11 +212,7 @@ struct TransactionSwipeRow<Content: View>: View {
         ZStack {
             background
 
-            content
-                .contentShape(Rectangle())
-                .onTapGesture(perform: onTap)
-                .simultaneousGesture(rowGesture)
-                .offset(x: motion.displayedOffset)
+            interactiveContent
         }
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .sensoryFeedback(.impact(weight: .light), trigger: motion.isCommitted) { _, isCommitted in
@@ -168,6 +228,28 @@ struct TransactionSwipeRow<Content: View>: View {
         .accessibilityAction(named: Text("Delete")) {
             onDelete()
         }
+    }
+
+    @ViewBuilder
+    private var interactiveContent: some View {
+        #if os(iOS)
+            content
+                .contentShape(Rectangle())
+                .onTapGesture(perform: onTap)
+                .gesture(
+                    TransactionHorizontalSwipeGesture(
+                        onChanged: updateSwipe,
+                        onEnded: finishSwipe
+                    )
+                )
+                .offset(x: motion.displayedOffset)
+        #else
+            content
+                .contentShape(Rectangle())
+                .onTapGesture(perform: onTap)
+                .simultaneousGesture(rowGesture)
+                .offset(x: motion.displayedOffset)
+        #endif
     }
 
     /// What the swipe is heading towards, sitting still behind the moving row.
@@ -219,31 +301,37 @@ struct TransactionSwipeRow<Content: View>: View {
     private var rowGesture: some Gesture {
         DragGesture(minimumDistance: 12)
             .onChanged { value in
-                let moved = motion.dragging(value.translation)
-
-                // A drag reports every frame, and most of those frames leave
-                // the row exactly where it was: a scroll never moves it at
-                // all. Writing the state anyway would rebuild the card under
-                // the finger at the frame rate for nothing.
-                if moved != motion {
-                    motion = moved
-                }
+                updateSwipe(value.translation)
             }
             .onEnded { value in
-                let released = motion.dragging(value.translation)
-
-                withAnimation(.snappy(duration: 0.25)) {
-                    motion = TransactionSwipeMotion()
-                }
-
-                switch released.committedAction {
-                case .delete:
-                    onDelete()
-                case .edit:
-                    onEdit()
-                case nil:
-                    break
-                }
+                finishSwipe(value.translation)
             }
+    }
+
+    private func updateSwipe(_ translation: CGSize) {
+        let moved = motion.dragging(translation)
+
+        // A drag reports every frame, and most of those frames leave the row
+        // exactly where it was. Avoid rebuilding it when nothing changed.
+        if moved != motion {
+            motion = moved
+        }
+    }
+
+    private func finishSwipe(_ translation: CGSize) {
+        let released = motion.dragging(translation)
+
+        withAnimation(.snappy(duration: 0.25)) {
+            motion = TransactionSwipeMotion()
+        }
+
+        switch released.committedAction {
+        case .delete:
+            onDelete()
+        case .edit:
+            onEdit()
+        case nil:
+            break
+        }
     }
 }
