@@ -18,6 +18,9 @@ struct MonMonBackupDocumentTests {
 
         #expect(try MonMonBackupScalar.parseUUID(MonMonBackupScalar.uuid(laterID)) == laterID)
         #expect(try MonMonBackupScalar.parseDecimal("1234.5") == Decimal(string: "1234.5"))
+        #expect(throws: MonMonBackupScalarError.invalidDecimal) {
+            try MonMonBackupScalar.parseDecimal("NaN")
+        }
         #expect(try MonMonBackupScalar.parseDate("2023-11-14T22:13:20.125Z") == instant)
     }
 

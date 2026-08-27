@@ -718,14 +718,8 @@ struct MonMonBackupService {
     }
 
     func loadRecovery() throws -> ValidatedMonMonBackup {
-        let values = try recoveryURL.resourceValues(forKeys: [.fileSizeKey])
-        guard let fileSize = values.fileSize,
-            fileSize <= MonMonBackupValidator.maximumByteCount
-        else {
-            throw MonMonBackupValidationError.fileTooLarge
-        }
         return try MonMonBackupValidator.decodeAndValidate(
-            Data(contentsOf: recoveryURL, options: .mappedIfSafe)
+            MonMonBackupFileReader.read(recoveryURL)
         )
     }
 

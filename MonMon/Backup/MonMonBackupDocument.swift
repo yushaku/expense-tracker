@@ -29,7 +29,8 @@ enum MonMonBackupScalar {
     }
 
     static func parseDecimal(_ value: String) throws -> Decimal {
-        guard let parsed = Decimal(string: value, locale: posixLocale), decimal(parsed) == value
+        guard let parsed = Decimal(string: value, locale: posixLocale), !parsed.isNaN,
+            decimal(parsed) == value
         else {
             throw MonMonBackupScalarError.invalidDecimal
         }

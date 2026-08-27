@@ -53,11 +53,11 @@ Files: service and service tests from Task 3.
 
 ## Task 5: Add the Settings backup/restore flow
 
-- [ ] Add accessible export, import, preview, destructive confirmation,
+- [x] Add accessible export, import, preview, destructive confirmation,
       progress, success/failure, and Restore Previous Data states.
-- [ ] Use security-scoped file access and stop access in every path.
-- [ ] Require authentication when app lock is enabled.
-- [ ] Warn that exported JSON is readable and that CloudKit sync may propagate
+- [x] Use security-scoped file access and stop access in every path.
+- [x] Require authentication when app lock is enabled.
+- [x] Warn that exported JSON is readable and that CloudKit sync may propagate
       restored state.
 
 Files: `MonMon/Backup/BackupRestoreView.swift`,

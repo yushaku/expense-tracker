@@ -60,6 +60,21 @@ struct MonMonBackupValidatorTests {
         }
     }
 
+    @Test("File reads stop at the byte limit")
+    func boundedFileRead() throws {
+        let url = FileManager.default.temporaryDirectory
+            .appending(path: "monmon-bounded-read-\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: url) }
+        try Data(repeating: 0, count: 11).write(to: url)
+
+        #expect(throws: MonMonBackupValidationError.fileTooLarge) {
+            try MonMonBackupFileReader.read(url, maximumByteCount: 10)
+        }
+
+        try Data("valid".utf8).write(to: url)
+        #expect(try MonMonBackupFileReader.read(url, maximumByteCount: 10) == Data("valid".utf8))
+    }
+
     @Test("Malformed scalars, enums, and duplicate IDs are rejected")
     func structuralFailures() throws {
         var malformed = MonMonBackupPayload.empty

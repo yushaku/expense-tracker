@@ -160,6 +160,30 @@ enum MonMonBackupValidator {
     }
 }
 
+enum MonMonBackupFileReader {
+    static func read(
+        _ url: URL,
+        maximumByteCount: Int = MonMonBackupValidator.maximumByteCount
+    ) throws -> Data {
+        guard maximumByteCount >= 0, maximumByteCount < Int.max else {
+            throw MonMonBackupValidationError.fileTooLarge
+        }
+        let handle = try FileHandle(forReadingFrom: url)
+        defer { try? handle.close() }
+        var data = Data()
+        while data.count <= maximumByteCount {
+            let remaining = maximumByteCount + 1 - data.count
+            guard let chunk = try handle.read(upToCount: min(64 * 1_024, remaining)),
+                !chunk.isEmpty
+            else {
+                return data
+            }
+            data.append(chunk)
+        }
+        throw MonMonBackupValidationError.fileTooLarge
+    }
+}
+
 private struct PayloadChecker {
     let payload: MonMonBackupPayload
     private(set) var warnings: [MonMonBackupWarning] = []

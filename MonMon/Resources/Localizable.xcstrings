@@ -7847,6 +7847,156 @@
           }
         }
       }
+    },
+    "Full backup": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sao lưu toàn bộ" } } }
+    },
+    "Export or replace every account, transaction, category, recurring rule, saving, investment, transfer, and debt on this device.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xuất hoặc thay thế toàn bộ tài khoản, giao dịch, danh mục, định kỳ, tiết kiệm, đầu tư, chuyển khoản và khoản nợ trên thiết bị này." } } }
+    },
+    "Exported JSON is readable financial data. Keep it somewhere private.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tệp JSON xuất ra chứa dữ liệu tài chính có thể đọc được. Hãy lưu ở nơi riêng tư." } } }
+    },
+    "Export Backup": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xuất bản sao lưu" } } }
+    },
+    "Restore Backup": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khôi phục bản sao lưu" } } }
+    },
+    "Restore Previous Data": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khôi phục dữ liệu trước đó" } } }
+    },
+    "Working…": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang xử lý…" } } }
+    },
+    "Export readable JSON?": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xuất tệp JSON có thể đọc được?" } } }
+    },
+    "Anyone who can open the file can read the financial data inside it.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bất kỳ ai mở được tệp đều có thể đọc dữ liệu tài chính bên trong." } } }
+    },
+    "Backup exported.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã xuất bản sao lưu." } } }
+    },
+    "Backup failed": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sao lưu thất bại" } } }
+    },
+    "Restore Preview": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xem trước khôi phục" } } }
+    },
+    "Restore and Replace": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khôi phục và thay thế" } } }
+    },
+    "Replace all local data?": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thay thế toàn bộ dữ liệu cục bộ?" } } }
+    },
+    "The selected snapshot becomes the complete local dataset. MonMon will create a private safety copy first.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản sao đã chọn sẽ trở thành toàn bộ dữ liệu cục bộ. MonMon sẽ tạo một bản an toàn riêng tư trước." } } }
+    },
+    "Restoring…": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang khôi phục…" } } }
+    },
+    "Backup details": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chi tiết bản sao lưu" } } }
+    },
+    "App version": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phiên bản ứng dụng" } } }
+    },
+    "File size": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Kích thước tệp" } } }
+    },
+    "Current total": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tổng hiện tại" } } }
+    },
+    "Incoming total": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tổng sắp khôi phục" } } }
+    },
+    "Recurring rules": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Quy tắc định kỳ" } } }
+    },
+    "Pending captures": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi nhanh đang chờ" } } }
+    },
+    "Savings deposits": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sổ tiết kiệm" } } }
+    },
+    "Savings withdrawals": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Rút tiết kiệm" } } }
+    },
+    "Fund & gold instruments": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sản phẩm quỹ và vàng" } } }
+    },
+    "Fund & gold holdings": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khoản nắm giữ quỹ và vàng" } } }
+    },
+    "Fund & gold sales": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lần bán quỹ và vàng" } } }
+    },
+    "Debt payments": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thanh toán nợ" } } }
+    },
+    "Some optional links or saved defaults are stale. MonMon will clear only those defaults and preserve supported records.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Một số liên kết tùy chọn hoặc mặc định đã cũ. MonMon chỉ xóa các mặc định đó và giữ lại các bản ghi được hỗ trợ." } } }
+    },
+    "Close MonMon on other devices. Restore here, let this device sync, then reopen the others.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đóng MonMon trên các thiết bị khác. Khôi phục tại đây, chờ thiết bị này đồng bộ rồi mở lại các thiết bị kia." } } }
+    },
+    "The selected backup is larger than 100 MB.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản sao lưu đã chọn lớn hơn 100 MB." } } }
+    },
+    "This isn’t a readable MonMon backup.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đây không phải bản sao lưu MonMon có thể đọc được." } } }
+    },
+    "This JSON file is not a MonMon backup.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tệp JSON này không phải bản sao lưu MonMon." } } }
+    },
+    "This backup needs a newer version of MonMon.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản sao lưu này cần phiên bản MonMon mới hơn." } } }
+    },
+    "This backup belongs to a different MonMon build.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản sao lưu này thuộc một bản dựng MonMon khác." } } }
+    },
+    "The backup is damaged or was edited.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản sao lưu bị hỏng hoặc đã được chỉnh sửa." } } }
+    },
+    "The backup contains invalid or inconsistent data.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản sao lưu chứa dữ liệu không hợp lệ hoặc không nhất quán." } } }
+    },
+    "MonMon couldn’t create the safety copy, so no data was changed.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "MonMon không thể tạo bản an toàn nên không có dữ liệu nào bị thay đổi." } } }
+    },
+    "MonMon couldn’t replace the local data. Your previous data is still available.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "MonMon không thể thay thế dữ liệu cục bộ. Dữ liệu trước đó của bạn vẫn còn." } } }
+    },
+    "Local restore complete.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã khôi phục dữ liệu cục bộ." } } }
+    },
+    "Local restore complete. iCloud will sync this state separately.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã khôi phục dữ liệu cục bộ. iCloud sẽ đồng bộ trạng thái này riêng." } } }
+    },
+    "Created": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thời điểm tạo" } } }
+    },
+    "Build": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản dựng" } } }
+    },
+    "Records": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản ghi" } } }
+    },
+    "Continue": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiếp tục" } } }
+    },
+    "Authentication is required.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Cần xác thực để tiếp tục." } } }
+    },
+    "The backup is larger than 100 MB and wasn’t exported.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản sao lưu lớn hơn 100 MB nên chưa được xuất." } } }
+    },
+    "The selected backup is no longer valid. Choose the file again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản sao lưu đã chọn không còn hợp lệ. Hãy chọn lại tệp." } } }
+    },
+    "MonMon couldn’t complete the backup operation. Try again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "MonMon không thể hoàn tất thao tác sao lưu. Hãy thử lại." } } }
     }
   },
   "version": "1.0"

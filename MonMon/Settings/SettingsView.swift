@@ -338,6 +338,8 @@ struct SettingsView: View {
                 if cloudSync.isEnabled {
                     syncControls
                 }
+
+                BackupRestoreView()
             }
         }
     }
