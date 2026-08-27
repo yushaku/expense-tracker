@@ -188,10 +188,8 @@ enum AccountPalette {
 private extension CashAccountKind {
     var legendSymbolName: String {
         switch self {
-        case .cash:
-            "banknote.fill"
-        case .bank:
-            "building.columns.fill"
+        case .normal:
+            "wallet.bifold.fill"
         case .credit:
             "creditcard.fill"
         }

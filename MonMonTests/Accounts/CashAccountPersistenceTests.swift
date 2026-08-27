@@ -20,9 +20,10 @@ struct CashAccountPersistenceTests {
         let openingBalance = Decimal(12_345_678)
         let account = CashAccount(
             id: id,
-            name: "Salary account",
-            kind: .bank,
-            openingBalance: openingBalance,
+            name: "Visa",
+            kind: .credit,
+            openingBalance: -openingBalance,
+            creditLimit: 50_000_000,
             currencyCode: "VND",
             createdAt: createdAt
         )
@@ -35,9 +36,10 @@ struct CashAccountPersistenceTests {
 
         #expect(accounts.count == 1)
         #expect(savedAccount.id == id)
-        #expect(savedAccount.name == "Salary account")
-        #expect(savedAccount.kind == .bank)
-        #expect(savedAccount.openingBalance == openingBalance)
+        #expect(savedAccount.name == "Visa")
+        #expect(savedAccount.kind == .credit)
+        #expect(savedAccount.openingBalance == -openingBalance)
+        #expect(savedAccount.creditLimit == 50_000_000)
         #expect(savedAccount.currencyCode == "VND")
         #expect(savedAccount.createdAt == createdAt)
     }

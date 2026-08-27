@@ -18,7 +18,7 @@ struct AccountDraftTests {
     func validInputCreatesAnAccount() throws {
         let draft = AccountDraft(
             name: "  Salary account  ",
-            kind: .bank,
+            kind: .normal,
             openingBalanceText: "12345678"
         )
 
@@ -26,8 +26,9 @@ struct AccountDraftTests {
 
         #expect(account.id == fixedID)
         #expect(account.name == "Salary account")
-        #expect(account.kind == .bank)
+        #expect(account.kind == .normal)
         #expect(account.openingBalance == Decimal(12_345_678))
+        #expect(account.creditLimit == 0)
         #expect(account.currencyCode == "VND")
         #expect(account.createdAt == fixedDate)
     }
@@ -42,7 +43,7 @@ struct AccountDraftTests {
         let account = try draft.makeAccount(id: fixedID, createdAt: fixedDate)
 
         #expect(account.openingBalance == Decimal(12_345_678))
-        #expect(account.kind == .cash)
+        #expect(account.kind == .normal)
     }
 
     @Test("Zero is a valid opening balance")
@@ -79,6 +80,86 @@ struct AccountDraftTests {
         #expect(throws: AccountFormError.negativeOpeningBalance) {
             try draft.makeAccount(id: fixedID, createdAt: fixedDate)
         }
+    }
+
+    @Test("Only Normal and Credit are selectable account kinds")
+    func selectableAccountKindsAreCanonical() {
+        #expect(CashAccountKind.allCases == [.normal, .credit])
+    }
+
+    @Test("Legacy Cash and Bank raw values decode as Normal")
+    func legacyKindsDecodeAsNormal() throws {
+        #expect(CashAccountKind(rawValue: "cash") == .normal)
+        #expect(CashAccountKind(rawValue: "bank") == .normal)
+
+        let decoded = try JSONDecoder().decode(
+            CashAccountKind.self,
+            from: Data(#""bank""#.utf8)
+        )
+        #expect(decoded == .normal)
+        #expect(try JSONEncoder().encode(decoded) == Data(#""normal""#.utf8))
+    }
+
+    @Test("Credit limit parses exactly for a Credit account")
+    func creditLimitParsesExactly() throws {
+        let draft = AccountDraft(
+            name: "Visa",
+            kind: .credit,
+            openingBalanceText: "-5.200.000",
+            creditLimitText: "20.000.000"
+        )
+
+        let account = try draft.makeAccount(id: fixedID, createdAt: fixedDate)
+
+        #expect(account.openingBalance == -5_200_000)
+        #expect(account.creditLimit == 20_000_000)
+    }
+
+    @Test("Credit requires a numeric non-negative limit")
+    func invalidCreditLimitIsRejected() {
+        let nonnumeric = AccountDraft(
+            name: "Visa",
+            kind: .credit,
+            openingBalanceText: "0",
+            creditLimitText: "not money"
+        )
+        let negative = AccountDraft(
+            name: "Visa",
+            kind: .credit,
+            openingBalanceText: "0",
+            creditLimitText: "-1"
+        )
+
+        #expect(throws: AccountFormError.invalidCreditLimit) {
+            try nonnumeric.makeAccount(id: fixedID, createdAt: fixedDate)
+        }
+        #expect(throws: AccountFormError.negativeCreditLimit) {
+            try negative.makeAccount(id: fixedID, createdAt: fixedDate)
+        }
+    }
+
+    @Test("Normal clears a stale Credit limit")
+    func normalAccountClearsCreditLimit() throws {
+        let account = CashAccount(
+            id: fixedID,
+            name: "Visa",
+            kind: .credit,
+            openingBalance: -1_000_000,
+            creditLimit: 20_000_000,
+            currencyCode: VNDCurrency.code,
+            createdAt: fixedDate
+        )
+        let draft = AccountDraft(
+            name: "Daily account",
+            kind: .normal,
+            openingBalanceText: "1.000.000",
+            creditLimitText: "not visible"
+        )
+
+        try draft.apply(to: account)
+
+        #expect(account.kind == .normal)
+        #expect(account.creditLimit == 0)
     }
 
     @Test("VND display abbreviates with a Vietnamese decimal comma")

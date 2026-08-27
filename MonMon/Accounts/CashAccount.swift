@@ -5,8 +5,9 @@ import SwiftData
 final class CashAccount {
     var id: UUID = UUID()
     var name: String = ""
-    var kind: CashAccountKind = CashAccountKind.cash
+    var kind: CashAccountKind = CashAccountKind.normal
     var openingBalance: Decimal = Decimal.zero
+    var creditLimit: Decimal = Decimal.zero
     var currencyCode: String = VNDCurrency.code
     var createdAt: Date = Date(timeIntervalSince1970: 0)
 
@@ -15,6 +16,7 @@ final class CashAccount {
         name: String,
         kind: CashAccountKind,
         openingBalance: Decimal,
+        creditLimit: Decimal = .zero,
         currencyCode: String,
         createdAt: Date
     ) {
@@ -22,6 +24,7 @@ final class CashAccount {
         self.name = name
         self.kind = kind
         self.openingBalance = openingBalance
+        self.creditLimit = creditLimit
         self.currencyCode = currencyCode
         self.createdAt = createdAt
     }
