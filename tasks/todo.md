@@ -10,10 +10,10 @@ Files: `MonMon/Settings/SettingsView.swift`
 
 ## Task 1: Define and encode the backup document
 
-- [ ] Start with failing round-trip and canonical-scalar tests.
-- [ ] Add format/version metadata, payload DTOs for all 13 models, preferences,
+- [x] Start with failing round-trip and canonical-scalar tests.
+- [x] Add format/version metadata, payload DTOs for all 13 models, preferences,
       deterministic sorting, JSON encoding/decoding, and payload SHA-256.
-- [ ] Prove deterministic bytes for logically identical snapshots.
+- [x] Prove deterministic bytes for logically identical snapshots.
 
 Files: `MonMon/Backup/MonMonBackupDocument.swift`,
 `MonMonTests/Backup/MonMonBackupDocumentTests.swift`, project file.
