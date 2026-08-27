@@ -2,11 +2,11 @@
 
 ## Task 1: Make Debts a pushed screen with a ratio chart
 
-- [ ] Remove modal-only navigation and dismissal UI from `DebtListView`.
-- [ ] Show an accessible borrowed-versus-lent doughnut from outstanding totals.
-- [ ] Show a textual zero state when both outstanding totals are zero.
-- [ ] Preserve add-debt, grouped debt rows, detail navigation, and empty states.
-- [ ] Verify the focused debt tests and compile the screen.
+- [x] Remove modal-only navigation and dismissal UI from `DebtListView`.
+- [x] Show an accessible borrowed-versus-lent doughnut from outstanding totals.
+- [x] Show a textual zero state when both outstanding totals are zero.
+- [x] Preserve add-debt, grouped debt rows, detail navigation, and empty states.
+- [x] Verify the focused debt tests and compile the screen.
 
 Files: `MonMon/Debts/DebtListView.swift`
 

@@ -9,7 +9,7 @@ struct DebtRoute: Hashable {
 }
 
 struct DebtListView: View {
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.locale) private var locale
 
     @Query(sort: \Debt.createdAt, order: .forward)
     private var debts: [Debt]
@@ -29,71 +29,49 @@ struct DebtListView: View {
     }
 
     var body: some View {
-        #if os(macOS)
-            list
-                .frame(minWidth: 460, minHeight: 600)
-        #else
-            list
-        #endif
-    }
+        ZStack {
+            MonMonTheme.canvas
+                .ignoresSafeArea()
 
-    private var list: some View {
-        NavigationStack {
-            ZStack {
-                MonMonTheme.canvas
-                    .ignoresSafeArea()
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+                    if accounts.isEmpty && debts.isEmpty {
+                        noAccountsState
+                    } else if debts.isEmpty {
+                        emptyState
+                    } else {
+                        positionCard
 
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                        if accounts.isEmpty && debts.isEmpty {
-                            noAccountsState
-                        } else if debts.isEmpty {
-                            emptyState
-                        } else {
-                            positionCard
+                        section(
+                            "Money I owe",
+                            debts: DebtSummary.sortedForDisplay(borrowed, payments: payments),
+                            tint: MonMonTheme.credit
+                        )
 
-                            section(
-                                "Money I owe",
-                                debts: DebtSummary.sortedForDisplay(borrowed, payments: payments),
-                                tint: MonMonTheme.credit
-                            )
-
-                            section(
-                                "Money owed to me",
-                                debts: DebtSummary.sortedForDisplay(lent, payments: payments),
-                                tint: MonMonTheme.lent
-                            )
-                        }
-                    }
-                    .frame(maxWidth: MonMonTheme.maxContentWidth)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
-                    .frame(maxWidth: .infinity)
-                }
-            }
-            .navigationTitle("Debts")
-            .accessibilityIdentifier("debt-list")
-            .navigationDestination(for: DebtRoute.self) { route in
-                DebtDetailView(route: route, asOf: asOf)
-            }
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") {
-                        dismiss()
+                        section(
+                            "Money owed to me",
+                            debts: DebtSummary.sortedForDisplay(lent, payments: payments),
+                            tint: MonMonTheme.lent
+                        )
                     }
                 }
-
-                ToolbarItem(placement: .primaryAction) {
-                    addDebtButton
-                }
+                .frame(maxWidth: MonMonTheme.maxContentWidth)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .frame(maxWidth: .infinity)
             }
-            .sheet(item: $editorMode) { mode in
-                DebtEditorView(mode: mode)
-            }
-            .tint(MonMonTheme.accent)
-            .foregroundStyle(MonMonTheme.textPrimary)
-            .preferredColorScheme(MonMonTheme.colorScheme)
         }
+        .navigationTitle("Debts")
+        .accessibilityIdentifier("debt-list")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                addDebtButton
+            }
+        }
+        .sheet(item: $editorMode) { mode in
+            DebtEditorView(mode: mode)
+        }
+        .tint(MonMonTheme.accent)
     }
 
     private var addDebtButton: some View {
@@ -118,8 +96,8 @@ struct DebtListView: View {
 
     private var netPosition: Decimal { owedToMe - owed }
 
-    /// The one figure the sheet exists to answer, which is why both directions
-    /// share a list rather than hiding behind a picker.
+    /// Net position answers which side is larger; the doughnut underneath says
+    /// how the two outstanding balances make up the whole debt picture.
     private var positionCard: some View {
         VStack(alignment: .leading, spacing: 18) {
             Label("NET POSITION", systemImage: "scalemass.fill")
@@ -134,21 +112,35 @@ struct DebtListView: View {
                 .minimumScaleFactor(0.58)
                 .foregroundStyle(netPositionTint)
 
-            VStack(alignment: .leading, spacing: 6) {
-                Label(
-                    "Owed \(VNDCurrency.format(owed))",
-                    systemImage: "tray.and.arrow.down.fill"
-                )
+            Divider()
+                .overlay(MonMonTheme.heroBorder)
 
-                Label(
-                    "Lent \(VNDCurrency.format(owedToMe))",
-                    systemImage: "tray.and.arrow.up.fill"
-                )
+            if doughnutItems.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    Label("OUTSTANDING", systemImage: "checkmark.circle.fill")
+                        .font(.caption.weight(.semibold))
+                        .tracking(0.8)
+                        .foregroundStyle(MonMonTheme.textSecondary)
 
-                Label(countLabel, systemImage: "rectangle.stack.fill")
+                    Text(VNDCurrency.format(Decimal.zero))
+                        .font(.title3.weight(.bold))
+                        .monospacedDigit()
+                }
+                .accessibilityElement(children: .combine)
+            } else {
+                AllocationDoughnut(
+                    context: AppText.string("Debts", in: locale).lowercased(),
+                    items: doughnutItems,
+                    totalLabel: AppText.string("OUTSTANDING", in: locale)
+                )
             }
-            .font(.subheadline.weight(.medium))
-            .foregroundStyle(MonMonTheme.textSecondary)
+
+            Divider()
+                .overlay(MonMonTheme.heroBorder)
+
+            Label(countLabel, systemImage: "rectangle.stack.fill")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(MonMonTheme.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(24)
@@ -160,7 +152,26 @@ struct DebtListView: View {
             RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
                 .stroke(MonMonTheme.heroBorder, lineWidth: 1)
         }
-        .accessibilityElement(children: .combine)
+    }
+
+    private var doughnutItems: [AllocationDoughnutItem] {
+        [
+            AllocationDoughnutItem(
+                id: DebtDirection.borrowed.rawValue,
+                name: DebtDirection.borrowed.displayName(in: locale),
+                amount: owed,
+                tint: MonMonTheme.credit,
+                symbolName: DebtDirection.borrowed.symbolName
+            ),
+            AllocationDoughnutItem(
+                id: DebtDirection.lent.rawValue,
+                name: DebtDirection.lent.displayName(in: locale),
+                amount: owedToMe,
+                tint: MonMonTheme.lent,
+                symbolName: DebtDirection.lent.symbolName
+            ),
+        ]
+        .filter { $0.amount > 0 }
     }
 
     private var netPositionText: String {
@@ -201,7 +212,12 @@ struct DebtListView: View {
                 }
 
                 ForEach(group) { debt in
-                    NavigationLink(value: DebtRoute(debtID: debt.id)) {
+                    NavigationLink {
+                        DebtDetailView(
+                            route: DebtRoute(debtID: debt.id),
+                            asOf: asOf
+                        )
+                    } label: {
                         card(for: debt)
                     }
                     .buttonStyle(.plain)
@@ -295,7 +311,12 @@ struct DebtListView: View {
 
 #if DEBUG
     #Preview("Debts") {
-        DebtListView()
-            .modelContainer(PreviewData.populated)
+        NavigationStack {
+            DebtListView()
+        }
+        .tint(MonMonTheme.accent)
+        .foregroundStyle(MonMonTheme.textPrimary)
+        .preferredColorScheme(MonMonTheme.colorScheme)
+        .modelContainer(PreviewData.populated)
     }
 #endif
