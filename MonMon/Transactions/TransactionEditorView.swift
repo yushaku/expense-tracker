@@ -139,7 +139,6 @@ struct TransactionEditorView: View {
             .foregroundStyle(MonMonTheme.textPrimary)
             .preferredColorScheme(MonMonTheme.colorScheme)
         }
-        .presentationContentInteraction(TransactionSheetPresentation.contentInteraction)
     }
 
     private func applyDefaultsIfNeeded() {

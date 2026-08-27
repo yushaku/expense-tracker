@@ -67,7 +67,7 @@ private struct TransactionActionHost: ViewModifier {
     func body(content: Content) -> some View {
         content
             .environment(actions)
-            .sheet(item: $actions.detailed, onDismiss: presentPendingEditor) { transaction in
+            .appSheet(item: $actions.detailed, onDismiss: presentPendingEditor) { transaction in
                 TransactionDetailSheet(
                     transaction: transaction,
                     category: category(transaction),

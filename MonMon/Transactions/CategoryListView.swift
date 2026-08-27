@@ -60,7 +60,7 @@ struct CategoryListView: View {
                     .accessibilityIdentifier("add-category")
                 }
             }
-            .sheet(item: $editorMode) { mode in
+            .appSheet(item: $editorMode) { mode in
                 CategoryEditorView(mode: mode)
             }
             .tint(MonMonTheme.accent)

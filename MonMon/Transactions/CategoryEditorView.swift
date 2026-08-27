@@ -110,7 +110,7 @@ struct CategoryEditorView: View {
             } message: {
                 Text("No transaction uses it, so nothing else changes.")
             }
-            .sheet(isPresented: $isReassigning) {
+            .appSheet(isPresented: $isReassigning) {
                 if let editedCategory = mode.editedCategory {
                     CategoryReassignView(
                         category: editedCategory,

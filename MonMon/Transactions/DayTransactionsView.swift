@@ -85,7 +85,7 @@ struct DayTransactionsView: View {
             TransactionPeriod.format(Self.titleTemplate, in: locale).format(period.day)
         )
         .accessibilityIdentifier("day-transactions")
-        .sheet(item: $editorMode) { mode in
+        .appSheet(item: $editorMode) { mode in
             // A transaction added from a day lands on that day, which is the
             // only day this screen can show.
             TransactionEditorView(mode: mode, defaultDate: period.day)

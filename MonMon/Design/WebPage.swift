@@ -46,7 +46,7 @@ private struct WebPageModifier: ViewModifier {
                 page = nil
             }
         #else
-            content.sheet(item: $page) { page in
+            content.appSheet(item: $page) { page in
                 SafariPage(url: page.url)
                     .ignoresSafeArea()
             }

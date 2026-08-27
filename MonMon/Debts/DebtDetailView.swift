@@ -54,10 +54,10 @@ struct DebtDetailView: View {
                 }
             }
         }
-        .sheet(item: $editorMode) { mode in
+        .appSheet(item: $editorMode) { mode in
             DebtEditorView(mode: mode)
         }
-        .sheet(item: $paymentEditorMode) { mode in
+        .appSheet(item: $paymentEditorMode) { mode in
             if let debt {
                 DebtPaymentEditorView(mode: mode, debt: debt)
             }

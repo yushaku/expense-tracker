@@ -87,7 +87,7 @@ struct DebtListView: View {
                     addDebtButton
                 }
             }
-            .sheet(item: $editorMode) { mode in
+            .appSheet(item: $editorMode) { mode in
                 DebtEditorView(mode: mode)
             }
             .tint(MonMonTheme.accent)

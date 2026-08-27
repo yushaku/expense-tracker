@@ -281,7 +281,7 @@ struct DateRangeFilterButton: View {
         .accessibilityLabel("Filter by date")
         .accessibilityValue(range.title(in: locale))
         .accessibilityIdentifier(identifier("period-filter"))
-        .sheet(isPresented: $isFiltering) {
+        .appSheet(isPresented: $isFiltering) {
             sheet
         }
     }

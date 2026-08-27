@@ -201,7 +201,7 @@ struct BackupRestoreView: View {
                 }
             }
         }
-        .sheet(item: $selection) { selection in
+        .appSheet(item: $selection) { selection in
             BackupRestorePreviewSheet(
                 selection: selection,
                 isWorking: isWorking,

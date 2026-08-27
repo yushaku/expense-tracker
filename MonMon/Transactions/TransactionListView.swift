@@ -123,10 +123,10 @@ struct TransactionListView: View {
             }
             .compactRootNavigationTitle("Spending")
             .accessibilityIdentifier("spending-list")
-            .sheet(item: $editorMode) { mode in
+            .appSheet(item: $editorMode) { mode in
                 TransactionEditorView(mode: mode, defaultDate: defaultDate)
             }
-            .sheet(isPresented: $isFiltering) {
+            .appSheet(isPresented: $isFiltering) {
                 ReportFilterSheet(
                     query: $query,
                     categories: categories,
@@ -143,22 +143,22 @@ struct TransactionListView: View {
                     editorMode = .edit(transaction)
                 }
             )
-            .sheet(isPresented: $isManagingCategories) {
+            .appSheet(isPresented: $isManagingCategories) {
                 CategoryListView()
             }
-            .sheet(isPresented: $isManagingRecurring) {
+            .appSheet(isPresented: $isManagingRecurring) {
                 RecurringListView()
             }
-            .sheet(isPresented: $isEditingDefaults) {
+            .appSheet(isPresented: $isEditingDefaults) {
                 TransactionDefaultsView()
             }
-            .sheet(isPresented: $isShowingImportInbox) {
+            .appSheet(isPresented: $isShowingImportInbox) {
                 StatementImportInboxView(inbox: importInbox)
             }
-            .sheet(isPresented: $isShowingCaptureInbox) {
+            .appSheet(isPresented: $isShowingCaptureInbox) {
                 PendingTransactionCaptureListView()
             }
-            .sheet(isPresented: $isShowingQuickCapture) {
+            .appSheet(isPresented: $isShowingQuickCapture) {
                 QuickTransactionCaptureView()
             }
             .task { await importInbox.refresh() }

@@ -41,7 +41,7 @@ struct PendingTransactionCaptureListView: View {
                     Button("Done") { dismiss() }
                 }
             }
-            .sheet(item: $selectedCapture) { capture in
+            .appSheet(item: $selectedCapture) { capture in
                 TransactionEditorView(mode: .review(capture))
             }
             .tint(MonMonTheme.accent)

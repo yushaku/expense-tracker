@@ -95,7 +95,7 @@ struct InvestmentsScreen: View {
         }
         .navigationTitle("Investments")
         .accessibilityIdentifier("investments-list")
-        .sheet(item: $editor) { mode in
+        .appSheet(item: $editor) { mode in
             switch mode {
             case .savings(let savingsMode):
                 SavingsEditorView(mode: savingsMode)

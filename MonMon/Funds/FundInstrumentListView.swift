@@ -138,10 +138,10 @@ struct FundInstrumentListView: View {
                     Button("Done") { dismiss() }
                 }
             }
-            .sheet(item: $editorMode) { mode in
+            .appSheet(item: $editorMode) { mode in
                 FundInstrumentEditorView(mode: mode, kinds: scope.kinds)
             }
-            .sheet(isPresented: $isImporting) {
+            .appSheet(isPresented: $isImporting) {
                 FundCatalogueImportView(
                     title: "Add from \(scope.importSource.displayName)",
                     importer: scope.makeImporter()

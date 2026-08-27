@@ -89,10 +89,10 @@ struct WealthView: View {
             .navigationDestination(for: DebtRoute.self) { route in
                 DebtDetailView(route: route)
             }
-            .sheet(item: $editorMode) { mode in
+            .appSheet(item: $editorMode) { mode in
                 AccountEditorView(mode: mode)
             }
-            .sheet(item: $debtEditorMode) { mode in
+            .appSheet(item: $debtEditorMode) { mode in
                 DebtEditorView(mode: mode)
             }
             .tint(MonMonTheme.accent)
