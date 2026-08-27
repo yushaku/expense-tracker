@@ -2,9 +2,9 @@
 
 ## Task 0: Restore the baseline macOS quality gate
 
-- [ ] Guard the iOS-only `ShortcutsLink` on macOS.
-- [ ] Run focused/full macOS tests to prove the baseline compiles.
-- [ ] Commit the prerequisite independently.
+- [x] Guard the iOS-only `ShortcutsLink` on macOS.
+- [x] Run focused/full macOS tests to prove the baseline compiles.
+- [x] Commit the prerequisite independently.
 
 Files: `MonMon/Settings/SettingsView.swift`
 
