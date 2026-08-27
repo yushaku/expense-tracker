@@ -12,10 +12,10 @@ Files: `MonMon/Debts/DebtListView.swift`
 
 ## Task 2: Reduce Wealth to two debt totals
 
-- [ ] Replace debt count, add action, and individual cards with one navigation card.
-- [ ] Show exactly outstanding borrowed and outstanding lent values, including zero.
-- [ ] Remove Wealth-owned debt editor and detail-route state made obsolete by the move.
-- [ ] Verify the focused debt tests and compile the integrated flow.
+- [x] Replace debt count, add action, and individual cards with one navigation card.
+- [x] Show exactly outstanding borrowed and outstanding lent values, including zero.
+- [x] Remove Wealth-owned debt editor and detail-route state made obsolete by the move.
+- [x] Verify the focused debt tests and compile the integrated flow.
 
 Files: `MonMon/Accounts/WealthView.swift`
 
