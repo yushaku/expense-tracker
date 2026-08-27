@@ -187,10 +187,12 @@ struct SettingsView: View {
                 text: "Name it Voice Capture and tap it whenever you want to record."
             )
 
-            ShortcutsLink()
-                .shortcutsLinkStyle(.automaticOutline)
-                .accessibilityIdentifier("open-monmon-shortcuts")
-                .padding(.top, 2)
+            #if os(iOS)
+                ShortcutsLink()
+                    .shortcutsLinkStyle(.automaticOutline)
+                    .accessibilityIdentifier("open-monmon-shortcuts")
+                    .padding(.top, 2)
+            #endif
         }
         .padding(.top, 2)
     }
@@ -336,6 +338,8 @@ struct SettingsView: View {
                 if cloudSync.isEnabled {
                     syncControls
                 }
+
+                BackupRestoreView()
             }
         }
     }
