@@ -198,6 +198,9 @@ private struct PayloadChecker {
             try scalarIDAndDate(record.id, record.createdAt)
             try require(CashAccountKind(rawValue: record.kind) != nil)
             _ = try MonMonBackupScalar.parseDecimal(record.openingBalance)
+            if let creditLimit = record.creditLimit {
+                try nonnegative(creditLimit)
+            }
             try currency(record.currencyCode)
         }
         try validateUniqueRecords(payload.categories) { record in

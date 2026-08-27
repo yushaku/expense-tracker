@@ -77,12 +77,37 @@ struct MonMonBackupDocumentTests {
             ])
     }
 
+    @Test("A legacy account record without a Credit limit still decodes")
+    func legacyAccountRecordDecodes() throws {
+        let data = Data(
+            #"""
+            {
+              "id": "00000000-0000-0000-0000-000000000001",
+              "name": "Wallet",
+              "kind": "cash",
+              "openingBalance": "1000",
+              "currencyCode": "VND",
+              "createdAt": "2023-11-14T22:13:20.125Z"
+            }
+            """#.utf8
+        )
+
+        let record = try JSONDecoder().decode(
+            MonMonBackupPayload.AccountRecord.self,
+            from: data
+        )
+
+        #expect(record.kind == "cash")
+        #expect(record.creditLimit == nil)
+    }
+
     private func account(id: UUID, name: String) -> MonMonBackupPayload.AccountRecord {
         MonMonBackupPayload.AccountRecord(
             id: MonMonBackupScalar.uuid(id),
             name: name,
             kind: "cash",
             openingBalance: "1000",
+            creditLimit: "0",
             currencyCode: "VND",
             createdAt: MonMonBackupScalar.date(instant)
         )

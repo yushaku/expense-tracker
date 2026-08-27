@@ -185,6 +185,7 @@ private extension MonMonBackupService {
             name: record.name,
             kind: try enumValue(record.kind),
             openingBalance: try MonMonBackupScalar.parseDecimal(record.openingBalance),
+            creditLimit: try record.creditLimit.map(MonMonBackupScalar.parseDecimal) ?? .zero,
             currencyCode: record.currencyCode,
             createdAt: try MonMonBackupScalar.parseDate(record.createdAt)
         )
@@ -196,6 +197,8 @@ private extension MonMonBackupService {
         model.name = record.name
         model.kind = try enumValue(record.kind)
         model.openingBalance = try MonMonBackupScalar.parseDecimal(record.openingBalance)
+        model.creditLimit =
+            try record.creditLimit.map(MonMonBackupScalar.parseDecimal) ?? .zero
         model.currencyCode = record.currencyCode
         model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
     }
@@ -804,6 +807,7 @@ struct MonMonBackupService {
             name: model.name,
             kind: model.kind.rawValue,
             openingBalance: MonMonBackupScalar.decimal(model.openingBalance),
+            creditLimit: MonMonBackupScalar.decimal(model.creditLimit),
             currencyCode: model.currencyCode,
             createdAt: MonMonBackupScalar.date(model.createdAt)
         )

@@ -32,13 +32,13 @@ Files: `CashBalanceSummary.swift`, `CashBalanceSummaryTests.swift`,
 
 ## Task 3: Preserve backup compatibility
 
-- [ ] Write failing tests for restoring an old account record without a credit
+- [x] Write failing tests for restoring an old account record without a credit
       limit and round-tripping a new Credit limit.
-- [ ] Export, validate, create, and update the optional backup credit-limit field;
+- [x] Export, validate, create, and update the optional backup credit-limit field;
       validate it as non-negative when present.
-- [ ] Prove legacy `cash`/`bank` backup kinds restore as Normal and new exports use
+- [x] Prove legacy `cash`/`bank` backup kinds restore as Normal and new exports use
       `normal`.
-- [ ] Run focused backup tests and commit.
+- [x] Run focused backup tests.
 
 Files: `MonMonBackupDocument.swift`, `MonMonBackupService.swift`,
 `MonMonBackupValidator.swift`, `MonMonBackupDocumentTests.swift`,
