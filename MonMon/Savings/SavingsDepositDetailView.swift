@@ -74,7 +74,7 @@ struct SavingsDepositDetailView: View {
                 }
             }
         }
-        .sheet(item: $editor) { editor in
+        .appSheet(item: $editor) { editor in
             switch editor {
             case .deposit(let mode):
                 SavingsEditorView(mode: mode)

@@ -75,7 +75,7 @@ struct RecurringListView: View {
                     }
                 }
             }
-            .sheet(item: $editorMode) { mode in
+            .appSheet(item: $editorMode) { mode in
                 RecurringEditorView(mode: mode, defaultDate: asOf, asOf: asOf)
             }
             .tint(MonMonTheme.accent)

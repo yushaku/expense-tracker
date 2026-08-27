@@ -27,6 +27,30 @@ final class PendingTransactionCapture {
         self.createdAt = createdAt
     }
 
+    init(
+        id: UUID,
+        rawText: String,
+        kind: TransactionKind,
+        amount: Decimal?,
+        occurredAt: Date,
+        note: String,
+        accountID: UUID?,
+        categoryID: UUID?,
+        issueCodes: String,
+        createdAt: Date
+    ) {
+        self.id = id
+        self.rawText = rawText
+        self.kind = kind
+        self.amount = amount
+        self.occurredAt = occurredAt
+        self.note = note
+        self.accountID = accountID
+        self.categoryID = categoryID
+        self.issueCodes = issueCodes
+        self.createdAt = createdAt
+    }
+
     var issues: Set<TransactionCaptureIssue> {
         Set(
             issueCodes.split(separator: ",").compactMap {

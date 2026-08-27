@@ -69,13 +69,13 @@ struct FundGroupDetailView: View {
                 }
             }
         }
-        .sheet(item: $editorMode) { mode in
+        .appSheet(item: $editorMode) { mode in
             FundEditorView(
                 mode: mode,
                 kinds: group.instrument?.kind == .gold ? [.gold] : [.fund, .etf]
             )
         }
-        .sheet(item: $saleEditorMode) { mode in
+        .appSheet(item: $saleEditorMode) { mode in
             FundSaleEditorView(mode: mode)
         }
         .tint(MonMonTheme.accent)

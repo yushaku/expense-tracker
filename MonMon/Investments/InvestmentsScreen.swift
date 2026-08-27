@@ -90,12 +90,9 @@ struct InvestmentsScreen: View {
                 }
             }
         }
-        .navigationDestination(for: FundGroupRoute.self) { route in
-            FundGroupDetailView(route: route)
-        }
         .navigationTitle("Investments")
         .accessibilityIdentifier("investments-list")
-        .sheet(item: $editor) { mode in
+        .appSheet(item: $editor) { mode in
             switch mode {
             case .savings(let savingsMode):
                 SavingsEditorView(mode: savingsMode)
