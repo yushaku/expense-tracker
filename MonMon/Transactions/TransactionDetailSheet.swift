@@ -1,5 +1,12 @@
 import SwiftUI
 
+/// Both transaction sheets contain scroll views. Give the presentation the
+/// first claim on a swipe so pulling down dismisses it without a scroll bounce
+/// taking the opening part of the gesture.
+enum TransactionSheetPresentation {
+    static let contentInteraction = PresentationContentInteraction.resizes
+}
+
 /// A quick read of one transaction list item. Editing remains in the full
 /// editor; this sheet is read-only so a tap never changes money by accident.
 struct TransactionDetailSheet: View {
@@ -87,6 +94,7 @@ struct TransactionDetailSheet: View {
         // One height, so a drag downwards leaves in one motion rather than
         // stopping halfway at a second one.
         .presentationDetents([.large])
+        .presentationContentInteraction(TransactionSheetPresentation.contentInteraction)
         .presentationDragIndicator(.visible)
         .accessibilityIdentifier("transaction-details")
     }
