@@ -51,6 +51,7 @@
 		A00000000000000000000211 /* VNDCurrency.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000122 /* VNDCurrency.swift */; };
 		A00000000000000000000212 /* CashBalanceSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000123 /* CashBalanceSummaryTests.swift */; };
 		A00000000000000000000213 /* CashBalanceSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000124 /* CashBalanceSummary.swift */; };
+		E20000000000000000000002 /* AccountLinkedSourceSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000000000000000000001 /* AccountLinkedSourceSummary.swift */; };
 		A00000000000000000000214 /* WealthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000125 /* WealthView.swift */; };
 		A00000000000000000000215 /* AccountEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000126 /* AccountEditorView.swift */; };
 		A00000000000000000000216 /* MonMonTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000127 /* MonMonTheme.swift */; };
@@ -96,7 +97,7 @@
 		A00000000000000000009005 /* ReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000009105 /* ReportView.swift */; };
 		R20000000000000000000101 /* AccountReportSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = R20000000000000000000001 /* AccountReportSummary.swift */; };
 		R20000000000000000000102 /* AccountSpendingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = R20000000000000000000002 /* AccountSpendingSection.swift */; };
-		R20000000000000000000103 /* AccountActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = R20000000000000000000003 /* AccountActivityView.swift */; };
+		R20000000000000000000103 /* AccountDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = R20000000000000000000003 /* AccountDetailView.swift */; };
 		R30000000000000000000101 /* TransactionFilterControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = R30000000000000000000001 /* TransactionFilterControls.swift */; };
 		A00000000000000000009004 /* NetTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000009104 /* NetTrendCard.swift */; };
 		A00000000000000000009001 /* TransactionQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000009101 /* TransactionQuery.swift */; };
@@ -405,6 +406,7 @@
 		A00000000000000000000122 /* VNDCurrency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VNDCurrency.swift; sourceTree = "<group>"; };
 		A00000000000000000000123 /* CashBalanceSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashBalanceSummaryTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000124 /* CashBalanceSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashBalanceSummary.swift; sourceTree = "<group>"; };
+		E20000000000000000000001 /* AccountLinkedSourceSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountLinkedSourceSummary.swift; sourceTree = "<group>"; };
 		A00000000000000000000125 /* WealthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WealthView.swift; sourceTree = "<group>"; };
 		A00000000000000000000126 /* AccountEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountEditorView.swift; sourceTree = "<group>"; };
 		A00000000000000000000127 /* MonMonTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonMonTheme.swift; sourceTree = "<group>"; };
@@ -450,7 +452,7 @@
 		A00000000000000000009105 /* ReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportView.swift; sourceTree = "<group>"; };
 		R20000000000000000000001 /* AccountReportSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountReportSummary.swift; sourceTree = "<group>"; };
 		R20000000000000000000002 /* AccountSpendingSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSpendingSection.swift; sourceTree = "<group>"; };
-		R20000000000000000000003 /* AccountActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountActivityView.swift; sourceTree = "<group>"; };
+		R20000000000000000000003 /* AccountDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDetailView.swift; sourceTree = "<group>"; };
 		R30000000000000000000001 /* TransactionFilterControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFilterControls.swift; sourceTree = "<group>"; };
 		A00000000000000000009104 /* NetTrendCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetTrendCard.swift; sourceTree = "<group>"; };
 		A00000000000000000009101 /* TransactionQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionQuery.swift; sourceTree = "<group>"; };
@@ -873,6 +875,7 @@
 				A00000000000000000000125 /* WealthView.swift */,
 				A00000000000000000000128 /* CashAccountCard.swift */,
 				A00000000000000000000124 /* CashBalanceSummary.swift */,
+				E20000000000000000000001 /* AccountLinkedSourceSummary.swift */,
 				A00000000000000000000117 /* CashAccount.swift */,
 				A00000000000000000000116 /* CashAccountKind.swift */,
 				A00000000000000000000122 /* VNDCurrency.swift */,
@@ -1038,7 +1041,7 @@
 				A00000000000000000009105 /* ReportView.swift */,
 				R20000000000000000000001 /* AccountReportSummary.swift */,
 				R20000000000000000000002 /* AccountSpendingSection.swift */,
-				R20000000000000000000003 /* AccountActivityView.swift */,
+				R20000000000000000000003 /* AccountDetailView.swift */,
 				R30000000000000000000001 /* TransactionFilterControls.swift */,
 				A00000000000000000009104 /* NetTrendCard.swift */,
 				A00000000000000000009101 /* TransactionQuery.swift */,
@@ -1582,7 +1585,7 @@
 				A00000000000000000009005 /* ReportView.swift in Sources */,
 				R20000000000000000000101 /* AccountReportSummary.swift in Sources */,
 				R20000000000000000000102 /* AccountSpendingSection.swift in Sources */,
-				R20000000000000000000103 /* AccountActivityView.swift in Sources */,
+				R20000000000000000000103 /* AccountDetailView.swift in Sources */,
 				R30000000000000000000101 /* TransactionFilterControls.swift in Sources */,
 				A00000000000000000009004 /* NetTrendCard.swift in Sources */,
 				A00000000000000000009001 /* TransactionQuery.swift in Sources */,
@@ -1607,6 +1610,7 @@
 				A00000000000000000000210 /* AccountDraft.swift in Sources */,
 				A00000000000000000000214 /* WealthView.swift in Sources */,
 				A00000000000000000000213 /* CashBalanceSummary.swift in Sources */,
+				E20000000000000000000002 /* AccountLinkedSourceSummary.swift in Sources */,
 				A00000000000000000000208 /* CashAccount.swift in Sources */,
 				A00000000000000000000217 /* CashAccountCard.swift in Sources */,
 				A00000000000000000000207 /* CashAccountKind.swift in Sources */,

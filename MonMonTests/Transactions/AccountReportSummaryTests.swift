@@ -219,4 +219,126 @@ struct AccountReportSummaryTests {
                 ]
         )
     }
+
+    @Test("Linked sources count every account reference by source kind")
+    func linkedSourcesCountAccountReferences() {
+        let wallet = makeAccount("Wallet")
+        let deposit = SavingsDeposit(
+            id: UUID(),
+            name: "Term deposit",
+            principal: 10_000_000,
+            annualInterestRate: 5,
+            termMonths: 6,
+            openedAt: createdAt,
+            currencyCode: VNDCurrency.code,
+            createdAt: createdAt,
+            sourceAccountID: wallet.id
+        )
+        let withdrawal = SavingsWithdrawal(
+            id: UUID(),
+            depositID: deposit.id,
+            principal: 1_000_000,
+            amountReceived: 1_050_000,
+            destinationAccountID: wallet.id,
+            withdrawnAt: createdAt,
+            currencyCode: VNDCurrency.code,
+            createdAt: createdAt
+        )
+        let holding = FundHolding(
+            id: UUID(),
+            instrumentID: UUID(),
+            units: 10,
+            averageCostPerUnit: 100_000,
+            createdAt: createdAt,
+            sourceAccountID: wallet.id
+        )
+        let sale = FundSale(
+            id: UUID(),
+            holdingID: holding.id,
+            units: 2,
+            pricePerUnit: 120_000,
+            proceedsAccountID: wallet.id,
+            soldAt: createdAt,
+            currencyCode: VNDCurrency.code,
+            createdAt: createdAt
+        )
+        let debt = Debt(
+            id: UUID(),
+            counterparty: "Friend",
+            direction: .borrowed,
+            principal: 3_000_000,
+            annualInterestRate: 0,
+            openedAt: createdAt,
+            dueDate: nil,
+            accountID: wallet.id,
+            note: "",
+            currencyCode: VNDCurrency.code,
+            createdAt: createdAt
+        )
+        let payment = DebtPayment(
+            id: UUID(),
+            debtID: debt.id,
+            amount: 500_000,
+            occurredAt: createdAt,
+            accountID: wallet.id,
+            note: "",
+            currencyCode: VNDCurrency.code,
+            createdAt: createdAt
+        )
+        let recurring = RecurringRule(
+            id: UUID(),
+            kind: .expense,
+            amount: 200_000,
+            note: "Internet",
+            accountID: wallet.id,
+            categoryID: nil,
+            currencyCode: VNDCurrency.code,
+            frequency: .monthly,
+            interval: 1,
+            anchorDate: createdAt,
+            endDate: nil,
+            isPaused: false,
+            lastGeneratedAt: nil,
+            createdAt: createdAt
+        )
+
+        let rows = AccountLinkedSourceSummary.rows(
+            for: wallet,
+            deposits: [deposit],
+            withdrawals: [withdrawal],
+            holdings: [holding],
+            sales: [sale],
+            debts: [debt],
+            payments: [payment],
+            recurringRules: [recurring]
+        )
+
+        #expect(
+            rows
+                == [
+                    AccountLinkedSourceRow(kind: .savings, count: 2),
+                    AccountLinkedSourceRow(kind: .funds, count: 2),
+                    AccountLinkedSourceRow(kind: .debts, count: 2),
+                    AccountLinkedSourceRow(kind: .recurring, count: 1),
+                ]
+        )
+    }
+
+    @Test("Accounts with no linked sources return no source rows")
+    func noLinkedSourcesReturnsNoRows() {
+        let account = makeAccount("Wallet")
+
+        #expect(
+            AccountLinkedSourceSummary.rows(
+                for: account,
+                deposits: [],
+                withdrawals: [],
+                holdings: [],
+                sales: [],
+                debts: [],
+                payments: [],
+                recurringRules: []
+            ).isEmpty
+        )
+    }
 }

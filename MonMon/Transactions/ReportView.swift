@@ -75,10 +75,8 @@ struct ReportView: View {
             .navigationDestination(for: DayPeriod.self) { period in
                 DayTransactionsView(period: period)
             }
-            .navigationDestination(for: AccountActivityRoute.self) { route in
-                if let account = account(route.accountID) {
-                    AccountActivityView(account: account)
-                }
+            .navigationDestination(for: AccountDetailRoute.self) { route in
+                AccountDetailView(route: route)
             }
             .appSheet(isPresented: $isFiltering) {
                 ReportFilterSheet(
