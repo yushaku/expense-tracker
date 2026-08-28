@@ -1,6 +1,72 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Coffee": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Cà phê" } } }
+    },
+    "Coffee amount": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền cà phê" } } }
+    },
+    "Coffee emoji": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji cà phê" } } }
+    },
+    "Emoji": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji" } } }
+    },
+    "Fuel": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xăng" } } }
+    },
+    "Fuel amount": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền xăng" } } }
+    },
+    "Fuel emoji": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji xăng" } } }
+    },
+    "Lunch": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bữa trưa" } } }
+    },
+    "Lunch amount": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền bữa trưa" } } }
+    },
+    "Lunch emoji": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji bữa trưa" } } }
+    },
+    "Preset": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục đặt sẵn" } } }
+    },
+    "Quick Expense": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chi tiêu nhanh" } } }
+    },
+    "Quick Expense Preset": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục chi tiêu nhanh" } } }
+    },
+    "Quick expenses": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chi tiêu nhanh" } } }
+    },
+    "Record %@ expense for %@ đồng": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi khoản chi %@ với số tiền %@ đồng" } } }
+    },
+    "Record Quick Expense": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi chi tiêu nhanh" } } }
+    },
+    "Record one configured expense preset.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi một khoản chi đã đặt sẵn." } } }
+    },
+    "Record one of your three preset expenses with one tap.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi một trong ba khoản chi đặt sẵn chỉ bằng một lần chạm." } } }
+    },
+    "Save presets": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lưu mục đặt sẵn" } } }
+    },
+    "Saved. The widget is up to date.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã lưu. Tiện ích đã được cập nhật." } } }
+    },
+    "Set the three expenses shown on the Home Screen widget.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đặt ba khoản chi hiển thị trên tiện ích Màn hình chính." } } }
+    },
+    "Use one emoji and a positive whole amount for every preset.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dùng một emoji và số tiền nguyên dương cho mỗi mục đặt sẵn." } } }
+    },
     "AVAILABLE CREDIT": {
       "localizations": {
         "vi": {

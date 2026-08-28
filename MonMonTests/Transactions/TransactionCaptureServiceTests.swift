@@ -76,6 +76,45 @@ struct TransactionCaptureServiceTests {
         #expect(try context.fetch(FetchDescriptor<PendingTransactionCapture>()).count == 1)
     }
 
+    @Test("Ready-only intent capture commits one expense without staging review")
+    func readyOnlyIntentCommitsExpense() async throws {
+        let fixture = try makeFixture()
+        let dependency = TransactionCaptureIntentDependency(
+            container: fixture.container,
+            defaults: fixture.defaults
+        )
+
+        let result = try await dependency.recordReady("35.000 ☕")
+        let context = ModelContext(fixture.container)
+        let transactions = try context.fetch(FetchDescriptor<MoneyTransaction>())
+
+        #expect(result.disposition == .transaction)
+        #expect(transactions.count == 1)
+        #expect(transactions.first?.kind == .expense)
+        #expect(transactions.first?.amount == 35_000)
+        #expect(transactions.first?.note == "☕")
+        #expect(try context.fetch(FetchDescriptor<PendingTransactionCapture>()).isEmpty)
+    }
+
+    @Test("Ready-only intent capture writes nothing when defaults are unavailable")
+    func readyOnlyIntentRejectsMissingDefaults() async throws {
+        let fixture = try makeFixture()
+        fixture.defaults.removeObject(forKey: TransactionDefaults.accountStorageKey)
+        fixture.defaults.removeObject(forKey: TransactionDefaults.categoryStorageKey)
+        let dependency = TransactionCaptureIntentDependency(
+            container: fixture.container,
+            defaults: fixture.defaults
+        )
+
+        await #expect(throws: TransactionCaptureServiceError.incompleteCapture) {
+            try await dependency.recordReady("35.000 ☕")
+        }
+
+        let context = ModelContext(fixture.container)
+        #expect(try context.fetch(FetchDescriptor<MoneyTransaction>()).isEmpty)
+        #expect(try context.fetch(FetchDescriptor<PendingTransactionCapture>()).isEmpty)
+    }
+
     @Test("A stale prepared capture is rejected before writing")
     func stalePreparedCaptureIsRejected() throws {
         let fixture = try makeFixture()
