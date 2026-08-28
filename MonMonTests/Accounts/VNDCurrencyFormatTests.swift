@@ -58,4 +58,15 @@ struct VNDCurrencyFormatTests {
         #expect(text == "1.234.567")
         #expect(VNDCurrency.parse(text) == amount)
     }
+
+    @Test("Money input groups thousands on every assignment")
+    func moneyInputGroupsThousandsAsTheOwnerTypes() {
+        @VNDInput var text = ""
+
+        text = "80000"
+        #expect(text == "80.000")
+
+        text = "10000000"
+        #expect(text == "10.000.000")
+    }
 }

@@ -1,5 +1,19 @@
 import Foundation
 
+@propertyWrapper
+struct VNDInput: Equatable {
+    private var text: String
+
+    var wrappedValue: String {
+        get { text }
+        set { text = VNDCurrency.formatInput(newValue) }
+    }
+
+    init(wrappedValue: String) {
+        text = VNDCurrency.formatInput(wrappedValue)
+    }
+}
+
 enum VNDCurrency {
     static let code = "VND"
 

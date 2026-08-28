@@ -17,7 +17,7 @@ enum FundSaleFormError: Error, Equatable {
 /// reason.
 struct FundSaleDraft: Equatable {
     var unitsText: String
-    var pricePerUnitText: String
+    @VNDInput var pricePerUnitText: String
     var soldAt: Date
     var proceedsAccountID: UUID?
     var note: String

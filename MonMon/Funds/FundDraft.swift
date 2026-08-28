@@ -17,7 +17,7 @@ enum FundFormError: Error, Equatable {
 struct FundDraft: Equatable {
     var instrumentID: UUID?
     var unitsText: String
-    var averageCostText: String
+    @VNDInput var averageCostText: String
     var sourceAccountID: UUID?
     /// The day the units were bought. Defaults to whatever the caller passes —
     /// today, for a new position — and can be moved back, because a stack of

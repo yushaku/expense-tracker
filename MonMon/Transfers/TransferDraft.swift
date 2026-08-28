@@ -10,7 +10,7 @@ enum TransferFormError: Error, Equatable {
 }
 
 struct TransferDraft: Equatable {
-    var amountText: String
+    @VNDInput var amountText: String
     var occurredAt: Date
     var note: String
     var sourceAccountID: UUID?
