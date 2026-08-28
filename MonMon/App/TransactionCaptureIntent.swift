@@ -29,6 +29,19 @@ struct TransactionCaptureIntentDependency: @unchecked Sendable {
             return try service.commit(capture)
         }
     }
+
+    func recordQuickExpense(
+        _ preset: QuickExpensePreset
+    ) async throws -> TransactionCaptureCommitResult {
+        try await MainActor.run {
+            let service = TransactionCaptureService(container: container, defaults: defaults)
+            let capture = try service.prepareQuickExpense(preset)
+            guard capture.isReady else {
+                throw TransactionCaptureServiceError.incompleteCapture
+            }
+            return try service.commit(capture)
+        }
+    }
 }
 
 enum TransactionCaptureIntentError: Error, LocalizedError, Sendable {

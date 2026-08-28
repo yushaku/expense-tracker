@@ -35,10 +35,7 @@ struct MonMonApp: App {
         AppDependencyManager.shared.add(
             dependency: QuickExpenseIntentDependency { slot in
                 let preset = QuickExpensePresetStore().preset(for: slot)
-                let amount = VNDCurrency.formatPlain(preset.amount)
-                _ = try await transactionCaptureDependency.recordReady(
-                    "\(amount) \(preset.symbol)"
-                )
+                _ = try await transactionCaptureDependency.recordQuickExpense(preset)
             }
         )
         AppDependencyManager.shared.add(

@@ -30,10 +30,16 @@ struct QuickExpensePreset: Codable, Equatable, Identifiable, Sendable {
     let slot: QuickExpenseSlot
     let symbol: String
     let amount: Decimal
+    let categoryID: UUID?
 
     var id: QuickExpenseSlot { slot }
 
-    init(slot: QuickExpenseSlot, symbol: String, amount: Decimal) throws {
+    init(
+        slot: QuickExpenseSlot,
+        symbol: String,
+        amount: Decimal,
+        categoryID: UUID? = nil
+    ) throws {
         let normalizedSymbol = symbol.trimmingCharacters(in: .whitespacesAndNewlines)
         let containsEmojiPresentation = normalizedSymbol.unicodeScalars.contains {
             $0.properties.isEmojiPresentation || $0.value == 0xFE0F
@@ -51,6 +57,7 @@ struct QuickExpensePreset: Codable, Equatable, Identifiable, Sendable {
         self.slot = slot
         self.symbol = normalizedSymbol
         self.amount = amount
+        self.categoryID = categoryID
     }
 
     static let defaults = QuickExpenseSlot.allCases.map(defaultPreset(for:))
@@ -82,6 +89,7 @@ struct QuickExpensePreset: Codable, Equatable, Identifiable, Sendable {
         self.slot = slot
         self.symbol = symbol
         self.amount = amount
+        categoryID = nil
     }
 
     init(from decoder: any Decoder) throws {
@@ -89,7 +97,8 @@ struct QuickExpensePreset: Codable, Equatable, Identifiable, Sendable {
         try self.init(
             slot: container.decode(QuickExpenseSlot.self, forKey: .slot),
             symbol: container.decode(String.self, forKey: .symbol),
-            amount: container.decode(Decimal.self, forKey: .amount)
+            amount: container.decode(Decimal.self, forKey: .amount),
+            categoryID: container.decodeIfPresent(UUID.self, forKey: .categoryID)
         )
     }
 }
@@ -197,7 +206,8 @@ struct QuickExpensePresetStore {
             return try QuickExpensePreset(
                 slot: preset.slot,
                 symbol: preset.symbol,
-                amount: preset.amount
+                amount: preset.amount,
+                categoryID: preset.categoryID
             )
         }
     }
@@ -219,7 +229,8 @@ struct QuickExpensePresetStore {
             migratedPresets[index] = try QuickExpensePreset(
                 slot: preset.slot,
                 symbol: preset.symbol,
-                amount: preset.amount
+                amount: preset.amount,
+                categoryID: preset.categoryID
             )
         }
 

@@ -1,7 +1,14 @@
+import SwiftData
 import SwiftUI
 import WidgetKit
 
 struct QuickExpensePresetsCard: View {
+    @Query(sort: \TransactionCategory.createdAt, order: .forward)
+    private var categories: [TransactionCategory]
+
+    @AppStorage(TransactionDefaults.categoryStorageKey)
+    private var defaultExpenseCategoryValue = ""
+
     @State private var drafts = QuickExpensePreset.defaults.map(QuickExpensePresetDraft.init)
     @State private var savedDrafts = QuickExpensePreset.defaults.map(QuickExpensePresetDraft.init)
     @State private var visibleCount: QuickExpensePresetCount = .three
@@ -36,15 +43,18 @@ struct QuickExpensePresetsCard: View {
 
             ForEach(visibleSlots, id: \.self) { slot in
                 VStack(spacing: 16) {
-                    QuickExpensePresetRow(draft: $drafts[slot.editorIndex])
+                    QuickExpensePresetRow(
+                        draft: $drafts[slot.editorIndex],
+                        categories: expenseCategories
+                    )
                     Divider()
                         .overlay(MonMonTheme.border)
                         .opacity(slot == visibleSlots.last ? 0 : 1)
                 }
             }
 
-            if let statusMessage {
-                Text(statusMessage)
+            if let displayedStatusMessage {
+                Text(displayedStatusMessage)
                     .font(.caption)
                     .foregroundStyle(isValid ? MonMonTheme.textSecondary : MonMonTheme.danger)
                     .accessibilityIdentifier("quick-expense-status")
@@ -76,20 +86,30 @@ struct QuickExpensePresetsCard: View {
             savedVisibleCount = configuration.visibleCount
         }
         .onChange(of: drafts) {
-            statusMessage =
-                isValid ? nil : "Use one emoji and a positive whole amount for every preset."
+            statusMessage = nil
         }
         .onChange(of: visibleCount) {
-            statusMessage =
-                isValid ? nil : "Use one emoji and a positive whole amount for every preset."
+            statusMessage = nil
         }
     }
 
     private var isValid: Bool {
         drafts.count == QuickExpenseSlot.allCases.count
             && drafts.prefix(visibleCount.rawValue).allSatisfy {
-                (try? $0.makePreset()) != nil
+                (try? $0.makePreset()) != nil && isCategoryValid($0.categoryID)
             }
+    }
+
+    private var expenseCategories: [TransactionCategory] {
+        categories.filter { $0.kind == .expense }
+    }
+
+    private var displayedStatusMessage: LocalizedStringResource? {
+        if !isValid {
+            return
+                "Use one emoji, a positive whole amount, and a current expense category for every preset."
+        }
+        return statusMessage
     }
 
     private var visibleSlots: ArraySlice<QuickExpenseSlot> {
@@ -124,7 +144,18 @@ struct QuickExpensePresetsCard: View {
             statusMessage = "Saved. The widget is up to date."
             WidgetCenter.shared.reloadTimelines(ofKind: QuickExpenseWidgetConfiguration.kind)
         } catch {
-            statusMessage = "Use one emoji and a positive whole amount for every preset."
+            statusMessage =
+                "Use one emoji, a positive whole amount, and a current expense category for every preset."
         }
+    }
+
+    private func isCategoryValid(_ categoryID: UUID?) -> Bool {
+        if let categoryID {
+            return expenseCategories.contains { $0.id == categoryID }
+        }
+        return TransactionDefaults.resolveCategoryID(
+            defaultExpenseCategoryValue,
+            categories: expenseCategories
+        ) != nil
     }
 }

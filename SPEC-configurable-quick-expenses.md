@@ -5,7 +5,8 @@
 Let the owner choose whether the Quick Expense widget uses 3, 6, or 9
 editable presets. Preserve all nine configured values when the visible count is
 reduced. Show at most 3 presets in a small widget, 6 in a medium widget, and 9
-in a large widget so every action remains comfortably tappable.
+in a large widget so every action remains comfortably tappable. Each preset can
+also use its own expense category; see `SPEC-quick-expense-categories.md`.
 
 ## Defaults and Migration
 
@@ -27,7 +28,9 @@ in a large widget so every action remains comfortably tappable.
   all nine drafts in memory and persistence.
 - Save the visible count and all nine presets atomically, then reload the
   WidgetKit timeline.
-- Continue using the shared transaction-default account and expense category.
+- Continue using the shared transaction-default account. Each preset uses its
+  configured expense category, or the transaction-default category when left
+  on “Transaction default.”
 
 ## Widget Experience
 
@@ -57,6 +60,7 @@ in a large widget so every action remains comfortably tappable.
 - Small, medium, and large widgets show no more than 3, 6, and 9 actions,
   respectively.
 - The widget refreshes after in-app changes and after a successful expense.
+- Each preset records against its configured expense category.
 
 ## Open Questions
 

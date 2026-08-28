@@ -1,6 +1,9 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Add an expense category to configure this preset.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm danh mục chi tiêu để cấu hình mục đặt sẵn này." } } }
+    },
     "Bills": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hóa đơn" } } }
     },
@@ -94,6 +97,9 @@
     "Quick expenses": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chi tiêu nhanh" } } }
     },
+    "Transaction default": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mặc định giao dịch" } } }
+    },
     "Record %@ expense for %@ đồng": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi khoản chi %@ với số tiền %@ đồng" } } }
     },
@@ -126,6 +132,9 @@
     },
     "Transit emoji": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji đi lại" } } }
+    },
+    "Use one emoji, a positive whole amount, and a current expense category for every preset.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dùng một emoji, số tiền nguyên dương và danh mục chi tiêu hiện có cho mỗi mục đặt sẵn." } } }
     },
     "Use one emoji and a positive whole amount for every preset.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dùng một emoji và số tiền nguyên dương cho mỗi mục đặt sẵn." } } }

@@ -43,13 +43,33 @@ struct QuickExpensePresetStoreTests {
         #expect(loaded.activePresets.count == 9)
     }
 
+    @Test("A configured category round trips without changing preset order")
+    func configuredCategoryRoundTrips() throws {
+        let fixture = try makeFixture()
+        let categoryID = UUID()
+        var presets = QuickExpensePreset.defaults
+        presets[0] = try QuickExpensePreset(
+            slot: .coffee,
+            symbol: "☕",
+            amount: 35_000,
+            categoryID: categoryID
+        )
+
+        try fixture.store.save(
+            QuickExpenseConfiguration(visibleCount: .three, presets: presets)
+        )
+
+        #expect(fixture.store.load().presets[0].categoryID == categoryID)
+        #expect(fixture.store.load().presets.dropFirst().allSatisfy { $0.categoryID == nil })
+    }
+
     @Test("A legacy three-preset payload preserves custom values")
     func legacyPayloadMigrates() throws {
         let fixture = try makeFixture()
         let legacyPresets = [
-            try QuickExpensePreset(slot: .fuel, symbol: "🚕", amount: 120_000),
-            try QuickExpensePreset(slot: .coffee, symbol: "🧋", amount: 42_000),
-            try QuickExpensePreset(slot: .lunch, symbol: "🥗", amount: 65_000),
+            LegacyPreset(slot: .fuel, symbol: "🚕", amount: 120_000),
+            LegacyPreset(slot: .coffee, symbol: "🧋", amount: 42_000),
+            LegacyPreset(slot: .lunch, symbol: "🥗", amount: 65_000),
         ]
         fixture.defaults.set(
             try JSONEncoder().encode(legacyPresets),
@@ -62,6 +82,7 @@ struct QuickExpensePresetStoreTests {
         #expect(migrated.presets.count == 9)
         #expect(migrated.activePresets.map(\.symbol) == ["🧋", "🥗", "🚕"])
         #expect(migrated.activePresets.map(\.amount) == [42_000, 65_000, 120_000])
+        #expect(migrated.presets.allSatisfy { $0.categoryID == nil })
         #expect(
             Array(migrated.presets.dropFirst(3)) == Array(QuickExpensePreset.defaults.dropFirst(3)))
     }
@@ -168,6 +189,21 @@ struct QuickExpensePresetStoreTests {
         #expect(try draft.makePreset().amount == 42_000)
     }
 
+    @Test("An editor draft round trips its configured category")
+    func editorDraftRoundTripsCategory() throws {
+        let categoryID = UUID()
+        let preset = try QuickExpensePreset(
+            slot: .coffee,
+            symbol: "☕",
+            amount: 35_000,
+            categoryID: categoryID
+        )
+        let draft = QuickExpensePresetDraft(preset: preset)
+
+        #expect(draft.categoryID == categoryID)
+        #expect(try draft.makePreset().categoryID == categoryID)
+    }
+
     @Test("An editor draft rejects an invalid amount")
     func editorDraftRejectsInvalidAmount() throws {
         let preset = try QuickExpensePreset(slot: .coffee, symbol: "☕", amount: 35_000)
@@ -205,6 +241,12 @@ struct QuickExpensePresetStoreTests {
     private struct Fixture {
         let defaults: UserDefaults
         let store: QuickExpensePresetStore
+    }
+
+    private struct LegacyPreset: Codable {
+        let slot: QuickExpenseSlot
+        let symbol: String
+        let amount: Decimal
     }
 
     private actor SlotRecorder {
