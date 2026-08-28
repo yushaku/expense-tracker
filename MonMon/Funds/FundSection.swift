@@ -72,6 +72,14 @@ struct FundSection: View {
             .font(.subheadline.weight(.medium))
             .foregroundStyle(isGain ? MonMonTheme.gain : MonMonTheme.danger)
 
+            Label(
+                totalProfitLossDescription,
+                systemImage: isTotalGain ? "arrow.up.right" : "arrow.down.right"
+            )
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(isTotalGain ? MonMonTheme.gain : MonMonTheme.danger)
+            .accessibilityIdentifier("total-profit-loss")
+
             Label(holdingCountLabel, systemImage: "rectangle.stack.fill")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(MonMonTheme.textSecondary)
@@ -160,6 +168,36 @@ struct FundSection: View {
         let label = isGain ? "Unrealized gain" : "Unrealized loss"
         let sign = isGain ? "+" : "−"
         return "\(label) \(sign)\(VNDCurrency.format(abs(profitLoss)))"
+    }
+
+    /// The paper gain and what selling returned, added, against every đồng put
+    /// in. The line above it can only ever move; this one is the score.
+    private var totalProfitLoss: Decimal {
+        FundSummary.totalProfitLoss(
+            of: displayedHoldings,
+            instruments: instruments,
+            sales: sales
+        )
+    }
+
+    private var totalReturnPercent: Decimal {
+        FundSummary.totalReturnPercent(
+            of: displayedHoldings,
+            instruments: instruments,
+            sales: sales
+        )
+    }
+
+    private var isTotalGain: Bool {
+        totalProfitLoss >= 0
+    }
+
+    private var totalProfitLossDescription: LocalizedStringKey {
+        let label = isTotalGain ? "Total gain" : "Total loss"
+        let sign = isTotalGain ? "+" : "−"
+        let amount = VNDCurrency.format(abs(totalProfitLoss))
+        let percent = PercentInput.format(abs(totalReturnPercent))
+        return "\(label) \(sign)\(amount) (\(sign)\(percent)%)"
     }
 
     private var itemNoun: String {

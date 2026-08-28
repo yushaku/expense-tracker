@@ -71,6 +71,48 @@ enum FundSummary {
             - totalOpenCostBasis(of: holdings, sales: sales)
     }
 
+    /// Everything these positions have made: the paper gain on what is still
+    /// held, plus what selling actually returned.
+    ///
+    /// The two halves are kept apart everywhere else because they answer
+    /// different questions — one can still change, the other cannot. This is
+    /// the figure that answers the third: whether the money put in has come
+    /// back.
+    static func totalProfitLoss(
+        of holdings: [FundHolding],
+        instruments: [FundInstrument],
+        sales: [FundSale]
+    ) -> Decimal {
+        totalUnrealizedProfitLoss(of: holdings, instruments: instruments, sales: sales)
+            + FundSaleSummary.totalRealizedProfitLoss(
+                of: FundSaleSummary.sales(of: holdings, sales: sales),
+                holdings: holdings
+            )
+    }
+
+    /// That same figure against everything put in: the cost of the units still
+    /// held plus the cost of the units already sold.
+    ///
+    /// Measured against both because both were paid for. Against the open cost
+    /// alone, a position sold at a profit would report a return on money no
+    /// longer invested, which flatters it.
+    static func totalReturnPercent(
+        of holdings: [FundHolding],
+        instruments: [FundInstrument],
+        sales: [FundSale]
+    ) -> Decimal {
+        let closed = FundSaleSummary.sales(of: holdings, sales: sales)
+        let basis =
+            totalOpenCostBasis(of: holdings, sales: sales)
+            + FundSaleSummary.totalCostBasisSold(of: closed, holdings: holdings)
+
+        guard basis > 0 else {
+            return .zero
+        }
+
+        return totalProfitLoss(of: holdings, instruments: instruments, sales: sales) / basis * 100
+    }
+
     /// Positions whose instrument is missing from the catalogue.
     ///
     /// Joins are resolved in Swift, so a holding can still name an instrument
