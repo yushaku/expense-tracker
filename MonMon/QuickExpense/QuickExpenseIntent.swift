@@ -7,6 +7,12 @@ extension QuickExpenseSlot: AppEnum {
         .coffee: "Coffee",
         .lunch: "Lunch",
         .fuel: "Fuel",
+        .groceries: "Groceries",
+        .parking: "Parking",
+        .transit: "Transit",
+        .medicine: "Medicine",
+        .entertainment: "Entertainment",
+        .bills: "Bills",
     ]
 }
 
@@ -53,10 +59,10 @@ struct RecordQuickExpenseIntent: AppIntent {
         Summary("Record \(\.$slot)")
     }
 
-    func perform() async throws -> some IntentResult {
+    func perform() async throws -> some IntentResult & ProvidesDialog {
         do {
             try await dependency.record(slot)
-            return .result()
+            return .result(dialog: "Saved in MonMon.")
         } catch is CancellationError {
             throw CancellationError()
         } catch {

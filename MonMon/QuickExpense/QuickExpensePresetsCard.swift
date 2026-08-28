@@ -2,8 +2,10 @@ import SwiftUI
 import WidgetKit
 
 struct QuickExpensePresetsCard: View {
-    @State private var drafts: [QuickExpensePresetDraft] = []
-    @State private var savedDrafts: [QuickExpensePresetDraft] = []
+    @State private var drafts = QuickExpensePreset.defaults.map(QuickExpensePresetDraft.init)
+    @State private var savedDrafts = QuickExpensePreset.defaults.map(QuickExpensePresetDraft.init)
+    @State private var visibleCount: QuickExpensePresetCount = .three
+    @State private var savedVisibleCount: QuickExpensePresetCount = .three
     @State private var statusMessage: LocalizedStringResource?
 
     private let store = QuickExpensePresetStore()
@@ -14,16 +16,30 @@ struct QuickExpensePresetsCard: View {
                 .font(.headline)
                 .foregroundStyle(MonMonTheme.accent)
 
-            Text("Set the three expenses shown on the Home Screen widget.")
+            Text("Choose 3, 6, or 9 expenses for the Home Screen widget.")
                 .font(.caption)
                 .foregroundStyle(MonMonTheme.textSecondary)
 
-            ForEach($drafts) { $draft in
-                QuickExpensePresetRow(draft: $draft)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Presets shown")
+                    .font(.subheadline.weight(.medium))
 
-                if draft.id != drafts.last?.id {
+                Picker("Presets shown", selection: $visibleCount) {
+                    ForEach(QuickExpensePresetCount.allCases) { count in
+                        Text(count.rawValue, format: .number)
+                            .tag(count)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .accessibilityIdentifier("quick-expense-visible-count")
+            }
+
+            ForEach(visibleSlots, id: \.self) { slot in
+                VStack(spacing: 16) {
+                    QuickExpensePresetRow(draft: $drafts[slot.editorIndex])
                     Divider()
                         .overlay(MonMonTheme.border)
+                        .opacity(slot == visibleSlots.last ? 0 : 1)
                 }
             }
 
@@ -38,7 +54,7 @@ struct QuickExpensePresetsCard: View {
                 save()
             }
             .buttonStyle(.prominentAction)
-            .disabled(!isValid || drafts == savedDrafts)
+            .disabled(!isValid || !hasChanges)
             .accessibilityIdentifier("save-quick-expense-presets")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -52,11 +68,18 @@ struct QuickExpensePresetsCard: View {
                 .stroke(MonMonTheme.border, lineWidth: 1)
         }
         .task {
-            let loadedDrafts = store.load().map(QuickExpensePresetDraft.init)
+            let configuration = store.load()
+            let loadedDrafts = configuration.presets.map(QuickExpensePresetDraft.init)
             drafts = loadedDrafts
             savedDrafts = loadedDrafts
+            visibleCount = configuration.visibleCount
+            savedVisibleCount = configuration.visibleCount
         }
         .onChange(of: drafts) {
+            statusMessage =
+                isValid ? nil : "Use one emoji and a positive whole amount for every preset."
+        }
+        .onChange(of: visibleCount) {
             statusMessage =
                 isValid ? nil : "Use one emoji and a positive whole amount for every preset."
         }
@@ -64,103 +87,44 @@ struct QuickExpensePresetsCard: View {
 
     private var isValid: Bool {
         drafts.count == QuickExpenseSlot.allCases.count
-            && drafts.allSatisfy { (try? $0.makePreset()) != nil }
+            && drafts.prefix(visibleCount.rawValue).allSatisfy {
+                (try? $0.makePreset()) != nil
+            }
+    }
+
+    private var visibleSlots: ArraySlice<QuickExpenseSlot> {
+        QuickExpenseSlot.allCases.prefix(visibleCount.rawValue)
+    }
+
+    private var hasChanges: Bool {
+        visibleCount != savedVisibleCount
+            || drafts != savedDrafts
     }
 
     private func save() {
         do {
-            try store.save(drafts.map { try $0.makePreset() })
-            savedDrafts = drafts
+            let presets = try drafts.enumerated().map { index, draft in
+                if let preset = try? draft.makePreset() {
+                    return preset
+                }
+                if index >= visibleCount.rawValue {
+                    return try savedDrafts[index].makePreset()
+                }
+                return try draft.makePreset()
+            }
+            let configuration = QuickExpenseConfiguration(
+                visibleCount: visibleCount,
+                presets: presets
+            )
+            try store.save(configuration)
+            let persistedDrafts = presets.map(QuickExpensePresetDraft.init)
+            drafts = persistedDrafts
+            savedDrafts = persistedDrafts
+            savedVisibleCount = visibleCount
             statusMessage = "Saved. The widget is up to date."
             WidgetCenter.shared.reloadTimelines(ofKind: QuickExpenseWidgetConfiguration.kind)
         } catch {
             statusMessage = "Use one emoji and a positive whole amount for every preset."
-        }
-    }
-}
-
-private struct QuickExpensePresetRow: View {
-    @Binding var draft: QuickExpensePresetDraft
-
-    var body: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 12) {
-                title
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                fields
-            }
-
-            VStack(alignment: .leading, spacing: 10) {
-                title
-                fields
-            }
-        }
-    }
-
-    private var title: some View {
-        Text(draft.slot.title)
-            .font(.subheadline.weight(.medium))
-    }
-
-    private var fields: some View {
-        HStack(spacing: 10) {
-            TextField("Emoji", text: $draft.symbol)
-                .multilineTextAlignment(.center)
-                .frame(minWidth: 56)
-                .accessibilityLabel(Text(draft.slot.emojiFieldLabel))
-                .accessibilityIdentifier("quick-expense-\(draft.slot.rawValue)-symbol")
-
-            TextField("Amount", text: $draft.amountText)
-                #if os(iOS)
-                    .keyboardType(.numberPad)
-                #endif
-                .multilineTextAlignment(.trailing)
-                .monospacedDigit()
-                .frame(minWidth: 116)
-                .onChange(of: draft.amountText) {
-                    let formatted = VNDCurrency.formatInput(draft.amountText)
-                    if formatted != draft.amountText {
-                        draft.amountText = formatted
-                    }
-                }
-                .accessibilityLabel(Text(draft.slot.amountFieldLabel))
-                .accessibilityIdentifier("quick-expense-\(draft.slot.rawValue)-amount")
-        }
-        .textFieldStyle(.roundedBorder)
-    }
-}
-
-private extension QuickExpenseSlot {
-    var title: LocalizedStringResource {
-        switch self {
-        case .coffee:
-            "Coffee"
-        case .lunch:
-            "Lunch"
-        case .fuel:
-            "Fuel"
-        }
-    }
-
-    var emojiFieldLabel: LocalizedStringResource {
-        switch self {
-        case .coffee:
-            "Coffee emoji"
-        case .lunch:
-            "Lunch emoji"
-        case .fuel:
-            "Fuel emoji"
-        }
-    }
-
-    var amountFieldLabel: LocalizedStringResource {
-        switch self {
-        case .coffee:
-            "Coffee amount"
-        case .lunch:
-            "Lunch amount"
-        case .fuel:
-            "Fuel amount"
         }
     }
 }

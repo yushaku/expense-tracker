@@ -1,3 +1,4 @@
+import AppIntents
 import Foundation
 import Testing
 
@@ -5,32 +6,89 @@ import Testing
 
 @Suite("Quick expense presets")
 struct QuickExpensePresetStoreTests {
-    @Test("Missing storage returns the three requested defaults")
+    @Test("Missing storage returns nine defaults with three visible")
     func missingStorageReturnsDefaults() throws {
         let fixture = try makeFixture()
 
-        let presets = fixture.store.load()
+        let configuration = fixture.store.load()
 
-        #expect(presets == QuickExpensePreset.defaults)
-        #expect(presets.map(\.slot) == [.coffee, .lunch, .fuel])
-        #expect(presets.map(\.symbol) == ["☕", "🍜", "⛽"])
-        #expect(presets.map(\.amount) == [35_000, 50_000, 100_000])
+        #expect(configuration == .defaults)
+        #expect(configuration.visibleCount == .three)
+        #expect(configuration.presets.count == 9)
+        #expect(configuration.activePresets.map(\.slot) == [.coffee, .lunch, .fuel])
+        #expect(configuration.activePresets.map(\.symbol) == ["☕", "🍜", "⛽"])
+        #expect(configuration.activePresets.map(\.amount) == [35_000, 50_000, 100_000])
+        #expect(
+            configuration.presets.map(\.symbol) == ["☕", "🍜", "⛽", "🛒", "🅿️", "🚌", "💊", "🎬", "🧾"])
+        #expect(
+            configuration.presets.map(\.amount)
+                == [35_000, 50_000, 100_000, 200_000, 20_000, 15_000, 100_000, 150_000, 500_000]
+        )
     }
 
-    @Test("A complete valid set round trips in slot order")
+    @Test("A complete configuration round trips in slot order")
     func validSetRoundTrips() throws {
         let fixture = try makeFixture()
-        let presets = [
+        let presets = try customizedPresets().reversed()
+
+        try fixture.store.save(
+            QuickExpenseConfiguration(visibleCount: .nine, presets: Array(presets))
+        )
+
+        let loaded = fixture.store.load()
+        let expectedPresets = try customizedPresets()
+        #expect(loaded.visibleCount == .nine)
+        #expect(loaded.presets.map(\.slot) == QuickExpenseSlot.allCases)
+        #expect(loaded.presets.map(\.symbol) == expectedPresets.map(\.symbol))
+        #expect(loaded.activePresets.count == 9)
+    }
+
+    @Test("A legacy three-preset payload preserves custom values")
+    func legacyPayloadMigrates() throws {
+        let fixture = try makeFixture()
+        let legacyPresets = [
             try QuickExpensePreset(slot: .fuel, symbol: "🚕", amount: 120_000),
             try QuickExpensePreset(slot: .coffee, symbol: "🧋", amount: 42_000),
             try QuickExpensePreset(slot: .lunch, symbol: "🥗", amount: 65_000),
         ]
+        fixture.defaults.set(
+            try JSONEncoder().encode(legacyPresets),
+            forKey: QuickExpensePresetStore.storageKey
+        )
 
-        try fixture.store.save(presets)
+        let migrated = fixture.store.load()
 
-        #expect(fixture.store.load().map(\.slot) == [.coffee, .lunch, .fuel])
-        #expect(fixture.store.load().map(\.symbol) == ["🧋", "🥗", "🚕"])
-        #expect(fixture.store.load().map(\.amount) == [42_000, 65_000, 120_000])
+        #expect(migrated.visibleCount == .three)
+        #expect(migrated.presets.count == 9)
+        #expect(migrated.activePresets.map(\.symbol) == ["🧋", "🥗", "🚕"])
+        #expect(migrated.activePresets.map(\.amount) == [42_000, 65_000, 120_000])
+        #expect(
+            Array(migrated.presets.dropFirst(3)) == Array(QuickExpensePreset.defaults.dropFirst(3)))
+    }
+
+    @Test("The supported counts expose active prefixes of three, six, and nine")
+    func supportedCountsExposeActivePrefixes() {
+        #expect(QuickExpensePresetCount.allCases.map(\.rawValue) == [3, 6, 9])
+        #expect(
+            QuickExpenseConfiguration(
+                visibleCount: .six,
+                presets: QuickExpensePreset.defaults
+            ).activePresets.count == 6
+        )
+    }
+
+    @Test("Reducing the visible count retains hidden presets")
+    func hiddenPresetsAreRetained() throws {
+        let fixture = try makeFixture()
+        let presets = try customizedPresets()
+        try fixture.store.save(QuickExpenseConfiguration(visibleCount: .nine, presets: presets))
+        try fixture.store.save(QuickExpenseConfiguration(visibleCount: .three, presets: presets))
+
+        let loaded = fixture.store.load()
+
+        #expect(loaded.visibleCount == .three)
+        #expect(loaded.activePresets.count == 3)
+        #expect(loaded.presets == presets)
     }
 
     @Test("A preset requires exactly one visible symbol")
@@ -64,7 +122,7 @@ struct QuickExpensePresetStoreTests {
         let fixture = try makeFixture()
         fixture.defaults.set(Data("not-json".utf8), forKey: QuickExpensePresetStore.storageKey)
 
-        #expect(fixture.store.load() == QuickExpensePreset.defaults)
+        #expect(fixture.store.load() == .defaults)
     }
 
     @Test("Saving requires one preset for every slot")
@@ -73,7 +131,9 @@ struct QuickExpensePresetStoreTests {
         let coffee = try QuickExpensePreset(slot: .coffee, symbol: "☕", amount: 35_000)
 
         #expect(throws: QuickExpensePresetError.incompleteSet) {
-            try fixture.store.save([coffee])
+            try fixture.store.save(
+                QuickExpenseConfiguration(visibleCount: .three, presets: [coffee])
+            )
         }
     }
 
@@ -87,6 +147,13 @@ struct QuickExpensePresetStoreTests {
         try await dependency.record(.lunch)
 
         #expect(await recorder.slots == [.lunch])
+    }
+
+    @Test("A successful quick expense intent provides user-visible feedback")
+    func successfulIntentProvidesDialog() {
+        requireDialog {
+            try await RecordQuickExpenseIntent(slot: .coffee).perform()
+        }
     }
 
     @Test("An editor draft round trips a localized VND amount")
@@ -118,6 +185,22 @@ struct QuickExpensePresetStoreTests {
         defaults.removePersistentDomain(forName: suiteName)
         return Fixture(defaults: defaults, store: QuickExpensePresetStore(defaults: defaults))
     }
+
+    private func customizedPresets() throws -> [QuickExpensePreset] {
+        try zip(QuickExpenseSlot.allCases, ["🧋", "🥗", "🚕", "🛍️", "🚙", "🚇", "🩹", "🎮", "📄"])
+            .enumerated()
+            .map { index, pair in
+                try QuickExpensePreset(
+                    slot: pair.0,
+                    symbol: pair.1,
+                    amount: Decimal((index + 1) * 10_000)
+                )
+            }
+    }
+
+    private func requireDialog<Result: IntentResult & ProvidesDialog>(
+        _ operation: @escaping () async throws -> Result
+    ) {}
 
     private struct Fixture {
         let defaults: UserDefaults

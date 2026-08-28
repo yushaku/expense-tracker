@@ -2,12 +2,13 @@
 
 ## Objective
 
-Add an iPhone home-screen widget with three one-tap expense presets. The
-defaults are Coffee (`☕`, 35,000 VND), Lunch (`🍜`, 50,000 VND), and Fuel
-(`⛽`, 100,000 VND). The owner can edit each preset's emoji and amount from the
-existing in-app transaction Defaults screen. Tapping a widget button records an
-ordinary expense using the current default account and expense category, then
-WidgetKit reloads the widget timeline.
+Add an iPhone home-screen widget with a configurable 3, 6, or 9 one-tap expense
+presets. The first defaults are Coffee (`☕`, 35,000 VND), Lunch (`🍜`, 50,000
+VND), and Fuel (`⛽`, 100,000 VND). The owner can choose the count and edit each
+preset's emoji and amount from the existing in-app transaction Defaults screen.
+Tapping a widget button records an ordinary expense using the current default
+account and expense category, then WidgetKit reloads the widget timeline. See
+`SPEC-configurable-quick-expenses.md` for the expanded defaults and migration.
 
 ## Tech Stack
 
@@ -54,7 +55,7 @@ try store.save(presets)
 ```
 
 Use native `Button(intent:)` controls in the widget, theme tokens in the app,
-stable enum identity for all three rows, and explicit accessibility labels.
+stable enum identity for all rows, and explicit accessibility labels.
 
 ## Testing Strategy
 
@@ -73,14 +74,15 @@ stable enum identity for all three rows, and explicit accessibility labels.
 - Always: create an ordinary expense, use the current default expense account
   and category, keep presets positive and non-empty, share only preset settings
   through the app group, and let WidgetKit reload after intent completion.
-- Ask first: per-preset account/category settings, more than three presets,
+- Ask first: per-preset account/category settings, more than nine presets,
   changing the SwiftData store layout, or a new dependency.
 - Never: stage a failed preset as pending review, create duplicate stores, merge
   to `dev`/`main`, push, or install on iPhone without explicit approval.
 
 ## Success Criteria
 
-- A small and medium Quick Expense widget show the three configured presets.
+- Small, medium, and large Quick Expense widgets show up to 3, 6, and 9
+  configured presets.
 - Defaults are `☕ 35k`, `🍜 50k`, and `⛽ 100k`.
 - The owner can edit every emoji and amount on the transaction Defaults screen;
   valid changes persist across launches and refresh installed widgets.
@@ -94,6 +96,5 @@ stable enum identity for all three rows, and explicit accessibility labels.
 
 ## Open Questions
 
-None. The supplied examples define the three defaults; configuration is limited
-to emoji and amount, while account/category continue to come from the existing
-transaction defaults.
+None. Configuration is limited to count, emoji, and amount, while
+account/category continue to come from the existing transaction defaults.

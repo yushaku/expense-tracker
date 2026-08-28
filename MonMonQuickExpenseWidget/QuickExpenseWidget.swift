@@ -8,7 +8,7 @@ struct QuickExpenseEntry: TimelineEntry {
 
 struct QuickExpenseProvider: TimelineProvider {
     func placeholder(in context: Context) -> QuickExpenseEntry {
-        QuickExpenseEntry(date: .now, presets: QuickExpensePreset.defaults)
+        QuickExpenseEntry(date: .now, presets: QuickExpenseConfiguration.defaults.activePresets)
     }
 
     func getSnapshot(
@@ -26,7 +26,7 @@ struct QuickExpenseProvider: TimelineProvider {
     }
 
     private var currentEntry: QuickExpenseEntry {
-        QuickExpenseEntry(date: .now, presets: QuickExpensePresetStore().load())
+        QuickExpenseEntry(date: .now, presets: QuickExpensePresetStore().load().activePresets)
     }
 }
 
@@ -36,13 +36,13 @@ struct QuickExpenseWidgetView: View {
     let entry: QuickExpenseEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            if family == .systemMedium {
+        VStack(alignment: .leading, spacing: 8) {
+            if family != .systemSmall {
                 Label("Quick Expense", systemImage: "bolt.fill")
                     .font(.headline)
                     .foregroundStyle(.tint)
 
-                HStack(spacing: 8) {
+                LazyVGrid(columns: columns, spacing: 8) {
                     presetButtons
                 }
             } else {
@@ -58,8 +58,29 @@ struct QuickExpenseWidgetView: View {
 
     @ViewBuilder
     private var presetButtons: some View {
-        ForEach(entry.presets) { preset in
+        ForEach(visiblePresets) { preset in
             QuickExpenseButton(preset: preset)
+        }
+    }
+
+    private var columns: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: 8), count: 3)
+    }
+
+    private var visiblePresets: [QuickExpensePreset] {
+        Array(entry.presets.prefix(maximumPresetCount))
+    }
+
+    private var maximumPresetCount: Int {
+        switch family {
+        case .systemSmall:
+            3
+        case .systemMedium:
+            6
+        case .systemLarge:
+            9
+        default:
+            3
         }
     }
 }
@@ -99,7 +120,7 @@ struct MonMonQuickExpenseWidget: Widget {
             QuickExpenseWidgetView(entry: entry)
         }
         .configurationDisplayName("Quick Expense")
-        .description("Record one of your three preset expenses with one tap.")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .description("Record one of your configured preset expenses with one tap.")
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
