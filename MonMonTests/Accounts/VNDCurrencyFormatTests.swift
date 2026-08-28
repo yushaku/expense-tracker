@@ -59,14 +59,10 @@ struct VNDCurrencyFormatTests {
         #expect(VNDCurrency.parse(text) == amount)
     }
 
-    @Test("Money input groups thousands on every assignment")
-    func moneyInputGroupsThousandsAsTheOwnerTypes() {
-        @VNDInput var text = ""
-
-        text = "80000"
-        #expect(text == "80.000")
-
-        text = "10000000"
-        #expect(text == "10.000.000")
+    @Test("Live money input publishes only the grouped replacement")
+    func liveMoneyInputPublishesOnlyTheGroupedReplacement() {
+        #expect(VNDCurrency.liveInputUpdate(for: "80000") == "80.000")
+        #expect(VNDCurrency.liveInputUpdate(for: "1000000") == "1.000.000")
+        #expect(VNDCurrency.liveInputUpdate(for: "1.000.000") == nil)
     }
 }

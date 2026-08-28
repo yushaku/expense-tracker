@@ -16,7 +16,7 @@ struct DebtDraft: Equatable {
 
     var counterparty: String
     var direction: DebtDirection
-    @VNDInput var principalText: String
+    var principalText: String
     /// Blank means zero. An interest-free loan from a relative is the common
     /// case and should not require a typed nought — a deliberate divergence
     /// from `SavingsDraft`, where a term deposit paying nothing is nonsense.

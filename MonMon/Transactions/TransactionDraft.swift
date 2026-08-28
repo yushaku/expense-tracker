@@ -92,7 +92,7 @@ enum TransactionDefaults {
 
 struct TransactionDraft: Equatable {
     var kind: TransactionKind
-    @VNDInput var amountText: String
+    var amountText: String
     var occurredAt: Date
     var note: String
     var accountID: UUID?

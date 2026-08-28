@@ -243,14 +243,8 @@ struct TransactionEditorForm: View {
 
     @ViewBuilder
     private var amountTextField: some View {
-        #if os(iOS)
-            TextField("0", text: $draft.amountText)
-                .keyboardType(.numberPad)
-                .accessibilityIdentifier("transaction-amount")
-        #else
-            TextField("0", text: $draft.amountText)
-                .accessibilityIdentifier("transaction-amount")
-        #endif
+        VNDTextField(text: $draft.amountText)
+            .accessibilityIdentifier("transaction-amount")
     }
 
     private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {

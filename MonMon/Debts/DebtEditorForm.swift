@@ -339,14 +339,8 @@ struct DebtEditorForm: View {
 
     @ViewBuilder
     private var principalTextField: some View {
-        #if os(iOS)
-            TextField("0", text: $draft.principalText)
-                .keyboardType(.numberPad)
-                .accessibilityIdentifier("debt-principal")
-        #else
-            TextField("0", text: $draft.principalText)
-                .accessibilityIdentifier("debt-principal")
-        #endif
+        VNDTextField(text: $draft.principalText)
+            .accessibilityIdentifier("debt-principal")
     }
 
     @ViewBuilder

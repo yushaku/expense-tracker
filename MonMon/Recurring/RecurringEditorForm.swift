@@ -318,14 +318,8 @@ struct RecurringEditorForm: View {
 
     @ViewBuilder
     private var amountTextField: some View {
-        #if os(iOS)
-            TextField("0", text: $draft.amountText)
-                .keyboardType(.numberPad)
-                .accessibilityIdentifier("recurring-amount")
-        #else
-            TextField("0", text: $draft.amountText)
-                .accessibilityIdentifier("recurring-amount")
-        #endif
+        VNDTextField(text: $draft.amountText)
+            .accessibilityIdentifier("recurring-amount")
     }
 
     @ViewBuilder

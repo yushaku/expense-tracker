@@ -260,14 +260,8 @@ struct DebtPaymentEditorForm: View {
 
     @ViewBuilder
     private var amountTextField: some View {
-        #if os(iOS)
-            TextField("0", text: $draft.amountText)
-                .keyboardType(.numberPad)
-                .accessibilityIdentifier("debt-payment-amount")
-        #else
-            TextField("0", text: $draft.amountText)
-                .accessibilityIdentifier("debt-payment-amount")
-        #endif
+        VNDTextField(text: $draft.amountText)
+            .accessibilityIdentifier("debt-payment-amount")
     }
 
     private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {

@@ -18,7 +18,7 @@ struct FundInstrumentDraft: Equatable {
     var symbol: String
     var name: String
     var kind: FundInstrumentKind
-    @VNDInput var priceText: String
+    var priceText: String
     var priceAsOf: Date
     var autoQuoteEnabled: Bool
 

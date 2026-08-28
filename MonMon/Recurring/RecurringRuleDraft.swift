@@ -22,7 +22,7 @@ struct RecurringRuleDraft: Equatable {
     static let maxBackfill = 400
 
     var kind: TransactionKind
-    @VNDInput var amountText: String
+    var amountText: String
     var note: String
     var accountID: UUID?
     var categoryID: UUID?
