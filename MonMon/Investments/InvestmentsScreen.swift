@@ -72,10 +72,6 @@ struct InvestmentsScreen: View {
 
                     segmentPicker
 
-                    if !segment.instrumentKinds.isEmpty {
-                        refreshBar
-                    }
-
                     selectedSection
                 }
                 .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -211,46 +207,6 @@ struct InvestmentsScreen: View {
         )
     }
 
-    /// Refresh, and whatever the last one came to.
-    ///
-    /// On this screen rather than only inside the catalogue sheet: this is
-    /// where the valuations are read, so this is where somebody notices a price
-    /// is behind and wants it fetched.
-    private var refreshBar: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Button {
-                refresh()
-            } label: {
-                Label(
-                    refresher.isRunning ? "Refreshing…" : "Refresh prices",
-                    systemImage: "arrow.clockwise"
-                )
-                .font(.subheadline.weight(.semibold))
-                .lineLimit(1)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 11)
-                .background(Capsule().fill(MonMonTheme.accent.opacity(0.16)))
-                .contentShape(Capsule())
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(MonMonTheme.accent)
-            .disabled(refresher.isRunning || !canRefresh)
-            .accessibilityLabel("Refresh prices")
-            .accessibilityIdentifier("refresh-investment-quotes")
-
-            if let summary = refreshSummary {
-                Text(summary)
-                    .font(.caption)
-                    .foregroundStyle(
-                        refresher.outcomes.values.contains(where: \.isFailure)
-                            ? MonMonTheme.danger : MonMonTheme.textSecondary
-                    )
-                    .accessibilityIdentifier("refresh-investment-summary")
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
     /// What the last refresh did, in one line. A failure is what the line
     /// carries when there is one: an owner who asked for prices and got none
     /// needs to know why more than they need a count of the rest.
@@ -273,6 +229,10 @@ struct InvestmentsScreen: View {
             return outcomes.compactMap { $0.message(in: locale) }.first
         }
         return AppText.string("\(updated) updated", in: locale)
+    }
+
+    private var hasRefreshFailure: Bool {
+        pricedInstruments.contains { refresher.outcomes[$0.id]?.isFailure == true }
     }
 
     /// Refresh is offered only where a request could achieve something: a held
@@ -334,7 +294,12 @@ struct InvestmentsScreen: View {
                     """,
                 emptySystemImage: "chart.line.uptrend.xyaxis",
                 addTitle: InvestmentSegment.funds.addTitle,
-                addIdentifier: InvestmentSegment.funds.addIdentifier
+                addIdentifier: InvestmentSegment.funds.addIdentifier,
+                onRefresh: { refresh() },
+                isRefreshing: refresher.isRunning,
+                canRefresh: canRefresh,
+                refreshMessage: refreshSummary,
+                hasFailure: hasRefreshFailure
             ) {
                 add()
             }
@@ -352,7 +317,12 @@ struct InvestmentsScreen: View {
                     """,
                 emptySystemImage: "seal.fill",
                 addTitle: InvestmentSegment.gold.addTitle,
-                addIdentifier: InvestmentSegment.gold.addIdentifier
+                addIdentifier: InvestmentSegment.gold.addIdentifier,
+                onRefresh: { refresh() },
+                isRefreshing: refresher.isRunning,
+                canRefresh: canRefresh,
+                refreshMessage: refreshSummary,
+                hasFailure: hasRefreshFailure
             ) {
                 add()
             }
