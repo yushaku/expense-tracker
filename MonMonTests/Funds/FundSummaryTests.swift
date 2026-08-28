@@ -53,6 +53,59 @@ struct FundSummaryTests {
         )
     }
 
+    /// Selling moves a gain from the unrealized figure to the realized one. The
+    /// total has to carry both, or the card loses the gain the moment it is
+    /// taken.
+    @Test("The total carries the realized gain as well as the paper one")
+    func totalCountsRealizedAndUnrealized() {
+        let instrument = FundTestFactory.instrument(symbol: "VESAF", pricePerUnit: 30_000)
+        let holding = FundTestFactory.holding(
+            in: instrument,
+            units: 1_000,
+            averageCostPerUnit: 20_000
+        )
+        // 400 units out at 25.000 ₫: 8.000.000 ₫ of cost returning 10.000.000 ₫.
+        let sale = FundTestFactory.sale(of: holding, units: 400, pricePerUnit: 25_000)
+
+        // 600 units left, costing 12.000.000 ₫ and worth 18.000.000 ₫.
+        #expect(
+            FundSummary.totalUnrealizedProfitLoss(
+                of: [holding], instruments: [instrument], sales: [sale])
+                == 6_000_000
+        )
+        #expect(
+            FundSummary.totalProfitLoss(
+                of: [holding], instruments: [instrument], sales: [sale])
+                == 8_000_000
+        )
+    }
+
+    /// Against the open cost alone this would read 66,67%, a return on money no
+    /// longer invested.
+    @Test("The total percent is measured against everything put in")
+    func totalPercentCountsSoldCost() {
+        let instrument = FundTestFactory.instrument(symbol: "VESAF", pricePerUnit: 30_000)
+        let holding = FundTestFactory.holding(
+            in: instrument,
+            units: 1_000,
+            averageCostPerUnit: 20_000
+        )
+        let sale = FundTestFactory.sale(of: holding, units: 400, pricePerUnit: 25_000)
+
+        // 8.000.000 ₫ against 12.000.000 ₫ still held plus 8.000.000 ₫ sold.
+        #expect(
+            FundSummary.totalReturnPercent(
+                of: [holding], instruments: [instrument], sales: [sale])
+                == 40
+        )
+    }
+
+    @Test("Nothing held and nothing sold divides by nothing")
+    func totalPercentOfNothingIsZero() {
+        #expect(FundSummary.totalProfitLoss(of: [], instruments: [], sales: []) == 0)
+        #expect(FundSummary.totalReturnPercent(of: [], instruments: [], sales: []) == 0)
+    }
+
     /// The whole reason the price moved off the position: two lots of one ticker
     /// are valued at one price, and cannot drift apart.
     @Test("Two holdings of one instrument share its price")
