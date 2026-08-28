@@ -25,6 +25,19 @@ struct FundSection: View {
     let emptySystemImage: String
     let addTitle: LocalizedStringKey
     let addIdentifier: String
+    /// Refetches the prices this section is valued from. `nil` where nothing
+    /// offers one — a preview, or a section that only reports.
+    var onRefresh: (() -> Void)?
+    var isRefreshing = false
+    /// Whether a request could achieve anything: something held, with automatic
+    /// quotes left on. The icon stays visible and goes dim when it could not,
+    /// rather than appearing and disappearing as positions are sold.
+    var canRefresh = false
+    /// What the last refresh came to, when it is worth saying. Failures are.
+    var refreshMessage: String?
+    /// Whether the message above reports a failure rather than a count. Passed
+    /// in because the outcomes belong to the refresher, not to this view.
+    var hasFailure = false
     let onAdd: () -> Void
 
     var body: some View {
@@ -205,6 +218,37 @@ struct FundSection: View {
         }
     }
 
+    /// An icon on the title's line rather than a button of its own above the
+    /// list: refreshing is something done to what is already on screen, and a
+    /// labelled button cost a row of height to say what the arrow says.
+    private func refreshButton(_ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Group {
+                if isRefreshing {
+                    ProgressView()
+                        .controlSize(.small)
+                } else {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.subheadline.weight(.semibold))
+                }
+            }
+            .frame(width: 32, height: 32)
+            .background(MonMonTheme.funds.opacity(0.16), in: Circle())
+            .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(MonMonTheme.funds)
+        .disabled(isRefreshing || !canRefresh)
+        .opacity(canRefresh || isRefreshing ? 1 : 0.4)
+        .accessibilityLabel("Refresh prices")
+        .accessibilityIdentifier("refresh-investment-quotes")
+    }
+
+    /// A message the refresh failed on is the one thing here worth colouring.
+    private var isRefreshFailure: Bool {
+        refreshMessage != nil && !isRefreshing && hasFailure
+    }
+
     /// One card per fund, not per purchase. Buying the same fund every month is
     /// one position built in instalments, and a list that showed each instalment
     /// buried what the position actually is; the instalments are one tap in.
@@ -222,6 +266,19 @@ struct FundSection: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
                     .background(MonMonTheme.funds.opacity(0.16), in: Capsule())
+
+                if let onRefresh {
+                    refreshButton(onRefresh)
+                }
+            }
+
+            if let refreshMessage {
+                Text(refreshMessage)
+                    .font(.caption)
+                    .foregroundStyle(
+                        isRefreshFailure ? MonMonTheme.danger : MonMonTheme.textSecondary
+                    )
+                    .accessibilityIdentifier("refresh-summary")
             }
 
             ForEach(groups) { group in
