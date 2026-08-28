@@ -21,10 +21,16 @@ struct QuickExpensePreset: Codable, Equatable, Identifiable, Sendable {
 
     init(slot: QuickExpenseSlot, symbol: String, amount: Decimal) throws {
         let normalizedSymbol = symbol.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard normalizedSymbol.count == 1 else {
+        let containsEmojiPresentation = normalizedSymbol.unicodeScalars.contains {
+            $0.properties.isEmojiPresentation || $0.value == 0xFE0F
+        }
+        guard normalizedSymbol.count == 1, containsEmojiPresentation else {
             throw QuickExpensePresetError.invalidSymbol
         }
-        guard amount > 0 else {
+        var amountToRound = amount
+        var roundedAmount = Decimal()
+        NSDecimalRound(&roundedAmount, &amountToRound, 0, .plain)
+        guard amount > 0, amount == roundedAmount else {
             throw QuickExpensePresetError.invalidAmount
         }
 

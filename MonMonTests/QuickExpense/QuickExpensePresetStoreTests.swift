@@ -41,15 +41,21 @@ struct QuickExpensePresetStoreTests {
         #expect(throws: QuickExpensePresetError.invalidSymbol) {
             try QuickExpensePreset(slot: .coffee, symbol: "☕☕", amount: 35_000)
         }
+        #expect(throws: QuickExpensePresetError.invalidSymbol) {
+            try QuickExpensePreset(slot: .coffee, symbol: "C", amount: 35_000)
+        }
     }
 
-    @Test("A preset amount must be positive")
+    @Test("A preset amount must be positive and whole")
     func amountValidation() {
         #expect(throws: QuickExpensePresetError.invalidAmount) {
             try QuickExpensePreset(slot: .coffee, symbol: "☕", amount: 0)
         }
         #expect(throws: QuickExpensePresetError.invalidAmount) {
             try QuickExpensePreset(slot: .coffee, symbol: "☕", amount: -1)
+        }
+        #expect(throws: QuickExpensePresetError.invalidAmount) {
+            try QuickExpensePreset(slot: .coffee, symbol: "☕", amount: 35_000.5)
         }
     }
 

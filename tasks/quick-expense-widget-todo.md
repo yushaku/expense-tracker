@@ -32,8 +32,8 @@ Files: defaults view/editor, widget extension, project file.
 
 ## Task 4: Review and verification
 
-- [ ] Run the full macOS unit suite.
-- [ ] Run recursive Swift format lint.
-- [ ] Run the non-Simulator iOS SDK build.
-- [ ] Review correctness, readability, architecture, security, and performance.
-- [ ] Commit on `feat/quick-expense-widget`; do not merge, push, or install.
+- [x] Run the full macOS unit suite.
+- [x] Run recursive Swift format lint.
+- [x] Run the non-Simulator iOS SDK build.
+- [x] Review correctness, readability, architecture, security, and performance.
+- [x] Commit on `feat/quick-expense-widget`; do not merge, push, or install.

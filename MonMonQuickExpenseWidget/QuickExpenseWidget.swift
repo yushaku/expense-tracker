@@ -37,16 +37,16 @@ struct QuickExpenseWidgetView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("Quick Expense", systemImage: "bolt.fill")
-                .font(.headline)
-                .foregroundStyle(.tint)
-
             if family == .systemMedium {
+                Label("Quick Expense", systemImage: "bolt.fill")
+                    .font(.headline)
+                    .foregroundStyle(.tint)
+
                 HStack(spacing: 8) {
                     presetButtons
                 }
             } else {
-                VStack(spacing: 7) {
+                VStack(spacing: 5) {
                     presetButtons
                 }
             }

@@ -4,7 +4,7 @@ import WidgetKit
 struct QuickExpensePresetsCard: View {
     @State private var drafts: [QuickExpensePresetDraft] = []
     @State private var savedDrafts: [QuickExpensePresetDraft] = []
-    @State private var statusMessage: String?
+    @State private var statusMessage: LocalizedStringResource?
 
     private let store = QuickExpensePresetStore()
 
@@ -57,7 +57,8 @@ struct QuickExpensePresetsCard: View {
             savedDrafts = loadedDrafts
         }
         .onChange(of: drafts) {
-            statusMessage = isValid ? nil : "Use one emoji and a positive amount for every preset."
+            statusMessage =
+                isValid ? nil : "Use one emoji and a positive whole amount for every preset."
         }
     }
 
@@ -73,7 +74,7 @@ struct QuickExpensePresetsCard: View {
             statusMessage = "Saved. The widget is up to date."
             WidgetCenter.shared.reloadTimelines(ofKind: QuickExpenseWidgetConfiguration.kind)
         } catch {
-            statusMessage = "Use one emoji and a positive amount for every preset."
+            statusMessage = "Use one emoji and a positive whole amount for every preset."
         }
     }
 }
@@ -106,7 +107,7 @@ private struct QuickExpensePresetRow: View {
             TextField("Emoji", text: $draft.symbol)
                 .multilineTextAlignment(.center)
                 .frame(minWidth: 56)
-                .accessibilityLabel("\(draft.slot.title) emoji")
+                .accessibilityLabel(Text(draft.slot.emojiFieldLabel))
                 .accessibilityIdentifier("quick-expense-\(draft.slot.rawValue)-symbol")
 
             TextField("Amount", text: $draft.amountText)
@@ -122,7 +123,7 @@ private struct QuickExpensePresetRow: View {
                         draft.amountText = formatted
                     }
                 }
-                .accessibilityLabel("\(draft.slot.title) amount")
+                .accessibilityLabel(Text(draft.slot.amountFieldLabel))
                 .accessibilityIdentifier("quick-expense-\(draft.slot.rawValue)-amount")
         }
         .textFieldStyle(.roundedBorder)
@@ -130,7 +131,7 @@ private struct QuickExpensePresetRow: View {
 }
 
 private extension QuickExpenseSlot {
-    var title: String {
+    var title: LocalizedStringResource {
         switch self {
         case .coffee:
             "Coffee"
@@ -138,6 +139,28 @@ private extension QuickExpenseSlot {
             "Lunch"
         case .fuel:
             "Fuel"
+        }
+    }
+
+    var emojiFieldLabel: LocalizedStringResource {
+        switch self {
+        case .coffee:
+            "Coffee emoji"
+        case .lunch:
+            "Lunch emoji"
+        case .fuel:
+            "Fuel emoji"
+        }
+    }
+
+    var amountFieldLabel: LocalizedStringResource {
+        switch self {
+        case .coffee:
+            "Coffee amount"
+        case .lunch:
+            "Lunch amount"
+        case .fuel:
+            "Fuel amount"
         }
     }
 }

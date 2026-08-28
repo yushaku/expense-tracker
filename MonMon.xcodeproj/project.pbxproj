@@ -12,6 +12,7 @@
 		J10000000000000000000203 /* QuickExpenseIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000103 /* QuickExpenseIntent.swift */; };
 		J10000000000000000000204 /* VNDCurrency.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000122 /* VNDCurrency.swift */; };
 		J10000000000000000000205 /* MonMonQuickExpenseWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = J10000000000000000000101 /* MonMonQuickExpenseWidget.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		J10000000000000000000206 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000008 /* Localizable.xcstrings */; };
 		W10000000000000000000203 /* QuickExpenseIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000103 /* QuickExpenseIntent.swift */; };
 		W10000000000000000000204 /* QuickExpensePresetDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000104 /* QuickExpensePresetDraft.swift */; };
 		W10000000000000000000205 /* QuickExpensePresetsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000105 /* QuickExpensePresetsCard.swift */; };
@@ -1423,6 +1424,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				J10000000000000000000206 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -24,7 +24,7 @@ WidgetKit reloads the widget timeline.
 
 - Test: `rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO test`
 - Lint: `rtk swift format lint --strict --recursive MonMon MonMonTests MonMonShareExtension MonMonQuickExpenseWidget`
-- Build: `rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -sdk iphonesimulator -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=NO build`
+- Build: `rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'generic/platform=iOS' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO build`
 - Physical-device validation after an approved merge to `dev` only:
   `scripts/run-iphone.sh Yushaku`
 
@@ -49,7 +49,8 @@ let preset = try QuickExpensePreset(
     symbol: "☕",
     amount: 35_000
 )
-try store.save([preset])
+let presets = [preset] + Array(QuickExpensePreset.defaults.dropFirst())
+try store.save(presets)
 ```
 
 Use native `Button(intent:)` controls in the widget, theme tokens in the app,
