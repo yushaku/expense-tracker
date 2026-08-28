@@ -1,9 +1,5 @@
 import SwiftUI
 
-struct AccountActivityRoute: Hashable {
-    let accountID: UUID
-}
-
 struct AccountSpendingSection: View {
     @Environment(\.locale) private var locale
 
@@ -74,14 +70,14 @@ struct AccountSpendingSection: View {
     private var accountRows: some View {
         VStack(spacing: 10) {
             ForEach(displayRows) { row in
-                NavigationLink(value: AccountActivityRoute(accountID: row.account.id)) {
+                NavigationLink(value: AccountDetailRoute(accountID: row.account.id)) {
                     accountRow(row)
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier(
                     "report-account-spending-\(row.account.id.uuidString)"
                 )
-                .accessibilityHint("Shows all activity for this account.")
+                .accessibilityHint("Shows account details and activity.")
             }
         }
     }
