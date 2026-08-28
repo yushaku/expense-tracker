@@ -12,8 +12,8 @@ enum SavingsWithdrawalFormError: Error, Equatable {
 }
 
 struct SavingsWithdrawalDraft: Equatable {
-    var principalText: String
-    var amountReceivedText: String
+    @VNDInput var principalText: String
+    @VNDInput var amountReceivedText: String
     var withdrawnAt: Date
     var destinationAccountID: UUID?
     var note: String

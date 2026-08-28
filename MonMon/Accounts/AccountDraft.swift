@@ -11,8 +11,8 @@ enum AccountFormError: Error, Equatable {
 struct AccountDraft: Equatable {
     var name: String
     var kind: CashAccountKind
-    var openingBalanceText: String
-    var creditLimitText: String
+    @VNDInput var openingBalanceText: String
+    @VNDInput var creditLimitText: String
 
     init(
         name: String = "",

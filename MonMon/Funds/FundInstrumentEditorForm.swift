@@ -219,20 +219,13 @@ struct FundInstrumentEditorForm: View {
     @ViewBuilder
     private var priceTextField: some View {
         #if os(iOS)
-            TextField("0", text: priceTextBinding)
+            TextField("0", text: $draft.priceText)
                 .keyboardType(.decimalPad)
                 .accessibilityIdentifier("instrument-price")
         #else
-            TextField("0", text: priceTextBinding)
+            TextField("0", text: $draft.priceText)
                 .accessibilityIdentifier("instrument-price")
         #endif
-    }
-
-    private var priceTextBinding: Binding<String> {
-        Binding(
-            get: { draft.priceText },
-            set: { draft.priceText = VNDCurrency.formatInput($0) }
-        )
     }
 
     private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {

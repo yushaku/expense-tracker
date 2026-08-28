@@ -16,7 +16,7 @@ struct SavingsDraft: Equatable {
     static let termRange: ClosedRange<Int> = 1...120
 
     var name: String
-    var principalText: String
+    @VNDInput var principalText: String
     var rateText: String
     var termMonthsText: String
     var openedAt: Date
