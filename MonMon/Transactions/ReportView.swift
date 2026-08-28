@@ -40,8 +40,7 @@ struct ReportView: View {
     @State private var editorMode: TransactionEditorMode?
     @State private var isFiltering = false
 
-    /// One details sheet and one delete question for the whole list, rather
-    /// than one of each per row.
+    /// One interaction host for the whole list, rather than one per row.
     @State private var transactionActions = TransactionActions()
 
     /// Weekday first: over a run of days the name is what the eye picks out, and

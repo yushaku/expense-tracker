@@ -182,4 +182,48 @@ struct MoneyTransactionPersistenceTests {
             ) == 10_000_000
         )
     }
+
+    @Test("A deleted transaction can be restored with all of its original data")
+    func deletedTransactionCanBeRestored() throws {
+        let container = try makeContainer()
+        let context = ModelContext(container)
+        let account = makeAccount(openingBalance: 10_000_000)
+        let transactionID = UUID()
+        let categoryID = UUID()
+        let ruleID = UUID()
+        context.insert(account)
+
+        let transaction = MoneyTransaction(
+            id: transactionID,
+            kind: .expense,
+            amount: 200_000,
+            occurredAt: occurredAt,
+            note: "Lunch",
+            accountID: account.id,
+            categoryID: categoryID,
+            sourceRuleID: ruleID,
+            currencyCode: VNDCurrency.code,
+            createdAt: occurredAt.addingTimeInterval(-60),
+            sourceImportID: "statement-row"
+        )
+        context.insert(transaction)
+        try context.save()
+
+        let deleted = try TransactionDeletion.delete(transaction, from: context)
+        let restored = try TransactionDeletion.restore(deleted, in: context)
+        let stored = try #require(try context.fetch(FetchDescriptor<MoneyTransaction>()).first)
+
+        #expect(stored === restored)
+        #expect(restored.id == transactionID)
+        #expect(restored.kind == .expense)
+        #expect(restored.amount == 200_000)
+        #expect(restored.occurredAt == occurredAt)
+        #expect(restored.note == "Lunch")
+        #expect(restored.accountID == account.id)
+        #expect(restored.categoryID == categoryID)
+        #expect(restored.sourceRuleID == ruleID)
+        #expect(restored.currencyCode == VNDCurrency.code)
+        #expect(restored.createdAt == occurredAt.addingTimeInterval(-60))
+        #expect(restored.sourceImportID == "statement-row")
+    }
 }

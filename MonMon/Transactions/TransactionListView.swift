@@ -29,8 +29,7 @@ struct TransactionListView: View {
     @State private var isShowingImportInbox = false
     @State private var isShowingAccounts = false
 
-    /// One details sheet and one delete question for the whole list, rather
-    /// than one of each per row.
+    /// One interaction host for the whole list, rather than one per row.
     @State private var transactionActions = TransactionActions()
     @State private var isShowingCaptureInbox = false
     @State private var isShowingQuickCapture = false
@@ -137,6 +136,7 @@ struct TransactionListView: View {
             }
             .transactionActions(
                 transactionActions,
+                undoBottomInset: FloatingAddButton.contentInset,
                 category: category(for:),
                 account: account(for:),
                 onEdit: { transaction in
