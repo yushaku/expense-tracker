@@ -49,4 +49,18 @@ enum InvestmentSegment: String, CaseIterable, Identifiable, Hashable {
             "add-gold"
         }
     }
+
+    /// The instrument kinds this segment prices, empty for the one that holds
+    /// no instruments at all. Savings pays a stated rate rather than carrying a
+    /// quote, so there is nothing to refresh on it.
+    var instrumentKinds: [FundInstrumentKind] {
+        switch self {
+        case .savings:
+            []
+        case .funds:
+            [.fund, .etf]
+        case .gold:
+            [.gold]
+        }
+    }
 }

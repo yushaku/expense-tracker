@@ -48,8 +48,11 @@ struct InvestmentsScreen: View {
 
     @Environment(\.locale) private var locale
 
+    @Environment(\.modelContext) private var modelContext
+
     @State private var segment: InvestmentSegment
     @State private var editor: InvestmentEditorMode?
+    @State private var refresher = FundPriceRefresher()
 
     /// Which list is in front on arrival. The Wealth screen names all three
     /// before pushing here, so landing on the one that was tapped saves the
@@ -68,6 +71,10 @@ struct InvestmentsScreen: View {
                     summaryCard
 
                     segmentPicker
+
+                    if !segment.instrumentKinds.isEmpty {
+                        refreshBar
+                    }
 
                     selectedSection
                 }
@@ -92,6 +99,18 @@ struct InvestmentsScreen: View {
         }
         .navigationTitle("Investments")
         .accessibilityIdentifier("investments-list")
+        // Opening a segment onto a price older than the day it should carry
+        // fetches it. Keyed on the segment so switching to gold prices gold,
+        // and bounded by the refresher: current prices ask for nothing, and a
+        // ticker asked about minutes ago is not asked about again.
+        .task(id: segment) {
+            await refresher.refreshStale(
+                instruments: pricedInstruments,
+                holdings: holdings,
+                sales: sales,
+                in: modelContext
+            )
+        }
         .appSheet(item: $editor) { mode in
             switch mode {
             case .savings(let savingsMode):
@@ -190,6 +209,97 @@ struct InvestmentsScreen: View {
             instruments: instruments,
             sales: sales
         )
+    }
+
+    /// Refresh, and whatever the last one came to.
+    ///
+    /// On this screen rather than only inside the catalogue sheet: this is
+    /// where the valuations are read, so this is where somebody notices a price
+    /// is behind and wants it fetched.
+    private var refreshBar: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Button {
+                refresh()
+            } label: {
+                Label(
+                    refresher.isRunning ? "Refreshing…" : "Refresh prices",
+                    systemImage: "arrow.clockwise"
+                )
+                .font(.subheadline.weight(.semibold))
+                .lineLimit(1)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 11)
+                .background(Capsule().fill(MonMonTheme.accent.opacity(0.16)))
+                .contentShape(Capsule())
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(MonMonTheme.accent)
+            .disabled(refresher.isRunning || !canRefresh)
+            .accessibilityLabel("Refresh prices")
+            .accessibilityIdentifier("refresh-investment-quotes")
+
+            if let summary = refreshSummary {
+                Text(summary)
+                    .font(.caption)
+                    .foregroundStyle(
+                        refresher.outcomes.values.contains(where: \.isFailure)
+                            ? MonMonTheme.danger : MonMonTheme.textSecondary
+                    )
+                    .accessibilityIdentifier("refresh-investment-summary")
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// What the last refresh did, in one line. A failure is what the line
+    /// carries when there is one: an owner who asked for prices and got none
+    /// needs to know why more than they need a count of the rest.
+    private var refreshSummary: String? {
+        guard !refresher.isRunning else {
+            return nil
+        }
+
+        let outcomes = pricedInstruments.compactMap { refresher.outcomes[$0.id] }
+        guard !outcomes.isEmpty else {
+            return nil
+        }
+
+        if let failure = outcomes.first(where: \.isFailure) {
+            return failure.message(in: locale)
+        }
+
+        let updated = outcomes.filter(\.isUpdate).count
+        guard updated > 0 else {
+            return outcomes.compactMap { $0.message(in: locale) }.first
+        }
+        return AppText.string("\(updated) updated", in: locale)
+    }
+
+    /// Refresh is offered only where a request could achieve something: a held
+    /// instrument of the kind on show, with automatic quotes left on.
+    private var canRefresh: Bool {
+        refresher.hasAnythingToRefresh(
+            instruments: pricedInstruments,
+            holdings: holdings,
+            sales: sales
+        )
+    }
+
+    /// The instruments the segment on show is priced from.
+    private var pricedInstruments: [FundInstrument] {
+        let kinds = segment.instrumentKinds
+        return instruments.filter { kinds.contains($0.kind) }
+    }
+
+    private func refresh() {
+        Task {
+            await refresher.refresh(
+                instruments: pricedInstruments,
+                holdings: holdings,
+                sales: sales,
+                in: modelContext
+            )
+        }
     }
 
     private var segmentPicker: some View {

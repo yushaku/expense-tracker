@@ -5,9 +5,8 @@ import SwiftData
 /// Loads a provider's catalogue so the owner can pick entries instead of typing
 /// a symbol, name, and price one at a time.
 ///
-/// Owner-triggered, like every other outbound call in the app: the list is
-/// fetched when the import screen is opened, and nothing is written until
-/// something is chosen.
+/// The list is fetched when the import screen is opened, and nothing is written
+/// until something is chosen. Opening this screen is the ask.
 @MainActor
 @Observable
 final class FundCatalogueImport {

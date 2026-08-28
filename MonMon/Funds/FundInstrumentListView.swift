@@ -380,7 +380,8 @@ struct FundInstrumentListView: View {
         )
     }
 
-    /// Owner-triggered, and the only thing in the app that opens a connection.
+    /// Owner-triggered. The Investments screen fetches on opening too, when
+    /// what it shows is out of date; this button asks regardless.
     private func refresh() {
         Task {
             await refresher.refresh(

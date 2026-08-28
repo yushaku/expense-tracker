@@ -22,6 +22,11 @@ struct FundLogoView: View {
                 MonMonTheme.funds.opacity(0.16),
                 in: RoundedRectangle(cornerRadius: size * 0.3, style: .continuous)
             )
+            // The image fills the badge and is cut to its corners, so a logo
+            // sits in the same square the monogram does rather than floating
+            // inside it. Clipping is on the badge rather than the image so the
+            // tinted plate behind a monogram keeps the same shape.
+            .clipShape(RoundedRectangle(cornerRadius: size * 0.3, style: .continuous))
             .accessibilityHidden(true)
     }
 
@@ -30,10 +35,12 @@ struct FundLogoView: View {
         if let url = logoURL.flatMap(URL.init(string:)) {
             AsyncImage(url: url) { phase in
                 if let image = phase.image {
+                    // Filled, not fitted: these are square-ish company marks on
+                    // their own white ground, and fitting them left a border of
+                    // fund mauve around a white tile.
                     image
                         .resizable()
-                        .scaledToFit()
-                        .padding(size * 0.14)
+                        .scaledToFill()
                 } else {
                     // Both the wait and the failure show the monogram. A
                     // spinner in a 44pt badge reads as something being wrong,

@@ -2,10 +2,13 @@ import Foundation
 import Observation
 import SwiftData
 
-/// Refreshes the catalogue's prices when the owner asks.
+/// Refreshes the catalogue's prices, on the owner's word or on opening a screen
+/// that shows a price too old to be right.
 ///
-/// Owner-triggered only: no timer, no background task, no fetch on launch or on
-/// a tab appearing. The app makes no connection nobody asked for.
+/// There is still no timer and no background task: the app fetches while the
+/// owner is looking at the figure it would correct, and never otherwise. What
+/// bounds it is `requestFloor` and staleness — a screen opened twice in a
+/// minute, or opened onto prices already current, asks for nothing.
 @MainActor
 @Observable
 final class FundPriceRefresher {
@@ -39,10 +42,48 @@ final class FundPriceRefresher {
     private(set) var outcomes: [UUID: Outcome] = [:]
 
     private let router: FundQuoteRouter
+    /// Where a missing logo is looked up. Fmarket lists every fund's manager
+    /// and that manager's image in one reply, so a backfill costs one request
+    /// however many instruments are short of one.
+    private let catalogue: any FundCatalogueProvider
     private var lastAttempt: [String: Date] = [:]
+    private var lastLogoAttempt: Date?
 
-    init(router: FundQuoteRouter = FundQuoteRouter()) {
+    init(
+        router: FundQuoteRouter = FundQuoteRouter(),
+        catalogue: any FundCatalogueProvider = FmarketQuoteProvider()
+    ) {
         self.router = router
+        self.catalogue = catalogue
+    }
+
+    /// Whether opening a screen should fetch without being asked: something is
+    /// held, its quotes are automatic, and the price on it is older than the
+    /// newest day it could carry.
+    ///
+    /// Separate from `hasAnythingToRefresh` because the two answer different
+    /// questions. The button stays offered while every price is current — the
+    /// owner may know something the calendar does not — but a screen opening
+    /// onto current prices must ask for nothing.
+    func hasAnythingStale(
+        instruments: [FundInstrument],
+        holdings: [FundHolding],
+        sales: [FundSale],
+        asOf: Date = .now
+    ) -> Bool {
+        instruments.contains { instrument in
+            instrument.autoQuoteEnabled
+                && TradingCalendar.isStale(
+                    priceAsOf: instrument.priceAsOf,
+                    kind: instrument.kind,
+                    asOf: asOf
+                )
+                && FundSummary.totalUnits(
+                    for: instrument,
+                    holdings: holdings,
+                    sales: sales
+                ) > 0
+        }
     }
 
     /// Instruments worth asking about at all: held by something, and not opted
@@ -101,6 +142,13 @@ final class FundPriceRefresher {
             }
         }
 
+        // The logos come last and separately: a fund's image is not its price,
+        // and a listing that will not answer must not cost the prices already
+        // fetched above.
+        if await syncLogos(instruments: instruments, asOf: asOf) {
+            wroteAnything = true
+        }
+
         guard wroteAnything else {
             return
         }
@@ -116,6 +164,81 @@ final class FundPriceRefresher {
                 outcomes[id] = .failed(.transport)
             }
         }
+    }
+
+    /// The same refresh, but only when a price on show is out of date.
+    ///
+    /// This is what a screen calls on opening. It returns without a request
+    /// when everything is current, so arriving at a screen twice in a row is
+    /// silent rather than a spinner over figures that were already right.
+    func refreshStale(
+        instruments: [FundInstrument],
+        holdings: [FundHolding],
+        sales: [FundSale],
+        in context: ModelContext,
+        asOf: Date = .now
+    ) async {
+        guard
+            hasAnythingStale(
+                instruments: instruments,
+                holdings: holdings,
+                sales: sales,
+                asOf: asOf
+            )
+        else {
+            return
+        }
+
+        await refresh(
+            instruments: instruments,
+            holdings: holdings,
+            sales: sales,
+            in: context,
+            asOf: asOf
+        )
+    }
+
+    /// Fills in the manager's logo for funds imported before there were logos,
+    /// or added by hand under a ticker Fmarket lists.
+    ///
+    /// Missing ones only. A logo already stored is left exactly as it is: the
+    /// image is decoration, and re-reading the whole catalogue to rewrite a URL
+    /// that still resolves would spend a request on nothing.
+    ///
+    /// - Returns: whether anything was written.
+    private func syncLogos(instruments: [FundInstrument], asOf: Date) async -> Bool {
+        let missing = instruments.filter { $0.logoURL == nil && $0.kind != .gold }
+        guard !missing.isEmpty else {
+            return false
+        }
+
+        if let last = lastLogoAttempt, asOf.timeIntervalSince(last) < Self.requestFloor {
+            return false
+        }
+        lastLogoAttempt = asOf
+
+        guard let listed = try? await catalogue.catalogue() else {
+            // A logo nobody can fetch is not worth reporting. The badge already
+            // says the only thing there is to say by showing the ticker.
+            return false
+        }
+
+        let logos = Dictionary(
+            listed.compactMap { candidate -> (String, String)? in
+                candidate.logoURL.map { (candidate.symbol.uppercased(), $0) }
+            },
+            uniquingKeysWith: { first, _ in first }
+        )
+
+        var wrote = false
+        for instrument in missing {
+            guard let logo = logos[instrument.symbol.uppercased()] else {
+                continue
+            }
+            instrument.logoURL = logo
+            wrote = true
+        }
+        return wrote
     }
 
     private func refreshOne(
