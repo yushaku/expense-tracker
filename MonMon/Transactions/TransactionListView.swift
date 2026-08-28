@@ -24,7 +24,6 @@ struct TransactionListView: View {
 
     @State private var query = TransactionQuery(range: .month(containing: .now))
     @State private var editorMode: TransactionEditorMode?
-    @State private var breakdownKind: TransactionKind = .expense
     @State private var isManagingCategories = false
     @State private var isManagingRecurring = false
     @State private var isEditingDefaults = false
@@ -66,12 +65,6 @@ struct TransactionListView: View {
                         } else {
                             quickActions
 
-                            CategoryBreakdownCard(
-                                kind: $breakdownKind,
-                                slices: breakdownSlices,
-                                range: query.range
-                            )
-
                             transactionsSection
                         }
                     }
@@ -108,9 +101,6 @@ struct TransactionListView: View {
 
                     DateRangeFilterButton(range: $query.range, systemImage: "calendar")
                 }
-            }
-            .navigationDestination(for: CategoryPeriod.self) { period in
-                CategoryTransactionsView(period: period)
             }
             .navigationDestination(for: DayPeriod.self) { period in
                 DayTransactionsView(period: period)
@@ -394,33 +384,10 @@ struct TransactionListView: View {
         Dictionary(uniqueKeysWithValues: accounts.map { ($0.id, $0.name) })
     }
 
-    private var breakdownSlices: [CategoryBreakdownSlice] {
-        CategoryBreakdown.slices(
-            of: breakdownKind,
-            transactions: breakdownTransactions,
-            categories: categories
-        )
-    }
-
-    /// The category card owns its income/expense choice. Search, category, and
-    /// account filters still narrow it, while the rows' direction picker does
-    /// not override the card's own choice.
-    private var breakdownTransactions: [MoneyTransaction] {
-        var breakdownQuery = query
-        breakdownQuery.filter = .all
-
-        return TransactionSearch.results(
-            of: breakdownQuery,
-            transactions: transactions,
-            categoryNames: categoryNames,
-            accountNames: accountNames
-        )
-    }
-
     /// The three things the owner sets up rather than records: what a
     /// transaction can be filed under, what records itself, and what a new one
-    /// starts on. They sit above the breakdown because each one changes what it
-    /// shows, and none of them belongs on the floating add button.
+    /// starts on. They sit above the transactions, and none of them belongs on
+    /// the floating add button.
     private var quickActions: some View {
         // Four labelled buttons crowd an iPhone in one row, so the labels drop
         // below the icons before the row wraps.
