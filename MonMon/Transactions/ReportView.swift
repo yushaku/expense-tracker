@@ -78,6 +78,12 @@ struct ReportData {
         )
     }
 
+    func categoryWaterfallSummary(
+        categories: [TransactionCategory]
+    ) -> CategoryWaterfallSummary {
+        CategoryWaterfall.summary(transactions: transactions, categories: categories)
+    }
+
     var allowsCategoryKindSelection: Bool {
         globalKind == nil
     }
@@ -202,6 +208,12 @@ struct ReportView: View {
                         range: query.range,
                         showsKindPicker: report.allowsCategoryKindSelection
                     )
+
+                    if visibility.showsCategoryWaterfall {
+                        CategoryWaterfallCard(
+                            summary: report.categoryWaterfallSummary(categories: categories)
+                        )
+                    }
                 }
 
                 AccountSpendingSection(
