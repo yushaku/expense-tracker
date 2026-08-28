@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		W10000000000000000000202 /* QuickExpensePreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000102 /* QuickExpensePreset.swift */; };
+		W10000000000000000000201 /* QuickExpensePresetStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000101 /* QuickExpensePresetStoreTests.swift */; };
 		K10000000000000000000210 /* MonMonBackupDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000110 /* MonMonBackupDocument.swift */; };
 		K10000000000000000000211 /* MonMonBackupDocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000111 /* MonMonBackupDocumentTests.swift */; };
 		K10000000000000000000212 /* MonMonBackupValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000112 /* MonMonBackupValidator.swift */; };
@@ -336,6 +338,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		W10000000000000000000102 /* QuickExpensePreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpensePreset.swift; sourceTree = "<group>"; };
+		W10000000000000000000101 /* QuickExpensePresetStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpensePresetStoreTests.swift; sourceTree = "<group>"; };
 		K10000000000000000000110 /* MonMonBackupDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonMonBackupDocument.swift; sourceTree = "<group>"; };
 		K10000000000000000000111 /* MonMonBackupDocumentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonMonBackupDocumentTests.swift; sourceTree = "<group>"; };
 		K10000000000000000000112 /* MonMonBackupValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonMonBackupValidator.swift; sourceTree = "<group>"; };
@@ -691,6 +695,7 @@
 		A00000000000000000000012 /* MonMon */ = {
 			isa = PBXGroup;
 			children = (
+				W10000000000000000000012 /* QuickExpense */,
 				K10000000000000000000101 /* Backup */,
 				33DE4088303D787400918EDF /* MonMonDebug.entitlements */,
 				A00000000000000000000D00 /* Recurring */,
@@ -709,6 +714,14 @@
 				B10000000000000000000001 /* Imports */,
 			);
 			path = MonMon;
+			sourceTree = "<group>";
+		};
+		W10000000000000000000012 /* QuickExpense */ = {
+			isa = PBXGroup;
+			children = (
+				W10000000000000000000102 /* QuickExpensePreset.swift */,
+			);
+			path = QuickExpense;
 			sourceTree = "<group>";
 		};
 		A00000000000000000000013 /* App */ = {
@@ -740,6 +753,7 @@
 		A00000000000000000000015 /* MonMonTests */ = {
 			isa = PBXGroup;
 			children = (
+				W10000000000000000000011 /* QuickExpense */,
 				K10000000000000000000102 /* Backup */,
 				A00000000000000000000D03 /* Recurring */,
 				A00000000000000000000A09 /* App */,
@@ -754,6 +768,14 @@
 				B10000000000000000000002 /* Imports */,
 			);
 			path = MonMonTests;
+			sourceTree = "<group>";
+		};
+		W10000000000000000000011 /* QuickExpense */ = {
+			isa = PBXGroup;
+			children = (
+				W10000000000000000000101 /* QuickExpensePresetStoreTests.swift */,
+			);
+			path = QuickExpense;
 			sourceTree = "<group>";
 		};
 		A00000000000000000000016 /* Products */ = {
@@ -1361,6 +1383,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				W10000000000000000000202 /* QuickExpensePreset.swift in Sources */,
 				K10000000000000000000210 /* MonMonBackupDocument.swift in Sources */,
 				K10000000000000000000212 /* MonMonBackupValidator.swift in Sources */,
 				K10000000000000000000214 /* MonMonBackupService.swift in Sources */,
@@ -1560,6 +1583,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				W10000000000000000000201 /* QuickExpensePresetStoreTests.swift in Sources */,
 				K10000000000000000000211 /* MonMonBackupDocumentTests.swift in Sources */,
 				K10000000000000000000213 /* MonMonBackupValidatorTests.swift in Sources */,
 				K10000000000000000000215 /* MonMonBackupServiceTests.swift in Sources */,
