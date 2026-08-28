@@ -2492,6 +2492,116 @@
         }
       }
     },
+    "CATEGORY WATERFALL": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DÒNG TIỀN THEO DANH MỤC"
+          }
+        }
+      }
+    },
+    "Cash-flow step": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bước dòng tiền"
+          }
+        }
+      }
+    },
+    "EXPENSES": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CHI"
+          }
+        }
+      }
+    },
+    "Lower balance": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số dư thấp hơn"
+          }
+        }
+      }
+    },
+    "NET SAVINGS": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TIẾT KIỆM RÒNG"
+          }
+        }
+      }
+    },
+    "Net savings": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiết kiệm ròng"
+          }
+        }
+      }
+    },
+    "Other": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khác"
+          }
+        }
+      }
+    },
+    "SAVINGS RATE": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TỶ LỆ TIẾT KIỆM"
+          }
+        }
+      }
+    },
+    "Subtract %@, remaining %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trừ %@, còn lại %@"
+          }
+        }
+      }
+    },
+    "Upper balance": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số dư cao hơn"
+          }
+        }
+      }
+    },
+    "Zero balance": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số dư bằng không"
+          }
+        }
+      }
+    },
     "Backup": {
       "localizations": {
         "vi": {

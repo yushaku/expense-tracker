@@ -114,3 +114,120 @@ enum CategoryBreakdown {
             .sorted { $0.occurredAt > $1.occurredAt }
     }
 }
+
+/// One bar in the running story from income, through each spending category,
+/// to the money left over. Expense amounts stay positive while their end value
+/// falls below their start value, keeping the stored-money sign convention.
+struct CategoryWaterfallStep: Identifiable, Equatable {
+    enum Kind: Equatable {
+        case income
+        case expense
+        case other
+        case netSavings
+    }
+
+    let id: String
+    let name: String
+    let kind: Kind
+    let amount: Decimal
+    let start: Decimal
+    let end: Decimal
+    let colorName: String?
+}
+
+struct CategoryWaterfallSummary: Equatable {
+    let income: Decimal
+    let totalExpense: Decimal
+    let netSavings: Decimal
+    let savingsRate: Decimal?
+    let steps: [CategoryWaterfallStep]
+}
+
+enum CategoryWaterfall {
+    private static let maximumCategoryCount = 6
+
+    /// Builds the complete cash-flow bridge for an already filtered report.
+    /// The six largest categories keep their own bars; the rest form one final
+    /// `Other` subtraction so the chart remains legible on an iPhone.
+    static func summary(
+        transactions: [MoneyTransaction],
+        categories: [TransactionCategory]
+    ) -> CategoryWaterfallSummary {
+        let income = TransactionSummary.totalIncome(of: transactions)
+        let expenseSlices = CategoryBreakdown.slices(
+            of: .expense,
+            transactions: transactions,
+            categories: categories
+        )
+        let totalExpense = CategoryBreakdown.total(of: expenseSlices)
+        let netSavings = income - totalExpense
+        let savingsRate = income > 0 ? Percentage.share(of: netSavings, in: income) : nil
+
+        var steps = [
+            CategoryWaterfallStep(
+                id: "income",
+                name: "Income",
+                kind: .income,
+                amount: income,
+                start: .zero,
+                end: income,
+                colorName: nil
+            )
+        ]
+        var balance = income
+
+        for slice in expenseSlices.prefix(maximumCategoryCount) {
+            let remaining = balance - slice.amount
+            steps.append(
+                CategoryWaterfallStep(
+                    id: "expense-\(slice.id)",
+                    name: slice.name,
+                    kind: .expense,
+                    amount: slice.amount,
+                    start: balance,
+                    end: remaining,
+                    colorName: slice.colorName
+                )
+            )
+            balance = remaining
+        }
+
+        let tail = expenseSlices.dropFirst(maximumCategoryCount)
+        let otherAmount = tail.reduce(Decimal.zero) { $0 + $1.amount }
+
+        if otherAmount > 0 {
+            let remaining = balance - otherAmount
+            steps.append(
+                CategoryWaterfallStep(
+                    id: "other",
+                    name: "Other",
+                    kind: .other,
+                    amount: otherAmount,
+                    start: balance,
+                    end: remaining,
+                    colorName: nil
+                )
+            )
+        }
+
+        steps.append(
+            CategoryWaterfallStep(
+                id: "net-savings",
+                name: "Net savings",
+                kind: .netSavings,
+                amount: netSavings,
+                start: .zero,
+                end: netSavings,
+                colorName: nil
+            )
+        )
+
+        return CategoryWaterfallSummary(
+            income: income,
+            totalExpense: totalExpense,
+            netSavings: netSavings,
+            savingsRate: savingsRate,
+            steps: steps
+        )
+    }
+}
