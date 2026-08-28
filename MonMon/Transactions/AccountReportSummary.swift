@@ -91,15 +91,11 @@ enum AccountActivityItem: Identifiable {
         transfers: [AccountTransfer]
     ) -> [AccountActivityItem] {
         let transactionItems =
-            transactions
-            .filter { $0.accountID == accountID }
+            Self.transactions(for: accountID, in: transactions)
             .map(AccountActivityItem.transaction)
 
         let transferItems =
-            transfers
-            .filter {
-                $0.sourceAccountID == accountID || $0.destinationAccountID == accountID
-            }
+            Self.transfers(for: accountID, in: transfers)
             .map(AccountActivityItem.transfer)
 
         return (transactionItems + transferItems).sorted { left, right in
@@ -108,6 +104,22 @@ enum AccountActivityItem: Identifiable {
             }
 
             return left.id.sortKey < right.id.sortKey
+        }
+    }
+
+    static func transactions(
+        for accountID: UUID,
+        in transactions: [MoneyTransaction]
+    ) -> [MoneyTransaction] {
+        transactions.filter { $0.accountID == accountID }
+    }
+
+    static func transfers(
+        for accountID: UUID,
+        in transfers: [AccountTransfer]
+    ) -> [AccountTransfer] {
+        transfers.filter {
+            $0.sourceAccountID == accountID || $0.destinationAccountID == accountID
         }
     }
 }

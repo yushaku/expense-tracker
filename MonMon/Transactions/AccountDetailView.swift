@@ -5,6 +5,18 @@ struct AccountDetailRoute: Hashable {
     let accountID: UUID
 }
 
+private enum AccountDetailTab: CaseIterable, Hashable {
+    case transactions
+    case linkedInvestments
+
+    var title: LocalizedStringKey {
+        switch self {
+        case .transactions: "Transactions"
+        case .linkedInvestments: "Linked Investments"
+        }
+    }
+}
+
 struct AccountDetailView: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -47,6 +59,7 @@ struct AccountDetailView: View {
     @State private var transactionEditorMode: TransactionEditorMode?
     @State private var transferEditorMode: TransferEditorMode?
     @State private var transactionActions = TransactionActions()
+    @State private var selectedTab: AccountDetailTab = .transactions
 
     private var account: CashAccount? {
         accounts.first { $0.id == route.accountID }
@@ -97,7 +110,10 @@ struct AccountDetailView: View {
     }
 
     private func content(for account: CashAccount) -> some View {
-        ScrollView {
+        let accountTransactions = accountTransactions(for: account)
+        let accountTransfers = accountTransfers(for: account)
+
+        return ScrollView {
             LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                 CashAccountCard(
                     account: account,
@@ -111,9 +127,33 @@ struct AccountDetailView: View {
                     sales: sales
                 )
 
-                AccountLinkedSourcesCard(rows: linkedSources(for: account))
+                SegmentedTabs(
+                    label: "Account Detail",
+                    selection: $selectedTab,
+                    options: AccountDetailTab.allCases,
+                    title: \.title
+                )
+                .accessibilityIdentifier("account-detail-tabs")
 
-                activitySection(for: account)
+                switch selectedTab {
+                case .transactions:
+                    TransactionListSection(
+                        title: "History",
+                        transactions: accountTransactions,
+                        categories: categories,
+                        accounts: accounts,
+                        emptyNotice: "No transactions recorded for this account.",
+                        accessibilityIdentifierPrefix: "account-detail-transaction",
+                        showsCount: true
+                    )
+
+                    if !accountTransfers.isEmpty {
+                        transferHistorySection(accountTransfers)
+                    }
+
+                case .linkedInvestments:
+                    AccountLinkedSourcesCard(rows: linkedSources(for: account))
+                }
             }
             .frame(maxWidth: MonMonTheme.maxContentWidth)
             .padding(.horizontal, 20)
@@ -122,15 +162,13 @@ struct AccountDetailView: View {
         }
     }
 
-    private func activitySection(for account: CashAccount) -> some View {
-        let activity = activity(for: account)
-
-        return VStack(alignment: .leading, spacing: 12) {
+    private func transferHistorySection(_ accountTransfers: [AccountTransfer]) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
-                Text("Activity")
+                Text("Transfers")
                     .font(.title3.weight(.semibold))
 
-                Text(activity.count.formatted())
+                Text(accountTransfers.count.formatted())
                     .font(.caption.weight(.bold))
                     .foregroundStyle(MonMonTheme.accent)
                     .padding(.horizontal, 10)
@@ -140,74 +178,29 @@ struct AccountDetailView: View {
                 Spacer(minLength: 0)
             }
 
-            if activity.isEmpty {
-                emptyActivityState
-            } else {
-                ForEach(activity) { item in
-                    activityRow(item, account: account)
+            ForEach(accountTransfers) { transfer in
+                Button {
+                    transferEditorMode = .edit(transfer)
+                } label: {
+                    TransferCard(
+                        transfer: transfer,
+                        sourceAccount: self.account(transfer.sourceAccountID),
+                        destinationAccount: self.account(transfer.destinationAccountID)
+                    )
                 }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("account-detail-transfer-\(transfer.id.uuidString)")
+                .accessibilityHint("Opens the transfer editor.")
             }
         }
     }
 
-    private var emptyActivityState: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "clock.arrow.trianglehead.counterclockwise.rotate.90")
-                .font(.system(size: 24, weight: .semibold))
-                .foregroundStyle(MonMonTheme.accent)
-                .frame(width: 56, height: 56)
-                .background(MonMonTheme.accent.opacity(0.16), in: Circle())
-                .accessibilityHidden(true)
-
-            Text("No activity recorded for this account.")
-                .font(.subheadline)
-                .foregroundStyle(MonMonTheme.textSecondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 24)
-        .padding(.vertical, 32)
-        .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 16))
-        .overlay {
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(MonMonTheme.border, lineWidth: 1)
-        }
-        .accessibilityIdentifier("account-detail-activity-empty")
+    private func accountTransactions(for account: CashAccount) -> [MoneyTransaction] {
+        AccountActivityItem.transactions(for: account.id, in: transactions)
     }
 
-    @ViewBuilder
-    private func activityRow(_ item: AccountActivityItem, account: CashAccount) -> some View {
-        switch item {
-        case .transaction(let transaction):
-            TransactionItem(
-                transaction: transaction,
-                category: category(for: transaction),
-                account: account,
-                accessibilityIdentifier: "account-detail-transaction-\(transaction.id.uuidString)"
-            )
-
-        case .transfer(let transfer):
-            Button {
-                transferEditorMode = .edit(transfer)
-            } label: {
-                TransferCard(
-                    transfer: transfer,
-                    sourceAccount: self.account(transfer.sourceAccountID),
-                    destinationAccount: self.account(transfer.destinationAccountID)
-                )
-            }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("account-detail-transfer-\(transfer.id.uuidString)")
-            .accessibilityHint("Opens the transfer editor.")
-        }
-    }
-
-    private func activity(for account: CashAccount) -> [AccountActivityItem] {
-        AccountActivityItem.items(
-            for: account.id,
-            transactions: transactions,
-            transfers: transfers
-        )
+    private func accountTransfers(for account: CashAccount) -> [AccountTransfer] {
+        AccountActivityItem.transfers(for: account.id, in: transfers)
     }
 
     private func linkedSources(for account: CashAccount) -> [AccountLinkedSourceRow] {

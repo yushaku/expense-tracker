@@ -175,6 +175,49 @@ struct AccountReportSummaryTests {
         )
     }
 
+    @Test("Account detail history separates matching transactions and transfers")
+    func accountDetailHistoryUsesOnlyMatchingMovements() {
+        let wallet = makeAccount("Wallet")
+        let bank = makeAccount("Bank")
+        let other = makeAccount("Other")
+        let walletTransactionID = UUID()
+        let incomingTransferID = UUID()
+        let outgoingTransferID = UUID()
+
+        let matchingTransactions = AccountActivityItem.transactions(
+            for: wallet.id,
+            in: [
+                makeTransaction(
+                    id: walletTransactionID,
+                    amount: 100_000,
+                    account: wallet
+                ),
+                makeTransaction(amount: 200_000, account: other),
+            ]
+        )
+        let matchingTransfers = AccountActivityItem.transfers(
+            for: wallet.id,
+            in: [
+                makeTransfer(
+                    id: incomingTransferID,
+                    from: bank,
+                    to: wallet,
+                    occurredAt: createdAt
+                ),
+                makeTransfer(
+                    id: outgoingTransferID,
+                    from: wallet,
+                    to: bank,
+                    occurredAt: createdAt
+                ),
+                makeTransfer(from: bank, to: other, occurredAt: createdAt),
+            ]
+        )
+
+        #expect(matchingTransactions.map(\.id) == [walletTransactionID])
+        #expect(matchingTransfers.map(\.id) == [incomingTransferID, outgoingTransferID])
+    }
+
     @Test("Equal activity timestamps use a stable kind and identifier order")
     func equalDatesHaveStableOrder() {
         let wallet = makeAccount("Wallet")
