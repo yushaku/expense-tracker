@@ -13,6 +13,7 @@ struct TransactionCaptureCommitResult: Equatable, Sendable {
 
 enum TransactionCaptureServiceError: Error, Equatable, Sendable {
     case emptyCapture
+    case incompleteCapture
     case staleCapture
     case storeFailure
 }

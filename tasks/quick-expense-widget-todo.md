@@ -12,11 +12,11 @@ Files: shared preset/store source, preset tests, project file.
 
 ## Task 2: Record only complete preset expenses
 
-- [ ] Add a capture dependency method that commits only ready transactions.
-- [ ] Prove a valid preset creates one transaction and no pending item.
-- [ ] Prove missing defaults create neither a transaction nor pending item.
-- [ ] Add the quick-expense App Intent dependency and app registration.
-- [ ] Verify focused capture tests and compile the app target.
+- [x] Add a capture dependency method that commits only ready transactions.
+- [x] Prove a valid preset creates one transaction and no pending item.
+- [x] Prove missing defaults create neither a transaction nor pending item.
+- [x] Add the quick-expense App Intent dependency and app registration.
+- [x] Verify focused capture tests and compile the app target.
 
 Files: capture service/intent, quick-expense intent, app registration, tests.
 

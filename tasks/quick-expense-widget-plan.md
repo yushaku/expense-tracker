@@ -10,8 +10,8 @@ tested boundaries.
 
 - Store only three small preset values in app-group `UserDefaults`; the widget
   never opens or duplicates the SwiftData stack.
-- Execute the action in the main app process. Use iOS 26 execution-target
-  selection for background operation and an app-opening fallback on iOS 18-25.
+- Execute the action in the main app process. Use iOS 26 background intent
+  modes and Apple's compatibility conformance on iOS 18-25.
 - Reuse `TransactionCaptureService` and the current transaction defaults. Add a
   ready-only entry point so invalid defaults cannot create pending captures.
 - Use a static widget configuration because presets are edited in MonMon, not
@@ -35,7 +35,7 @@ plans remain intact.
 |---|---|---|
 | Widget extension writes a different store | High | Restrict intent execution to the main app process |
 | Missing defaults stage an uncertain item | High | Require `ParsedTransactionCapture.isReady` before commit |
-| Older iOS cannot select the app execution target | Medium | Open the app before execution on iOS 18-25 |
+| Older iOS lacks intent modes | Medium | Use Apple's compatibility conformance for iOS 18-25 |
 | Invalid edits replace working presets | Medium | Validate the complete three-slot set before saving |
 | Widget shows stale values after edits | Medium | Reload its timeline after each valid persisted edit |
 

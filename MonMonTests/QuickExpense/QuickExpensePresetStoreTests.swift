@@ -71,6 +71,18 @@ struct QuickExpensePresetStoreTests {
         }
     }
 
+    @Test("The intent dependency forwards the selected preset slot")
+    func intentDependencyForwardsSlot() async throws {
+        let recorder = SlotRecorder()
+        let dependency = QuickExpenseIntentDependency { slot in
+            await recorder.record(slot)
+        }
+
+        try await dependency.record(.lunch)
+
+        #expect(await recorder.slots == [.lunch])
+    }
+
     private func makeFixture() throws -> Fixture {
         let suiteName = "QuickExpensePresetStoreTests-\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suiteName))
@@ -81,5 +93,13 @@ struct QuickExpensePresetStoreTests {
     private struct Fixture {
         let defaults: UserDefaults
         let store: QuickExpensePresetStore
+    }
+
+    private actor SlotRecorder {
+        private(set) var slots: [QuickExpenseSlot] = []
+
+        func record(_ slot: QuickExpenseSlot) {
+            slots.append(slot)
+        }
     }
 }

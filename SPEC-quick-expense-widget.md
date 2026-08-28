@@ -17,8 +17,8 @@ WidgetKit reloads the widget timeline.
 - App-group `UserDefaults` for the small preset configuration shared with the
   widget extension.
 - Swift Testing for preset validation/persistence and intent persistence.
-- iOS 26 `allowedExecutionTargets` for background execution in the main app;
-  iOS 18-25 use an app-opening compatibility fallback.
+- iOS 26 background intent modes and Apple's `ForegroundContinuableIntent`
+  compatibility conformance for iOS 18-25 app-process execution.
 
 ## Commands
 
@@ -88,8 +88,7 @@ stable enum identity for all three rows, and explicit accessibility labels.
 - Missing or stale transaction defaults create neither a transaction nor a
   pending-review record.
 - Returning from the intent causes WidgetKit to reload the timeline.
-- On iOS 26 the action runs in the app process without foregrounding MonMon; on
-  iOS 18-25 MonMon opens as a compatibility fallback before the action runs.
+- The action runs in the app process without foregrounding MonMon on iOS 18+.
 - Full tests, format lint, and a non-Simulator iOS SDK build pass.
 
 ## Open Questions
