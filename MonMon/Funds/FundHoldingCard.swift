@@ -135,15 +135,10 @@ struct FundHoldingCard: View {
             // Special Access Fund" wrapped to three lines and pushed the market
             // value off an iPhone's width, while the symbol is what the owner
             // recognises the holding by anyway.
-            Text((instrument?.symbol ?? "??").prefix(2))
-                .font(.system(size: 15, weight: .bold, design: .rounded))
-                .foregroundStyle(MonMonTheme.funds)
-                .frame(width: 44, height: 44)
-                .background(
-                    MonMonTheme.funds.opacity(0.16),
-                    in: RoundedRectangle(cornerRadius: 13)
-                )
-                .accessibilityHidden(true)
+            FundLogoView(
+                symbol: instrument?.symbol ?? "??",
+                logoURL: instrument?.logoURL
+            )
 
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 8) {

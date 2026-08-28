@@ -204,6 +204,8 @@ struct FundInstrumentListView: View {
     private func editableContent(_ instrument: FundInstrument) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 12) {
+                FundLogoView(symbol: instrument.symbol, logoURL: instrument.logoURL, size: 34)
+
                 VStack(alignment: .leading, spacing: 3) {
                     Text(instrument.symbol)
                         .font(.headline)

@@ -80,6 +80,7 @@
 		A00000000000000000000239 /* FundSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000150 /* FundSummary.swift */; };
 		A00000000000000000000240 /* FundSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000151 /* FundSection.swift */; };
 		A00000000000000000000241 /* FundHoldingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000152 /* FundHoldingCard.swift */; };
+		A00000000000000000000F41 /* FundLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F40 /* FundLogoView.swift */; };
 		A00000000000000000000242 /* FundEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000153 /* FundEditorView.swift */; };
 		A00000000000000000000243 /* FundEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000154 /* FundEditorForm.swift */; };
 		A00000000000000000000244 /* UnitQuantityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000155 /* UnitQuantityTests.swift */; };
@@ -435,6 +436,7 @@
 		A00000000000000000000150 /* FundSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSummary.swift; sourceTree = "<group>"; };
 		A00000000000000000000151 /* FundSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundSection.swift; sourceTree = "<group>"; };
 		A00000000000000000000152 /* FundHoldingCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundHoldingCard.swift; sourceTree = "<group>"; };
+		A00000000000000000000F40 /* FundLogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundLogoView.swift; sourceTree = "<group>"; };
 		A00000000000000000000153 /* FundEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundEditorView.swift; sourceTree = "<group>"; };
 		A00000000000000000000154 /* FundEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundEditorForm.swift; sourceTree = "<group>"; };
 		A00000000000000000000155 /* UnitQuantityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitQuantityTests.swift; sourceTree = "<group>"; };
@@ -988,6 +990,7 @@
 				A00000000000000000000F10 /* FundPositionGroup.swift */,
 				A00000000000000000000151 /* FundSection.swift */,
 				A00000000000000000000152 /* FundHoldingCard.swift */,
+				A00000000000000000000F40 /* FundLogoView.swift */,
 				A00000000000000000000153 /* FundEditorView.swift */,
 				A00000000000000000000154 /* FundEditorForm.swift */,
 			);
@@ -1661,6 +1664,7 @@
 				A00000000000000000000F11 /* FundPositionGroup.swift in Sources */,
 				A00000000000000000000240 /* FundSection.swift in Sources */,
 				A00000000000000000000241 /* FundHoldingCard.swift in Sources */,
+				A00000000000000000000F41 /* FundLogoView.swift in Sources */,
 				A00000000000000000000242 /* FundEditorView.swift in Sources */,
 				A00000000000000000000243 /* FundEditorForm.swift in Sources */,
 				A00000000000000000000840 /* DebtDirection.swift in Sources */,

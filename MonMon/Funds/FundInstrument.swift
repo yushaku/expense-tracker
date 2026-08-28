@@ -33,6 +33,11 @@ final class FundInstrument {
     /// When the app last fetched successfully. `nil` while the price is typed.
     var priceFetchedAt: Date?
     var autoQuoteEnabled: Bool = true
+    /// The fund manager's logo, as the provider's listing gave it. Cosmetic and
+    /// optional: Fmarket publishes one logo per management company, not one per
+    /// fund, and an instrument added by hand has none at all. Nothing reads it
+    /// but the badge, which falls back to the ticker when it is missing.
+    var logoURL: String?
     var currencyCode: String = VNDCurrency.code
     var createdAt: Date = Date(timeIntervalSince1970: 0)
 
@@ -47,6 +52,7 @@ final class FundInstrument {
         priceSource: String = FundQuoteSource.manual.rawValue,
         priceFetchedAt: Date? = nil,
         autoQuoteEnabled: Bool = true,
+        logoURL: String? = nil,
         currencyCode: String,
         createdAt: Date
     ) {
@@ -60,6 +66,7 @@ final class FundInstrument {
         self.priceSource = priceSource
         self.priceFetchedAt = priceFetchedAt
         self.autoQuoteEnabled = autoQuoteEnabled
+        self.logoURL = logoURL
         self.currencyCode = currencyCode
         self.createdAt = createdAt
     }
