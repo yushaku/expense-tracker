@@ -12,10 +12,12 @@ import SwiftUI
 struct ReportContentVisibility: Equatable {
     let showsNetTrend: Bool
     let showsTransactionList: Bool
+    let showsCategoryWaterfall: Bool
 
     init(query: TransactionQuery) {
         showsNetTrend = !query.hasSearchText
         showsTransactionList = query.hasSearchText
+        showsCategoryWaterfall = query.filter == .all
     }
 }
 
