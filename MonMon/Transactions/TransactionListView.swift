@@ -535,6 +535,7 @@ struct TransactionListView: View {
             categories: categories,
             accounts: accounts,
             emptyNotice: emptyFilterNotice,
+            undoBottomInset: FloatingAddButton.contentInset,
             onEdit: { transaction in
                 editorMode = .edit(transaction)
             }

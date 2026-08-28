@@ -1,13 +1,81 @@
 import SwiftData
 import SwiftUI
 
+struct DeletedTransaction: Equatable, Identifiable {
+    let id: UUID
+    let kind: TransactionKind
+    let amount: Decimal
+    let occurredAt: Date
+    let note: String
+    let accountID: UUID
+    let categoryID: UUID?
+    let sourceRuleID: UUID?
+    let currencyCode: String
+    let createdAt: Date
+    let sourceImportID: String?
+
+    init(_ transaction: MoneyTransaction) {
+        id = transaction.id
+        kind = transaction.kind
+        amount = transaction.amount
+        occurredAt = transaction.occurredAt
+        note = transaction.note
+        accountID = transaction.accountID
+        categoryID = transaction.categoryID
+        sourceRuleID = transaction.sourceRuleID
+        currencyCode = transaction.currencyCode
+        createdAt = transaction.createdAt
+        sourceImportID = transaction.sourceImportID
+    }
+
+    func makeTransaction() -> MoneyTransaction {
+        MoneyTransaction(
+            id: id,
+            kind: kind,
+            amount: amount,
+            occurredAt: occurredAt,
+            note: note,
+            accountID: accountID,
+            categoryID: categoryID,
+            sourceRuleID: sourceRuleID,
+            currencyCode: currencyCode,
+            createdAt: createdAt,
+            sourceImportID: sourceImportID
+        )
+    }
+}
+
 enum TransactionDeletion {
     @MainActor
-    static func delete(_ transaction: MoneyTransaction, from context: ModelContext) throws {
+    @discardableResult
+    static func delete(
+        _ transaction: MoneyTransaction,
+        from context: ModelContext
+    ) throws -> DeletedTransaction {
+        let deleted = DeletedTransaction(transaction)
         context.delete(transaction)
 
         do {
             try context.save()
+            return deleted
+        } catch {
+            context.rollback()
+            throw error
+        }
+    }
+
+    @MainActor
+    @discardableResult
+    static func restore(
+        _ deleted: DeletedTransaction,
+        in context: ModelContext
+    ) throws -> MoneyTransaction {
+        let transaction = deleted.makeTransaction()
+        context.insert(transaction)
+
+        do {
+            try context.save()
+            return transaction
         } catch {
             context.rollback()
             throw error
@@ -18,7 +86,7 @@ enum TransactionDeletion {
 /// What a list opens on behalf of the transaction rows in it.
 ///
 /// A row shows one transaction and carries the swipe that acts on it, but the
-/// sheet and the questions that follow belong to the list. Held by the row,
+/// sheets and follow-up actions belong to the list. Held by the row,
 /// each of those is built again for every transaction on screen, and the weight
 /// of that tells under the finger: a sheet dragged down stutters, and a
 /// dismissed question leaves the list unable to scroll for a moment. A screen
@@ -26,9 +94,11 @@ enum TransactionDeletion {
 @Observable
 final class TransactionActions {
     var detailed: MoneyTransaction?
-    var deleting: MoneyTransaction?
+    var deleteRequested: MoneyTransaction?
     var editing: MoneyTransaction?
+    var undoableDeletion: DeletedTransaction?
     var didFailToDelete = false
+    var didFailToRestore = false
 }
 
 extension View {
@@ -36,6 +106,7 @@ extension View {
     /// questions they ask for, and answers a row's request to edit.
     func transactionActions(
         _ actions: TransactionActions,
+        undoBottomInset: CGFloat = 20,
         category: @escaping (MoneyTransaction) -> TransactionCategory?,
         account: @escaping (MoneyTransaction) -> CashAccount?,
         onEdit: @escaping (MoneyTransaction) -> Void
@@ -43,6 +114,7 @@ extension View {
         modifier(
             TransactionActionHost(
                 actions: actions,
+                undoBottomInset: undoBottomInset,
                 category: category,
                 account: account,
                 onEdit: onEdit
@@ -56,6 +128,7 @@ private struct TransactionActionHost: ViewModifier {
 
     @Bindable var actions: TransactionActions
 
+    let undoBottomInset: CGFloat
     let category: (MoneyTransaction) -> TransactionCategory?
     let account: (MoneyTransaction) -> CashAccount?
     let onEdit: (MoneyTransaction) -> Void
@@ -81,26 +154,33 @@ private struct TransactionActionHost: ViewModifier {
                     }
                 )
             }
-            .confirmationDialog(
-                "Delete this transaction?",
-                isPresented: isAskingBeforeDeleting,
-                titleVisibility: .visible,
-                presenting: actions.deleting
-            ) { transaction in
-                Button("Delete", role: .destructive) {
-                    delete(transaction)
+            .overlay(alignment: .bottom) {
+                if actions.undoableDeletion != nil {
+                    TransactionUndoBanner(undo: restoreLastDeletion)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, undoBottomInset)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
-                .accessibilityIdentifier("confirm-delete-transaction")
-
-                Button("Cancel", role: .cancel) {}
-            } message: { _ in
-                Text("Its account balance returns to what it was.")
             }
             .alert(
                 "Couldn’t delete this transaction. Try again.",
                 isPresented: $actions.didFailToDelete
             ) {
                 Button("OK", role: .cancel) {}
+            }
+            .alert(
+                "Couldn’t restore this transaction. Try adding it again.",
+                isPresented: $actions.didFailToRestore
+            ) {
+                Button("OK", role: .cancel) {}
+            }
+            .onChange(of: actions.deleteRequested) { _, requested in
+                guard let requested else {
+                    return
+                }
+
+                actions.deleteRequested = nil
+                delete(requested)
             }
             .onChange(of: actions.editing) { _, requested in
                 guard let requested else {
@@ -110,17 +190,21 @@ private struct TransactionActionHost: ViewModifier {
                 actions.editing = nil
                 onEdit(requested)
             }
-    }
+            .task(id: actions.undoableDeletion?.id) {
+                guard actions.undoableDeletion != nil else {
+                    return
+                }
 
-    private var isAskingBeforeDeleting: Binding<Bool> {
-        Binding(
-            get: { actions.deleting != nil },
-            set: { isAsking in
-                if !isAsking {
-                    actions.deleting = nil
+                try? await Task.sleep(for: .seconds(5))
+
+                guard !Task.isCancelled else {
+                    return
+                }
+
+                withAnimation(.snappy(duration: 0.28)) {
+                    actions.undoableDeletion = nil
                 }
             }
-        )
     }
 
     private func presentPendingEditor() {
@@ -134,15 +218,65 @@ private struct TransactionActionHost: ViewModifier {
 
     private func delete(_ transaction: MoneyTransaction) {
         do {
-            try TransactionDeletion.delete(transaction, from: modelContext)
+            let deleted = try TransactionDeletion.delete(transaction, from: modelContext)
+
+            withAnimation(.snappy(duration: 0.28)) {
+                actions.undoableDeletion = deleted
+            }
         } catch {
             actions.didFailToDelete = true
         }
     }
+
+    private func restoreLastDeletion() {
+        guard let deleted = actions.undoableDeletion else {
+            return
+        }
+
+        do {
+            try TransactionDeletion.restore(deleted, in: modelContext)
+
+            withAnimation(.snappy(duration: 0.28)) {
+                actions.undoableDeletion = nil
+            }
+        } catch {
+            actions.undoableDeletion = nil
+            actions.didFailToRestore = true
+        }
+    }
+}
+
+private struct TransactionUndoBanner: View {
+    let undo: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Text("Transaction deleted")
+                .font(.subheadline.weight(.medium))
+
+            Spacer(minLength: 8)
+
+            Button("Undo", action: undo)
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(MonMonTheme.accent)
+                .frame(minHeight: 44)
+                .accessibilityIdentifier("undo-delete-transaction")
+        }
+        .padding(.leading, 16)
+        .padding(.trailing, 10)
+        .padding(.vertical, 6)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
+        .overlay {
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(MonMonTheme.border, lineWidth: 1)
+        }
+        .shadow(color: .black.opacity(0.24), radius: 14, y: 6)
+        .accessibilityIdentifier("transaction-delete-undo-banner")
+    }
 }
 
 /// The shared transaction interaction used by lists across the app: tap for
-/// details, swipe left to edit, and swipe right to delete with confirmation.
+/// details, swipe left to edit, and swipe right to delete with a brief Undo.
 ///
 /// The row asks; the list its screen set up with `transactionActions` answers.
 struct TransactionItem: View {
@@ -177,7 +311,7 @@ struct TransactionItem: View {
                 actions?.editing = transaction
             },
             onDelete: {
-                actions?.deleting = transaction
+                actions?.deleteRequested = transaction
             }
         ) {
             TransactionCard(

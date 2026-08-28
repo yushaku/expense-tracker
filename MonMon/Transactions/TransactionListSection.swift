@@ -18,6 +18,7 @@ struct TransactionListSection<Accessory: View>: View {
     let emptyNotice: LocalizedStringKey
     let accessibilityIdentifierPrefix: String
     let showsCount: Bool
+    let undoBottomInset: CGFloat
     let onEdit: (MoneyTransaction) -> Void
     @ViewBuilder let accessory: Accessory
 
@@ -29,6 +30,7 @@ struct TransactionListSection<Accessory: View>: View {
         emptyNotice: LocalizedStringKey,
         accessibilityIdentifierPrefix: String = "transaction",
         showsCount: Bool = false,
+        undoBottomInset: CGFloat = 20,
         onEdit: @escaping (MoneyTransaction) -> Void,
         @ViewBuilder accessory: () -> Accessory
     ) {
@@ -39,6 +41,7 @@ struct TransactionListSection<Accessory: View>: View {
         self.emptyNotice = emptyNotice
         self.accessibilityIdentifierPrefix = accessibilityIdentifierPrefix
         self.showsCount = showsCount
+        self.undoBottomInset = undoBottomInset
         self.onEdit = onEdit
         self.accessory = accessory()
     }
@@ -72,6 +75,7 @@ struct TransactionListSection<Accessory: View>: View {
         }
         .transactionActions(
             actions,
+            undoBottomInset: undoBottomInset,
             category: category(for:),
             account: account(for:),
             onEdit: onEdit
@@ -160,6 +164,7 @@ extension TransactionListSection where Accessory == EmptyView {
         emptyNotice: LocalizedStringKey,
         accessibilityIdentifierPrefix: String = "transaction",
         showsCount: Bool = false,
+        undoBottomInset: CGFloat = 20,
         onEdit: @escaping (MoneyTransaction) -> Void
     ) {
         self.init(
@@ -170,6 +175,7 @@ extension TransactionListSection where Accessory == EmptyView {
             emptyNotice: emptyNotice,
             accessibilityIdentifierPrefix: accessibilityIdentifierPrefix,
             showsCount: showsCount,
+            undoBottomInset: undoBottomInset,
             onEdit: onEdit
         ) {
             EmptyView()

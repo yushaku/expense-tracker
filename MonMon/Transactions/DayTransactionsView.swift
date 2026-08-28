@@ -49,6 +49,7 @@ struct DayTransactionsView: View {
                         categories: categories,
                         accounts: accounts,
                         emptyNotice: "Nothing recorded on this day.",
+                        undoBottomInset: FloatingAddButton.contentInset,
                         onEdit: { transaction in
                             editorMode = .edit(transaction)
                         }
