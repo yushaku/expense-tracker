@@ -5,49 +5,36 @@ struct QuickExpensePresetRow: View {
     let categories: [TransactionCategory]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 12) {
-                    title
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    fields
-                }
-
-                VStack(alignment: .leading, spacing: 10) {
-                    title
-                    fields
-                }
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 0) {
+                nameField
+                    .frame(minWidth: 64, maxWidth: 84)
+                verticalDivider
+                amountField
+                    .frame(minWidth: 96, maxWidth: .infinity)
+                verticalDivider
+                categoryField
+                    .frame(minWidth: 108, maxWidth: .infinity)
             }
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Category")
-                    .font(.caption.weight(.medium))
-
-                if categories.isEmpty {
-                    Text("Add an expense category to configure this preset.")
-                        .font(.caption)
-                        .foregroundStyle(MonMonTheme.textSecondary)
-                } else {
-                    Picker("Category", selection: $draft.categoryID) {
-                        if hasStaleSelection, let categoryID = draft.categoryID {
-                            Text("Choose")
-                                .tag(UUID?.some(categoryID))
-                        }
-
-                        Text("Transaction default")
-                            .tag(UUID?.none)
-
-                        ForEach(categories) { category in
-                            Label(category.name, systemImage: category.symbolName)
-                                .tag(UUID?.some(category.id))
-                        }
-                    }
-                    .labelsHidden()
-                    .accessibilityIdentifier(
-                        "quick-expense-\(draft.slot.rawValue)-category"
-                    )
+            VStack(spacing: 0) {
+                HStack(spacing: 0) {
+                    nameField
+                    verticalDivider
+                    amountField
                 }
+                horizontalDivider
+                categoryField
             }
+        }
+        .frame(maxWidth: .infinity)
+        .background(
+            MonMonTheme.field,
+            in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(MonMonTheme.border, lineWidth: 1)
         }
     }
 
@@ -58,36 +45,81 @@ struct QuickExpensePresetRow: View {
         return !categories.contains { $0.id == categoryID }
     }
 
-    private var title: some View {
-        Text(draft.slot.title)
-            .font(.subheadline.weight(.medium))
+    private var verticalDivider: some View {
+        Divider()
+            .overlay(MonMonTheme.border)
+            .padding(.vertical, 10)
     }
 
-    private var fields: some View {
-        HStack(spacing: 10) {
-            TextField("Emoji", text: $draft.symbol)
-                .multilineTextAlignment(.center)
-                .frame(minWidth: 56)
-                .accessibilityLabel(Text(draft.slot.emojiFieldLabel))
-                .accessibilityIdentifier("quick-expense-\(draft.slot.rawValue)-symbol")
+    private var horizontalDivider: some View {
+        Divider()
+            .overlay(MonMonTheme.border)
+    }
 
-            TextField("Amount", text: $draft.amountText)
-                #if os(iOS)
-                    .keyboardType(.numberPad)
-                #endif
-                .multilineTextAlignment(.trailing)
-                .monospacedDigit()
-                .frame(minWidth: 116)
-                .onChange(of: draft.amountText) {
-                    let formatted = VNDCurrency.formatInput(draft.amountText)
-                    if formatted != draft.amountText {
-                        draft.amountText = formatted
-                    }
+    private var nameField: some View {
+        TextField("Name", text: $draft.symbol)
+            .font(.body.weight(.medium))
+            .multilineTextAlignment(.center)
+            .textFieldStyle(.plain)
+            .padding(.horizontal, 10)
+            .frame(minHeight: 48)
+            .accessibilityLabel(Text(draft.slot.nameFieldLabel))
+            .accessibilityIdentifier("quick-expense-\(draft.slot.rawValue)-symbol")
+    }
+
+    private var amountField: some View {
+        TextField("Price", text: $draft.amountText)
+            #if os(iOS)
+                .keyboardType(.numberPad)
+            #endif
+            .multilineTextAlignment(.trailing)
+            .monospacedDigit()
+            .textFieldStyle(.plain)
+            .padding(.horizontal, 10)
+            .frame(minHeight: 48)
+            .onChange(of: draft.amountText) {
+                let formatted = VNDCurrency.formatInput(draft.amountText)
+                if formatted != draft.amountText {
+                    draft.amountText = formatted
                 }
-                .accessibilityLabel(Text(draft.slot.amountFieldLabel))
-                .accessibilityIdentifier("quick-expense-\(draft.slot.rawValue)-amount")
+            }
+            .accessibilityLabel(Text(draft.slot.amountFieldLabel))
+            .accessibilityIdentifier("quick-expense-\(draft.slot.rawValue)-amount")
+    }
+
+    @ViewBuilder
+    private var categoryField: some View {
+        if categories.isEmpty {
+            Text("No category")
+                .font(.caption)
+                .foregroundStyle(MonMonTheme.danger)
+                .lineLimit(1)
+                .padding(.horizontal, 10)
+                .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+        } else {
+            Picker("Category", selection: $draft.categoryID) {
+                if hasStaleSelection, let categoryID = draft.categoryID {
+                    Text("Choose")
+                        .tag(UUID?.some(categoryID))
+                }
+
+                Text("Transaction default")
+                    .tag(UUID?.none)
+
+                ForEach(categories) { category in
+                    Label(category.name, systemImage: category.symbolName)
+                        .tag(UUID?.some(category.id))
+                }
+            }
+            .labelsHidden()
+            .pickerStyle(.menu)
+            .lineLimit(1)
+            .padding(.horizontal, 4)
+            .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+            .accessibilityIdentifier(
+                "quick-expense-\(draft.slot.rawValue)-category"
+            )
         }
-        .textFieldStyle(.roundedBorder)
     }
 }
 
@@ -106,31 +138,17 @@ extension QuickExpenseSlot {
         }
     }
 
-    var title: LocalizedStringResource {
+    var nameFieldLabel: LocalizedStringResource {
         switch self {
-        case .coffee: "Coffee"
-        case .lunch: "Lunch"
-        case .fuel: "Fuel"
-        case .groceries: "Groceries"
-        case .parking: "Parking"
-        case .transit: "Transit"
-        case .medicine: "Medicine"
-        case .entertainment: "Entertainment"
-        case .bills: "Bills"
-        }
-    }
-
-    var emojiFieldLabel: LocalizedStringResource {
-        switch self {
-        case .coffee: "Coffee emoji"
-        case .lunch: "Lunch emoji"
-        case .fuel: "Fuel emoji"
-        case .groceries: "Groceries emoji"
-        case .parking: "Parking emoji"
-        case .transit: "Transit emoji"
-        case .medicine: "Medicine emoji"
-        case .entertainment: "Entertainment emoji"
-        case .bills: "Bills emoji"
+        case .coffee: "Coffee name"
+        case .lunch: "Lunch name"
+        case .fuel: "Fuel name"
+        case .groceries: "Groceries name"
+        case .parking: "Parking name"
+        case .transit: "Transit name"
+        case .medicine: "Medicine name"
+        case .entertainment: "Entertainment name"
+        case .bills: "Bills name"
         }
     }
 

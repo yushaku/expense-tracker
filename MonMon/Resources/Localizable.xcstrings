@@ -4,6 +4,45 @@
     "Add an expense category to configure this preset.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm danh mục chi tiêu để cấu hình mục đặt sẵn này." } } }
     },
+    "Bills name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản hóa đơn" } } }
+    },
+    "Coffee name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản cà phê" } } }
+    },
+    "Entertainment name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản giải trí" } } }
+    },
+    "Fuel name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản xăng" } } }
+    },
+    "Groceries name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản đi chợ" } } }
+    },
+    "Lunch name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản bữa trưa" } } }
+    },
+    "Medicine name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản thuốc" } } }
+    },
+    "No category": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa có danh mục" } } }
+    },
+    "Parking name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản đỗ xe" } } }
+    },
+    "Saved": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã lưu" } } }
+    },
+    "Saved %@ expense to MonMon": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã lưu khoản chi %@ vào MonMon" } } }
+    },
+    "Transit name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản đi lại" } } }
+    },
+    "Use a short name, a positive whole amount, and a current expense category for every preset.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dùng tên ngắn, số tiền nguyên dương và danh mục chi tiêu hiện có cho mỗi mục đặt sẵn." } } }
+    },
     "Bills": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hóa đơn" } } }
     },

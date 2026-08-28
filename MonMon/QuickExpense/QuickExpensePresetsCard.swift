@@ -19,9 +19,8 @@ struct QuickExpensePresetsCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Label("Quick expenses", systemImage: "bolt.circle.fill")
+            Text("Quick expenses")
                 .font(.headline)
-                .foregroundStyle(MonMonTheme.accent)
 
             Text("Choose 3, 6, or 9 expenses for the Home Screen widget.")
                 .font(.caption)
@@ -42,15 +41,10 @@ struct QuickExpensePresetsCard: View {
             }
 
             ForEach(visibleSlots, id: \.self) { slot in
-                VStack(spacing: 16) {
-                    QuickExpensePresetRow(
-                        draft: $drafts[slot.editorIndex],
-                        categories: expenseCategories
-                    )
-                    Divider()
-                        .overlay(MonMonTheme.border)
-                        .opacity(slot == visibleSlots.last ? 0 : 1)
-                }
+                QuickExpensePresetRow(
+                    draft: $drafts[slot.editorIndex],
+                    categories: expenseCategories
+                )
             }
 
             if let displayedStatusMessage {
@@ -107,7 +101,7 @@ struct QuickExpensePresetsCard: View {
     private var displayedStatusMessage: LocalizedStringResource? {
         if !isValid {
             return
-                "Use one emoji, a positive whole amount, and a current expense category for every preset."
+                "Use a short name, a positive whole amount, and a current expense category for every preset."
         }
         return statusMessage
     }
@@ -145,7 +139,7 @@ struct QuickExpensePresetsCard: View {
             WidgetCenter.shared.reloadTimelines(ofKind: QuickExpenseWidgetConfiguration.kind)
         } catch {
             statusMessage =
-                "Use one emoji, a positive whole amount, and a current expense category for every preset."
+                "Use a short name, a positive whole amount, and a current expense category for every preset."
         }
     }
 
