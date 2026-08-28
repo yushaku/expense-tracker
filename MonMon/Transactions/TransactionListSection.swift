@@ -4,12 +4,10 @@ import SwiftUI
 ///
 /// Spending defines the visual language: transactions are grouped by day, the
 /// day's net sits in its header, and every row opens details with the same edit
-/// and delete gestures. Callers provide only their heading variation and the
-/// edit destination.
+/// and delete gestures. The enclosing screen owns the shared transaction
+/// actions so sheets and the Undo banner stay anchored to its viewport.
 struct TransactionListSection<Accessory: View>: View {
     @Environment(\.locale) private var locale
-
-    @State private var actions = TransactionActions()
 
     let title: LocalizedStringKey
     let transactions: [MoneyTransaction]
@@ -18,8 +16,6 @@ struct TransactionListSection<Accessory: View>: View {
     let emptyNotice: LocalizedStringKey
     let accessibilityIdentifierPrefix: String
     let showsCount: Bool
-    let undoBottomInset: CGFloat
-    let onEdit: (MoneyTransaction) -> Void
     @ViewBuilder let accessory: Accessory
 
     init(
@@ -30,8 +26,6 @@ struct TransactionListSection<Accessory: View>: View {
         emptyNotice: LocalizedStringKey,
         accessibilityIdentifierPrefix: String = "transaction",
         showsCount: Bool = false,
-        undoBottomInset: CGFloat = 20,
-        onEdit: @escaping (MoneyTransaction) -> Void,
         @ViewBuilder accessory: () -> Accessory
     ) {
         self.title = title
@@ -41,8 +35,6 @@ struct TransactionListSection<Accessory: View>: View {
         self.emptyNotice = emptyNotice
         self.accessibilityIdentifierPrefix = accessibilityIdentifierPrefix
         self.showsCount = showsCount
-        self.undoBottomInset = undoBottomInset
-        self.onEdit = onEdit
         self.accessory = accessory()
     }
 
@@ -73,13 +65,6 @@ struct TransactionListSection<Accessory: View>: View {
                 }
             }
         }
-        .transactionActions(
-            actions,
-            undoBottomInset: undoBottomInset,
-            category: category(for:),
-            account: account(for:),
-            onEdit: onEdit
-        )
     }
 
     private var header: some View {
@@ -163,9 +148,7 @@ extension TransactionListSection where Accessory == EmptyView {
         accounts: [CashAccount],
         emptyNotice: LocalizedStringKey,
         accessibilityIdentifierPrefix: String = "transaction",
-        showsCount: Bool = false,
-        undoBottomInset: CGFloat = 20,
-        onEdit: @escaping (MoneyTransaction) -> Void
+        showsCount: Bool = false
     ) {
         self.init(
             title: title,
@@ -174,9 +157,7 @@ extension TransactionListSection where Accessory == EmptyView {
             accounts: accounts,
             emptyNotice: emptyNotice,
             accessibilityIdentifierPrefix: accessibilityIdentifierPrefix,
-            showsCount: showsCount,
-            undoBottomInset: undoBottomInset,
-            onEdit: onEdit
+            showsCount: showsCount
         ) {
             EmptyView()
         }

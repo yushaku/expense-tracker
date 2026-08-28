@@ -26,6 +26,7 @@ struct CategoryTransactionsView: View {
     let period: CategoryPeriod
 
     @State private var editorMode: TransactionEditorMode?
+    @State private var transactionActions = TransactionActions()
 
     var body: some View {
         ZStack {
@@ -40,10 +41,7 @@ struct CategoryTransactionsView: View {
                         transactions: matching,
                         categories: categories,
                         accounts: accounts,
-                        emptyNotice: emptyNotice,
-                        onEdit: { transaction in
-                            editorMode = .edit(transaction)
-                        }
+                        emptyNotice: emptyNotice
                     )
                 }
                 .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -57,6 +55,12 @@ struct CategoryTransactionsView: View {
         .appSheet(item: $editorMode) { mode in
             TransactionEditorView(mode: mode)
         }
+        .transactionActions(
+            transactionActions,
+            category: category(for:),
+            account: account(for:),
+            onEdit: { editorMode = .edit($0) }
+        )
         .tint(MonMonTheme.accent)
     }
 
@@ -131,5 +135,17 @@ struct CategoryTransactionsView: View {
 
     private var emptyNotice: LocalizedStringKey {
         "Nothing left under this category \(period.range.phrase(in: locale))."
+    }
+
+    private func category(for transaction: MoneyTransaction) -> TransactionCategory? {
+        guard let categoryID = transaction.categoryID else {
+            return nil
+        }
+
+        return categories.first { $0.id == categoryID }
+    }
+
+    private func account(for transaction: MoneyTransaction) -> CashAccount? {
+        accounts.first { $0.id == transaction.accountID }
     }
 }
