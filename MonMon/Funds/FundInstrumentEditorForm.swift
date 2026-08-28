@@ -218,14 +218,8 @@ struct FundInstrumentEditorForm: View {
 
     @ViewBuilder
     private var priceTextField: some View {
-        #if os(iOS)
-            TextField("0", text: $draft.priceText)
-                .keyboardType(.decimalPad)
-                .accessibilityIdentifier("instrument-price")
-        #else
-            TextField("0", text: $draft.priceText)
-                .accessibilityIdentifier("instrument-price")
-        #endif
+        VNDTextField(text: $draft.priceText, keyboard: .decimal)
+            .accessibilityIdentifier("instrument-price")
     }
 
     private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {

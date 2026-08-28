@@ -281,12 +281,7 @@ struct SavingsWithdrawalEditorForm: View {
 
     @ViewBuilder
     private func currencyTextField(text: Binding<String>) -> some View {
-        #if os(iOS)
-            TextField("0", text: text)
-                .keyboardType(.numberPad)
-        #else
-            TextField("0", text: text)
-        #endif
+        VNDTextField(text: text)
     }
 
     private var difference: Decimal? {

@@ -68,10 +68,7 @@ struct QuickExpensePresetRow: View {
     }
 
     private var amountField: some View {
-        TextField("Price", text: $draft.amountText)
-            #if os(iOS)
-                .keyboardType(.numberPad)
-            #endif
+        VNDTextField("Price", text: $draft.amountText)
             .multilineTextAlignment(.trailing)
             .monospacedDigit()
             .textFieldStyle(.plain)

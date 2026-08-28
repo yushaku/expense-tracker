@@ -9,7 +9,7 @@ enum DebtPaymentFormError: Error, Equatable {
 }
 
 struct DebtPaymentDraft: Equatable {
-    @VNDInput var amountText: String
+    var amountText: String
     var occurredAt: Date
     var accountID: UUID?
     var note: String

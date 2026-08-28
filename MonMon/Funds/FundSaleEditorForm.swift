@@ -403,14 +403,8 @@ struct FundSaleEditorForm: View {
 
     @ViewBuilder
     private var priceTextField: some View {
-        #if os(iOS)
-            TextField("0", text: $draft.pricePerUnitText)
-                .keyboardType(.numberPad)
-                .accessibilityIdentifier("fund-sale-price")
-        #else
-            TextField("0", text: $draft.pricePerUnitText)
-                .accessibilityIdentifier("fund-sale-price")
-        #endif
+        VNDTextField(text: $draft.pricePerUnitText)
+            .accessibilityIdentifier("fund-sale-price")
     }
 
     private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {
