@@ -16,7 +16,7 @@ also use its own expense category; see `SPEC-quick-expense-categories.md`.
   20,000 VND), Transit (`🚌`, 15,000 VND), Medicine (`💊`, 100,000 VND),
   Entertainment (`🎬`, 150,000 VND), and Bills (`🧾`, 500,000 VND).
 - Migrate the existing three-preset JSON payload without changing the owner's
-  custom emoji or amount. Migrated configurations start with a visible count
+  custom name/emoji or amount. Migrated configurations start with a visible count
   of three and receive defaults for the six new slots.
 - Missing or malformed storage recovers to the nine defaults with a visible
   count of three.
@@ -40,7 +40,8 @@ also use its own expense category; see `SPEC-quick-expense-categories.md`.
 - If the configured count exceeds a family's capacity, that family displays
   only its prefix. The configuration itself is not changed.
 - Every button remains a native `Button(intent:)`. A successful action returns
-  the localized “Saved in MonMon.” dialog and reloads the timeline.
+  the localized “Saved in MonMon.” dialog, reloads the timeline, and briefly
+  replaces the tapped action with a saved confirmation.
 
 ## Quality Gates
 
@@ -64,5 +65,5 @@ also use its own expense category; see `SPEC-quick-expense-categories.md`.
 
 ## Open Questions
 
-None. The six new defaults are starting values only; every emoji and amount is
-editable in the app.
+None. The six new defaults are starting values only; every short name and amount
+is editable in the app, and existing emoji values remain valid names.

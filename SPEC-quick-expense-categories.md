@@ -47,7 +47,7 @@ let preset = try QuickExpensePreset(
 
 - Add `categoryID: UUID?` to each preset's app-group payload.
 - Existing payloads without the field decode with `categoryID == nil` and keep
-  all emoji, amount, count, and ordering values.
+  all name/emoji, amount, count, and ordering values.
 - `nil` means “Transaction default” and preserves current behavior until the
   owner selects a category.
 - A non-nil category must identify a current expense category. A deleted or
@@ -55,7 +55,8 @@ let preset = try QuickExpensePreset(
 
 ## UI Behavior
 
-- Each visible preset row includes a native category picker.
+- Each visible preset uses one compact Name–Price–Category surface with a native
+  category picker and no separate per-field labels.
 - Options contain “Transaction default” plus all current expense categories.
 - A stale explicit selection displays a choose state and blocks saving while
   that preset is visible.

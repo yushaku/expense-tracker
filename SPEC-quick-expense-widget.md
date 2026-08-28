@@ -5,10 +5,11 @@
 Add an iPhone home-screen widget with a configurable 3, 6, or 9 one-tap expense
 presets. The first defaults are Coffee (`☕`, 35,000 VND), Lunch (`🍜`, 50,000
 VND), and Fuel (`⛽`, 100,000 VND). The owner can choose the count and edit each
-preset's emoji, amount, and expense category from the existing in-app
+preset's short name, amount, and expense category from the existing in-app
 transaction Defaults screen. Tapping a widget button records an ordinary
 expense using the current default account and that preset's category, then
-WidgetKit reloads the widget timeline. See
+WidgetKit reloads the widget timeline and briefly shows a saved confirmation.
+Existing emoji values remain valid short names. See
 `SPEC-configurable-quick-expenses.md` and
 `SPEC-quick-expense-categories.md` for expanded behavior and migration.
 
@@ -56,12 +57,15 @@ let presets = [preset] + Array(QuickExpensePreset.defaults.dropFirst())
 try store.save(presets)
 ```
 
+The persisted `symbol` key remains unchanged for compatibility, but its
+user-facing value is a trimmed, nonempty name of at most 16 characters.
+
 Use native `Button(intent:)` controls in the widget, theme tokens in the app,
 stable enum identity for all rows, and explicit accessibility labels.
 
 ## Testing Strategy
 
-- Unit-test default presets, round-trip app-group persistence, symbol/amount
+- Unit-test default presets, round-trip app-group persistence, name/amount
   validation, and recovery from malformed stored data.
 - Add a ready-only capture test proving a valid preset creates one transaction
   and no pending-review item; add a missing-default test proving it writes
@@ -87,19 +91,20 @@ stable enum identity for all rows, and explicit accessibility labels.
 - Small, medium, and large Quick Expense widgets show up to 3, 6, and 9
   configured presets.
 - Defaults are `☕ 35k`, `🍜 50k`, and `⛽ 100k`.
-- The owner can edit every emoji, amount, and expense category on the
+- The owner can edit every short name, amount, and expense category on the
   transaction Defaults screen; valid changes persist across launches and
   refresh installed widgets.
 - One widget-button tap creates exactly one expense with today's timestamp, the
-  preset emoji as its note, the current default account, and its configured
+  preset name as its note, the current default account, and its configured
   category.
 - Missing or stale account/category configuration creates neither a transaction
   nor a pending-review record.
-- Returning from the intent causes WidgetKit to reload the timeline.
+- Returning from the intent causes WidgetKit to reload the timeline and show a
+  transient saved state on the tapped preset.
 - The action runs in the app process without foregrounding MonMon on iOS 18+.
 - Full tests, format lint, and a non-Simulator iOS SDK build pass.
 
 ## Open Questions
 
-None. Configuration is limited to count, emoji, amount, and expense category;
-the account continues to come from the existing transaction defaults.
+None. Configuration is limited to count, short name, amount, and expense
+category; the account continues to come from the existing transaction defaults.

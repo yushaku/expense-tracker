@@ -21,7 +21,7 @@ enum QuickExpensePresetCount: Int, CaseIterable, Codable, Identifiable, Sendable
 }
 
 enum QuickExpensePresetError: Error, Equatable, Sendable {
-    case invalidSymbol
+    case invalidName
     case invalidAmount
     case incompleteSet
 }
@@ -41,11 +41,8 @@ struct QuickExpensePreset: Codable, Equatable, Identifiable, Sendable {
         categoryID: UUID? = nil
     ) throws {
         let normalizedSymbol = symbol.trimmingCharacters(in: .whitespacesAndNewlines)
-        let containsEmojiPresentation = normalizedSymbol.unicodeScalars.contains {
-            $0.properties.isEmojiPresentation || $0.value == 0xFE0F
-        }
-        guard normalizedSymbol.count == 1, containsEmojiPresentation else {
-            throw QuickExpensePresetError.invalidSymbol
+        guard !normalizedSymbol.isEmpty, normalizedSymbol.count <= 16 else {
+            throw QuickExpensePresetError.invalidName
         }
         var amountToRound = amount
         var roundedAmount = Decimal()
@@ -139,6 +136,52 @@ enum QuickExpenseWidgetConfiguration {
             return .standard
         }
         return defaults
+    }
+}
+
+struct QuickExpenseFeedback: Codable, Equatable, Sendable {
+    static let displayDuration: TimeInterval = 5
+
+    let slot: QuickExpenseSlot
+    let savedAt: Date
+
+    var expirationDate: Date {
+        savedAt.addingTimeInterval(Self.displayDuration)
+    }
+
+    func isVisible(at date: Date) -> Bool {
+        date < expirationDate
+    }
+}
+
+struct QuickExpenseFeedbackStore {
+    static let storageKey = "quickExpenseFeedback"
+
+    private let defaults: UserDefaults
+    private let encoder = JSONEncoder()
+    private let decoder = JSONDecoder()
+
+    init(defaults: UserDefaults? = nil) {
+        self.defaults = defaults ?? QuickExpenseWidgetConfiguration.makeDefaults()
+    }
+
+    func recordSuccess(for slot: QuickExpenseSlot, at date: Date = .now) {
+        let feedback = QuickExpenseFeedback(slot: slot, savedAt: date)
+        guard let data = try? encoder.encode(feedback) else {
+            return
+        }
+        defaults.set(data, forKey: Self.storageKey)
+    }
+
+    func latestSuccess(at date: Date = .now) -> QuickExpenseFeedback? {
+        guard
+            let data = defaults.data(forKey: Self.storageKey),
+            let feedback = try? decoder.decode(QuickExpenseFeedback.self, from: data),
+            feedback.isVisible(at: date)
+        else {
+            return nil
+        }
+        return feedback
     }
 }
 

@@ -112,17 +112,25 @@ struct QuickExpensePresetStoreTests {
         #expect(loaded.presets == presets)
     }
 
-    @Test("A preset requires exactly one visible symbol")
-    func symbolValidation() {
-        #expect(throws: QuickExpensePresetError.invalidSymbol) {
+    @Test("A preset requires a short nonempty name")
+    func nameValidation() throws {
+        #expect(throws: QuickExpensePresetError.invalidName) {
             try QuickExpensePreset(slot: .coffee, symbol: "", amount: 35_000)
         }
-        #expect(throws: QuickExpensePresetError.invalidSymbol) {
-            try QuickExpensePreset(slot: .coffee, symbol: "☕☕", amount: 35_000)
+        #expect(throws: QuickExpensePresetError.invalidName) {
+            try QuickExpensePreset(slot: .coffee, symbol: "   ", amount: 35_000)
         }
-        #expect(throws: QuickExpensePresetError.invalidSymbol) {
-            try QuickExpensePreset(slot: .coffee, symbol: "C", amount: 35_000)
+        #expect(throws: QuickExpensePresetError.invalidName) {
+            try QuickExpensePreset(slot: .coffee, symbol: "12345678901234567", amount: 35_000)
         }
+
+        #expect(
+            try QuickExpensePreset(slot: .coffee, symbol: "  Morning coffee  ", amount: 35_000)
+                .symbol == "Morning coffee"
+        )
+        #expect(
+            try QuickExpensePreset(slot: .coffee, symbol: "☕", amount: 35_000).symbol == "☕"
+        )
     }
 
     @Test("A preset amount must be positive and whole")
@@ -161,13 +169,39 @@ struct QuickExpensePresetStoreTests {
     @Test("The intent dependency forwards the selected preset slot")
     func intentDependencyForwardsSlot() async throws {
         let recorder = SlotRecorder()
-        let dependency = QuickExpenseIntentDependency { slot in
+        let feedbackRecorder = SlotRecorder()
+        let dependency = QuickExpenseIntentDependency(
+            feedbackRecorder: { slot in
+                await feedbackRecorder.record(slot)
+            }
+        ) { slot in
             await recorder.record(slot)
         }
 
         try await dependency.record(.lunch)
 
         #expect(await recorder.slots == [.lunch])
+        #expect(await feedbackRecorder.slots == [.lunch])
+    }
+
+    @Test("Widget success feedback expires after its display duration")
+    func widgetSuccessFeedbackExpires() throws {
+        let fixture = try makeFeedbackFixture()
+        let savedAt = Date(timeIntervalSince1970: 1_000)
+
+        fixture.store.recordSuccess(for: .coffee, at: savedAt)
+
+        #expect(fixture.store.latestSuccess(at: savedAt)?.slot == .coffee)
+        #expect(
+            fixture.store.latestSuccess(
+                at: savedAt.addingTimeInterval(QuickExpenseFeedback.displayDuration - 0.1)
+            )?.slot == .coffee
+        )
+        #expect(
+            fixture.store.latestSuccess(
+                at: savedAt.addingTimeInterval(QuickExpenseFeedback.displayDuration)
+            ) == nil
+        )
     }
 
     @Test("A successful quick expense intent provides user-visible feedback")
@@ -222,6 +256,16 @@ struct QuickExpensePresetStoreTests {
         return Fixture(defaults: defaults, store: QuickExpensePresetStore(defaults: defaults))
     }
 
+    private func makeFeedbackFixture() throws -> FeedbackFixture {
+        let suiteName = "QuickExpenseFeedbackStoreTests-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defaults.removePersistentDomain(forName: suiteName)
+        return FeedbackFixture(
+            defaults: defaults,
+            store: QuickExpenseFeedbackStore(defaults: defaults)
+        )
+    }
+
     private func customizedPresets() throws -> [QuickExpensePreset] {
         try zip(QuickExpenseSlot.allCases, ["🧋", "🥗", "🚕", "🛍️", "🚙", "🚇", "🩹", "🎮", "📄"])
             .enumerated()
@@ -241,6 +285,11 @@ struct QuickExpensePresetStoreTests {
     private struct Fixture {
         let defaults: UserDefaults
         let store: QuickExpensePresetStore
+    }
+
+    private struct FeedbackFixture {
+        let defaults: UserDefaults
+        let store: QuickExpenseFeedbackStore
     }
 
     private struct LegacyPreset: Codable {

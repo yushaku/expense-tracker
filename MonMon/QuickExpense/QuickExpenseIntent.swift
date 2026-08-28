@@ -18,13 +18,21 @@ extension QuickExpenseSlot: AppEnum {
 
 struct QuickExpenseIntentDependency: Sendable {
     private let recorder: @Sendable (QuickExpenseSlot) async throws -> Void
+    private let feedbackRecorder: @Sendable (QuickExpenseSlot) async -> Void
 
-    init(_ recorder: @escaping @Sendable (QuickExpenseSlot) async throws -> Void) {
+    init(
+        feedbackRecorder: @escaping @Sendable (QuickExpenseSlot) async -> Void = { slot in
+            QuickExpenseFeedbackStore().recordSuccess(for: slot)
+        },
+        _ recorder: @escaping @Sendable (QuickExpenseSlot) async throws -> Void
+    ) {
+        self.feedbackRecorder = feedbackRecorder
         self.recorder = recorder
     }
 
     func record(_ slot: QuickExpenseSlot) async throws {
         try await recorder(slot)
+        await feedbackRecorder(slot)
     }
 }
 

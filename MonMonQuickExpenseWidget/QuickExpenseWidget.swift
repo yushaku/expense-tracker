@@ -4,11 +4,16 @@ import WidgetKit
 struct QuickExpenseEntry: TimelineEntry {
     let date: Date
     let presets: [QuickExpensePreset]
+    let feedback: QuickExpenseFeedback?
 }
 
 struct QuickExpenseProvider: TimelineProvider {
     func placeholder(in context: Context) -> QuickExpenseEntry {
-        QuickExpenseEntry(date: .now, presets: QuickExpenseConfiguration.defaults.activePresets)
+        QuickExpenseEntry(
+            date: .now,
+            presets: QuickExpenseConfiguration.defaults.activePresets,
+            feedback: nil
+        )
     }
 
     func getSnapshot(
@@ -22,11 +27,27 @@ struct QuickExpenseProvider: TimelineProvider {
         in context: Context,
         completion: @escaping (Timeline<QuickExpenseEntry>) -> Void
     ) {
-        completion(Timeline(entries: [currentEntry], policy: .never))
+        let entry = currentEntry
+        var entries = [entry]
+        if let feedback = entry.feedback {
+            entries.append(
+                QuickExpenseEntry(
+                    date: feedback.expirationDate,
+                    presets: entry.presets,
+                    feedback: nil
+                )
+            )
+        }
+        completion(Timeline(entries: entries, policy: .never))
     }
 
     private var currentEntry: QuickExpenseEntry {
-        QuickExpenseEntry(date: .now, presets: QuickExpensePresetStore().load().activePresets)
+        let now = Date.now
+        return QuickExpenseEntry(
+            date: now,
+            presets: QuickExpensePresetStore().load().activePresets,
+            feedback: QuickExpenseFeedbackStore().latestSuccess(at: now)
+        )
     }
 }
 
@@ -59,7 +80,10 @@ struct QuickExpenseWidgetView: View {
     @ViewBuilder
     private var presetButtons: some View {
         ForEach(visiblePresets) { preset in
-            QuickExpenseButton(preset: preset)
+            QuickExpenseButton(
+                preset: preset,
+                showsSuccess: entry.feedback?.slot == preset.slot
+            )
         }
     }
 
@@ -87,16 +111,30 @@ struct QuickExpenseWidgetView: View {
 
 private struct QuickExpenseButton: View {
     let preset: QuickExpensePreset
+    let showsSuccess: Bool
 
     var body: some View {
         Button(intent: RecordQuickExpenseIntent(slot: preset.slot)) {
             HStack(spacing: 6) {
-                Text(preset.symbol)
-                    .font(.title3)
-                Text(VNDCurrency.format(preset.amount))
-                    .font(.caption.weight(.semibold))
-                    .monospacedDigit()
-                    .lineLimit(1)
+                if showsSuccess {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.body.weight(.semibold))
+                } else {
+                    Text(preset.symbol)
+                        .font(.body.weight(.medium))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+                Group {
+                    if showsSuccess {
+                        Text("Saved")
+                    } else {
+                        Text(VNDCurrency.format(preset.amount))
+                    }
+                }
+                .font(.caption.weight(.semibold))
+                .monospacedDigit()
+                .lineLimit(1)
             }
             .frame(maxWidth: .infinity, minHeight: 38)
             .padding(.horizontal, 6)
@@ -104,9 +142,16 @@ private struct QuickExpenseButton: View {
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(
-            "Record \(preset.symbol) expense for \(VNDCurrency.formatPlain(preset.amount)) đồng"
-        )
+        .foregroundStyle(showsSuccess ? Color.green : Color.primary)
+        .invalidatableContent()
+        .accessibilityLabel(Text(accessibilityLabel))
+    }
+
+    private var accessibilityLabel: LocalizedStringResource {
+        if showsSuccess {
+            return "Saved \(preset.symbol) expense to MonMon"
+        }
+        return "Record \(preset.symbol) expense for \(VNDCurrency.formatPlain(preset.amount)) đồng"
     }
 }
 
