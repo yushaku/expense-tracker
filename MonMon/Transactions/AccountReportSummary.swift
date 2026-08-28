@@ -114,6 +114,16 @@ enum AccountActivityItem: Identifiable {
         transactions.filter { $0.accountID == accountID }
     }
 
+    static func transactions(
+        for accountID: UUID,
+        during range: TransactionRange,
+        in transactions: [MoneyTransaction]
+    ) -> [MoneyTransaction] {
+        transactions.filter {
+            $0.accountID == accountID && range.contains($0.occurredAt)
+        }
+    }
+
     static func transfers(
         for accountID: UUID,
         in transfers: [AccountTransfer]

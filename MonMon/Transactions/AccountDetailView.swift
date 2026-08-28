@@ -18,6 +18,8 @@ private enum AccountDetailTab: CaseIterable, Hashable {
 }
 
 struct AccountDetailView: View {
+    @Environment(\.locale) private var locale
+
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
 
@@ -58,6 +60,7 @@ struct AccountDetailView: View {
     @State private var transferEditorMode: TransferEditorMode?
     @State private var transactionActions = TransactionActions()
     @State private var selectedTab: AccountDetailTab = .transactions
+    @State private var transactionRange = TransactionRange.month(containing: .now)
 
     private var account: CashAccount? {
         accounts.first { $0.id == route.accountID }
@@ -135,10 +138,12 @@ struct AccountDetailView: View {
                         transactions: accountTransactions,
                         categories: categories,
                         accounts: accounts,
-                        emptyNotice: "No transactions recorded for this account.",
+                        emptyNotice: emptyTransactionNotice,
                         accessibilityIdentifierPrefix: "account-detail-transaction",
                         showsCount: true
-                    )
+                    ) {
+                        transactionFilter
+                    }
 
                     if !accountTransfers.isEmpty {
                         transferHistorySection(accountTransfers)
@@ -189,7 +194,32 @@ struct AccountDetailView: View {
     }
 
     private func accountTransactions(for account: CashAccount) -> [MoneyTransaction] {
-        AccountActivityItem.transactions(for: account.id, in: transactions)
+        AccountActivityItem.transactions(
+            for: account.id,
+            during: transactionRange,
+            in: transactions
+        )
+    }
+
+    private var transactionFilter: some View {
+        HStack(spacing: 8) {
+            Text(transactionRange.title(in: locale).uppercased())
+                .font(.caption.weight(.semibold))
+                .tracking(0.6)
+                .foregroundStyle(MonMonTheme.textSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .accessibilityHidden(true)
+
+            DateRangeFilterButton(
+                range: $transactionRange,
+                identifierPrefix: "account-detail-transactions"
+            )
+        }
+    }
+
+    private var emptyTransactionNotice: LocalizedStringKey {
+        "No transactions recorded \(transactionRange.phrase(in: locale))."
     }
 
     private func accountTransfers(for account: CashAccount) -> [AccountTransfer] {

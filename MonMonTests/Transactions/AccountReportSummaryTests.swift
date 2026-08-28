@@ -218,6 +218,39 @@ struct AccountReportSummaryTests {
         #expect(matchingTransfers.map(\.id) == [incomingTransferID, outgoingTransferID])
     }
 
+    @Test("Account detail transaction filter keeps its account inside the selected period")
+    func accountDetailTransactionFilterUsesAccountAndPeriod() {
+        let wallet = makeAccount("Wallet")
+        let other = makeAccount("Other")
+        let visibleTransactionID = UUID()
+        let range = TransactionRange.month(containing: date(2026, 1, 15))
+
+        let matchingTransactions = AccountActivityItem.transactions(
+            for: wallet.id,
+            during: range,
+            in: [
+                makeTransaction(
+                    id: visibleTransactionID,
+                    amount: 100_000,
+                    account: wallet,
+                    occurredAt: date(2026, 1, 10)
+                ),
+                makeTransaction(
+                    amount: 200_000,
+                    account: wallet,
+                    occurredAt: date(2026, 2, 10)
+                ),
+                makeTransaction(
+                    amount: 300_000,
+                    account: other,
+                    occurredAt: date(2026, 1, 20)
+                ),
+            ]
+        )
+
+        #expect(matchingTransactions.map(\.id) == [visibleTransactionID])
+    }
+
     @Test("Equal activity timestamps use a stable kind and identifier order")
     func equalDatesHaveStableOrder() {
         let wallet = makeAccount("Wallet")
