@@ -4,6 +4,20 @@ enum QuickExpenseSlot: String, CaseIterable, Codable, Sendable {
     case coffee
     case lunch
     case fuel
+    case groceries
+    case parking
+    case transit
+    case medicine
+    case entertainment
+    case bills
+}
+
+enum QuickExpensePresetCount: Int, CaseIterable, Codable, Identifiable, Sendable {
+    case three = 3
+    case six = 6
+    case nine = 9
+
+    var id: Int { rawValue }
 }
 
 enum QuickExpensePresetError: Error, Equatable, Sendable {
@@ -39,11 +53,7 @@ struct QuickExpensePreset: Codable, Equatable, Identifiable, Sendable {
         self.amount = amount
     }
 
-    static let defaults = [
-        QuickExpensePreset(uncheckedSlot: .coffee, symbol: "☕", amount: 35_000),
-        QuickExpensePreset(uncheckedSlot: .lunch, symbol: "🍜", amount: 50_000),
-        QuickExpensePreset(uncheckedSlot: .fuel, symbol: "⛽", amount: 100_000),
-    ]
+    static let defaults = QuickExpenseSlot.allCases.map(defaultPreset(for:))
 
     static func defaultPreset(for slot: QuickExpenseSlot) -> QuickExpensePreset {
         switch slot {
@@ -53,6 +63,18 @@ struct QuickExpensePreset: Codable, Equatable, Identifiable, Sendable {
             QuickExpensePreset(uncheckedSlot: .lunch, symbol: "🍜", amount: 50_000)
         case .fuel:
             QuickExpensePreset(uncheckedSlot: .fuel, symbol: "⛽", amount: 100_000)
+        case .groceries:
+            QuickExpensePreset(uncheckedSlot: .groceries, symbol: "🛒", amount: 200_000)
+        case .parking:
+            QuickExpensePreset(uncheckedSlot: .parking, symbol: "🅿️", amount: 20_000)
+        case .transit:
+            QuickExpensePreset(uncheckedSlot: .transit, symbol: "🚌", amount: 15_000)
+        case .medicine:
+            QuickExpensePreset(uncheckedSlot: .medicine, symbol: "💊", amount: 100_000)
+        case .entertainment:
+            QuickExpensePreset(uncheckedSlot: .entertainment, symbol: "🎬", amount: 150_000)
+        case .bills:
+            QuickExpensePreset(uncheckedSlot: .bills, symbol: "🧾", amount: 500_000)
         }
     }
 
@@ -70,6 +92,20 @@ struct QuickExpensePreset: Codable, Equatable, Identifiable, Sendable {
             amount: container.decode(Decimal.self, forKey: .amount)
         )
     }
+}
+
+struct QuickExpenseConfiguration: Codable, Equatable, Sendable {
+    let visibleCount: QuickExpensePresetCount
+    let presets: [QuickExpensePreset]
+
+    var activePresets: [QuickExpensePreset] {
+        Array(presets.prefix(visibleCount.rawValue))
+    }
+
+    static let defaults = QuickExpenseConfiguration(
+        visibleCount: .three,
+        presets: QuickExpensePreset.defaults
+    )
 }
 
 enum QuickExpenseWidgetConfiguration {
@@ -109,28 +145,46 @@ struct QuickExpensePresetStore {
         encoder.outputFormatting = [.sortedKeys]
     }
 
-    func load() -> [QuickExpensePreset] {
-        guard
-            let data = defaults.data(forKey: Self.storageKey),
-            let decoded = try? decoder.decode([QuickExpensePreset].self, from: data),
-            let normalized = try? normalize(decoded)
-        else {
-            return QuickExpensePreset.defaults
+    func load() -> QuickExpenseConfiguration {
+        guard let data = defaults.data(forKey: Self.storageKey) else {
+            return .defaults
         }
-        return normalized
+
+        if let decoded = try? decoder.decode(QuickExpenseConfiguration.self, from: data),
+            let normalized = try? normalize(decoded)
+        {
+            return normalized
+        }
+
+        if let legacyPresets = try? decoder.decode([QuickExpensePreset].self, from: data),
+            let migrated = try? migrate(legacyPresets)
+        {
+            return migrated
+        }
+
+        return .defaults
     }
 
-    func save(_ presets: [QuickExpensePreset]) throws {
-        let normalized = try normalize(presets)
+    func save(_ configuration: QuickExpenseConfiguration) throws {
+        let normalized = try normalize(configuration)
         defaults.set(try encoder.encode(normalized), forKey: Self.storageKey)
     }
 
     func preset(for slot: QuickExpenseSlot) -> QuickExpensePreset {
-        load().first { $0.slot == slot }
+        load().presets.first { $0.slot == slot }
             ?? QuickExpensePreset.defaultPreset(for: slot)
     }
 
-    private func normalize(_ presets: [QuickExpensePreset]) throws -> [QuickExpensePreset] {
+    private func normalize(
+        _ configuration: QuickExpenseConfiguration
+    ) throws -> QuickExpenseConfiguration {
+        QuickExpenseConfiguration(
+            visibleCount: configuration.visibleCount,
+            presets: try normalizePresets(configuration.presets)
+        )
+    }
+
+    private func normalizePresets(_ presets: [QuickExpensePreset]) throws -> [QuickExpensePreset] {
         guard presets.count == QuickExpenseSlot.allCases.count else {
             throw QuickExpensePresetError.incompleteSet
         }
@@ -146,5 +200,36 @@ struct QuickExpensePresetStore {
                 amount: preset.amount
             )
         }
+    }
+
+    private func migrate(_ legacyPresets: [QuickExpensePreset]) throws -> QuickExpenseConfiguration
+    {
+        let legacySlots: [QuickExpenseSlot] = [.coffee, .lunch, .fuel]
+        guard legacyPresets.count == legacySlots.count else {
+            throw QuickExpensePresetError.incompleteSet
+        }
+
+        var migratedPresets = QuickExpensePreset.defaults
+        for slot in legacySlots {
+            let matches = legacyPresets.filter { $0.slot == slot }
+            guard matches.count == 1, let preset = matches.first else {
+                throw QuickExpensePresetError.incompleteSet
+            }
+            let index = try requiredIndex(for: slot)
+            migratedPresets[index] = try QuickExpensePreset(
+                slot: preset.slot,
+                symbol: preset.symbol,
+                amount: preset.amount
+            )
+        }
+
+        return QuickExpenseConfiguration(visibleCount: .three, presets: migratedPresets)
+    }
+
+    private func requiredIndex(for slot: QuickExpenseSlot) throws -> Int {
+        guard let index = QuickExpenseSlot.allCases.firstIndex(of: slot) else {
+            throw QuickExpensePresetError.incompleteSet
+        }
+        return index
     }
 }

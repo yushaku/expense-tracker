@@ -7,6 +7,12 @@ extension QuickExpenseSlot: AppEnum {
         .coffee: "Coffee",
         .lunch: "Lunch",
         .fuel: "Fuel",
+        .groceries: "Groceries",
+        .parking: "Parking",
+        .transit: "Transit",
+        .medicine: "Medicine",
+        .entertainment: "Entertainment",
+        .bills: "Bills",
     ]
 }
 
