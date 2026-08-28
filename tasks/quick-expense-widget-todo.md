@@ -22,11 +22,11 @@ Files: capture service/intent, quick-expense intent, app registration, tests.
 
 ## Task 3: Add configuration UI and widget
 
-- [ ] Add three accessible emoji/amount rows to transaction Defaults.
-- [ ] Persist valid edits and reload the widget timeline.
-- [ ] Add small and medium widgets with three native intent buttons.
-- [ ] Add the widget target, embedding, Info.plist, and app-group entitlement.
-- [ ] Verify the iOS SDK build.
+- [x] Add three accessible emoji/amount rows to transaction Defaults.
+- [x] Persist valid edits and reload the widget timeline.
+- [x] Add small and medium widgets with three native intent buttons.
+- [x] Add the widget target, embedding, Info.plist, and app-group entitlement.
+- [x] Verify the iOS SDK build.
 
 Files: defaults view/editor, widget extension, project file.
 

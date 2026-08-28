@@ -7,7 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		J10000000000000000000201 /* QuickExpenseWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000102 /* QuickExpenseWidget.swift */; };
+		J10000000000000000000202 /* QuickExpensePreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000102 /* QuickExpensePreset.swift */; };
+		J10000000000000000000203 /* QuickExpenseIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000103 /* QuickExpenseIntent.swift */; };
+		J10000000000000000000204 /* VNDCurrency.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000122 /* VNDCurrency.swift */; };
+		J10000000000000000000205 /* MonMonQuickExpenseWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = J10000000000000000000101 /* MonMonQuickExpenseWidget.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		W10000000000000000000203 /* QuickExpenseIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000103 /* QuickExpenseIntent.swift */; };
+		W10000000000000000000204 /* QuickExpensePresetDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000104 /* QuickExpensePresetDraft.swift */; };
+		W10000000000000000000205 /* QuickExpensePresetsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000105 /* QuickExpensePresetsCard.swift */; };
 		W10000000000000000000202 /* QuickExpensePreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000102 /* QuickExpensePreset.swift */; };
 		W10000000000000000000201 /* QuickExpensePresetStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000101 /* QuickExpensePresetStoreTests.swift */; };
 		K10000000000000000000210 /* MonMonBackupDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000110 /* MonMonBackupDocument.swift */; };
@@ -308,6 +315,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		J10000000000000000000602 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A00000000000000000000003 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = J10000000000000000000001;
+			remoteInfo = MonMonQuickExpenseWidget;
+		};
 		A00000000000000000000602 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A00000000000000000000003 /* Project object */;
@@ -332,6 +346,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				D10000000000000000000203 /* MonMonShareExtension.appex in Embed App Extensions */,
+				J10000000000000000000205 /* MonMonQuickExpenseWidget.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -339,7 +354,13 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		J10000000000000000000101 /* MonMonQuickExpenseWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MonMonQuickExpenseWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		J10000000000000000000102 /* QuickExpenseWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpenseWidget.swift; sourceTree = "<group>"; };
+		J10000000000000000000103 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		J10000000000000000000104 /* MonMonQuickExpenseWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MonMonQuickExpenseWidget.entitlements; sourceTree = "<group>"; };
 		W10000000000000000000103 /* QuickExpenseIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpenseIntent.swift; sourceTree = "<group>"; };
+		W10000000000000000000104 /* QuickExpensePresetDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpensePresetDraft.swift; sourceTree = "<group>"; };
+		W10000000000000000000105 /* QuickExpensePresetsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpensePresetsCard.swift; sourceTree = "<group>"; };
 		W10000000000000000000102 /* QuickExpensePreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpensePreset.swift; sourceTree = "<group>"; };
 		W10000000000000000000101 /* QuickExpensePresetStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpensePresetStoreTests.swift; sourceTree = "<group>"; };
 		K10000000000000000000110 /* MonMonBackupDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonMonBackupDocument.swift; sourceTree = "<group>"; };
@@ -648,6 +669,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		J10000000000000000000302 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A00000000000000000000302 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -680,6 +708,7 @@
 				A00000000000000000000012 /* MonMon */,
 				A00000000000000000000015 /* MonMonTests */,
 				D10000000000000000000010 /* MonMonShareExtension */,
+				J10000000000000000000010 /* MonMonQuickExpenseWidget */,
 				A00000000000000000000016 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -722,6 +751,8 @@
 			isa = PBXGroup;
 			children = (
 				W10000000000000000000103 /* QuickExpenseIntent.swift */,
+				W10000000000000000000104 /* QuickExpensePresetDraft.swift */,
+				W10000000000000000000105 /* QuickExpensePresetsCard.swift */,
 				W10000000000000000000102 /* QuickExpensePreset.swift */,
 			);
 			path = QuickExpense;
@@ -787,6 +818,7 @@
 				A00000000000000000000120 /* MonMon.app */,
 				A00000000000000000000121 /* MonMonTests.xctest */,
 				D10000000000000000000101 /* MonMonShareExtension.appex */,
+				J10000000000000000000101 /* MonMonQuickExpenseWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1248,6 +1280,16 @@
 			path = MonMonShareExtension;
 			sourceTree = "<group>";
 		};
+		J10000000000000000000010 /* MonMonQuickExpenseWidget */ = {
+			isa = PBXGroup;
+			children = (
+				J10000000000000000000104 /* MonMonQuickExpenseWidget.entitlements */,
+				J10000000000000000000103 /* Info.plist */,
+				J10000000000000000000102 /* QuickExpenseWidget.swift */,
+			);
+			path = MonMonQuickExpenseWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1264,6 +1306,7 @@
 			);
 			dependencies = (
 				D10000000000000000000601 /* PBXTargetDependency */,
+				J10000000000000000000601 /* PBXTargetDependency */,
 			);
 			name = MonMon;
 			packageProductDependencies = (
@@ -1308,6 +1351,23 @@
 			productReference = D10000000000000000000101 /* MonMonShareExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		J10000000000000000000001 /* MonMonQuickExpenseWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = J10000000000000000000401 /* Build configuration list for PBXNativeTarget "MonMonQuickExpenseWidget" */;
+			buildPhases = (
+				J10000000000000000000301 /* Sources */,
+				J10000000000000000000302 /* Frameworks */,
+				J10000000000000000000303 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MonMonQuickExpenseWidget;
+			productName = MonMonQuickExpenseWidget;
+			productReference = J10000000000000000000101 /* MonMonQuickExpenseWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -1326,6 +1386,9 @@
 						TestTargetID = A00000000000000000000001;
 					};
 					D10000000000000000000001 = {
+						CreatedOnToolsVersion = 26.6;
+					};
+					J10000000000000000000001 = {
 						CreatedOnToolsVersion = 26.6;
 					};
 				};
@@ -1350,11 +1413,19 @@
 				A00000000000000000000001 /* MonMon */,
 				A00000000000000000000002 /* MonMonTests */,
 				D10000000000000000000001 /* MonMonShareExtension */,
+				J10000000000000000000001 /* MonMonQuickExpenseWidget */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		J10000000000000000000303 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A00000000000000000000303 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1382,10 +1453,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		J10000000000000000000301 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				J10000000000000000000201 /* QuickExpenseWidget.swift in Sources */,
+				J10000000000000000000202 /* QuickExpensePreset.swift in Sources */,
+				J10000000000000000000203 /* QuickExpenseIntent.swift in Sources */,
+				J10000000000000000000204 /* VNDCurrency.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A00000000000000000000301 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				W10000000000000000000205 /* QuickExpensePresetsCard.swift in Sources */,
+				W10000000000000000000204 /* QuickExpensePresetDraft.swift in Sources */,
 				W10000000000000000000203 /* QuickExpenseIntent.swift in Sources */,
 				W10000000000000000000202 /* QuickExpensePreset.swift in Sources */,
 				K10000000000000000000210 /* MonMonBackupDocument.swift in Sources */,
@@ -1689,6 +1773,12 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		J10000000000000000000601 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilter = ios;
+			target = J10000000000000000000001 /* MonMonQuickExpenseWidget */;
+			targetProxy = J10000000000000000000602 /* PBXContainerItemProxy */;
+		};
 		A00000000000000000000601 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = A00000000000000000000001 /* MonMon */;
@@ -1703,6 +1793,50 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		J10000000000000000000501 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A00000000000000000000102 /* Debug.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = MonMonQuickExpenseWidget/MonMonQuickExpenseWidget.entitlements;
+				DEVELOPMENT_TEAM = VB5AW63GJ8;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MonMonQuickExpenseWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_ID).QuickExpenseWidget";
+				PRODUCT_NAME = MonMonQuickExpenseWidget;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) WIDGET_EXTENSION";
+			};
+			name = Debug;
+		};
+		J10000000000000000000502 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A00000000000000000000103 /* Release.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = MonMonQuickExpenseWidget/MonMonQuickExpenseWidget.entitlements;
+				DEVELOPMENT_TEAM = VB5AW63GJ8;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MonMonQuickExpenseWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_ID).QuickExpenseWidget";
+				PRODUCT_NAME = MonMonQuickExpenseWidget;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) WIDGET_EXTENSION";
+			};
+			name = Release;
+		};
 		A00000000000000000000501 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A00000000000000000000102 /* Debug.xcconfig */;
@@ -1822,6 +1956,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		J10000000000000000000401 /* Build configuration list for PBXNativeTarget "MonMonQuickExpenseWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				J10000000000000000000501 /* Debug */,
+				J10000000000000000000502 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		A00000000000000000000401 /* Build configuration list for PBXProject "MonMon" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

@@ -83,6 +83,29 @@ struct QuickExpensePresetStoreTests {
         #expect(await recorder.slots == [.lunch])
     }
 
+    @Test("An editor draft round trips a localized VND amount")
+    func editorDraftRoundTripsAmount() throws {
+        let preset = try QuickExpensePreset(slot: .coffee, symbol: "☕", amount: 35_000)
+        var draft = QuickExpensePresetDraft(preset: preset)
+
+        draft.symbol = "🧋"
+        draft.amountText = "42.000"
+
+        #expect(try draft.makePreset().symbol == "🧋")
+        #expect(try draft.makePreset().amount == 42_000)
+    }
+
+    @Test("An editor draft rejects an invalid amount")
+    func editorDraftRejectsInvalidAmount() throws {
+        let preset = try QuickExpensePreset(slot: .coffee, symbol: "☕", amount: 35_000)
+        var draft = QuickExpensePresetDraft(preset: preset)
+        draft.amountText = "35k"
+
+        #expect(throws: QuickExpensePresetError.invalidAmount) {
+            try draft.makePreset()
+        }
+    }
+
     private func makeFixture() throws -> Fixture {
         let suiteName = "QuickExpensePresetStoreTests-\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suiteName))

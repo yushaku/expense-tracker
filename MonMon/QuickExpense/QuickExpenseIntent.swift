@@ -70,7 +70,10 @@ extension RecordQuickExpenseIntent {
     static var supportedModes: IntentModes { .background }
 }
 
-// On iOS 18-25 this compatibility conformance keeps widget execution in the
-// app process. iOS 26 uses `supportedModes` above instead.
-@available(*, deprecated)
-extension RecordQuickExpenseIntent: ForegroundContinuableIntent {}
+#if !WIDGET_EXTENSION
+    // On iOS 18-25 this compatibility conformance keeps widget execution in the
+    // app process. The widget target declares the intent but cannot itself adopt
+    // this app-only protocol. iOS 26 uses `supportedModes` above instead.
+    @available(*, deprecated)
+    extension RecordQuickExpenseIntent: ForegroundContinuableIntent {}
+#endif

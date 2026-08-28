@@ -24,6 +24,7 @@ struct TransactionDefaultsView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                         TransactionDefaultsCard()
+                        QuickExpensePresetsCard()
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
                     .padding(.horizontal, 20)
