@@ -208,7 +208,6 @@ enum CategoryWaterfall {
                     colorName: nil
                 )
             )
-            balance = remaining
         }
 
         steps.append(
