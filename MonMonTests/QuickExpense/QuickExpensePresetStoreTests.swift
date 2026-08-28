@@ -1,3 +1,4 @@
+import AppIntents
 import Foundation
 import Testing
 
@@ -89,6 +90,13 @@ struct QuickExpensePresetStoreTests {
         #expect(await recorder.slots == [.lunch])
     }
 
+    @Test("A successful quick expense intent provides user-visible feedback")
+    func successfulIntentProvidesDialog() {
+        requireDialog {
+            try await RecordQuickExpenseIntent(slot: .coffee).perform()
+        }
+    }
+
     @Test("An editor draft round trips a localized VND amount")
     func editorDraftRoundTripsAmount() throws {
         let preset = try QuickExpensePreset(slot: .coffee, symbol: "☕", amount: 35_000)
@@ -118,6 +126,10 @@ struct QuickExpensePresetStoreTests {
         defaults.removePersistentDomain(forName: suiteName)
         return Fixture(defaults: defaults, store: QuickExpensePresetStore(defaults: defaults))
     }
+
+    private func requireDialog<Result: IntentResult & ProvidesDialog>(
+        _ operation: @escaping () async throws -> Result
+    ) {}
 
     private struct Fixture {
         let defaults: UserDefaults
