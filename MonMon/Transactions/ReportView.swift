@@ -40,15 +40,6 @@ struct ReportView: View {
     @State private var editorMode: TransactionEditorMode?
     @State private var isFiltering = false
 
-    /// One details sheet and one delete question for the whole list, rather
-    /// than one of each per row.
-    @State private var transactionActions = TransactionActions()
-
-    /// Weekday first: over a run of days the name is what the eye picks out, and
-    /// the year is left to the period title above the list.
-    private static let dayTemplate = Date.FormatStyle().weekday(.abbreviated).day().month(
-        .abbreviated)
-
     var body: some View {
         NavigationStack {
             ZStack {
@@ -100,14 +91,6 @@ struct ReportView: View {
             .appSheet(item: $editorMode) { mode in
                 TransactionEditorView(mode: mode, defaultDate: defaultDate)
             }
-            .transactionActions(
-                transactionActions,
-                category: category(for:),
-                account: account(for:),
-                onEdit: { transaction in
-                    editorMode = .edit(transaction)
-                }
-            )
             .tint(MonMonTheme.accent)
         }
     }
@@ -292,85 +275,19 @@ struct ReportView: View {
             : "Nothing recorded \(query.range.phrase(in: locale))."
     }
 
-    /// Search results broken at each day the way the Spending screen breaks
-    /// transactions, so a result read here reads the same as it does where it
-    /// was recorded.
     private func resultsSection(_ results: [MoneyTransaction]) -> some View {
-        VStack(alignment: .leading, spacing: 20) {
-            HStack(spacing: 12) {
-                Text("Results")
-                    .font(.title3.weight(.semibold))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-
-                Text(results.count.formatted())
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(MonMonTheme.accent)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(MonMonTheme.accent.opacity(0.16), in: Capsule())
-
-                Spacer(minLength: 8)
+        TransactionListSection(
+            title: "Results",
+            transactions: results,
+            categories: categories,
+            accounts: accounts,
+            emptyNotice: "Nothing matches what you are looking for.",
+            accessibilityIdentifierPrefix: "report-transaction",
+            showsCount: true,
+            onEdit: { transaction in
+                editorMode = .edit(transaction)
             }
-
-            ForEach(TransactionSummary.byDay(results)) { group in
-                VStack(alignment: .leading, spacing: 12) {
-                    dayHeader(for: group)
-
-                    ForEach(group.transactions) { transaction in
-                        TransactionItem(
-                            transaction: transaction,
-                            category: category(for: transaction),
-                            account: account(for: transaction),
-                            showsDate: false,
-                            accessibilityIdentifier:
-                                "report-transaction-\(transaction.id.uuidString)"
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    private func dayHeader(for group: TransactionDayGroup) -> some View {
-        HStack(spacing: 12) {
-            Text(
-                TransactionPeriod.format(Self.dayTemplate, in: locale).format(group.day)
-                    .uppercased()
-            )
-            .font(.caption.weight(.semibold))
-            .tracking(0.8)
-            .lineLimit(1)
-            .minimumScaleFactor(0.7)
-
-            Spacer(minLength: 8)
-
-            Text(signed(group.net))
-                .font(.caption.weight(.bold))
-                .monospacedDigit()
-                .foregroundStyle(group.net < 0 ? MonMonTheme.danger : MonMonTheme.gain)
-        }
-        .foregroundStyle(MonMonTheme.textSecondary)
-        .accessibilityElement(children: .combine)
-    }
-
-    private func signed(_ amount: Decimal) -> String {
-        let magnitude = amount < 0 ? -amount : amount
-        let sign = amount < 0 ? "−" : "+"
-
-        return "\(sign)\(VNDCurrency.format(magnitude))"
-    }
-
-    private func category(for transaction: MoneyTransaction) -> TransactionCategory? {
-        guard let categoryID = transaction.categoryID else {
-            return nil
-        }
-
-        return categories.first { $0.id == categoryID }
-    }
-
-    private func account(for transaction: MoneyTransaction) -> CashAccount? {
-        accounts.first { $0.id == transaction.accountID }
+        )
     }
 
     private func account(_ id: UUID) -> CashAccount? {

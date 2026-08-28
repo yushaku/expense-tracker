@@ -29,16 +29,8 @@ struct TransactionListView: View {
     @State private var isShowingImportInbox = false
     @State private var isShowingAccounts = false
 
-    /// One details sheet and one delete question for the whole list, rather
-    /// than one of each per row.
-    @State private var transactionActions = TransactionActions()
     @State private var isShowingCaptureInbox = false
     @State private var isShowingQuickCapture = false
-
-    /// Weekday first: over a run of days the name is what the eye picks out,
-    /// and the year is left to the period title above the list.
-    private static let dayTemplate = Date.FormatStyle().weekday(.abbreviated).day().month(
-        .abbreviated)
 
     var body: some View {
         NavigationStack {
@@ -135,14 +127,6 @@ struct TransactionListView: View {
                     identifierPrefix: "spending-"
                 )
             }
-            .transactionActions(
-                transactionActions,
-                category: category(for:),
-                account: account(for:),
-                onEdit: { transaction in
-                    editorMode = .edit(transaction)
-                }
-            )
             .appSheet(isPresented: $isManagingCategories) {
                 CategoryListView()
             }
@@ -544,108 +528,36 @@ struct TransactionListView: View {
         )
     }
 
-    private func signed(_ amount: Decimal) -> String {
-        let magnitude = amount < 0 ? -amount : amount
-        let sign = amount < 0 ? "−" : "+"
-
-        return "\(sign)\(VNDCurrency.format(magnitude))"
-    }
-
-    /// Transactions run in date order, so the list breaks them at each day and
-    /// heads the run with that date and what the day came to. The cards below a
-    /// header drop their own date, which the header now carries.
-    ///
     private var transactionsSection: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            HStack(spacing: 12) {
-                Text("Transactions")
-                    .font(.title3.weight(.semibold))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-
-                Spacer(minLength: 8)
-
-                // This affects the rows only. The period-wide figures live on
-                // Report and continue to count both directions.
-                Picker("Show", selection: $query.filter) {
-                    ForEach(TransactionListFilter.allCases) { filter in
-                        Text(filter.displayName)
-                            .tag(filter)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .frame(maxWidth: 210)
-                .accessibilityIdentifier("transaction-filter")
+        TransactionListSection(
+            title: "Transactions",
+            transactions: visibleTransactions,
+            categories: categories,
+            accounts: accounts,
+            emptyNotice: emptyFilterNotice,
+            onEdit: { transaction in
+                editorMode = .edit(transaction)
             }
-
-            if visibleTransactions.isEmpty {
-                Text(emptyFilterNotice)
-                    .font(.subheadline)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-            }
-
-            ForEach(dayGroups) { group in
-                VStack(alignment: .leading, spacing: 12) {
-                    dayHeader(for: group)
-
-                    ForEach(group.transactions) { transaction in
-                        TransactionItem(
-                            transaction: transaction,
-                            category: category(for: transaction),
-                            account: account(for: transaction),
-                            showsDate: false,
-                            accessibilityIdentifier: "transaction-\(transaction.id.uuidString)"
-                        )
-                    }
+        ) {
+            // This affects the rows only. The period-wide figures live on
+            // Report and continue to count both directions.
+            Picker("Show", selection: $query.filter) {
+                ForEach(TransactionListFilter.allCases) { filter in
+                    Text(filter.displayName)
+                        .tag(filter)
                 }
             }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .frame(maxWidth: 210)
+            .accessibilityIdentifier("transaction-filter")
         }
-    }
-
-    private var dayGroups: [TransactionDayGroup] {
-        TransactionSummary.byDay(visibleTransactions)
     }
 
     private var emptyFilterNotice: LocalizedStringKey {
         query.isNarrowed
             ? "Nothing matches what you are looking for."
             : "Nothing recorded \(query.range.phrase(in: locale))."
-    }
-
-    private func dayHeader(for group: TransactionDayGroup) -> some View {
-        HStack(spacing: 12) {
-            Text(
-                TransactionPeriod.format(Self.dayTemplate, in: locale).format(group.day)
-                    .uppercased()
-            )
-            .font(.caption.weight(.semibold))
-            .tracking(0.8)
-            .lineLimit(1)
-            .minimumScaleFactor(0.7)
-
-            Spacer(minLength: 8)
-
-            Text(signed(group.net))
-                .font(.caption.weight(.semibold))
-                .monospacedDigit()
-                .lineLimit(1)
-        }
-        .foregroundStyle(MonMonTheme.textSecondary)
-        .padding(.horizontal, 4)
-        .accessibilityElement(children: .combine)
-    }
-
-    private func category(for transaction: MoneyTransaction) -> TransactionCategory? {
-        guard let categoryID = transaction.categoryID else {
-            return nil
-        }
-
-        return categories.first { $0.id == categoryID }
-    }
-
-    private func account(for transaction: MoneyTransaction) -> CashAccount? {
-        accounts.first { $0.id == transaction.accountID }
     }
 
     private var noAccountState: some View {
