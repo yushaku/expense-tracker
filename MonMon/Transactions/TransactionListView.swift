@@ -25,6 +25,7 @@ struct TransactionListView: View {
     @State private var isManagingRecurring = false
     @State private var isEditingDefaults = false
     @State private var isFiltering = false
+    @State private var transactionActions = TransactionActions()
     @State private var importInbox = StatementImportInbox.live()
     @State private var isShowingImportInbox = false
     @State private var isShowingAccounts = false
@@ -145,6 +146,13 @@ struct TransactionListView: View {
             .appSheet(isPresented: $isShowingQuickCapture) {
                 QuickTransactionCaptureView()
             }
+            .transactionActions(
+                transactionActions,
+                undoBottomInset: FloatingAddButton.contentInset,
+                category: category(for:),
+                account: account(for:),
+                onEdit: { editorMode = .edit($0) }
+            )
             .task { await importInbox.refresh() }
             .onChange(of: scenePhase) { _, phase in
                 guard phase == .active else {
@@ -534,11 +542,7 @@ struct TransactionListView: View {
             transactions: visibleTransactions,
             categories: categories,
             accounts: accounts,
-            emptyNotice: emptyFilterNotice,
-            undoBottomInset: FloatingAddButton.contentInset,
-            onEdit: { transaction in
-                editorMode = .edit(transaction)
-            }
+            emptyNotice: emptyFilterNotice
         ) {
             // This affects the rows only. The period-wide figures live on
             // Report and continue to count both directions.
@@ -553,6 +557,18 @@ struct TransactionListView: View {
             .frame(maxWidth: 210)
             .accessibilityIdentifier("transaction-filter")
         }
+    }
+
+    private func category(for transaction: MoneyTransaction) -> TransactionCategory? {
+        guard let categoryID = transaction.categoryID else {
+            return nil
+        }
+
+        return categories.first { $0.id == categoryID }
+    }
+
+    private func account(for transaction: MoneyTransaction) -> CashAccount? {
+        accounts.first { $0.id == transaction.accountID }
     }
 
     private var emptyFilterNotice: LocalizedStringKey {

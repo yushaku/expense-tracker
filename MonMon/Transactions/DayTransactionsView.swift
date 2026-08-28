@@ -28,6 +28,7 @@ struct DayTransactionsView: View {
     let period: DayPeriod
 
     @State private var editorMode: TransactionEditorMode?
+    @State private var transactionActions = TransactionActions()
 
     var body: some View {
         ZStack {
@@ -48,11 +49,7 @@ struct DayTransactionsView: View {
                         transactions: matching,
                         categories: categories,
                         accounts: accounts,
-                        emptyNotice: "Nothing recorded on this day.",
-                        undoBottomInset: FloatingAddButton.contentInset,
-                        onEdit: { transaction in
-                            editorMode = .edit(transaction)
-                        }
+                        emptyNotice: "Nothing recorded on this day."
                     )
                 }
                 .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -81,6 +78,13 @@ struct DayTransactionsView: View {
             // only day this screen can show.
             TransactionEditorView(mode: mode, defaultDate: period.day)
         }
+        .transactionActions(
+            transactionActions,
+            undoBottomInset: FloatingAddButton.contentInset,
+            category: category(for:),
+            account: account(for:),
+            onEdit: { editorMode = .edit($0) }
+        )
         .tint(MonMonTheme.accent)
     }
 
@@ -96,6 +100,18 @@ struct DayTransactionsView: View {
 
     private var expense: Decimal {
         TransactionSummary.totalExpense(of: matching)
+    }
+
+    private func category(for transaction: MoneyTransaction) -> TransactionCategory? {
+        guard let categoryID = transaction.categoryID else {
+            return nil
+        }
+
+        return categories.first { $0.id == categoryID }
+    }
+
+    private func account(for transaction: MoneyTransaction) -> CashAccount? {
+        accounts.first { $0.id == transaction.accountID }
     }
 
     /// The bar has room for a short date; the card below it spells the day out.
