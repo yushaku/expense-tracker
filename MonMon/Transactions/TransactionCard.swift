@@ -6,8 +6,8 @@ struct TransactionCard: View {
     let transaction: MoneyTransaction
     let category: TransactionCategory?
     let account: CashAccount?
-    /// The spending list puts one date over each day of cards, so the card
-    /// drops its own copy there and keeps it everywhere else.
+    /// The shared transaction list puts one date over each day of cards, so
+    /// the card drops its own copy there and keeps it everywhere else.
     var showsDate = true
 
     private static let dateTemplate = Date.FormatStyle().day().month(.abbreviated)

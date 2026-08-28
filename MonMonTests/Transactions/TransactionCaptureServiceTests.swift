@@ -76,6 +76,138 @@ struct TransactionCaptureServiceTests {
         #expect(try context.fetch(FetchDescriptor<PendingTransactionCapture>()).count == 1)
     }
 
+    @Test("Ready-only intent capture commits one expense without staging review")
+    func readyOnlyIntentCommitsExpense() async throws {
+        let fixture = try makeFixture()
+        let dependency = TransactionCaptureIntentDependency(
+            container: fixture.container,
+            defaults: fixture.defaults
+        )
+
+        let result = try await dependency.recordReady("35.000 ☕")
+        let context = ModelContext(fixture.container)
+        let transactions = try context.fetch(FetchDescriptor<MoneyTransaction>())
+
+        #expect(result.disposition == .transaction)
+        #expect(transactions.count == 1)
+        #expect(transactions.first?.kind == .expense)
+        #expect(transactions.first?.amount == 35_000)
+        #expect(transactions.first?.note == "☕")
+        #expect(try context.fetch(FetchDescriptor<PendingTransactionCapture>()).isEmpty)
+    }
+
+    @Test("Ready-only intent capture writes nothing when defaults are unavailable")
+    func readyOnlyIntentRejectsMissingDefaults() async throws {
+        let fixture = try makeFixture()
+        fixture.defaults.removeObject(forKey: TransactionDefaults.accountStorageKey)
+        fixture.defaults.removeObject(forKey: TransactionDefaults.categoryStorageKey)
+        let dependency = TransactionCaptureIntentDependency(
+            container: fixture.container,
+            defaults: fixture.defaults
+        )
+
+        await #expect(throws: TransactionCaptureServiceError.incompleteCapture) {
+            try await dependency.recordReady("35.000 ☕")
+        }
+
+        let context = ModelContext(fixture.container)
+        #expect(try context.fetch(FetchDescriptor<MoneyTransaction>()).isEmpty)
+        #expect(try context.fetch(FetchDescriptor<PendingTransactionCapture>()).isEmpty)
+    }
+
+    @Test("Quick expense uses its configured category instead of the global default")
+    func quickExpenseUsesConfiguredCategory() async throws {
+        let fixture = try makeFixture()
+        let dependency = TransactionCaptureIntentDependency(
+            container: fixture.container,
+            defaults: fixture.defaults
+        )
+        let preset = try QuickExpensePreset(
+            slot: .fuel,
+            symbol: "⛽",
+            amount: 100_000,
+            categoryID: fixture.transportCategoryID
+        )
+
+        let result = try await dependency.recordQuickExpense(preset)
+
+        let context = ModelContext(fixture.container)
+        let transactions = try context.fetch(FetchDescriptor<MoneyTransaction>())
+        #expect(result.disposition == .transaction)
+        #expect(transactions.count == 1)
+        #expect(transactions.first?.amount == 100_000)
+        #expect(transactions.first?.categoryID == fixture.transportCategoryID)
+        #expect(transactions.first?.accountID == fixture.accountID)
+        #expect(transactions.first?.note == "⛽")
+    }
+
+    @Test("Legacy quick expense without a category uses the global default")
+    func quickExpenseWithoutCategoryUsesDefault() async throws {
+        let fixture = try makeFixture()
+        let dependency = TransactionCaptureIntentDependency(
+            container: fixture.container,
+            defaults: fixture.defaults
+        )
+        let preset = try QuickExpensePreset(
+            slot: .coffee,
+            symbol: "☕",
+            amount: 35_000
+        )
+
+        _ = try await dependency.recordQuickExpense(preset)
+
+        let context = ModelContext(fixture.container)
+        let transaction = try #require(
+            context.fetch(FetchDescriptor<MoneyTransaction>()).first
+        )
+        #expect(transaction.categoryID == fixture.categoryID)
+    }
+
+    @Test("Quick expense rejects a deleted configured category without writing")
+    func quickExpenseRejectsDeletedCategory() async throws {
+        let fixture = try makeFixture()
+        let dependency = TransactionCaptureIntentDependency(
+            container: fixture.container,
+            defaults: fixture.defaults
+        )
+        let preset = try QuickExpensePreset(
+            slot: .coffee,
+            symbol: "☕",
+            amount: 35_000,
+            categoryID: UUID()
+        )
+
+        await #expect(throws: TransactionCaptureServiceError.incompleteCapture) {
+            try await dependency.recordQuickExpense(preset)
+        }
+
+        let context = ModelContext(fixture.container)
+        #expect(try context.fetch(FetchDescriptor<MoneyTransaction>()).isEmpty)
+        #expect(try context.fetch(FetchDescriptor<PendingTransactionCapture>()).isEmpty)
+    }
+
+    @Test("Quick expense rejects a configured income category without writing")
+    func quickExpenseRejectsIncomeCategory() async throws {
+        let fixture = try makeFixture()
+        let dependency = TransactionCaptureIntentDependency(
+            container: fixture.container,
+            defaults: fixture.defaults
+        )
+        let preset = try QuickExpensePreset(
+            slot: .coffee,
+            symbol: "☕",
+            amount: 35_000,
+            categoryID: fixture.incomeCategoryID
+        )
+
+        await #expect(throws: TransactionCaptureServiceError.incompleteCapture) {
+            try await dependency.recordQuickExpense(preset)
+        }
+
+        let context = ModelContext(fixture.container)
+        #expect(try context.fetch(FetchDescriptor<MoneyTransaction>()).isEmpty)
+    }
+
     @Test("A stale prepared capture is rejected before writing")
     func stalePreparedCaptureIsRejected() throws {
         let fixture = try makeFixture()
@@ -102,6 +234,8 @@ struct TransactionCaptureServiceTests {
         let context = ModelContext(container)
         let accountID = UUID()
         let categoryID = UUID()
+        let transportCategoryID = UUID()
+        let incomeCategoryID = UUID()
         context.insert(
             CashAccount(
                 id: accountID,
@@ -122,6 +256,26 @@ struct TransactionCaptureServiceTests {
                 createdAt: now
             )
         )
+        context.insert(
+            TransactionCategory(
+                id: transportCategoryID,
+                name: "Đi lại",
+                kind: .expense,
+                symbolName: "car.fill",
+                colorName: "blue",
+                createdAt: now.addingTimeInterval(1)
+            )
+        )
+        context.insert(
+            TransactionCategory(
+                id: incomeCategoryID,
+                name: "Lương",
+                kind: .income,
+                symbolName: "banknote.fill",
+                colorName: "green",
+                createdAt: now.addingTimeInterval(2)
+            )
+        )
         try context.save()
 
         let suiteName = "TransactionCaptureServiceTests-\(UUID().uuidString)"
@@ -134,7 +288,9 @@ struct TransactionCaptureServiceTests {
             service: TransactionCaptureService(container: container, defaults: defaults),
             defaults: defaults,
             accountID: accountID,
-            categoryID: categoryID
+            categoryID: categoryID,
+            transportCategoryID: transportCategoryID,
+            incomeCategoryID: incomeCategoryID
         )
     }
 
@@ -144,5 +300,7 @@ struct TransactionCaptureServiceTests {
         let defaults: UserDefaults
         let accountID: UUID
         let categoryID: UUID
+        let transportCategoryID: UUID
+        let incomeCategoryID: UUID
     }
 }

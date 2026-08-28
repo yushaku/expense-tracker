@@ -175,6 +175,82 @@ struct AccountReportSummaryTests {
         )
     }
 
+    @Test("Account detail history separates matching transactions and transfers")
+    func accountDetailHistoryUsesOnlyMatchingMovements() {
+        let wallet = makeAccount("Wallet")
+        let bank = makeAccount("Bank")
+        let other = makeAccount("Other")
+        let walletTransactionID = UUID()
+        let incomingTransferID = UUID()
+        let outgoingTransferID = UUID()
+
+        let matchingTransactions = AccountActivityItem.transactions(
+            for: wallet.id,
+            in: [
+                makeTransaction(
+                    id: walletTransactionID,
+                    amount: 100_000,
+                    account: wallet
+                ),
+                makeTransaction(amount: 200_000, account: other),
+            ]
+        )
+        let matchingTransfers = AccountActivityItem.transfers(
+            for: wallet.id,
+            in: [
+                makeTransfer(
+                    id: incomingTransferID,
+                    from: bank,
+                    to: wallet,
+                    occurredAt: createdAt
+                ),
+                makeTransfer(
+                    id: outgoingTransferID,
+                    from: wallet,
+                    to: bank,
+                    occurredAt: createdAt
+                ),
+                makeTransfer(from: bank, to: other, occurredAt: createdAt),
+            ]
+        )
+
+        #expect(matchingTransactions.map(\.id) == [walletTransactionID])
+        #expect(matchingTransfers.map(\.id) == [incomingTransferID, outgoingTransferID])
+    }
+
+    @Test("Account detail transaction filter keeps its account inside the selected period")
+    func accountDetailTransactionFilterUsesAccountAndPeriod() {
+        let wallet = makeAccount("Wallet")
+        let other = makeAccount("Other")
+        let visibleTransactionID = UUID()
+        let range = TransactionRange.month(containing: date(2026, 1, 15))
+
+        let matchingTransactions = AccountActivityItem.transactions(
+            for: wallet.id,
+            during: range,
+            in: [
+                makeTransaction(
+                    id: visibleTransactionID,
+                    amount: 100_000,
+                    account: wallet,
+                    occurredAt: date(2026, 1, 10)
+                ),
+                makeTransaction(
+                    amount: 200_000,
+                    account: wallet,
+                    occurredAt: date(2026, 2, 10)
+                ),
+                makeTransaction(
+                    amount: 300_000,
+                    account: other,
+                    occurredAt: date(2026, 1, 20)
+                ),
+            ]
+        )
+
+        #expect(matchingTransactions.map(\.id) == [visibleTransactionID])
+    }
+
     @Test("Equal activity timestamps use a stable kind and identifier order")
     func equalDatesHaveStableOrder() {
         let wallet = makeAccount("Wallet")
@@ -217,6 +293,128 @@ struct AccountReportSummaryTests {
                     .transaction(laterID),
                     .transfer(transferID),
                 ]
+        )
+    }
+
+    @Test("Linked sources count every account reference by source kind")
+    func linkedSourcesCountAccountReferences() {
+        let wallet = makeAccount("Wallet")
+        let deposit = SavingsDeposit(
+            id: UUID(),
+            name: "Term deposit",
+            principal: 10_000_000,
+            annualInterestRate: 5,
+            termMonths: 6,
+            openedAt: createdAt,
+            currencyCode: VNDCurrency.code,
+            createdAt: createdAt,
+            sourceAccountID: wallet.id
+        )
+        let withdrawal = SavingsWithdrawal(
+            id: UUID(),
+            depositID: deposit.id,
+            principal: 1_000_000,
+            amountReceived: 1_050_000,
+            destinationAccountID: wallet.id,
+            withdrawnAt: createdAt,
+            currencyCode: VNDCurrency.code,
+            createdAt: createdAt
+        )
+        let holding = FundHolding(
+            id: UUID(),
+            instrumentID: UUID(),
+            units: 10,
+            averageCostPerUnit: 100_000,
+            createdAt: createdAt,
+            sourceAccountID: wallet.id
+        )
+        let sale = FundSale(
+            id: UUID(),
+            holdingID: holding.id,
+            units: 2,
+            pricePerUnit: 120_000,
+            proceedsAccountID: wallet.id,
+            soldAt: createdAt,
+            currencyCode: VNDCurrency.code,
+            createdAt: createdAt
+        )
+        let debt = Debt(
+            id: UUID(),
+            counterparty: "Friend",
+            direction: .borrowed,
+            principal: 3_000_000,
+            annualInterestRate: 0,
+            openedAt: createdAt,
+            dueDate: nil,
+            accountID: wallet.id,
+            note: "",
+            currencyCode: VNDCurrency.code,
+            createdAt: createdAt
+        )
+        let payment = DebtPayment(
+            id: UUID(),
+            debtID: debt.id,
+            amount: 500_000,
+            occurredAt: createdAt,
+            accountID: wallet.id,
+            note: "",
+            currencyCode: VNDCurrency.code,
+            createdAt: createdAt
+        )
+        let recurring = RecurringRule(
+            id: UUID(),
+            kind: .expense,
+            amount: 200_000,
+            note: "Internet",
+            accountID: wallet.id,
+            categoryID: nil,
+            currencyCode: VNDCurrency.code,
+            frequency: .monthly,
+            interval: 1,
+            anchorDate: createdAt,
+            endDate: nil,
+            isPaused: false,
+            lastGeneratedAt: nil,
+            createdAt: createdAt
+        )
+
+        let rows = AccountLinkedSourceSummary.rows(
+            for: wallet,
+            deposits: [deposit],
+            withdrawals: [withdrawal],
+            holdings: [holding],
+            sales: [sale],
+            debts: [debt],
+            payments: [payment],
+            recurringRules: [recurring]
+        )
+
+        #expect(
+            rows
+                == [
+                    AccountLinkedSourceRow(kind: .savings, count: 2),
+                    AccountLinkedSourceRow(kind: .funds, count: 2),
+                    AccountLinkedSourceRow(kind: .debts, count: 2),
+                    AccountLinkedSourceRow(kind: .recurring, count: 1),
+                ]
+        )
+    }
+
+    @Test("Accounts with no linked sources return no source rows")
+    func noLinkedSourcesReturnsNoRows() {
+        let account = makeAccount("Wallet")
+
+        #expect(
+            AccountLinkedSourceSummary.rows(
+                for: account,
+                deposits: [],
+                withdrawals: [],
+                holdings: [],
+                sales: [],
+                debts: [],
+                payments: [],
+                recurringRules: []
+            ).isEmpty
         )
     }
 }

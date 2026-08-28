@@ -13,6 +13,7 @@ struct TransactionCaptureCommitResult: Equatable, Sendable {
 
 enum TransactionCaptureServiceError: Error, Equatable, Sendable {
     case emptyCapture
+    case incompleteCapture
     case staleCapture
     case storeFailure
 }
@@ -43,6 +44,54 @@ struct TransactionCaptureService {
             )
         } catch let error as TransactionCaptureServiceError {
             throw error
+        } catch {
+            throw TransactionCaptureServiceError.storeFailure
+        }
+    }
+
+    func prepareQuickExpense(
+        _ preset: QuickExpensePreset,
+        now: Date = .now
+    ) throws -> ParsedTransactionCapture {
+        let context = ModelContext(container)
+        do {
+            let accounts = try context.fetch(FetchDescriptor<CashAccount>())
+            let categories = try context.fetch(FetchDescriptor<TransactionCategory>())
+            let accountID = TransactionDefaults.resolveAccountID(
+                defaults.string(forKey: TransactionDefaults.accountStorageKey) ?? "",
+                accounts: accounts
+            )
+            let categoryID: UUID?
+            if let configuredCategoryID = preset.categoryID {
+                categoryID =
+                    categories.first {
+                        $0.id == configuredCategoryID && $0.kind == .expense
+                    }?.id
+            } else {
+                categoryID = TransactionDefaults.resolveCategoryID(
+                    defaults.string(forKey: TransactionDefaults.categoryStorageKey) ?? "",
+                    categories: categories
+                )
+            }
+
+            var issues = Set<TransactionCaptureIssue>()
+            if accountID == nil {
+                issues.insert(.missingAccount)
+            }
+            if categoryID == nil {
+                issues.insert(.missingCategory)
+            }
+
+            return ParsedTransactionCapture(
+                rawText: "\(VNDCurrency.formatPlain(preset.amount)) \(preset.symbol)",
+                kind: .expense,
+                amount: preset.amount,
+                occurredAt: now,
+                note: preset.symbol,
+                accountID: accountID,
+                categoryID: categoryID,
+                issues: issues
+            )
         } catch {
             throw TransactionCaptureServiceError.storeFailure
         }

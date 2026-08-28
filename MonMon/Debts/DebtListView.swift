@@ -83,26 +83,12 @@ struct DebtListView: View {
         DebtSummary.totalOutstanding(of: debts, payments: payments, direction: .lent)
     }
 
-    private var netPosition: Decimal { owedToMe - owed }
-
-    /// Net position answers which side is larger; the doughnut underneath says
-    /// how the two outstanding balances make up the whole debt picture.
     private var positionCard: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Label("NET POSITION", systemImage: "scalemass.fill")
+            Label("OUTSTANDING DEBT", systemImage: "chart.pie.fill")
                 .font(.caption.weight(.semibold))
                 .tracking(0.8)
                 .foregroundStyle(MonMonTheme.textSecondary)
-
-            Text(netPositionText)
-                .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.58)
-                .foregroundStyle(netPositionTint)
-
-            Divider()
-                .overlay(MonMonTheme.heroBorder)
 
             if doughnutItems.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
@@ -123,23 +109,16 @@ struct DebtListView: View {
                     totalLabel: AppText.string("OUTSTANDING", in: locale)
                 )
             }
-
-            Divider()
-                .overlay(MonMonTheme.heroBorder)
-
-            Label(countLabel, systemImage: "rectangle.stack.fill")
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(MonMonTheme.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(24)
         .background {
             RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .fill(MonMonTheme.hero)
+                .fill(MonMonTheme.surface)
         }
         .overlay {
             RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .stroke(MonMonTheme.heroBorder, lineWidth: 1)
+                .stroke(MonMonTheme.border, lineWidth: 1)
         }
     }
 
@@ -161,25 +140,6 @@ struct DebtListView: View {
             ),
         ]
         .filter { $0.amount > 0 }
-    }
-
-    private var netPositionText: String {
-        netPosition < 0
-            ? "−\(VNDCurrency.format(-netPosition))" : VNDCurrency.format(netPosition)
-    }
-
-    private var netPositionTint: Color {
-        if netPosition < 0 {
-            MonMonTheme.credit
-        } else if netPosition > 0 {
-            MonMonTheme.lent
-        } else {
-            MonMonTheme.textPrimary
-        }
-    }
-
-    private var countLabel: LocalizedStringKey {
-        "\(debts.count) debts"
     }
 
     // MARK: - Sections

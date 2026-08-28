@@ -28,8 +28,15 @@ struct MonMonApp: App {
         }
         container = modelContainer
 
+        let transactionCaptureDependency = TransactionCaptureIntentDependency(
+            container: modelContainer
+        )
+        AppDependencyManager.shared.add(dependency: transactionCaptureDependency)
         AppDependencyManager.shared.add(
-            dependency: TransactionCaptureIntentDependency(container: modelContainer)
+            dependency: QuickExpenseIntentDependency { slot in
+                let preset = QuickExpensePresetStore().preset(for: slot)
+                _ = try await transactionCaptureDependency.recordQuickExpense(preset)
+            }
         )
         AppDependencyManager.shared.add(
             dependency: QuickCaptureIntentDependency(appRoute: appRoute, appLock: appLock)

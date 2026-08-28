@@ -1,6 +1,10 @@
 import SwiftData
 import SwiftUI
 
+private enum SpendingDestination: Hashable {
+    case accounts
+}
+
 struct TransactionListView: View {
     @Environment(AppRoute.self) private var appRoute
     @Environment(\.locale) private var locale
@@ -25,23 +29,16 @@ struct TransactionListView: View {
     @State private var isManagingRecurring = false
     @State private var isEditingDefaults = false
     @State private var isFiltering = false
+    @State private var transactionActions = TransactionActions()
     @State private var importInbox = StatementImportInbox.live()
     @State private var isShowingImportInbox = false
-    @State private var isShowingAccounts = false
+    @State private var navigationPath = NavigationPath()
 
-    /// One details sheet and one delete question for the whole list, rather
-    /// than one of each per row.
-    @State private var transactionActions = TransactionActions()
     @State private var isShowingCaptureInbox = false
     @State private var isShowingQuickCapture = false
 
-    /// Weekday first: over a run of days the name is what the eye picks out,
-    /// and the year is left to the period title above the list.
-    private static let dayTemplate = Date.FormatStyle().weekday(.abbreviated).day().month(
-        .abbreviated)
-
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             ZStack {
                 MonMonTheme.canvas
                     .ignoresSafeArea()
@@ -118,8 +115,14 @@ struct TransactionListView: View {
             .navigationDestination(for: DayPeriod.self) { period in
                 DayTransactionsView(period: period)
             }
-            .navigationDestination(isPresented: $isShowingAccounts) {
-                AccountsScreen()
+            .navigationDestination(for: SpendingDestination.self) { destination in
+                switch destination {
+                case .accounts:
+                    AccountsScreen()
+                }
+            }
+            .navigationDestination(for: AccountDetailRoute.self) { route in
+                AccountDetailView(route: route)
             }
             .compactRootNavigationTitle("Spending")
             .accessibilityIdentifier("spending-list")
@@ -135,14 +138,6 @@ struct TransactionListView: View {
                     identifierPrefix: "spending-"
                 )
             }
-            .transactionActions(
-                transactionActions,
-                category: category(for:),
-                account: account(for:),
-                onEdit: { transaction in
-                    editorMode = .edit(transaction)
-                }
-            )
             .appSheet(isPresented: $isManagingCategories) {
                 CategoryListView()
             }
@@ -161,6 +156,13 @@ struct TransactionListView: View {
             .appSheet(isPresented: $isShowingQuickCapture) {
                 QuickTransactionCaptureView()
             }
+            .transactionActions(
+                transactionActions,
+                undoBottomInset: FloatingAddButton.contentInset,
+                category: category(for:),
+                account: account(for:),
+                onEdit: { editorMode = .edit($0) }
+            )
             .task { await importInbox.refresh() }
             .onChange(of: scenePhase) { _, phase in
                 guard phase == .active else {
@@ -471,7 +473,7 @@ struct TransactionListView: View {
             isStacked: isStacked,
             accessibilityIdentifier: "open-accounts"
         ) {
-            isShowingAccounts = true
+            navigationPath.append(SpendingDestination.accounts)
         }
     }
 
@@ -544,96 +546,27 @@ struct TransactionListView: View {
         )
     }
 
-    private func signed(_ amount: Decimal) -> String {
-        let magnitude = amount < 0 ? -amount : amount
-        let sign = amount < 0 ? "−" : "+"
-
-        return "\(sign)\(VNDCurrency.format(magnitude))"
-    }
-
-    /// Transactions run in date order, so the list breaks them at each day and
-    /// heads the run with that date and what the day came to. The cards below a
-    /// header drop their own date, which the header now carries.
-    ///
     private var transactionsSection: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            HStack(spacing: 12) {
-                Text("Transactions")
-                    .font(.title3.weight(.semibold))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-
-                Spacer(minLength: 8)
-
-                // This affects the rows only. The period-wide figures live on
-                // Report and continue to count both directions.
-                Picker("Show", selection: $query.filter) {
-                    ForEach(TransactionListFilter.allCases) { filter in
-                        Text(filter.displayName)
-                            .tag(filter)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .frame(maxWidth: 210)
-                .accessibilityIdentifier("transaction-filter")
-            }
-
-            if visibleTransactions.isEmpty {
-                Text(emptyFilterNotice)
-                    .font(.subheadline)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-            }
-
-            ForEach(dayGroups) { group in
-                VStack(alignment: .leading, spacing: 12) {
-                    dayHeader(for: group)
-
-                    ForEach(group.transactions) { transaction in
-                        TransactionItem(
-                            transaction: transaction,
-                            category: category(for: transaction),
-                            account: account(for: transaction),
-                            showsDate: false,
-                            accessibilityIdentifier: "transaction-\(transaction.id.uuidString)"
-                        )
-                    }
+        TransactionListSection(
+            title: "Transactions",
+            transactions: visibleTransactions,
+            categories: categories,
+            accounts: accounts,
+            emptyNotice: emptyFilterNotice
+        ) {
+            // This affects the rows only. The period-wide figures live on
+            // Report and continue to count both directions.
+            Picker("Show", selection: $query.filter) {
+                ForEach(TransactionListFilter.allCases) { filter in
+                    Text(filter.displayName)
+                        .tag(filter)
                 }
             }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .frame(maxWidth: 210)
+            .accessibilityIdentifier("transaction-filter")
         }
-    }
-
-    private var dayGroups: [TransactionDayGroup] {
-        TransactionSummary.byDay(visibleTransactions)
-    }
-
-    private var emptyFilterNotice: LocalizedStringKey {
-        query.isNarrowed
-            ? "Nothing matches what you are looking for."
-            : "Nothing recorded \(query.range.phrase(in: locale))."
-    }
-
-    private func dayHeader(for group: TransactionDayGroup) -> some View {
-        HStack(spacing: 12) {
-            Text(
-                TransactionPeriod.format(Self.dayTemplate, in: locale).format(group.day)
-                    .uppercased()
-            )
-            .font(.caption.weight(.semibold))
-            .tracking(0.8)
-            .lineLimit(1)
-            .minimumScaleFactor(0.7)
-
-            Spacer(minLength: 8)
-
-            Text(signed(group.net))
-                .font(.caption.weight(.semibold))
-                .monospacedDigit()
-                .lineLimit(1)
-        }
-        .foregroundStyle(MonMonTheme.textSecondary)
-        .padding(.horizontal, 4)
-        .accessibilityElement(children: .combine)
     }
 
     private func category(for transaction: MoneyTransaction) -> TransactionCategory? {
@@ -646,6 +579,12 @@ struct TransactionListView: View {
 
     private func account(for transaction: MoneyTransaction) -> CashAccount? {
         accounts.first { $0.id == transaction.accountID }
+    }
+
+    private var emptyFilterNotice: LocalizedStringKey {
+        query.isNarrowed
+            ? "Nothing matches what you are looking for."
+            : "Nothing recorded \(query.range.phrase(in: locale))."
     }
 
     private var noAccountState: some View {

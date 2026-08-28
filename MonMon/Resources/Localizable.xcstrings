@@ -1,6 +1,183 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Add an expense category to configure this preset.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm danh mục chi tiêu để cấu hình mục đặt sẵn này." } } }
+    },
+    "Bills name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản hóa đơn" } } }
+    },
+    "Coffee name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản cà phê" } } }
+    },
+    "Entertainment name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản giải trí" } } }
+    },
+    "Fuel name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản xăng" } } }
+    },
+    "Groceries name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản đi chợ" } } }
+    },
+    "Lunch name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản bữa trưa" } } }
+    },
+    "Medicine name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản thuốc" } } }
+    },
+    "No category": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa có danh mục" } } }
+    },
+    "Parking name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản đỗ xe" } } }
+    },
+    "Saved": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã lưu" } } }
+    },
+    "Saved %@ expense to MonMon": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã lưu khoản chi %@ vào MonMon" } } }
+    },
+    "Transit name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản đi lại" } } }
+    },
+    "Use a short name, a positive whole amount, and a current expense category for every preset.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dùng tên ngắn, số tiền nguyên dương và danh mục chi tiêu hiện có cho mỗi mục đặt sẵn." } } }
+    },
+    "Bills": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hóa đơn" } } }
+    },
+    "Bills amount": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền hóa đơn" } } }
+    },
+    "Bills emoji": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji hóa đơn" } } }
+    },
+    "Choose 3, 6, or 9 expenses for the Home Screen widget.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn 3, 6 hoặc 9 khoản chi cho tiện ích Màn hình chính." } } }
+    },
+    "Coffee": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Cà phê" } } }
+    },
+    "Coffee amount": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền cà phê" } } }
+    },
+    "Coffee emoji": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji cà phê" } } }
+    },
+    "Emoji": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji" } } }
+    },
+    "Entertainment": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Giải trí" } } }
+    },
+    "Entertainment amount": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền giải trí" } } }
+    },
+    "Entertainment emoji": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji giải trí" } } }
+    },
+    "Fuel": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xăng" } } }
+    },
+    "Fuel amount": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền xăng" } } }
+    },
+    "Fuel emoji": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji xăng" } } }
+    },
+    "Groceries": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đi chợ" } } }
+    },
+    "Groceries amount": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền đi chợ" } } }
+    },
+    "Groceries emoji": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji đi chợ" } } }
+    },
+    "Lunch": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bữa trưa" } } }
+    },
+    "Lunch amount": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền bữa trưa" } } }
+    },
+    "Lunch emoji": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji bữa trưa" } } }
+    },
+    "Medicine": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thuốc" } } }
+    },
+    "Medicine amount": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền thuốc" } } }
+    },
+    "Medicine emoji": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji thuốc" } } }
+    },
+    "Parking": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đỗ xe" } } }
+    },
+    "Parking amount": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phí đỗ xe" } } }
+    },
+    "Parking emoji": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji đỗ xe" } } }
+    },
+    "Preset": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục đặt sẵn" } } }
+    },
+    "Presets shown": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số mục hiển thị" } } }
+    },
+    "Quick Expense": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chi tiêu nhanh" } } }
+    },
+    "Quick Expense Preset": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục chi tiêu nhanh" } } }
+    },
+    "Quick expenses": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chi tiêu nhanh" } } }
+    },
+    "Transaction default": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mặc định giao dịch" } } }
+    },
+    "Record %@ expense for %@ đồng": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi khoản chi %@ với số tiền %@ đồng" } } }
+    },
+    "Record Quick Expense": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi chi tiêu nhanh" } } }
+    },
+    "Record one configured expense preset.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi một khoản chi đã đặt sẵn." } } }
+    },
+    "Record one of your configured preset expenses with one tap.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi một khoản chi đã đặt sẵn chỉ bằng một lần chạm." } } }
+    },
+    "Record one of your three preset expenses with one tap.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi một trong ba khoản chi đặt sẵn chỉ bằng một lần chạm." } } }
+    },
+    "Save presets": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lưu mục đặt sẵn" } } }
+    },
+    "Saved. The widget is up to date.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã lưu. Tiện ích đã được cập nhật." } } }
+    },
+    "Set the three expenses shown on the Home Screen widget.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đặt ba khoản chi hiển thị trên tiện ích Màn hình chính." } } }
+    },
+    "Transit": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đi lại" } } }
+    },
+    "Transit amount": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền đi lại" } } }
+    },
+    "Transit emoji": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji đi lại" } } }
+    },
+    "Use one emoji, a positive whole amount, and a current expense category for every preset.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dùng một emoji, số tiền nguyên dương và danh mục chi tiêu hiện có cho mỗi mục đặt sẵn." } } }
+    },
+    "Use one emoji and a positive whole amount for every preset.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dùng một emoji và số tiền nguyên dương cho mỗi mục đặt sẵn." } } }
+    },
     "AVAILABLE CREDIT": {
       "localizations": {
         "vi": {

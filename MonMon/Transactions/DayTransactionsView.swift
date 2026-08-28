@@ -28,6 +28,7 @@ struct DayTransactionsView: View {
     let period: DayPeriod
 
     @State private var editorMode: TransactionEditorMode?
+    @State private var transactionActions = TransactionActions()
 
     var body: some View {
         ZStack {
@@ -44,25 +45,12 @@ struct DayTransactionsView: View {
                         count: matching.count
                     )
 
-                    if matching.isEmpty {
-                        emptyState
-                    } else {
-                        ForEach(matching) { transaction in
-                            Button {
-                                editorMode = .edit(transaction)
-                            } label: {
-                                TransactionCard(
-                                    transaction: transaction,
-                                    category: category(for: transaction),
-                                    account: account(for: transaction),
-                                    showsDate: false
-                                )
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityIdentifier("transaction-\(transaction.id.uuidString)")
-                            .accessibilityHint("Opens the transaction editor.")
-                        }
-                    }
+                    TransactionListSection(
+                        transactions: matching,
+                        categories: categories,
+                        accounts: accounts,
+                        emptyNotice: "Nothing recorded on this day."
+                    )
                 }
                 .frame(maxWidth: MonMonTheme.maxContentWidth)
                 .padding(.horizontal, 20)
@@ -90,6 +78,13 @@ struct DayTransactionsView: View {
             // only day this screen can show.
             TransactionEditorView(mode: mode, defaultDate: period.day)
         }
+        .transactionActions(
+            transactionActions,
+            undoBottomInset: FloatingAddButton.contentInset,
+            category: category(for:),
+            account: account(for:),
+            onEdit: { editorMode = .edit($0) }
+        )
         .tint(MonMonTheme.accent)
     }
 
@@ -105,18 +100,6 @@ struct DayTransactionsView: View {
 
     private var expense: Decimal {
         TransactionSummary.totalExpense(of: matching)
-    }
-
-    private var emptyState: some View {
-        Text("Nothing recorded on this day.")
-            .font(.subheadline)
-            .foregroundStyle(MonMonTheme.textSecondary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(20)
-            .background {
-                RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                    .fill(MonMonTheme.surface)
-            }
     }
 
     private func category(for transaction: MoneyTransaction) -> TransactionCategory? {
