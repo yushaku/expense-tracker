@@ -18,8 +18,6 @@ private enum AccountDetailTab: CaseIterable, Hashable {
 }
 
 struct AccountDetailView: View {
-    @Environment(\.dismiss) private var dismiss
-
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
 
@@ -101,11 +99,6 @@ struct AccountDetailView: View {
             account: transactionAccount(for:),
             onEdit: { transactionEditorMode = .edit($0) }
         )
-        .onChange(of: account == nil) { _, isGone in
-            if isGone {
-                dismiss()
-            }
-        }
         .tint(MonMonTheme.accent)
     }
 
