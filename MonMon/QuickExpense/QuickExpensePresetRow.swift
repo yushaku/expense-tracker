@@ -2,20 +2,60 @@ import SwiftUI
 
 struct QuickExpensePresetRow: View {
     @Binding var draft: QuickExpensePresetDraft
+    let categories: [TransactionCategory]
 
     var body: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 12) {
-                title
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                fields
+        VStack(alignment: .leading, spacing: 10) {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 12) {
+                    title
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    fields
+                }
+
+                VStack(alignment: .leading, spacing: 10) {
+                    title
+                    fields
+                }
             }
 
-            VStack(alignment: .leading, spacing: 10) {
-                title
-                fields
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Category")
+                    .font(.caption.weight(.medium))
+
+                if categories.isEmpty {
+                    Text("Add an expense category to configure this preset.")
+                        .font(.caption)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                } else {
+                    Picker("Category", selection: $draft.categoryID) {
+                        if hasStaleSelection, let categoryID = draft.categoryID {
+                            Text("Choose")
+                                .tag(UUID?.some(categoryID))
+                        }
+
+                        Text("Transaction default")
+                            .tag(UUID?.none)
+
+                        ForEach(categories) { category in
+                            Label(category.name, systemImage: category.symbolName)
+                                .tag(UUID?.some(category.id))
+                        }
+                    }
+                    .labelsHidden()
+                    .accessibilityIdentifier(
+                        "quick-expense-\(draft.slot.rawValue)-category"
+                    )
+                }
             }
         }
+    }
+
+    private var hasStaleSelection: Bool {
+        guard let categoryID = draft.categoryID else {
+            return false
+        }
+        return !categories.contains { $0.id == categoryID }
     }
 
     private var title: some View {
