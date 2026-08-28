@@ -243,6 +243,9 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         var priceSource: String
         var priceFetchedAt: String?
         var autoQuoteEnabled: Bool
+        /// Absent in backups written before instruments carried a logo, and in
+        /// every instrument added by hand. Decodes as `nil` either way.
+        var logoURL: String?
         var currencyCode: String
         var createdAt: String
     }

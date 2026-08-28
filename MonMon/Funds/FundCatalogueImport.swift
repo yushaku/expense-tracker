@@ -155,6 +155,7 @@ final class FundCatalogueImport {
                     : provider.source.rawValue,
                 priceFetchedAt: candidate.pricePerUnit == nil ? nil : createdAt,
                 autoQuoteEnabled: true,
+                logoURL: candidate.logoURL,
                 currencyCode: VNDCurrency.code,
                 createdAt: createdAt
             )

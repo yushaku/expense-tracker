@@ -292,6 +292,12 @@ struct FundCatalogueImportView: View {
                 )
                 .accessibilityHidden(true)
 
+                FundLogoView(
+                    symbol: candidate.symbol,
+                    logoURL: candidate.logoURL,
+                    size: 34
+                )
+
                 VStack(alignment: .leading, spacing: 3) {
                     Text(candidate.symbol)
                         .font(.headline)
