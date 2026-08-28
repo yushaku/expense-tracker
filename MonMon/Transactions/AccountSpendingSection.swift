@@ -3,7 +3,7 @@ import SwiftUI
 struct AccountSpendingSection: View {
     @Environment(\.locale) private var locale
 
-    let monthTitle: String
+    let range: TransactionRange
     let rows: [AccountSpendingRow]
     let accounts: [CashAccount]
 
@@ -15,7 +15,7 @@ struct AccountSpendingSection: View {
                 emptyState
             } else {
                 AllocationDoughnut(
-                    context: monthTitle,
+                    context: range.title(in: locale),
                     items: doughnutItems,
                     totalLabel: TransactionKind.expense.displayName(in: locale),
                     showsLegend: false
@@ -49,7 +49,7 @@ struct AccountSpendingSection: View {
 
             Spacer(minLength: 8)
 
-            Text(monthTitle.uppercased())
+            Text(range.title(in: locale).uppercased())
                 .font(.caption.weight(.semibold))
                 .tracking(0.8)
                 .foregroundStyle(MonMonTheme.textSecondary)
@@ -59,12 +59,14 @@ struct AccountSpendingSection: View {
     }
 
     private var emptyState: some View {
-        Text("No spending recorded this month.")
-            .font(.subheadline)
-            .foregroundStyle(MonMonTheme.textSecondary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, 8)
-            .accessibilityIdentifier("report-account-spending-empty")
+        Text(
+            "No \(TransactionKind.expense.displayName(in: locale).lowercased()) recorded \(range.phrase(in: locale))."
+        )
+        .font(.subheadline)
+        .foregroundStyle(MonMonTheme.textSecondary)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 8)
+        .accessibilityIdentifier("report-account-spending-empty")
     }
 
     private var accountRows: some View {

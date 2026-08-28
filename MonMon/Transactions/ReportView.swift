@@ -19,6 +19,68 @@ struct ReportContentVisibility: Equatable {
     }
 }
 
+/// The one globally filtered transaction set every report projection reads.
+/// Keeping the projections here prevents a card from quietly falling back to
+/// the unfiltered ledger while its neighbours honor the header query.
+struct ReportData {
+    let transactions: [MoneyTransaction]
+    let globalKind: TransactionKind?
+
+    init(
+        query: TransactionQuery,
+        transactions: [MoneyTransaction],
+        categoryNames: [UUID: String],
+        accountNames: [UUID: String]
+    ) {
+        globalKind = query.filter.kind
+        self.transactions = TransactionSearch.results(
+            of: query,
+            transactions: transactions,
+            categoryNames: categoryNames,
+            accountNames: accountNames
+        )
+    }
+
+    var income: Decimal {
+        TransactionSummary.totalIncome(of: transactions)
+    }
+
+    var expense: Decimal {
+        TransactionSummary.totalExpense(of: transactions)
+    }
+
+    var count: Int {
+        transactions.count
+    }
+
+    var netTrend: [TransactionNetPoint] {
+        TransactionSummary.runningNet(transactions)
+    }
+
+    func calendarWeeks(of month: Date) -> [TransactionCalendarWeek] {
+        TransactionCalendar.weeks(of: month, transactions: transactions)
+    }
+
+    func accountSpendingRows(accounts: [CashAccount]) -> [AccountSpendingRow] {
+        AccountSpendingSummary.rows(accounts: accounts, transactions: transactions)
+    }
+
+    func categoryBreakdownSlices(
+        of kind: TransactionKind,
+        categories: [TransactionCategory]
+    ) -> [CategoryBreakdownSlice] {
+        CategoryBreakdown.slices(
+            of: globalKind ?? kind,
+            transactions: transactions,
+            categories: categories
+        )
+    }
+
+    var allowsCategoryKindSelection: Bool {
+        globalKind == nil
+    }
+}
+
 struct ReportView: View {
     @Environment(\.locale) private var locale
 
@@ -101,10 +163,7 @@ struct ReportView: View {
     }
 
     private var content: some View {
-        // Every card below reads the same results, so they are worked out once
-        // here rather than once per card.
-        let results = self.results
-        let summaryTransactions = self.summaryTransactions
+        let report = reportData
         let visibility = ReportContentVisibility(query: query)
 
         return ScrollView {
@@ -118,43 +177,44 @@ struct ReportView: View {
                 }
 
                 SpendingOverviewCard(
-                    title: summaryRange.title(in: locale),
-                    income: TransactionSummary.totalIncome(of: summaryTransactions),
-                    expense: TransactionSummary.totalExpense(of: summaryTransactions),
-                    count: summaryTransactions.count
+                    title: query.range.title(in: locale),
+                    income: report.income,
+                    expense: report.expense,
+                    count: report.count
                 )
                 .accessibilityIdentifier("report-overview")
 
                 TransactionCalendarCard(
                     month: summaryMonth,
-                    weeks: summaryCalendarWeeks,
+                    weeks: report.calendarWeeks(of: summaryMonth),
                     onStepMonth: stepSummaryMonth
                 )
 
                 AccountSpendingSection(
-                    monthTitle: summaryRange.title(in: locale),
-                    rows: AccountSpendingSummary.rows(
-                        accounts: accounts,
-                        transactions: summaryTransactions
-                    ),
+                    range: query.range,
+                    rows: report.accountSpendingRows(accounts: accounts),
                     accounts: accounts
                 )
 
-                if results.isEmpty {
+                if report.transactions.isEmpty {
                     emptyState
                 } else {
                     CategoryBreakdownCard(
-                        kind: $breakdownKind,
-                        slices: breakdownSlices(of: results),
-                        range: query.range
+                        kind: categoryBreakdownKindBinding(for: report),
+                        slices: report.categoryBreakdownSlices(
+                            of: breakdownKind,
+                            categories: categories
+                        ),
+                        range: query.range,
+                        showsKindPicker: report.allowsCategoryKindSelection
                     )
 
                     if visibility.showsTransactionList {
-                        resultsSection(results)
+                        resultsSection(report.transactions)
                     }
 
                     if visibility.showsNetTrend {
-                        NetTrendCard(points: TransactionSummary.runningNet(results))
+                        NetTrendCard(points: report.netTrend)
                     }
                 }
             }
@@ -166,27 +226,12 @@ struct ReportView: View {
         }
     }
 
-    private var results: [MoneyTransaction] {
-        TransactionSearch.results(
-            of: query,
+    private var reportData: ReportData {
+        ReportData(
+            query: query,
             transactions: transactions,
             categoryNames: categoryNames,
             accountNames: accountNames
-        )
-    }
-
-    private var summaryRange: TransactionRange {
-        .month(containing: summaryMonth)
-    }
-
-    private var summaryTransactions: [MoneyTransaction] {
-        TransactionSummary.inRange(summaryRange, transactions: transactions)
-    }
-
-    private var summaryCalendarWeeks: [TransactionCalendarWeek] {
-        TransactionCalendar.weeks(
-            of: summaryMonth,
-            transactions: transactions
         )
     }
 
@@ -208,12 +253,12 @@ struct ReportView: View {
         Dictionary(uniqueKeysWithValues: accounts.map { ($0.id, $0.name) })
     }
 
-    private func breakdownSlices(of results: [MoneyTransaction]) -> [CategoryBreakdownSlice] {
-        CategoryBreakdown.slices(
-            of: breakdownKind,
-            transactions: results,
-            categories: categories
-        )
+    private func categoryBreakdownKindBinding(for report: ReportData) -> Binding<TransactionKind> {
+        guard let globalKind = report.globalKind else {
+            return $breakdownKind
+        }
+
+        return .constant(globalKind)
     }
 
     /// Editing from a period that does not include today starts on its first
@@ -222,8 +267,8 @@ struct ReportView: View {
         query.range.contains(.now) ? .now : query.range.start
     }
 
-    /// The month summarized by the overview and account spending, kept separate
-    /// from the wider query that drives charts and search.
+    /// The month the calendar renders. Its day totals still come from the
+    /// globally filtered report data rather than from the unfiltered ledger.
     private var monthRail: some View {
         MonthRail(months: railMonths, selection: summaryMonth) { month in
             summaryMonth = TransactionPeriod.startOfMonth(for: month)

@@ -105,8 +105,8 @@ struct TransactionDayGroup: Identifiable {
     }
 }
 
-/// Which direction the spending list is showing. The totals above it always
-/// count both, so this narrows the list alone.
+/// Which direction a transaction query keeps. Screens decide which sections
+/// consume that query, so a global filter can drive every total and chart.
 enum TransactionListFilter: String, CaseIterable, Identifiable {
     case all
     case income
