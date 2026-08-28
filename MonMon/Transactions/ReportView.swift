@@ -131,6 +131,14 @@ struct ReportView: View {
                     onStepMonth: stepSummaryMonth
                 )
 
+                if !results.isEmpty {
+                    CategoryBreakdownCard(
+                        kind: $breakdownKind,
+                        slices: breakdownSlices(of: results),
+                        range: query.range
+                    )
+                }
+
                 AccountSpendingSection(
                     monthTitle: summaryRange.title(in: locale),
                     rows: AccountSpendingSummary.rows(
@@ -143,12 +151,6 @@ struct ReportView: View {
                 if results.isEmpty {
                     emptyState
                 } else {
-                    CategoryBreakdownCard(
-                        kind: $breakdownKind,
-                        slices: breakdownSlices(of: results),
-                        range: query.range
-                    )
-
                     if visibility.showsTransactionList {
                         resultsSection(results)
                     }
