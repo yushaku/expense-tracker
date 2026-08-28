@@ -1,6 +1,10 @@
 import SwiftData
 import SwiftUI
 
+private enum SpendingDestination: Hashable {
+    case accounts
+}
+
 struct TransactionListView: View {
     @Environment(AppRoute.self) private var appRoute
     @Environment(\.locale) private var locale
@@ -28,13 +32,13 @@ struct TransactionListView: View {
     @State private var transactionActions = TransactionActions()
     @State private var importInbox = StatementImportInbox.live()
     @State private var isShowingImportInbox = false
-    @State private var isShowingAccounts = false
+    @State private var navigationPath = NavigationPath()
 
     @State private var isShowingCaptureInbox = false
     @State private var isShowingQuickCapture = false
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             ZStack {
                 MonMonTheme.canvas
                     .ignoresSafeArea()
@@ -111,8 +115,14 @@ struct TransactionListView: View {
             .navigationDestination(for: DayPeriod.self) { period in
                 DayTransactionsView(period: period)
             }
-            .navigationDestination(isPresented: $isShowingAccounts) {
-                AccountsScreen()
+            .navigationDestination(for: SpendingDestination.self) { destination in
+                switch destination {
+                case .accounts:
+                    AccountsScreen()
+                }
+            }
+            .navigationDestination(for: AccountDetailRoute.self) { route in
+                AccountDetailView(route: route)
             }
             .compactRootNavigationTitle("Spending")
             .accessibilityIdentifier("spending-list")
@@ -463,7 +473,7 @@ struct TransactionListView: View {
             isStacked: isStacked,
             accessibilityIdentifier: "open-accounts"
         ) {
-            isShowingAccounts = true
+            navigationPath.append(SpendingDestination.accounts)
         }
     }
 

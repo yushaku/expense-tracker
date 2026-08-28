@@ -68,9 +68,6 @@ struct AccountsScreen: View {
         }
         .navigationTitle("Accounts")
         .accessibilityIdentifier("accounts-screen")
-        .navigationDestination(for: AccountDetailRoute.self) { route in
-            AccountDetailView(route: route)
-        }
         .appSheet(item: $accountEditorMode) { mode in
             AccountEditorView(mode: mode)
         }

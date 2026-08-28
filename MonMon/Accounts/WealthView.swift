@@ -69,6 +69,9 @@ struct WealthView: View {
             }
             .compactRootNavigationTitle("Wealth")
             .accessibilityIdentifier("wealth")
+            .navigationDestination(for: AccountDetailRoute.self) { route in
+                AccountDetailView(route: route)
+            }
             .tint(MonMonTheme.accent)
         }
     }
