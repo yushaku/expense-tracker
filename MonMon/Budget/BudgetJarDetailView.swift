@@ -31,12 +31,12 @@ struct BudgetJarDetailView: View {
     @Query(sort: \FundSale.soldAt, order: .reverse)
     private var fundSales: [FundSale]
 
-    @Query(sort: \TripWorkspace.startedAt, order: .reverse)
-    private var tripWorkspaces: [TripWorkspace]
-
     let row: BudgetJarSnapshot
     let month: Date
     let asOf: Date
+
+    @State private var editorMode: TransactionEditorMode?
+    @State private var transactionActions = TransactionActions()
 
     var body: some View {
         let currentActivity = activity
@@ -71,6 +71,15 @@ struct BudgetJarDetailView: View {
             }
         }
         .navigationTitle(row.name)
+        .appSheet(item: $editorMode) { mode in
+            TransactionEditorView(mode: mode)
+        }
+        .transactionActions(
+            transactionActions,
+            category: category(for:),
+            account: account(for:),
+            onEdit: { editorMode = .edit($0) }
+        )
         .tint(MonMonTheme.accent)
         .accessibilityIdentifier("budget-jar-detail")
     }
@@ -103,16 +112,14 @@ struct BudgetJarDetailView: View {
     @ViewBuilder
     private func transactionSection(_ activity: BudgetJarActivitySnapshot) -> some View {
         if !activity.transactions.isEmpty {
-            activitySection("Transactions", count: activity.transactions.count)
-
-            ForEach(activity.transactions) { transaction in
-                TransactionCard(
-                    transaction: transaction,
-                    category: category(for: transaction),
-                    account: account(transaction.accountID),
-                    tripName: tripName(for: transaction)
-                )
-            }
+            TransactionListSection(
+                transactions: activity.transactions,
+                categories: categories,
+                accounts: accounts,
+                emptyNotice: "No transactions assigned to this jar this month.",
+                accessibilityIdentifierPrefix: "budget-transaction",
+                showsCount: true
+            )
         }
     }
 
@@ -182,14 +189,12 @@ struct BudgetJarDetailView: View {
         accounts.first { $0.id == id }
     }
 
-    private func accountName(_ id: UUID) -> String? {
-        account(id)?.name
+    private func account(for transaction: MoneyTransaction) -> CashAccount? {
+        account(transaction.accountID)
     }
 
-    private func tripName(for transaction: MoneyTransaction) -> String? {
-        transaction.tripWorkspaceID.flatMap { id in
-            tripWorkspaces.first { $0.id == id }?.name
-        }
+    private func accountName(_ id: UUID) -> String? {
+        account(id)?.name
     }
 
     private func instrument(for holding: FundHolding) -> FundInstrument? {

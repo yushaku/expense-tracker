@@ -22,6 +22,12 @@ struct BudgetScreen: View {
     @Query(sort: \FundHolding.createdAt, order: .reverse)
     private var fundHoldings: [FundHolding]
 
+    @Query(sort: \FinancialGoal.createdAt, order: .forward)
+    private var goals: [FinancialGoal]
+
+    @Query(sort: \TripWorkspace.startedAt, order: .reverse)
+    private var tripWorkspaces: [TripWorkspace]
+
     @State private var isShowingRecurringIncome = false
     @State private var isShowingConfiguration = false
     @State private var isShowingGoals = false
@@ -62,6 +68,8 @@ struct BudgetScreen: View {
                                     onOpenDetails: { selectedJarID = row.jarID }
                                 )
                             }
+
+                            goalOverviewSection
                         }
                         .frame(maxWidth: MonMonTheme.maxContentWidth)
                         .padding(.horizontal, 20)
@@ -73,13 +81,6 @@ struct BudgetScreen: View {
             .compactRootNavigationTitle("Budget")
             .accessibilityIdentifier("budget")
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button("Goals", systemImage: "flag.checkered") {
-                        isShowingGoals = true
-                    }
-                    .accessibilityIdentifier("budget-goals")
-                }
-
                 ToolbarItem(placement: .primaryAction) {
                     Button("Setup", systemImage: "slider.horizontal.3") {
                         isShowingConfiguration = true
@@ -157,6 +158,122 @@ struct BudgetScreen: View {
 
     private var plannedByJar: [UUID: Decimal] {
         Dictionary(uniqueKeysWithValues: snapshot.rows.map { ($0.jarID, $0.planned) })
+    }
+
+    private var inProgressGoals: [FinancialGoal] {
+        goals.filter { $0.earmarkedAmount < $0.targetAmount }
+    }
+
+    private var activeTrips: [TripWorkspace] {
+        tripWorkspaces.filter { $0.status == .active }
+    }
+
+    private var goalOverviewSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Button {
+                isShowingGoals = true
+            } label: {
+                HStack(spacing: 10) {
+                    Text("Goals")
+                        .font(.title3.weight(.semibold))
+
+                    Text((inProgressGoals.count + activeTrips.count).formatted())
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(MonMonTheme.accent)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(MonMonTheme.accent.opacity(0.16), in: Capsule())
+
+                    Spacer(minLength: 8)
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(MonMonTheme.textMuted)
+                        .accessibilityHidden(true)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint("Opens all goals and goal history")
+            .accessibilityIdentifier("budget-goals")
+
+            if inProgressGoals.isEmpty && activeTrips.isEmpty {
+                Text("No active or in-progress goals")
+                    .font(.subheadline)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(18)
+                    .background(
+                        MonMonTheme.surface,
+                        in: RoundedRectangle(cornerRadius: 18)
+                    )
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 18)
+                            .stroke(MonMonTheme.border, lineWidth: 1)
+                    }
+            } else {
+                inProgressGoalList
+                activeTripList
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("budget-goal-overview")
+    }
+
+    @ViewBuilder
+    private var inProgressGoalList: some View {
+        if !inProgressGoals.isEmpty {
+            Text("In progress")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(MonMonTheme.textSecondary)
+
+            ForEach(inProgressGoals) { goal in
+                Button {
+                    isShowingGoals = true
+                } label: {
+                    GoalCard(
+                        goal: goal,
+                        jarName: goal.fundingJarID.flatMap(jarName)
+                            ?? String(localized: "No jar"),
+                        asOf: asOf
+                    )
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Opens all goals")
+                .accessibilityIdentifier("budget-goal-\(goal.id.uuidString)")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var activeTripList: some View {
+        if !activeTrips.isEmpty {
+            Text("Active")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(MonMonTheme.textSecondary)
+
+            ForEach(activeTrips) { workspace in
+                Button {
+                    isShowingGoals = true
+                } label: {
+                    TripWorkspaceCard(
+                        workspace: workspace,
+                        snapshot: TripSummary.snapshot(
+                            workspace: workspace,
+                            transactions: transactions,
+                            categories: categories
+                        )
+                    )
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Opens all goals")
+                .accessibilityIdentifier("budget-active-trip-\(workspace.id.uuidString)")
+            }
+        }
+    }
+
+    private func jarName(_ id: UUID) -> String? {
+        jars.first { $0.id == id }?.name
     }
 
     private var noIncomeCard: some View {
