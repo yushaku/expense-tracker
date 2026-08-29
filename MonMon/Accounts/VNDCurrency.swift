@@ -125,6 +125,13 @@ enum VNDCurrency {
             return nil
         }
 
+        // A field that starts at nought is typed into, not cleared first, so the
+        // leading noughts that produces are dropped rather than shown back as
+        // `05`. One is kept: a nought is a figure.
+        while integerDigits.count > 1, integerDigits.first == "0" {
+            integerDigits.removeFirst()
+        }
+
         var reversedGroupedDigits: [Character] = []
         for (index, digit) in integerDigits.reversed().enumerated() {
             if index > 0, index.isMultiple(of: 3) {

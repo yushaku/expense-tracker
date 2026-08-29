@@ -111,9 +111,11 @@ struct ReportView: View {
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
 
-    /// A year, not a month: the charts here are about a run of months, and a
-    /// period narrower than one bar has nothing to trend.
-    @State private var query = TransactionQuery(range: .year(containing: .now))
+    /// The month the clock is in: what the owner is spending out of right now
+    /// is the question they open this screen with, and a month is small enough
+    /// that every card can read it — the calendar grid draws it, and the trend
+    /// walks it a day at a time. A year is a tap on the rail away.
+    @State private var query = TransactionQuery(range: .month(containing: .now))
     @State private var breakdownKind: TransactionKind = .expense
     @State private var editorMode: TransactionEditorMode?
     @State private var isFiltering = false
