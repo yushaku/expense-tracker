@@ -1,6 +1,32 @@
 import SwiftData
 import SwiftUI
 
+struct TransactionDetailLinks: Equatable {
+    var categoryID: UUID? = nil
+    var accountID: UUID? = nil
+    var tripWorkspaceID: UUID? = nil
+
+    static func resolve(
+        transaction: MoneyTransaction,
+        categoryID: UUID?,
+        accountID: UUID?,
+        availableTripIDs: Set<UUID>
+    ) -> TransactionDetailLinks {
+        TransactionDetailLinks(
+            categoryID: categoryID == transaction.categoryID ? categoryID : nil,
+            accountID: accountID == transaction.accountID ? accountID : nil,
+            tripWorkspaceID: transaction.tripWorkspaceID.flatMap {
+                availableTripIDs.contains($0) ? $0 : nil
+            }
+        )
+    }
+}
+
+private enum TransactionDetailDestination: Hashable {
+    case account(UUID)
+    case trip(UUID)
+}
+
 /// A quick read of one transaction list item. Editing remains in the full
 /// editor; this sheet is read-only so a tap never changes money by accident.
 struct TransactionDetailSheet: View {
@@ -18,6 +44,7 @@ struct TransactionDetailSheet: View {
 
     @State private var isConfirmingDelete = false
     @State private var isShowingDeleteError = false
+    @State private var categoryEditorMode: CategoryEditorMode?
 
     private static let dateTemplate = Date.FormatStyle()
         .weekday(.wide)
@@ -61,6 +88,25 @@ struct TransactionDetailSheet: View {
                     .accessibilityIdentifier("close-transaction-details")
                 }
             }
+            .navigationDestination(for: TransactionDetailDestination.self) { destination in
+                switch destination {
+                case .account(let accountID):
+                    AccountDetailView(route: AccountDetailRoute(accountID: accountID))
+                case .trip(let workspaceID):
+                    if let workspace = tripWorkspaces.first(where: { $0.id == workspaceID }) {
+                        TripDetailView(workspace: workspace)
+                    } else {
+                        ContentUnavailableView(
+                            "Trip unavailable",
+                            systemImage: "airplane",
+                            description: Text("This trip is no longer in the current store.")
+                        )
+                    }
+                }
+            }
+            .appSheet(item: $categoryEditorMode) { mode in
+                CategoryEditorView(mode: mode)
+            }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 actions
             }
@@ -96,46 +142,52 @@ struct TransactionDetailSheet: View {
     }
 
     private var hero: some View {
-        VStack(spacing: 12) {
+        HStack(spacing: 14) {
             Image(systemName: symbolName)
-                .font(.system(size: 24, weight: .semibold))
+                .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(tint)
-                .frame(width: 58, height: 58)
-                .background(tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 18))
+                .frame(width: 48, height: 48)
+                .background(tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 14))
                 .accessibilityHidden(true)
 
-            Text("\(transaction.kind.signLabel)\(VNDCurrency.format(transaction.amount))")
-                .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.58)
-                .foregroundStyle(
-                    transaction.kind == .income ? MonMonTheme.gain : MonMonTheme.textPrimary
-                )
+            VStack(alignment: .leading, spacing: 4) {
+                Text("\(transaction.kind.signLabel)\(VNDCurrency.format(transaction.amount))")
+                    .font(.system(.title2, design: .rounded, weight: .bold))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.64)
+                    .foregroundStyle(
+                        transaction.kind == .income ? MonMonTheme.gain : MonMonTheme.textPrimary
+                    )
 
-            Text(categoryName)
-                .font(.headline)
-                .foregroundStyle(MonMonTheme.textSecondary)
-                .lineLimit(2)
-                .multilineTextAlignment(.center)
+                Text("\(transaction.kind.displayName(in: locale)) • \(formattedDate)")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .lineLimit(2)
+            }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 8)
         .accessibilityElement(children: .combine)
     }
 
     private var details: some View {
         TransactionDetailCard(
-            type: transaction.kind.displayName(in: locale),
-            typeImage: transaction.kind.symbolName,
             category: categoryName,
             categoryImage: symbolName,
             account: accountName,
             accountImage: account?.kind.iconName ?? "wallet.bifold",
-            date: TransactionPeriod.format(Self.dateTemplate, in: locale)
-                .format(transaction.occurredAt),
             trip: tripName,
-            note: note
+            note: note,
+            onOpenCategory: links.categoryID == nil
+                ? nil
+                : {
+                    if let category {
+                        categoryEditorMode = .edit(category)
+                    }
+                },
+            accountDestination: links.accountID.map(TransactionDetailDestination.account),
+            tripDestination: links.tripWorkspaceID.map(TransactionDetailDestination.trip)
         )
     }
 
@@ -156,14 +208,27 @@ struct TransactionDetailSheet: View {
         account?.name ?? AppText.string("Unknown account", in: locale)
     }
 
-    private var note: String {
+    private var note: String? {
         let trimmed = transaction.note.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? AppText.string("No note", in: locale) : trimmed
+        return trimmed.isEmpty ? nil : trimmed
     }
 
     private var tripName: String? {
         guard let workspaceID = transaction.tripWorkspaceID else { return nil }
         return tripWorkspaces.first { $0.id == workspaceID }?.name
+    }
+
+    private var formattedDate: String {
+        TransactionPeriod.format(Self.dateTemplate, in: locale).format(transaction.occurredAt)
+    }
+
+    private var links: TransactionDetailLinks {
+        TransactionDetailLinks.resolve(
+            transaction: transaction,
+            categoryID: category?.id,
+            accountID: account?.id,
+            availableTripIDs: Set(tripWorkspaces.map(\.id))
+        )
     }
 
     private var symbolName: String {
@@ -185,33 +250,51 @@ struct TransactionDetailSheet: View {
 }
 
 private struct TransactionDetailCard: View {
-    let type: String
-    let typeImage: String
     let category: String
     let categoryImage: String
     let account: String
     let accountImage: String
-    let date: String
     let trip: String?
-    let note: String
+    let note: String?
+    let onOpenCategory: (() -> Void)?
+    let accountDestination: TransactionDetailDestination?
+    let tripDestination: TransactionDetailDestination?
 
     var body: some View {
         VStack(spacing: 0) {
-            row(title: "Type", value: type, systemImage: typeImage)
+            linkedRow(
+                title: "Category",
+                value: category,
+                systemImage: categoryImage,
+                action: onOpenCategory
+            )
             divider
-            row(title: "Category", value: category, systemImage: categoryImage)
-            divider
-            row(title: "Account", value: account, systemImage: accountImage)
-            divider
-            row(title: "Date", value: date, systemImage: "calendar")
+            destinationRow(
+                title: "Account",
+                value: account,
+                systemImage: accountImage,
+                destination: accountDestination
+            )
             if let trip {
                 divider
-                row(title: "Trip", value: trip, systemImage: "airplane")
+                destinationRow(
+                    title: "Trip",
+                    value: trip,
+                    systemImage: "airplane",
+                    destination: tripDestination
+                )
             }
-            divider
-            row(title: "Note", value: note, systemImage: "note.text")
+            if let note {
+                divider
+                rowContent(
+                    title: "Note",
+                    value: note,
+                    systemImage: "note.text",
+                    showsDisclosure: false
+                )
+            }
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 14)
         .background(MonMonTheme.surface)
         .clipShape(RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous))
         .overlay {
@@ -224,35 +307,96 @@ private struct TransactionDetailCard: View {
         Divider().overlay(MonMonTheme.border)
     }
 
-    private func row(
+    @ViewBuilder
+    private func linkedRow(
         title: LocalizedStringKey,
         value: String,
-        systemImage: String
+        systemImage: String,
+        action: (() -> Void)?
     ) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: systemImage)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(MonMonTheme.accent)
-                .frame(width: 34, height: 34)
-                .background(
-                    MonMonTheme.accent.opacity(0.14), in: RoundedRectangle(cornerRadius: 10)
+        if let action {
+            Button(action: action) {
+                rowContent(
+                    title: title,
+                    value: value,
+                    systemImage: systemImage,
+                    showsDisclosure: true
                 )
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint("Opens this category")
+        } else {
+            rowContent(
+                title: title,
+                value: value,
+                systemImage: systemImage,
+                showsDisclosure: false
+            )
+        }
+    }
+
+    @ViewBuilder
+    private func destinationRow(
+        title: LocalizedStringKey,
+        value: String,
+        systemImage: String,
+        destination: TransactionDetailDestination?
+    ) -> some View {
+        if let destination {
+            NavigationLink(value: destination) {
+                rowContent(
+                    title: title,
+                    value: value,
+                    systemImage: systemImage,
+                    showsDisclosure: true
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint("Opens linked details")
+        } else {
+            rowContent(
+                title: title,
+                value: value,
+                systemImage: systemImage,
+                showsDisclosure: false
+            )
+        }
+    }
+
+    private func rowContent(
+        title: LocalizedStringKey,
+        value: String,
+        systemImage: String,
+        showsDisclosure: Bool
+    ) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: systemImage)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(MonMonTheme.accent)
+                .frame(width: 24)
                 .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
+            Text(title)
+                .font(.subheadline)
+                .foregroundStyle(MonMonTheme.textSecondary)
 
-                Text(value)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(MonMonTheme.textPrimary)
-                    .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 12)
+
+            Text(value)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(MonMonTheme.textPrimary)
+                .multilineTextAlignment(.trailing)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if showsDisclosure {
+                Image(systemName: "chevron.right")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textMuted)
+                    .accessibilityHidden(true)
             }
-
-            Spacer(minLength: 0)
         }
-        .padding(.vertical, 12)
+        .padding(.vertical, 11)
+        .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
     }
 }
