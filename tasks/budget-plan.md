@@ -34,7 +34,7 @@ Review + full non-Simulator gates
 3. [x] Add the root Budget destination and accessible Plan-vs-Actual cards.
 4. [x] Add jar and category configuration with protected system roles.
 5. [x] Extend complete backup/restore coverage for every new stored value.
-6. [ ] Review, simplify, and run full test, format, and compile-only build gates.
+6. [x] Review, simplify, and run full test, format, and compile-only build gates.
 
 ## Risks and Mitigations
 

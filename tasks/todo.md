@@ -87,7 +87,7 @@ Files: `MonMon/Backup/BackupRestoreView.swift`,
 - [x] Route savings deposits to Savings and Gold/Fund cost basis to Investment.
 - [x] Add an accessible Plan-vs-Actual Budget root destination.
 - [x] Include budget records in complete backup and restore.
-- [ ] Pass focused/full tests, format lint, and compile-only iPhoneOS build.
+- [x] Pass focused/full tests, format lint, and compile-only iPhoneOS build.
 
 ## Goal Envelopes — next branch
 
