@@ -130,7 +130,11 @@ struct MonMonBackupDocumentTests {
         let reencodedJSON = String(decoding: reencoded, as: UTF8.self)
 
         #expect(record.incomeAllocationSnapshot == nil)
+        #expect(record.tripWorkspaceID == nil)
+        #expect(record.budgetJarOverrideID == nil)
         #expect(reencodedJSON.contains("incomeAllocationSnapshot") == false)
+        #expect(reencodedJSON.contains("tripWorkspaceID") == false)
+        #expect(reencodedJSON.contains("budgetJarOverrideID") == false)
     }
 
     @Test("A legacy payload without budget jars still decodes")
@@ -141,6 +145,7 @@ struct MonMonBackupDocumentTests {
 
         #expect(payload.budgetJars.isEmpty)
         #expect(payload.goals.isEmpty)
+        #expect(payload.tripWorkspaces.isEmpty)
     }
 
     @Test("A signed legacy document without budget jars still validates")
@@ -168,6 +173,7 @@ struct MonMonBackupDocumentTests {
 
         #expect(validated.payload.budgetJars.isEmpty)
         #expect(validated.payload.goals.isEmpty)
+        #expect(validated.payload.tripWorkspaces.isEmpty)
     }
 
     private func account(id: UUID, name: String) -> MonMonBackupPayload.AccountRecord {

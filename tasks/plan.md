@@ -82,18 +82,18 @@ Review + non-Simulator gates
 
 ### Phase 4: Portability and completion
 
-- [ ] Task 10: Extend complete backup/restore, validation, recovery, and store
+- [x] Task 10: Extend complete backup/restore, validation, recovery, and store
   reconciliation with legacy compatibility.
-- [ ] Task 11: Run code-quality, simplification, and security reviews.
-- [ ] Task 12: Run focused/full tests, strict format lint, and compile-only
+- [x] Task 11: Run code-quality, simplification, and security reviews.
+- [x] Task 12: Run focused/full tests, strict format lint, and compile-only
   iPhoneOS build.
-- [ ] Task 13: Commit reviewable increments and hand back a clean feature
+- [x] Task 13: Commit reviewable increments and hand back a clean feature
   branch.
 
 ### Checkpoint: Complete
 
-- [ ] All `SPEC-trip-workspace.md` success criteria are met.
-- [ ] No Simulator, merge, push, or phone installation was performed.
+- [x] All `SPEC-trip-workspace.md` success criteria are met.
+- [x] No Simulator, merge, push, or phone installation was performed.
 
 ## Risks and Mitigations
 

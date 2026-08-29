@@ -242,6 +242,79 @@ struct MonMonBackupValidatorTests {
         }
     }
 
+    @Test("Trip records and transaction routing enforce structural invariants")
+    func invalidTripDataIsRejected() throws {
+        var payload = MonMonBackupPayload.empty
+        payload.tripWorkspaces = [tripWorkspace()]
+
+        _ = try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
+
+        payload.tripWorkspaces[0].status = "unknown"
+        #expect(throws: MonMonBackupValidationError.invalidPayload) {
+            try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
+        }
+
+        payload.tripWorkspaces[0] = tripWorkspace()
+        payload.tripWorkspaces[0].budgetAmount = "0"
+        #expect(throws: MonMonBackupValidationError.invalidPayload) {
+            try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
+        }
+
+        payload.tripWorkspaces[0] = tripWorkspace(status: .completed, completedAt: nil)
+        #expect(throws: MonMonBackupValidationError.invalidPayload) {
+            try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
+        }
+    }
+
+    @Test("Trip optional references warn while impossible transaction routing is rejected")
+    func tripReferenceAndRoutingValidation() throws {
+        let tripID = UUID()
+        var payload = MonMonBackupPayload.empty
+        payload.accounts = [account(id: accountID)]
+        payload.tripWorkspaces = [
+            tripWorkspace(
+                id: tripID,
+                sourceGoalID: UUID(),
+                fundingJarID: UUID()
+            )
+        ]
+        payload.transactions = [
+            MonMonBackupPayload.TransactionRecord(
+                id: MonMonBackupScalar.uuid(otherID),
+                kind: TransactionKind.expense.rawValue,
+                amount: "100",
+                occurredAt: MonMonBackupScalar.date(instant),
+                note: "Hotel",
+                accountID: MonMonBackupScalar.uuid(accountID),
+                categoryID: nil,
+                sourceRuleID: nil,
+                currencyCode: VNDCurrency.code,
+                createdAt: MonMonBackupScalar.date(instant),
+                sourceImportID: nil,
+                incomeAllocationSnapshot: nil,
+                tripWorkspaceID: MonMonBackupScalar.uuid(tripID),
+                budgetJarOverrideID: MonMonBackupScalar.uuid(UUID())
+            )
+        ]
+
+        let validated = try MonMonBackupValidator.validate(
+            try signed(payload),
+            expectedFlavour: .dev
+        )
+        #expect(validated.warnings.contains(.danglingOptionalReferences))
+
+        payload.transactions[0].kind = TransactionKind.income.rawValue
+        #expect(throws: MonMonBackupValidationError.invalidPayload) {
+            try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
+        }
+
+        payload.transactions[0].kind = TransactionKind.expense.rawValue
+        payload.transactions[0].tripWorkspaceID = nil
+        #expect(throws: MonMonBackupValidationError.invalidPayload) {
+            try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
+        }
+    }
+
     @Test("Missing required account references and impossible transfers are rejected")
     func referenceFailures() throws {
         var payload = MonMonBackupPayload.empty
@@ -361,6 +434,28 @@ struct MonMonBackupValidatorTests {
             createdAt: MonMonBackupScalar.date(instant),
             sourceImportID: nil,
             incomeAllocationSnapshot: snapshot
+        )
+    }
+
+    private func tripWorkspace(
+        id: UUID = UUID(),
+        sourceGoalID: UUID? = nil,
+        fundingJarID: UUID? = nil,
+        status: TripWorkspaceStatus = .active,
+        completedAt: Date? = nil
+    ) -> MonMonBackupPayload.TripWorkspaceRecord {
+        MonMonBackupPayload.TripWorkspaceRecord(
+            id: MonMonBackupScalar.uuid(id),
+            sourceGoalID: sourceGoalID.map(MonMonBackupScalar.uuid),
+            name: "Japan",
+            budgetAmount: "1000",
+            fundingJarID: fundingJarID.map(MonMonBackupScalar.uuid),
+            symbolName: "airplane",
+            colorName: "sky",
+            status: status.rawValue,
+            startedAt: MonMonBackupScalar.date(instant),
+            completedAt: completedAt.map(MonMonBackupScalar.date),
+            createdAt: MonMonBackupScalar.date(instant)
         )
     }
 
