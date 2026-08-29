@@ -46,6 +46,16 @@ struct AccountDraftTests {
         #expect(account.kind == .normal)
     }
 
+    @Test("A new account starts at nought and saves on its name alone")
+    func newDraftStartsAtZero() throws {
+        var draft = AccountDraft()
+        draft.name = "Wallet"
+
+        let account = try draft.makeAccount(id: fixedID, createdAt: fixedDate)
+
+        #expect(account.openingBalance == 0)
+    }
+
     @Test("Zero is a valid opening balance")
     func zeroBalanceIsValid() throws {
         let draft = AccountDraft(name: "Wallet", openingBalanceText: "0")
