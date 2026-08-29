@@ -71,3 +71,41 @@ Files: `MonMon/Backup/BackupRestoreView.swift`,
 - [x] Run compile-only iOS SDK build.
 - [x] Commit final review-only corrections and report branch status.
 - [x] Do not merge, push, or install on iPhone without explicit owner request.
+
+---
+
+# Roadmap: Budget and Goals
+
+## Budget Core — current branch
+
+- [ ] Seed the standard six jars with a 55/10/10/10/10/5 allocation.
+- [ ] Protect Savings and Investment from deletion while allowing rename and resize.
+- [ ] Let the owner add, edit, and delete custom jars without exceeding 100%.
+- [ ] Persist configurable expense-category-to-jar mappings.
+- [ ] Forecast monthly income from recurring income rules.
+- [ ] Redistribute actual income, including bonuses, using the current percentages.
+- [ ] Route savings deposits to Savings and Gold/Fund cost basis to Investment.
+- [ ] Add an accessible Plan-vs-Actual Budget root destination.
+- [ ] Include budget records in complete backup and restore.
+- [ ] Pass focused/full tests, format lint, and compile-only iPhoneOS build.
+
+## Goal Envelopes — next branch
+
+- [ ] Add goals for a home, vehicle, trip, or owner-defined purpose.
+- [ ] Fund a goal from Savings, Investment, or another selected jar.
+- [ ] Calculate required monthly contribution and forecast completion date.
+- [ ] Keep one jar able to fund several goals without double-counting money.
+
+## Trip Workspace — after Goal Envelopes
+
+- [ ] Give a trip separate saving and spending phases.
+- [ ] Attach transactions to a trip while preserving their ordinary categories.
+- [ ] Allow a trip transaction to override its category’s default jar.
+- [ ] Show total trip budget plus food, accommodation, and transport breakdowns.
+
+## Later exploration
+
+- [ ] Income Allocation Timeline — explain each salary, bonus, and one-off allocation.
+- [ ] Historical monthly snapshots and explicit rollover rules.
+- [ ] Adaptive Coach — overspend warnings and reallocation suggestions.
+- [ ] Validate whether coaching is useful before adding notifications or automation.
