@@ -27,6 +27,7 @@ struct BudgetScreen: View {
     @State private var isShowingGoals = false
     @State private var isShowingIncomeTimeline = false
     @State private var selectedJarID: UUID?
+    @State private var selectedMonth: Date?
 
     private let asOf: Date
 
@@ -40,29 +41,33 @@ struct BudgetScreen: View {
                 MonMonTheme.canvas
                     .ignoresSafeArea()
 
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                        BudgetIncomeCard(
-                            snapshot: snapshot,
-                            monthTitle: monthTitle,
-                            onOpenTimeline: { isShowingIncomeTimeline = true }
-                        )
+                VStack(spacing: 0) {
+                    monthRail
 
-                        if snapshot.plannedIncome == 0 && snapshot.receivedIncome == 0 {
-                            noIncomeCard
-                        }
-
-                        ForEach(snapshot.rowsByAllocation) { row in
-                            BudgetJarCard(
-                                row: row,
-                                onOpenDetails: { selectedJarID = row.jarID }
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+                            BudgetIncomeCard(
+                                snapshot: snapshot,
+                                monthTitle: monthTitle,
+                                onOpenTimeline: { isShowingIncomeTimeline = true }
                             )
+
+                            if snapshot.plannedIncome == 0 && snapshot.receivedIncome == 0 {
+                                noIncomeCard
+                            }
+
+                            ForEach(snapshot.rowsByAllocation) { row in
+                                BudgetJarCard(
+                                    row: row,
+                                    onOpenDetails: { selectedJarID = row.jarID }
+                                )
+                            }
                         }
+                        .frame(maxWidth: MonMonTheme.maxContentWidth)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 16)
+                        .frame(maxWidth: .infinity)
                     }
-                    .frame(maxWidth: MonMonTheme.maxContentWidth)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
-                    .frame(maxWidth: .infinity)
                 }
             }
             .compactRootNavigationTitle("Budget")
@@ -103,7 +108,7 @@ struct BudgetScreen: View {
             }
             .navigationDestination(item: $selectedJarID) { jarID in
                 if let row = snapshot.rows.first(where: { $0.jarID == jarID }) {
-                    BudgetJarDetailView(row: row, asOf: asOf)
+                    BudgetJarDetailView(row: row, month: visibleMonth, asOf: asOf)
                 }
             }
             .tint(MonMonTheme.accent)
@@ -112,7 +117,7 @@ struct BudgetScreen: View {
 
     private var snapshot: BudgetSnapshot {
         BudgetSummary.snapshot(
-            monthContaining: asOf,
+            monthContaining: visibleMonth,
             asOf: asOf,
             jars: jars,
             categories: categories,
@@ -124,7 +129,30 @@ struct BudgetScreen: View {
     }
 
     private var monthTitle: String {
-        TransactionPeriod.title(for: asOf, in: locale)
+        TransactionPeriod.title(for: visibleMonth, in: locale)
+    }
+
+    private var visibleMonth: Date {
+        selectedMonth ?? TransactionPeriod.startOfMonth(for: asOf)
+    }
+
+    private var monthRail: some View {
+        let range = TransactionRange.month(containing: visibleMonth)
+        let periods = PeriodRailPeriods(range: range, today: asOf)
+
+        return PeriodRail(
+            unit: periods.unit,
+            periods: periods.periods,
+            selection: periods.selection
+        ) { period in
+            selectedMonth = period
+        }
+        .background(MonMonTheme.canvas)
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(MonMonTheme.border)
+                .frame(height: 1)
+        }
     }
 
     private var plannedByJar: [UUID: Decimal] {

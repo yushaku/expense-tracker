@@ -2,6 +2,8 @@ import SwiftData
 import SwiftUI
 
 struct BudgetJarDetailView: View {
+    @Environment(\.locale) private var locale
+
     @Query(sort: \BudgetJar.createdAt, order: .forward)
     private var jars: [BudgetJar]
 
@@ -33,6 +35,7 @@ struct BudgetJarDetailView: View {
     private var tripWorkspaces: [TripWorkspace]
 
     let row: BudgetJarSnapshot
+    let month: Date
     let asOf: Date
 
     var body: some View {
@@ -44,6 +47,13 @@ struct BudgetJarDetailView: View {
 
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+                    Label(
+                        TransactionPeriod.title(for: month, in: locale),
+                        systemImage: "calendar"
+                    )
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textSecondary)
+
                     BudgetJarCard(row: row)
 
                     if currentActivity.isEmpty {
@@ -80,7 +90,7 @@ struct BudgetJarDetailView: View {
 
         return BudgetJarActivity.snapshot(
             for: jar,
-            monthContaining: asOf,
+            monthContaining: month,
             asOf: asOf,
             jars: jars,
             categories: categories,
