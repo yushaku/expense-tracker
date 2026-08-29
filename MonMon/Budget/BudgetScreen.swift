@@ -33,6 +33,7 @@ struct BudgetScreen: View {
     @State private var isShowingGoals = false
     @State private var isShowingIncomeTimeline = false
     @State private var selectedJarID: UUID?
+    @State private var selectedGoalID: UUID?
     @State private var selectedMonth: Date?
 
     private let asOf: Date
@@ -111,6 +112,9 @@ struct BudgetScreen: View {
                 if let row = snapshot.rows.first(where: { $0.jarID == jarID }) {
                     BudgetJarDetailView(row: row, month: visibleMonth, asOf: asOf)
                 }
+            }
+            .navigationDestination(item: $selectedGoalID) { goalID in
+                GoalDetailView(goalID: goalID, plannedByJar: plannedByJar, asOf: asOf)
             }
             .tint(MonMonTheme.accent)
         }
@@ -229,7 +233,7 @@ struct BudgetScreen: View {
 
             ForEach(inProgressGoals) { goal in
                 Button {
-                    isShowingGoals = true
+                    selectedGoalID = goal.id
                 } label: {
                     GoalCard(
                         goal: goal,
@@ -239,7 +243,7 @@ struct BudgetScreen: View {
                     )
                 }
                 .buttonStyle(.plain)
-                .accessibilityHint("Opens all goals")
+                .accessibilityHint("Opens this goal's details")
                 .accessibilityIdentifier("budget-goal-\(goal.id.uuidString)")
             }
         }

@@ -8583,6 +8583,12 @@
     "Budget": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngân sách" } } }
     },
+    "Goal unavailable": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục tiêu không khả dụng" } } }
+    },
+    "This goal is no longer in the current store.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục tiêu này không còn trong dữ liệu hiện tại." } } }
+    },
     "Necessities": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thiết yếu" } } }
     },
@@ -8603,6 +8609,9 @@
     },
     "Planned": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dự kiến" } } }
+    },
+    "Planned %@ plus received %@": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dự kiến %@ cộng đã nhận %@" } } }
     },
     "Received": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã nhận" } } }
@@ -8634,11 +8643,17 @@
     "Available": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khả dụng" } } }
     },
+    "Allocated": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phân bổ" } } }
+    },
     "Actual": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thực tế" } } }
     },
     "Used": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã dùng" } } }
+    },
+    "Left": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Còn lại" } } }
     },
     "Setup": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thiết lập" } } }

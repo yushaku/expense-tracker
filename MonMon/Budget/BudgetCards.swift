@@ -189,14 +189,17 @@ struct BudgetJarCard: View {
             HStack(alignment: .top, spacing: 12) {
                 availableMetric
                 metric("Used", amount: row.used)
+                metric(
+                    "Left",
+                    amount: row.remaining,
+                    isTrailing: true,
+                    isWarning: row.remaining < 0
+                )
             }
 
             if isShowingAvailableBreakdown {
-                HStack(alignment: .top, spacing: 12) {
-                    metric("Planned", amount: row.planned)
-                    metric("Received", amount: row.received)
-                }
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                availableBreakdown
+                    .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
         .padding(18)
@@ -283,7 +286,7 @@ struct BudgetJarCard: View {
             }
         } label: {
             HStack(alignment: .firstTextBaseline, spacing: 6) {
-                metric("Available", amount: row.projected)
+                metric("Allocated", amount: row.projected)
 
                 Image(
                     systemName: isShowingAvailableBreakdown ? "chevron.up" : "chevron.down"
@@ -296,7 +299,7 @@ struct BudgetJarCard: View {
         }
         .buttonStyle(.plain)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityLabel("Available")
+        .accessibilityLabel("Allocated")
         .accessibilityValue(VNDCurrency.format(row.projected))
         .accessibilityHint(
             isShowingAvailableBreakdown
@@ -304,11 +307,30 @@ struct BudgetJarCard: View {
         )
     }
 
-    private func metric(_ title: LocalizedStringKey, amount: Decimal) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
+    private var availableBreakdown: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            breakdownTerm("Planned", amount: row.planned)
+
+            Text("+")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(MonMonTheme.textMuted)
+                .accessibilityHidden(true)
+
+            breakdownTerm("Received", amount: row.received)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(
+            "Planned \(VNDCurrency.format(row.planned)) plus received \(VNDCurrency.format(row.received))"
+        )
+    }
+
+    private func breakdownTerm(_ title: LocalizedStringKey, amount: Decimal) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
             Text(title)
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(MonMonTheme.textMuted)
+                .lineLimit(1)
 
             Text(VNDCurrency.format(amount))
                 .font(.caption.weight(.semibold))
@@ -316,6 +338,26 @@ struct BudgetJarCard: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func metric(
+        _ title: LocalizedStringKey,
+        amount: Decimal,
+        isTrailing: Bool = false,
+        isWarning: Bool = false
+    ) -> some View {
+        VStack(alignment: isTrailing ? .trailing : .leading, spacing: 3) {
+            Text(title)
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(MonMonTheme.textMuted)
+
+            Text(VNDCurrency.format(amount))
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(isWarning ? MonMonTheme.danger : MonMonTheme.textPrimary)
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+        }
+        .frame(maxWidth: .infinity, alignment: isTrailing ? .trailing : .leading)
     }
 }

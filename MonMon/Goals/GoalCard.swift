@@ -1,9 +1,23 @@
+import SwiftData
 import SwiftUI
 
 struct GoalCard: View {
     let goal: FinancialGoal
     let jarName: String
     let asOf: Date
+    let showsDisclosure: Bool
+
+    init(
+        goal: FinancialGoal,
+        jarName: String,
+        asOf: Date,
+        showsDisclosure: Bool = true
+    ) {
+        self.goal = goal
+        self.jarName = jarName
+        self.asOf = asOf
+        self.showsDisclosure = showsDisclosure
+    }
 
     private var snapshot: GoalProgressSnapshot {
         GoalProgress.snapshot(goal: goal, asOf: asOf)
@@ -56,7 +70,7 @@ struct GoalCard: View {
                     .foregroundStyle(tint)
                     .labelStyle(.iconOnly)
                     .accessibilityLabel("Complete")
-            } else {
+            } else if showsDisclosure {
                 Image(systemName: "chevron.right")
                     .font(.footnote.weight(.semibold))
                     .foregroundStyle(MonMonTheme.textMuted)
@@ -139,5 +153,138 @@ struct GoalCard: View {
                 .minimumScaleFactor(0.6)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+struct GoalDetailView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    @Query(sort: \FinancialGoal.createdAt, order: .forward)
+    private var goals: [FinancialGoal]
+
+    @Query(sort: \BudgetJar.createdAt, order: .forward)
+    private var jars: [BudgetJar]
+
+    let goalID: UUID
+    let plannedByJar: [UUID: Decimal]
+    let asOf: Date
+
+    @State private var editorMode: GoalEditorMode?
+
+    private var goal: FinancialGoal? {
+        goals.first { $0.id == goalID }
+    }
+
+    var body: some View {
+        Group {
+            if let goal {
+                ZStack {
+                    MonMonTheme.canvas
+                        .ignoresSafeArea()
+
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+                            GoalCard(
+                                goal: goal,
+                                jarName: jarName(for: goal),
+                                asOf: asOf,
+                                showsDisclosure: false
+                            )
+
+                            detailsCard(goal)
+                        }
+                        .frame(maxWidth: MonMonTheme.maxContentWidth)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 16)
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+            } else {
+                ContentUnavailableView(
+                    "Goal unavailable",
+                    systemImage: "flag.slash",
+                    description: Text("This goal is no longer in the current store.")
+                )
+            }
+        }
+        .navigationTitle(goal?.name ?? String(localized: "Goal"))
+        .toolbar {
+            if let goal {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Edit goal", systemImage: "pencil") {
+                        editorMode = .edit(goal)
+                    }
+                    .accessibilityIdentifier("goal-detail-edit")
+                }
+            }
+        }
+        .appSheet(item: $editorMode) { mode in
+            GoalEditorView(mode: mode, plannedByJar: plannedByJar, asOf: asOf)
+        }
+        .onChange(of: goal?.id) { _, currentGoalID in
+            if currentGoalID == nil {
+                dismiss()
+            }
+        }
+        .tint(MonMonTheme.accent)
+        .accessibilityIdentifier("goal-detail")
+    }
+
+    private func detailsCard(_ goal: FinancialGoal) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Details")
+                .font(.headline)
+
+            detailRow("Type") {
+                Text(goal.kind.title)
+            }
+
+            Divider()
+                .overlay(MonMonTheme.border)
+
+            detailRow("Funding jar") {
+                Text(jarName(for: goal))
+            }
+
+            Divider()
+                .overlay(MonMonTheme.border)
+
+            detailRow("Target date") {
+                Text(goal.targetDate, format: .dateTime.day().month().year())
+            }
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 18))
+        .overlay {
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(MonMonTheme.border, lineWidth: 1)
+        }
+    }
+
+    private func detailRow<Value: View>(
+        _ title: LocalizedStringKey,
+        @ViewBuilder value: () -> Value
+    ) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Text(title)
+                .font(.subheadline)
+                .foregroundStyle(MonMonTheme.textSecondary)
+
+            Spacer(minLength: 12)
+
+            value()
+                .font(.subheadline.weight(.semibold))
+                .multilineTextAlignment(.trailing)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private func jarName(for goal: FinancialGoal) -> String {
+        guard let jarID = goal.fundingJarID else {
+            return String(localized: "No jar")
+        }
+
+        return jars.first { $0.id == jarID }?.name ?? String(localized: "No jar")
     }
 }
