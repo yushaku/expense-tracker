@@ -51,6 +51,33 @@ struct SpendingTrendPoint: Identifiable, Equatable {
     var id: Date { start }
 }
 
+/// Turns the continuous date Swift Charts reports under a finger into an
+/// actual point the chart can highlight.
+enum TrendChartSelection {
+    static func nearest<Element>(
+        to proposed: Date,
+        in elements: [Element],
+        date: (Element) -> Date
+    ) -> Element? {
+        elements.min { lhs, rhs in
+            let lhsDate = date(lhs)
+            let rhsDate = date(rhs)
+            let lhsDistance = abs(lhsDate.timeIntervalSince(proposed))
+            let rhsDistance = abs(rhsDate.timeIntervalSince(proposed))
+
+            if lhsDistance == rhsDistance {
+                return lhsDate < rhsDate
+            }
+
+            return lhsDistance < rhsDistance
+        }
+    }
+
+    static func nearestDate(to proposed: Date, in dates: [Date]) -> Date? {
+        nearest(to: proposed, in: dates) { $0 }
+    }
+}
+
 /// Money out and money in, bucket by bucket, over the period on show.
 ///
 /// The totals above the card say what a period came to; this says how it got

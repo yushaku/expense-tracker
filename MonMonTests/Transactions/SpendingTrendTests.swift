@@ -166,4 +166,33 @@ struct SpendingTrendTests {
 
         #expect(total == 90_000)
     }
+
+    @Test("Chart selection snaps to the nearest plotted date")
+    func chartSelectionSnapsToNearestDate() {
+        let starts = [date(2026, 3, 1), date(2026, 3, 5), date(2026, 3, 10)]
+
+        let selected = TrendChartSelection.nearestDate(
+            to: date(2026, 3, 7),
+            in: starts
+        )
+
+        #expect(selected == date(2026, 3, 5))
+    }
+
+    @Test("An equidistant chart selection prefers the earlier plotted date")
+    func chartSelectionTiePrefersEarlierDate() {
+        let starts = [date(2026, 3, 5), date(2026, 3, 7)]
+
+        let selected = TrendChartSelection.nearestDate(
+            to: date(2026, 3, 6),
+            in: starts
+        )
+
+        #expect(selected == date(2026, 3, 5))
+    }
+
+    @Test("Chart selection has no result when the chart has no points")
+    func chartSelectionNeedsPoints() {
+        #expect(TrendChartSelection.nearestDate(to: .now, in: []) == nil)
+    }
 }
