@@ -91,10 +91,16 @@ Files: `MonMon/Backup/BackupRestoreView.swift`,
 
 ## Goal Envelopes — next branch
 
-- [ ] Add goals for a home, vehicle, trip, or owner-defined purpose.
-- [ ] Fund a goal from Savings, Investment, or another selected jar.
+- [ ] Add a CloudKit-compatible goal model for Home, Vehicle, Trip, and Custom.
+- [ ] Treat earmarked goal money as an overlay, never a second asset or transaction.
+- [ ] Fund each goal from Savings, Investment, or another selected jar.
 - [ ] Calculate required monthly contribution and forecast completion date.
-- [ ] Keep one jar able to fund several goals without double-counting money.
+- [ ] Aggregate several goals against one jar without double-committing its monthly plan.
+- [ ] Warn when later income or jar edits make existing commitments exceed capacity.
+- [ ] Block deletion of a custom jar while a goal references it.
+- [ ] Add accessible Goal list, progress cards, and add/edit/delete flow inside Budget.
+- [ ] Include goals in complete backup/restore while preserving legacy compatibility.
+- [ ] Pass focused/full tests, format lint, review, and compile-only iPhoneOS build.
 
 ## Trip Workspace — after Goal Envelopes
 

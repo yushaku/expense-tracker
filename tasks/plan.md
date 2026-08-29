@@ -1,96 +1,92 @@
-# Implementation Plan: Full Backup and Restore
+# Implementation Plan: Goal Envelopes
 
-## Outcome
+## Overview
 
-Implement the approved `full-backup-restore` specification as a versioned JSON
-snapshot that covers every SwiftData model and the approved logical preferences.
-Restore is an explicit, previewed, authoritative replacement by UUID. Before any
-store mutation, MonMon writes one private recovery snapshot that can be restored
-from Settings.
+Build the second module in `BUDGET-CAPABILITIES.md`: goals that earmark money
+inside one jar, reserve a monthly contribution without duplicating the jar's
+plan, and forecast progress toward a target.
 
 ## Dependency Graph
 
 ```text
-Portable document contract + canonical scalar encoding
+Goal model + pure forecast contract
     |
     v
-Pure validation + checksum + restore preview
+Draft validation + per-jar commitment capacity
     |
     v
-SwiftData snapshot export + preferences
+SwiftData persistence + jar deletion integrity
     |
     v
-Recovery snapshot + transactional replacement restore
+Goal list/cards/editor inside Budget
     |
     v
-Settings UI + file importer/exporter + app-lock gate
+Complete backup/restore integration
     |
     v
-Review, full gates, owner-directed merge and iPhone validation
+Review + full non-Simulator gates
 ```
 
 ## Architecture Decisions
 
-- Use ordinary UTF-8 JSON and `UTType.json`; do not add CSV, encryption, merge,
-  or database-file copying.
-- Represent UUIDs as lowercase strings, Decimal values as canonical base-10
-  strings, dates as UTC ISO-8601 with fractional seconds, and enums as raw
-  strings.
-- Compute SHA-256 over a canonical, sorted-key encoding of `payload` only.
-- Keep document decoding and validation free of SwiftData and SwiftUI.
-- Use a dedicated `ModelContext` with autosave disabled. Restore updates rows by
-  UUID, inserts missing rows, deletes rows absent from the snapshot, and saves
-  once; failures roll back.
-- Write the pre-restore snapshot atomically under Application Support. On iOS,
-  add complete file protection. If this write fails, restore does not start.
-- Restore preferences only after the financial save succeeds.
-- Treat imported JSON as untrusted. Reject files over 100 MB, unknown format or
-  version, invalid scalar/enum values, duplicate IDs, dangling required
-  references, invalid provenance hashes, non-finite/negative-invalid values,
-  and checksum mismatch before creating a context that writes.
-- The checksum detects damage, not malicious authorship; UI copy must not imply
-  authenticity or encryption.
+- A goal is a planning overlay, not a financial account. Its earmarked amount is
+  never included in Wealth and does not create transactions.
+- One goal has one funding jar in this slice. Several goals may share a jar.
+- The shared scarce resource is the jar's planned monthly income allocation.
+  Aggregate goal contributions may not exceed it at save time.
+- Existing goals are not mutated if later income or percentage edits cause an
+  overcommitment; the list reports the deficit for owner correction.
+- Goal calculations remain pure and calendar-parameterised. Views render
+  prepared snapshots and forms own their save/dismiss behaviour.
+- Goal backup fields are optional at the payload boundary so existing snapshots
+  remain restorable.
 
-## Increment Strategy
+## Task List
 
-1. Fix the pre-existing macOS `ShortcutsLink` compile blocker separately.
-2. Add the portable document contract and canonical codec with failing tests.
-3. Add pure validator and preview tests.
-4. Add full snapshot export and preference capture with in-memory-store tests.
-5. Add recovery snapshot and authoritative restore with rollback tests.
-6. Add accessible Settings UI, import/export presentation, warnings, and app-lock
-   authentication.
-7. Run security/quality review, simplify, and execute all non-Simulator gates.
+### Phase 1: Contract and foundation
 
-Every increment is a reviewable commit. No merge, push, or physical-device run
-occurs without a new explicit owner request.
+- [ ] Task 1: Add RED tests for forecast, required monthly contribution, and validation.
+- [ ] Task 2: Add the CloudKit-compatible goal model, pure engine, and draft.
 
-## Security Threat Model
+### Checkpoint: Foundation
 
-| Threat | Boundary | Mitigation |
+- [ ] Focused Goal tests pass.
+- [ ] Goal model persists in an in-memory `MonMonSchema` container.
+
+### Phase 2: Integrity and user flow
+
+- [ ] Task 3: Aggregate jar commitments and block deletion of referenced jars.
+- [ ] Task 4: Add accessible Goal list, cards, add/edit/delete form, and Budget entry point.
+- [ ] Task 5: Add localized English and Vietnamese Goal copy.
+
+### Checkpoint: Core flow
+
+- [ ] Goal CRUD works end to end in code and compile checks.
+- [ ] Shared-jar capacity and overcommitment states are visible and tested.
+
+### Phase 3: Portability and completion
+
+- [ ] Task 6: Extend complete backup validation, export, and authoritative restore.
+- [ ] Task 7: Run SwiftUI correctness, quality, simplification, and security review.
+- [ ] Task 8: Run focused/full tests, strict format lint, and compile-only iPhoneOS build.
+- [ ] Task 9: Commit reviewable increments and hand back the clean feature branch.
+
+### Checkpoint: Complete
+
+- [ ] All `SPEC-goal-envelopes.md` success criteria are met.
+- [ ] No Simulator, merge, push, or phone installation was performed.
+
+## Risks and Mitigations
+
+| Risk | Impact | Mitigation |
 |---|---|---|
-| Oversized or deeply malformed JSON exhausts memory | Imported file | Check resource size before reading; hard cap at 100 MB; decode once |
-| Corrupted/tampered snapshot silently changes data | Document | Canonical payload SHA-256 and strict validation before writes |
-| Partial destructive restore loses current data | Persistence | Private recovery snapshot, dedicated context, one save, rollback |
-| Plaintext backup leaks financial data | Exported file | Explicit warning, no sensitive logs, protected private recovery file |
-| Invalid references leave unusable records | Payload graph | Validate IDs, duplicates, enums, provenance, and required references |
-| Restore bypasses enabled app lock | Settings action | Reuse app-lock authentication before restore confirmation |
+| Goal money accidentally inflates net worth | High | Keep Goal out of asset summaries and document it as an overlay |
+| One jar promises the same monthly money twice | High | Validate aggregate contribution against its current planned allocation |
+| Income changes make valid commitments stale | Medium | Preserve data and show an explicit overcommitted state |
+| Jar deletion leaves dangling Goal references | High | Block deletion while goals reference the jar |
+| New model is omitted from backup | High | Add document/service/validator tests in the same branch |
+| Date math shifts at month boundaries | Medium | Parameterise Calendar and test beginning/end-of-month cases |
 
-## Completion Gates
+## Open Questions
 
-- Focused contract, validator, export, restore, and UI-state tests pass.
-- Full macOS unit tests pass.
-- Recursive Swift format lint passes.
-- Compile-only iOS SDK build passes without a Simulator.
-- Diff contains no real owner data, backup output, paths, hashes, or unrelated
-  changes.
-- Physical iPhone validation remains pending until the owner asks to merge the
-  branch into `dev`.
-
-## Official Sources
-
-- Apple `ModelContext`: https://developer.apple.com/documentation/swiftdata/modelcontext
-- Apple `fileImporter`: https://developer.apple.com/documentation/swiftui/view/fileimporter%28ispresented%3Aallowedcontenttypes%3Aoncompletion%3A%29
-- Apple Application Support directory: https://developer.apple.com/documentation/foundation/url/applicationsupportdirectory
-- Apple atomic/protected data writing: https://developer.apple.com/documentation/foundation/nsdata/writingoptions/completefileprotection
-
+None. Automatic transfers and Trip spending are explicitly deferred.
