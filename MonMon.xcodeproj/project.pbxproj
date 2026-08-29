@@ -141,7 +141,6 @@
 		A00000000000000000000282 /* Percentage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000193 /* Percentage.swift */; };
 		A00000000000000000000283 /* CategoryBreakdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000194 /* CategoryBreakdown.swift */; };
 		A00000000000000000000284 /* CategoryBreakdownCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000195 /* CategoryBreakdownCard.swift */; };
-		W10000000000000000000002 /* CategoryWaterfallCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000001 /* CategoryWaterfallCard.swift */; };
 		A00000000000000000000285 /* CategoryTransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000196 /* CategoryTransactionsView.swift */; };
 		A00000000000000000000286 /* CategoryBreakdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000197 /* CategoryBreakdownTests.swift */; };
 		A00000000000000000000287 /* CalendarTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000198 /* CalendarTheme.swift */; };
@@ -498,7 +497,6 @@
 		A00000000000000000000193 /* Percentage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Percentage.swift; sourceTree = "<group>"; };
 		A00000000000000000000194 /* CategoryBreakdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBreakdown.swift; sourceTree = "<group>"; };
 		A00000000000000000000195 /* CategoryBreakdownCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBreakdownCard.swift; sourceTree = "<group>"; };
-		W10000000000000000000001 /* CategoryWaterfallCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryWaterfallCard.swift; sourceTree = "<group>"; };
 		A00000000000000000000196 /* CategoryTransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryTransactionsView.swift; sourceTree = "<group>"; };
 		A00000000000000000000197 /* CategoryBreakdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBreakdownTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000198 /* CalendarTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarTheme.swift; sourceTree = "<group>"; };
@@ -1067,7 +1065,6 @@
 				A00000000000000000000180 /* TransactionListView.swift */,
 				A00000000000000000000194 /* CategoryBreakdown.swift */,
 				A00000000000000000000195 /* CategoryBreakdownCard.swift */,
-				W10000000000000000000001 /* CategoryWaterfallCard.swift */,
 				A00000000000000000000196 /* CategoryTransactionsView.swift */,
 				C10000000000000000000001 /* TransactionCalendar.swift */,
 				C10000000000000000000002 /* TransactionCalendarCard.swift */,
@@ -1547,7 +1544,6 @@
 				C10000000000000000000103 /* DayTransactionsView.swift in Sources */,
 				C10000000000000000000106 /* SpendingOverviewCard.swift in Sources */,
 				A00000000000000000000284 /* CategoryBreakdownCard.swift in Sources */,
-				W10000000000000000000002 /* CategoryWaterfallCard.swift in Sources */,
 				A00000000000000000000283 /* CategoryBreakdown.swift in Sources */,
 				A00000000000000000000282 /* Percentage.swift in Sources */,
 				A00000000000000000000281 /* FloatingAddButton.swift in Sources */,

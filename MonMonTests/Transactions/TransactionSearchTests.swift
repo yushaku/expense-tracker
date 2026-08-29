@@ -269,24 +269,15 @@ struct TransactionSearchTests {
 
         #expect(ReportContentVisibility(query: query).showsNetTrend)
         #expect(!ReportContentVisibility(query: query).showsTransactionList)
-        #expect(ReportContentVisibility(query: query).showsCategoryWaterfall)
 
         query.filter = .income
 
         #expect(ReportContentVisibility(query: query).showsNetTrend)
         #expect(!ReportContentVisibility(query: query).showsTransactionList)
-        #expect(!ReportContentVisibility(query: query).showsCategoryWaterfall)
-
-        query.filter = .expense
-
-        #expect(!ReportContentVisibility(query: query).showsCategoryWaterfall)
-
-        query.filter = .all
 
         query.text = "salary"
 
         #expect(!ReportContentVisibility(query: query).showsNetTrend)
         #expect(ReportContentVisibility(query: query).showsTransactionList)
-        #expect(ReportContentVisibility(query: query).showsCategoryWaterfall)
     }
 }
