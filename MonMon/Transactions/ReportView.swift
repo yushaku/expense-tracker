@@ -12,51 +12,21 @@ import SwiftUI
 struct ReportContentVisibility: Equatable {
     let showsNetTrend: Bool
     let showsTransactionList: Bool
+    /// A trend needs a period made of smaller ones. Filtered to a single day
+    /// there is nothing finer to walk, so the card stands down rather than
+    /// drawing one point and calling it a line.
+    let showsSpendingTrend: Bool
+    /// A month grid can only draw a month. Filtered to a year, a day, or a
+    /// hand-picked span, it would either show days the figures above it exclude
+    /// or one month standing for a period that is not one month, so it stands
+    /// down and leaves the period to the cards that can read it.
+    let showsCalendar: Bool
 
     init(query: TransactionQuery) {
         showsNetTrend = !query.hasSearchText
         showsTransactionList = query.hasSearchText
-    }
-}
-
-/// Which months the report's calendar may show, and which of them it is on.
-///
-/// The header's period is the authority here as it is everywhere else on the
-/// screen: the rail offers only the months inside it, and a month picked before
-/// the period moved is dropped rather than left standing empty over figures that
-/// no longer include it.
-struct ReportCalendarMonths: Equatable {
-    let months: [Date]
-    let selection: Date
-
-    init(range: TransactionRange, preferred: Date?, today: Date) {
-        let months = TransactionPeriod.months(from: range.start, through: range.lastDay)
-        let currentMonth = TransactionPeriod.startOfMonth(for: today)
-
-        self.months = months
-        selection =
-            [preferred, currentMonth]
-            .compactMap { $0 }
-            .map(TransactionPeriod.startOfMonth(for:))
-            .first { months.contains($0) }
-            ?? months.first
-            ?? currentMonth
-    }
-
-    /// The month `steps` away from `month`, or nil when that lands outside the
-    /// period the header is asking for.
-    func stepped(from month: Date, by steps: Int) -> Date? {
-        guard let index = months.firstIndex(of: TransactionPeriod.startOfMonth(for: month)) else {
-            return nil
-        }
-
-        let target = index + steps
-
-        guard months.indices.contains(target) else {
-            return nil
-        }
-
-        return months[target]
+        showsSpendingTrend = !query.hasSearchText && query.range.scope != .day
+        showsCalendar = query.range.scope == .month
     }
 }
 
@@ -98,6 +68,13 @@ struct ReportData {
         TransactionSummary.runningNet(transactions)
     }
 
+    /// The range is handed in rather than kept here, because the trend draws
+    /// every bucket of the period — including the ones that recorded nothing,
+    /// which the transactions alone cannot name.
+    func spendingTrend(in range: TransactionRange) -> [SpendingTrendPoint] {
+        SpendingTrend.points(of: transactions, in: range)
+    }
+
     func calendarWeeks(of month: Date) -> [TransactionCalendarWeek] {
         TransactionCalendar.weeks(of: month, transactions: transactions)
     }
@@ -133,11 +110,6 @@ struct ReportView: View {
 
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
-
-    /// The month the owner picked off the rail, if they picked one. Nil means
-    /// "whichever month the header's period puts on show", and a pick that the
-    /// period no longer covers is ignored rather than corrected behind a sheet.
-    @State private var pickedMonth: Date?
 
     /// A year, not a month: the charts here are about a run of months, and a
     /// period narrower than one bar has nothing to trend.
@@ -228,11 +200,13 @@ struct ReportView: View {
                 )
                 .accessibilityIdentifier("report-overview")
 
-                TransactionCalendarCard(
-                    month: calendarMonths.selection,
-                    weeks: report.calendarWeeks(of: calendarMonths.selection),
-                    onStepMonth: stepSummaryMonth
-                )
+                if visibility.showsCalendar {
+                    TransactionCalendarCard(
+                        month: calendarMonth,
+                        weeks: report.calendarWeeks(of: calendarMonth),
+                        onStepMonth: stepMonth
+                    )
+                }
 
                 if !report.transactions.isEmpty {
                     CategoryBreakdownCard(
@@ -259,6 +233,15 @@ struct ReportView: View {
                         resultsSection(report.transactions)
                     }
 
+                    if visibility.showsSpendingTrend,
+                        let unit = SpendingTrend.unit(for: query.range)
+                    {
+                        SpendingTrendCard(
+                            unit: unit,
+                            points: report.spendingTrend(in: query.range)
+                        )
+                    }
+
                     if visibility.showsNetTrend {
                         NetTrendCard(points: report.netTrend)
                     }
@@ -281,22 +264,16 @@ struct ReportView: View {
         )
     }
 
-    /// The months the calendar can be moved over, read from the header's period
-    /// rather than kept beside it.
-    private var calendarMonths: ReportCalendarMonths {
-        ReportCalendarMonths(range: query.range, preferred: pickedMonth, today: .now)
+    /// The month the calendar draws, which is the month the header is filtered
+    /// to: the card is only on screen while that period is one month.
+    private var calendarMonth: Date {
+        TransactionPeriod.startOfMonth(for: query.range.start)
     }
 
-    /// Stepping stops at the edges of the period on show: a month outside it has
-    /// nothing to draw, because the figures above the calendar exclude it.
-    private func stepSummaryMonth(_ steps: Int) {
-        let months = calendarMonths
-
-        guard let moved = months.stepped(from: months.selection, by: steps) else {
-            return
-        }
-
-        pickedMonth = moved
+    /// The calendar's arrows move the filter itself, so the grid and the figures
+    /// above it can never come to describe different months.
+    private func stepMonth(_ steps: Int) {
+        query.range = query.range.stepped(by: steps)
     }
 
     private var categoryNames: [UUID: String] {
@@ -333,7 +310,6 @@ struct ReportView: View {
             selection: periods.selection
         ) { period in
             query.range = periods.unit.range(containing: period)
-            pickedMonth = nil
         }
         .background(MonMonTheme.canvas)
         .overlay(alignment: .bottom) {

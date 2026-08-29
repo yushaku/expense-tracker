@@ -8044,6 +8044,36 @@
         }
       }
     },
+    "SPENDING TREND": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "XU HƯỚNG CHI TIÊU"
+          }
+        }
+      }
+    },
+    "Averaging %@ out and %@ in per day.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trung bình %@ chi ra và %@ thu vào mỗi ngày."
+          }
+        }
+      }
+    },
+    "Averaging %@ out and %@ in per month.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trung bình %@ chi ra và %@ thu vào mỗi tháng."
+          }
+        }
+      }
+    },
     "No categories yet.": {
       "localizations": {
         "vi": {
