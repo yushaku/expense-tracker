@@ -10,6 +10,8 @@ final class TransactionCategory {
     /// leave a record that will not render.
     var symbolName: String = CategoryPalette.defaultSymbolName
     var colorName: String = CategoryPalette.defaultColorName
+    /// The budget jar this expense normally uses. Income categories leave it empty.
+    var budgetJarID: UUID?
     var createdAt: Date = Date(timeIntervalSince1970: 0)
 
     init(
@@ -18,7 +20,8 @@ final class TransactionCategory {
         kind: TransactionKind,
         symbolName: String,
         colorName: String,
-        createdAt: Date
+        createdAt: Date,
+        budgetJarID: UUID? = nil
     ) {
         self.id = id
         self.name = name
@@ -26,5 +29,6 @@ final class TransactionCategory {
         self.symbolName = symbolName
         self.colorName = colorName
         self.createdAt = createdAt
+        self.budgetJarID = budgetJarID
     }
 }

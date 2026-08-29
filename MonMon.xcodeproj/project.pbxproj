@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		U10000000000000000000201 /* BudgetJarSeedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000101 /* BudgetJarSeedTests.swift */; };
+		U10000000000000000000202 /* BudgetJar.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000102 /* BudgetJar.swift */; };
+		U10000000000000000000203 /* BudgetJarSeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000103 /* BudgetJarSeed.swift */; };
 		J10000000000000000000201 /* QuickExpenseWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000102 /* QuickExpenseWidget.swift */; };
 		J10000000000000000000202 /* QuickExpensePreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000102 /* QuickExpensePreset.swift */; };
 		J10000000000000000000203 /* QuickExpenseIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000103 /* QuickExpenseIntent.swift */; };
@@ -363,6 +366,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		U10000000000000000000101 /* BudgetJarSeedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetJarSeedTests.swift; sourceTree = "<group>"; };
+		U10000000000000000000102 /* BudgetJar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetJar.swift; sourceTree = "<group>"; };
+		U10000000000000000000103 /* BudgetJarSeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetJarSeed.swift; sourceTree = "<group>"; };
 		J10000000000000000000101 /* MonMonQuickExpenseWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MonMonQuickExpenseWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		J10000000000000000000102 /* QuickExpenseWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpenseWidget.swift; sourceTree = "<group>"; };
 		J10000000000000000000103 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -743,6 +749,7 @@
 		A00000000000000000000012 /* MonMon */ = {
 			isa = PBXGroup;
 			children = (
+				U10000000000000000000001 /* Budget */,
 				W10000000000000000000012 /* QuickExpense */,
 				K10000000000000000000101 /* Backup */,
 				33DE4088303D787400918EDF /* MonMonDebug.entitlements */,
@@ -805,6 +812,7 @@
 		A00000000000000000000015 /* MonMonTests */ = {
 			isa = PBXGroup;
 			children = (
+				U10000000000000000000002 /* Budget */,
 				W10000000000000000000011 /* QuickExpense */,
 				K10000000000000000000102 /* Backup */,
 				A00000000000000000000D03 /* Recurring */,
@@ -828,6 +836,23 @@
 				W10000000000000000000101 /* QuickExpensePresetStoreTests.swift */,
 			);
 			path = QuickExpense;
+			sourceTree = "<group>";
+		};
+		U10000000000000000000002 /* Budget */ = {
+			isa = PBXGroup;
+			children = (
+				U10000000000000000000101 /* BudgetJarSeedTests.swift */,
+			);
+			path = Budget;
+			sourceTree = "<group>";
+		};
+		U10000000000000000000001 /* Budget */ = {
+			isa = PBXGroup;
+			children = (
+				U10000000000000000000102 /* BudgetJar.swift */,
+				U10000000000000000000103 /* BudgetJarSeed.swift */,
+			);
+			path = Budget;
 			sourceTree = "<group>";
 		};
 		A00000000000000000000016 /* Products */ = {
@@ -1494,6 +1519,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				U10000000000000000000202 /* BudgetJar.swift in Sources */,
+				U10000000000000000000203 /* BudgetJarSeed.swift in Sources */,
 				W10000000000000000000205 /* QuickExpensePresetsCard.swift in Sources */,
 				W10000000000000000000206 /* QuickExpensePresetRow.swift in Sources */,
 				W10000000000000000000204 /* QuickExpensePresetDraft.swift in Sources */,
@@ -1703,6 +1730,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				U10000000000000000000201 /* BudgetJarSeedTests.swift in Sources */,
 				W10000000000000000000201 /* QuickExpensePresetStoreTests.swift in Sources */,
 				K10000000000000000000211 /* MonMonBackupDocumentTests.swift in Sources */,
 				K10000000000000000000213 /* MonMonBackupValidatorTests.swift in Sources */,
