@@ -25,6 +25,7 @@ struct BudgetScreen: View {
     @State private var isShowingRecurringIncome = false
     @State private var isShowingConfiguration = false
     @State private var isShowingGoals = false
+    @State private var isShowingIncomeTimeline = false
 
     private let asOf: Date
 
@@ -40,7 +41,11 @@ struct BudgetScreen: View {
 
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                        BudgetIncomeCard(snapshot: snapshot, monthTitle: monthTitle)
+                        BudgetIncomeCard(
+                            snapshot: snapshot,
+                            monthTitle: monthTitle,
+                            onOpenTimeline: { isShowingIncomeTimeline = true }
+                        )
 
                         if snapshot.plannedIncome == 0 && snapshot.receivedIncome == 0 {
                             noIncomeCard
@@ -88,6 +93,9 @@ struct BudgetScreen: View {
             }
             .appSheet(isPresented: $isShowingGoals) {
                 GoalListView(plannedByJar: plannedByJar, asOf: asOf)
+            }
+            .appSheet(isPresented: $isShowingIncomeTimeline) {
+                IncomeAllocationTimelineView(asOf: asOf)
             }
             .tint(MonMonTheme.accent)
         }

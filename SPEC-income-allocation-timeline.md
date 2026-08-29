@@ -27,13 +27,13 @@ remainder. Later jar edits must not rewrite that history.
 ## Commands
 
 - Focused tests:
-  `rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/MonMonIncomeTimelineDerivedData CODE_SIGNING_ALLOWED=NO test -only-testing:MonMonTests/IncomeAllocationSnapshotTests -only-testing:MonMonTests/IncomeAllocationBackfillTests`
+  `rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/MonMonIncomeTimelineDerivedData CODE_SIGNING_ALLOWED=NO test -only-testing:MonMonTests/IncomeAllocationSnapshotTests -only-testing:MonMonTests/IncomeAllocationLifecycleTests -only-testing:MonMonTests/IncomeAllocationTimelineTests`
 - Full tests:
   `rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/MonMonIncomeTimelineDerivedData CODE_SIGNING_ALLOWED=NO test`
 - Format lint:
   `rtk swift format lint --strict --recursive MonMon MonMonTests MonMonShareExtension`
 - Compile-only iPhoneOS check:
-  `rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -sdk iphoneos -derivedDataPath /tmp/MonMonIncomeTimelineDerivedData CODE_SIGNING_ALLOWED=NO build`
+  `rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath /tmp/MonMonIncomeTimelineIOSDerivedData CODE_SIGNING_ALLOWED=NO build`
 
 ## Project Structure
 

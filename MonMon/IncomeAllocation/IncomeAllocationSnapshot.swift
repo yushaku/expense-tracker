@@ -94,6 +94,16 @@ struct IncomeAllocationSnapshot: Codable, Equatable, Sendable {
         else {
             throw IncomeAllocationSnapshotError.invalidSnapshot
         }
+        let expected = Self.distribution(
+            amount: sourceAmount,
+            identities: slices.map { ($0.jarID, $0.percent) }
+        )
+        guard
+            slices.map(\.amount) == expected.amounts,
+            unallocatedAmount == expected.unallocatedAmount
+        else {
+            throw IncomeAllocationSnapshotError.invalidSnapshot
+        }
         return self
     }
 
@@ -123,23 +133,12 @@ struct IncomeAllocationSnapshot: Codable, Equatable, Sendable {
             if $0.createdAt != $1.createdAt { return $0.createdAt < $1.createdAt }
             return $0.id.uuidString < $1.id.uuidString
         }
-        let totalPercent = ordered.reduce(Decimal.zero) { $0 + $1.percent }
-        let target = roundedDown(amount * totalPercent / 100)
-        let raw = ordered.map { amount * $0.percent / 100 }
-        var allocations = raw.map(roundedDown)
-        let missingUnits = NSDecimalNumber(decimal: target - allocations.reduce(0, +)).intValue
+        let distribution = distribution(
+            amount: amount,
+            identities: ordered.map { ($0.id, $0.percent) }
+        )
 
-        let correctionOrder = raw.indices.sorted {
-            let leftRemainder = raw[$0] - allocations[$0]
-            let rightRemainder = raw[$1] - allocations[$1]
-            if leftRemainder != rightRemainder { return leftRemainder > rightRemainder }
-            return ordered[$0].id.uuidString < ordered[$1].id.uuidString
-        }
-        for index in correctionOrder.prefix(max(0, missingUnits)) {
-            allocations[index] += 1
-        }
-
-        let slices = zip(ordered, allocations).map { input, allocation in
+        let slices = zip(ordered, distribution.amounts).map { input, allocation in
             Slice(
                 jarID: input.id,
                 name: input.name,
@@ -155,8 +154,30 @@ struct IncomeAllocationSnapshot: Codable, Equatable, Sendable {
             capturedAt: capturedAt,
             isEstimated: isEstimated,
             slices: slices,
-            unallocatedAmount: amount - target
+            unallocatedAmount: distribution.unallocatedAmount
         ).validated()
+    }
+
+    private static func distribution(
+        amount: Decimal,
+        identities: [(id: UUID, percent: Decimal)]
+    ) -> (amounts: [Decimal], unallocatedAmount: Decimal) {
+        let totalPercent = identities.reduce(Decimal.zero) { $0 + $1.percent }
+        let target = roundedDown(amount * totalPercent / 100)
+        let raw = identities.map { amount * $0.percent / 100 }
+        var amounts = raw.map(roundedDown)
+        let missingUnits = NSDecimalNumber(decimal: target - amounts.reduce(0, +)).intValue
+
+        let correctionOrder = raw.indices.sorted {
+            let leftRemainder = raw[$0] - amounts[$0]
+            let rightRemainder = raw[$1] - amounts[$1]
+            if leftRemainder != rightRemainder { return leftRemainder > rightRemainder }
+            return identities[$0].id.uuidString < identities[$1].id.uuidString
+        }
+        for index in correctionOrder.prefix(max(0, missingUnits)) {
+            amounts[index] += 1
+        }
+        return (amounts, amount - target)
     }
 
     private static func roundedDown(_ value: Decimal) -> Decimal {

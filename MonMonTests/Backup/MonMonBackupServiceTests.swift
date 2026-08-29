@@ -116,6 +116,94 @@ struct MonMonBackupServiceTests {
         }
     }
 
+    @Test("An income allocation snapshot survives export and restore")
+    func incomeAllocationSnapshotRoundTrips() throws {
+        let source = try makeContainer()
+        let account = CashAccount(
+            id: UUID(),
+            name: "Bank",
+            kind: .normal,
+            openingBalance: 0,
+            currencyCode: VNDCurrency.code,
+            createdAt: instant
+        )
+        let category = TransactionCategory(
+            id: UUID(),
+            name: "Salary",
+            kind: .income,
+            symbolName: "banknote.fill",
+            colorName: "green",
+            createdAt: instant
+        )
+        let savingsJar = BudgetJar(
+            id: UUID(),
+            name: "Savings",
+            allocationPercent: 50,
+            role: .savings,
+            symbolName: "building.columns.fill",
+            colorName: "yellow",
+            createdAt: instant
+        )
+        let investmentJar = BudgetJar(
+            id: UUID(),
+            name: "Investment",
+            allocationPercent: 50,
+            role: .investment,
+            symbolName: "chart.line.uptrend.xyaxis",
+            colorName: "blue",
+            createdAt: instant
+        )
+        let transaction = MoneyTransaction(
+            id: UUID(),
+            kind: .income,
+            amount: 1_000,
+            occurredAt: instant,
+            note: "Salary",
+            accountID: account.id,
+            categoryID: category.id,
+            sourceRuleID: nil,
+            currencyCode: VNDCurrency.code,
+            createdAt: instant
+        )
+        try IncomeAllocationLifecycle.captureNew(
+            on: transaction,
+            jars: [savingsJar, investmentJar],
+            capturedAt: instant
+        )
+        source.mainContext.insert(account)
+        source.mainContext.insert(category)
+        source.mainContext.insert(savingsJar)
+        source.mainContext.insert(investmentJar)
+        source.mainContext.insert(transaction)
+        try source.mainContext.save()
+
+        let document = try service(container: source, defaults: makeDefaults()).makeDocument(
+            exportedAt: instant,
+            appVersion: "1.0",
+            flavour: .dev
+        )
+        #expect(
+            document.payload.transactions.single?.incomeAllocationSnapshot
+                == transaction.incomeAllocationSnapshot
+        )
+
+        let destination = try makeContainer()
+        let recoveryURL = temporaryRecoveryURL()
+        defer { try? FileManager.default.removeItem(at: recoveryURL) }
+        let validated = try MonMonBackupValidator.validate(document, expectedFlavour: .dev)
+        _ = try service(
+            container: destination,
+            defaults: makeDefaults(),
+            recoveryURL: recoveryURL
+        ).restore(validated)
+        let restored = try #require(
+            destination.mainContext.fetch(FetchDescriptor<MoneyTransaction>()).single
+        )
+
+        #expect(restored.incomeAllocationSnapshot == transaction.incomeAllocationSnapshot)
+        #expect(try IncomeAllocationLifecycle.snapshot(in: restored)?.allocatedAmount == 1_000)
+    }
+
     @Test("Restore replaces every model, writes preferences, and is idempotent")
     func restoresCompleteSnapshot() throws {
         let sourceContainer = try makeContainer()

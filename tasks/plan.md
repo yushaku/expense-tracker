@@ -56,32 +56,32 @@ Review + non-Simulator gates
 
 ### Phase 2: Transaction lifecycle
 
-- [ ] Task 3: Capture and refresh snapshots in manual transaction edit/create and undo.
-- [ ] Task 4: Capture snapshots in recurring generation.
-- [ ] Task 5: Capture snapshots in statement import and pending-capture commit.
-- [ ] Task 6: Backfill missing legacy income idempotently as estimated.
+- [x] Task 3: Capture and refresh snapshots in manual transaction edit/create and undo.
+- [x] Task 4: Capture snapshots in recurring generation.
+- [x] Task 5: Capture snapshots in statement import and pending-capture commit.
+- [x] Task 6: Backfill missing legacy income idempotently as estimated.
 
 ### Checkpoint: Lifecycle integrity
 
-- [ ] Every production income creation path is covered by an integration test.
-- [ ] Edit, delete/undo, malformed data, and legacy backfill tests pass.
+- [x] Every production income creation path is covered by an integration test.
+- [x] Edit, delete/undo, malformed data, and legacy backfill tests pass.
 
 ### Phase 3: Owner experience and portability
 
-- [ ] Task 7: Add timeline preparation and accessible month-selectable SwiftUI inside Budget.
-- [ ] Task 8: Add English/Vietnamese copy and explicit historical-vs-current explanation.
-- [ ] Task 9: Extend complete backup validation, export, and authoritative restore.
+- [x] Task 7: Add timeline preparation and accessible month-selectable SwiftUI inside Budget.
+- [x] Task 8: Add English/Vietnamese copy and explicit historical-vs-current explanation.
+- [x] Task 9: Extend complete backup validation, export, and authoritative restore.
 
 ### Phase 4: Completion
 
-- [ ] Task 10: Run SwiftUI, quality, simplification, and security review.
-- [ ] Task 11: Run focused/full tests, strict format lint, and compile-only iPhoneOS build.
-- [ ] Task 12: Commit reviewable increments and hand back a clean feature branch.
+- [x] Task 10: Run SwiftUI, quality, simplification, and security review.
+- [x] Task 11: Run focused/full tests, strict format lint, and compile-only iPhoneOS build.
+- [x] Task 12: Commit reviewable increments and hand back a clean feature branch.
 
 ### Checkpoint: Complete
 
-- [ ] All `SPEC-income-allocation-timeline.md` success criteria are met.
-- [ ] No Simulator, merge, push, or phone installation was performed.
+- [x] All `SPEC-income-allocation-timeline.md` success criteria are met.
+- [x] No Simulator, merge, push, or phone installation was performed.
 
 ## Risks and Mitigations
 

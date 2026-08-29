@@ -1,6 +1,45 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Couldn’t update older income allocations. Try again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể cập nhật phân bổ cho các khoản thu cũ. Hãy thử lại." } } }
+    },
+    "Estimated from current setup": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ước tính theo thiết lập hiện tại" } } }
+    },
+    "Historical allocations stay frozen and may differ from your current Budget setup.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phân bổ lịch sử được giữ nguyên và có thể khác với thiết lập Ngân sách hiện tại." } } }
+    },
+    "Imported": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập từ sao kê" } } }
+    },
+    "Income allocation": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phân bổ thu nhập" } } }
+    },
+    "Income allocation history": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lịch sử phân bổ thu nhập" } } }
+    },
+    "Income history": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lịch sử thu nhập" } } }
+    },
+    "No income recorded": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa ghi nhận thu nhập" } } }
+    },
+    "One-off": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Một lần" } } }
+    },
+    "Recorded income for this month will appear here.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Các khoản thu đã ghi nhận trong tháng này sẽ xuất hiện ở đây." } } }
+    },
+    "Some allocations are unreadable. Original records are unchanged.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể đọc một số phân bổ thu nhập. Dữ liệu gốc vẫn được giữ nguyên." } } }
+    },
+    "Total received": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tổng đã nhận" } } }
+    },
+    "Unallocated": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa phân bổ" } } }
+    },
     "Current month": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tháng hiện tại" } } }
     },

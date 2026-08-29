@@ -292,7 +292,9 @@ private struct PayloadChecker {
         }
         try validateUniqueRecords(payload.transactions) { record in
             try scalarIDAndDate(record.id, record.createdAt)
-            try require(TransactionKind(rawValue: record.kind) != nil)
+            guard let kind = TransactionKind(rawValue: record.kind) else {
+                throw MonMonBackupValidationError.invalidPayload
+            }
             try positive(record.amount)
             try date(record.occurredAt)
             try uuid(record.accountID)
@@ -300,6 +302,17 @@ private struct PayloadChecker {
             try optionalUUID(record.sourceRuleID)
             try currency(record.currencyCode)
             try importHash(record.sourceImportID)
+            if let encodedSnapshot = record.incomeAllocationSnapshot {
+                let snapshot: IncomeAllocationSnapshot
+                do {
+                    snapshot = try IncomeAllocationSnapshotCodec.decode(encodedSnapshot)
+                } catch {
+                    throw MonMonBackupValidationError.invalidPayload
+                }
+                let transactionAmount = try MonMonBackupScalar.parseDecimal(record.amount)
+                try require(kind == .income)
+                try require(snapshot.sourceAmount == transactionAmount)
+            }
         }
         try validateUniqueRecords(payload.pendingCaptures) { record in
             try scalarIDAndDate(record.id, record.createdAt)

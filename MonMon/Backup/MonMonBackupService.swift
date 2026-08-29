@@ -490,7 +490,8 @@ private extension MonMonBackupService {
             sourceRuleID: try optionalUUID(record.sourceRuleID),
             currencyCode: record.currencyCode,
             createdAt: try MonMonBackupScalar.parseDate(record.createdAt),
-            sourceImportID: record.sourceImportID
+            sourceImportID: record.sourceImportID,
+            incomeAllocationSnapshot: record.incomeAllocationSnapshot
         )
     }
 
@@ -509,6 +510,7 @@ private extension MonMonBackupService {
         model.currencyCode = record.currencyCode
         model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
         model.sourceImportID = record.sourceImportID
+        model.incomeAllocationSnapshot = record.incomeAllocationSnapshot
     }
 
     func makePendingCapture(
@@ -1040,7 +1042,8 @@ struct MonMonBackupService {
             sourceRuleID: model.sourceRuleID.map(MonMonBackupScalar.uuid),
             currencyCode: model.currencyCode,
             createdAt: MonMonBackupScalar.date(model.createdAt),
-            sourceImportID: model.sourceImportID
+            sourceImportID: model.sourceImportID,
+            incomeAllocationSnapshot: model.incomeAllocationSnapshot
         )
     }
 

@@ -187,6 +187,61 @@ struct MonMonBackupValidatorTests {
         }
     }
 
+    @Test("Income allocation snapshots must be valid and match an income amount")
+    @MainActor
+    func invalidIncomeAllocationSnapshotIsRejected() throws {
+        let categoryID = UUID()
+        let snapshot = try makeIncomeSnapshot(amount: 100)
+        var payload = MonMonBackupPayload.empty
+        payload.accounts = [account(id: accountID)]
+        payload.categories = [
+            MonMonBackupPayload.CategoryRecord(
+                id: MonMonBackupScalar.uuid(categoryID),
+                name: "Salary",
+                kind: TransactionKind.income.rawValue,
+                symbolName: "banknote.fill",
+                colorName: "green",
+                createdAt: MonMonBackupScalar.date(instant),
+                budgetJarID: nil
+            )
+        ]
+        payload.transactions = [
+            transaction(
+                kind: .income,
+                amount: "100",
+                categoryID: categoryID,
+                snapshot: snapshot
+            )
+        ]
+
+        _ = try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
+
+        payload.transactions[0].incomeAllocationSnapshot = "not-json"
+        #expect(throws: MonMonBackupValidationError.invalidPayload) {
+            try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
+        }
+
+        payload.transactions[0] = transaction(
+            kind: .expense,
+            amount: "100",
+            categoryID: categoryID,
+            snapshot: snapshot
+        )
+        #expect(throws: MonMonBackupValidationError.invalidPayload) {
+            try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
+        }
+
+        payload.transactions[0] = transaction(
+            kind: .income,
+            amount: "101",
+            categoryID: categoryID,
+            snapshot: snapshot
+        )
+        #expect(throws: MonMonBackupValidationError.invalidPayload) {
+            try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
+        }
+    }
+
     @Test("Missing required account references and impossible transfers are rejected")
     func referenceFailures() throws {
         var payload = MonMonBackupPayload.empty
@@ -284,6 +339,49 @@ struct MonMonBackupValidatorTests {
             symbolName: "airplane",
             colorName: "sky",
             createdAt: MonMonBackupScalar.date(instant)
+        )
+    }
+
+    private func transaction(
+        kind: TransactionKind,
+        amount: String,
+        categoryID: UUID,
+        snapshot: String?
+    ) -> MonMonBackupPayload.TransactionRecord {
+        MonMonBackupPayload.TransactionRecord(
+            id: MonMonBackupScalar.uuid(otherID),
+            kind: kind.rawValue,
+            amount: amount,
+            occurredAt: MonMonBackupScalar.date(instant),
+            note: "Salary",
+            accountID: MonMonBackupScalar.uuid(accountID),
+            categoryID: MonMonBackupScalar.uuid(categoryID),
+            sourceRuleID: nil,
+            currencyCode: VNDCurrency.code,
+            createdAt: MonMonBackupScalar.date(instant),
+            sourceImportID: nil,
+            incomeAllocationSnapshot: snapshot
+        )
+    }
+
+    @MainActor
+    private func makeIncomeSnapshot(amount: Decimal) throws -> String {
+        let jar = BudgetJar(
+            id: UUID(),
+            name: "Savings",
+            allocationPercent: 100,
+            role: .savings,
+            symbolName: "building.columns.fill",
+            colorName: "yellow",
+            createdAt: instant
+        )
+        return try IncomeAllocationSnapshotCodec.encode(
+            IncomeAllocationSnapshot.capture(
+                amount: amount,
+                jars: [jar],
+                capturedAt: instant,
+                isEstimated: false
+            )
         )
     }
 }

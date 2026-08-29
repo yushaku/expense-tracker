@@ -183,6 +183,7 @@ struct TransactionCaptureService {
 
         let accounts = try context.fetch(FetchDescriptor<CashAccount>())
         let categories = try context.fetch(FetchDescriptor<TransactionCategory>())
+        let jars = try context.fetch(FetchDescriptor<BudgetJar>())
         guard accounts.contains(where: { $0.id == accountID }),
             categories.contains(where: { $0.id == categoryID && $0.kind == capture.kind })
         else {
@@ -198,7 +199,13 @@ struct TransactionCaptureService {
             categoryID: categoryID
         )
         do {
-            context.insert(try draft.makeTransaction(id: id, createdAt: createdAt))
+            let transaction = try draft.makeTransaction(id: id, createdAt: createdAt)
+            try IncomeAllocationLifecycle.captureNew(
+                on: transaction,
+                jars: jars,
+                capturedAt: createdAt
+            )
+            context.insert(transaction)
         } catch {
             throw TransactionCaptureServiceError.staleCapture
         }

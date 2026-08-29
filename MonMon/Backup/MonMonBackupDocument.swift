@@ -443,6 +443,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         var currencyCode: String
         var createdAt: String
         var sourceImportID: String?
+        var incomeAllocationSnapshot: String? = nil
     }
 
     struct PendingCaptureRecord: Codable, Equatable, Sendable, MonMonBackupRecord {

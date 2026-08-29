@@ -110,6 +110,34 @@ struct IncomeAllocationSnapshotTests {
         #expect(refreshed.reconciledAmount == 2_000)
     }
 
+    @Test("Decoding rejects amounts that disagree with frozen percentages")
+    func codecRejectsTamperedAllocationAmounts() throws {
+        let tampered = IncomeAllocationSnapshot(
+            version: IncomeAllocationSnapshot.currentVersion,
+            sourceAmount: 1_000,
+            capturedAt: capturedAt,
+            isEstimated: false,
+            slices: [
+                .init(
+                    jarID: uuid(1),
+                    name: "Savings",
+                    symbolName: "tag.fill",
+                    colorName: "green",
+                    percent: 60,
+                    amount: 700
+                )
+            ],
+            unallocatedAmount: 300
+        )
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .millisecondsSince1970
+        let encoded = try #require(String(data: encoder.encode(tampered), encoding: .utf8))
+
+        #expect(throws: IncomeAllocationSnapshotError.invalidSnapshot) {
+            try IncomeAllocationSnapshotCodec.decode(encoded)
+        }
+    }
+
     private func jar(id: UUID, name: String, percent: Decimal) -> BudgetJar {
         BudgetJar(
             id: id,
