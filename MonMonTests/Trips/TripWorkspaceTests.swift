@@ -114,11 +114,9 @@ struct TripWorkspaceTests {
             goal: goal,
             existingWorkspaces: [],
             id: UUID(),
-            startedAt: startedAt
+            startedAt: startedAt,
+            in: container.mainContext
         )
-
-        container.mainContext.insert(workspace)
-        try container.mainContext.save()
 
         let stored = try #require(
             try container.mainContext.fetch(FetchDescriptor<TripWorkspace>()).first)

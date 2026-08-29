@@ -10,9 +10,7 @@ struct TransactionSearchButton: View {
             ZStack(alignment: .topTrailing) {
                 Image(systemName: "magnifyingglass")
                     .font(.footnote.weight(.bold))
-                    .foregroundStyle(MonMonTheme.accent)
                     .frame(width: 30, height: 30)
-                    .background(MonMonTheme.accent.opacity(0.16), in: Circle())
 
                 if isActive {
                     Circle()
@@ -24,6 +22,7 @@ struct TransactionSearchButton: View {
             .contentShape(Circle())
         }
         .buttonStyle(.plain)
+        .headerIconStyle()
         .accessibilityLabel("Search transactions")
         .accessibilityIdentifier(accessibilityIdentifier)
     }

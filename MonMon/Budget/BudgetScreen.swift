@@ -2,6 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct BudgetScreen: View {
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.locale) private var locale
 
     @Query(sort: \BudgetJar.createdAt, order: .forward)
@@ -35,6 +36,7 @@ struct BudgetScreen: View {
     @State private var selectedJarID: UUID?
     @State private var selectedGoalID: UUID?
     @State private var selectedMonth: Date?
+    @State private var startErrorMessage: LocalizedStringKey?
 
     private let asOf: Date
 
@@ -86,6 +88,8 @@ struct BudgetScreen: View {
                     Button("Setup", systemImage: "slider.horizontal.3") {
                         isShowingConfiguration = true
                     }
+                    .buttonStyle(.plain)
+                    .headerIconStyle()
                     .accessibilityIdentifier("budget-setup")
                 }
 
@@ -93,6 +97,8 @@ struct BudgetScreen: View {
                     Button("Income", systemImage: "arrow.triangle.2.circlepath") {
                         isShowingRecurringIncome = true
                     }
+                    .buttonStyle(.plain)
+                    .headerIconStyle()
                     .accessibilityIdentifier("budget-income-rules")
                 }
             }
@@ -115,6 +121,15 @@ struct BudgetScreen: View {
             }
             .navigationDestination(item: $selectedGoalID) { goalID in
                 GoalDetailView(goalID: goalID, plannedByJar: plannedByJar, asOf: asOf)
+            }
+            .alert(
+                "Couldn’t start this trip",
+                isPresented: startErrorBinding,
+                presenting: startErrorMessage
+            ) { _ in
+                Button("OK", role: .cancel) {}
+            } message: { message in
+                Text(message)
             }
             .tint(MonMonTheme.accent)
         }
@@ -168,6 +183,10 @@ struct BudgetScreen: View {
         goals.filter { $0.earmarkedAmount < $0.targetAmount }
     }
 
+    private var tripCollection: TripWorkspaceCollection {
+        TripWorkspaceCollection.snapshot(goals: goals, workspaces: tripWorkspaces)
+    }
+
     private var activeTrips: [TripWorkspace] {
         tripWorkspaces.filter { $0.status == .active }
     }
@@ -181,12 +200,16 @@ struct BudgetScreen: View {
                     Text("Goals")
                         .font(.title3.weight(.semibold))
 
-                    Text((inProgressGoals.count + activeTrips.count).formatted())
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(MonMonTheme.accent)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 5)
-                        .background(MonMonTheme.accent.opacity(0.16), in: Capsule())
+                    Text(
+                        (inProgressGoals.count
+                            + tripCollection.readyGoals.count
+                            + activeTrips.count).formatted()
+                    )
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(MonMonTheme.accent)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(MonMonTheme.accent.opacity(0.16), in: Capsule())
 
                     Spacer(minLength: 8)
 
@@ -201,7 +224,7 @@ struct BudgetScreen: View {
             .accessibilityHint("Opens all goals and goal history")
             .accessibilityIdentifier("budget-goals")
 
-            if inProgressGoals.isEmpty && activeTrips.isEmpty {
+            if inProgressGoals.isEmpty && tripCollection.readyGoals.isEmpty && activeTrips.isEmpty {
                 Text("No active or in-progress goals")
                     .font(.subheadline)
                     .foregroundStyle(MonMonTheme.textSecondary)
@@ -217,6 +240,7 @@ struct BudgetScreen: View {
                     }
             } else {
                 inProgressGoalList
+                readyTripList
                 activeTripList
             }
         }
@@ -225,9 +249,27 @@ struct BudgetScreen: View {
     }
 
     @ViewBuilder
+    private var readyTripList: some View {
+        if !tripCollection.readyGoals.isEmpty {
+            Text("Ready to spend")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(MonMonTheme.textSecondary)
+
+            ForEach(tripCollection.readyGoals) { goal in
+                TripReadyCard(
+                    goal: goal,
+                    jarName: goal.fundingJarID.flatMap(jarName)
+                        ?? String(localized: "No jar"),
+                    onStart: { startSpending(goal) }
+                )
+            }
+        }
+    }
+
+    @ViewBuilder
     private var inProgressGoalList: some View {
         if !inProgressGoals.isEmpty {
-            Text("In progress")
+            Text("Accumulating")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(MonMonTheme.textSecondary)
 
@@ -278,6 +320,34 @@ struct BudgetScreen: View {
 
     private func jarName(_ id: UUID) -> String? {
         jars.first { $0.id == id }?.name
+    }
+
+    private var startErrorBinding: Binding<Bool> {
+        Binding(
+            get: { startErrorMessage != nil },
+            set: { isPresented in
+                if !isPresented {
+                    startErrorMessage = nil
+                }
+            }
+        )
+    }
+
+    private func startSpending(_ goal: FinancialGoal) {
+        startErrorMessage = nil
+        do {
+            try TripWorkspaceLifecycle.start(
+                goal: goal,
+                existingWorkspaces: tripWorkspaces,
+                id: UUID(),
+                startedAt: .now,
+                in: modelContext
+            )
+        } catch TripWorkspaceLifecycleError.workspaceAlreadyExists {
+            startErrorMessage = "This goal already has a trip workspace."
+        } catch {
+            startErrorMessage = "Check that this Trip goal is fully funded and has a funding jar."
+        }
     }
 
     private var noIncomeCard: some View {

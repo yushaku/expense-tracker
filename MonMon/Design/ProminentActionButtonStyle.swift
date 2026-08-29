@@ -37,6 +37,19 @@ extension ButtonStyle where Self == ProminentActionButtonStyle {
     }
 }
 
+private struct HeaderIconStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .foregroundStyle(MonMonTheme.textPrimary)
+    }
+}
+
+extension View {
+    func headerIconStyle() -> some View {
+        modifier(HeaderIconStyle())
+    }
+}
+
 #if DEBUG
     #Preview("Prominent action") {
         VStack(spacing: 20) {

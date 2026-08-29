@@ -45,6 +45,31 @@ enum TripWorkspaceLifecycle {
         )
     }
 
+    @MainActor
+    @discardableResult
+    static func start(
+        goal: FinancialGoal,
+        existingWorkspaces: [TripWorkspace],
+        id: UUID,
+        startedAt: Date,
+        in context: ModelContext
+    ) throws -> TripWorkspace {
+        let workspace = try start(
+            goal: goal,
+            existingWorkspaces: existingWorkspaces,
+            id: id,
+            startedAt: startedAt
+        )
+        context.insert(workspace)
+        do {
+            try context.save()
+            return workspace
+        } catch {
+            context.rollback()
+            throw error
+        }
+    }
+
     static func complete(_ workspace: TripWorkspace, at completedAt: Date) {
         workspace.status = .completed
         workspace.completedAt = completedAt

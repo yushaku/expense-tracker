@@ -8826,6 +8826,9 @@
     "In progress": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang thực hiện" } } }
     },
+    "Accumulating": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang tích luỹ" } } }
+    },
     "Completed": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã hoàn thành" } } }
     },
