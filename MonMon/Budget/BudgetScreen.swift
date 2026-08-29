@@ -24,6 +24,7 @@ struct BudgetScreen: View {
 
     @State private var isShowingRecurringIncome = false
     @State private var isShowingConfiguration = false
+    @State private var isShowingGoals = false
 
     private let asOf: Date
 
@@ -59,6 +60,13 @@ struct BudgetScreen: View {
             .accessibilityIdentifier("budget")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
+                    Button("Goals", systemImage: "flag.checkered") {
+                        isShowingGoals = true
+                    }
+                    .accessibilityIdentifier("budget-goals")
+                }
+
+                ToolbarItem(placement: .primaryAction) {
                     Button("Setup", systemImage: "slider.horizontal.3") {
                         isShowingConfiguration = true
                     }
@@ -77,6 +85,9 @@ struct BudgetScreen: View {
             }
             .appSheet(isPresented: $isShowingConfiguration) {
                 BudgetConfigurationView()
+            }
+            .appSheet(isPresented: $isShowingGoals) {
+                GoalListView(plannedByJar: plannedByJar, asOf: asOf)
             }
             .tint(MonMonTheme.accent)
         }
@@ -97,6 +108,10 @@ struct BudgetScreen: View {
 
     private var monthTitle: String {
         TransactionPeriod.title(for: asOf, in: locale)
+    }
+
+    private var plannedByJar: [UUID: Decimal] {
+        Dictionary(uniqueKeysWithValues: snapshot.rows.map { ($0.jarID, $0.planned) })
     }
 
     private var noIncomeCard: some View {

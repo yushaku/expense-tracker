@@ -45,24 +45,24 @@ Review + full non-Simulator gates
 
 ### Phase 1: Contract and foundation
 
-- [ ] Task 1: Add RED tests for forecast, required monthly contribution, and validation.
-- [ ] Task 2: Add the CloudKit-compatible goal model, pure engine, and draft.
+- [x] Task 1: Add RED tests for forecast, required monthly contribution, and validation.
+- [x] Task 2: Add the CloudKit-compatible goal model, pure engine, and draft.
 
 ### Checkpoint: Foundation
 
-- [ ] Focused Goal tests pass.
-- [ ] Goal model persists in an in-memory `MonMonSchema` container.
+- [x] Focused Goal tests pass.
+- [x] Goal model persists in an in-memory `MonMonSchema` container.
 
 ### Phase 2: Integrity and user flow
 
-- [ ] Task 3: Aggregate jar commitments and block deletion of referenced jars.
-- [ ] Task 4: Add accessible Goal list, cards, add/edit/delete form, and Budget entry point.
-- [ ] Task 5: Add localized English and Vietnamese Goal copy.
+- [x] Task 3: Aggregate jar commitments and block deletion of referenced jars.
+- [x] Task 4: Add accessible Goal list, cards, add/edit/delete form, and Budget entry point.
+- [x] Task 5: Add localized English and Vietnamese Goal copy.
 
 ### Checkpoint: Core flow
 
-- [ ] Goal CRUD works end to end in code and compile checks.
-- [ ] Shared-jar capacity and overcommitment states are visible and tested.
+- [x] Goal CRUD works end to end in code and compile checks.
+- [x] Shared-jar capacity and overcommitment states are visible and tested.
 
 ### Phase 3: Portability and completion
 

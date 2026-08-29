@@ -7,6 +7,21 @@ enum FinancialGoalKind: String, Codable, CaseIterable {
     case trip
     case vehicle
 
+    static let pickerCases: [FinancialGoalKind] = [.home, .vehicle, .trip, .custom]
+
+    var title: LocalizedStringResource {
+        switch self {
+        case .custom:
+            "Custom"
+        case .home:
+            "Home"
+        case .trip:
+            "Trip"
+        case .vehicle:
+            "Vehicle"
+        }
+    }
+
     var symbolName: String {
         switch self {
         case .custom:

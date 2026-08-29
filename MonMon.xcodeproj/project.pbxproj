@@ -13,6 +13,9 @@
 		V10000000000000000000204 /* GoalProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = V10000000000000000000104 /* GoalProgress.swift */; };
 		V10000000000000000000205 /* FinancialGoalDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = V10000000000000000000105 /* FinancialGoalDraft.swift */; };
 		V10000000000000000000206 /* GoalCommitment.swift in Sources */ = {isa = PBXBuildFile; fileRef = V10000000000000000000106 /* GoalCommitment.swift */; };
+		V10000000000000000000207 /* GoalCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = V10000000000000000000107 /* GoalCard.swift */; };
+		V10000000000000000000208 /* GoalListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = V10000000000000000000108 /* GoalListView.swift */; };
+		V10000000000000000000209 /* GoalEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = V10000000000000000000109 /* GoalEditorView.swift */; };
 		U10000000000000000000201 /* BudgetJarSeedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000101 /* BudgetJarSeedTests.swift */; };
 		U10000000000000000000202 /* BudgetJar.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000102 /* BudgetJar.swift */; };
 		U10000000000000000000203 /* BudgetJarSeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000103 /* BudgetJarSeed.swift */; };
@@ -387,6 +390,9 @@
 		V10000000000000000000104 /* GoalProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalProgress.swift; sourceTree = "<group>"; };
 		V10000000000000000000105 /* FinancialGoalDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialGoalDraft.swift; sourceTree = "<group>"; };
 		V10000000000000000000106 /* GoalCommitment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalCommitment.swift; sourceTree = "<group>"; };
+		V10000000000000000000107 /* GoalCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalCard.swift; sourceTree = "<group>"; };
+		V10000000000000000000108 /* GoalListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalListView.swift; sourceTree = "<group>"; };
+		V10000000000000000000109 /* GoalEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalEditorView.swift; sourceTree = "<group>"; };
 		U10000000000000000000101 /* BudgetJarSeedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetJarSeedTests.swift; sourceTree = "<group>"; };
 		U10000000000000000000102 /* BudgetJar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetJar.swift; sourceTree = "<group>"; };
 		U10000000000000000000103 /* BudgetJarSeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetJarSeed.swift; sourceTree = "<group>"; };
@@ -809,6 +815,9 @@
 				V10000000000000000000104 /* GoalProgress.swift */,
 				V10000000000000000000105 /* FinancialGoalDraft.swift */,
 				V10000000000000000000106 /* GoalCommitment.swift */,
+				V10000000000000000000107 /* GoalCard.swift */,
+				V10000000000000000000108 /* GoalListView.swift */,
+				V10000000000000000000109 /* GoalEditorView.swift */,
 			);
 			path = Goals;
 			sourceTree = "<group>";
@@ -1584,6 +1593,9 @@
 				V10000000000000000000204 /* GoalProgress.swift in Sources */,
 				V10000000000000000000205 /* FinancialGoalDraft.swift in Sources */,
 				V10000000000000000000206 /* GoalCommitment.swift in Sources */,
+				V10000000000000000000207 /* GoalCard.swift in Sources */,
+				V10000000000000000000208 /* GoalListView.swift in Sources */,
+				V10000000000000000000209 /* GoalEditorView.swift in Sources */,
 				U10000000000000000000202 /* BudgetJar.swift in Sources */,
 				U10000000000000000000203 /* BudgetJarSeed.swift in Sources */,
 				U10000000000000000000205 /* BudgetSummary.swift in Sources */,

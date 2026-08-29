@@ -8573,6 +8573,165 @@
     },
     "Export or replace every account, transaction, category, budget jar, recurring rule, saving, investment, transfer, and debt on this device.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xuất hoặc thay thế toàn bộ tài khoản, giao dịch, danh mục, hũ ngân sách, khoản định kỳ, tiết kiệm, đầu tư, chuyển khoản và khoản nợ trên thiết bị này." } } }
+    },
+    "Goals": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục tiêu" } } }
+    },
+    "Add goal": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm mục tiêu" } } }
+    },
+    "Custom": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tuỳ chỉnh" } } }
+    },
+    "Home": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhà ở" } } }
+    },
+    "Trip": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Du lịch" } } }
+    },
+    "Vehicle": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xe cộ" } } }
+    },
+    "Goal progress": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiến độ mục tiêu" } } }
+    },
+    "Earmarked": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã dành riêng" } } }
+    },
+    "Remaining": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Còn thiếu" } } }
+    },
+    "Target": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục tiêu" } } }
+    },
+    "Required monthly": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Cần mỗi tháng" } } }
+    },
+    "Forecast": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dự kiến hoàn thành" } } }
+    },
+    "No monthly plan": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa có kế hoạch tháng" } } }
+    },
+    "In progress": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang thực hiện" } } }
+    },
+    "Completed": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã hoàn thành" } } }
+    },
+    "Opens this goal for editing": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mở mục tiêu này để chỉnh sửa" } } }
+    },
+    "%@ is overcommitted by %@ per month.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "%@ đang cam kết vượt %@ mỗi tháng." } } }
+    },
+    "No goals yet": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa có mục tiêu" } } }
+    },
+    "Create a home, vehicle, trip, or custom target and fund it from a jar.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tạo mục tiêu mua nhà, mua xe, du lịch hoặc tuỳ chỉnh và tài trợ từ một hũ." } } }
+    },
+    "Create a goal": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tạo mục tiêu" } } }
+    },
+    "Edit goal": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sửa mục tiêu" } } }
+    },
+    "Delete this goal?": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xoá mục tiêu này?" } } }
+    },
+    "This removes the earmark only. It does not move or delete financial records.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thao tác này chỉ xoá phần tiền đánh dấu, không di chuyển hoặc xoá dữ liệu tài chính." } } }
+    },
+    "Shape this goal": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Điều chỉnh mục tiêu" } } }
+    },
+    "Create a financial target": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tạo mục tiêu tài chính" } } }
+    },
+    "Goal money stays inside its jar and is never counted as a second asset.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền mục tiêu vẫn nằm trong hũ và không bao giờ được tính thành tài sản thứ hai." } } }
+    },
+    "Purpose": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục đích" } } }
+    },
+    "Goal type": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Loại mục tiêu" } } }
+    },
+    "First home": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngôi nhà đầu tiên" } } }
+    },
+    "Funding jar": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ tài trợ" } } }
+    },
+    "Choose a jar": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn một hũ" } } }
+    },
+    "Money": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền" } } }
+    },
+    "Target amount": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền mục tiêu" } } }
+    },
+    "Already earmarked": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã dành riêng" } } }
+    },
+    "Monthly plan": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Kế hoạch hàng tháng" } } }
+    },
+    "Target date": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngày mục tiêu" } } }
+    },
+    "Planned contribution": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khoản dự kiến đóng góp" } } }
+    },
+    "Jar plan this month: %@": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Kế hoạch của hũ tháng này: %@" } } }
+    },
+    "This jar does not have enough uncommitted monthly plan for the goal.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ này không còn đủ kế hoạch tháng chưa cam kết cho mục tiêu." } } }
+    },
+    "Delete goal": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xoá mục tiêu" } } }
+    },
+    "Enter a goal name.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập tên mục tiêu." } } }
+    },
+    "Enter a valid target amount.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập số tiền mục tiêu hợp lệ." } } }
+    },
+    "The target must be greater than zero.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền mục tiêu phải lớn hơn 0." } } }
+    },
+    "Enter a valid earmarked amount.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập số tiền dành riêng hợp lệ." } } }
+    },
+    "The earmarked amount cannot be negative.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền dành riêng không thể là số âm." } } }
+    },
+    "The earmarked amount cannot exceed the target.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền dành riêng không thể vượt mục tiêu." } } }
+    },
+    "Enter a valid monthly contribution.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập khoản đóng góp hàng tháng hợp lệ." } } }
+    },
+    "The monthly contribution cannot be negative.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khoản đóng góp hàng tháng không thể là số âm." } } }
+    },
+    "Choose today or a future date.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn hôm nay hoặc một ngày trong tương lai." } } }
+    },
+    "Choose a funding jar.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn hũ tài trợ." } } }
+    },
+    "Couldn’t save this goal. Try again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể lưu mục tiêu này. Hãy thử lại." } } }
+    },
+    "Couldn’t delete this goal. Try again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể xoá mục tiêu này. Hãy thử lại." } } }
+    },
+    "Move or delete this jar’s goals before deleting the jar.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chuyển hoặc xoá các mục tiêu dùng hũ này trước khi xoá hũ." } } }
     }
   },
   "version": "1.0"
