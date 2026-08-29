@@ -37,6 +37,7 @@ struct BudgetSummaryTests {
         #expect(snapshot.receivedIncome == 7_000_000)
         #expect(snapshot.projectedIncome == 37_000_000)
         #expect(snapshot.rows.count == 1)
+        #expect(snapshot.rows.first?.received == 7_000_000)
         #expect(snapshot.rows.first?.remaining == 37_000_000)
     }
 
@@ -145,6 +146,33 @@ struct BudgetSummaryTests {
 
         #expect(snapshot.rows.count == 1)
         #expect(snapshot.rows.first?.used == .zero)
+    }
+
+    @Test("A stale category mapping falls back to an existing jar")
+    func staleCategoryMappingFallsBack() throws {
+        let necessities = jar(id: BudgetJarSeed.necessitiesID, percent: 100)
+        let staleCategory = category(name: "Food", jarID: UUID())
+        let asOf = try date(2026, 8, 20)
+
+        let snapshot = BudgetSummary.snapshot(
+            monthContaining: asOf,
+            asOf: asOf,
+            jars: [necessities],
+            categories: [staleCategory],
+            recurringRules: [],
+            transactions: [
+                transaction(
+                    kind: .expense,
+                    amount: 250_000,
+                    date: try date(2026, 8, 12),
+                    categoryID: staleCategory.id
+                )
+            ],
+            savingsDeposits: [],
+            fundHoldings: []
+        )
+
+        #expect(snapshot.rows.first?.used == 250_000)
     }
 
     private func date(_ year: Int, _ month: Int, _ day: Int) throws -> Date {

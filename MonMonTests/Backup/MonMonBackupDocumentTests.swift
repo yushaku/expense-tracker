@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 import Testing
 
@@ -110,6 +111,32 @@ struct MonMonBackupDocumentTests {
         #expect(payload.budgetJars.isEmpty)
     }
 
+    @Test("A signed legacy document without budget jars still validates")
+    func signedLegacyDocumentValidates() throws {
+        let payload = LegacyPayload.empty
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        let digest = SHA256.hash(data: try encoder.encode(payload))
+            .map { String(format: "%02x", $0) }
+            .joined()
+        let legacy = LegacyDocument(
+            format: MonMonBackupDocument.currentFormat,
+            formatVersion: MonMonBackupDocument.currentVersion,
+            exportedAt: MonMonBackupScalar.date(instant),
+            appVersion: "1.0",
+            flavour: .dev,
+            payload: payload,
+            payloadSHA256: digest
+        )
+
+        let validated = try MonMonBackupValidator.decodeAndValidate(
+            encoder.encode(legacy),
+            expectedFlavour: .dev
+        )
+
+        #expect(validated.payload.budgetJars.isEmpty)
+    }
+
     private func account(id: UUID, name: String) -> MonMonBackupPayload.AccountRecord {
         MonMonBackupPayload.AccountRecord(
             id: MonMonBackupScalar.uuid(id),
@@ -155,6 +182,16 @@ private struct LegacyPayload: Encodable {
         recurringRules: [],
         preferences: .empty
     )
+}
+
+private struct LegacyDocument: Encodable {
+    var format: String
+    var formatVersion: Int
+    var exportedAt: String
+    var appVersion: String
+    var flavour: MonMonBackupFlavour
+    var payload: LegacyPayload
+    var payloadSHA256: String
 }
 
 extension Array {

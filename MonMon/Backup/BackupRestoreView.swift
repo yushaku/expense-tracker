@@ -100,7 +100,7 @@ struct BackupRestoreView: View {
                 .font(.subheadline.weight(.semibold))
 
             Text(
-                "Export or replace every account, transaction, category, recurring rule, saving, investment, transfer, and debt on this device."
+                "Export or replace every account, transaction, category, budget jar, recurring rule, saving, investment, transfer, and debt on this device."
             )
             .font(.caption)
             .foregroundStyle(MonMonTheme.textSecondary)

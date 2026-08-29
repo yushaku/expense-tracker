@@ -127,7 +127,7 @@ struct BudgetJarCard: View {
 
             HStack(alignment: .top, spacing: 12) {
                 metric("Plan", amount: row.planned)
-                metric("Available", amount: row.projected)
+                metric("Actual", amount: row.received)
                 metric("Used", amount: row.used)
             }
         }

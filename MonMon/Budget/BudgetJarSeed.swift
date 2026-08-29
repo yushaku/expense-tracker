@@ -102,7 +102,7 @@ enum BudgetJarSeed {
         let categories = (try? context.fetch(FetchDescriptor<TransactionCategory>())) ?? []
         for category in categories where category.kind == .expense && category.budgetJarID == nil {
             category.budgetJarID =
-                category.name == AppText.string(key: "Entertainment", in: locale)
+                category.id == CategorySeed.entertainmentID
                 ? playID : necessitiesID
         }
 

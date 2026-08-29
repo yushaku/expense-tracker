@@ -71,6 +71,29 @@ struct BudgetJarSeedTests {
         #expect(salary.budgetJarID == nil)
     }
 
+    @Test("Entertainment maps to Play regardless of the seeded language")
+    func entertainmentMappingUsesStableIdentity() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let categories = CategorySeed.makeCategories(
+            createdAt: referenceDate,
+            locale: Locale(identifier: "vi")
+        )
+        categories.forEach(context.insert)
+
+        BudgetJarSeed.seedIfNeeded(
+            in: context,
+            createdAt: referenceDate,
+            locale: Locale(identifier: "en")
+        )
+
+        let entertainment = try #require(
+            categories.first { $0.id == CategorySeed.entertainmentID }
+        )
+        #expect(entertainment.name == "Giải trí")
+        #expect(entertainment.budgetJarID == BudgetJarSeed.playID)
+    }
+
     @Test("System jars cannot be deleted")
     func systemJarsCannotBeDeleted() throws {
         let container = try makeContainer()

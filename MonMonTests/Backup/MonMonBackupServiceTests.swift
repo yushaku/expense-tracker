@@ -304,17 +304,17 @@ struct MonMonBackupServiceTests {
         )
         let validated = try MonMonBackupValidator.validate(incoming, expectedFlavour: .dev)
         let destination = try makeContainer()
-        destination.mainContext.insert(
-            BudgetJar(
-                id: UUID(),
-                name: "Old jar",
-                allocationPercent: 100,
-                role: .custom,
-                symbolName: "tag.fill",
-                colorName: "green",
-                createdAt: instant
-            )
+        BudgetJarSeed.seedIfNeeded(
+            in: destination.mainContext,
+            createdAt: instant,
+            locale: Locale(identifier: "en")
         )
+        let oldJar = try #require(
+            destination.mainContext.fetch(FetchDescriptor<BudgetJar>()).first {
+                $0.id == BudgetJarSeed.necessitiesID
+            }
+        )
+        oldJar.name = "Old jar"
         try destination.mainContext.save()
         let recoveryURL = temporaryRecoveryURL()
         defer { try? FileManager.default.removeItem(at: recoveryURL) }

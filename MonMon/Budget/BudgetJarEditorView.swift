@@ -123,7 +123,7 @@ struct BudgetJarEditorView: View {
 
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("Categories mapped here will move to the Necessities jar.")
+                Text("Categories mapped here will move to another available jar.")
             }
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)

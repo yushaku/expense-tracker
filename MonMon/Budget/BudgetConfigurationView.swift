@@ -125,6 +125,10 @@ struct BudgetConfigurationView: View {
                 .font(.subheadline)
                 .foregroundStyle(MonMonTheme.textSecondary)
 
+            Text("Unmapped expenses use \(fallbackJarName).")
+                .font(.caption)
+                .foregroundStyle(MonMonTheme.textSecondary)
+
             VStack(spacing: 0) {
                 ForEach(expenseCategories) { category in
                     BudgetCategoryMappingRow(category: category, jars: jars)
@@ -200,6 +204,10 @@ struct BudgetConfigurationView: View {
 
     private var expenseCategories: [TransactionCategory] {
         categories.filter { $0.kind == .expense }
+    }
+
+    private var fallbackJarName: String {
+        BudgetJarRouting.fallback(in: jars)?.name ?? String(localized: "No jar")
     }
 
     private var allocationTotal: Decimal {

@@ -16,15 +16,7 @@ enum BudgetJarStore {
             throw BudgetJarStoreError.protectedJar
         }
 
-        let replacement =
-            jars.first {
-                $0.id != jar.id && $0.id == BudgetJarSeed.necessitiesID
-            } ?? jars.first {
-                $0.id != jar.id && $0.role == .custom
-            }
-            ?? jars.first {
-                $0.id != jar.id
-            }
+        let replacement = BudgetJarRouting.fallback(in: jars, excluding: jar.id)
 
         for category in categories where category.budgetJarID == jar.id {
             category.budgetJarID = replacement?.id

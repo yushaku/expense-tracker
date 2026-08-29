@@ -51,8 +51,9 @@ salary data already stored as recurring income.
   unmapped expense categories fall back visibly to Necessities until assigned.
 - Planned income is the sum of active recurring income occurrences in the
   selected month. Actual income is the sum of income transactions in that month.
-- Planned and actual income are allocated using the current jar percentages.
-  Extra actual income is therefore distributed automatically.
+- Available income combines income received through today with recurring income
+  still scheduled later in the month. Planned and actual income are allocated
+  using the current jar percentages, so an actual bonus is distributed automatically.
 - Ordinary spending follows the transaction category’s jar assignment. Savings
   principal opened in the month always uses Savings. Fund and gold purchase cost
   basis in the month always uses Investment.
@@ -62,6 +63,7 @@ salary data already stored as recurring income.
 ```swift
 let snapshot = BudgetSummary.snapshot(
     monthContaining: asOf,
+    asOf: asOf,
     jars: jars,
     categories: categories,
     recurringRules: rules,
@@ -115,4 +117,3 @@ let snapshot = BudgetSummary.snapshot(
 ## Open Questions
 
 None for `budget-core`. Later modules retain their questions in `tasks/todo.md`.
-

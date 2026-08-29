@@ -66,14 +66,17 @@ enum BudgetSummary {
             )
         let categoryJars = Dictionary(
             uniqueKeysWithValues: categories.map { ($0.id, $0.budgetJarID) })
-        let fallbackJarID = fallbackJar(in: jars)?.id
+        let validJarIDs = Set(jars.map(\.id))
+        let fallbackJarID = BudgetJarRouting.fallback(in: jars)?.id
         var usedByJar: [UUID: Decimal] = [:]
 
         for transaction in transactions
         where transaction.kind == .expense
             && contains(transaction.occurredAt, from: start, to: end, asOf: asOf)
         {
-            let mappedJarID = transaction.categoryID.flatMap { categoryJars[$0] ?? nil }
+            let mappedJarID = transaction.categoryID
+                .flatMap { categoryJars[$0] ?? nil }
+                .flatMap { validJarIDs.contains($0) ? $0 : nil }
             guard let jarID = mappedJarID ?? fallbackJarID else {
                 continue
             }
@@ -171,12 +174,6 @@ enum BudgetSummary {
         asOf: Date
     ) -> Bool {
         date >= start && date < end && date <= asOf
-    }
-
-    private static func fallbackJar(in jars: [BudgetJar]) -> BudgetJar? {
-        jars.first { $0.id == BudgetJarSeed.necessitiesID }
-            ?? jars.first { $0.role == .custom }
-            ?? jars.first
     }
 
     private static func allocation(of amount: Decimal, percent: Decimal) -> Decimal {

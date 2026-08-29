@@ -39,3 +39,15 @@ final class BudgetJar {
         role == .savings || role == .investment
     }
 }
+
+enum BudgetJarRouting {
+    static func fallback(
+        in jars: [BudgetJar],
+        excluding excludedID: UUID? = nil
+    ) -> BudgetJar? {
+        let available = jars.filter { $0.id != excludedID }
+        return available.first { $0.id == BudgetJarSeed.necessitiesID }
+            ?? available.first { $0.role == .custom }
+            ?? available.first
+    }
+}

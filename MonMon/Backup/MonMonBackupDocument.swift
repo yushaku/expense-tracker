@@ -138,6 +138,25 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
     var debtPayments: [DebtPaymentRecord]
     var recurringRules: [RecurringRuleRecord]
     var preferences: Preferences
+    private var includesBudgetJars: Bool
+
+    private enum CodingKeys: String, CodingKey {
+        case accounts
+        case savingsDeposits
+        case savingsWithdrawals
+        case fundInstruments
+        case fundHoldings
+        case fundSales
+        case budgetJars
+        case categories
+        case transactions
+        case pendingCaptures
+        case transfers
+        case debts
+        case debtPayments
+        case recurringRules
+        case preferences
+    }
 
     static let empty = MonMonBackupPayload(
         accounts: [],
@@ -189,6 +208,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         self.debtPayments = debtPayments
         self.recurringRules = recurringRules
         self.preferences = preferences
+        includesBudgetJars = true
     }
 
     init(from decoder: Decoder) throws {
@@ -208,11 +228,9 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         )
         fundHoldings = try container.decode([FundHoldingRecord].self, forKey: .fundHoldings)
         fundSales = try container.decode([FundSaleRecord].self, forKey: .fundSales)
+        includesBudgetJars = container.contains(.budgetJars)
         budgetJars =
-            try container.decodeIfPresent(
-                [BudgetJarRecord].self,
-                forKey: .budgetJars
-            ) ?? []
+            try container.decodeIfPresent([BudgetJarRecord].self, forKey: .budgetJars) ?? []
         categories = try container.decode([CategoryRecord].self, forKey: .categories)
         transactions = try container.decode([TransactionRecord].self, forKey: .transactions)
         pendingCaptures = try container.decode(
@@ -224,6 +242,27 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         debtPayments = try container.decode([DebtPaymentRecord].self, forKey: .debtPayments)
         recurringRules = try container.decode([RecurringRuleRecord].self, forKey: .recurringRules)
         preferences = try container.decode(Preferences.self, forKey: .preferences)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(accounts, forKey: .accounts)
+        try container.encode(savingsDeposits, forKey: .savingsDeposits)
+        try container.encode(savingsWithdrawals, forKey: .savingsWithdrawals)
+        try container.encode(fundInstruments, forKey: .fundInstruments)
+        try container.encode(fundHoldings, forKey: .fundHoldings)
+        try container.encode(fundSales, forKey: .fundSales)
+        if includesBudgetJars {
+            try container.encode(budgetJars, forKey: .budgetJars)
+        }
+        try container.encode(categories, forKey: .categories)
+        try container.encode(transactions, forKey: .transactions)
+        try container.encode(pendingCaptures, forKey: .pendingCaptures)
+        try container.encode(transfers, forKey: .transfers)
+        try container.encode(debts, forKey: .debts)
+        try container.encode(debtPayments, forKey: .debtPayments)
+        try container.encode(recurringRules, forKey: .recurringRules)
+        try container.encode(preferences, forKey: .preferences)
     }
 
     func sorted() -> MonMonBackupPayload {

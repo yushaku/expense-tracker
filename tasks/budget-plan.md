@@ -29,12 +29,12 @@ Review + full non-Simulator gates
 
 ## Increment Strategy
 
-1. Add failing tests for the six default jars and monthly calculation contract.
-2. Add the minimal SwiftData model, seeding, category assignment, and pure engine.
-3. Add the root Budget destination and accessible Plan-vs-Actual cards.
-4. Add jar and category configuration with protected system roles.
-5. Extend complete backup/restore coverage for every new stored value.
-6. Review, simplify, and run full test, format, and compile-only build gates.
+1. [x] Add failing tests for the six default jars and monthly calculation contract.
+2. [x] Add the minimal SwiftData model, seeding, category assignment, and pure engine.
+3. [x] Add the root Budget destination and accessible Plan-vs-Actual cards.
+4. [x] Add jar and category configuration with protected system roles.
+5. [x] Extend complete backup/restore coverage for every new stored value.
+6. [ ] Review, simplify, and run full test, format, and compile-only build gates.
 
 ## Risks and Mitigations
 
@@ -56,4 +56,3 @@ Review + full non-Simulator gates
 - Recursive strict Swift format lint passes.
 - Compile-only iPhoneOS SDK build passes without a Simulator.
 - Branch is committed but not merged, pushed, or installed on the phone.
-

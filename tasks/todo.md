@@ -11,7 +11,7 @@ Files: `MonMon/Settings/SettingsView.swift`
 ## Task 1: Define and encode the backup document
 
 - [x] Start with failing round-trip and canonical-scalar tests.
-- [x] Add format/version metadata, payload DTOs for all 13 models, preferences,
+- [x] Add format/version metadata, payload DTOs for all 14 models, preferences,
       deterministic sorting, JSON encoding/decoding, and payload SHA-256.
 - [x] Prove deterministic bytes for logically identical snapshots.
 
@@ -78,15 +78,15 @@ Files: `MonMon/Backup/BackupRestoreView.swift`,
 
 ## Budget Core — current branch
 
-- [ ] Seed the standard six jars with a 55/10/10/10/10/5 allocation.
-- [ ] Protect Savings and Investment from deletion while allowing rename and resize.
-- [ ] Let the owner add, edit, and delete custom jars without exceeding 100%.
-- [ ] Persist configurable expense-category-to-jar mappings.
-- [ ] Forecast monthly income from recurring income rules.
-- [ ] Redistribute actual income, including bonuses, using the current percentages.
-- [ ] Route savings deposits to Savings and Gold/Fund cost basis to Investment.
-- [ ] Add an accessible Plan-vs-Actual Budget root destination.
-- [ ] Include budget records in complete backup and restore.
+- [x] Seed the standard six jars with a 55/10/10/10/10/5 allocation.
+- [x] Protect Savings and Investment from deletion while allowing rename and resize.
+- [x] Let the owner add, edit, and delete custom jars without exceeding 100%.
+- [x] Persist configurable expense-category-to-jar mappings.
+- [x] Forecast monthly income from recurring income rules.
+- [x] Redistribute actual income, including bonuses, using the current percentages.
+- [x] Route savings deposits to Savings and Gold/Fund cost basis to Investment.
+- [x] Add an accessible Plan-vs-Actual Budget root destination.
+- [x] Include budget records in complete backup and restore.
 - [ ] Pass focused/full tests, format lint, and compile-only iPhoneOS build.
 
 ## Goal Envelopes — next branch
