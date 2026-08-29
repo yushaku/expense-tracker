@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		V10000000000000000000201 /* GoalProgressTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = V10000000000000000000101 /* GoalProgressTests.swift */; };
+		V10000000000000000000202 /* FinancialGoalDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = V10000000000000000000102 /* FinancialGoalDraftTests.swift */; };
+		V10000000000000000000203 /* FinancialGoal.swift in Sources */ = {isa = PBXBuildFile; fileRef = V10000000000000000000103 /* FinancialGoal.swift */; };
+		V10000000000000000000204 /* GoalProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = V10000000000000000000104 /* GoalProgress.swift */; };
+		V10000000000000000000205 /* FinancialGoalDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = V10000000000000000000105 /* FinancialGoalDraft.swift */; };
 		U10000000000000000000201 /* BudgetJarSeedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000101 /* BudgetJarSeedTests.swift */; };
 		U10000000000000000000202 /* BudgetJar.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000102 /* BudgetJar.swift */; };
 		U10000000000000000000203 /* BudgetJarSeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000103 /* BudgetJarSeed.swift */; };
@@ -375,6 +380,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		V10000000000000000000101 /* GoalProgressTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalProgressTests.swift; sourceTree = "<group>"; };
+		V10000000000000000000102 /* FinancialGoalDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialGoalDraftTests.swift; sourceTree = "<group>"; };
+		V10000000000000000000103 /* FinancialGoal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialGoal.swift; sourceTree = "<group>"; };
+		V10000000000000000000104 /* GoalProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalProgress.swift; sourceTree = "<group>"; };
+		V10000000000000000000105 /* FinancialGoalDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialGoalDraft.swift; sourceTree = "<group>"; };
 		U10000000000000000000101 /* BudgetJarSeedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetJarSeedTests.swift; sourceTree = "<group>"; };
 		U10000000000000000000102 /* BudgetJar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetJar.swift; sourceTree = "<group>"; };
 		U10000000000000000000103 /* BudgetJarSeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetJarSeed.swift; sourceTree = "<group>"; };
@@ -767,6 +777,7 @@
 		A00000000000000000000012 /* MonMon */ = {
 			isa = PBXGroup;
 			children = (
+				V10000000000000000000001 /* Goals */,
 				U10000000000000000000001 /* Budget */,
 				W10000000000000000000012 /* QuickExpense */,
 				K10000000000000000000101 /* Backup */,
@@ -787,6 +798,16 @@
 				B10000000000000000000001 /* Imports */,
 			);
 			path = MonMon;
+			sourceTree = "<group>";
+		};
+		V10000000000000000000001 /* Goals */ = {
+			isa = PBXGroup;
+			children = (
+				V10000000000000000000103 /* FinancialGoal.swift */,
+				V10000000000000000000104 /* GoalProgress.swift */,
+				V10000000000000000000105 /* FinancialGoalDraft.swift */,
+			);
+			path = Goals;
 			sourceTree = "<group>";
 		};
 		W10000000000000000000012 /* QuickExpense */ = {
@@ -830,6 +851,7 @@
 		A00000000000000000000015 /* MonMonTests */ = {
 			isa = PBXGroup;
 			children = (
+				V10000000000000000000002 /* Goals */,
 				U10000000000000000000002 /* Budget */,
 				W10000000000000000000011 /* QuickExpense */,
 				K10000000000000000000102 /* Backup */,
@@ -846,6 +868,15 @@
 				B10000000000000000000002 /* Imports */,
 			);
 			path = MonMonTests;
+			sourceTree = "<group>";
+		};
+		V10000000000000000000002 /* Goals */ = {
+			isa = PBXGroup;
+			children = (
+				V10000000000000000000101 /* GoalProgressTests.swift */,
+				V10000000000000000000102 /* FinancialGoalDraftTests.swift */,
+			);
+			path = Goals;
 			sourceTree = "<group>";
 		};
 		W10000000000000000000011 /* QuickExpense */ = {
@@ -1546,6 +1577,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				V10000000000000000000203 /* FinancialGoal.swift in Sources */,
+				V10000000000000000000204 /* GoalProgress.swift in Sources */,
+				V10000000000000000000205 /* FinancialGoalDraft.swift in Sources */,
 				U10000000000000000000202 /* BudgetJar.swift in Sources */,
 				U10000000000000000000203 /* BudgetJarSeed.swift in Sources */,
 				U10000000000000000000205 /* BudgetSummary.swift in Sources */,
@@ -1764,6 +1798,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				V10000000000000000000201 /* GoalProgressTests.swift in Sources */,
+				V10000000000000000000202 /* FinancialGoalDraftTests.swift in Sources */,
 				U10000000000000000000201 /* BudgetJarSeedTests.swift in Sources */,
 				U10000000000000000000204 /* BudgetSummaryTests.swift in Sources */,
 				U10000000000000000000206 /* BudgetJarDraftTests.swift in Sources */,
