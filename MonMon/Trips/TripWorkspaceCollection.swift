@@ -1,11 +1,11 @@
 import Foundation
 
 struct TripWorkspaceCollection {
-    let readyGoals: [FinancialGoal]
+    let usableGoals: [FinancialGoal]
     let activeWorkspaces: [TripWorkspace]
     let completedWorkspaces: [TripWorkspace]
 
-    var readyGoalIDs: [UUID] { readyGoals.map(\.id) }
+    var usableGoalIDs: [UUID] { usableGoals.map(\.id) }
     var activeWorkspaceIDs: [UUID] { activeWorkspaces.map(\.id) }
     var completedWorkspaceIDs: [UUID] { completedWorkspaces.map(\.id) }
 
@@ -14,12 +14,10 @@ struct TripWorkspaceCollection {
         workspaces: [TripWorkspace]
     ) -> TripWorkspaceCollection {
         let startedGoalIDs = Set(workspaces.compactMap(\.sourceGoalID))
-        let readyGoals =
+        let usableGoals =
             goals
             .filter {
-                $0.kind == .trip
-                    && $0.targetAmount > 0
-                    && $0.earmarkedAmount >= $0.targetAmount
+                $0.earmarkedAmount > 0
                     && $0.fundingJarID != nil
                     && !startedGoalIDs.contains($0.id)
             }
@@ -36,7 +34,7 @@ struct TripWorkspaceCollection {
             }
 
         return TripWorkspaceCollection(
-            readyGoals: readyGoals,
+            usableGoals: usableGoals,
             activeWorkspaces: active,
             completedWorkspaces: completed
         )

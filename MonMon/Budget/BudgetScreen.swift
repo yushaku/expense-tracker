@@ -2,7 +2,6 @@ import SwiftData
 import SwiftUI
 
 struct BudgetScreen: View {
-    @Environment(\.modelContext) private var modelContext
     @Environment(\.locale) private var locale
 
     @Query(sort: \BudgetJar.createdAt, order: .forward)
@@ -36,7 +35,6 @@ struct BudgetScreen: View {
     @State private var selectedJarID: UUID?
     @State private var selectedGoalID: UUID?
     @State private var selectedMonth: Date?
-    @State private var startErrorMessage: LocalizedStringKey?
 
     private let asOf: Date
 
@@ -122,15 +120,6 @@ struct BudgetScreen: View {
             .navigationDestination(item: $selectedGoalID) { goalID in
                 GoalDetailView(goalID: goalID, plannedByJar: plannedByJar, asOf: asOf)
             }
-            .alert(
-                "Couldn’t start this trip",
-                isPresented: startErrorBinding,
-                presenting: startErrorMessage
-            ) { _ in
-                Button("OK", role: .cancel) {}
-            } message: { message in
-                Text(message)
-            }
             .tint(MonMonTheme.accent)
         }
     }
@@ -180,7 +169,14 @@ struct BudgetScreen: View {
     }
 
     private var inProgressGoals: [FinancialGoal] {
-        goals.filter { $0.earmarkedAmount < $0.targetAmount }
+        let startedGoalIDs = Set(tripWorkspaces.compactMap(\.sourceGoalID))
+        return goals.filter {
+            $0.earmarkedAmount < $0.targetAmount && !startedGoalIDs.contains($0.id)
+        }
+    }
+
+    private var completedGoalsAvailableToUse: [FinancialGoal] {
+        tripCollection.usableGoals.filter { $0.earmarkedAmount >= $0.targetAmount }
     }
 
     private var tripCollection: TripWorkspaceCollection {
@@ -202,7 +198,7 @@ struct BudgetScreen: View {
 
                     Text(
                         (inProgressGoals.count
-                            + tripCollection.readyGoals.count
+                            + completedGoalsAvailableToUse.count
                             + activeTrips.count).formatted()
                     )
                     .font(.caption.weight(.bold))
@@ -224,7 +220,9 @@ struct BudgetScreen: View {
             .accessibilityHint("Opens all goals and goal history")
             .accessibilityIdentifier("budget-goals")
 
-            if inProgressGoals.isEmpty && tripCollection.readyGoals.isEmpty && activeTrips.isEmpty {
+            if inProgressGoals.isEmpty && completedGoalsAvailableToUse.isEmpty
+                && activeTrips.isEmpty
+            {
                 Text("No active or in-progress goals")
                     .font(.subheadline)
                     .foregroundStyle(MonMonTheme.textSecondary)
@@ -240,7 +238,7 @@ struct BudgetScreen: View {
                     }
             } else {
                 inProgressGoalList
-                readyTripList
+                usableGoalList
                 activeTripList
             }
         }
@@ -249,19 +247,14 @@ struct BudgetScreen: View {
     }
 
     @ViewBuilder
-    private var readyTripList: some View {
-        if !tripCollection.readyGoals.isEmpty {
-            Text("Ready to spend")
+    private var usableGoalList: some View {
+        if !completedGoalsAvailableToUse.isEmpty {
+            Text("Ready to use")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(MonMonTheme.textSecondary)
 
-            ForEach(tripCollection.readyGoals) { goal in
-                TripReadyCard(
-                    goal: goal,
-                    jarName: goal.fundingJarID.flatMap(jarName)
-                        ?? String(localized: "No jar"),
-                    onStart: { startSpending(goal) }
-                )
+            ForEach(completedGoalsAvailableToUse) { goal in
+                goalButton(goal)
             }
         }
     }
@@ -274,19 +267,7 @@ struct BudgetScreen: View {
                 .foregroundStyle(MonMonTheme.textSecondary)
 
             ForEach(inProgressGoals) { goal in
-                Button {
-                    selectedGoalID = goal.id
-                } label: {
-                    GoalCard(
-                        goal: goal,
-                        jarName: goal.fundingJarID.flatMap(jarName)
-                            ?? String(localized: "No jar"),
-                        asOf: asOf
-                    )
-                }
-                .buttonStyle(.plain)
-                .accessibilityHint("Opens this goal's details")
-                .accessibilityIdentifier("budget-goal-\(goal.id.uuidString)")
+                goalButton(goal)
             }
         }
     }
@@ -322,32 +303,20 @@ struct BudgetScreen: View {
         jars.first { $0.id == id }?.name
     }
 
-    private var startErrorBinding: Binding<Bool> {
-        Binding(
-            get: { startErrorMessage != nil },
-            set: { isPresented in
-                if !isPresented {
-                    startErrorMessage = nil
-                }
-            }
-        )
-    }
-
-    private func startSpending(_ goal: FinancialGoal) {
-        startErrorMessage = nil
-        do {
-            try TripWorkspaceLifecycle.start(
+    private func goalButton(_ goal: FinancialGoal) -> some View {
+        Button {
+            selectedGoalID = goal.id
+        } label: {
+            GoalCard(
                 goal: goal,
-                existingWorkspaces: tripWorkspaces,
-                id: UUID(),
-                startedAt: .now,
-                in: modelContext
+                jarName: goal.fundingJarID.flatMap(jarName)
+                    ?? String(localized: "No jar"),
+                asOf: asOf
             )
-        } catch TripWorkspaceLifecycleError.workspaceAlreadyExists {
-            startErrorMessage = "This goal already has a trip workspace."
-        } catch {
-            startErrorMessage = "Check that this Trip goal is fully funded and has a funding jar."
         }
+        .buttonStyle(.plain)
+        .accessibilityHint("Opens this goal's details")
+        .accessibilityIdentifier("budget-goal-\(goal.id.uuidString)")
     }
 
     private var noIncomeCard: some View {

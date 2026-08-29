@@ -1,46 +1,5 @@
 import SwiftUI
 
-struct TripReadyCard: View {
-    let goal: FinancialGoal
-    let jarName: String
-    let onStart: () -> Void
-
-    private var tint: Color {
-        CategoryPalette.color(named: goal.colorName)
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            TripCardHeader(
-                name: goal.name,
-                subtitle: Text(jarName),
-                symbolName: goal.symbolName,
-                tint: tint,
-                status: "Ready to spend"
-            )
-
-            HStack(alignment: .firstTextBaseline) {
-                Text("Trip budget")
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-
-                Spacer(minLength: 12)
-
-                Text(VNDCurrency.format(goal.targetAmount))
-                    .font(.headline)
-                    .monospacedDigit()
-            }
-
-            Button("Start spending", systemImage: "play.fill", action: onStart)
-                .buttonStyle(.borderedProminent)
-                .frame(maxWidth: .infinity, alignment: .trailing)
-                .accessibilityIdentifier("trip-start-\(goal.id.uuidString)")
-        }
-        .tripCardStyle()
-        .accessibilityElement(children: .contain)
-    }
-}
-
 struct TripWorkspaceCard: View {
     let workspace: TripWorkspace
     let snapshot: TripSummarySnapshot

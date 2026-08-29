@@ -63,10 +63,10 @@ struct TripSummaryTests {
         #expect(snapshot.categoryBreakdown.first?.amount == 6_500_000)
     }
 
-    @Test("Trip collection separates ready, active, and completed work")
+    @Test("Trip collection separates funded goals, active trips, and completed trips")
     func collectionSeparatesLifecycleStages() {
-        let ready = goal(name: "Ready", earmarked: 10_000_000)
-        let saving = goal(name: "Saving", earmarked: 4_000_000)
+        let fullyFunded = goal(name: "Fully funded", earmarked: 10_000_000)
+        let partiallyFunded = goal(name: "Partially funded", earmarked: 4_000_000)
         let jarless = goal(name: "No jar", earmarked: 10_000_000)
         jarless.fundingJarID = nil
         let alreadyStarted = goal(name: "Started", earmarked: 10_000_000)
@@ -78,11 +78,11 @@ struct TripSummaryTests {
         )
 
         let collection = TripWorkspaceCollection.snapshot(
-            goals: [saving, ready, jarless, alreadyStarted],
+            goals: [partiallyFunded, fullyFunded, jarless, alreadyStarted],
             workspaces: [completed, active]
         )
 
-        #expect(collection.readyGoalIDs == [ready.id])
+        #expect(collection.usableGoalIDs == [partiallyFunded.id, fullyFunded.id])
         #expect(collection.activeWorkspaceIDs == [active.id])
         #expect(collection.completedWorkspaceIDs == [completed.id])
     }
@@ -147,7 +147,7 @@ struct TripSummaryTests {
         FinancialGoal(
             id: UUID(),
             name: name,
-            kind: .trip,
+            kind: .custom,
             targetAmount: 10_000_000,
             earmarkedAmount: earmarked,
             targetDate: occurredAt,

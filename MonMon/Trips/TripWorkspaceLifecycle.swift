@@ -2,9 +2,8 @@ import Foundation
 import SwiftData
 
 enum TripWorkspaceLifecycleError: Error, Equatable {
-    case goalNotFullyFunded
+    case goalHasNoFunds
     case missingFundingJar
-    case notTripGoal
     case workspaceAlreadyExists
     case workspaceHasTransactions
     case workspaceNotActive
@@ -17,11 +16,8 @@ enum TripWorkspaceLifecycle {
         id: UUID,
         startedAt: Date
     ) throws -> TripWorkspace {
-        guard goal.kind == .trip else {
-            throw TripWorkspaceLifecycleError.notTripGoal
-        }
-        guard goal.targetAmount > 0, goal.earmarkedAmount >= goal.targetAmount else {
-            throw TripWorkspaceLifecycleError.goalNotFullyFunded
+        guard goal.earmarkedAmount > 0 else {
+            throw TripWorkspaceLifecycleError.goalHasNoFunds
         }
         guard goal.fundingJarID != nil else {
             throw TripWorkspaceLifecycleError.missingFundingJar
@@ -34,7 +30,7 @@ enum TripWorkspaceLifecycle {
             id: id,
             sourceGoalID: goal.id,
             name: goal.name,
-            budgetAmount: goal.targetAmount,
+            budgetAmount: goal.earmarkedAmount,
             fundingJarID: goal.fundingJarID,
             symbolName: goal.symbolName,
             colorName: goal.colorName,
