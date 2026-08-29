@@ -58,17 +58,17 @@ Review + non-Simulator gates
 
 ### Phase 2: Financial integration
 
-- [ ] Task 3: Preserve trip and jar-override metadata through transaction
+- [x] Task 3: Preserve trip and jar-override metadata through transaction
   create/edit/delete/undo paths.
-- [ ] Task 4: Route Budget expenses by valid override before category mapping
+- [x] Task 4: Route Budget expenses by valid override before category mapping
   and protect referenced jars.
-- [ ] Task 5: Derive exact budget, spent, remaining, over-budget, and category
+- [x] Task 5: Derive exact budget, spent, remaining, over-budget, and category
   breakdowns from linked expenses only.
 
 ### Checkpoint: Financial integrity
 
-- [ ] Trip totals reconcile exactly to ordinary expense transactions.
-- [ ] Trip metadata does not change account totals or create money movement.
+- [x] Trip totals reconcile exactly to ordinary expense transactions.
+- [x] Trip metadata does not change account totals or create money movement.
 
 ### Phase 3: Owner experience
 

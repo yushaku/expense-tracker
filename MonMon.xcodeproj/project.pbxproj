@@ -10,6 +10,8 @@
 		Y10000000000000000000201 /* TripWorkspaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000101 /* TripWorkspaceTests.swift */; };
 		Y10000000000000000000202 /* TripWorkspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000102 /* TripWorkspace.swift */; };
 		Y10000000000000000000203 /* TripWorkspaceLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000103 /* TripWorkspaceLifecycle.swift */; };
+		Y10000000000000000000204 /* TripSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000104 /* TripSummaryTests.swift */; };
+		Y10000000000000000000205 /* TripSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000105 /* TripSummary.swift */; };
 		X10000000000000000000201 /* IncomeAllocationSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = X10000000000000000000101 /* IncomeAllocationSnapshotTests.swift */; };
 		X10000000000000000000202 /* IncomeAllocationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = X10000000000000000000102 /* IncomeAllocationSnapshot.swift */; };
 		X10000000000000000000203 /* IncomeAllocationLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = X10000000000000000000103 /* IncomeAllocationLifecycleTests.swift */; };
@@ -397,6 +399,8 @@
 		Y10000000000000000000101 /* TripWorkspaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspaceTests.swift; sourceTree = "<group>"; };
 		Y10000000000000000000102 /* TripWorkspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspace.swift; sourceTree = "<group>"; };
 		Y10000000000000000000103 /* TripWorkspaceLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspaceLifecycle.swift; sourceTree = "<group>"; };
+		Y10000000000000000000104 /* TripSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripSummaryTests.swift; sourceTree = "<group>"; };
+		Y10000000000000000000105 /* TripSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripSummary.swift; sourceTree = "<group>"; };
 		X10000000000000000000101 /* IncomeAllocationSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeAllocationSnapshotTests.swift; sourceTree = "<group>"; };
 		X10000000000000000000102 /* IncomeAllocationSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeAllocationSnapshot.swift; sourceTree = "<group>"; };
 		X10000000000000000000103 /* IncomeAllocationLifecycleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeAllocationLifecycleTests.swift; sourceTree = "<group>"; };
@@ -846,6 +850,7 @@
 			children = (
 				Y10000000000000000000102 /* TripWorkspace.swift */,
 				Y10000000000000000000103 /* TripWorkspaceLifecycle.swift */,
+				Y10000000000000000000105 /* TripSummary.swift */,
 			);
 			path = Trips;
 			sourceTree = "<group>";
@@ -940,6 +945,7 @@
 			isa = PBXGroup;
 			children = (
 				Y10000000000000000000101 /* TripWorkspaceTests.swift */,
+				Y10000000000000000000104 /* TripSummaryTests.swift */,
 			);
 			path = Trips;
 			sourceTree = "<group>";
@@ -1653,6 +1659,7 @@
 			files = (
 				Y10000000000000000000202 /* TripWorkspace.swift in Sources */,
 				Y10000000000000000000203 /* TripWorkspaceLifecycle.swift in Sources */,
+				Y10000000000000000000205 /* TripSummary.swift in Sources */,
 				X10000000000000000000202 /* IncomeAllocationSnapshot.swift in Sources */,
 				X10000000000000000000204 /* IncomeAllocationLifecycle.swift in Sources */,
 				X10000000000000000000206 /* IncomeAllocationTimeline.swift in Sources */,
@@ -1883,6 +1890,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				Y10000000000000000000201 /* TripWorkspaceTests.swift in Sources */,
+				Y10000000000000000000204 /* TripSummaryTests.swift in Sources */,
 				X10000000000000000000201 /* IncomeAllocationSnapshotTests.swift in Sources */,
 				X10000000000000000000203 /* IncomeAllocationLifecycleTests.swift in Sources */,
 				X10000000000000000000205 /* IncomeAllocationTimelineTests.swift in Sources */,

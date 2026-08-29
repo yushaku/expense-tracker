@@ -2,6 +2,7 @@ import SwiftData
 
 enum BudgetJarStoreError: Error, Equatable {
     case jarFundsGoals
+    case jarFundsTrips
     case protectedJar
 }
 
@@ -19,6 +20,10 @@ enum BudgetJarStore {
         }
         guard !goals.contains(where: { $0.fundingJarID == jar.id }) else {
             throw BudgetJarStoreError.jarFundsGoals
+        }
+        let trips = try context.fetch(FetchDescriptor<TripWorkspace>())
+        guard !trips.contains(where: { $0.fundingJarID == jar.id }) else {
+            throw BudgetJarStoreError.jarFundsTrips
         }
 
         let replacement = BudgetJarRouting.fallback(in: jars, excluding: jar.id)

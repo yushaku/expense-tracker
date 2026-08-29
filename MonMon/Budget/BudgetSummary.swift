@@ -74,10 +74,13 @@ enum BudgetSummary {
         where transaction.kind == .expense
             && contains(transaction.occurredAt, from: start, to: end, asOf: asOf)
         {
+            let overrideJarID = transaction.tripWorkspaceID
+                .flatMap { _ in transaction.budgetJarOverrideID }
+                .flatMap { validJarIDs.contains($0) ? $0 : nil }
             let mappedJarID = transaction.categoryID
                 .flatMap { categoryJars[$0] ?? nil }
                 .flatMap { validJarIDs.contains($0) ? $0 : nil }
-            guard let jarID = mappedJarID ?? fallbackJarID else {
+            guard let jarID = overrideJarID ?? mappedJarID ?? fallbackJarID else {
                 continue
             }
             usedByJar[jarID, default: .zero] += transaction.amount

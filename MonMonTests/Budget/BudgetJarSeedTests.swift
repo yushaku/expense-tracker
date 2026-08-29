@@ -210,4 +210,46 @@ struct BudgetJarSeedTests {
         }
         #expect(try context.fetchCount(FetchDescriptor<BudgetJar>()) == 1)
     }
+
+    @Test("A custom jar referenced by Trip history cannot be deleted")
+    func tripFundingJarCannotBeDeleted() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let jar = BudgetJar(
+            id: UUID(),
+            name: "Travel",
+            allocationPercent: 10,
+            role: .custom,
+            symbolName: "airplane",
+            colorName: "sky",
+            createdAt: referenceDate
+        )
+        let trip = TripWorkspace(
+            id: UUID(),
+            sourceGoalID: UUID(),
+            name: "Da Nang",
+            budgetAmount: 30_000_000,
+            fundingJarID: jar.id,
+            symbolName: "airplane",
+            colorName: "sky",
+            status: .completed,
+            startedAt: referenceDate,
+            completedAt: referenceDate,
+            createdAt: referenceDate
+        )
+        context.insert(jar)
+        context.insert(trip)
+        try context.save()
+
+        #expect(throws: BudgetJarStoreError.jarFundsTrips) {
+            try BudgetJarStore.delete(
+                jar,
+                jars: [jar],
+                categories: [],
+                goals: [],
+                in: context
+            )
+        }
+        #expect(try context.fetchCount(FetchDescriptor<BudgetJar>()) == 1)
+    }
 }
