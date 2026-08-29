@@ -8583,6 +8583,12 @@
     "Budget": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngân sách" } } }
     },
+    "Goal unavailable": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục tiêu không khả dụng" } } }
+    },
+    "This goal is no longer in the current store.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục tiêu này không còn trong dữ liệu hiện tại." } } }
+    },
     "Necessities": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thiết yếu" } } }
     },
