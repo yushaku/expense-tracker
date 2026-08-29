@@ -5,6 +5,8 @@ struct BudgetIncomeCard: View {
     let monthTitle: String
     let onOpenTimeline: () -> Void
 
+    @State private var isShowingIncomeBreakdown = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack(spacing: 12) {
@@ -26,23 +28,17 @@ struct BudgetIncomeCard: View {
                 .accessibilityIdentifier("budget-income-history")
             }
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Available to plan")
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
+            availableIncome
 
-                Text(VNDCurrency.format(snapshot.projectedIncome))
-                    .font(.system(.title, design: .rounded, weight: .bold))
-                    .monospacedDigit()
-                    .minimumScaleFactor(0.7)
+            if isShowingIncomeBreakdown {
+                HStack(alignment: .top, spacing: 20) {
+                    incomeMetric("Planned", amount: snapshot.plannedIncome)
+                    incomeMetric("Received", amount: snapshot.receivedIncome)
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
 
             BudgetAllocationOverview(snapshot: snapshot)
-
-            HStack(alignment: .top, spacing: 20) {
-                incomeMetric("Planned", amount: snapshot.plannedIncome)
-                incomeMetric("Received", amount: snapshot.receivedIncome)
-            }
 
             if snapshot.unallocatedPercent > 0 {
                 Label(
@@ -63,6 +59,43 @@ struct BudgetIncomeCard: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("budget-income-summary")
+    }
+
+    private var availableIncome: some View {
+        Button {
+            withAnimation(.snappy(duration: 0.25)) {
+                isShowingIncomeBreakdown.toggle()
+            }
+        } label: {
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Available to plan")
+                        .font(.caption)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+
+                    Text(VNDCurrency.format(snapshot.projectedIncome))
+                        .font(.system(.title, design: .rounded, weight: .bold))
+                        .monospacedDigit()
+                        .minimumScaleFactor(0.7)
+                }
+
+                Spacer(minLength: 8)
+
+                Image(systemName: isShowingIncomeBreakdown ? "chevron.up" : "chevron.down")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(MonMonTheme.textMuted)
+                    .accessibilityHidden(true)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Available to plan")
+        .accessibilityValue(VNDCurrency.format(snapshot.projectedIncome))
+        .accessibilityHint(
+            isShowingIncomeBreakdown
+                ? "Hides planned and received income" : "Shows planned and received income"
+        )
+        .accessibilityIdentifier("budget-available-income")
     }
 
     private func incomeMetric(_ title: LocalizedStringKey, amount: Decimal) -> some View {
@@ -134,6 +167,9 @@ private struct BudgetAllocationOverview: View {
 }
 struct BudgetJarCard: View {
     let row: BudgetJarSnapshot
+    var onOpenDetails: (() -> Void)? = nil
+
+    @State private var isShowingAvailableBreakdown = false
 
     private var tint: Color {
         CategoryPalette.color(named: row.colorName)
@@ -148,66 +184,19 @@ struct BudgetJarCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 12) {
-                Image(systemName: CategoryPalette.symbolName(row.symbolName))
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(tint)
-                    .frame(width: 38, height: 38)
-                    .background(tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 11))
-                    .accessibilityHidden(true)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 6) {
-                        Text(row.name)
-                            .font(.headline)
-                            .lineLimit(1)
-
-                        if row.role != .custom {
-                            Image(systemName: "lock.fill")
-                                .font(.caption2)
-                                .foregroundStyle(MonMonTheme.textMuted)
-                                .accessibilityLabel("System jar")
-                        }
-                    }
-
-                    Text("\(PercentInput.format(row.allocationPercent))% allocation")
-                        .font(.caption)
-                        .foregroundStyle(MonMonTheme.textSecondary)
-                }
-                .layoutPriority(1)
-
-                Spacer(minLength: 8)
-
-                HStack(spacing: 5) {
-                    Image(
-                        systemName: row.remaining >= 0
-                            ? "calendar" : "exclamationmark.triangle.fill"
-                    )
-                    .accessibilityHidden(true)
-
-                    Text(VNDCurrency.format(row.remaining))
-                        .monospacedDigit()
-                }
-                .font(.subheadline.weight(.semibold))
-                .lineLimit(1)
-                .minimumScaleFactor(0.65)
-                .foregroundStyle(
-                    row.remaining >= 0 ? MonMonTheme.textPrimary : MonMonTheme.danger
-                )
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(row.remaining >= 0 ? "Left this month" : "Over budget")
-                .accessibilityValue(VNDCurrency.format(row.remaining))
-            }
-
-            ProgressView(value: progress)
-                .tint(row.remaining >= 0 ? tint : MonMonTheme.danger)
-                .accessibilityLabel("Budget used")
-                .accessibilityValue(Percentage.label(of: row.used, in: row.projected))
+            detailLinkContent
 
             HStack(alignment: .top, spacing: 12) {
-                metric("Plan", amount: row.planned)
-                metric("Actual", amount: row.received)
+                availableMetric
                 metric("Used", amount: row.used)
+            }
+
+            if isShowingAvailableBreakdown {
+                HStack(alignment: .top, spacing: 12) {
+                    metric("Planned", amount: row.planned)
+                    metric("Received", amount: row.received)
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
         .padding(18)
@@ -219,6 +208,100 @@ struct BudgetJarCard: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("budget-jar-\(row.jarID.uuidString)")
+    }
+
+    @ViewBuilder
+    private var detailLinkContent: some View {
+        if let onOpenDetails {
+            Button(action: onOpenDetails) {
+                VStack(alignment: .leading, spacing: 16) {
+                    header(showsDisclosure: true)
+                    progressBar
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint("Opens activity in this budget jar")
+        } else {
+            VStack(alignment: .leading, spacing: 16) {
+                header(showsDisclosure: false)
+                progressBar
+            }
+        }
+    }
+
+    private func header(showsDisclosure: Bool) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: CategoryPalette.symbolName(row.symbolName))
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(tint)
+                .frame(width: 38, height: 38)
+                .background(tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 11))
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(row.name)
+                        .font(.headline)
+                        .lineLimit(1)
+
+                    if row.role != .custom {
+                        Image(systemName: "lock.fill")
+                            .font(.caption2)
+                            .foregroundStyle(MonMonTheme.textMuted)
+                            .accessibilityLabel("System jar")
+                    }
+                }
+
+                Text("\(PercentInput.format(row.allocationPercent))% allocation")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            }
+
+            Spacer(minLength: 8)
+
+            if showsDisclosure {
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(MonMonTheme.textMuted)
+                    .accessibilityHidden(true)
+            }
+        }
+    }
+
+    private var progressBar: some View {
+        ProgressView(value: progress)
+            .tint(row.remaining >= 0 ? tint : MonMonTheme.danger)
+            .accessibilityLabel("Budget used")
+            .accessibilityValue(Percentage.label(of: row.used, in: row.projected))
+    }
+
+    private var availableMetric: some View {
+        Button {
+            withAnimation(.snappy(duration: 0.25)) {
+                isShowingAvailableBreakdown.toggle()
+            }
+        } label: {
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                metric("Available", amount: row.projected)
+
+                Image(
+                    systemName: isShowingAvailableBreakdown ? "chevron.up" : "chevron.down"
+                )
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(MonMonTheme.textMuted)
+                .accessibilityHidden(true)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityLabel("Available")
+        .accessibilityValue(VNDCurrency.format(row.projected))
+        .accessibilityHint(
+            isShowingAvailableBreakdown
+                ? "Hides planned and received amounts" : "Shows planned and received amounts"
+        )
     }
 
     private func metric(_ title: LocalizedStringKey, amount: Decimal) -> some View {
