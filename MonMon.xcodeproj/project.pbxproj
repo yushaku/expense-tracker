@@ -14,6 +14,8 @@
 		U10000000000000000000205 /* BudgetSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000105 /* BudgetSummary.swift */; };
 		U10000000000000000000206 /* BudgetJarDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000106 /* BudgetJarDraftTests.swift */; };
 		U10000000000000000000207 /* BudgetJarDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000107 /* BudgetJarDraft.swift */; };
+		U10000000000000000000208 /* BudgetCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000108 /* BudgetCards.swift */; };
+		U10000000000000000000209 /* BudgetScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000109 /* BudgetScreen.swift */; };
 		J10000000000000000000201 /* QuickExpenseWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000102 /* QuickExpenseWidget.swift */; };
 		J10000000000000000000202 /* QuickExpensePreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000102 /* QuickExpensePreset.swift */; };
 		J10000000000000000000203 /* QuickExpenseIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000103 /* QuickExpenseIntent.swift */; };
@@ -377,6 +379,8 @@
 		U10000000000000000000105 /* BudgetSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetSummary.swift; sourceTree = "<group>"; };
 		U10000000000000000000106 /* BudgetJarDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetJarDraftTests.swift; sourceTree = "<group>"; };
 		U10000000000000000000107 /* BudgetJarDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetJarDraft.swift; sourceTree = "<group>"; };
+		U10000000000000000000108 /* BudgetCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetCards.swift; sourceTree = "<group>"; };
+		U10000000000000000000109 /* BudgetScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetScreen.swift; sourceTree = "<group>"; };
 		J10000000000000000000101 /* MonMonQuickExpenseWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MonMonQuickExpenseWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		J10000000000000000000102 /* QuickExpenseWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpenseWidget.swift; sourceTree = "<group>"; };
 		J10000000000000000000103 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -863,6 +867,8 @@
 				U10000000000000000000103 /* BudgetJarSeed.swift */,
 				U10000000000000000000105 /* BudgetSummary.swift */,
 				U10000000000000000000107 /* BudgetJarDraft.swift */,
+				U10000000000000000000108 /* BudgetCards.swift */,
+				U10000000000000000000109 /* BudgetScreen.swift */,
 			);
 			path = Budget;
 			sourceTree = "<group>";
@@ -1535,6 +1541,8 @@
 				U10000000000000000000203 /* BudgetJarSeed.swift in Sources */,
 				U10000000000000000000205 /* BudgetSummary.swift in Sources */,
 				U10000000000000000000207 /* BudgetJarDraft.swift in Sources */,
+				U10000000000000000000208 /* BudgetCards.swift in Sources */,
+				U10000000000000000000209 /* BudgetScreen.swift in Sources */,
 				W10000000000000000000205 /* QuickExpensePresetsCard.swift in Sources */,
 				W10000000000000000000206 /* QuickExpensePresetRow.swift in Sources */,
 				W10000000000000000000204 /* QuickExpensePresetDraft.swift in Sources */,
