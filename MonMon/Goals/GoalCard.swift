@@ -90,7 +90,7 @@ struct GoalCard: View {
 
     private var amountMetrics: some View {
         HStack(alignment: .top, spacing: 12) {
-            metric("Saved", amount: goal.earmarkedAmount)
+            metric("Earmarked", amount: goal.earmarkedAmount)
             metric("Remaining", amount: snapshot.remainingAmount)
             metric("Target", amount: goal.targetAmount)
         }

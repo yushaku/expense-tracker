@@ -87,6 +87,35 @@ struct MonMonBackupServiceTests {
         #expect(try container.mainContext.fetchCount(FetchDescriptor<MoneyTransaction>()) == 1)
     }
 
+    @Test("Export rejects a goal without its required funding jar")
+    func exportRejectsGoalWithoutFundingJar() throws {
+        let container = try makeContainer()
+        container.mainContext.insert(
+            FinancialGoal(
+                id: UUID(),
+                name: "Orphan goal",
+                kind: .custom,
+                targetAmount: 1_000,
+                earmarkedAmount: 0,
+                targetDate: instant.addingTimeInterval(31_536_000),
+                monthlyContribution: 100,
+                fundingJarID: nil,
+                symbolName: "target",
+                colorName: "green",
+                createdAt: instant
+            )
+        )
+        try container.mainContext.save()
+
+        #expect(throws: MonMonBackupServiceError.invalidSnapshot) {
+            _ = try service(container: container, defaults: makeDefaults()).makeDocument(
+                exportedAt: instant,
+                appVersion: "1.0",
+                flavour: .dev
+            )
+        }
+    }
+
     @Test("Restore replaces every model, writes preferences, and is idempotent")
     func restoresCompleteSnapshot() throws {
         let sourceContainer = try makeContainer()

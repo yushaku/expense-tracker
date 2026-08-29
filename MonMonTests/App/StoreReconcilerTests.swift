@@ -315,6 +315,38 @@ struct StoreReconcilerTests {
         #expect(remaining.first?.createdAt == day0)
     }
 
+    @Test("Two physical copies of one financial goal fold into one")
+    func duplicateFinancialGoalsFoldIntoOne() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let goalID = UUID()
+        for createdAt in [day0, day1] {
+            context.insert(
+                FinancialGoal(
+                    id: goalID,
+                    name: "Japan trip",
+                    kind: .trip,
+                    targetAmount: 100_000_000,
+                    earmarkedAmount: 10_000_000,
+                    targetDate: day1.addingTimeInterval(31_536_000),
+                    monthlyContribution: 5_000_000,
+                    fundingJarID: BudgetJarSeed.savingsID,
+                    symbolName: "airplane",
+                    colorName: "sky",
+                    createdAt: createdAt
+                )
+            )
+        }
+        try context.save()
+
+        let report = try StoreReconciler.reconcile(in: context)
+
+        #expect(report.goals == 1)
+        let remaining = try context.fetch(FetchDescriptor<FinancialGoal>())
+        #expect(remaining.count == 1)
+        #expect(remaining.first?.createdAt == day0)
+    }
+
     @Test("Distinct accounts are never folded together")
     func distinctAccountsSurvive() throws {
         let container = try makeContainer()

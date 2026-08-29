@@ -8580,6 +8580,9 @@
     "Goals": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục tiêu" } } }
     },
+    "Goal name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên mục tiêu" } } }
+    },
     "Add goal": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm mục tiêu" } } }
     },

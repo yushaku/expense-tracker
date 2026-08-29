@@ -250,7 +250,7 @@ private struct GoalEditorForm: View {
                 .accessibilityIdentifier("goal-kind")
 
                 field("Name", error: nameError) {
-                    TextField("First home", text: $draft.name)
+                    TextField("Goal name", text: $draft.name)
                         .accessibilityIdentifier("goal-name")
                 }
 

@@ -67,14 +67,14 @@ Review + full non-Simulator gates
 ### Phase 3: Portability and completion
 
 - [x] Task 6: Extend complete backup validation, export, and authoritative restore.
-- [ ] Task 7: Run SwiftUI correctness, quality, simplification, and security review.
-- [ ] Task 8: Run focused/full tests, strict format lint, and compile-only iPhoneOS build.
-- [ ] Task 9: Commit reviewable increments and hand back the clean feature branch.
+- [x] Task 7: Run SwiftUI correctness, quality, simplification, and security review.
+- [x] Task 8: Run focused/full tests, strict format lint, and compile-only iPhoneOS build.
+- [x] Task 9: Commit reviewable increments and hand back the clean feature branch.
 
 ### Checkpoint: Complete
 
-- [ ] All `SPEC-goal-envelopes.md` success criteria are met.
-- [ ] No Simulator, merge, push, or phone installation was performed.
+- [x] All `SPEC-goal-envelopes.md` success criteria are met.
+- [x] No Simulator, merge, push, or phone installation was performed.
 
 ## Risks and Mitigations
 

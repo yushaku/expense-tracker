@@ -89,18 +89,18 @@ Files: `MonMon/Backup/BackupRestoreView.swift`,
 - [x] Include budget records in complete backup and restore.
 - [x] Pass focused/full tests, format lint, and compile-only iPhoneOS build.
 
-## Goal Envelopes — next branch
+## Goal Envelopes — completed on feature branch
 
-- [ ] Add a CloudKit-compatible goal model for Home, Vehicle, Trip, and Custom.
-- [ ] Treat earmarked goal money as an overlay, never a second asset or transaction.
-- [ ] Fund each goal from Savings, Investment, or another selected jar.
-- [ ] Calculate required monthly contribution and forecast completion date.
-- [ ] Aggregate several goals against one jar without double-committing its monthly plan.
-- [ ] Warn when later income or jar edits make existing commitments exceed capacity.
-- [ ] Block deletion of a custom jar while a goal references it.
-- [ ] Add accessible Goal list, progress cards, and add/edit/delete flow inside Budget.
-- [ ] Include goals in complete backup/restore while preserving legacy compatibility.
-- [ ] Pass focused/full tests, format lint, review, and compile-only iPhoneOS build.
+- [x] Add a CloudKit-compatible goal model for Home, Vehicle, Trip, and Custom.
+- [x] Treat earmarked goal money as an overlay, never a second asset or transaction.
+- [x] Fund each goal from Savings, Investment, or another selected jar.
+- [x] Calculate required monthly contribution and forecast completion date.
+- [x] Aggregate several goals against one jar without double-committing its monthly plan.
+- [x] Warn when later income or jar edits make existing commitments exceed capacity.
+- [x] Block deletion of a custom jar while a goal references it.
+- [x] Add accessible Goal list, progress cards, and add/edit/delete flow inside Budget.
+- [x] Include goals in complete backup/restore while preserving legacy compatibility.
+- [x] Pass focused/full tests, format lint, review, and compile-only iPhoneOS build.
 
 ## Trip Workspace — after Goal Envelopes
 

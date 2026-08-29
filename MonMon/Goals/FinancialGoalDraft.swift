@@ -110,8 +110,7 @@ struct FinancialGoalDraft: Equatable {
             throw FinancialGoalFormError.negativeMonthlyContribution
         }
 
-        guard !calendar.startOfDay(for: targetDate).isBefore(calendar.startOfDay(for: asOf))
-        else {
+        guard calendar.startOfDay(for: targetDate) >= calendar.startOfDay(for: asOf) else {
             throw FinancialGoalFormError.targetDateInPast
         }
 
@@ -211,11 +210,5 @@ struct FinancialGoalDraft: Equatable {
         goal.fundingJarID = values.fundingJarID
         goal.symbolName = values.symbolName
         goal.colorName = values.colorName
-    }
-}
-
-private extension Date {
-    func isBefore(_ other: Date) -> Bool {
-        self < other
     }
 }
