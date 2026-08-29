@@ -43,14 +43,9 @@ struct GoalCard: View {
                 Text(goal.name)
                     .font(.headline)
 
-                HStack(spacing: 4) {
-                    Text(goal.kind.title)
-                    Text("·")
-                        .accessibilityHidden(true)
-                    Text(jarName)
-                }
-                .font(.caption)
-                .foregroundStyle(MonMonTheme.textSecondary)
+                Text(jarName)
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
             }
 
             Spacer(minLength: 8)
