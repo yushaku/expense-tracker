@@ -123,9 +123,21 @@ struct FinancialGoalDraft: Equatable {
         let otherCommitment =
             goals
             .filter { $0.id != editedID && $0.fundingJarID == fundingJarID }
-            .reduce(Decimal.zero) { $0 + $1.monthlyContribution }
+            .reduce(Decimal.zero) {
+                $0 + GoalCommitment.activeMonthlyContribution(for: $1)
+            }
+        let candidateCommitment = GoalCommitment.activeMonthlyContribution(
+            targetAmount: targetAmount,
+            earmarkedAmount: earmarkedAmount,
+            monthlyContribution: monthlyContribution
+        )
         let capacity = plannedByJar[fundingJarID, default: .zero]
-        guard otherCommitment + monthlyContribution <= capacity else {
+        let totalAfterSave = otherCommitment + candidateCommitment
+        let previousContribution =
+            goals.first { $0.id == editedID && $0.fundingJarID == fundingJarID }
+            .map(GoalCommitment.activeMonthlyContribution(for:)) ?? .zero
+        let totalBeforeSave = otherCommitment + previousContribution
+        guard totalAfterSave <= capacity || totalAfterSave <= totalBeforeSave else {
             throw FinancialGoalFormError.monthlyCommitmentExceedsJar
         }
 

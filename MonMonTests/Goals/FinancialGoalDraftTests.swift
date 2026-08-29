@@ -114,6 +114,25 @@ struct FinancialGoalDraftTests {
         #expect(validated.monthlyContribution == 700)
     }
 
+    @Test("Editing an overcommitted goal without increasing it remains possible")
+    func staleOvercommitCanBeEditedWithoutWorseningIt() throws {
+        let savings = jar(name: "Savings", percent: 10)
+        let existing = goal(jarID: savings.id, monthlyContribution: 1_100)
+        var value = draft(name: "Renamed", jarID: savings.id)
+        value.monthlyContributionText = "1100"
+
+        let validated = try value.validated(
+            jars: [savings],
+            goals: [existing],
+            plannedByJar: [savings.id: 1_000],
+            editedID: existing.id,
+            asOf: asOf,
+            calendar: calendar
+        )
+
+        #expect(validated.name == "Renamed")
+    }
+
     private func draft(name: String = "Home", jarID: UUID?) -> FinancialGoalDraft {
         FinancialGoalDraft(
             name: name,

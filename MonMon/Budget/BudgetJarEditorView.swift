@@ -34,6 +34,9 @@ struct BudgetJarEditorView: View {
     @Query(sort: \TransactionCategory.createdAt, order: .forward)
     private var categories: [TransactionCategory]
 
+    @Query(sort: \FinancialGoal.createdAt, order: .forward)
+    private var goals: [FinancialGoal]
+
     private let mode: BudgetJarEditorMode
 
     @State private var draft: BudgetJarDraft
@@ -393,9 +396,13 @@ struct BudgetJarEditorView: View {
                 editedJar,
                 jars: jars,
                 categories: categories,
+                goals: goals,
                 in: modelContext
             )
             dismiss()
+        } catch BudgetJarStoreError.jarFundsGoals {
+            modelContext.rollback()
+            saveErrorMessage = "Move or delete this jar’s goals before deleting the jar."
         } catch {
             modelContext.rollback()
             saveErrorMessage = "Couldn’t delete this jar. Try again."

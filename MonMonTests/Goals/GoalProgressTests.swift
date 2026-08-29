@@ -97,3 +97,50 @@ struct GoalProgressTests {
         return date
     }
 }
+
+@Suite("Goal jar commitment")
+struct GoalJarCommitmentTests {
+    @Test("Several active goals commit one jar plan exactly once")
+    func activeGoalsAreAggregated() {
+        let jarID = UUID()
+        let goals = [
+            goal(jarID: jarID, target: 10_000, earmarked: 1_000, monthly: 600),
+            goal(jarID: jarID, target: 5_000, earmarked: 500, monthly: 500),
+            goal(jarID: jarID, target: 2_000, earmarked: 2_000, monthly: 900),
+            goal(jarID: UUID(), target: 8_000, earmarked: 0, monthly: 700),
+        ]
+
+        let snapshot = GoalCommitment.snapshot(
+            jarID: jarID,
+            goals: goals,
+            plannedCapacity: 1_000
+        )
+
+        #expect(snapshot.goalCount == 2)
+        #expect(snapshot.committedAmount == 1_100)
+        #expect(snapshot.availableAmount == 0)
+        #expect(snapshot.overcommittedAmount == 100)
+        #expect(snapshot.isOvercommitted)
+    }
+
+    private func goal(
+        jarID: UUID,
+        target: Decimal,
+        earmarked: Decimal,
+        monthly: Decimal
+    ) -> FinancialGoal {
+        FinancialGoal(
+            id: UUID(),
+            name: "Goal",
+            kind: .custom,
+            targetAmount: target,
+            earmarkedAmount: earmarked,
+            targetDate: Date(timeIntervalSince1970: 1_900_000_000),
+            monthlyContribution: monthly,
+            fundingJarID: jarID,
+            symbolName: "tag.fill",
+            colorName: "green",
+            createdAt: Date(timeIntervalSince1970: 1_800_000_000)
+        )
+    }
+}

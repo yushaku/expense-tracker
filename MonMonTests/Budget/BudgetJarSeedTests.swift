@@ -115,6 +115,7 @@ struct BudgetJarSeedTests {
                 savings,
                 jars: [savings],
                 categories: [],
+                goals: [],
                 in: context
             )
         }
@@ -160,10 +161,53 @@ struct BudgetJarSeedTests {
             play,
             jars: [necessities, play],
             categories: [entertainment],
+            goals: [],
             in: context
         )
 
         #expect(entertainment.budgetJarID == necessities.id)
+        #expect(try context.fetchCount(FetchDescriptor<BudgetJar>()) == 1)
+    }
+
+    @Test("A custom jar funding a goal cannot be deleted")
+    func goalFundingJarCannotBeDeleted() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let jar = BudgetJar(
+            id: UUID(),
+            name: "Home fund",
+            allocationPercent: 10,
+            role: .custom,
+            symbolName: "house.fill",
+            colorName: "blue",
+            createdAt: referenceDate
+        )
+        let goal = FinancialGoal(
+            id: UUID(),
+            name: "First home",
+            kind: .home,
+            targetAmount: 1_000_000_000,
+            earmarkedAmount: 100_000_000,
+            targetDate: referenceDate.addingTimeInterval(31_536_000),
+            monthlyContribution: 5_000_000,
+            fundingJarID: jar.id,
+            symbolName: "house.fill",
+            colorName: "blue",
+            createdAt: referenceDate
+        )
+        context.insert(jar)
+        context.insert(goal)
+        try context.save()
+
+        #expect(throws: BudgetJarStoreError.jarFundsGoals) {
+            try BudgetJarStore.delete(
+                jar,
+                jars: [jar],
+                categories: [],
+                goals: [goal],
+                in: context
+            )
+        }
         #expect(try context.fetchCount(FetchDescriptor<BudgetJar>()) == 1)
     }
 }
