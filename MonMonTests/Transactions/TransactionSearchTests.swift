@@ -289,4 +289,61 @@ struct TransactionSearchTests {
         #expect(ReportContentVisibility(query: query).showsTransactionList)
         #expect(ReportContentVisibility(query: query).showsCategoryWaterfall)
     }
+
+    @Test("The report calendar offers only the months the header period covers")
+    func calendarMonthsFollowTheHeaderPeriod() {
+        let months = ReportCalendarMonths(
+            range: .custom(from: date(2026, 2, 10), to: date(2026, 4, 3)),
+            preferred: nil,
+            today: date(2026, 8, 20)
+        )
+
+        #expect(months.months == [date(2026, 2, 1), date(2026, 3, 1), date(2026, 4, 1)])
+        #expect(months.selection == date(2026, 2, 1))
+    }
+
+    @Test("The report calendar starts on today's month when the period covers it")
+    func calendarMonthsPreferTodayInsideThePeriod() {
+        let months = ReportCalendarMonths(
+            range: .year(containing: date(2026, 8, 20)),
+            preferred: nil,
+            today: date(2026, 8, 20)
+        )
+
+        #expect(months.months.count == 12)
+        #expect(months.selection == date(2026, 8, 1))
+    }
+
+    @Test("A picked month is dropped once the header period stops covering it")
+    func calendarMonthsDropAPickOutsideThePeriod() {
+        let kept = ReportCalendarMonths(
+            range: .year(containing: date(2026, 8, 20)),
+            preferred: date(2026, 3, 1),
+            today: date(2026, 8, 20)
+        )
+
+        #expect(kept.selection == date(2026, 3, 1))
+
+        let dropped = ReportCalendarMonths(
+            range: .year(containing: date(2025, 8, 20)),
+            preferred: date(2026, 3, 1),
+            today: date(2026, 8, 20)
+        )
+
+        #expect(dropped.selection == date(2025, 1, 1))
+    }
+
+    @Test("Stepping the report calendar stops at the edges of the period")
+    func calendarMonthsStepWithinThePeriod() {
+        let months = ReportCalendarMonths(
+            range: .custom(from: date(2026, 2, 10), to: date(2026, 4, 3)),
+            preferred: nil,
+            today: date(2026, 8, 20)
+        )
+
+        #expect(months.stepped(from: date(2026, 2, 1), by: -1) == nil)
+        #expect(months.stepped(from: date(2026, 2, 1), by: 1) == date(2026, 3, 1))
+        #expect(months.stepped(from: date(2026, 4, 1), by: 1) == nil)
+        #expect(months.stepped(from: date(2026, 12, 1), by: 1) == nil)
+    }
 }
