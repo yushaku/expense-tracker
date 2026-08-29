@@ -77,7 +77,8 @@ enum BudgetJarSeed {
     static func seedIfNeeded(
         in context: ModelContext,
         createdAt: Date = .now,
-        locale: Locale = AppLanguage.stored.locale
+        locale: Locale = AppLanguage.stored.locale,
+        saveChanges: Bool = true
     ) {
         let existing = (try? context.fetchCount(FetchDescriptor<BudgetJar>())) ?? 0
         guard existing == 0 else {
@@ -105,6 +106,8 @@ enum BudgetJarSeed {
                 ? playID : necessitiesID
         }
 
-        try? context.save()
+        if saveChanges {
+            try? context.save()
+        }
     }
 }

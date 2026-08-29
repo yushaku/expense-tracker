@@ -51,14 +51,19 @@ struct MonMonBackupServiceTests {
         #expect(validated.payload.fundInstruments.count == 1)
         #expect(validated.payload.fundHoldings.count == 1)
         #expect(validated.payload.fundSales.count == 1)
+        #expect(validated.payload.budgetJars.count == 3)
         #expect(validated.payload.categories.count == 1)
+        #expect(
+            validated.payload.categories.single?.budgetJarID
+                == MonMonBackupScalar.uuid(fixture.jarID)
+        )
         #expect(validated.payload.transactions.count == 1)
         #expect(validated.payload.pendingCaptures.count == 1)
         #expect(validated.payload.transfers.count == 1)
         #expect(validated.payload.debts.count == 1)
         #expect(validated.payload.debtPayments.count == 1)
         #expect(validated.payload.recurringRules.count == 1)
-        #expect(validated.payload.recordCount == 14)
+        #expect(validated.payload.recordCount == 17)
         #expect(validated.payload.transactions.single?.sourceImportID == importedSource)
         #expect(validated.payload.preferences.theme == AppTheme.dark.rawValue)
         #expect(validated.payload.preferences.language == AppLanguage.vietnamese.rawValue)
@@ -115,7 +120,7 @@ struct MonMonBackupServiceTests {
 
         let report = try restoreService.restore(validated)
 
-        #expect(report.restoredRecordCount == 14)
+        #expect(report.restoredRecordCount == 17)
         #expect(try destination.mainContext.fetchCount(FetchDescriptor<CashAccount>()) == 2)
         let restoredCredit = try #require(
             destination.mainContext.fetch(FetchDescriptor<CashAccount>()).first {
@@ -125,6 +130,17 @@ struct MonMonBackupServiceTests {
         #expect(restoredCredit.creditLimit == 20_000)
         #expect(try destination.mainContext.fetchCount(FetchDescriptor<MoneyTransaction>()) == 1)
         #expect(try destination.mainContext.fetchCount(FetchDescriptor<RecurringRule>()) == 1)
+        let restoredJar = try #require(
+            destination.mainContext.fetch(FetchDescriptor<BudgetJar>()).first {
+                $0.id == fixture.jarID
+            }
+        )
+        #expect(restoredJar.id == fixture.jarID)
+        #expect(restoredJar.role == .custom)
+        let restoredCategory = try #require(
+            destination.mainContext.fetch(FetchDescriptor<TransactionCategory>()).single
+        )
+        #expect(restoredCategory.budgetJarID == fixture.jarID)
         #expect(
             destinationDefaults.string(forKey: TransactionDefaults.accountStorageKey)
                 == fixture.bankID.uuidString
@@ -278,6 +294,44 @@ struct MonMonBackupServiceTests {
         #expect(restored.creditLimit == 0)
     }
 
+    @Test("Restoring a legacy payload seeds the six default budget jars")
+    func legacyRestoreSeedsBudgetJars() throws {
+        let incoming = try MonMonBackupDocument.make(
+            payload: .empty,
+            exportedAt: instant,
+            appVersion: "1.0",
+            flavour: .dev
+        )
+        let validated = try MonMonBackupValidator.validate(incoming, expectedFlavour: .dev)
+        let destination = try makeContainer()
+        destination.mainContext.insert(
+            BudgetJar(
+                id: UUID(),
+                name: "Old jar",
+                allocationPercent: 100,
+                role: .custom,
+                symbolName: "tag.fill",
+                colorName: "green",
+                createdAt: instant
+            )
+        )
+        try destination.mainContext.save()
+        let recoveryURL = temporaryRecoveryURL()
+        defer { try? FileManager.default.removeItem(at: recoveryURL) }
+
+        _ = try service(
+            container: destination,
+            defaults: makeDefaults(),
+            recoveryURL: recoveryURL
+        ).restore(validated)
+
+        let jars = try destination.mainContext.fetch(FetchDescriptor<BudgetJar>())
+        #expect(jars.count == 6)
+        #expect(jars.contains { $0.role == .savings })
+        #expect(jars.contains { $0.role == .investment })
+        #expect(!jars.contains { $0.name == "Old jar" })
+    }
+
     private func makeContainer() throws -> ModelContainer {
         try ModelContainer(
             for: Schema(MonMonSchema.models),
@@ -313,6 +367,9 @@ struct MonMonBackupServiceTests {
         let bankID = UUID()
         let walletID = UUID()
         let categoryID = UUID()
+        let jarID = UUID()
+        let investmentJarID = UUID()
+        let savingsJarID = UUID()
         let ruleID = UUID()
         let instrumentID = UUID()
         let depositID = UUID()
@@ -341,13 +398,47 @@ struct MonMonBackupServiceTests {
             )
         )
         context.insert(
+            BudgetJar(
+                id: jarID,
+                name: "Necessities",
+                allocationPercent: 55,
+                role: .custom,
+                symbolName: "house.fill",
+                colorName: "blue",
+                createdAt: instant
+            )
+        )
+        context.insert(
+            BudgetJar(
+                id: investmentJarID,
+                name: "Investment",
+                allocationPercent: 10,
+                role: .investment,
+                symbolName: "chart.line.uptrend.xyaxis",
+                colorName: "mauve",
+                createdAt: instant.addingTimeInterval(1)
+            )
+        )
+        context.insert(
+            BudgetJar(
+                id: savingsJarID,
+                name: "Savings",
+                allocationPercent: 10,
+                role: .savings,
+                symbolName: "building.columns.fill",
+                colorName: "yellow",
+                createdAt: instant.addingTimeInterval(2)
+            )
+        )
+        context.insert(
             TransactionCategory(
                 id: categoryID,
                 name: "Food",
                 kind: .expense,
                 symbolName: "fork.knife",
                 colorName: "orange",
-                createdAt: instant
+                createdAt: instant,
+                budgetJarID: jarID
             )
         )
         context.insert(
@@ -505,7 +596,12 @@ struct MonMonBackupServiceTests {
             )
         )
         try context.save()
-        return FixtureIDs(bankID: bankID, walletID: walletID, categoryID: categoryID)
+        return FixtureIDs(
+            bankID: bankID,
+            walletID: walletID,
+            categoryID: categoryID,
+            jarID: jarID
+        )
     }
 }
 
@@ -513,6 +609,7 @@ private struct FixtureIDs {
     let bankID: UUID
     let walletID: UUID
     let categoryID: UUID
+    let jarID: UUID
 }
 
 extension Array {

@@ -487,6 +487,7 @@ private struct BackupRestorePreviewSheet: View {
             )
             Divider()
             detailRow("Accounts", value: counts.accounts.formatted())
+            detailRow("Budget jars", value: counts.budgetJars.formatted())
             detailRow("Transactions", value: counts.transactions.formatted())
             detailRow("Categories", value: counts.categories.formatted())
             detailRow("Recurring rules", value: counts.recurringRules.formatted())

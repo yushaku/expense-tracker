@@ -101,6 +101,15 @@ struct MonMonBackupDocumentTests {
         #expect(record.creditLimit == nil)
     }
 
+    @Test("A legacy payload without budget jars still decodes")
+    func legacyPayloadWithoutBudgetJarsDecodes() throws {
+        let data = try JSONEncoder().encode(LegacyPayload.empty)
+
+        let payload = try JSONDecoder().decode(MonMonBackupPayload.self, from: data)
+
+        #expect(payload.budgetJars.isEmpty)
+    }
+
     private func account(id: UUID, name: String) -> MonMonBackupPayload.AccountRecord {
         MonMonBackupPayload.AccountRecord(
             id: MonMonBackupScalar.uuid(id),
@@ -112,6 +121,40 @@ struct MonMonBackupDocumentTests {
             createdAt: MonMonBackupScalar.date(instant)
         )
     }
+}
+
+private struct LegacyPayload: Encodable {
+    var accounts: [MonMonBackupPayload.AccountRecord]
+    var savingsDeposits: [MonMonBackupPayload.SavingsDepositRecord]
+    var savingsWithdrawals: [MonMonBackupPayload.SavingsWithdrawalRecord]
+    var fundInstruments: [MonMonBackupPayload.FundInstrumentRecord]
+    var fundHoldings: [MonMonBackupPayload.FundHoldingRecord]
+    var fundSales: [MonMonBackupPayload.FundSaleRecord]
+    var categories: [MonMonBackupPayload.CategoryRecord]
+    var transactions: [MonMonBackupPayload.TransactionRecord]
+    var pendingCaptures: [MonMonBackupPayload.PendingCaptureRecord]
+    var transfers: [MonMonBackupPayload.TransferRecord]
+    var debts: [MonMonBackupPayload.DebtRecord]
+    var debtPayments: [MonMonBackupPayload.DebtPaymentRecord]
+    var recurringRules: [MonMonBackupPayload.RecurringRuleRecord]
+    var preferences: MonMonBackupPayload.Preferences
+
+    static let empty = LegacyPayload(
+        accounts: [],
+        savingsDeposits: [],
+        savingsWithdrawals: [],
+        fundInstruments: [],
+        fundHoldings: [],
+        fundSales: [],
+        categories: [],
+        transactions: [],
+        pendingCaptures: [],
+        transfers: [],
+        debts: [],
+        debtPayments: [],
+        recurringRules: [],
+        preferences: .empty
+    )
 }
 
 extension Array {

@@ -129,6 +129,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
     var fundInstruments: [FundInstrumentRecord]
     var fundHoldings: [FundHoldingRecord]
     var fundSales: [FundSaleRecord]
+    var budgetJars: [BudgetJarRecord]
     var categories: [CategoryRecord]
     var transactions: [TransactionRecord]
     var pendingCaptures: [PendingCaptureRecord]
@@ -145,6 +146,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         fundInstruments: [],
         fundHoldings: [],
         fundSales: [],
+        budgetJars: [],
         categories: [],
         transactions: [],
         pendingCaptures: [],
@@ -155,6 +157,75 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         preferences: .empty
     )
 
+    init(
+        accounts: [AccountRecord],
+        savingsDeposits: [SavingsDepositRecord],
+        savingsWithdrawals: [SavingsWithdrawalRecord],
+        fundInstruments: [FundInstrumentRecord],
+        fundHoldings: [FundHoldingRecord],
+        fundSales: [FundSaleRecord],
+        budgetJars: [BudgetJarRecord],
+        categories: [CategoryRecord],
+        transactions: [TransactionRecord],
+        pendingCaptures: [PendingCaptureRecord],
+        transfers: [TransferRecord],
+        debts: [DebtRecord],
+        debtPayments: [DebtPaymentRecord],
+        recurringRules: [RecurringRuleRecord],
+        preferences: Preferences
+    ) {
+        self.accounts = accounts
+        self.savingsDeposits = savingsDeposits
+        self.savingsWithdrawals = savingsWithdrawals
+        self.fundInstruments = fundInstruments
+        self.fundHoldings = fundHoldings
+        self.fundSales = fundSales
+        self.budgetJars = budgetJars
+        self.categories = categories
+        self.transactions = transactions
+        self.pendingCaptures = pendingCaptures
+        self.transfers = transfers
+        self.debts = debts
+        self.debtPayments = debtPayments
+        self.recurringRules = recurringRules
+        self.preferences = preferences
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        accounts = try container.decode([AccountRecord].self, forKey: .accounts)
+        savingsDeposits = try container.decode(
+            [SavingsDepositRecord].self,
+            forKey: .savingsDeposits
+        )
+        savingsWithdrawals = try container.decode(
+            [SavingsWithdrawalRecord].self,
+            forKey: .savingsWithdrawals
+        )
+        fundInstruments = try container.decode(
+            [FundInstrumentRecord].self,
+            forKey: .fundInstruments
+        )
+        fundHoldings = try container.decode([FundHoldingRecord].self, forKey: .fundHoldings)
+        fundSales = try container.decode([FundSaleRecord].self, forKey: .fundSales)
+        budgetJars =
+            try container.decodeIfPresent(
+                [BudgetJarRecord].self,
+                forKey: .budgetJars
+            ) ?? []
+        categories = try container.decode([CategoryRecord].self, forKey: .categories)
+        transactions = try container.decode([TransactionRecord].self, forKey: .transactions)
+        pendingCaptures = try container.decode(
+            [PendingCaptureRecord].self,
+            forKey: .pendingCaptures
+        )
+        transfers = try container.decode([TransferRecord].self, forKey: .transfers)
+        debts = try container.decode([DebtRecord].self, forKey: .debts)
+        debtPayments = try container.decode([DebtPaymentRecord].self, forKey: .debtPayments)
+        recurringRules = try container.decode([RecurringRuleRecord].self, forKey: .recurringRules)
+        preferences = try container.decode(Preferences.self, forKey: .preferences)
+    }
+
     func sorted() -> MonMonBackupPayload {
         var result = self
         result.accounts = accounts.backupSorted()
@@ -163,6 +234,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         result.fundInstruments = fundInstruments.backupSorted()
         result.fundHoldings = fundHoldings.backupSorted()
         result.fundSales = fundSales.backupSorted()
+        result.budgetJars = budgetJars.backupSorted()
         result.categories = categories.backupSorted()
         result.transactions = transactions.backupSorted()
         result.pendingCaptures = pendingCaptures.backupSorted()
@@ -176,7 +248,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
     var recordCount: Int {
         accounts.count + savingsDeposits.count + savingsWithdrawals.count
             + fundInstruments.count + fundHoldings.count + fundSales.count
-            + categories.count + transactions.count + pendingCaptures.count
+            + budgetJars.count + categories.count + transactions.count + pendingCaptures.count
             + transfers.count + debts.count + debtPayments.count + recurringRules.count
     }
 
@@ -276,6 +348,17 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         var id: String
         var name: String
         var kind: String
+        var symbolName: String
+        var colorName: String
+        var createdAt: String
+        var budgetJarID: String? = nil
+    }
+
+    struct BudgetJarRecord: Codable, Equatable, Sendable, MonMonBackupRecord {
+        var id: String
+        var name: String
+        var allocationPercent: String
+        var role: String
         var symbolName: String
         var colorName: String
         var createdAt: String
