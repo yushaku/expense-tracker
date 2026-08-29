@@ -20,9 +20,20 @@ struct TransactionDetailLinks: Equatable {
             }
         )
     }
+
+    func categoryPeriod(for transaction: MoneyTransaction) -> CategoryPeriod? {
+        categoryID.map {
+            CategoryPeriod(
+                categoryID: $0,
+                kind: transaction.kind,
+                range: .month(containing: transaction.occurredAt)
+            )
+        }
+    }
 }
 
 private enum TransactionDetailDestination: Hashable {
+    case category(CategoryPeriod)
     case account(UUID)
     case trip(UUID)
 }
@@ -44,7 +55,7 @@ struct TransactionDetailSheet: View {
 
     @State private var isConfirmingDelete = false
     @State private var isShowingDeleteError = false
-    @State private var categoryEditorMode: CategoryEditorMode?
+    @State private var selectedDetent = PresentationDetent.medium
 
     private static let dateTemplate = Date.FormatStyle()
         .weekday(.wide)
@@ -90,6 +101,8 @@ struct TransactionDetailSheet: View {
             }
             .navigationDestination(for: TransactionDetailDestination.self) { destination in
                 switch destination {
+                case .category(let period):
+                    CategoryTransactionsView(period: period)
                 case .account(let accountID):
                     AccountDetailView(route: AccountDetailRoute(accountID: accountID))
                 case .trip(let workspaceID):
@@ -103,9 +116,6 @@ struct TransactionDetailSheet: View {
                         )
                     }
                 }
-            }
-            .appSheet(item: $categoryEditorMode) { mode in
-                CategoryEditorView(mode: mode)
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 actions
@@ -134,9 +144,7 @@ struct TransactionDetailSheet: View {
             .foregroundStyle(MonMonTheme.textPrimary)
             .preferredColorScheme(MonMonTheme.colorScheme)
         }
-        // One height, so a drag downwards leaves in one motion rather than
-        // stopping halfway at a second one.
-        .presentationDetents([.large])
+        .presentationDetents([.medium, .large], selection: $selectedDetent)
         .presentationDragIndicator(.visible)
         .accessibilityIdentifier("transaction-details")
     }
@@ -179,13 +187,9 @@ struct TransactionDetailSheet: View {
             accountImage: account?.kind.iconName ?? "wallet.bifold",
             trip: tripName,
             note: note,
-            onOpenCategory: links.categoryID == nil
-                ? nil
-                : {
-                    if let category {
-                        categoryEditorMode = .edit(category)
-                    }
-                },
+            categoryDestination: links.categoryPeriod(for: transaction).map(
+                TransactionDetailDestination.category
+            ),
             accountDestination: links.accountID.map(TransactionDetailDestination.account),
             tripDestination: links.tripWorkspaceID.map(TransactionDetailDestination.trip)
         )
@@ -256,17 +260,17 @@ private struct TransactionDetailCard: View {
     let accountImage: String
     let trip: String?
     let note: String?
-    let onOpenCategory: (() -> Void)?
+    let categoryDestination: TransactionDetailDestination?
     let accountDestination: TransactionDetailDestination?
     let tripDestination: TransactionDetailDestination?
 
     var body: some View {
         VStack(spacing: 0) {
-            linkedRow(
+            destinationRow(
                 title: "Category",
                 value: category,
                 systemImage: categoryImage,
-                action: onOpenCategory
+                destination: categoryDestination
             )
             divider
             destinationRow(
@@ -305,34 +309,6 @@ private struct TransactionDetailCard: View {
 
     private var divider: some View {
         Divider().overlay(MonMonTheme.border)
-    }
-
-    @ViewBuilder
-    private func linkedRow(
-        title: LocalizedStringKey,
-        value: String,
-        systemImage: String,
-        action: (() -> Void)?
-    ) -> some View {
-        if let action {
-            Button(action: action) {
-                rowContent(
-                    title: title,
-                    value: value,
-                    systemImage: systemImage,
-                    showsDisclosure: true
-                )
-            }
-            .buttonStyle(.plain)
-            .accessibilityHint("Opens this category")
-        } else {
-            rowContent(
-                title: title,
-                value: value,
-                systemImage: systemImage,
-                showsDisclosure: false
-            )
-        }
     }
 
     @ViewBuilder

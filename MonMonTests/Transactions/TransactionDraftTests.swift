@@ -407,6 +407,36 @@ struct TransactionDraftTests {
 
 @Suite("Transaction detail links")
 struct TransactionDetailLinksTests {
+    @Test("Category link opens its report for the transaction month")
+    func categoryLinkUsesTransactionMonth() {
+        let categoryID = UUID()
+        let occurredAt = Date(timeIntervalSince1970: 1_709_251_200)
+        let transaction = MoneyTransaction(
+            id: UUID(),
+            kind: .expense,
+            amount: 100_000,
+            occurredAt: occurredAt,
+            note: "",
+            accountID: UUID(),
+            categoryID: categoryID,
+            sourceRuleID: nil,
+            currencyCode: VNDCurrency.code,
+            createdAt: occurredAt
+        )
+        let links = TransactionDetailLinks.resolve(
+            transaction: transaction,
+            categoryID: categoryID,
+            accountID: nil,
+            availableTripIDs: []
+        )
+
+        let period = links.categoryPeriod(for: transaction)
+
+        #expect(period?.categoryID == categoryID)
+        #expect(period?.kind == .expense)
+        #expect(period?.range == .month(containing: occurredAt))
+    }
+
     @Test("Only existing related items become link targets")
     func missingRelatedItemsAreNotLinked() {
         let accountID = UUID()
