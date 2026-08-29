@@ -21,6 +21,47 @@ struct ReportContentVisibility: Equatable {
     }
 }
 
+/// Which months the report's calendar may show, and which of them it is on.
+///
+/// The header's period is the authority here as it is everywhere else on the
+/// screen: the rail offers only the months inside it, and a month picked before
+/// the period moved is dropped rather than left standing empty over figures that
+/// no longer include it.
+struct ReportCalendarMonths: Equatable {
+    let months: [Date]
+    let selection: Date
+
+    init(range: TransactionRange, preferred: Date?, today: Date) {
+        let months = TransactionPeriod.months(from: range.start, through: range.lastDay)
+        let currentMonth = TransactionPeriod.startOfMonth(for: today)
+
+        self.months = months
+        selection =
+            [preferred, currentMonth]
+            .compactMap { $0 }
+            .map(TransactionPeriod.startOfMonth(for:))
+            .first { months.contains($0) }
+            ?? months.first
+            ?? currentMonth
+    }
+
+    /// The month `steps` away from `month`, or nil when that lands outside the
+    /// period the header is asking for.
+    func stepped(from month: Date, by steps: Int) -> Date? {
+        guard let index = months.firstIndex(of: TransactionPeriod.startOfMonth(for: month)) else {
+            return nil
+        }
+
+        let target = index + steps
+
+        guard months.indices.contains(target) else {
+            return nil
+        }
+
+        return months[target]
+    }
+}
+
 /// The one globally filtered transaction set every report projection reads.
 /// Keeping the projections here prevents a card from quietly falling back to
 /// the unfiltered ledger while its neighbours honor the header query.
@@ -101,7 +142,10 @@ struct ReportView: View {
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
 
-    @State private var summaryMonth = TransactionPeriod.startOfMonth(for: .now)
+    /// The month the owner picked off the rail, if they picked one. Nil means
+    /// "whichever month the header's period puts on show", and a pick that the
+    /// period no longer covers is ignored rather than corrected behind a sheet.
+    @State private var pickedMonth: Date?
 
     /// A year, not a month: the charts here are about a run of months, and a
     /// period narrower than one bar has nothing to trend.
@@ -193,8 +237,8 @@ struct ReportView: View {
                 .accessibilityIdentifier("report-overview")
 
                 TransactionCalendarCard(
-                    month: summaryMonth,
-                    weeks: report.calendarWeeks(of: summaryMonth),
+                    month: calendarMonths.selection,
+                    weeks: report.calendarWeeks(of: calendarMonths.selection),
                     onStepMonth: stepSummaryMonth
                 )
 
@@ -251,14 +295,22 @@ struct ReportView: View {
         )
     }
 
-    private func stepSummaryMonth(_ steps: Int) {
-        let calendar = TransactionPeriod.calendar
+    /// The months the calendar can be moved over, read from the header's period
+    /// rather than kept beside it.
+    private var calendarMonths: ReportCalendarMonths {
+        ReportCalendarMonths(range: query.range, preferred: pickedMonth, today: .now)
+    }
 
-        guard let moved = calendar.date(byAdding: .month, value: steps, to: summaryMonth) else {
+    /// Stepping stops at the edges of the period on show: a month outside it has
+    /// nothing to draw, because the figures above the calendar exclude it.
+    private func stepSummaryMonth(_ steps: Int) {
+        let months = calendarMonths
+
+        guard let moved = months.stepped(from: months.selection, by: steps) else {
             return
         }
 
-        summaryMonth = TransactionPeriod.startOfMonth(for: moved)
+        pickedMonth = moved
     }
 
     private var categoryNames: [UUID: String] {
@@ -284,10 +336,11 @@ struct ReportView: View {
     }
 
     /// The month the calendar renders. Its day totals still come from the
-    /// globally filtered report data rather than from the unfiltered ledger.
+    /// globally filtered report data rather than from the unfiltered ledger, and
+    /// the months it offers are the ones that period covers.
     private var monthRail: some View {
-        MonthRail(months: railMonths, selection: summaryMonth) { month in
-            summaryMonth = TransactionPeriod.startOfMonth(for: month)
+        MonthRail(months: calendarMonths.months, selection: calendarMonths.selection) { month in
+            pickedMonth = TransactionPeriod.startOfMonth(for: month)
         }
         .background(MonMonTheme.canvas)
         .overlay(alignment: .bottom) {
@@ -295,15 +348,6 @@ struct ReportView: View {
                 .fill(MonMonTheme.border)
                 .frame(height: 1)
         }
-    }
-
-    /// Keep the selected summary month on the rail even when it lies beyond the
-    /// calendar picker's ordinary bounds.
-    private var railMonths: [Date] {
-        TransactionPeriod.months(
-            from: min(CalendarTheme.startMonth(), summaryMonth),
-            through: max(CalendarTheme.endMonth(), summaryMonth)
-        )
     }
 
     private var emptyState: some View {
