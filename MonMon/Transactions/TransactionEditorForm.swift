@@ -159,44 +159,20 @@ struct TransactionEditorForm: View {
             VStack(alignment: .leading, spacing: 18) {
                 sectionHeader("Trip spending", systemImage: "airplane")
 
-                VStack(alignment: .leading, spacing: 8) {
-                    fieldLabel("Trip")
+                HStack(alignment: .top, spacing: 12) {
+                    tripPickerField
 
-                    Picker("Trip", selection: $draft.tripWorkspaceID) {
-                        Text("No trip")
-                            .tag(UUID?.none)
-
-                        ForEach(availableTripWorkspaces) { workspace in
-                            Text(workspace.name)
-                                .tag(UUID?.some(workspace.id))
-                        }
+                    if draft.tripWorkspaceID != nil {
+                        budgetJarPickerField
                     }
-                    .labelsHidden()
-                    .accessibilityIdentifier("transaction-trip")
                 }
 
                 if draft.tripWorkspaceID != nil {
-                    VStack(alignment: .leading, spacing: 8) {
-                        fieldLabel("Budget jar")
-
-                        Picker("Budget jar", selection: $draft.budgetJarOverrideID) {
-                            Text("Use category jar")
-                                .tag(UUID?.none)
-
-                            ForEach(budgetJars) { jar in
-                                Text(jar.name)
-                                    .tag(UUID?.some(jar.id))
-                            }
-                        }
-                        .labelsHidden()
-                        .accessibilityIdentifier("transaction-trip-jar")
-
-                        Text(
-                            "The expense keeps its category. This choice only changes which jar pays for it."
-                        )
-                        .font(.caption)
-                        .foregroundStyle(MonMonTheme.textSecondary)
-                    }
+                    Text(
+                        "The expense keeps its category. This choice only changes which jar pays for it."
+                    )
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
                 }
 
                 if let tripRoutingErrorMessage {
@@ -207,6 +183,44 @@ struct TransactionEditorForm: View {
                 }
             }
         }
+    }
+
+    private var tripPickerField: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            fieldLabel("Trip")
+
+            Picker("Trip", selection: $draft.tripWorkspaceID) {
+                Text("No trip")
+                    .tag(UUID?.none)
+
+                ForEach(availableTripWorkspaces) { workspace in
+                    Text(workspace.name)
+                        .tag(UUID?.some(workspace.id))
+                }
+            }
+            .labelsHidden()
+            .accessibilityIdentifier("transaction-trip")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var budgetJarPickerField: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            fieldLabel("Budget jar")
+
+            Picker("Budget jar", selection: $draft.budgetJarOverrideID) {
+                Text("Use category jar")
+                    .tag(UUID?.none)
+
+                ForEach(budgetJars) { jar in
+                    Text(jar.name)
+                        .tag(UUID?.some(jar.id))
+                }
+            }
+            .labelsHidden()
+            .accessibilityIdentifier("transaction-trip-jar")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var showsTripRouting: Bool {
