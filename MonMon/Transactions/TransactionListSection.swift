@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 /// The transaction list shared by every transaction-only screen.
@@ -8,6 +9,9 @@ import SwiftUI
 /// actions so sheets and the Undo banner stay anchored to its viewport.
 struct TransactionListSection<Accessory: View>: View {
     @Environment(\.locale) private var locale
+
+    @Query(sort: \TripWorkspace.startedAt, order: .reverse)
+    private var tripWorkspaces: [TripWorkspace]
 
     let title: LocalizedStringKey
     let transactions: [MoneyTransaction]
@@ -57,6 +61,7 @@ struct TransactionListSection<Accessory: View>: View {
                             transaction: transaction,
                             category: category(for: transaction),
                             account: account(for: transaction),
+                            tripName: tripName(for: transaction),
                             showsDate: false,
                             accessibilityIdentifier:
                                 "\(accessibilityIdentifierPrefix)-\(transaction.id.uuidString)"
@@ -91,6 +96,11 @@ struct TransactionListSection<Accessory: View>: View {
 
     private var dayGroups: [TransactionDayGroup] {
         TransactionSummary.byDay(transactions)
+    }
+
+    private func tripName(for transaction: MoneyTransaction) -> String? {
+        guard let workspaceID = transaction.tripWorkspaceID else { return nil }
+        return tripWorkspaces.first { $0.id == workspaceID }?.name
     }
 
     private func dayHeader(for group: TransactionDayGroup) -> some View {

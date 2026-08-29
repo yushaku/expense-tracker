@@ -1,6 +1,9 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Trip: %@": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chuyến đi: %@" } } }
+    },
     "Trip spending": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chi tiêu chuyến đi" } } }
     },
