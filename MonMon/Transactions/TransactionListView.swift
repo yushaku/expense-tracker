@@ -407,16 +407,7 @@ struct TransactionListView: View {
     }
 
     private var featuredGoal: FinancialGoal? {
-        let startedGoalIDs = Set(tripWorkspaces.compactMap(\.sourceGoalID))
-        let accumulatingGoals = goals.filter {
-            $0.earmarkedAmount < $0.targetAmount
-                && !startedGoalIDs.contains($0.id)
-        }
-        return accumulatingGoals.min {
-            $0.targetDate == $1.targetDate
-                ? $0.createdAt < $1.createdAt
-                : $0.targetDate < $1.targetDate
-        }
+        SpendingFeaturedGoal.select(from: goals, workspaces: tripWorkspaces)
     }
 
     private func jarName(_ id: UUID) -> String? {
