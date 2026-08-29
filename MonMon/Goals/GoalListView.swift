@@ -132,18 +132,16 @@ struct GoalListView: View {
     private func startSpending(_ goal: FinancialGoal) {
         startErrorMessage = nil
         do {
-            let workspace = try TripWorkspaceLifecycle.start(
+            try TripWorkspaceLifecycle.start(
                 goal: goal,
                 existingWorkspaces: tripWorkspaces,
                 id: UUID(),
-                startedAt: .now
+                startedAt: .now,
+                in: modelContext
             )
-            modelContext.insert(workspace)
-            try modelContext.save()
         } catch TripWorkspaceLifecycleError.workspaceAlreadyExists {
             startErrorMessage = "This goal already has a trip workspace."
         } catch {
-            modelContext.rollback()
             startErrorMessage = "Check that this Trip goal is fully funded and has a funding jar."
         }
     }
