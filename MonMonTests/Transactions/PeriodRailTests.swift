@@ -123,4 +123,14 @@ struct PeriodRailTests {
         #expect(PeriodRailUnit.month.label(for: older, in: english, today: today) == "Mar 2019")
         #expect(PeriodRailUnit.day.label(for: older, in: english, today: today) == "Mar 4, 2019")
     }
+
+    @Test("Period grids identify the current month and year independently of selection")
+    func periodGridsIdentifyCurrentPeriods() {
+        let now = date(2026, 8, 29)
+
+        #expect(PeriodGrid.isCurrent(year: 2026, month: 8, now: now))
+        #expect(!PeriodGrid.isCurrent(year: 2026, month: 7, now: now))
+        #expect(PeriodGrid.isCurrent(year: 2026, now: now))
+        #expect(!PeriodGrid.isCurrent(year: 2025, now: now))
+    }
 }
