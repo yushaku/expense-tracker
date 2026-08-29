@@ -6,6 +6,7 @@ struct TransactionCard: View {
     let transaction: MoneyTransaction
     let category: TransactionCategory?
     let account: CashAccount?
+    var tripName: String? = nil
     /// The shared transaction list puts one date over each day of cards, so
     /// the card drops its own copy there and keeps it everywhere else.
     var showsDate = true
@@ -30,6 +31,17 @@ struct TransactionCard: View {
                             .foregroundStyle(MonMonTheme.textSecondary)
                             .accessibilityLabel("Recurring")
                     }
+                }
+
+                if let tripName {
+                    Label(tripName, systemImage: "airplane")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(MonMonTheme.accent)
+                        .lineLimit(1)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(MonMonTheme.accent.opacity(0.14), in: Capsule())
+                        .accessibilityLabel("Trip: \(tripName)")
                 }
 
                 Text(subtitle)

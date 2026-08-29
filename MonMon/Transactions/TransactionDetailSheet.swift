@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 /// A quick read of one transaction list item. Editing remains in the full
@@ -5,6 +6,9 @@ import SwiftUI
 struct TransactionDetailSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
+
+    @Query(sort: \TripWorkspace.startedAt, order: .reverse)
+    private var tripWorkspaces: [TripWorkspace]
 
     let transaction: MoneyTransaction
     let category: TransactionCategory?
@@ -130,6 +134,7 @@ struct TransactionDetailSheet: View {
             accountImage: account?.kind.iconName ?? "wallet.bifold",
             date: TransactionPeriod.format(Self.dateTemplate, in: locale)
                 .format(transaction.occurredAt),
+            trip: tripName,
             note: note
         )
     }
@@ -154,6 +159,11 @@ struct TransactionDetailSheet: View {
     private var note: String {
         let trimmed = transaction.note.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? AppText.string("No note", in: locale) : trimmed
+    }
+
+    private var tripName: String? {
+        guard let workspaceID = transaction.tripWorkspaceID else { return nil }
+        return tripWorkspaces.first { $0.id == workspaceID }?.name
     }
 
     private var symbolName: String {
@@ -182,6 +192,7 @@ private struct TransactionDetailCard: View {
     let account: String
     let accountImage: String
     let date: String
+    let trip: String?
     let note: String
 
     var body: some View {
@@ -193,6 +204,10 @@ private struct TransactionDetailCard: View {
             row(title: "Account", value: account, systemImage: accountImage)
             divider
             row(title: "Date", value: date, systemImage: "calendar")
+            if let trip {
+                divider
+                row(title: "Trip", value: trip, systemImage: "airplane")
+            }
             divider
             row(title: "Note", value: note, systemImage: "note.text")
         }

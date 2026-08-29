@@ -181,7 +181,13 @@ private struct TripDetailContent: View {
                     TripErrorBanner(message: saveErrorMessage)
                 }
 
-                TripCategorySection(slices: snapshot.categoryBreakdown)
+                CategoryBreakdownCard(
+                    kind: .constant(.expense),
+                    slices: snapshot.categoryBreakdown,
+                    showsKindPicker: false,
+                    emptyStateMessage:
+                        "Food, accommodation, transport, and other spending will appear here."
+                )
 
                 TripTransactionSection(
                     transactions: linkedTransactions,
@@ -259,56 +265,6 @@ private struct TripSummarySection: View {
 
     private var tint: Color {
         CategoryPalette.color(named: workspace.colorName)
-    }
-}
-
-private struct TripCategorySection: View {
-    let slices: [CategoryBreakdownSlice]
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Spending by category")
-                .font(.title3.weight(.semibold))
-
-            if slices.isEmpty {
-                Text("Food, accommodation, transport, and other spending will appear here.")
-                    .font(.subheadline)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-                    .padding(18)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 16))
-            } else {
-                ForEach(slices) { slice in
-                    HStack(spacing: 12) {
-                        Image(systemName: slice.symbolName)
-                            .foregroundStyle(CategoryPalette.color(named: slice.colorName))
-                            .frame(width: 36, height: 36)
-                            .background(
-                                CategoryPalette.color(named: slice.colorName).opacity(0.14),
-                                in: RoundedRectangle(cornerRadius: 10)
-                            )
-                            .accessibilityHidden(true)
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(slice.name)
-                                .font(.subheadline.weight(.semibold))
-                            Text("Expenses: \(slice.count)")
-                                .font(.caption)
-                                .foregroundStyle(MonMonTheme.textSecondary)
-                        }
-
-                        Spacer(minLength: 12)
-
-                        Text(VNDCurrency.format(slice.amount))
-                            .font(.subheadline.weight(.semibold))
-                            .monospacedDigit()
-                    }
-                    .padding(14)
-                    .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 14))
-                    .accessibilityElement(children: .combine)
-                }
-            }
-        }
     }
 }
 

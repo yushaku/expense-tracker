@@ -294,6 +294,7 @@ struct TransactionItem: View {
     let transaction: MoneyTransaction
     let category: TransactionCategory?
     let account: CashAccount?
+    let tripName: String?
     let showsDate: Bool
     let accessibilityIdentifier: String
 
@@ -301,12 +302,14 @@ struct TransactionItem: View {
         transaction: MoneyTransaction,
         category: TransactionCategory?,
         account: CashAccount?,
+        tripName: String? = nil,
         showsDate: Bool = true,
         accessibilityIdentifier: String
     ) {
         self.transaction = transaction
         self.category = category
         self.account = account
+        self.tripName = tripName
         self.showsDate = showsDate
         self.accessibilityIdentifier = accessibilityIdentifier
     }
@@ -327,6 +330,7 @@ struct TransactionItem: View {
                 transaction: transaction,
                 category: category,
                 account: account,
+                tripName: tripName,
                 showsDate: showsDate
             )
         }
