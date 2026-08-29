@@ -244,14 +244,8 @@ struct SavingsEditorForm: View {
 
     @ViewBuilder
     private var principalTextField: some View {
-        #if os(iOS)
-            TextField("0", text: $draft.principalText)
-                .keyboardType(.numberPad)
-                .accessibilityIdentifier("savings-principal")
-        #else
-            TextField("0", text: $draft.principalText)
-                .accessibilityIdentifier("savings-principal")
-        #endif
+        VNDTextField(text: $draft.principalText)
+            .accessibilityIdentifier("savings-principal")
     }
 
     @ViewBuilder

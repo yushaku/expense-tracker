@@ -204,6 +204,8 @@ struct FundInstrumentListView: View {
     private func editableContent(_ instrument: FundInstrument) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 12) {
+                FundLogoView(symbol: instrument.symbol, logoURL: instrument.logoURL, size: 34)
+
                 VStack(alignment: .leading, spacing: 3) {
                     Text(instrument.symbol)
                         .font(.headline)
@@ -378,7 +380,8 @@ struct FundInstrumentListView: View {
         )
     }
 
-    /// Owner-triggered, and the only thing in the app that opens a connection.
+    /// Owner-triggered. The Investments screen fetches on opening too, when
+    /// what it shows is out of date; this button asks regardless.
     private func refresh() {
         Task {
             await refresher.refresh(

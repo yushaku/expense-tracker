@@ -12,10 +12,90 @@ import SwiftUI
 struct ReportContentVisibility: Equatable {
     let showsNetTrend: Bool
     let showsTransactionList: Bool
+    /// A trend needs a period made of smaller ones. Filtered to a single day
+    /// there is nothing finer to walk, so the card stands down rather than
+    /// drawing one point and calling it a line.
+    let showsSpendingTrend: Bool
+    /// A month grid can only draw a month. Filtered to a year, a day, or a
+    /// hand-picked span, it would either show days the figures above it exclude
+    /// or one month standing for a period that is not one month, so it stands
+    /// down and leaves the period to the cards that can read it.
+    let showsCalendar: Bool
 
     init(query: TransactionQuery) {
         showsNetTrend = !query.hasSearchText
         showsTransactionList = query.hasSearchText
+        showsSpendingTrend = !query.hasSearchText && query.range.scope != .day
+        showsCalendar = query.range.scope == .month
+    }
+}
+
+/// The one globally filtered transaction set every report projection reads.
+/// Keeping the projections here prevents a card from quietly falling back to
+/// the unfiltered ledger while its neighbours honor the header query.
+struct ReportData {
+    let transactions: [MoneyTransaction]
+    let globalKind: TransactionKind?
+
+    init(
+        query: TransactionQuery,
+        transactions: [MoneyTransaction],
+        categoryNames: [UUID: String],
+        accountNames: [UUID: String]
+    ) {
+        globalKind = query.filter.kind
+        self.transactions = TransactionSearch.results(
+            of: query,
+            transactions: transactions,
+            categoryNames: categoryNames,
+            accountNames: accountNames
+        )
+    }
+
+    var income: Decimal {
+        TransactionSummary.totalIncome(of: transactions)
+    }
+
+    var expense: Decimal {
+        TransactionSummary.totalExpense(of: transactions)
+    }
+
+    var count: Int {
+        transactions.count
+    }
+
+    var netTrend: [TransactionNetPoint] {
+        TransactionSummary.runningNet(transactions)
+    }
+
+    /// The range is handed in rather than kept here, because the trend draws
+    /// every bucket of the period — including the ones that recorded nothing,
+    /// which the transactions alone cannot name.
+    func spendingTrend(in range: TransactionRange) -> [SpendingTrendPoint] {
+        SpendingTrend.points(of: transactions, in: range)
+    }
+
+    func calendarWeeks(of month: Date) -> [TransactionCalendarWeek] {
+        TransactionCalendar.weeks(of: month, transactions: transactions)
+    }
+
+    func accountSpendingRows(accounts: [CashAccount]) -> [AccountSpendingRow] {
+        AccountSpendingSummary.rows(accounts: accounts, transactions: transactions)
+    }
+
+    func categoryBreakdownSlices(
+        of kind: TransactionKind,
+        categories: [TransactionCategory]
+    ) -> [CategoryBreakdownSlice] {
+        CategoryBreakdown.slices(
+            of: globalKind ?? kind,
+            transactions: transactions,
+            categories: categories
+        )
+    }
+
+    var allowsCategoryKindSelection: Bool {
+        globalKind == nil
     }
 }
 
@@ -31,11 +111,11 @@ struct ReportView: View {
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
 
-    @State private var summaryMonth = TransactionPeriod.startOfMonth(for: .now)
-
-    /// A year, not a month: the charts here are about a run of months, and a
-    /// period narrower than one bar has nothing to trend.
-    @State private var query = TransactionQuery(range: .year(containing: .now))
+    /// The month the clock is in: what the owner is spending out of right now
+    /// is the question they open this screen with, and a month is small enough
+    /// that every card can read it — the calendar grid draws it, and the trend
+    /// walks it a day at a time. A year is a tap on the rail away.
+    @State private var query = TransactionQuery(range: .month(containing: .now))
     @State private var breakdownKind: TransactionKind = .expense
     @State private var editorMode: TransactionEditorMode?
     @State private var isFiltering = false
@@ -52,7 +132,7 @@ struct ReportView: View {
             .compactRootNavigationTitle("Report")
             .accessibilityIdentifier("report")
             .safeAreaInset(edge: .top, spacing: 0) {
-                monthRail
+                periodRail
             }
             .toolbar {
                 ToolbarItemGroup(placement: .primaryAction) {
@@ -101,10 +181,7 @@ struct ReportView: View {
     }
 
     private var content: some View {
-        // Every card below reads the same results, so they are worked out once
-        // here rather than once per card.
-        let results = self.results
-        let summaryTransactions = self.summaryTransactions
+        let report = reportData
         let visibility = ReportContentVisibility(query: query)
 
         return ScrollView {
@@ -118,43 +195,57 @@ struct ReportView: View {
                 }
 
                 SpendingOverviewCard(
-                    title: summaryRange.title(in: locale),
-                    income: TransactionSummary.totalIncome(of: summaryTransactions),
-                    expense: TransactionSummary.totalExpense(of: summaryTransactions),
-                    count: summaryTransactions.count
+                    title: query.range.title(in: locale),
+                    income: report.income,
+                    expense: report.expense,
+                    count: report.count
                 )
                 .accessibilityIdentifier("report-overview")
 
-                TransactionCalendarCard(
-                    month: summaryMonth,
-                    weeks: summaryCalendarWeeks,
-                    onStepMonth: stepSummaryMonth
-                )
+                if visibility.showsCalendar {
+                    TransactionCalendarCard(
+                        month: calendarMonth,
+                        weeks: report.calendarWeeks(of: calendarMonth),
+                        onStepMonth: stepMonth
+                    )
+                }
+
+                if !report.transactions.isEmpty {
+                    CategoryBreakdownCard(
+                        kind: categoryBreakdownKindBinding(for: report),
+                        slices: report.categoryBreakdownSlices(
+                            of: breakdownKind,
+                            categories: categories
+                        ),
+                        range: query.range,
+                        showsKindPicker: report.allowsCategoryKindSelection
+                    )
+                }
 
                 AccountSpendingSection(
-                    monthTitle: summaryRange.title(in: locale),
-                    rows: AccountSpendingSummary.rows(
-                        accounts: accounts,
-                        transactions: summaryTransactions
-                    ),
+                    range: query.range,
+                    rows: report.accountSpendingRows(accounts: accounts),
                     accounts: accounts
                 )
 
-                if results.isEmpty {
+                if report.transactions.isEmpty {
                     emptyState
                 } else {
-                    CategoryBreakdownCard(
-                        kind: $breakdownKind,
-                        slices: breakdownSlices(of: results),
-                        range: query.range
-                    )
-
                     if visibility.showsTransactionList {
-                        resultsSection(results)
+                        resultsSection(report.transactions)
+                    }
+
+                    if visibility.showsSpendingTrend,
+                        let unit = SpendingTrend.unit(for: query.range)
+                    {
+                        SpendingTrendCard(
+                            unit: unit,
+                            points: report.spendingTrend(in: query.range)
+                        )
                     }
 
                     if visibility.showsNetTrend {
-                        NetTrendCard(points: TransactionSummary.runningNet(results))
+                        NetTrendCard(points: report.netTrend)
                     }
                 }
             }
@@ -166,38 +257,25 @@ struct ReportView: View {
         }
     }
 
-    private var results: [MoneyTransaction] {
-        TransactionSearch.results(
-            of: query,
+    private var reportData: ReportData {
+        ReportData(
+            query: query,
             transactions: transactions,
             categoryNames: categoryNames,
             accountNames: accountNames
         )
     }
 
-    private var summaryRange: TransactionRange {
-        .month(containing: summaryMonth)
+    /// The month the calendar draws, which is the month the header is filtered
+    /// to: the card is only on screen while that period is one month.
+    private var calendarMonth: Date {
+        TransactionPeriod.startOfMonth(for: query.range.start)
     }
 
-    private var summaryTransactions: [MoneyTransaction] {
-        TransactionSummary.inRange(summaryRange, transactions: transactions)
-    }
-
-    private var summaryCalendarWeeks: [TransactionCalendarWeek] {
-        TransactionCalendar.weeks(
-            of: summaryMonth,
-            transactions: transactions
-        )
-    }
-
-    private func stepSummaryMonth(_ steps: Int) {
-        let calendar = TransactionPeriod.calendar
-
-        guard let moved = calendar.date(byAdding: .month, value: steps, to: summaryMonth) else {
-            return
-        }
-
-        summaryMonth = TransactionPeriod.startOfMonth(for: moved)
+    /// The calendar's arrows move the filter itself, so the grid and the figures
+    /// above it can never come to describe different months.
+    private func stepMonth(_ steps: Int) {
+        query.range = query.range.stepped(by: steps)
     }
 
     private var categoryNames: [UUID: String] {
@@ -208,12 +286,12 @@ struct ReportView: View {
         Dictionary(uniqueKeysWithValues: accounts.map { ($0.id, $0.name) })
     }
 
-    private func breakdownSlices(of results: [MoneyTransaction]) -> [CategoryBreakdownSlice] {
-        CategoryBreakdown.slices(
-            of: breakdownKind,
-            transactions: results,
-            categories: categories
-        )
+    private func categoryBreakdownKindBinding(for report: ReportData) -> Binding<TransactionKind> {
+        guard let globalKind = report.globalKind else {
+            return $breakdownKind
+        }
+
+        return .constant(globalKind)
     }
 
     /// Editing from a period that does not include today starts on its first
@@ -222,11 +300,18 @@ struct ReportView: View {
         query.range.contains(.now) ? .now : query.range.start
     }
 
-    /// The month summarized by the overview and account spending, kept separate
-    /// from the wider query that drives charts and search.
-    private var monthRail: some View {
-        MonthRail(months: railMonths, selection: summaryMonth) { month in
-            summaryMonth = TransactionPeriod.startOfMonth(for: month)
+    /// The rail walks in whatever unit the header is filtering by, and a tap on
+    /// it moves that filter rather than a period kept beside it: a screen
+    /// showing a year steps by years, one showing a day by days.
+    private var periodRail: some View {
+        let periods = PeriodRailPeriods(range: query.range, today: .now)
+
+        return PeriodRail(
+            unit: periods.unit,
+            periods: periods.periods,
+            selection: periods.selection
+        ) { period in
+            query.range = periods.unit.range(containing: period)
         }
         .background(MonMonTheme.canvas)
         .overlay(alignment: .bottom) {
@@ -234,15 +319,6 @@ struct ReportView: View {
                 .fill(MonMonTheme.border)
                 .frame(height: 1)
         }
-    }
-
-    /// Keep the selected summary month on the rail even when it lies beyond the
-    /// calendar picker's ordinary bounds.
-    private var railMonths: [Date] {
-        TransactionPeriod.months(
-            from: min(CalendarTheme.startMonth(), summaryMonth),
-            through: max(CalendarTheme.endMonth(), summaryMonth)
-        )
     }
 
     private var emptyState: some View {

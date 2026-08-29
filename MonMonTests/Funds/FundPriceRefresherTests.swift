@@ -71,11 +71,44 @@ struct FundPriceRefresherTests {
         }
     }
 
+    /// Answers the catalogue call the logo backfill makes, and counts it. No
+    /// test reaches Fmarket: a refresher built with the real provider would,
+    /// the moment an instrument was short of a logo.
+    private struct StubCatalogue: FundCatalogueProvider {
+        let source = FundQuoteSource.fmarket
+        var listed: [FundInstrumentCandidate] = []
+        var error: FundQuoteError?
+        let calls: StubProvider.Calls
+
+        func catalogue() async throws -> [FundInstrumentCandidate] {
+            calls.record("catalogue")
+            if let error {
+                throw error
+            }
+            return listed
+        }
+
+        func latestQuote(symbol: String, asOf: Date) async throws -> FundQuote {
+            throw FundQuoteError.noQuoteAvailable
+        }
+
+        func search(_ query: String) async throws -> [FundInstrumentCandidate] {
+            listed
+        }
+    }
+
+    private func candidate(_ symbol: String, logoURL: String?) -> FundInstrumentCandidate {
+        FundInstrumentCandidate(symbol: symbol, name: symbol, kind: .fund, logoURL: logoURL)
+    }
+
     private func refresher(
         price: Decimal = 30_000,
         askPrice: Decimal? = nil,
         quoteDay: Date? = nil,
-        error: FundQuoteError? = nil
+        error: FundQuoteError? = nil,
+        listed: [FundInstrumentCandidate] = [],
+        catalogueError: FundQuoteError? = nil,
+        catalogueCalls: StubProvider.Calls = StubProvider.Calls()
     ) -> (FundPriceRefresher, StubProvider.Calls) {
         let calls = StubProvider.Calls()
         let stub = StubProvider(
@@ -92,10 +125,137 @@ struct FundPriceRefresherTests {
                     fmarket: stub,
                     vndirect: stub,
                     vangToday: stub
+                ),
+                catalogue: StubCatalogue(
+                    listed: listed,
+                    error: catalogueError,
+                    calls: catalogueCalls
                 )
             ),
             calls
         )
+    }
+
+    @Test("A screen opening onto current prices asks for nothing")
+    func staleRefreshSkipsCurrentPrices() async throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        _ = seed(context, priceAsOf: startOfAsOf)
+        try context.save()
+
+        let catalogueCalls = StubProvider.Calls()
+        let (refresher, calls) = refresher(catalogueCalls: catalogueCalls)
+        let (instruments, holdings) = try fetch(context)
+        await refresher.refreshStale(
+            instruments: instruments,
+            holdings: holdings,
+            sales: [],
+            in: context,
+            asOf: asOf
+        )
+
+        #expect(calls.count == 0)
+        #expect(catalogueCalls.count == 0)
+        #expect(refresher.outcomes.isEmpty)
+    }
+
+    @Test("A screen opening onto a price behind its day fetches it")
+    func staleRefreshFetchesBehindPrices() async throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let instrument = seed(context, priceAsOf: day(-10))
+        try context.save()
+
+        let (refresher, calls) = refresher(price: 31_581)
+        let (instruments, holdings) = try fetch(context)
+        await refresher.refreshStale(
+            instruments: instruments,
+            holdings: holdings,
+            sales: [],
+            in: context,
+            asOf: asOf
+        )
+
+        #expect(calls.count == 1)
+        #expect(instrument.currentPricePerUnit == 31_581)
+    }
+
+    @Test("A refresh fills in a logo the instrument is missing")
+    func refreshBackfillsMissingLogo() async throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let instrument = seed(context, priceAsOf: day(-10))
+        try context.save()
+
+        let catalogueCalls = StubProvider.Calls()
+        let (refresher, _) = refresher(
+            listed: [candidate("VESAF", logoURL: "https://files.fmarket.vn/vcam.png")],
+            catalogueCalls: catalogueCalls
+        )
+        let (instruments, holdings) = try fetch(context)
+        await refresher.refresh(
+            instruments: instruments,
+            holdings: holdings,
+            sales: [],
+            in: context,
+            asOf: asOf
+        )
+
+        #expect(catalogueCalls.count == 1)
+        #expect(instrument.logoURL == "https://files.fmarket.vn/vcam.png")
+    }
+
+    /// The image is decoration. A stored one is left alone, which is what keeps
+    /// the backfill to the one request it needs and no more.
+    @Test("A logo already stored costs no request")
+    func storedLogoIsNotRefetched() async throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let instrument = seed(context, priceAsOf: day(-10))
+        instrument.logoURL = "https://files.fmarket.vn/old.png"
+        try context.save()
+
+        let catalogueCalls = StubProvider.Calls()
+        let (refresher, _) = refresher(
+            listed: [candidate("VESAF", logoURL: "https://files.fmarket.vn/new.png")],
+            catalogueCalls: catalogueCalls
+        )
+        let (instruments, holdings) = try fetch(context)
+        await refresher.refresh(
+            instruments: instruments,
+            holdings: holdings,
+            sales: [],
+            in: context,
+            asOf: asOf
+        )
+
+        #expect(catalogueCalls.count == 0)
+        #expect(instrument.logoURL == "https://files.fmarket.vn/old.png")
+    }
+
+    /// A listing that will not answer must cost nothing the prices already
+    /// fetched, and must not leave the refresh reporting a failure it did not
+    /// have.
+    @Test("A logo lookup that fails leaves the prices alone")
+    func failedLogoLookupKeepsPrices() async throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let instrument = seed(context, priceAsOf: day(-10))
+        try context.save()
+
+        let (refresher, _) = refresher(price: 31_581, catalogueError: .transport)
+        let (instruments, holdings) = try fetch(context)
+        await refresher.refresh(
+            instruments: instruments,
+            holdings: holdings,
+            sales: [],
+            in: context,
+            asOf: asOf
+        )
+
+        #expect(instrument.currentPricePerUnit == 31_581)
+        #expect(instrument.logoURL == nil)
+        #expect(refresher.outcomes[instrument.id]?.isFailure == false)
     }
 
     @Test("A refresh stores both sides of a gold quote")
@@ -337,7 +497,8 @@ struct FundPriceRefresherTests {
 
         let provider = SelectiveProvider(quoteDay: startOfAsOf, calls: calls)
         let refresher = FundPriceRefresher(
-            router: FundQuoteRouter(fmarket: provider, vndirect: provider))
+            router: FundQuoteRouter(fmarket: provider, vndirect: provider),
+            catalogue: StubCatalogue(calls: StubProvider.Calls()))
         let (instruments, holdings) = try fetch(context)
         await refresher.refresh(
             instruments: instruments, holdings: holdings, sales: [], in: context,

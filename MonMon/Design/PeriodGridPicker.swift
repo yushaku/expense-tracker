@@ -25,6 +25,13 @@ enum PeriodGrid {
         date(year: year, month: 1)
     }
 
+    /// Whether a grid cell names the period the device clock is inside. A
+    /// missing month asks about the whole year.
+    static func isCurrent(year: Int, month: Int? = nil, now: Date = .now) -> Bool {
+        let unit: PeriodRailUnit = month == nil ? .year : .month
+        return unit.marksNow(date(year: year, month: month ?? 1), now: now)
+    }
+
     /// The twelve month names in the language on show. Built per call rather
     /// than stored, because a stored list would keep the language the app
     /// happened to launch in.
@@ -90,23 +97,44 @@ struct MonthGridPicker: View {
 
     private func monthCell(year: Int, month: Int) -> some View {
         let isSelected = year == selectedYear && month == selectedMonth
+        let isCurrent = PeriodGrid.isCurrent(year: year, month: month)
 
         return Button {
             selection = PeriodGrid.date(year: year, month: month)
         } label: {
             Text(PeriodGrid.monthNames(in: locale)[month - 1])
-                .font(.subheadline.weight(isSelected ? .bold : .medium))
-                .foregroundStyle(isSelected ? MonMonTheme.onAccent : MonMonTheme.textPrimary)
+                .font(.subheadline.weight(isSelected ? .bold : (isCurrent ? .semibold : .medium)))
+                .foregroundStyle(
+                    isSelected
+                        ? MonMonTheme.onAccent
+                        : (isCurrent ? MonMonTheme.accent : MonMonTheme.textPrimary)
+                )
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
                 .background {
                     Capsule(style: .continuous)
-                        .fill(isSelected ? MonMonTheme.accent : MonMonTheme.field)
+                        .fill(
+                            isSelected
+                                ? MonMonTheme.accent
+                                : (isCurrent ? MonMonTheme.accent.opacity(0.14) : MonMonTheme.field)
+                        )
+                }
+                .overlay {
+                    Capsule(style: .continuous)
+                        .stroke(
+                            isCurrent
+                                ? (isSelected
+                                    ? MonMonTheme.onAccent.opacity(0.8)
+                                    : MonMonTheme.accent.opacity(0.65))
+                                : Color.clear,
+                            lineWidth: 1.5
+                        )
                 }
                 .contentShape(Capsule(style: .continuous))
         }
         .buttonStyle(.plain)
         .accessibilityLabel("\(PeriodGrid.monthNames(in: locale)[month - 1]) \(year)")
+        .accessibilityValue(isCurrent ? Text("Current month") : Text(""))
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 }
@@ -141,23 +169,44 @@ struct YearGridPicker: View {
 
     private func yearCell(_ year: Int) -> some View {
         let isSelected = year == selectedYear
+        let isCurrent = PeriodGrid.isCurrent(year: year)
 
         return Button {
             selection = PeriodGrid.date(year: year)
         } label: {
             Text(String(year))
-                .font(.subheadline.weight(isSelected ? .bold : .medium))
+                .font(.subheadline.weight(isSelected ? .bold : (isCurrent ? .semibold : .medium)))
                 .monospacedDigit()
-                .foregroundStyle(isSelected ? MonMonTheme.onAccent : MonMonTheme.textPrimary)
+                .foregroundStyle(
+                    isSelected
+                        ? MonMonTheme.onAccent
+                        : (isCurrent ? MonMonTheme.accent : MonMonTheme.textPrimary)
+                )
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
                 .background {
                     Capsule(style: .continuous)
-                        .fill(isSelected ? MonMonTheme.accent : MonMonTheme.field)
+                        .fill(
+                            isSelected
+                                ? MonMonTheme.accent
+                                : (isCurrent ? MonMonTheme.accent.opacity(0.14) : MonMonTheme.field)
+                        )
+                }
+                .overlay {
+                    Capsule(style: .continuous)
+                        .stroke(
+                            isCurrent
+                                ? (isSelected
+                                    ? MonMonTheme.onAccent.opacity(0.8)
+                                    : MonMonTheme.accent.opacity(0.65))
+                                : Color.clear,
+                            lineWidth: 1.5
+                        )
                 }
                 .contentShape(Capsule(style: .continuous))
         }
         .buttonStyle(.plain)
+        .accessibilityValue(isCurrent ? Text("Current year") : Text(""))
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 }

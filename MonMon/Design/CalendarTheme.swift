@@ -103,11 +103,16 @@ struct ThemedDayView: DayView {
 
                 createSelectionView()
 
-                // Today keeps a ring when it is not the selection, so the day
-                // is findable without relying on colour alone.
-                if isToday(), !isSelected() {
+                // Today always keeps a ring, including while selected, so the
+                // current day and the owner's selection remain separate facts.
+                if isToday() {
                     Circle()
-                        .stroke(MonMonTheme.accent.opacity(0.55), lineWidth: 1.5)
+                        .stroke(
+                            isSelected()
+                                ? MonMonTheme.onAccent.opacity(0.8)
+                                : MonMonTheme.accent.opacity(0.55),
+                            lineWidth: 1.5
+                        )
                 }
 
                 createDayLabel()
@@ -118,6 +123,7 @@ struct ThemedDayView: DayView {
             // today feel unselectable. The whole square takes the tap instead.
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .contentShape(Rectangle())
+            .accessibilityValue(isToday() ? Text("Today") : Text(""))
         )
     }
 

@@ -46,15 +46,7 @@ struct FundGroupCard: View {
 
     private var header: some View {
         HStack(spacing: 14) {
-            Text(group.symbol.prefix(2))
-                .font(.system(size: 15, weight: .bold, design: .rounded))
-                .foregroundStyle(MonMonTheme.funds)
-                .frame(width: 44, height: 44)
-                .background(
-                    MonMonTheme.funds.opacity(0.16),
-                    in: RoundedRectangle(cornerRadius: 13)
-                )
-                .accessibilityHidden(true)
+            FundLogoView(symbol: group.symbol, logoURL: group.instrument?.logoURL)
 
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 8) {

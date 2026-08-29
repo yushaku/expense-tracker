@@ -1,4 +1,9 @@
 import Foundation
+import SwiftUI
+
+#if os(iOS)
+    import UIKit
+#endif
 
 enum VNDCurrency {
     static let code = "VND"
@@ -42,6 +47,15 @@ enum VNDCurrency {
     /// report it instead of silently deleting input.
     static func formatInput(_ text: String) -> String {
         normalizedInput(text) ?? text
+    }
+
+    /// Returns a replacement only when a live text edit needs another state
+    /// update. That second update makes SwiftUI reconcile the platform text
+    /// field with the grouped value instead of leaving its raw keystrokes on
+    /// screen.
+    static func liveInputUpdate(for text: String) -> String? {
+        let formatted = formatInput(text)
+        return formatted == text ? nil : formatted
     }
 
     /// An abbreviated amount: `100đ`, `1k`, `1,5k`, `1,2M`, `1B`.
@@ -111,6 +125,13 @@ enum VNDCurrency {
             return nil
         }
 
+        // A field that starts at nought is typed into, not cleared first, so the
+        // leading noughts that produces are dropped rather than shown back as
+        // `05`. One is kept: a nought is a figure.
+        while integerDigits.count > 1, integerDigits.first == "0" {
+            integerDigits.removeFirst()
+        }
+
         var reversedGroupedDigits: [Character] = []
         for (index, digit) in integerDigits.reversed().enumerated() {
             if index > 0, index.isMultiple(of: 3) {
@@ -129,5 +150,56 @@ enum VNDCurrency {
             return nil
         }
         return groupedInteger + "," + fractionDigits
+    }
+}
+
+enum VNDTextFieldKeyboard {
+    case wholeNumber
+    case decimal
+    case signed
+
+    #if os(iOS)
+        fileprivate var uiKeyboardType: UIKeyboardType {
+            switch self {
+            case .wholeNumber:
+                .numberPad
+            case .decimal:
+                .decimalPad
+            case .signed:
+                .numbersAndPunctuation
+            }
+        }
+    #endif
+}
+
+struct VNDTextField: View {
+    let prompt: LocalizedStringKey
+    @Binding var text: String
+    let keyboard: VNDTextFieldKeyboard
+
+    init(
+        _ prompt: LocalizedStringKey = "0",
+        text: Binding<String>,
+        keyboard: VNDTextFieldKeyboard = .wholeNumber
+    ) {
+        self.prompt = prompt
+        _text = text
+        self.keyboard = keyboard
+    }
+
+    var body: some View {
+        Group {
+            #if os(iOS)
+                TextField(prompt, text: $text)
+                    .keyboardType(keyboard.uiKeyboardType)
+            #else
+                TextField(prompt, text: $text)
+            #endif
+        }
+        .onChange(of: text, initial: true) { _, newText in
+            if let formatted = VNDCurrency.liveInputUpdate(for: newText) {
+                text = formatted
+            }
+        }
     }
 }

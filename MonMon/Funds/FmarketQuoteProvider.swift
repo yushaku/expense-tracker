@@ -59,6 +59,7 @@ struct FmarketQuoteProvider: FundCatalogueProvider {
         return try rows.map { row in
             let object = try JSONReader.object(row)
             let change = (object["productNavChange"] as? [String: Any]) ?? [:]
+            let owner = (object["owner"] as? [String: Any]) ?? [:]
 
             return FundInstrumentCandidate(
                 symbol: try JSONReader.string(object["shortName"]).uppercased(),
@@ -67,10 +68,29 @@ struct FmarketQuoteProvider: FundCatalogueProvider {
                 kind: .fund,
                 pricePerUnit: try? JSONReader.price(object["nav"]),
                 priceAsOf: Self.tradingDay(fromMilliseconds: change["updateAt"]),
-                owner: (object["owner"] as? [String: Any])
-                    .flatMap { $0["name"] as? String } ?? ""
+                owner: owner["name"] as? String ?? "",
+                // Fmarket hangs the logo off the management company, not the
+                // fund. A row without one is imported as before: the badge
+                // falls back to the ticker.
+                logoURL: Self.logoURL(from: owner)
             )
         }
+    }
+
+    /// The manager's logo, when the listing gives a usable absolute URL.
+    ///
+    /// Anything else — an empty string, a relative path, a scheme this app will
+    /// not open — is dropped rather than stored for a view to fail on later.
+    private static func logoURL(from owner: [String: Any]) -> String? {
+        guard
+            let text = (owner["avatarUrl"] as? String)?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+            let url = URL(string: text),
+            url.scheme == "https"
+        else {
+            return nil
+        }
+        return url.absoluteString
     }
 
     /// `updateAt` is epoch milliseconds. A listing with no usable stamp yields

@@ -68,21 +68,12 @@ struct QuickExpensePresetRow: View {
     }
 
     private var amountField: some View {
-        TextField("Price", text: $draft.amountText)
-            #if os(iOS)
-                .keyboardType(.numberPad)
-            #endif
+        VNDTextField("Price", text: $draft.amountText)
             .multilineTextAlignment(.trailing)
             .monospacedDigit()
             .textFieldStyle(.plain)
             .padding(.horizontal, 10)
             .frame(minHeight: 48)
-            .onChange(of: draft.amountText) {
-                let formatted = VNDCurrency.formatInput(draft.amountText)
-                if formatted != draft.amountText {
-                    draft.amountText = formatted
-                }
-            }
             .accessibilityLabel(Text(draft.slot.amountFieldLabel))
             .accessibilityIdentifier("quick-expense-\(draft.slot.rawValue)-amount")
     }

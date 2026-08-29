@@ -97,6 +97,29 @@ struct FundCatalogueImportTests {
         #expect(aeif.priceAsOf == Date(timeIntervalSince1970: 0))
     }
 
+    /// The logo is the manager's, so two funds of one manager carry the same
+    /// image, and a fund whose listing gives none carries no image at all.
+    @Test("Importing keeps the manager's logo when the listing carries one")
+    func importKeepsManagerLogo() async throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let importer = importer(FundQuoteFixtures.fmarketCatalogue)
+        await importer.load(existing: [])
+
+        try importer.importing(importer.importable, into: context, existing: [])
+
+        let saved = try context.fetch(FetchDescriptor<FundInstrument>())
+        let vesaf = try #require(saved.first { $0.symbol == "VESAF" })
+        let veof = try #require(saved.first { $0.symbol == "VEOF" })
+        #expect(vesaf.logoURL == "https://files.fmarket.vn/pro/user/2/vcam.png?timestamp=1")
+        #expect(veof.logoURL == vesaf.logoURL)
+
+        // AEIF's listing has no manager, and UMMF's logo is offered over
+        // plain http. Neither is stored, and both still import.
+        #expect(saved.first { $0.symbol == "AEIF" }?.logoURL == nil)
+        #expect(saved.first { $0.symbol == "UMMF" }?.logoURL == nil)
+    }
+
     @Test("Importing a ticker already stored adds nothing")
     func importingDuplicateAddsNothing() async throws {
         let container = try makeContainer()

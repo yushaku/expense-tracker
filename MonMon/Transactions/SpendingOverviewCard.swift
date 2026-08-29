@@ -183,27 +183,31 @@ struct SpendingOverviewCard: View {
     private func directionTile(_ kind: TransactionKind, amount: Decimal) -> some View {
         let tint = kind == .income ? MonMonTheme.gain : MonMonTheme.danger
 
-        return HStack(spacing: 8) {
+        return HStack(alignment: .center, spacing: 10) {
+            // The figure is what the tile is for, so it takes the room and the
+            // weight; the name and the arrow that label it stack out of its way.
             Text(VNDCurrency.format(amount))
-                .font(.subheadline.weight(.bold))
+                .font(.system(size: 20, weight: .bold, design: .rounded))
                 .monospacedDigit()
                 .lineLimit(1)
-                .minimumScaleFactor(0.6)
+                .minimumScaleFactor(0.5)
                 .foregroundStyle(MonMonTheme.textPrimary)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            Spacer(minLength: 4)
+            VStack(alignment: .trailing, spacing: 4) {
+                Text(kind.displayName)
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
 
-            Text(kind.displayName)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(MonMonTheme.textSecondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-
-            Image(systemName: kind.symbolName)
-                .font(.caption2.weight(.bold))
-                .foregroundStyle(tint)
-                .frame(width: 22, height: 22)
-                .background(tint.opacity(0.18), in: Circle())
+                Image(systemName: kind.symbolName)
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(tint)
+                    .frame(width: 22, height: 22)
+                    .background(tint.opacity(0.18), in: Circle())
+            }
+            .fixedSize(horizontal: true, vertical: false)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 12)

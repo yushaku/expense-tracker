@@ -52,27 +52,54 @@ enum TransactionPeriod {
     /// in, oldest first. Both ends are included, so a strip built from a pair of
     /// dates can show the month either of them sits in.
     static func months(from start: Date, through end: Date) -> [Date] {
-        let first = startOfMonth(for: start)
-        let last = startOfMonth(for: end)
+        steps(of: .month, from: startOfMonth(for: start), through: startOfMonth(for: end))
+    }
 
+    static func startOfYear(for date: Date) -> Date {
+        let components = calendar.dateComponents([.year], from: date)
+        return calendar.date(from: components) ?? date
+    }
+
+    /// Every year from the one `start` falls in through the one `end` falls in,
+    /// oldest first, on the same both-ends-included footing as `months`.
+    static func years(from start: Date, through end: Date) -> [Date] {
+        steps(of: .year, from: startOfYear(for: start), through: startOfYear(for: end))
+    }
+
+    /// Every day from `start` through `end`, oldest first, both included.
+    static func days(from start: Date, through end: Date) -> [Date] {
+        steps(
+            of: .day,
+            from: calendar.startOfDay(for: start),
+            through: calendar.startOfDay(for: end)
+        )
+    }
+
+    /// Walks one unit at a time from the first boundary to the last. Callers
+    /// hand in dates already cut to the unit, so the walk never drifts.
+    private static func steps(
+        of component: Calendar.Component,
+        from first: Date,
+        through last: Date
+    ) -> [Date] {
         guard first <= last else {
             return []
         }
 
-        var months: [Date] = []
+        var dates: [Date] = []
         var cursor = first
 
         while cursor <= last {
-            months.append(cursor)
+            dates.append(cursor)
 
-            guard let next = calendar.date(byAdding: .month, value: 1, to: cursor) else {
+            guard let next = calendar.date(byAdding: component, value: 1, to: cursor) else {
                 break
             }
 
             cursor = next
         }
 
-        return months
+        return dates
     }
 
     static func title(for date: Date, in locale: Locale) -> String {

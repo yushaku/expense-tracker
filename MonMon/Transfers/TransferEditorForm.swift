@@ -204,14 +204,8 @@ struct TransferEditorForm: View {
 
     @ViewBuilder
     private var amountTextField: some View {
-        #if os(iOS)
-            TextField("0", text: $draft.amountText)
-                .keyboardType(.numberPad)
-                .accessibilityIdentifier("transfer-amount")
-        #else
-            TextField("0", text: $draft.amountText)
-                .accessibilityIdentifier("transfer-amount")
-        #endif
+        VNDTextField(text: $draft.amountText)
+            .accessibilityIdentifier("transfer-amount")
     }
 
     private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {

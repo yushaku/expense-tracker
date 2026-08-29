@@ -65,13 +65,16 @@ enum FundQuoteFixtures {
         {"status":200,"data":{"total":4,"rows":[
           {"id":70,"shortName":"UMMF","name":"QUY DAU TU TIEN TE UOB",
            "nav":10000.0,"productNavChange":{"updateAt":1787420400000},
-           "owner":{"id":1,"name":"CÔNG TY CỔ PHẦN QUẢN LÝ QUỸ UOB ASSET MANAGEMENT (VIỆT NAM)"}},
+           "owner":{"id":1,"name":"CÔNG TY CỔ PHẦN QUẢN LÝ QUỸ UOB ASSET MANAGEMENT (VIỆT NAM)",
+                     "avatarUrl":"http://files.fmarket.vn/pro/user/1/uob.png"}},
           {"id":23,"shortName":"vesaf","name":"QUỸ ĐẦU TƯ CỔ PHIẾU TIẾP CẬN THỊ TRƯỜNG VINACAPITAL",
            "nav":31581.76,"productNavChange":{"updateAt":1787420400000},
-           "owner":{"id":2,"name":"CÔNG TY CỔ PHẦN QUẢN LÝ QUỸ VINACAPITAL"}},
+           "owner":{"id":2,"name":"CÔNG TY CỔ PHẦN QUẢN LÝ QUỸ VINACAPITAL",
+                    "avatarUrl":"https://files.fmarket.vn/pro/user/2/vcam.png?timestamp=1"}},
           {"id":24,"shortName":"VEOF","name":"QUỸ ĐẦU TƯ CỔ PHIẾU HƯNG THỊNH VINACAPITAL",
            "nav":28000.5,"productNavChange":{"updateAt":1787420400000},
-           "owner":{"id":2,"name":"CÔNG TY CỔ PHẦN QUẢN LÝ QUỸ VINACAPITAL"}},
+           "owner":{"id":2,"name":"CÔNG TY CỔ PHẦN QUẢN LÝ QUỸ VINACAPITAL",
+                    "avatarUrl":"https://files.fmarket.vn/pro/user/2/vcam.png?timestamp=1"}},
           {"id":91,"shortName":"AEIF","name":"QUỸ ĐẦU TƯ CỔ PHIẾU AMBER","nav":9348.31}
         ]}}
         """

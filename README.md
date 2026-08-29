@@ -18,8 +18,9 @@ outstanding follows the payments, and total assets stay put through all of it.
 `market-valuation` replaces the hand-typed NAV with one fetched from Fmarket for
 open-ended funds and VNDIRECT for listed ETFs, and values physical gold from the
 shop-buy side of a vang.today quote. The price lives on a `FundInstrument`
-catalogue so one catalogue code can only ever carry one price. Every fetch is
-owner-triggered. `recurring-transactions` records money that comes back — rent,
+catalogue so one catalogue code can only ever carry one price. A fetch happens
+when the owner asks for one, or when a screen opens onto a price older than the
+day it should carry — never on a timer and never in the background. `recurring-transactions` records money that comes back — rent,
 salary, a subscription — from a rule the owner writes once, catching up on
 every date it has fallen due each time the app is opened.
 

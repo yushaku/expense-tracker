@@ -64,6 +64,27 @@ struct TransactionPeriodTests {
         #expect(months.isEmpty)
     }
 
+    @Test("A span of dates lists every year it touches, oldest first")
+    func yearsCoverBothEnds() {
+        #expect(
+            TransactionPeriod.years(from: date(2024, 11, 20), through: date(2026, 2, 3))
+                == [date(2024, 1, 1), date(2025, 1, 1), date(2026, 1, 1)]
+        )
+    }
+
+    @Test("A span of dates lists every day it touches, oldest first")
+    func daysCoverBothEnds() {
+        #expect(
+            TransactionPeriod.days(from: date(2026, 1, 30, 22), through: date(2026, 2, 2))
+                == [date(2026, 1, 30), date(2026, 1, 31), date(2026, 2, 1), date(2026, 2, 2)]
+        )
+    }
+
+    @Test("A year starts at midnight on its first day")
+    func startOfYearIsFirstDay() {
+        #expect(TransactionPeriod.startOfYear(for: date(2026, 8, 15, 13, 45)) == date(2026, 1, 1))
+    }
+
     @Test("The title names the month and the year in the language it is asked for")
     func titleFollowsTheLocale() {
         let august = date(2026, 8, 15)

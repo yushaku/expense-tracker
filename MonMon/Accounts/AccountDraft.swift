@@ -14,10 +14,14 @@ struct AccountDraft: Equatable {
     var openingBalanceText: String
     var creditLimitText: String
 
+    /// A new account starts at zero rather than blank: most accounts are opened
+    /// with nothing in them yet, and an owner who does have a balance types over
+    /// a nought as readily as into an empty field. It also means the form can be
+    /// saved the moment it has a name.
     init(
         name: String = "",
         kind: CashAccountKind = .normal,
-        openingBalanceText: String = "",
+        openingBalanceText: String = "0",
         creditLimitText: String = ""
     ) {
         self.name = name

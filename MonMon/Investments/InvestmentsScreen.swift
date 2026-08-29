@@ -48,8 +48,11 @@ struct InvestmentsScreen: View {
 
     @Environment(\.locale) private var locale
 
+    @Environment(\.modelContext) private var modelContext
+
     @State private var segment: InvestmentSegment
     @State private var editor: InvestmentEditorMode?
+    @State private var refresher = FundPriceRefresher()
 
     /// Which list is in front on arrival. The Wealth screen names all three
     /// before pushing here, so landing on the one that was tapped saves the
@@ -92,6 +95,18 @@ struct InvestmentsScreen: View {
         }
         .navigationTitle("Investments")
         .accessibilityIdentifier("investments-list")
+        // Opening a segment onto a price older than the day it should carry
+        // fetches it. Keyed on the segment so switching to gold prices gold,
+        // and bounded by the refresher: current prices ask for nothing, and a
+        // ticker asked about minutes ago is not asked about again.
+        .task(id: segment) {
+            await refresher.refreshStale(
+                instruments: pricedInstruments,
+                holdings: holdings,
+                sales: sales,
+                in: modelContext
+            )
+        }
         .appSheet(item: $editor) { mode in
             switch mode {
             case .savings(let savingsMode):
@@ -192,6 +207,61 @@ struct InvestmentsScreen: View {
         )
     }
 
+    /// What the last refresh did, in one line. A failure is what the line
+    /// carries when there is one: an owner who asked for prices and got none
+    /// needs to know why more than they need a count of the rest.
+    private var refreshSummary: String? {
+        guard !refresher.isRunning else {
+            return nil
+        }
+
+        let outcomes = pricedInstruments.compactMap { refresher.outcomes[$0.id] }
+        guard !outcomes.isEmpty else {
+            return nil
+        }
+
+        if let failure = outcomes.first(where: \.isFailure) {
+            return failure.message(in: locale)
+        }
+
+        let updated = outcomes.filter(\.isUpdate).count
+        guard updated > 0 else {
+            return outcomes.compactMap { $0.message(in: locale) }.first
+        }
+        return AppText.string("\(updated) updated", in: locale)
+    }
+
+    private var hasRefreshFailure: Bool {
+        pricedInstruments.contains { refresher.outcomes[$0.id]?.isFailure == true }
+    }
+
+    /// Refresh is offered only where a request could achieve something: a held
+    /// instrument of the kind on show, with automatic quotes left on.
+    private var canRefresh: Bool {
+        refresher.hasAnythingToRefresh(
+            instruments: pricedInstruments,
+            holdings: holdings,
+            sales: sales
+        )
+    }
+
+    /// The instruments the segment on show is priced from.
+    private var pricedInstruments: [FundInstrument] {
+        let kinds = segment.instrumentKinds
+        return instruments.filter { kinds.contains($0.kind) }
+    }
+
+    private func refresh() {
+        Task {
+            await refresher.refresh(
+                instruments: pricedInstruments,
+                holdings: holdings,
+                sales: sales,
+                in: modelContext
+            )
+        }
+    }
+
     private var segmentPicker: some View {
         SegmentedTabs(
             label: "Investment kind",
@@ -224,7 +294,12 @@ struct InvestmentsScreen: View {
                     """,
                 emptySystemImage: "chart.line.uptrend.xyaxis",
                 addTitle: InvestmentSegment.funds.addTitle,
-                addIdentifier: InvestmentSegment.funds.addIdentifier
+                addIdentifier: InvestmentSegment.funds.addIdentifier,
+                onRefresh: { refresh() },
+                isRefreshing: refresher.isRunning,
+                canRefresh: canRefresh,
+                refreshMessage: refreshSummary,
+                hasFailure: hasRefreshFailure
             ) {
                 add()
             }
@@ -242,7 +317,12 @@ struct InvestmentsScreen: View {
                     """,
                 emptySystemImage: "seal.fill",
                 addTitle: InvestmentSegment.gold.addTitle,
-                addIdentifier: InvestmentSegment.gold.addIdentifier
+                addIdentifier: InvestmentSegment.gold.addIdentifier,
+                onRefresh: { refresh() },
+                isRefreshing: refresher.isRunning,
+                canRefresh: canRefresh,
+                refreshMessage: refreshSummary,
+                hasFailure: hasRefreshFailure
             ) {
                 add()
             }

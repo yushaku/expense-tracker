@@ -213,30 +213,19 @@ struct AccountEditorForm: View {
 
     @ViewBuilder
     private var balanceTextField: some View {
-        #if os(iOS)
-            // A credit card balance can be negative, and `.numberPad` has no
-            // minus key, so that kind needs the punctuation keyboard.
-            TextField("0", text: $draft.openingBalanceText)
-                .keyboardType(
-                    draft.kind.allowsNegativeBalance ? .numbersAndPunctuation : .numberPad
-                )
-                .accessibilityIdentifier("opening-balance")
-        #else
-            TextField("0", text: $draft.openingBalanceText)
-                .accessibilityIdentifier("opening-balance")
-        #endif
+        // A credit card balance can be negative, so it needs a minus-capable
+        // keyboard while normal balances stay on the simpler number pad.
+        VNDTextField(
+            text: $draft.openingBalanceText,
+            keyboard: draft.kind.allowsNegativeBalance ? .signed : .wholeNumber
+        )
+        .accessibilityIdentifier("opening-balance")
     }
 
     @ViewBuilder
     private var creditLimitTextField: some View {
-        #if os(iOS)
-            TextField("0", text: $draft.creditLimitText)
-                .keyboardType(.numberPad)
-                .accessibilityIdentifier("credit-limit")
-        #else
-            TextField("0", text: $draft.creditLimitText)
-                .accessibilityIdentifier("credit-limit")
-        #endif
+        VNDTextField(text: $draft.creditLimitText)
+            .accessibilityIdentifier("credit-limit")
     }
 
     private var balanceHint: LocalizedStringKey {

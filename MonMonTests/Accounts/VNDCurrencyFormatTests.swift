@@ -58,4 +58,21 @@ struct VNDCurrencyFormatTests {
         #expect(text == "1.234.567")
         #expect(VNDCurrency.parse(text) == amount)
     }
+
+    @Test("Typing into a field that starts at nought drops the leading nought")
+    func leadingZerosAreDropped() {
+        #expect(VNDCurrency.formatInput("05") == "5")
+        #expect(VNDCurrency.formatInput("0001234") == "1.234")
+        #expect(VNDCurrency.formatInput("000") == "0")
+        #expect(VNDCurrency.formatInput("0") == "0")
+        #expect(VNDCurrency.formatInput("0,5") == "0,5")
+        #expect(VNDCurrency.parse("05") == 5)
+    }
+
+    @Test("Live money input publishes only the grouped replacement")
+    func liveMoneyInputPublishesOnlyTheGroupedReplacement() {
+        #expect(VNDCurrency.liveInputUpdate(for: "80000") == "80.000")
+        #expect(VNDCurrency.liveInputUpdate(for: "1000000") == "1.000.000")
+        #expect(VNDCurrency.liveInputUpdate(for: "1.000.000") == nil)
+    }
 }

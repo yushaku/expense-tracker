@@ -270,14 +270,8 @@ struct FundEditorForm: View {
 
     @ViewBuilder
     private var averageCostTextField: some View {
-        #if os(iOS)
-            TextField("0", text: $draft.averageCostText)
-                .keyboardType(.decimalPad)
-                .accessibilityIdentifier("fund-average-cost")
-        #else
-            TextField("0", text: $draft.averageCostText)
-                .accessibilityIdentifier("fund-average-cost")
-        #endif
+        VNDTextField(text: $draft.averageCostText, keyboard: .decimal)
+            .accessibilityIdentifier("fund-average-cost")
     }
 
     private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {

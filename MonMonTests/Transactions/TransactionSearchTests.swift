@@ -203,6 +203,66 @@ struct TransactionSearchTests {
         #expect(!byDirection.hasSearchText)
     }
 
+    @Test("Every report projection uses the global query results")
+    func everyReportProjectionUsesTheGlobalQuery() {
+        let account = CashAccount(
+            id: accountID,
+            name: "Wallet",
+            kind: .normal,
+            openingBalance: 0,
+            currencyCode: VNDCurrency.code,
+            createdAt: createdAt
+        )
+        let category = TransactionCategory(
+            id: categoryID,
+            name: "Food",
+            kind: .expense,
+            symbolName: "fork.knife",
+            colorName: "peach",
+            createdAt: createdAt
+        )
+        let included = makeTransaction(
+            amount: 125_000,
+            note: "Coffee",
+            categoryID: categoryID
+        )
+        let transactions = [
+            included,
+            makeTransaction(kind: .income, note: "Coffee", categoryID: categoryID),
+            makeTransaction(note: "Lunch", categoryID: categoryID),
+            makeTransaction(note: "Coffee", accountID: UUID(), categoryID: categoryID),
+            makeTransaction(note: "Coffee", categoryID: UUID()),
+            makeTransaction(note: "Coffee", occurredAt: date(2026, 2, 1), categoryID: categoryID),
+        ]
+        var query = januaryQuery
+        query.text = "coffee"
+        query.filter = .expense
+        query.categoryIDs = [categoryID]
+        query.accountIDs = [accountID]
+
+        let report = ReportData(
+            query: query,
+            transactions: transactions,
+            categoryNames: [categoryID: category.name],
+            accountNames: [accountID: account.name]
+        )
+
+        #expect(report.transactions.map(\.id) == [included.id])
+        #expect(report.income == 0)
+        #expect(report.expense == 125_000)
+        #expect(report.count == 1)
+        #expect(
+            TransactionCalendar.monthTotals(of: report.calendarWeeks(of: date(2026, 1, 1)))
+                .expense == 125_000
+        )
+        #expect(
+            report.accountSpendingRows(accounts: [account])
+                == [AccountSpendingRow(accountID: accountID, amount: 125_000, count: 1)]
+        )
+        #expect(report.categoryBreakdownSlices(of: .income, categories: [category]).count == 1)
+        #expect(report.netTrend.map(\.net) == [-125_000])
+    }
+
     @Test("Report shows transaction rows only while searching")
     func reportTransactionListVisibility() {
         var query = januaryQuery
@@ -219,5 +279,22 @@ struct TransactionSearchTests {
 
         #expect(!ReportContentVisibility(query: query).showsNetTrend)
         #expect(ReportContentVisibility(query: query).showsTransactionList)
+    }
+
+    @Test("The report calendar shows only while the filter is one month")
+    func calendarFollowsTheFilterScope() {
+        var query = januaryQuery
+
+        query.range = .month(containing: date(2026, 1, 15))
+        #expect(ReportContentVisibility(query: query).showsCalendar)
+
+        query.range = .year(containing: date(2026, 1, 15))
+        #expect(!ReportContentVisibility(query: query).showsCalendar)
+
+        query.range = .day(containing: date(2026, 1, 15))
+        #expect(!ReportContentVisibility(query: query).showsCalendar)
+
+        query.range = .custom(from: date(2026, 1, 2), to: date(2026, 3, 4))
+        #expect(!ReportContentVisibility(query: query).showsCalendar)
     }
 }

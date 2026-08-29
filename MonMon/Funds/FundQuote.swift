@@ -48,6 +48,10 @@ struct FundInstrumentCandidate: Sendable, Equatable, Identifiable {
     /// The fund management company, as the listing gives it. Empty when the
     /// listing does not say.
     let owner: String
+    /// The manager's logo, when the listing carries one. Fmarket publishes it
+    /// per management company, so every fund of one manager shares an image.
+    /// `nil` for a listing that gives none, and nothing depends on it.
+    let logoURL: String?
 
     var id: String { symbol }
 
@@ -58,7 +62,8 @@ struct FundInstrumentCandidate: Sendable, Equatable, Identifiable {
         pricePerUnit: Decimal? = nil,
         askPricePerUnit: Decimal? = nil,
         priceAsOf: Date? = nil,
-        owner: String = ""
+        owner: String = "",
+        logoURL: String? = nil
     ) {
         self.symbol = symbol
         self.name = name
@@ -67,6 +72,7 @@ struct FundInstrumentCandidate: Sendable, Equatable, Identifiable {
         self.askPricePerUnit = askPricePerUnit
         self.priceAsOf = priceAsOf
         self.owner = owner
+        self.logoURL = logoURL
     }
 }
 

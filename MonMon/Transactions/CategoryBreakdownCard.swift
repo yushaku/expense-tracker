@@ -14,6 +14,7 @@ struct CategoryBreakdownCard: View {
 
     let slices: [CategoryBreakdownSlice]
     let range: TransactionRange
+    let showsKindPicker: Bool
 
     /// The wedge the owner tapped, held by id rather than by index so a period
     /// that reorders its categories keeps the same one picked.
@@ -62,13 +63,15 @@ struct CategoryBreakdownCard: View {
                 .foregroundStyle(MonMonTheme.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            SegmentedTabs(
-                label: "Direction",
-                selection: $kind,
-                options: TransactionKind.allCases,
-                title: \.displayName
-            )
-            .accessibilityIdentifier("breakdown-kind")
+            if showsKindPicker {
+                SegmentedTabs(
+                    label: "Direction",
+                    selection: $kind,
+                    options: TransactionKind.allCases,
+                    title: \.displayName
+                )
+                .accessibilityIdentifier("breakdown-kind")
+            }
         }
     }
 
