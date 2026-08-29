@@ -180,6 +180,9 @@ private struct GoalEditorForm: View {
     let minimumTargetDate: Date
     let onDelete: () -> Void
 
+    private let symbolColumns = [GridItem(.adaptive(minimum: 52), spacing: 10)]
+    private let colorColumns = [GridItem(.adaptive(minimum: 44), spacing: 10)]
+
     var body: some View {
         ZStack {
             MonMonTheme.canvas
@@ -188,9 +191,10 @@ private struct GoalEditorForm: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                     introduction
-                    purposeCard
+                    detailsCard
                     moneyCard
                     scheduleCard
+                    styleCard
 
                     if let saveErrorMessage {
                         errorBanner(saveErrorMessage)
@@ -205,10 +209,6 @@ private struct GoalEditorForm: View {
                 .padding(.vertical, 16)
                 .frame(maxWidth: .infinity)
             }
-        }
-        .onChange(of: draft.kind) { _, kind in
-            draft.symbolName = kind.symbolName
-            draft.colorName = kind.colorName
         }
     }
 
@@ -235,19 +235,10 @@ private struct GoalEditorForm: View {
         }
     }
 
-    private var purposeCard: some View {
+    private var detailsCard: some View {
         card {
             VStack(alignment: .leading, spacing: 18) {
-                sectionHeader("Purpose", systemImage: "flag.checkered")
-
-                Picker("Goal type", selection: $draft.kind) {
-                    ForEach(FinancialGoalKind.pickerCases, id: \.rawValue) { kind in
-                        Text(kind.title)
-                            .tag(kind)
-                    }
-                }
-                .pickerStyle(.menu)
-                .accessibilityIdentifier("goal-kind")
+                sectionHeader("Goal", systemImage: "flag.checkered")
 
                 field("Name", error: nameError) {
                     TextField("Goal name", text: $draft.name)
@@ -333,6 +324,83 @@ private struct GoalEditorForm: View {
                 }
             }
         }
+    }
+
+    private var styleCard: some View {
+        card {
+            VStack(alignment: .leading, spacing: 18) {
+                sectionHeader("Style", systemImage: "paintpalette.fill")
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Symbol")
+                        .font(.subheadline.weight(.medium))
+
+                    LazyVGrid(columns: symbolColumns, spacing: 10) {
+                        ForEach(CategoryPalette.symbolNames, id: \.self) { symbolName in
+                            symbolButton(symbolName)
+                        }
+                    }
+                    .accessibilityIdentifier("goal-symbol")
+                }
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Colour")
+                        .font(.subheadline.weight(.medium))
+
+                    LazyVGrid(columns: colorColumns, spacing: 10) {
+                        ForEach(CategoryPalette.colorNames, id: \.self) { colorName in
+                            colorButton(colorName)
+                        }
+                    }
+                    .accessibilityIdentifier("goal-color")
+                }
+            }
+        }
+    }
+
+    private func symbolButton(_ symbolName: String) -> some View {
+        let isSelected = draft.symbolName == symbolName
+
+        return Button {
+            draft.symbolName = symbolName
+        } label: {
+            Image(systemName: symbolName)
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(isSelected ? MonMonTheme.onAccent : MonMonTheme.textSecondary)
+                .frame(width: 52, height: 44)
+                .background(
+                    isSelected
+                        ? CategoryPalette.color(named: draft.colorName) : MonMonTheme.field,
+                    in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(symbolName)
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+    }
+
+    private func colorButton(_ colorName: String) -> some View {
+        let isSelected = draft.colorName == colorName
+
+        return Button {
+            draft.colorName = colorName
+        } label: {
+            Circle()
+                .fill(CategoryPalette.color(named: colorName))
+                .frame(width: 34, height: 34)
+                .overlay {
+                    // The tick, not the ring alone, says which colour is chosen.
+                    if isSelected {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(MonMonTheme.onAccent)
+                    }
+                }
+                .frame(width: 44, height: 44)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(colorName)
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 
     private func field<Content: View>(
