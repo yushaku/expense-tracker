@@ -37,6 +37,7 @@ struct MonMonBackupCounts: Equatable, Sendable {
     var fundInstruments: Int
     var fundHoldings: Int
     var fundSales: Int
+    var budgetJars: Int
     var categories: Int
     var transactions: Int
     var pendingCaptures: Int
@@ -52,6 +53,7 @@ struct MonMonBackupCounts: Equatable, Sendable {
         fundInstruments = payload.fundInstruments.count
         fundHoldings = payload.fundHoldings.count
         fundSales = payload.fundSales.count
+        budgetJars = payload.budgetJars.count
         categories = payload.categories.count
         transactions = payload.transactions.count
         pendingCaptures = payload.pendingCaptures.count
@@ -71,7 +73,7 @@ struct MonMonBackupPreview: Equatable, Sendable {
     var incomingRecordCount: Int {
         counts.accounts + counts.savingsDeposits + counts.savingsWithdrawals
             + counts.fundInstruments + counts.fundHoldings + counts.fundSales
-            + counts.categories + counts.transactions + counts.pendingCaptures
+            + counts.budgetJars + counts.categories + counts.transactions + counts.pendingCaptures
             + counts.transfers + counts.debts + counts.debtPayments + counts.recurringRules
     }
 }
@@ -207,11 +209,20 @@ private struct PayloadChecker {
             }
             try currency(record.currencyCode)
         }
+        try validateUniqueRecords(payload.budgetJars) { record in
+            try scalarIDAndDate(record.id, record.createdAt)
+            try require(BudgetJarRole(rawValue: record.role) != nil)
+            try require(
+                !record.name.isEmpty && !record.symbolName.isEmpty && !record.colorName.isEmpty)
+            let allocation = try MonMonBackupScalar.parseDecimal(record.allocationPercent)
+            try require(allocation >= .zero && allocation <= 100)
+        }
         try validateUniqueRecords(payload.categories) { record in
             try scalarIDAndDate(record.id, record.createdAt)
             try require(TransactionKind(rawValue: record.kind) != nil)
             try require(
                 !record.name.isEmpty && !record.symbolName.isEmpty && !record.colorName.isEmpty)
+            try optionalUUID(record.budgetJarID)
         }
         try validateUniqueRecords(payload.fundInstruments) { record in
             try scalarIDAndDate(record.id, record.createdAt)
@@ -376,11 +387,18 @@ private struct PayloadChecker {
         let accounts = Set(payload.accounts.map(\.id))
         let categories = Dictionary(
             uniqueKeysWithValues: payload.categories.map { ($0.id, $0.kind) })
+        let budgetJars = Set(payload.budgetJars.map(\.id))
         let instruments = Set(payload.fundInstruments.map(\.id))
         let deposits = Set(payload.savingsDeposits.map(\.id))
         let holdings = Set(payload.fundHoldings.map(\.id))
         let debts = Set(payload.debts.map(\.id))
         let rules = Set(payload.recurringRules.map(\.id))
+
+        for record in payload.categories {
+            if let budgetJarID = record.budgetJarID {
+                try requiredReference(budgetJarID, validIDs: budgetJars)
+            }
+        }
 
         for record in payload.savingsDeposits {
             optionalReference(record.sourceAccountID, validIDs: accounts)
@@ -424,6 +442,21 @@ private struct PayloadChecker {
     }
 
     private func validateAggregateLimits() throws {
+        let totalAllocation = try payload.budgetJars.reduce(Decimal.zero) { total, record in
+            total + (try MonMonBackupScalar.parseDecimal(record.allocationPercent))
+        }
+        try require(totalAllocation <= 100)
+
+        if !payload.budgetJars.isEmpty {
+            try require(
+                payload.budgetJars.filter { $0.role == BudgetJarRole.savings.rawValue }.count == 1
+            )
+            try require(
+                payload.budgetJars.filter { $0.role == BudgetJarRole.investment.rawValue }.count
+                    == 1
+            )
+        }
+
         let holdingUnits = try Dictionary(
             uniqueKeysWithValues: payload.fundHoldings.map {
                 ($0.id, try MonMonBackupScalar.parseDecimal($0.units))
@@ -606,6 +639,7 @@ extension MonMonBackupPayload.SavingsWithdrawalRecord: BackupIdentified {}
 extension MonMonBackupPayload.FundInstrumentRecord: BackupIdentified {}
 extension MonMonBackupPayload.FundHoldingRecord: BackupIdentified {}
 extension MonMonBackupPayload.FundSaleRecord: BackupIdentified {}
+extension MonMonBackupPayload.BudgetJarRecord: BackupIdentified {}
 extension MonMonBackupPayload.CategoryRecord: BackupIdentified {}
 extension MonMonBackupPayload.TransactionRecord: BackupIdentified {}
 extension MonMonBackupPayload.PendingCaptureRecord: BackupIdentified {}

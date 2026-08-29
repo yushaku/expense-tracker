@@ -8393,6 +8393,186 @@
     },
     "MonMon couldn’t complete the backup operation. Try again.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "MonMon không thể hoàn tất thao tác sao lưu. Hãy thử lại." } } }
+    },
+    "Budget": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngân sách" } } }
+    },
+    "Necessities": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thiết yếu" } } }
+    },
+    "Investment": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đầu tư" } } }
+    },
+    "Education": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phát triển bản thân" } } }
+    },
+    "Play": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hưởng thụ" } } }
+    },
+    "Giving": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Cho đi" } } }
+    },
+    "Available to plan": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Có thể phân bổ" } } }
+    },
+    "Planned": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dự kiến" } } }
+    },
+    "Received": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã nhận" } } }
+    },
+    "%@%% is not allocated yet": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "%@%% chưa được phân bổ" } } }
+    },
+    "%@%% allocation": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phân bổ %@%%" } } }
+    },
+    "System jar": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ hệ thống" } } }
+    },
+    "Protected jar": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ được bảo vệ" } } }
+    },
+    "Left this month": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Còn lại tháng này" } } }
+    },
+    "Over budget": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Vượt ngân sách" } } }
+    },
+    "Budget used": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngân sách đã dùng" } } }
+    },
+    "Plan": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Kế hoạch" } } }
+    },
+    "Available": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khả dụng" } } }
+    },
+    "Actual": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thực tế" } } }
+    },
+    "Used": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã dùng" } } }
+    },
+    "Setup": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thiết lập" } } }
+    },
+    "No monthly income planned": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa có thu nhập hàng tháng" } } }
+    },
+    "Add salary or another recurring income so Budget can plan the month ahead.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm lương hoặc khoản thu định kỳ để lập ngân sách cho tháng tới." } } }
+    },
+    "Add recurring income": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm thu nhập định kỳ" } } }
+    },
+    "Budget setup": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thiết lập ngân sách" } } }
+    },
+    "Add Jar": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm hũ" } } }
+    },
+    "Monthly allocation": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phân bổ hàng tháng" } } }
+    },
+    "%@%% assigned": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã phân bổ %@%%" } } }
+    },
+    "%@%% free": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Còn trống %@%%" } } }
+    },
+    "Your jar percentages can total less than 100%. The rest stays unallocated.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tổng tỷ lệ các hũ có thể dưới 100%. Phần còn lại sẽ chưa được phân bổ." } } }
+    },
+    "Jars": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Các hũ" } } }
+    },
+    "System routing": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Điều hướng hệ thống" } } }
+    },
+    "Custom routing": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Điều hướng tuỳ chỉnh" } } }
+    },
+    "Category mapping": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Gán danh mục vào hũ" } } }
+    },
+    "Each expense keeps its category. This mapping decides which jar pays for it.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mỗi khoản chi vẫn giữ danh mục; thiết lập này quyết định khoản đó trừ vào hũ nào." } } }
+    },
+    "Default jar": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ mặc định" } } }
+    },
+    "Jar": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ" } } }
+    },
+    "Couldn’t save this mapping. Try again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể lưu thiết lập này. Hãy thử lại." } } }
+    },
+    "Add jar": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm hũ" } } }
+    },
+    "Edit jar": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sửa hũ" } } }
+    },
+    "Create a money jar": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tạo một hũ tài chính" } } }
+    },
+    "Shape this money jar": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Điều chỉnh hũ tài chính này" } } }
+    },
+    "The percentage sets its monthly plan from recurring income.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tỷ lệ này xác định ngân sách tháng từ thu nhập định kỳ." } } }
+    },
+    "Jar details": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thông tin hũ" } } }
+    },
+    "Savings and Investment are system jars. You can rename or resize them, but not delete them.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiết kiệm và Đầu tư là hũ hệ thống. Bạn có thể đổi tên hoặc tỷ lệ nhưng không thể xoá." } } }
+    },
+    "Delete jar": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xoá hũ" } } }
+    },
+    "Delete this jar?": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xoá hũ này?" } } }
+    },
+    "Categories mapped here will move to the Necessities jar.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Các danh mục đang gán vào đây sẽ chuyển sang hũ Thiết yếu." } } }
+    },
+    "Enter a jar name.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập tên hũ." } } }
+    },
+    "Another jar already has this name.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Một hũ khác đã dùng tên này." } } }
+    },
+    "Enter a valid percentage.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập tỷ lệ hợp lệ." } } }
+    },
+    "The percentage cannot be negative.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tỷ lệ không thể là số âm." } } }
+    },
+    "All jar percentages together cannot exceed 100%.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tổng tỷ lệ các hũ không thể vượt quá 100%." } } }
+    },
+    "Couldn’t save this jar. Try again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể lưu hũ này. Hãy thử lại." } } }
+    },
+    "Couldn’t delete this jar. Try again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể xoá hũ này. Hãy thử lại." } } }
+    },
+    "Budget jars": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ ngân sách" } } }
+    },
+    "Unmapped expenses use %@.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khoản chi chưa gán sẽ dùng hũ %@." } } }
+    },
+    "No jar": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa có hũ" } } }
+    },
+    "Categories mapped here will move to another available jar.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Các danh mục đang gán vào đây sẽ chuyển sang một hũ còn lại." } } }
+    },
+    "Export or replace every account, transaction, category, budget jar, recurring rule, saving, investment, transfer, and debt on this device.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xuất hoặc thay thế toàn bộ tài khoản, giao dịch, danh mục, hũ ngân sách, khoản định kỳ, tiết kiệm, đầu tư, chuyển khoản và khoản nợ trên thiết bị này." } } }
     }
   },
   "version": "1.0"

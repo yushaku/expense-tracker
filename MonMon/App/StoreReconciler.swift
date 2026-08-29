@@ -32,12 +32,13 @@ enum StoreReconciler {
         var categories = 0
         var instruments = 0
         var accounts = 0
+        var budgetJars = 0
         var transactions = 0
         var transfers = 0
 
         var isEmpty: Bool {
-            categories == 0 && instruments == 0 && accounts == 0 && transactions == 0
-                && transfers == 0
+            categories == 0 && instruments == 0 && accounts == 0 && budgetJars == 0
+                && transactions == 0 && transfers == 0
         }
     }
 
@@ -50,6 +51,7 @@ enum StoreReconciler {
         report.categories = try foldCategories(in: context)
         report.instruments = try foldInstruments(in: context)
         report.accounts = try foldAnchorAccounts(in: context)
+        report.budgetJars = try foldBudgetJars(in: context)
         report.transactions = try foldGeneratedTransactions(in: context)
         report.transactions += try foldImportedTransactions(in: context)
         report.transfers = try foldImportedTransfers(in: context)
@@ -141,6 +143,28 @@ enum StoreReconciler {
         let accounts = try context.fetch(FetchDescriptor<CashAccount>())
         let merges = DuplicateReconciler.merges(
             in: accounts,
+            key: { $0.id.uuidString },
+            createdAt: \.createdAt,
+            id: \.id
+        )
+
+        var folded = 0
+        for merge in merges {
+            for duplicate in merge.duplicates {
+                context.delete(duplicate)
+                folded += 1
+            }
+        }
+
+        return folded
+    }
+
+    /// Seeded jars use fixed ids on every device, so CloudKit can materialize
+    /// two physical rows that represent the same logical jar.
+    private static func foldBudgetJars(in context: ModelContext) throws -> Int {
+        let jars = try context.fetch(FetchDescriptor<BudgetJar>())
+        let merges = DuplicateReconciler.merges(
+            in: jars,
             key: { $0.id.uuidString },
             createdAt: \.createdAt,
             id: \.id

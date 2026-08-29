@@ -1,9 +1,10 @@
 import SwiftUI
 
 /// Declaration order is the order of the bar: recording money comes first,
-/// looking back over it follows, then what the owner has, then settings.
+/// planning and looking back follow, then what the owner has, then settings.
 enum RootTab: String, CaseIterable, Identifiable {
     case spending
+    case budget
     case report
     case wealth
     case settings
@@ -12,6 +13,8 @@ enum RootTab: String, CaseIterable, Identifiable {
 
     var title: LocalizedStringKey {
         switch self {
+        case .budget:
+            "Budget"
         case .report:
             "Report"
         case .wealth:
@@ -25,6 +28,8 @@ enum RootTab: String, CaseIterable, Identifiable {
 
     var symbolName: String {
         switch self {
+        case .budget:
+            "banknote.fill"
         case .report:
             "chart.bar.fill"
         case .wealth:
@@ -88,6 +93,8 @@ struct RootTabView: View {
         @ViewBuilder
         private var destinations: some View {
             switch selection {
+            case .budget:
+                BudgetScreen()
             case .report:
                 ReportView()
             case .wealth:
@@ -164,6 +171,13 @@ struct RootTabView: View {
                     }
                     .accessibilityIdentifier(RootTab.spending.accessibilityIdentifier)
                     .tag(RootTab.spending)
+
+                BudgetScreen()
+                    .tabItem {
+                        Label(RootTab.budget.title, systemImage: RootTab.budget.symbolName)
+                    }
+                    .accessibilityIdentifier(RootTab.budget.accessibilityIdentifier)
+                    .tag(RootTab.budget)
 
                 ReportView()
                     .tabItem {

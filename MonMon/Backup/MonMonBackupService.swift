@@ -21,6 +21,16 @@ private extension MonMonBackupService {
             update: updateAccount
         )
         try reconcile(
+            current: context.fetch(FetchDescriptor<BudgetJar>()),
+            records: payload.budgetJars,
+            in: context,
+            modelID: \BudgetJar.id,
+            createdAt: \BudgetJar.createdAt,
+            recordID: { try MonMonBackupScalar.parseUUID($0.id) },
+            make: makeBudgetJar,
+            update: updateBudgetJar
+        )
+        try reconcile(
             current: context.fetch(FetchDescriptor<TransactionCategory>()),
             records: payload.categories,
             in: context,
@@ -140,6 +150,10 @@ private extension MonMonBackupService {
             make: makeDebtPayment,
             update: updateDebtPayment
         )
+
+        if payload.budgetJars.isEmpty {
+            BudgetJarSeed.seedIfNeeded(in: context, saveChanges: false)
+        }
     }
 
     func reconcile<Model, Record>(
@@ -212,7 +226,8 @@ private extension MonMonBackupService {
             kind: try enumValue(record.kind),
             symbolName: record.symbolName,
             colorName: record.colorName,
-            createdAt: try MonMonBackupScalar.parseDate(record.createdAt)
+            createdAt: try MonMonBackupScalar.parseDate(record.createdAt),
+            budgetJarID: try optionalUUID(record.budgetJarID)
         )
     }
 
@@ -223,6 +238,32 @@ private extension MonMonBackupService {
         model.id = try MonMonBackupScalar.parseUUID(record.id)
         model.name = record.name
         model.kind = try enumValue(record.kind)
+        model.symbolName = record.symbolName
+        model.colorName = record.colorName
+        model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
+        model.budgetJarID = try optionalUUID(record.budgetJarID)
+    }
+
+    func makeBudgetJar(_ record: MonMonBackupPayload.BudgetJarRecord) throws -> BudgetJar {
+        BudgetJar(
+            id: try MonMonBackupScalar.parseUUID(record.id),
+            name: record.name,
+            allocationPercent: try MonMonBackupScalar.parseDecimal(record.allocationPercent),
+            role: try enumValue(record.role),
+            symbolName: record.symbolName,
+            colorName: record.colorName,
+            createdAt: try MonMonBackupScalar.parseDate(record.createdAt)
+        )
+    }
+
+    func updateBudgetJar(
+        _ model: BudgetJar,
+        _ record: MonMonBackupPayload.BudgetJarRecord
+    ) throws {
+        model.id = try MonMonBackupScalar.parseUUID(record.id)
+        model.name = record.name
+        model.allocationPercent = try MonMonBackupScalar.parseDecimal(record.allocationPercent)
+        model.role = try enumValue(record.role)
         model.symbolName = record.symbolName
         model.colorName = record.colorName
         model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
@@ -784,6 +825,7 @@ struct MonMonBackupService {
                 fundHoldingRecord
             ),
             fundSales: try context.fetch(FetchDescriptor<FundSale>()).map(fundSaleRecord),
+            budgetJars: try context.fetch(FetchDescriptor<BudgetJar>()).map(budgetJarRecord),
             categories: try context.fetch(FetchDescriptor<TransactionCategory>()).map(
                 categoryRecord
             ),
@@ -902,6 +944,21 @@ struct MonMonBackupService {
             id: MonMonBackupScalar.uuid(model.id),
             name: model.name,
             kind: model.kind.rawValue,
+            symbolName: model.symbolName,
+            colorName: model.colorName,
+            createdAt: MonMonBackupScalar.date(model.createdAt),
+            budgetJarID: model.budgetJarID.map(MonMonBackupScalar.uuid)
+        )
+    }
+
+    private func budgetJarRecord(
+        _ model: BudgetJar
+    ) -> MonMonBackupPayload.BudgetJarRecord {
+        MonMonBackupPayload.BudgetJarRecord(
+            id: MonMonBackupScalar.uuid(model.id),
+            name: model.name,
+            allocationPercent: MonMonBackupScalar.decimal(model.allocationPercent),
+            role: model.role.rawValue,
             symbolName: model.symbolName,
             colorName: model.colorName,
             createdAt: MonMonBackupScalar.date(model.createdAt)

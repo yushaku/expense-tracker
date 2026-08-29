@@ -125,6 +125,38 @@ struct MonMonBackupValidatorTests {
         }
     }
 
+    @Test("Budget jar roles, allocation, and category references are validated")
+    func invalidBudgetJarDataIsRejected() throws {
+        var payload = MonMonBackupPayload.empty
+        payload.budgetJars = [budgetJar(id: accountID, role: .custom)]
+        payload.budgetJars[0].role = "unknown"
+
+        #expect(throws: MonMonBackupValidationError.invalidPayload) {
+            try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
+        }
+
+        payload.budgetJars = [
+            budgetJar(id: accountID, role: .custom),
+            budgetJar(id: UUID(), role: .investment),
+            budgetJar(id: UUID(), role: .savings),
+        ]
+        payload.categories = [
+            MonMonBackupPayload.CategoryRecord(
+                id: MonMonBackupScalar.uuid(otherID),
+                name: "Food",
+                kind: TransactionKind.expense.rawValue,
+                symbolName: "fork.knife",
+                colorName: "green",
+                createdAt: MonMonBackupScalar.date(instant),
+                budgetJarID: MonMonBackupScalar.uuid(UUID())
+            )
+        ]
+
+        #expect(throws: MonMonBackupValidationError.invalidReference) {
+            try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
+        }
+    }
+
     @Test("Missing required account references and impossible transfers are rejected")
     func referenceFailures() throws {
         var payload = MonMonBackupPayload.empty
@@ -190,6 +222,21 @@ struct MonMonBackupValidatorTests {
             kind: "bank",
             openingBalance: "1000",
             currencyCode: "VND",
+            createdAt: MonMonBackupScalar.date(instant)
+        )
+    }
+
+    private func budgetJar(
+        id: UUID,
+        role: BudgetJarRole
+    ) -> MonMonBackupPayload.BudgetJarRecord {
+        MonMonBackupPayload.BudgetJarRecord(
+            id: MonMonBackupScalar.uuid(id),
+            name: "Necessities",
+            allocationPercent: role == .custom ? "55" : "10",
+            role: role.rawValue,
+            symbolName: "house.fill",
+            colorName: "blue",
             createdAt: MonMonBackupScalar.date(instant)
         )
     }

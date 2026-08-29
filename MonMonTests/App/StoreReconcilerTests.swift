@@ -288,6 +288,33 @@ struct StoreReconcilerTests {
         #expect(remaining.first?.createdAt == day0)
     }
 
+    @Test("Two copies of a seeded budget jar fold into one")
+    func twoSeededBudgetJarsFoldIntoOne() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        for createdAt in [day0, day1] {
+            context.insert(
+                BudgetJar(
+                    id: BudgetJarSeed.savingsID,
+                    name: "Savings",
+                    allocationPercent: 10,
+                    role: .savings,
+                    symbolName: "building.columns.fill",
+                    colorName: "yellow",
+                    createdAt: createdAt
+                )
+            )
+        }
+        try context.save()
+
+        let report = try StoreReconciler.reconcile(in: context)
+
+        #expect(report.budgetJars == 1)
+        let remaining = try context.fetch(FetchDescriptor<BudgetJar>())
+        #expect(remaining.count == 1)
+        #expect(remaining.first?.createdAt == day0)
+    }
+
     @Test("Distinct accounts are never folded together")
     func distinctAccountsSurvive() throws {
         let container = try makeContainer()
