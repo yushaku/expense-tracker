@@ -1,3 +1,4 @@
+import Charts
 import SwiftUI
 
 struct BudgetIncomeCard: View {
@@ -6,10 +7,25 @@ struct BudgetIncomeCard: View {
     let onOpenTimeline: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Label(monthTitle, systemImage: "calendar")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(MonMonTheme.textSecondary)
+        VStack(alignment: .leading, spacing: 18) {
+            HStack(spacing: 12) {
+                Label(monthTitle, systemImage: "calendar")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textSecondary)
+
+                Spacer(minLength: 8)
+
+                Button(action: onOpenTimeline) {
+                    Image(systemName: "clock.arrow.circlepath")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(MonMonTheme.accent)
+                        .frame(width: 44, height: 44)
+                        .background(MonMonTheme.accent.opacity(0.14), in: Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Income history")
+                .accessibilityIdentifier("budget-income-history")
+            }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("Available to plan")
@@ -21,6 +37,8 @@ struct BudgetIncomeCard: View {
                     .monospacedDigit()
                     .minimumScaleFactor(0.7)
             }
+
+            BudgetAllocationOverview(snapshot: snapshot)
 
             HStack(alignment: .top, spacing: 20) {
                 incomeMetric("Planned", amount: snapshot.plannedIncome)
@@ -36,12 +54,6 @@ struct BudgetIncomeCard: View {
                 .foregroundStyle(MonMonTheme.textSecondary)
                 .accessibilityIdentifier("budget-unallocated")
             }
-
-            Button("Income history", systemImage: "clock.arrow.circlepath") {
-                onOpenTimeline()
-            }
-            .buttonStyle(.bordered)
-            .accessibilityIdentifier("budget-income-history")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
@@ -67,6 +79,134 @@ struct BudgetIncomeCard: View {
                 .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private struct BudgetAllocationOverview: View {
+    @Environment(\.locale) private var locale
+
+    let snapshot: BudgetSnapshot
+
+    private static let diameter: CGFloat = 168
+
+    private var allocatedPercent: Decimal {
+        min(max(snapshot.allocationPercent, 0), 100)
+    }
+
+    private var chartRows: [BudgetJarSnapshot] {
+        snapshot.rows.filter { $0.allocationPercent > 0 }
+    }
+
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 24) {
+                doughnut
+                legend
+            }
+
+            VStack(spacing: 18) {
+                doughnut
+                legend
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Budget allocation")
+    }
+
+    private var doughnut: some View {
+        Chart {
+            ForEach(chartRows) { row in
+                SectorMark(
+                    angle: .value(
+                        "Allocation percentage",
+                        chartValue(row.allocationPercent)
+                    ),
+                    innerRadius: .ratio(0.62),
+                    outerRadius: .ratio(0.9),
+                    angularInset: 1.5
+                )
+                .cornerRadius(4)
+                .foregroundStyle(CategoryPalette.color(named: row.colorName))
+            }
+
+            if snapshot.unallocatedPercent > 0 {
+                SectorMark(
+                    angle: .value(
+                        "Unallocated percentage",
+                        chartValue(snapshot.unallocatedPercent)
+                    ),
+                    innerRadius: .ratio(0.62),
+                    outerRadius: .ratio(0.9),
+                    angularInset: 1.5
+                )
+                .cornerRadius(4)
+                .foregroundStyle(MonMonTheme.textMuted.opacity(0.42))
+            }
+        }
+        .chartLegend(.hidden)
+        .frame(width: Self.diameter, height: Self.diameter)
+        .overlay {
+            VStack(spacing: 2) {
+                Text("ALLOCATED")
+                    .font(.caption2.weight(.semibold))
+                    .tracking(0.6)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+
+                Text("\(PercentInput.format(allocatedPercent))%")
+                    .font(.headline.weight(.bold))
+                    .monospacedDigit()
+            }
+            .padding(.horizontal, 20)
+        }
+        // The rows beside or below the chart carry the same information in text.
+        .accessibilityHidden(true)
+    }
+
+    private var legend: some View {
+        VStack(spacing: 10) {
+            ForEach(snapshot.rows) { row in
+                legendRow(
+                    name: row.name,
+                    percent: row.allocationPercent,
+                    color: CategoryPalette.color(named: row.colorName)
+                )
+            }
+
+            if snapshot.unallocatedPercent > 0 {
+                legendRow(
+                    name: AppText.string("Unallocated", in: locale),
+                    percent: snapshot.unallocatedPercent,
+                    color: MonMonTheme.textMuted.opacity(0.42)
+                )
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func legendRow(name: String, percent: Decimal, color: Color) -> some View {
+        HStack(spacing: 10) {
+            Circle()
+                .fill(color)
+                .frame(width: 10, height: 10)
+                .accessibilityHidden(true)
+
+            Text(name)
+                .font(.caption.weight(.medium))
+                .lineLimit(1)
+
+            Spacer(minLength: 8)
+
+            Text("\(PercentInput.format(percent))%")
+                .font(.caption.weight(.semibold))
+                .monospacedDigit()
+                .foregroundStyle(MonMonTheme.textSecondary)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private func chartValue(_ percent: Decimal) -> Double {
+        NSDecimalNumber(decimal: percent).doubleValue
     }
 }
 
