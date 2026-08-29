@@ -404,3 +404,44 @@ struct TransactionDraftTests {
         #expect(transaction.amount == 200_000)
     }
 }
+
+@Suite("Transaction detail links")
+struct TransactionDetailLinksTests {
+    @Test("Only existing related items become link targets")
+    func missingRelatedItemsAreNotLinked() {
+        let accountID = UUID()
+        let categoryID = UUID()
+        let tripID = UUID()
+        let transaction = MoneyTransaction(
+            id: UUID(),
+            kind: .expense,
+            amount: 100_000,
+            occurredAt: .now,
+            note: "",
+            accountID: accountID,
+            categoryID: categoryID,
+            sourceRuleID: nil,
+            currencyCode: VNDCurrency.code,
+            createdAt: .now,
+            tripWorkspaceID: tripID
+        )
+
+        let links = TransactionDetailLinks.resolve(
+            transaction: transaction,
+            categoryID: categoryID,
+            accountID: accountID,
+            availableTripIDs: [tripID]
+        )
+        let missing = TransactionDetailLinks.resolve(
+            transaction: transaction,
+            categoryID: nil,
+            accountID: nil,
+            availableTripIDs: []
+        )
+
+        #expect(links.categoryID == categoryID)
+        #expect(links.accountID == accountID)
+        #expect(links.tripWorkspaceID == tripID)
+        #expect(missing == TransactionDetailLinks())
+    }
+}
