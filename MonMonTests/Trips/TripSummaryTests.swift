@@ -87,6 +87,22 @@ struct TripSummaryTests {
         #expect(collection.completedWorkspaceIDs == [completed.id])
     }
 
+    @Test("Spending highlights only the most recently started active trip")
+    func spendingFeaturedTripUsesLatestActiveWorkspace() {
+        let olderActive = trip(budget: 10_000_000)
+        olderActive.startedAt = occurredAt
+        let newerActive = trip(budget: 8_000_000)
+        newerActive.startedAt = occurredAt.addingTimeInterval(1)
+        let completed = trip(budget: 5_000_000, status: .completed)
+        completed.startedAt = occurredAt.addingTimeInterval(2)
+
+        #expect(
+            SpendingFeaturedTrip.select(from: [olderActive, completed, newerActive])?.id
+                == newerActive.id
+        )
+        #expect(SpendingFeaturedTrip.select(from: [completed]) == nil)
+    }
+
     @Test("Selecting a Trip defaults its jar and detaching clears Trip routing")
     func transactionSelectionDefaultsAndClearsRouting() {
         let active = trip(budget: 10_000_000)

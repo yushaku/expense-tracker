@@ -40,3 +40,19 @@ struct TripWorkspaceCollection {
         )
     }
 }
+
+enum SpendingFeaturedTrip {
+    static func select(from workspaces: [TripWorkspace]) -> TripWorkspace? {
+        workspaces
+            .filter { $0.status == .active }
+            .max {
+                if $0.startedAt != $1.startedAt {
+                    return $0.startedAt < $1.startedAt
+                }
+                if $0.createdAt != $1.createdAt {
+                    return $0.createdAt < $1.createdAt
+                }
+                return $0.id.uuidString < $1.id.uuidString
+            }
+    }
+}

@@ -3,6 +3,7 @@ import SwiftUI
 
 private enum SpendingDestination: Hashable {
     case accounts
+    case trip(UUID)
 }
 
 struct TransactionListView: View {
@@ -18,12 +19,6 @@ struct TransactionListView: View {
 
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
-
-    @Query(sort: \FinancialGoal.createdAt, order: .forward)
-    private var goals: [FinancialGoal]
-
-    @Query(sort: \BudgetJar.createdAt, order: .forward)
-    private var budgetJars: [BudgetJar]
 
     @Query(sort: \TripWorkspace.startedAt, order: .reverse)
     private var tripWorkspaces: [TripWorkspace]
@@ -74,15 +69,20 @@ struct TransactionListView: View {
                         } else {
                             quickActions
 
-                            if let featuredGoal {
-                                GoalCard(
-                                    goal: featuredGoal,
-                                    jarName: featuredGoal.fundingJarID.flatMap(jarName)
-                                        ?? String(localized: "No jar"),
-                                    asOf: .now,
-                                    showsDisclosure: false
-                                )
-                                .accessibilityIdentifier("spending-featured-goal")
+                            if let featuredTrip {
+                                NavigationLink(value: SpendingDestination.trip(featuredTrip.id)) {
+                                    TripWorkspaceCard(
+                                        workspace: featuredTrip,
+                                        snapshot: TripSummary.snapshot(
+                                            workspace: featuredTrip,
+                                            transactions: transactions,
+                                            categories: categories
+                                        )
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityHint("Opens this trip workspace")
+                                .accessibilityIdentifier("spending-featured-trip")
                             }
 
                             transactionsSection
@@ -129,6 +129,16 @@ struct TransactionListView: View {
                 switch destination {
                 case .accounts:
                     AccountsScreen()
+                case .trip(let workspaceID):
+                    if let workspace = tripWorkspaces.first(where: { $0.id == workspaceID }) {
+                        TripDetailView(workspace: workspace)
+                    } else {
+                        ContentUnavailableView(
+                            "Trip unavailable",
+                            systemImage: "airplane",
+                            description: Text("This trip is no longer in the current store.")
+                        )
+                    }
                 }
             }
             .navigationDestination(for: AccountDetailRoute.self) { route in
@@ -406,12 +416,8 @@ struct TransactionListView: View {
         Dictionary(uniqueKeysWithValues: accounts.map { ($0.id, $0.name) })
     }
 
-    private var featuredGoal: FinancialGoal? {
-        SpendingFeaturedGoal.select(from: goals, workspaces: tripWorkspaces)
-    }
-
-    private func jarName(_ id: UUID) -> String? {
-        budgetJars.first { $0.id == id }?.name
+    private var featuredTrip: TripWorkspace? {
+        SpendingFeaturedTrip.select(from: tripWorkspaces)
     }
 
     /// The three things the owner sets up rather than records: what a
