@@ -12,6 +12,10 @@ import SwiftUI
 struct ReportContentVisibility: Equatable {
     let showsNetTrend: Bool
     let showsTransactionList: Bool
+    /// A trend needs a period made of smaller ones. Filtered to a single day
+    /// there is nothing finer to walk, so the card stands down rather than
+    /// drawing one point and calling it a line.
+    let showsSpendingTrend: Bool
     /// A month grid can only draw a month. Filtered to a year, a day, or a
     /// hand-picked span, it would either show days the figures above it exclude
     /// or one month standing for a period that is not one month, so it stands
@@ -21,6 +25,7 @@ struct ReportContentVisibility: Equatable {
     init(query: TransactionQuery) {
         showsNetTrend = !query.hasSearchText
         showsTransactionList = query.hasSearchText
+        showsSpendingTrend = !query.hasSearchText && query.range.scope != .day
         showsCalendar = query.range.scope == .month
     }
 }
@@ -61,6 +66,13 @@ struct ReportData {
 
     var netTrend: [TransactionNetPoint] {
         TransactionSummary.runningNet(transactions)
+    }
+
+    /// The range is handed in rather than kept here, because the trend draws
+    /// every bucket of the period — including the ones that recorded nothing,
+    /// which the transactions alone cannot name.
+    func spendingTrend(in range: TransactionRange) -> [SpendingTrendPoint] {
+        SpendingTrend.points(of: transactions, in: range)
     }
 
     func calendarWeeks(of month: Date) -> [TransactionCalendarWeek] {
@@ -219,6 +231,15 @@ struct ReportView: View {
                 } else {
                     if visibility.showsTransactionList {
                         resultsSection(report.transactions)
+                    }
+
+                    if visibility.showsSpendingTrend,
+                        let unit = SpendingTrend.unit(for: query.range)
+                    {
+                        SpendingTrendCard(
+                            unit: unit,
+                            points: report.spendingTrend(in: query.range)
+                        )
                     }
 
                     if visibility.showsNetTrend {
