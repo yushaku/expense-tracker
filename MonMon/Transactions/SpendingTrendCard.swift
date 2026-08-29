@@ -19,6 +19,7 @@ struct SpendingTrendCard: View {
     ///
     /// The last one on show cannot be put away: an empty chart answers nothing.
     @State private var hiddenKinds: Set<TransactionKind> = []
+    @State private var selectedStart: Date?
 
     private var shownKinds: [TransactionKind] {
         TransactionKind.allCases.filter { !hiddenKinds.contains($0) }
@@ -35,6 +36,18 @@ struct SpendingTrendCard: View {
         case .income:
             point.income
         }
+    }
+
+    private var selectedPoint: SpendingTrendPoint? {
+        guard let selectedStart else {
+            return nil
+        }
+
+        return TrendChartSelection.nearest(
+            to: selectedStart,
+            in: points,
+            date: { $0.start }
+        )
     }
 
     var body: some View {
@@ -145,6 +158,31 @@ struct SpendingTrendCard: View {
                     .foregroundStyle(by: .value("Direction", kind.rawValue))
                 }
             }
+
+            if let selectedPoint {
+                RuleMark(x: .value("Selected period", selectedPoint.start))
+                    .foregroundStyle(MonMonTheme.textMuted.opacity(0.55))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                    .annotation(position: .top, spacing: 8) {
+                        selectionLabel(selectedPoint)
+                    }
+
+                ForEach(shownKinds, id: \.self) { kind in
+                    PointMark(
+                        x: .value("Selected period", selectedPoint.start),
+                        y: .value("Selected amount", amount(of: kind, in: selectedPoint).chartValue)
+                    )
+                    .symbolSize(120)
+                    .foregroundStyle(tint(of: kind))
+
+                    PointMark(
+                        x: .value("Selected period", selectedPoint.start),
+                        y: .value("Selected amount", amount(of: kind, in: selectedPoint).chartValue)
+                    )
+                    .symbolSize(42)
+                    .foregroundStyle(MonMonTheme.surface)
+                }
+            }
         }
         .chartForegroundStyleScale(
             domain: TransactionKind.allCases.map(\.rawValue),
@@ -177,10 +215,36 @@ struct SpendingTrendCard: View {
                 .foregroundStyle(MonMonTheme.textMuted)
             }
         }
+        .chartXSelection(value: $selectedStart)
         .frame(height: 190)
+        .sensoryFeedback(.selection, trigger: selectedPoint?.start)
+        .onChange(of: points) {
+            selectedStart = nil
+        }
         // The sentence under the chart states what the two lines average, which
         // is the reading of them that survives being read aloud.
         .accessibilityHidden(true)
+    }
+
+    private func selectionLabel(_ point: SpendingTrendPoint) -> some View {
+        HStack(spacing: 10) {
+            ForEach(shownKinds, id: \.self) { kind in
+                HStack(spacing: 5) {
+                    Circle()
+                        .fill(tint(of: kind))
+                        .frame(width: 7, height: 7)
+
+                    Text(VNDCurrency.format(amount(of: kind, in: point)))
+                }
+            }
+        }
+        .font(.caption.weight(.semibold))
+        .monospacedDigit()
+        .foregroundStyle(MonMonTheme.textPrimary)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(MonMonTheme.field, in: Capsule())
+        .shadow(color: .black.opacity(0.12), radius: 4, y: 2)
     }
 
     private var axisDateFormat: Date.FormatStyle {
