@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		X10000000000000000000201 /* IncomeAllocationSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = X10000000000000000000101 /* IncomeAllocationSnapshotTests.swift */; };
+		X10000000000000000000202 /* IncomeAllocationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = X10000000000000000000102 /* IncomeAllocationSnapshot.swift */; };
 		V10000000000000000000201 /* GoalProgressTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = V10000000000000000000101 /* GoalProgressTests.swift */; };
 		V10000000000000000000202 /* FinancialGoalDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = V10000000000000000000102 /* FinancialGoalDraftTests.swift */; };
 		V10000000000000000000203 /* FinancialGoal.swift in Sources */ = {isa = PBXBuildFile; fileRef = V10000000000000000000103 /* FinancialGoal.swift */; };
@@ -384,6 +386,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		X10000000000000000000101 /* IncomeAllocationSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeAllocationSnapshotTests.swift; sourceTree = "<group>"; };
+		X10000000000000000000102 /* IncomeAllocationSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeAllocationSnapshot.swift; sourceTree = "<group>"; };
 		V10000000000000000000101 /* GoalProgressTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalProgressTests.swift; sourceTree = "<group>"; };
 		V10000000000000000000102 /* FinancialGoalDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialGoalDraftTests.swift; sourceTree = "<group>"; };
 		V10000000000000000000103 /* FinancialGoal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialGoal.swift; sourceTree = "<group>"; };
@@ -785,6 +789,7 @@
 		A00000000000000000000012 /* MonMon */ = {
 			isa = PBXGroup;
 			children = (
+				X10000000000000000000001 /* IncomeAllocation */,
 				V10000000000000000000001 /* Goals */,
 				U10000000000000000000001 /* Budget */,
 				W10000000000000000000012 /* QuickExpense */,
@@ -806,6 +811,14 @@
 				B10000000000000000000001 /* Imports */,
 			);
 			path = MonMon;
+			sourceTree = "<group>";
+		};
+		X10000000000000000000001 /* IncomeAllocation */ = {
+			isa = PBXGroup;
+			children = (
+				X10000000000000000000102 /* IncomeAllocationSnapshot.swift */,
+			);
+			path = IncomeAllocation;
 			sourceTree = "<group>";
 		};
 		V10000000000000000000001 /* Goals */ = {
@@ -863,6 +876,7 @@
 		A00000000000000000000015 /* MonMonTests */ = {
 			isa = PBXGroup;
 			children = (
+				X10000000000000000000002 /* IncomeAllocation */,
 				V10000000000000000000002 /* Goals */,
 				U10000000000000000000002 /* Budget */,
 				W10000000000000000000011 /* QuickExpense */,
@@ -880,6 +894,14 @@
 				B10000000000000000000002 /* Imports */,
 			);
 			path = MonMonTests;
+			sourceTree = "<group>";
+		};
+		X10000000000000000000002 /* IncomeAllocation */ = {
+			isa = PBXGroup;
+			children = (
+				X10000000000000000000101 /* IncomeAllocationSnapshotTests.swift */,
+			);
+			path = IncomeAllocation;
 			sourceTree = "<group>";
 		};
 		V10000000000000000000002 /* Goals */ = {
@@ -1589,6 +1611,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				X10000000000000000000202 /* IncomeAllocationSnapshot.swift in Sources */,
 				V10000000000000000000203 /* FinancialGoal.swift in Sources */,
 				V10000000000000000000204 /* GoalProgress.swift in Sources */,
 				V10000000000000000000205 /* FinancialGoalDraft.swift in Sources */,
@@ -1814,6 +1837,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				X10000000000000000000201 /* IncomeAllocationSnapshotTests.swift in Sources */,
 				V10000000000000000000201 /* GoalProgressTests.swift in Sources */,
 				V10000000000000000000202 /* FinancialGoalDraftTests.swift in Sources */,
 				U10000000000000000000201 /* BudgetJarSeedTests.swift in Sources */,

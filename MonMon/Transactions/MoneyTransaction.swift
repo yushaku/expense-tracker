@@ -27,6 +27,9 @@ final class MoneyTransaction {
     /// transaction. `nil` means the record was created outside statement
     /// import or predates provenance tracking.
     var sourceImportID: String? = nil
+    /// Frozen, versioned explanation of how an income was assigned across
+    /// budget jars when it was recorded. Optional for legacy rows and expenses.
+    var incomeAllocationSnapshot: String? = nil
 
     init(
         id: UUID,
@@ -39,7 +42,8 @@ final class MoneyTransaction {
         sourceRuleID: UUID?,
         currencyCode: String,
         createdAt: Date,
-        sourceImportID: String? = nil
+        sourceImportID: String? = nil,
+        incomeAllocationSnapshot: String? = nil
     ) {
         self.id = id
         self.kind = kind
@@ -52,6 +56,7 @@ final class MoneyTransaction {
         self.currencyCode = currencyCode
         self.createdAt = createdAt
         self.sourceImportID = sourceImportID
+        self.incomeAllocationSnapshot = incomeAllocationSnapshot
     }
 }
 

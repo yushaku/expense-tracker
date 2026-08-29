@@ -56,8 +56,8 @@ remainder. Later jar edits must not rewrite that history.
   frozen slices. Each slice keeps jar UUID, name, symbol, colour, percentage,
   and exact allocated amount, so later rename or deletion cannot erase history.
 - Allocated slice amounts plus the unallocated remainder equal the source
-  transaction exactly. A deterministic rounding correction goes to the largest
-  percentage slice, with stable UUID tie-breaking.
+  transaction exactly. Whole-dong corrections use the largest fractional
+  remainder, with stable UUID tie-breaking.
 - New income captures the current jars in manual entry, recurring generation,
   statement import, and pending-capture commit paths.
 - An edit from expense to income captures the current jars. Editing an existing

@@ -46,13 +46,13 @@ Review + non-Simulator gates
 
 ### Phase 1: Snapshot contract
 
-- [ ] Task 1: Add RED tests for exact distribution, rounding, freezing, and amount refresh.
-- [ ] Task 2: Implement the versioned snapshot, codec, and optional transaction storage.
+- [x] Task 1: Add RED tests for exact distribution, rounding, freezing, and amount refresh.
+- [x] Task 2: Implement the versioned snapshot, codec, and optional transaction storage.
 
 ### Checkpoint: Snapshot foundation
 
-- [ ] Focused pure tests pass.
-- [ ] Snapshot round-trips without changing any ledger calculation.
+- [x] Focused pure tests pass.
+- [x] Snapshot round-trips without changing any ledger calculation.
 
 ### Phase 2: Transaction lifecycle
 

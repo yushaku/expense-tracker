@@ -113,8 +113,8 @@ Files: `MonMon/Backup/BackupRestoreView.swift`,
 
 ### Income Allocation Timeline — current branch
 
-- [ ] Freeze a versioned jar-allocation snapshot on every new income transaction.
-- [ ] Reconcile every snapshot exactly to its transaction plus unallocated remainder.
+- [ ] Freeze a versioned jar-allocation snapshot on every new income transaction. (Storage and codec complete; creation paths pending.)
+- [x] Reconcile every snapshot exactly to its transaction plus unallocated remainder.
 - [ ] Preserve snapshots through income edits and transaction delete/undo.
 - [ ] Capture manual, recurring, imported, and pending-capture income paths.
 - [ ] Backfill old income once and mark it as estimated.
