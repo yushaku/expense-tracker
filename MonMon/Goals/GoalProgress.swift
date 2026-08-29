@@ -104,22 +104,3 @@ enum GoalProgress {
         return max(1, NSDecimalNumber(decimal: result).intValue)
     }
 }
-
-enum SpendingFeaturedGoal {
-    static func select(
-        from goals: [FinancialGoal],
-        workspaces: [TripWorkspace]
-    ) -> FinancialGoal? {
-        let startedGoalIDs = Set(workspaces.compactMap(\.sourceGoalID))
-        let accumulatingGoals = goals.filter {
-            $0.earmarkedAmount > 0
-                && $0.earmarkedAmount < $0.targetAmount
-                && !startedGoalIDs.contains($0.id)
-        }
-        return accumulatingGoals.min {
-            $0.targetDate == $1.targetDate
-                ? $0.createdAt < $1.createdAt
-                : $0.targetDate < $1.targetDate
-        }
-    }
-}

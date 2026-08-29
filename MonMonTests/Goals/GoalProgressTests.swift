@@ -144,33 +144,3 @@ struct GoalJarCommitmentTests {
         )
     }
 }
-
-@Suite("Spending featured goal")
-struct SpendingFeaturedGoalTests {
-    @Test("A goal stays hidden until it has accumulated money")
-    func emptyGoalIsHidden() {
-        let goal = makeGoal(earmarkedAmount: 0)
-
-        #expect(SpendingFeaturedGoal.select(from: [goal], workspaces: []) == nil)
-
-        goal.earmarkedAmount = 1
-
-        #expect(SpendingFeaturedGoal.select(from: [goal], workspaces: [])?.id == goal.id)
-    }
-
-    private func makeGoal(earmarkedAmount: Decimal) -> FinancialGoal {
-        FinancialGoal(
-            id: UUID(),
-            name: "Japan",
-            kind: .custom,
-            targetAmount: 100_000_000,
-            earmarkedAmount: earmarkedAmount,
-            targetDate: Date(timeIntervalSince1970: 1_900_000_000),
-            monthlyContribution: 5_000_000,
-            fundingJarID: BudgetJarSeed.savingsID,
-            symbolName: "airplane",
-            colorName: "sky",
-            createdAt: Date(timeIntervalSince1970: 1_800_000_000)
-        )
-    }
-}
