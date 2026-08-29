@@ -1,6 +1,20 @@
 import SwiftData
 import SwiftUI
 
+/// Where a summary row on the Wealth screen leads.
+///
+/// A value rather than a view. A link that carries its own destination ties that
+/// destination to the row it was built from, and these rows sit in a lazy stack
+/// that rebuilds whenever the figures above them are recomputed — which drops
+/// whatever was pushed beyond it, sending an owner two screens in back out to
+/// one. The stack keeps the route instead, so nothing below depends on the row
+/// that started it still being on screen.
+enum WealthDestination: Hashable {
+    case accounts
+    case investments(InvestmentSegment)
+    case debts(DebtDirection)
+}
+
 /// Everything the owner has, in one picture: how it splits between cash,
 /// savings, funds, gold and what is lent out, then concise account, investment,
 /// and debt summaries.
@@ -69,6 +83,16 @@ struct WealthView: View {
             }
             .compactRootNavigationTitle("Wealth")
             .accessibilityIdentifier("wealth")
+            .navigationDestination(for: WealthDestination.self) { destination in
+                switch destination {
+                case .accounts:
+                    AccountsScreen()
+                case .investments(let segment):
+                    InvestmentsScreen(segment: segment)
+                case .debts(let direction):
+                    DebtListView(direction: direction)
+                }
+            }
             .navigationDestination(for: AccountDetailRoute.self) { route in
                 AccountDetailView(route: route)
             }
@@ -122,10 +146,9 @@ struct WealthView: View {
             systemImage: kind.iconName,
             tint: kind.tint,
             accessibilityIdentifier: "open-accounts-\(kind.rawValue)",
-            accessibilityHint: "Opens the Accounts screen."
-        ) {
-            AccountsScreen()
-        }
+            accessibilityHint: "Opens the Accounts screen.",
+            destination: .accounts
+        )
     }
 
     private func sectionHeader(_ title: LocalizedStringKey) -> some View {
@@ -134,7 +157,7 @@ struct WealthView: View {
             .foregroundStyle(MonMonTheme.textPrimary)
     }
 
-    private func summaryNavigationRow<Destination: View>(
+    private func summaryNavigationRow(
         title: LocalizedStringKey,
         subtitle: LocalizedStringKey? = nil,
         amount: Decimal,
@@ -142,11 +165,9 @@ struct WealthView: View {
         tint: Color,
         accessibilityIdentifier: String,
         accessibilityHint: LocalizedStringKey,
-        @ViewBuilder destination: () -> Destination
+        destination: WealthDestination
     ) -> some View {
-        NavigationLink {
-            destination()
-        } label: {
+        NavigationLink(value: destination) {
             HStack(spacing: 12) {
                 Image(systemName: systemImage)
                     .font(.subheadline.weight(.semibold))
@@ -261,10 +282,9 @@ struct WealthView: View {
             systemImage: systemImage,
             tint: tint,
             accessibilityIdentifier: "open-investments-\(segment.rawValue)",
-            accessibilityHint: "Opens the Investments screen."
-        ) {
-            InvestmentsScreen(segment: segment)
-        }
+            accessibilityHint: "Opens the Investments screen.",
+            destination: .investments(segment)
+        )
     }
 
     /// What a row counts is what its list holds, so the word follows the
@@ -310,10 +330,9 @@ struct WealthView: View {
                 systemImage: DebtDirection.borrowed.symbolName,
                 tint: MonMonTheme.credit,
                 accessibilityIdentifier: "open-debts-borrowed",
-                accessibilityHint: "Opens borrowed debts."
-            ) {
-                DebtListView(direction: .borrowed)
-            }
+                accessibilityHint: "Opens borrowed debts.",
+                destination: .debts(.borrowed)
+            )
 
             summaryNavigationRow(
                 title: DebtDirection.lent.displayName,
@@ -321,10 +340,9 @@ struct WealthView: View {
                 systemImage: DebtDirection.lent.symbolName,
                 tint: MonMonTheme.lent,
                 accessibilityIdentifier: "open-debts-lent",
-                accessibilityHint: "Opens lent debts."
-            ) {
-                DebtListView(direction: .lent)
-            }
+                accessibilityHint: "Opens lent debts.",
+                destination: .debts(.lent)
+            )
         }
     }
 
