@@ -33,21 +33,33 @@ struct TransactionCard: View {
                     }
                 }
 
-                if let tripName {
-                    Label(tripName, systemImage: "airplane")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(MonMonTheme.accent)
-                        .lineLimit(1)
+                HStack(spacing: 6) {
+                    Label(accountName, systemImage: "wallet.bifold")
+                        .foregroundStyle(MonMonTheme.textSecondary)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(MonMonTheme.accent.opacity(0.14), in: Capsule())
-                        .accessibilityLabel("Trip: \(tripName)")
-                }
+                        .background(MonMonTheme.textSecondary.opacity(0.12), in: Capsule())
+                        .accessibilityLabel("Account: \(accountName)")
 
-                Text(subtitle)
-                    .font(.subheadline)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-                    .lineLimit(2)
+                    if let tripName {
+                        Label(tripName, systemImage: "airplane")
+                            .foregroundStyle(MonMonTheme.accent)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(MonMonTheme.accent.opacity(0.14), in: Capsule())
+                            .accessibilityLabel("Trip: \(tripName)")
+                    }
+                }
+                .font(.caption2.weight(.semibold))
+                .lineLimit(1)
+                .labelStyle(.titleAndIcon)
+
+                if !note.isEmpty {
+                    Text(note)
+                        .font(.subheadline)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                        .lineLimit(2)
+                }
             }
 
             Spacer(minLength: 12)
@@ -101,11 +113,12 @@ struct TransactionCard: View {
         category?.name ?? AppText.string("Uncategorized", in: locale)
     }
 
-    private var subtitle: String {
-        let accountName = account?.name ?? AppText.string("Unknown account", in: locale)
-        let trimmedNote = transaction.note.trimmingCharacters(in: .whitespacesAndNewlines)
+    private var accountName: String {
+        account?.name ?? AppText.string("Unknown account", in: locale)
+    }
 
-        return trimmedNote.isEmpty ? accountName : "\(accountName) · \(trimmedNote)"
+    private var note: String {
+        transaction.note.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private var symbolName: String {

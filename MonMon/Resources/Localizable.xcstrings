@@ -13,6 +13,9 @@
     "Budget jar": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ ngân sách" } } }
     },
+    "Account: %@": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tài khoản: %@" } } }
+    },
     "Use category jar": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dùng hũ của danh mục" } } }
     },
@@ -28,6 +31,30 @@
     "Couldn’t start this trip": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể bắt đầu chuyến đi" } } }
     },
+    "Use this amount": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sử dụng khoản này" } } }
+    },
+    "Start a trip": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bắt đầu chuyến đi" } } }
+    },
+    "Open trip": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mở chuyến đi" } } }
+    },
+    "The accumulated amount will become this trip's budget.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền đã tích lũy sẽ trở thành ngân sách của chuyến đi này." } } }
+    },
+    "Turn the money accumulated so far into a separate spending workspace.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chuyển số tiền đã tích lũy thành một không gian chi tiêu riêng." } } }
+    },
+    "Add money to this goal before using it.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hãy tích lũy tiền cho mục tiêu trước khi sử dụng." } } }
+    },
+    "Choose a funding jar before using this goal.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hãy chọn hũ nguồn trước khi sử dụng mục tiêu này." } } }
+    },
+    "Couldn’t save your changes. Please try again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể lưu thay đổi. Vui lòng thử lại." } } }
+    },
     "This goal already has a trip workspace.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục tiêu này đã có không gian chi tiêu chuyến đi." } } }
     },
@@ -36,6 +63,9 @@
     },
     "Ready to spend": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sẵn sàng chi tiêu" } } }
+    },
+    "Ready to use": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sẵn sàng sử dụng" } } }
     },
     "Active trips": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chuyến đi đang diễn ra" } } }

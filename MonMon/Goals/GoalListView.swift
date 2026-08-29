@@ -6,8 +6,6 @@ private struct GoalTripDestination: Hashable {
 }
 
 struct GoalListView: View {
-    @Environment(\.modelContext) private var modelContext
-
     @Query(sort: \FinancialGoal.createdAt, order: .forward)
     private var goals: [FinancialGoal]
 
@@ -24,7 +22,6 @@ struct GoalListView: View {
     private var categories: [TransactionCategory]
 
     @State private var editorMode: GoalEditorMode?
-    @State private var startErrorMessage: LocalizedStringKey?
 
     let plannedByJar: [UUID: Decimal]
     let asOf: Date
@@ -45,10 +42,8 @@ struct GoalListView: View {
 
                         TripWorkspaceSections(
                             collection: tripCollection,
-                            jars: jars,
                             transactions: transactions,
-                            categories: categories,
-                            onStart: startSpending
+                            categories: categories
                         )
 
                         if goalsForGoalSections.isEmpty && !hasTripContent {
@@ -86,15 +81,6 @@ struct GoalListView: View {
             .appSheet(item: $editorMode) { mode in
                 GoalEditorView(mode: mode, plannedByJar: plannedByJar, asOf: asOf)
             }
-            .alert(
-                "Couldn’t start this trip",
-                isPresented: startErrorBinding,
-                presenting: startErrorMessage
-            ) { _ in
-                Button("OK", role: .cancel) {}
-            } message: { message in
-                Text(message)
-            }
             .tint(MonMonTheme.accent)
             .accessibilityIdentifier("goal-list")
         }
@@ -105,63 +91,26 @@ struct GoalListView: View {
     }
 
     private var goalsForGoalSections: [FinancialGoal] {
-        let hiddenGoalIDs = Set(
-            tripCollection.readyGoalIDs
-                + tripWorkspaces.compactMap(\.sourceGoalID)
-        )
+        let hiddenGoalIDs = Set(tripWorkspaces.compactMap(\.sourceGoalID))
         return goals.filter { !hiddenGoalIDs.contains($0.id) }
     }
 
     private var hasTripContent: Bool {
-        !tripCollection.readyGoals.isEmpty
-            || !tripCollection.activeWorkspaces.isEmpty
+        !tripCollection.activeWorkspaces.isEmpty
             || !tripCollection.completedWorkspaces.isEmpty
-    }
-
-    private var startErrorBinding: Binding<Bool> {
-        Binding(
-            get: { startErrorMessage != nil },
-            set: { isPresented in
-                if !isPresented {
-                    startErrorMessage = nil
-                }
-            }
-        )
-    }
-
-    private func startSpending(_ goal: FinancialGoal) {
-        startErrorMessage = nil
-        do {
-            try TripWorkspaceLifecycle.start(
-                goal: goal,
-                existingWorkspaces: tripWorkspaces,
-                id: UUID(),
-                startedAt: .now,
-                in: modelContext
-            )
-        } catch TripWorkspaceLifecycleError.workspaceAlreadyExists {
-            startErrorMessage = "This goal already has a trip workspace."
-        } catch {
-            startErrorMessage = "Check that this Trip goal is fully funded and has a funding jar."
-        }
     }
 }
 
 private struct TripWorkspaceSections: View {
     let collection: TripWorkspaceCollection
-    let jarNames: [UUID: String]
     let snapshots: [UUID: TripSummarySnapshot]
-    let onStart: (FinancialGoal) -> Void
 
     init(
         collection: TripWorkspaceCollection,
-        jars: [BudgetJar],
         transactions: [MoneyTransaction],
-        categories: [TransactionCategory],
-        onStart: @escaping (FinancialGoal) -> Void
+        categories: [TransactionCategory]
     ) {
         self.collection = collection
-        jarNames = Dictionary(uniqueKeysWithValues: jars.map { ($0.id, $0.name) })
         snapshots = Dictionary(
             uniqueKeysWithValues: (collection.activeWorkspaces + collection.completedWorkspaces).map
             { workspace in
@@ -175,27 +124,10 @@ private struct TripWorkspaceSections: View {
                 )
             }
         )
-        self.onStart = onStart
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            if !collection.readyGoals.isEmpty {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Ready to spend")
-                        .font(.title3.weight(.semibold))
-
-                    ForEach(collection.readyGoals) { goal in
-                        TripReadyCard(
-                            goal: goal,
-                            jarName: goal.fundingJarID.flatMap { jarNames[$0] }
-                                ?? String(localized: "No jar"),
-                            onStart: { onStart(goal) }
-                        )
-                    }
-                }
-            }
-
             workspaceSection("Active trips", workspaces: collection.activeWorkspaces)
             workspaceSection("Trip history", workspaces: collection.completedWorkspaces)
         }

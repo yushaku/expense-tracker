@@ -158,6 +158,7 @@ struct GoalCard: View {
 
 struct GoalDetailView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
 
     @Query(sort: \FinancialGoal.createdAt, order: .forward)
     private var goals: [FinancialGoal]
@@ -165,11 +166,17 @@ struct GoalDetailView: View {
     @Query(sort: \BudgetJar.createdAt, order: .forward)
     private var jars: [BudgetJar]
 
+    @Query(sort: \TripWorkspace.startedAt, order: .reverse)
+    private var tripWorkspaces: [TripWorkspace]
+
     let goalID: UUID
     let plannedByJar: [UUID: Decimal]
     let asOf: Date
 
     @State private var editorMode: GoalEditorMode?
+    @State private var isShowingUseOptions = false
+    @State private var selectedWorkspaceID: UUID?
+    @State private var startErrorMessage: LocalizedStringKey?
 
     private var goal: FinancialGoal? {
         goals.first { $0.id == goalID }
@@ -192,6 +199,7 @@ struct GoalDetailView: View {
                             )
 
                             detailsCard(goal)
+                            useAmountCard(goal)
                         }
                         .frame(maxWidth: MonMonTheme.maxContentWidth)
                         .padding(.horizontal, 20)
@@ -221,6 +229,38 @@ struct GoalDetailView: View {
         .appSheet(item: $editorMode) { mode in
             GoalEditorView(mode: mode, plannedByJar: plannedByJar, asOf: asOf)
         }
+        .navigationDestination(item: $selectedWorkspaceID) { workspaceID in
+            if let workspace = tripWorkspaces.first(where: { $0.id == workspaceID }) {
+                TripDetailView(workspace: workspace)
+            } else {
+                ContentUnavailableView(
+                    "Trip unavailable",
+                    systemImage: "airplane",
+                    description: Text("This trip is no longer in the current store.")
+                )
+            }
+        }
+        .confirmationDialog(
+            "Use this amount",
+            isPresented: $isShowingUseOptions,
+            titleVisibility: .visible
+        ) {
+            Button("Start a trip", systemImage: "airplane.departure") {
+                startTrip()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("The accumulated amount will become this trip's budget.")
+        }
+        .alert(
+            "Couldn’t start this trip",
+            isPresented: startErrorBinding,
+            presenting: startErrorMessage
+        ) { _ in
+            Button("OK", role: .cancel) {}
+        } message: { message in
+            Text(message)
+        }
         .onChange(of: goal?.id) { _, currentGoalID in
             if currentGoalID == nil {
                 dismiss()
@@ -234,13 +274,6 @@ struct GoalDetailView: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Details")
                 .font(.headline)
-
-            detailRow("Type") {
-                Text(goal.kind.title)
-            }
-
-            Divider()
-                .overlay(MonMonTheme.border)
 
             detailRow("Funding jar") {
                 Text(jarName(for: goal))
@@ -259,6 +292,41 @@ struct GoalDetailView: View {
         .overlay {
             RoundedRectangle(cornerRadius: 18)
                 .stroke(MonMonTheme.border, lineWidth: 1)
+        }
+    }
+
+    @ViewBuilder
+    private func useAmountCard(_ goal: FinancialGoal) -> some View {
+        if let workspace = workspace(for: goal) {
+            Button("Open trip", systemImage: "airplane") {
+                selectedWorkspaceID = workspace.id
+            }
+            .buttonStyle(.prominentAction)
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .accessibilityIdentifier("goal-open-trip")
+        } else if canUse(goal) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Use this amount")
+                    .font(.headline)
+
+                Text("Turn the money accumulated so far into a separate spending workspace.")
+                    .font(.subheadline)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+
+                Button("Use this amount", systemImage: "arrow.up.forward.app") {
+                    isShowingUseOptions = true
+                }
+                .buttonStyle(.prominentAction)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .accessibilityIdentifier("goal-use-amount")
+            }
+            .padding(18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 18))
+            .overlay {
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(MonMonTheme.border, lineWidth: 1)
+            }
         }
     }
 
@@ -286,5 +354,51 @@ struct GoalDetailView: View {
         }
 
         return jars.first { $0.id == jarID }?.name ?? String(localized: "No jar")
+    }
+
+    private func workspace(for goal: FinancialGoal) -> TripWorkspace? {
+        tripWorkspaces.first { $0.sourceGoalID == goal.id }
+    }
+
+    private func canUse(_ goal: FinancialGoal) -> Bool {
+        TripWorkspaceCollection.snapshot(goals: [goal], workspaces: tripWorkspaces)
+            .usableGoalIDs.contains(goal.id)
+    }
+
+    private var startErrorBinding: Binding<Bool> {
+        Binding(
+            get: { startErrorMessage != nil },
+            set: { isPresented in
+                if !isPresented {
+                    startErrorMessage = nil
+                }
+            }
+        )
+    }
+
+    private func startTrip() {
+        guard let goal else {
+            return
+        }
+
+        startErrorMessage = nil
+        do {
+            let workspace = try TripWorkspaceLifecycle.start(
+                goal: goal,
+                existingWorkspaces: tripWorkspaces,
+                id: UUID(),
+                startedAt: .now,
+                in: modelContext
+            )
+            selectedWorkspaceID = workspace.id
+        } catch TripWorkspaceLifecycleError.workspaceAlreadyExists {
+            startErrorMessage = "This goal already has a trip workspace."
+        } catch TripWorkspaceLifecycleError.goalHasNoFunds {
+            startErrorMessage = "Add money to this goal before using it."
+        } catch TripWorkspaceLifecycleError.missingFundingJar {
+            startErrorMessage = "Choose a funding jar before using this goal."
+        } catch {
+            startErrorMessage = "Couldn’t save your changes. Please try again."
+        }
     }
 }

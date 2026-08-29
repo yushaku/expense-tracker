@@ -9,9 +9,9 @@ import Testing
 struct TripWorkspaceTests {
     private let startedAt = Date(timeIntervalSince1970: 1_800_000_000)
 
-    @Test("A fully funded Trip goal starts one frozen active workspace")
-    func fullyFundedTripStartsWorkspace() throws {
-        let goal = makeGoal()
+    @Test("A partially funded general goal starts a workspace with its accumulated amount")
+    func partiallyFundedGeneralGoalStartsWorkspace() throws {
+        let goal = makeGoal(kind: .custom, earmarkedAmount: 12_000_000)
         let workspaceID = UUID()
 
         let workspace = try TripWorkspaceLifecycle.start(
@@ -27,7 +27,7 @@ struct TripWorkspaceTests {
         #expect(workspace.id == workspaceID)
         #expect(workspace.sourceGoalID == goal.id)
         #expect(workspace.name == "Da Nang")
-        #expect(workspace.budgetAmount == 30_000_000)
+        #expect(workspace.budgetAmount == 12_000_000)
         #expect(workspace.fundingJarID == BudgetJarSeed.savingsID)
         #expect(workspace.symbolName == "airplane")
         #expect(workspace.colorName == "sky")
@@ -37,18 +37,12 @@ struct TripWorkspaceTests {
         #expect(workspace.createdAt == startedAt)
     }
 
-    @Test("A non-Trip, incomplete, or jar-less goal cannot start spending")
+    @Test("An empty or jar-less goal cannot start spending")
     func ineligibleGoalsAreRejected() {
-        let home = makeGoal(kind: .home)
-        #expect(throws: TripWorkspaceLifecycleError.notTripGoal) {
+        let empty = makeGoal(earmarkedAmount: 0)
+        #expect(throws: TripWorkspaceLifecycleError.goalHasNoFunds) {
             _ = try TripWorkspaceLifecycle.start(
-                goal: home, existingWorkspaces: [], id: UUID(), startedAt: startedAt)
-        }
-
-        let incomplete = makeGoal(earmarkedAmount: 29_999_999)
-        #expect(throws: TripWorkspaceLifecycleError.goalNotFullyFunded) {
-            _ = try TripWorkspaceLifecycle.start(
-                goal: incomplete, existingWorkspaces: [], id: UUID(), startedAt: startedAt)
+                goal: empty, existingWorkspaces: [], id: UUID(), startedAt: startedAt)
         }
 
         let jarless = makeGoal(fundingJarID: nil)
