@@ -12,12 +12,10 @@ import SwiftUI
 struct ReportContentVisibility: Equatable {
     let showsNetTrend: Bool
     let showsTransactionList: Bool
-    let showsCategoryWaterfall: Bool
 
     init(query: TransactionQuery) {
         showsNetTrend = !query.hasSearchText
         showsTransactionList = query.hasSearchText
-        showsCategoryWaterfall = query.filter == .all
     }
 }
 
@@ -117,12 +115,6 @@ struct ReportData {
             transactions: transactions,
             categories: categories
         )
-    }
-
-    func categoryWaterfallSummary(
-        categories: [TransactionCategory]
-    ) -> CategoryWaterfallSummary {
-        CategoryWaterfall.summary(transactions: transactions, categories: categories)
     }
 
     var allowsCategoryKindSelection: Bool {
@@ -252,12 +244,6 @@ struct ReportView: View {
                         range: query.range,
                         showsKindPicker: report.allowsCategoryKindSelection
                     )
-
-                    if visibility.showsCategoryWaterfall {
-                        CategoryWaterfallCard(
-                            summary: report.categoryWaterfallSummary(categories: categories)
-                        )
-                    }
                 }
 
                 AccountSpendingSection(
