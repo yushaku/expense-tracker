@@ -88,6 +88,8 @@ struct BudgetScreen: View {
                     Button("Setup", systemImage: "slider.horizontal.3") {
                         isShowingConfiguration = true
                     }
+                    .buttonStyle(.plain)
+                    .headerIconStyle()
                     .accessibilityIdentifier("budget-setup")
                 }
 
@@ -95,6 +97,8 @@ struct BudgetScreen: View {
                     Button("Income", systemImage: "arrow.triangle.2.circlepath") {
                         isShowingRecurringIncome = true
                     }
+                    .buttonStyle(.plain)
+                    .headerIconStyle()
                     .accessibilityIdentifier("budget-income-rules")
                 }
             }

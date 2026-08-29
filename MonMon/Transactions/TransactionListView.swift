@@ -257,6 +257,8 @@ struct TransactionListView: View {
             }
             .frame(width: 32, height: 32)
         }
+        .buttonStyle(.plain)
+        .headerIconStyle()
         .accessibilityLabel(importInboxAccessibilityLabel)
         .accessibilityIdentifier("open-import-inbox")
     }
