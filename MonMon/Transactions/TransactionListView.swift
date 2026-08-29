@@ -493,7 +493,7 @@ struct TransactionListView: View {
     /// The months either side of the one on show, pinned under the navigation
     /// bar so a month is one tap away wherever the screen is scrolled to.
     private var monthRail: some View {
-        MonthRail(months: railMonths, selection: selectedMonth) { month in
+        PeriodRail(unit: .month, periods: railMonths, selection: selectedMonth) { month in
             query.range = .month(containing: month)
         }
         .background(MonMonTheme.canvas)

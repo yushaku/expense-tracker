@@ -147,6 +147,7 @@
 		A00000000000000000000288 /* VNDCurrencyFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000199 /* VNDCurrencyFormatTests.swift */; };
 		A00000000000000000000612 /* TransactionRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000610 /* TransactionRange.swift */; };
 		A00000000000000000000613 /* TransactionRangeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000611 /* TransactionRangeTests.swift */; };
+		A00000000000000000000702 /* PeriodRailTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000701 /* PeriodRailTests.swift */; };
 		A00000000000000000000640 /* AccountTransfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000620 /* AccountTransfer.swift */; };
 		A00000000000000000000641 /* TransferSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000621 /* TransferSummary.swift */; };
 		A00000000000000000000642 /* TransferDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000622 /* TransferDraft.swift */; };
@@ -305,7 +306,7 @@
 		C10000000000000000000102 /* TransactionCalendarCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000002 /* TransactionCalendarCard.swift */; };
 		C10000000000000000000103 /* DayTransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000003 /* DayTransactionsView.swift */; };
 		C10000000000000000000104 /* TransactionCalendarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000004 /* TransactionCalendarTests.swift */; };
-		C10000000000000000000105 /* MonthRail.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000005 /* MonthRail.swift */; };
+		C10000000000000000000105 /* PeriodRail.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000005 /* PeriodRail.swift */; };
 		C10000000000000000000106 /* SpendingOverviewCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000006 /* SpendingOverviewCard.swift */; };
 		C10000000000000000000107 /* AppLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000007 /* AppLanguage.swift */; };
 		C10000000000000000000108 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000008 /* Localizable.xcstrings */; };
@@ -503,6 +504,7 @@
 		A00000000000000000000199 /* VNDCurrencyFormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VNDCurrencyFormatTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000610 /* TransactionRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionRange.swift; sourceTree = "<group>"; };
 		A00000000000000000000611 /* TransactionRangeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionRangeTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000701 /* PeriodRailTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodRailTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000620 /* AccountTransfer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTransfer.swift; sourceTree = "<group>"; };
 		A00000000000000000000621 /* TransferSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferSummary.swift; sourceTree = "<group>"; };
 		A00000000000000000000622 /* TransferDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferDraft.swift; sourceTree = "<group>"; };
@@ -662,7 +664,7 @@
 		C10000000000000000000002 /* TransactionCalendarCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCalendarCard.swift; sourceTree = "<group>"; };
 		C10000000000000000000003 /* DayTransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayTransactionsView.swift; sourceTree = "<group>"; };
 		C10000000000000000000004 /* TransactionCalendarTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCalendarTests.swift; sourceTree = "<group>"; };
-		C10000000000000000000005 /* MonthRail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthRail.swift; sourceTree = "<group>"; };
+		C10000000000000000000005 /* PeriodRail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodRail.swift; sourceTree = "<group>"; };
 		C10000000000000000000006 /* SpendingOverviewCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendingOverviewCard.swift; sourceTree = "<group>"; };
 		C10000000000000000000007 /* AppLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguage.swift; sourceTree = "<group>"; };
 		C10000000000000000000008 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -903,7 +905,7 @@
 				A00000000000000000000192 /* FloatingAddButton.swift */,
 				A00000000000000000000803 /* ProminentActionButtonStyle.swift */,
 				A0000000000000000000080B /* DateRangeFilter.swift */,
-				C10000000000000000000005 /* MonthRail.swift */,
+				C10000000000000000000005 /* PeriodRail.swift */,
 				A00000000000000000000F01 /* WebPage.swift */,
 				A0000000000000000000080D /* PeriodGridPicker.swift */,
 				A00000000000000000000801 /* SegmentedTabs.swift */,
@@ -1081,6 +1083,7 @@
 				Q10000000000000000000102 /* TransactionCaptureParserTests.swift */,
 				A00000000000000000000166 /* TransactionPeriodTests.swift */,
 				A00000000000000000000611 /* TransactionRangeTests.swift */,
+				A00000000000000000000701 /* PeriodRailTests.swift */,
 				A00000000000000000000167 /* TransactionSummaryTests.swift */,
 				A00000000000000000009102 /* TransactionSearchTests.swift */,
 				R20000000000000000000004 /* AccountReportSummaryTests.swift */,
@@ -1549,7 +1552,7 @@
 				A00000000000000000000281 /* FloatingAddButton.swift in Sources */,
 				A00000000000000000000804 /* ProminentActionButtonStyle.swift in Sources */,
 				A0000000000000000000080C /* DateRangeFilter.swift in Sources */,
-				C10000000000000000000105 /* MonthRail.swift in Sources */,
+				C10000000000000000000105 /* PeriodRail.swift in Sources */,
 				C10000000000000000000107 /* AppLanguage.swift in Sources */,
 				A00000000000000000000F02 /* WebPage.swift in Sources */,
 				A0000000000000000000080E /* PeriodGridPicker.swift in Sources */,
@@ -1739,6 +1742,7 @@
 				C10000000000000000000104 /* TransactionCalendarTests.swift in Sources */,
 				A00000000000000000000255 /* TransactionPeriodTests.swift in Sources */,
 				A00000000000000000000613 /* TransactionRangeTests.swift in Sources */,
+				A00000000000000000000702 /* PeriodRailTests.swift in Sources */,
 				A00000000000000000000650 /* TransferDraftTests.swift in Sources */,
 				A00000000000000000000651 /* TransferSummaryTests.swift in Sources */,
 				A00000000000000000000652 /* AccountTransferPersistenceTests.swift in Sources */,

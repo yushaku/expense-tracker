@@ -158,7 +158,7 @@ struct ReportView: View {
             .compactRootNavigationTitle("Report")
             .accessibilityIdentifier("report")
             .safeAreaInset(edge: .top, spacing: 0) {
-                monthRail
+                periodRail
             }
             .toolbar {
                 ToolbarItemGroup(placement: .primaryAction) {
@@ -321,12 +321,19 @@ struct ReportView: View {
         query.range.contains(.now) ? .now : query.range.start
     }
 
-    /// The month the calendar renders. Its day totals still come from the
-    /// globally filtered report data rather than from the unfiltered ledger, and
-    /// the months it offers are the ones that period covers.
-    private var monthRail: some View {
-        MonthRail(months: calendarMonths.months, selection: calendarMonths.selection) { month in
-            pickedMonth = TransactionPeriod.startOfMonth(for: month)
+    /// The rail walks in whatever unit the header is filtering by, and a tap on
+    /// it moves that filter rather than a period kept beside it: a screen
+    /// showing a year steps by years, one showing a day by days.
+    private var periodRail: some View {
+        let periods = PeriodRailPeriods(range: query.range, today: .now)
+
+        return PeriodRail(
+            unit: periods.unit,
+            periods: periods.periods,
+            selection: periods.selection
+        ) { period in
+            query.range = periods.unit.range(containing: period)
+            pickedMonth = nil
         }
         .background(MonMonTheme.canvas)
         .overlay(alignment: .bottom) {

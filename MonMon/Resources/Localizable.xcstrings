@@ -1,6 +1,15 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Current month": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tháng hiện tại" } } }
+    },
+    "Current year": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Năm hiện tại" } } }
+    },
+    "Today": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hôm nay" } } }
+    },
     "Add an expense category to configure this preset.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm danh mục chi tiêu để cấu hình mục đặt sẵn này." } } }
     },
