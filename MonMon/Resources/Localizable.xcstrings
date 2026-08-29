@@ -8074,6 +8074,46 @@
         }
       }
     },
+    "Averaging %@ out per day.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trung bình %@ chi ra mỗi ngày."
+          }
+        }
+      }
+    },
+    "Averaging %@ out per month.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trung bình %@ chi ra mỗi tháng."
+          }
+        }
+      }
+    },
+    "Averaging %@ in per day.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trung bình %@ thu vào mỗi ngày."
+          }
+        }
+      }
+    },
+    "Averaging %@ in per month.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trung bình %@ thu vào mỗi tháng."
+          }
+        }
+      }
+    },
     "No categories yet.": {
       "localizations": {
         "vi": {
