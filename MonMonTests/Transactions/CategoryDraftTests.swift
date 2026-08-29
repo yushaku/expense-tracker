@@ -3,6 +3,10 @@ import Testing
 
 @testable import MonMon
 
+#if os(macOS)
+    import AppKit
+#endif
+
 @Suite("Category draft validation")
 struct CategoryDraftTests {
     private let createdAt = Date(timeIntervalSince1970: 1_700_000_000)
@@ -107,5 +111,27 @@ struct CategoryDraftTests {
 
         #expect(draft.symbolName == CategoryPalette.defaultSymbolName)
         #expect(draft.colorName == CategoryPalette.defaultColorName)
+    }
+
+    @Test("The symbol palette covers common category themes without duplicates")
+    func symbolPaletteIsBroadAndUnique() {
+        let symbols = CategoryPalette.symbolNames
+
+        #expect(symbols.count >= 60)
+        #expect(Set(symbols).count == symbols.count)
+        #expect(symbols.contains("cup.and.saucer.fill"))
+        #expect(symbols.contains("bus.fill"))
+        #expect(symbols.contains("wrench.and.screwdriver.fill"))
+        #expect(symbols.contains("stethoscope"))
+        #expect(symbols.contains("graduationcap.fill"))
+        #expect(symbols.contains("creditcard.fill"))
+
+        #if os(macOS)
+            #expect(
+                symbols.allSatisfy {
+                    NSImage(systemSymbolName: $0, accessibilityDescription: nil) != nil
+                }
+            )
+        #endif
     }
 }
