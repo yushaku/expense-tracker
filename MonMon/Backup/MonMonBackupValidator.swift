@@ -38,6 +38,7 @@ struct MonMonBackupCounts: Equatable, Sendable {
     var fundHoldings: Int
     var fundSales: Int
     var budgetJars: Int
+    var goals: Int
     var categories: Int
     var transactions: Int
     var pendingCaptures: Int
@@ -54,6 +55,7 @@ struct MonMonBackupCounts: Equatable, Sendable {
         fundHoldings = payload.fundHoldings.count
         fundSales = payload.fundSales.count
         budgetJars = payload.budgetJars.count
+        goals = payload.goals.count
         categories = payload.categories.count
         transactions = payload.transactions.count
         pendingCaptures = payload.pendingCaptures.count
@@ -73,7 +75,8 @@ struct MonMonBackupPreview: Equatable, Sendable {
     var incomingRecordCount: Int {
         counts.accounts + counts.savingsDeposits + counts.savingsWithdrawals
             + counts.fundInstruments + counts.fundHoldings + counts.fundSales
-            + counts.budgetJars + counts.categories + counts.transactions + counts.pendingCaptures
+            + counts.budgetJars + counts.goals + counts.categories + counts.transactions
+            + counts.pendingCaptures
             + counts.transfers + counts.debts + counts.debtPayments + counts.recurringRules
     }
 }
@@ -216,6 +219,19 @@ private struct PayloadChecker {
                 !record.name.isEmpty && !record.symbolName.isEmpty && !record.colorName.isEmpty)
             let allocation = try MonMonBackupScalar.parseDecimal(record.allocationPercent)
             try require(allocation >= .zero && allocation <= 100)
+        }
+        try validateUniqueRecords(payload.goals) { record in
+            try scalarIDAndDate(record.id, record.createdAt)
+            try require(FinancialGoalKind(rawValue: record.kind) != nil)
+            try require(
+                !record.name.isEmpty && !record.symbolName.isEmpty && !record.colorName.isEmpty)
+            let target = try MonMonBackupScalar.parseDecimal(record.targetAmount)
+            let earmarked = try MonMonBackupScalar.parseDecimal(record.earmarkedAmount)
+            try require(target > .zero)
+            try require(earmarked >= .zero && earmarked <= target)
+            try date(record.targetDate)
+            try nonnegative(record.monthlyContribution)
+            try uuid(record.fundingJarID)
         }
         try validateUniqueRecords(payload.categories) { record in
             try scalarIDAndDate(record.id, record.createdAt)
@@ -398,6 +414,9 @@ private struct PayloadChecker {
             if let budgetJarID = record.budgetJarID {
                 try requiredReference(budgetJarID, validIDs: budgetJars)
             }
+        }
+        for record in payload.goals {
+            try requiredReference(record.fundingJarID, validIDs: budgetJars)
         }
 
         for record in payload.savingsDeposits {
@@ -640,6 +659,7 @@ extension MonMonBackupPayload.FundInstrumentRecord: BackupIdentified {}
 extension MonMonBackupPayload.FundHoldingRecord: BackupIdentified {}
 extension MonMonBackupPayload.FundSaleRecord: BackupIdentified {}
 extension MonMonBackupPayload.BudgetJarRecord: BackupIdentified {}
+extension MonMonBackupPayload.GoalRecord: BackupIdentified {}
 extension MonMonBackupPayload.CategoryRecord: BackupIdentified {}
 extension MonMonBackupPayload.TransactionRecord: BackupIdentified {}
 extension MonMonBackupPayload.PendingCaptureRecord: BackupIdentified {}

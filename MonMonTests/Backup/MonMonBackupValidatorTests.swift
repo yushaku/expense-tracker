@@ -157,6 +157,36 @@ struct MonMonBackupValidatorTests {
         }
     }
 
+    @Test("Goal values and funding jar references are validated")
+    func invalidGoalDataIsRejected() throws {
+        let investmentJarID = UUID()
+        let savingsJarID = UUID()
+        var payload = MonMonBackupPayload.empty
+        payload.budgetJars = [
+            budgetJar(id: accountID, role: .custom),
+            budgetJar(id: investmentJarID, role: .investment),
+            budgetJar(id: savingsJarID, role: .savings),
+        ]
+        payload.goals = [goal(id: otherID, jarID: savingsJarID)]
+        payload.goals[0].kind = "unknown"
+
+        #expect(throws: MonMonBackupValidationError.invalidPayload) {
+            try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
+        }
+
+        payload.goals[0].kind = FinancialGoalKind.trip.rawValue
+        payload.goals[0].fundingJarID = MonMonBackupScalar.uuid(UUID())
+        #expect(throws: MonMonBackupValidationError.invalidReference) {
+            try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
+        }
+
+        payload.goals[0].fundingJarID = MonMonBackupScalar.uuid(savingsJarID)
+        payload.goals[0].earmarkedAmount = "1001"
+        #expect(throws: MonMonBackupValidationError.invalidPayload) {
+            try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
+        }
+    }
+
     @Test("Missing required account references and impossible transfers are rejected")
     func referenceFailures() throws {
         var payload = MonMonBackupPayload.empty
@@ -237,6 +267,22 @@ struct MonMonBackupValidatorTests {
             role: role.rawValue,
             symbolName: "house.fill",
             colorName: "blue",
+            createdAt: MonMonBackupScalar.date(instant)
+        )
+    }
+
+    private func goal(id: UUID, jarID: UUID) -> MonMonBackupPayload.GoalRecord {
+        MonMonBackupPayload.GoalRecord(
+            id: MonMonBackupScalar.uuid(id),
+            name: "Trip",
+            kind: FinancialGoalKind.trip.rawValue,
+            targetAmount: "1000",
+            earmarkedAmount: "100",
+            targetDate: MonMonBackupScalar.date(instant.addingTimeInterval(31_536_000)),
+            monthlyContribution: "100",
+            fundingJarID: MonMonBackupScalar.uuid(jarID),
+            symbolName: "airplane",
+            colorName: "sky",
             createdAt: MonMonBackupScalar.date(instant)
         )
     }

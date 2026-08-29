@@ -109,6 +109,7 @@ struct MonMonBackupDocumentTests {
         let payload = try JSONDecoder().decode(MonMonBackupPayload.self, from: data)
 
         #expect(payload.budgetJars.isEmpty)
+        #expect(payload.goals.isEmpty)
     }
 
     @Test("A signed legacy document without budget jars still validates")
@@ -135,6 +136,7 @@ struct MonMonBackupDocumentTests {
         )
 
         #expect(validated.payload.budgetJars.isEmpty)
+        #expect(validated.payload.goals.isEmpty)
     }
 
     private func account(id: UUID, name: String) -> MonMonBackupPayload.AccountRecord {

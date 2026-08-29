@@ -8562,6 +8562,9 @@
     "Budget jars": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ ngân sách" } } }
     },
+    "Financial goals": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục tiêu tài chính" } } }
+    },
     "Unmapped expenses use %@.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khoản chi chưa gán sẽ dùng hũ %@." } } }
     },
@@ -8571,8 +8574,8 @@
     "Categories mapped here will move to another available jar.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Các danh mục đang gán vào đây sẽ chuyển sang một hũ còn lại." } } }
     },
-    "Export or replace every account, transaction, category, budget jar, recurring rule, saving, investment, transfer, and debt on this device.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xuất hoặc thay thế toàn bộ tài khoản, giao dịch, danh mục, hũ ngân sách, khoản định kỳ, tiết kiệm, đầu tư, chuyển khoản và khoản nợ trên thiết bị này." } } }
+    "Export or replace every account, transaction, category, budget jar, financial goal, recurring rule, saving, investment, transfer, and debt on this device.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xuất hoặc thay thế toàn bộ tài khoản, giao dịch, danh mục, hũ ngân sách, mục tiêu tài chính, khoản định kỳ, tiết kiệm, đầu tư, chuyển khoản và khoản nợ trên thiết bị này." } } }
     },
     "Goals": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục tiêu" } } }

@@ -130,6 +130,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
     var fundHoldings: [FundHoldingRecord]
     var fundSales: [FundSaleRecord]
     var budgetJars: [BudgetJarRecord]
+    var goals: [GoalRecord]
     var categories: [CategoryRecord]
     var transactions: [TransactionRecord]
     var pendingCaptures: [PendingCaptureRecord]
@@ -139,6 +140,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
     var recurringRules: [RecurringRuleRecord]
     var preferences: Preferences
     private var includesBudgetJars: Bool
+    private var includesGoals: Bool
 
     private enum CodingKeys: String, CodingKey {
         case accounts
@@ -148,6 +150,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         case fundHoldings
         case fundSales
         case budgetJars
+        case goals
         case categories
         case transactions
         case pendingCaptures
@@ -166,6 +169,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         fundHoldings: [],
         fundSales: [],
         budgetJars: [],
+        goals: [],
         categories: [],
         transactions: [],
         pendingCaptures: [],
@@ -184,6 +188,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         fundHoldings: [FundHoldingRecord],
         fundSales: [FundSaleRecord],
         budgetJars: [BudgetJarRecord],
+        goals: [GoalRecord],
         categories: [CategoryRecord],
         transactions: [TransactionRecord],
         pendingCaptures: [PendingCaptureRecord],
@@ -200,6 +205,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         self.fundHoldings = fundHoldings
         self.fundSales = fundSales
         self.budgetJars = budgetJars
+        self.goals = goals
         self.categories = categories
         self.transactions = transactions
         self.pendingCaptures = pendingCaptures
@@ -209,6 +215,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         self.recurringRules = recurringRules
         self.preferences = preferences
         includesBudgetJars = true
+        includesGoals = true
     }
 
     init(from decoder: Decoder) throws {
@@ -231,6 +238,8 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         includesBudgetJars = container.contains(.budgetJars)
         budgetJars =
             try container.decodeIfPresent([BudgetJarRecord].self, forKey: .budgetJars) ?? []
+        includesGoals = container.contains(.goals)
+        goals = try container.decodeIfPresent([GoalRecord].self, forKey: .goals) ?? []
         categories = try container.decode([CategoryRecord].self, forKey: .categories)
         transactions = try container.decode([TransactionRecord].self, forKey: .transactions)
         pendingCaptures = try container.decode(
@@ -255,6 +264,9 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         if includesBudgetJars {
             try container.encode(budgetJars, forKey: .budgetJars)
         }
+        if includesGoals {
+            try container.encode(goals, forKey: .goals)
+        }
         try container.encode(categories, forKey: .categories)
         try container.encode(transactions, forKey: .transactions)
         try container.encode(pendingCaptures, forKey: .pendingCaptures)
@@ -274,6 +286,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         result.fundHoldings = fundHoldings.backupSorted()
         result.fundSales = fundSales.backupSorted()
         result.budgetJars = budgetJars.backupSorted()
+        result.goals = goals.backupSorted()
         result.categories = categories.backupSorted()
         result.transactions = transactions.backupSorted()
         result.pendingCaptures = pendingCaptures.backupSorted()
@@ -287,7 +300,8 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
     var recordCount: Int {
         accounts.count + savingsDeposits.count + savingsWithdrawals.count
             + fundInstruments.count + fundHoldings.count + fundSales.count
-            + budgetJars.count + categories.count + transactions.count + pendingCaptures.count
+            + budgetJars.count + goals.count + categories.count + transactions.count
+            + pendingCaptures.count
             + transfers.count + debts.count + debtPayments.count + recurringRules.count
     }
 
@@ -398,6 +412,20 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         var name: String
         var allocationPercent: String
         var role: String
+        var symbolName: String
+        var colorName: String
+        var createdAt: String
+    }
+
+    struct GoalRecord: Codable, Equatable, Sendable, MonMonBackupRecord {
+        var id: String
+        var name: String
+        var kind: String
+        var targetAmount: String
+        var earmarkedAmount: String
+        var targetDate: String
+        var monthlyContribution: String
+        var fundingJarID: String
         var symbolName: String
         var colorName: String
         var createdAt: String

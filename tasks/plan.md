@@ -38,8 +38,8 @@ Review + full non-Simulator gates
   overcommitment; the list reports the deficit for owner correction.
 - Goal calculations remain pure and calendar-parameterised. Views render
   prepared snapshots and forms own their save/dismiss behaviour.
-- Goal backup fields are optional at the payload boundary so existing snapshots
-  remain restorable.
+- The Goal section is optional at the payload boundary so existing snapshots
+  remain restorable without changing their signed checksum.
 
 ## Task List
 
@@ -66,7 +66,7 @@ Review + full non-Simulator gates
 
 ### Phase 3: Portability and completion
 
-- [ ] Task 6: Extend complete backup validation, export, and authoritative restore.
+- [x] Task 6: Extend complete backup validation, export, and authoritative restore.
 - [ ] Task 7: Run SwiftUI correctness, quality, simplification, and security review.
 - [ ] Task 8: Run focused/full tests, strict format lint, and compile-only iPhoneOS build.
 - [ ] Task 9: Commit reviewable increments and hand back the clean feature branch.
