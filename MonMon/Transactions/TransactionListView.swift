@@ -19,6 +19,15 @@ struct TransactionListView: View {
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
 
+    @Query(sort: \FinancialGoal.createdAt, order: .forward)
+    private var goals: [FinancialGoal]
+
+    @Query(sort: \BudgetJar.createdAt, order: .forward)
+    private var budgetJars: [BudgetJar]
+
+    @Query(sort: \TripWorkspace.startedAt, order: .reverse)
+    private var tripWorkspaces: [TripWorkspace]
+
     @Query(sort: \PendingTransactionCapture.createdAt, order: .reverse)
     private var pendingCaptures: [PendingTransactionCapture]
 
@@ -64,6 +73,17 @@ struct TransactionListView: View {
                             noAccountState
                         } else {
                             quickActions
+
+                            if let featuredGoal {
+                                GoalCard(
+                                    goal: featuredGoal,
+                                    jarName: featuredGoal.fundingJarID.flatMap(jarName)
+                                        ?? String(localized: "No jar"),
+                                    asOf: .now,
+                                    showsDisclosure: false
+                                )
+                                .accessibilityIdentifier("spending-featured-goal")
+                            }
 
                             transactionsSection
                         }
@@ -384,6 +404,23 @@ struct TransactionListView: View {
 
     private var accountNames: [UUID: String] {
         Dictionary(uniqueKeysWithValues: accounts.map { ($0.id, $0.name) })
+    }
+
+    private var featuredGoal: FinancialGoal? {
+        let startedGoalIDs = Set(tripWorkspaces.compactMap(\.sourceGoalID))
+        let accumulatingGoals = goals.filter {
+            $0.earmarkedAmount < $0.targetAmount
+                && !startedGoalIDs.contains($0.id)
+        }
+        return accumulatingGoals.min {
+            $0.targetDate == $1.targetDate
+                ? $0.createdAt < $1.createdAt
+                : $0.targetDate < $1.targetDate
+        }
+    }
+
+    private func jarName(_ id: UUID) -> String? {
+        budgetJars.first { $0.id == id }?.name
     }
 
     /// The three things the owner sets up rather than records: what a
