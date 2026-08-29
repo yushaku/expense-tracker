@@ -26,6 +26,7 @@ struct BudgetScreen: View {
     @State private var isShowingConfiguration = false
     @State private var isShowingGoals = false
     @State private var isShowingIncomeTimeline = false
+    @State private var selectedJarID: UUID?
 
     private let asOf: Date
 
@@ -52,13 +53,10 @@ struct BudgetScreen: View {
                         }
 
                         ForEach(snapshot.rowsByAllocation) { row in
-                            NavigationLink {
-                                BudgetJarDetailView(row: row, asOf: asOf)
-                            } label: {
-                                BudgetJarCard(row: row)
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityHint("Opens activity in this budget jar")
+                            BudgetJarCard(
+                                row: row,
+                                onOpenDetails: { selectedJarID = row.jarID }
+                            )
                         }
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -102,6 +100,11 @@ struct BudgetScreen: View {
             }
             .appSheet(isPresented: $isShowingIncomeTimeline) {
                 IncomeAllocationTimelineView(asOf: asOf)
+            }
+            .navigationDestination(item: $selectedJarID) { jarID in
+                if let row = snapshot.rows.first(where: { $0.jarID == jarID }) {
+                    BudgetJarDetailView(row: row, asOf: asOf)
+                }
             }
             .tint(MonMonTheme.accent)
         }
