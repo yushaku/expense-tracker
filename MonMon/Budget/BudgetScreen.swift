@@ -227,7 +227,7 @@ struct BudgetScreen: View {
     @ViewBuilder
     private var inProgressGoalList: some View {
         if !inProgressGoals.isEmpty {
-            Text("In progress")
+            Text("Accumulating")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(MonMonTheme.textSecondary)
 
