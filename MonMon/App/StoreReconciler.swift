@@ -236,6 +236,7 @@ enum StoreReconciler {
 
         var folded = 0
         for merge in merges {
+            preserveIncomeAllocationSnapshot(in: merge)
             for duplicate in merge.duplicates {
                 context.delete(duplicate)
                 folded += 1
@@ -278,6 +279,7 @@ enum StoreReconciler {
 
         var folded = 0
         for merge in merges {
+            preserveIncomeAllocationSnapshot(in: merge)
             for duplicate in merge.duplicates {
                 context.delete(duplicate)
                 folded += 1
@@ -285,6 +287,29 @@ enum StoreReconciler {
         }
 
         return folded
+    }
+
+    private static func preserveIncomeAllocationSnapshot(
+        in merge: DuplicateReconciler.Merge<MoneyTransaction>
+    ) {
+        guard
+            merge.survivor.kind == .income,
+            merge.survivor.incomeAllocationSnapshot == nil
+        else {
+            return
+        }
+
+        for duplicate in merge.duplicates
+        where duplicate.amount == merge.survivor.amount {
+            guard let encoded = duplicate.incomeAllocationSnapshot else { continue }
+            do {
+                _ = try IncomeAllocationLifecycle.snapshot(in: duplicate)
+                merge.survivor.incomeAllocationSnapshot = encoded
+                return
+            } catch {
+                continue
+            }
+        }
     }
 
     private enum TransferImportSide {

@@ -60,6 +60,32 @@ struct MoneyTransactionPersistenceTests {
         #expect(stored.currencyCode == VNDCurrency.code)
     }
 
+    @Test("An optional income allocation snapshot round trips through the store")
+    func incomeAllocationSnapshotRoundTrips() throws {
+        let container = try makeContainer()
+        let context = ModelContext(container)
+        let snapshot = "{\"version\":1}"
+        let transaction = MoneyTransaction(
+            id: UUID(),
+            kind: .income,
+            amount: 5_000_000,
+            occurredAt: occurredAt,
+            note: "Salary",
+            accountID: UUID(),
+            categoryID: UUID(),
+            sourceRuleID: nil,
+            currencyCode: VNDCurrency.code,
+            createdAt: occurredAt,
+            incomeAllocationSnapshot: snapshot
+        )
+        context.insert(transaction)
+        try context.save()
+
+        let stored = try #require(try context.fetch(FetchDescriptor<MoneyTransaction>()).first)
+
+        #expect(stored.incomeAllocationSnapshot == snapshot)
+    }
+
     @Test("Recorded flow lowers and raises the account's available balance")
     func flowMovesTheStoredBalance() throws {
         let container = try makeContainer()
@@ -191,6 +217,7 @@ struct MoneyTransactionPersistenceTests {
         let transactionID = UUID()
         let categoryID = UUID()
         let ruleID = UUID()
+        let snapshot = "{\"version\":1}"
         context.insert(account)
 
         let transaction = MoneyTransaction(
@@ -204,7 +231,8 @@ struct MoneyTransactionPersistenceTests {
             sourceRuleID: ruleID,
             currencyCode: VNDCurrency.code,
             createdAt: occurredAt.addingTimeInterval(-60),
-            sourceImportID: "statement-row"
+            sourceImportID: "statement-row",
+            incomeAllocationSnapshot: snapshot
         )
         context.insert(transaction)
         try context.save()
@@ -225,5 +253,6 @@ struct MoneyTransactionPersistenceTests {
         #expect(restored.currencyCode == VNDCurrency.code)
         #expect(restored.createdAt == occurredAt.addingTimeInterval(-60))
         #expect(restored.sourceImportID == "statement-row")
+        #expect(restored.incomeAllocationSnapshot == snapshot)
     }
 }

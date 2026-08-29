@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		X10000000000000000000201 /* IncomeAllocationSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = X10000000000000000000101 /* IncomeAllocationSnapshotTests.swift */; };
+		X10000000000000000000202 /* IncomeAllocationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = X10000000000000000000102 /* IncomeAllocationSnapshot.swift */; };
+		X10000000000000000000203 /* IncomeAllocationLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = X10000000000000000000103 /* IncomeAllocationLifecycleTests.swift */; };
+		X10000000000000000000204 /* IncomeAllocationLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = X10000000000000000000104 /* IncomeAllocationLifecycle.swift */; };
+		X10000000000000000000205 /* IncomeAllocationTimelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = X10000000000000000000105 /* IncomeAllocationTimelineTests.swift */; };
+		X10000000000000000000206 /* IncomeAllocationTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = X10000000000000000000106 /* IncomeAllocationTimeline.swift */; };
+		X10000000000000000000207 /* IncomeAllocationTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = X10000000000000000000107 /* IncomeAllocationTimelineView.swift */; };
 		V10000000000000000000201 /* GoalProgressTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = V10000000000000000000101 /* GoalProgressTests.swift */; };
 		V10000000000000000000202 /* FinancialGoalDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = V10000000000000000000102 /* FinancialGoalDraftTests.swift */; };
 		V10000000000000000000203 /* FinancialGoal.swift in Sources */ = {isa = PBXBuildFile; fileRef = V10000000000000000000103 /* FinancialGoal.swift */; };
@@ -384,6 +391,13 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		X10000000000000000000101 /* IncomeAllocationSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeAllocationSnapshotTests.swift; sourceTree = "<group>"; };
+		X10000000000000000000102 /* IncomeAllocationSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeAllocationSnapshot.swift; sourceTree = "<group>"; };
+		X10000000000000000000103 /* IncomeAllocationLifecycleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeAllocationLifecycleTests.swift; sourceTree = "<group>"; };
+		X10000000000000000000104 /* IncomeAllocationLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeAllocationLifecycle.swift; sourceTree = "<group>"; };
+		X10000000000000000000105 /* IncomeAllocationTimelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeAllocationTimelineTests.swift; sourceTree = "<group>"; };
+		X10000000000000000000106 /* IncomeAllocationTimeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeAllocationTimeline.swift; sourceTree = "<group>"; };
+		X10000000000000000000107 /* IncomeAllocationTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeAllocationTimelineView.swift; sourceTree = "<group>"; };
 		V10000000000000000000101 /* GoalProgressTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalProgressTests.swift; sourceTree = "<group>"; };
 		V10000000000000000000102 /* FinancialGoalDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialGoalDraftTests.swift; sourceTree = "<group>"; };
 		V10000000000000000000103 /* FinancialGoal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialGoal.swift; sourceTree = "<group>"; };
@@ -785,6 +799,7 @@
 		A00000000000000000000012 /* MonMon */ = {
 			isa = PBXGroup;
 			children = (
+				X10000000000000000000001 /* IncomeAllocation */,
 				V10000000000000000000001 /* Goals */,
 				U10000000000000000000001 /* Budget */,
 				W10000000000000000000012 /* QuickExpense */,
@@ -806,6 +821,17 @@
 				B10000000000000000000001 /* Imports */,
 			);
 			path = MonMon;
+			sourceTree = "<group>";
+		};
+		X10000000000000000000001 /* IncomeAllocation */ = {
+			isa = PBXGroup;
+			children = (
+				X10000000000000000000102 /* IncomeAllocationSnapshot.swift */,
+				X10000000000000000000104 /* IncomeAllocationLifecycle.swift */,
+				X10000000000000000000106 /* IncomeAllocationTimeline.swift */,
+				X10000000000000000000107 /* IncomeAllocationTimelineView.swift */,
+			);
+			path = IncomeAllocation;
 			sourceTree = "<group>";
 		};
 		V10000000000000000000001 /* Goals */ = {
@@ -863,6 +889,7 @@
 		A00000000000000000000015 /* MonMonTests */ = {
 			isa = PBXGroup;
 			children = (
+				X10000000000000000000002 /* IncomeAllocation */,
 				V10000000000000000000002 /* Goals */,
 				U10000000000000000000002 /* Budget */,
 				W10000000000000000000011 /* QuickExpense */,
@@ -880,6 +907,16 @@
 				B10000000000000000000002 /* Imports */,
 			);
 			path = MonMonTests;
+			sourceTree = "<group>";
+		};
+		X10000000000000000000002 /* IncomeAllocation */ = {
+			isa = PBXGroup;
+			children = (
+				X10000000000000000000101 /* IncomeAllocationSnapshotTests.swift */,
+				X10000000000000000000103 /* IncomeAllocationLifecycleTests.swift */,
+				X10000000000000000000105 /* IncomeAllocationTimelineTests.swift */,
+			);
+			path = IncomeAllocation;
 			sourceTree = "<group>";
 		};
 		V10000000000000000000002 /* Goals */ = {
@@ -1589,6 +1626,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				X10000000000000000000202 /* IncomeAllocationSnapshot.swift in Sources */,
+				X10000000000000000000204 /* IncomeAllocationLifecycle.swift in Sources */,
+				X10000000000000000000206 /* IncomeAllocationTimeline.swift in Sources */,
+				X10000000000000000000207 /* IncomeAllocationTimelineView.swift in Sources */,
 				V10000000000000000000203 /* FinancialGoal.swift in Sources */,
 				V10000000000000000000204 /* GoalProgress.swift in Sources */,
 				V10000000000000000000205 /* FinancialGoalDraft.swift in Sources */,
@@ -1814,6 +1855,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				X10000000000000000000201 /* IncomeAllocationSnapshotTests.swift in Sources */,
+				X10000000000000000000203 /* IncomeAllocationLifecycleTests.swift in Sources */,
+				X10000000000000000000205 /* IncomeAllocationTimelineTests.swift in Sources */,
 				V10000000000000000000201 /* GoalProgressTests.swift in Sources */,
 				V10000000000000000000202 /* FinancialGoalDraftTests.swift in Sources */,
 				U10000000000000000000201 /* BudgetJarSeedTests.swift in Sources */,

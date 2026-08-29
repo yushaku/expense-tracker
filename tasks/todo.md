@@ -109,9 +109,21 @@ Files: `MonMon/Backup/BackupRestoreView.swift`,
 - [ ] Allow a trip transaction to override its category’s default jar.
 - [ ] Show total trip budget plus food, accommodation, and transport breakdowns.
 
-## Later exploration
+## Income Allocation Timeline — current branch
 
-- [ ] Income Allocation Timeline — explain each salary, bonus, and one-off allocation.
+- [x] Freeze a versioned jar-allocation snapshot on every new income transaction.
+- [x] Reconcile every snapshot exactly to its transaction plus unallocated remainder.
+- [x] Preserve snapshots through income edits and transaction delete/undo.
+- [x] Capture manual, recurring, imported, and pending-capture income paths.
+- [x] Backfill old income once and mark it as estimated.
+- [x] Add an accessible month-selectable timeline inside Budget.
+- [x] Distinguish recurring, imported, and one-off income events.
+- [x] Explain that historical splits may differ from the current Budget setup.
+- [x] Include snapshots in complete backup/restore with legacy compatibility.
+- [x] Pass focused/full tests, review, format lint, and compile-only iPhoneOS build.
+
+## Remaining exploration
+
 - [ ] Historical monthly snapshots and explicit rollover rules.
 - [ ] Adaptive Coach — overspend warnings and reallocation suggestions.
 - [ ] Validate whether coaching is useful before adding notifications or automation.

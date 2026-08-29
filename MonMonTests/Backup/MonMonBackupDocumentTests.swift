@@ -102,6 +102,37 @@ struct MonMonBackupDocumentTests {
         #expect(record.creditLimit == nil)
     }
 
+    @Test("A legacy transaction record without an income snapshot still decodes")
+    func legacyTransactionRecordDecodes() throws {
+        let data = Data(
+            #"""
+            {
+              "id": "00000000-0000-0000-0000-000000000001",
+              "kind": "income",
+              "amount": "1000",
+              "occurredAt": "2023-11-14T22:13:20.125Z",
+              "note": "Salary",
+              "accountID": "00000000-0000-0000-0000-000000000002",
+              "categoryID": null,
+              "sourceRuleID": null,
+              "currencyCode": "VND",
+              "createdAt": "2023-11-14T22:13:20.125Z",
+              "sourceImportID": null
+            }
+            """#.utf8
+        )
+
+        let record = try JSONDecoder().decode(
+            MonMonBackupPayload.TransactionRecord.self,
+            from: data
+        )
+        let reencoded = try JSONEncoder().encode(record)
+        let reencodedJSON = String(decoding: reencoded, as: UTF8.self)
+
+        #expect(record.incomeAllocationSnapshot == nil)
+        #expect(reencodedJSON.contains("incomeAllocationSnapshot") == false)
+    }
+
     @Test("A legacy payload without budget jars still decodes")
     func legacyPayloadWithoutBudgetJarsDecodes() throws {
         let data = try JSONEncoder().encode(LegacyPayload.empty)

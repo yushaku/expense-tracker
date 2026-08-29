@@ -1,92 +1,100 @@
-# Implementation Plan: Goal Envelopes
+# Implementation Plan: Income Allocation Timeline
 
 ## Overview
 
-Build the second module in `BUDGET-CAPABILITIES.md`: goals that earmark money
-inside one jar, reserve a monthly contribution without duplicating the jar's
-plan, and forecast progress toward a target.
+Capture a frozen explanation beside each received income transaction and expose
+it as a month-selectable timeline inside Budget. Existing income is backfilled
+once as estimated; snapshot metadata never enters financial totals.
 
 ## Dependency Graph
 
 ```text
-Goal model + pure forecast contract
+Pure snapshot + versioned codec
     |
     v
-Draft validation + per-jar commitment capacity
+MoneyTransaction optional storage + edit/delete lifecycle
     |
     v
-SwiftData persistence + jar deletion integrity
+Manual, recurring, import, and capture creation boundaries
     |
     v
-Goal list/cards/editor inside Budget
+Legacy backfill + timeline preparation
+    |
+    v
+Accessible Budget timeline UI
     |
     v
 Complete backup/restore integration
     |
     v
-Review + full non-Simulator gates
+Review + non-Simulator gates
 ```
 
 ## Architecture Decisions
 
-- A goal is a planning overlay, not a financial account. Its earmarked amount is
-  never included in Wealth and does not create transactions.
-- One goal has one funding jar in this slice. Several goals may share a jar.
-- The shared scarce resource is the jar's planned monthly income allocation.
-  Aggregate goal contributions may not exceed it at save time.
-- Existing goals are not mutated if later income or percentage edits cause an
-  overcommitment; the list reports the deficit for owner correction.
-- Goal calculations remain pure and calendar-parameterised. Views render
-  prepared snapshots and forms own their save/dismiss behaviour.
-- The Goal section is optional at the payload boundary so existing snapshots
-  remain restorable without changing their signed checksum.
+- Embed one optional snapshot string in `MoneyTransaction`; avoid a second
+  persistent event graph whose lifecycle could drift from the ledger row.
+- Freeze jar UUID, presentation, percentage, and exact allocated amount. Jar
+  configuration remains editable without rewriting history.
+- Keep the feature explanatory only. Budget's live current-plan math and all
+  financial balances remain unchanged.
+- Capture new income at every production creation boundary. Backfill only
+  snapshot-less legacy income and label it estimated.
+- Use one canonical codec/validator for local reads and untrusted backup import.
 
 ## Task List
 
-### Phase 1: Contract and foundation
+### Phase 1: Snapshot contract
 
-- [x] Task 1: Add RED tests for forecast, required monthly contribution, and validation.
-- [x] Task 2: Add the CloudKit-compatible goal model, pure engine, and draft.
+- [x] Task 1: Add RED tests for exact distribution, rounding, freezing, and amount refresh.
+- [x] Task 2: Implement the versioned snapshot, codec, and optional transaction storage.
 
-### Checkpoint: Foundation
+### Checkpoint: Snapshot foundation
 
-- [x] Focused Goal tests pass.
-- [x] Goal model persists in an in-memory `MonMonSchema` container.
+- [x] Focused pure tests pass.
+- [x] Snapshot round-trips without changing any ledger calculation.
 
-### Phase 2: Integrity and user flow
+### Phase 2: Transaction lifecycle
 
-- [x] Task 3: Aggregate jar commitments and block deletion of referenced jars.
-- [x] Task 4: Add accessible Goal list, cards, add/edit/delete form, and Budget entry point.
-- [x] Task 5: Add localized English and Vietnamese Goal copy.
+- [x] Task 3: Capture and refresh snapshots in manual transaction edit/create and undo.
+- [x] Task 4: Capture snapshots in recurring generation.
+- [x] Task 5: Capture snapshots in statement import and pending-capture commit.
+- [x] Task 6: Backfill missing legacy income idempotently as estimated.
 
-### Checkpoint: Core flow
+### Checkpoint: Lifecycle integrity
 
-- [x] Goal CRUD works end to end in code and compile checks.
-- [x] Shared-jar capacity and overcommitment states are visible and tested.
+- [x] Every production income creation path is covered by an integration test.
+- [x] Edit, delete/undo, malformed data, and legacy backfill tests pass.
 
-### Phase 3: Portability and completion
+### Phase 3: Owner experience and portability
 
-- [x] Task 6: Extend complete backup validation, export, and authoritative restore.
-- [x] Task 7: Run SwiftUI correctness, quality, simplification, and security review.
-- [x] Task 8: Run focused/full tests, strict format lint, and compile-only iPhoneOS build.
-- [x] Task 9: Commit reviewable increments and hand back the clean feature branch.
+- [x] Task 7: Add timeline preparation and accessible month-selectable SwiftUI inside Budget.
+- [x] Task 8: Add English/Vietnamese copy and explicit historical-vs-current explanation.
+- [x] Task 9: Extend complete backup validation, export, and authoritative restore.
+
+### Phase 4: Completion
+
+- [x] Task 10: Run SwiftUI, quality, simplification, and security review.
+- [x] Task 11: Run focused/full tests, strict format lint, and compile-only iPhoneOS build.
+- [x] Task 12: Commit reviewable increments and hand back a clean feature branch.
 
 ### Checkpoint: Complete
 
-- [x] All `SPEC-goal-envelopes.md` success criteria are met.
+- [x] All `SPEC-income-allocation-timeline.md` success criteria are met.
 - [x] No Simulator, merge, push, or phone installation was performed.
 
 ## Risks and Mitigations
 
 | Risk | Impact | Mitigation |
 |---|---|---|
-| Goal money accidentally inflates net worth | High | Keep Goal out of asset summaries and document it as an overlay |
-| One jar promises the same monthly money twice | High | Validate aggregate contribution against its current planned allocation |
-| Income changes make valid commitments stale | Medium | Preserve data and show an explicit overcommitted state |
-| Jar deletion leaves dangling Goal references | High | Block deletion while goals reference the jar |
-| New model is omitted from backup | High | Add document/service/validator tests in the same branch |
-| Date math shifts at month boundaries | Medium | Parameterise Calendar and test beginning/end-of-month cases |
+| Snapshot money does not reconcile to income | High | Deterministic rounding plus explicit unallocated remainder and equality tests |
+| One creation path omits capture | High | Enumerate and integration-test manual, recurring, import, and capture boundaries |
+| Jar edits rewrite history | High | Store frozen presentation and percentage inside the snapshot |
+| Embedded JSON becomes malformed | High | Versioned codec, strict validator, no silent overwrite, backup rejection |
+| Snapshot starts affecting balances | High | Keep all existing summary inputs unchanged and add neutrality tests |
+| Legacy backup checksum changes | High | Encode the optional transaction field only when present and keep legacy tests |
 
 ## Open Questions
 
-None. Automatic transfers and Trip spending are explicitly deferred.
+None. Projected future events and historical monthly Budget snapshots are
+explicitly deferred.

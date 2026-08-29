@@ -425,6 +425,18 @@ struct StoreReconcilerTests {
         )
     }
 
+    private func allocationJar() -> BudgetJar {
+        BudgetJar(
+            id: UUID(),
+            name: "Savings",
+            allocationPercent: 100,
+            role: .savings,
+            symbolName: "building.columns.fill",
+            colorName: "yellow",
+            createdAt: day0
+        )
+    }
+
     private func importedTransfer(
         createdAt: Date,
         sourceImportID: String? = nil,
@@ -488,6 +500,35 @@ struct StoreReconcilerTests {
         let remaining = try context.fetch(FetchDescriptor<MoneyTransaction>())
         #expect(remaining.count == 1)
         #expect(remaining.first?.id == survivor.id)
+    }
+
+    @Test("Folding generated income preserves a valid allocation snapshot")
+    func generatedIncomeFoldPreservesSnapshot() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let recurring = rule(categoryID: nil, createdAt: day0)
+        context.insert(recurring)
+        let survivor = generated(ruleID: recurring.id, occurredAt: day0, createdAt: day0)
+        survivor.kind = .income
+        let duplicate = generated(ruleID: recurring.id, occurredAt: day0, createdAt: day1)
+        duplicate.kind = .income
+        try IncomeAllocationLifecycle.captureNew(
+            on: duplicate,
+            jars: [allocationJar()],
+            capturedAt: day1
+        )
+        let expectedSnapshot = duplicate.incomeAllocationSnapshot
+        context.insert(survivor)
+        context.insert(duplicate)
+        try context.save()
+
+        _ = try StoreReconciler.reconcile(in: context)
+
+        let transactions = try context.fetch(FetchDescriptor<MoneyTransaction>())
+        let remaining = try #require(transactions.first)
+        #expect(transactions.count == 1)
+        #expect(remaining.id == survivor.id)
+        #expect(remaining.incomeAllocationSnapshot == expectedSnapshot)
     }
 
     @Test("One rule on two different days keeps both entries")

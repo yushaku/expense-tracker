@@ -3,6 +3,7 @@ import SwiftUI
 struct BudgetIncomeCard: View {
     let snapshot: BudgetSnapshot
     let monthTitle: String
+    let onOpenTimeline: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -35,6 +36,12 @@ struct BudgetIncomeCard: View {
                 .foregroundStyle(MonMonTheme.textSecondary)
                 .accessibilityIdentifier("budget-unallocated")
             }
+
+            Button("Income history", systemImage: "clock.arrow.circlepath") {
+                onOpenTimeline()
+            }
+            .buttonStyle(.bordered)
+            .accessibilityIdentifier("budget-income-history")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
@@ -43,7 +50,7 @@ struct BudgetIncomeCard: View {
             RoundedRectangle(cornerRadius: 20)
                 .stroke(MonMonTheme.heroBorder, lineWidth: 1)
         }
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("budget-income-summary")
     }
 

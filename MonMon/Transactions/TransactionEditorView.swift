@@ -50,6 +50,9 @@ struct TransactionEditorView: View {
     @Query(sort: \TransactionCategory.createdAt, order: .forward)
     private var categories: [TransactionCategory]
 
+    @Query(sort: \BudgetJar.createdAt, order: .forward)
+    private var budgetJars: [BudgetJar]
+
     @AppStorage(TransactionDefaults.accountStorageKey)
     private var defaultTransactionAccountValue = ""
     @AppStorage(TransactionDefaults.categoryStorageKey)
@@ -205,9 +208,24 @@ struct TransactionEditorView: View {
 
         do {
             if let editedTransaction = mode.editedTransaction {
+                let values = try draft.validate()
+                let snapshot = try IncomeAllocationLifecycle.snapshotForEdit(
+                    editedTransaction,
+                    newKind: values.kind,
+                    newAmount: values.amount,
+                    currentJars: budgetJars,
+                    capturedAt: .now
+                )
                 try draft.apply(to: editedTransaction)
+                editedTransaction.incomeAllocationSnapshot = snapshot
             } else {
-                let transaction = try draft.makeTransaction(id: UUID(), createdAt: .now)
+                let createdAt = Date.now
+                let transaction = try draft.makeTransaction(id: UUID(), createdAt: createdAt)
+                try IncomeAllocationLifecycle.captureNew(
+                    on: transaction,
+                    jars: budgetJars,
+                    capturedAt: createdAt
+                )
                 modelContext.insert(transaction)
                 if let pendingCapture = mode.pendingCapture {
                     modelContext.delete(pendingCapture)
