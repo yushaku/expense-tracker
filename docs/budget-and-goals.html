@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Cách MonMon chia thu nhập vào hũ ngân sách, cách mục tiêu để dành bên trong hũ, và những gì ứng dụng cố tình không làm.">
+  <link rel="stylesheet" href="assets/monmon-docs.css">
+  <title>MonMon — Ngân sách và mục tiêu</title>
+  <style>
+    .page {
+      width: min(1040px, calc(100% - var(--docs-page-gutter) - var(--docs-page-gutter)));
+      margin: 0 auto;
+      padding: var(--docs-page-padding-top) 0 var(--docs-page-padding-bottom);
+    }
+
+    a { color: var(--docs-accent); }
+    code { padding: 2px 6px; background: var(--docs-surface-2); border-radius: var(--docs-radius-xs); font-family: var(--docs-mono); font-size: .9em; }
+
+    .hero { max-width: 840px; }
+
+    .eyebrow, .label, .step-label {
+      font-family: var(--docs-mono);
+      font-size: var(--docs-type-xs);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow { margin-bottom: var(--docs-space-2); color: var(--docs-accent); }
+    h1 { max-width: 760px; }
+    .lede { max-width: 740px; margin-top: var(--docs-space-3); color: var(--docs-text-2); font-size: var(--docs-type-lg); }
+
+    .toc {
+      margin-top: var(--docs-space-5);
+      padding: var(--docs-space-4);
+      background: var(--docs-surface-2);
+      border-radius: var(--docs-radius-md);
+    }
+
+    .toc .label { color: var(--docs-muted); }
+    .toc ul { display: flex; flex-wrap: wrap; gap: var(--docs-space-2); margin-top: var(--docs-space-2); list-style: none; }
+    .toc a { display: inline-flex; min-height: 34px; align-items: center; padding: 5px 10px; background: var(--docs-surface); border: 1px solid var(--docs-border); border-radius: var(--docs-radius-pill); color: var(--docs-text-2); font-size: var(--docs-type-md); text-decoration: none; }
+    .toc a:hover { border-color: var(--docs-accent); color: var(--docs-accent); }
+
+    section { margin-top: var(--docs-section-gap); scroll-margin-top: var(--docs-space-4); }
+    section > h2 { margin-bottom: var(--docs-space-2); }
+    section > .section-lede { max-width: 780px; color: var(--docs-text-2); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: var(--docs-grid-gap);
+      margin-top: var(--docs-space-5);
+    }
+
+    .card {
+      padding: var(--docs-card-padding);
+      background: var(--docs-surface);
+      border: 1px solid var(--docs-border);
+      border-radius: var(--docs-radius-lg);
+      box-shadow: var(--docs-shadow);
+    }
+
+    .card h3 { margin-bottom: var(--docs-space-2); font-size: var(--docs-type-lg); letter-spacing: -.01em; }
+    .card p + p { margin-top: var(--docs-space-2); }
+    .card p, .card li { color: var(--docs-text-2); font-size: var(--docs-type-md); }
+    .card ul { margin-top: var(--docs-space-2); padding-left: 18px; }
+    .card li + li { margin-top: var(--docs-space-1); }
+    .card .label { display: block; margin-bottom: var(--docs-space-2); color: var(--docs-muted); }
+
+    .jar-table { width: 100%; margin-top: var(--docs-space-5); border-collapse: collapse; font-size: var(--docs-type-md); }
+    .jar-table caption { margin-bottom: var(--docs-space-2); color: var(--docs-muted); font-size: var(--docs-type-sm); text-align: left; }
+    .jar-table th, .jar-table td { padding: 10px 12px; border-bottom: 1px solid var(--docs-border); text-align: left; }
+    .jar-table th { color: var(--docs-muted); font-size: var(--docs-type-xs); letter-spacing: .06em; text-transform: uppercase; font-weight: 600; }
+    .jar-table td:last-child, .jar-table th:last-child { text-align: right; }
+    .jar-table tfoot td { border-bottom: none; font-weight: 700; }
+    .table-scroll { overflow-x: auto; }
+
+    .formula {
+      margin-top: var(--docs-space-5);
+      padding: var(--docs-space-5);
+      background: var(--docs-surface-2);
+      border-radius: var(--docs-radius-lg);
+    }
+
+    .formula dl { display: grid; gap: var(--docs-space-3); }
+    .formula dt { font-family: var(--docs-mono); font-size: var(--docs-type-md); color: var(--docs-accent); }
+    .formula dd { color: var(--docs-text-2); font-size: var(--docs-type-md); }
+
+    .steps { margin-top: var(--docs-space-5); display: grid; gap: var(--docs-space-3); counter-reset: step; list-style: none; }
+    .steps > li {
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr);
+      gap: var(--docs-space-4);
+      padding: var(--docs-space-4);
+      background: var(--docs-surface);
+      border: 1px solid var(--docs-border);
+      border-radius: var(--docs-radius-md);
+    }
+    .steps > li::before {
+      counter-increment: step;
+      content: counter(step);
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: var(--docs-radius-pill);
+      background: var(--docs-accent-soft);
+      color: var(--docs-accent);
+      font-family: var(--docs-mono);
+      font-size: var(--docs-type-sm);
+      font-weight: 700;
+    }
+    .steps h3 { margin-bottom: var(--docs-space-1); font-size: var(--docs-type-md); }
+    .steps p { color: var(--docs-text-2); font-size: var(--docs-type-md); }
+
+    .callout {
+      margin-top: var(--docs-space-5);
+      padding: var(--docs-space-5);
+      border: 1px solid var(--docs-border);
+      border-left: 3px solid var(--docs-warning);
+      border-radius: var(--docs-radius-md);
+      background: var(--docs-warning-soft);
+    }
+    .callout h3 { margin-bottom: var(--docs-space-2); font-size: var(--docs-type-md); color: var(--docs-warning); }
+    .callout p { color: var(--docs-text-2); font-size: var(--docs-type-md); }
+    .callout p + p { margin-top: var(--docs-space-2); }
+
+    .limits { margin-top: var(--docs-space-5); display: grid; gap: var(--docs-space-3); list-style: none; }
+    .limits li {
+      padding: var(--docs-space-4);
+      background: var(--docs-surface);
+      border: 1px solid var(--docs-border);
+      border-left: 3px solid var(--docs-info);
+      border-radius: var(--docs-radius-md);
+      color: var(--docs-text-2);
+      font-size: var(--docs-type-md);
+    }
+    .limits strong { color: var(--docs-text); }
+
+    footer.page-foot { margin-top: var(--docs-section-gap); padding-top: var(--docs-space-4); border-top: 1px solid var(--docs-border); color: var(--docs-muted); font-size: var(--docs-type-sm); }
+
+    @media print {
+      .docs-nav, .toc { display: none; }
+      .card, .steps > li, .limits li { box-shadow: none; break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <nav class="docs-nav" aria-label="Tài liệu MonMon">
+      <a class="docs-nav-brand" href="smart-note.html">MonMon Docs</a>
+      <ul class="docs-nav-list">
+        <li><a href="smart-note.html">Hướng dẫn sử dụng</a></li>
+        <li><a href="budget-and-goals.html" aria-current="page">Ngân sách &amp; mục tiêu</a></li>
+        <li><a href="bank-transaction-auto-note-research.html">Nghiên cứu</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
+      </ul>
+    </nav>
+
+    <header class="hero">
+      <p class="eyebrow">MonMon / Ngân sách và mục tiêu</p>
+      <h1>Hũ chia thu nhập, mục tiêu để dành trong hũ</h1>
+      <p class="lede">
+        Ngân sách trong MonMon là một kế hoạch, không phải một ví thứ hai. Hũ giữ phần trăm,
+        mục tiêu giữ phần tiền đã có chủ bên trong hũ, và mọi con số bạn thấy đều được tính lại
+        từ giao dịch bạn đã ghi. Không có bước “chuyển tiền vào hũ”.
+      </p>
+      <nav class="toc" aria-label="Mục lục">
+        <span class="label">Nội dung</span>
+        <ul>
+          <li><a href="#hu">Hũ ngân sách</a></li>
+          <li><a href="#con-so">Bốn con số của một hũ</a></li>
+          <li><a href="#dinh-tuyen">Chi tiêu rơi vào hũ nào</a></li>
+          <li><a href="#muc-tieu">Mục tiêu</a></li>
+          <li><a href="#suc-chua">Sức chứa của hũ</a></li>
+          <li><a href="#trip">Mục tiêu Trip</a></li>
+          <li><a href="#xoa-hu">Xoá hũ</a></li>
+          <li><a href="#khong-lam">Những gì MonMon không làm</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <section id="hu">
+      <h2>Hũ ngân sách</h2>
+      <p class="section-lede">
+        Mỗi hũ chỉ lưu một cái tên, một phần trăm, một vai trò và bộ biểu tượng &ndash; màu.
+        Hũ không lưu số dư. Lần đầu mở ứng dụng, MonMon tạo sẵn sáu hũ cộng lại vừa đúng 100%.
+      </p>
+
+      <div class="table-scroll">
+        <table class="jar-table">
+          <caption>Sáu hũ mặc định, tạo một lần khi kho dữ liệu còn trống</caption>
+          <thead>
+            <tr><th scope="col">Hũ</th><th scope="col">Vai trò</th><th scope="col">Phần trăm</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Necessities</td><td>custom</td><td>55%</td></tr>
+            <tr><td>Investment</td><td>investment</td><td>10%</td></tr>
+            <tr><td>Education</td><td>custom</td><td>10%</td></tr>
+            <tr><td>Savings</td><td>savings</td><td>10%</td></tr>
+            <tr><td>Play</td><td>custom</td><td>10%</td></tr>
+            <tr><td>Giving</td><td>custom</td><td>5%</td></tr>
+          </tbody>
+          <tfoot>
+            <tr><td>Tổng</td><td></td><td>100%</td></tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <span class="label">Sửa hũ</span>
+          <h3>Tên, phần trăm, biểu tượng</h3>
+          <p>
+            Màn hình sửa hũ có đúng ba việc: đặt tên, đặt <em>Monthly allocation</em>, và chọn
+            biểu tượng cùng màu ở thẻ <em>Style</em>. Tổng phần trăm của tất cả các hũ không được
+            vượt 100 &ndash; bản nháp từ chối lưu chứ không tự cắt bớt của hũ khác.
+          </p>
+          <p>Phần trăm chưa dùng hết hiện ở thẻ <em>Budget allocation</em> dưới nhãn <em>Unallocated</em>.</p>
+        </div>
+        <div class="card">
+          <span class="label">Vai trò</span>
+          <h3>Hai hũ được bảo vệ</h3>
+          <p>
+            Vai trò <code>savings</code> và <code>investment</code> không xoá được. Chúng là nơi
+            MonMon cộng thêm hoạt động ngoài chi tiêu thường: sổ tiết kiệm mở trong tháng vào hũ
+            savings, khoản mua chứng chỉ quỹ trong tháng vào hũ investment.
+          </p>
+          <p>Các hũ còn lại đều là <code>custom</code>, tự do thêm, sửa, xoá.</p>
+        </div>
+        <div class="card">
+          <span class="label">Tháng</span>
+          <h3>Mỗi tháng một bức ảnh</h3>
+          <p>
+            Màn hình Budget luôn nói về một tháng cụ thể. Giao dịch được tính khi rơi trong tháng
+            đó <em>và</em> không nằm ở tương lai so với hôm nay, nên tháng đang diễn ra không bao
+            giờ bị các bản ghi ngày mai làm lệch.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="con-so">
+      <h2>Bốn con số của một hũ</h2>
+      <p class="section-lede">
+        Không con số nào trong số này được lưu. Mở màn hình Budget là chúng được tính lại từ đầu,
+        từ quy tắc định kỳ, giao dịch và danh mục hiện tại.
+      </p>
+
+      <div class="formula">
+        <dl>
+          <dt>Planned = thu nhập định kỳ của tháng × phần trăm hũ</dt>
+          <dd>Thu nhập định kỳ là mọi quy tắc thu nhập chưa tạm dừng, đếm theo số lần rơi vào tháng đó.</dd>
+
+          <dt>Received = thu nhập đã ghi trong tháng × phần trăm hũ</dt>
+          <dd>Tiền thật đã vào, tính đến hôm nay.</dd>
+
+          <dt>Projected = (Received + phần định kỳ còn lại của tháng) × phần trăm hũ</dt>
+          <dd>Đây là con số <em>Left</em> lấy làm gốc, nên hũ vẫn nói đúng khi lương chưa về.</dd>
+
+          <dt>Used = chi tiêu định tuyến về hũ, cộng hoạt động theo vai trò</dt>
+          <dd>Hũ savings cộng tiền gốc sổ tiết kiệm mở trong tháng; hũ investment cộng giá vốn khoản quỹ mua trong tháng.</dd>
+        </dl>
+      </div>
+
+      <div class="callout">
+        <h3>Left có thể âm, và đó là ý đồ</h3>
+        <p>
+          <em>Left</em> là <code>Projected − Used</code>. MonMon không chặn bạn tiêu quá một hũ:
+          hũ là kế hoạch, còn giao dịch là sự thật. Vượt kế hoạch thì hũ nói bạn đã vượt, chứ
+          không từ chối ghi giao dịch.
+        </p>
+      </div>
+    </section>
+
+    <section id="dinh-tuyen">
+      <h2>Chi tiêu rơi vào hũ nào</h2>
+      <p class="section-lede">
+        Bạn không gán giao dịch cho hũ. Bạn gán <strong>danh mục</strong> cho hũ, một lần, rồi mọi
+        chi tiêu mang danh mục đó tự đi theo.
+      </p>
+
+      <ol class="steps">
+        <li>
+          <div>
+            <h3>Trip ghi đè, nếu có</h3>
+            <p>
+              Chi tiêu thuộc một chuyến đi và có ô hũ được chọn riêng thì hũ đó thắng. Nếu hũ đó
+              đã bị xoá, MonMon bỏ qua và đi tiếp xuống bước dưới.
+            </p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Hũ của danh mục</h3>
+            <p>
+              Mỗi danh mục chi có ô <em>budget jar</em>. Danh mục thu bỏ trống ô này &ndash; thu nhập
+              được chia theo phần trăm cho mọi hũ, không thuộc riêng hũ nào.
+            </p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Hũ dự phòng</h3>
+            <p>
+              Chi tiêu chưa có danh mục, hoặc danh mục chưa gán hũ, rơi về hũ dự phòng: Necessities
+              nếu còn, không thì hũ <code>custom</code> đầu tiên, không nữa thì hũ đầu tiên. Tiền
+              không bao giờ biến mất khỏi bảng ngân sách vì thiếu thiết lập.
+            </p>
+          </div>
+        </li>
+      </ol>
+
+      <div class="grid">
+        <div class="card">
+          <span class="label">Thu nhập</span>
+          <h3>Ảnh chụp phân bổ được đóng băng</h3>
+          <p>
+            Khi bạn ghi một khoản thu, MonMon lưu kèm bản phân bổ theo phần trăm <em>tại thời điểm
+            đó</em>. Đổi phần trăm hôm nay không viết lại lịch sử: khoản lương tháng trước vẫn kể
+            đúng câu chuyện tháng trước.
+          </p>
+          <p>Sửa số tiền của khoản thu thì bản phân bổ cũ được co giãn lại theo tỉ lệ cũ, không lấy phần trăm mới.</p>
+        </div>
+        <div class="card">
+          <span class="label">Xem lại</span>
+          <h3>Mở một hũ để xem vì sao</h3>
+          <p>
+            Chạm vào hũ để thấy danh sách những gì đã tính vào <em>Used</em> trong tháng: giao dịch
+            đã định tuyến về đây, cộng sổ tiết kiệm hoặc khoản quỹ nếu đó là hũ được bảo vệ.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="muc-tieu">
+      <h2>Mục tiêu</h2>
+      <p class="section-lede">
+        Một mục tiêu là khoản tiền đã có chủ <em>bên trong</em> một hũ. Nó không phải tài sản thứ
+        hai và không bao giờ được cộng thêm vào tài sản ròng.
+      </p>
+
+      <div class="grid">
+        <div class="card">
+          <span class="label">Màn hình tạo mục tiêu</span>
+          <h3>Bốn thẻ, theo thứ tự</h3>
+          <ul>
+            <li><strong>Goal</strong> &ndash; tên và hũ cấp vốn.</li>
+            <li><strong>Money</strong> &ndash; số cần đạt và số đã dành được.</li>
+            <li><strong>Monthly plan</strong> &ndash; ngày đích và mức góp hằng tháng.</li>
+            <li><strong>Style</strong> &ndash; biểu tượng và màu, chọn tay như khi tạo danh mục.</li>
+          </ul>
+          <p>
+            Không còn ô “Purpose”: trước đây nó chỉ dùng để suy ra biểu tượng và màu, nên giờ bạn
+            chọn thẳng cái mình muốn.
+          </p>
+        </div>
+        <div class="card">
+          <span class="label">Tự tính</span>
+          <h3>Tiến độ không phải nhập tay</h3>
+          <ul>
+            <li>Còn thiếu = số cần đạt − số đã dành.</li>
+            <li>Mức góp cần thiết = phần còn thiếu chia đều cho số tháng đến ngày đích, làm tròn lên.</li>
+            <li>Ngày dự kiến hoàn thành suy từ mức góp bạn đặt.</li>
+          </ul>
+          <p>Mục tiêu đã đủ tiền chuyển sang mục <em>Completed</em> và thôi đòi phần kế hoạch hằng tháng.</p>
+        </div>
+        <div class="card">
+          <span class="label">Xoá</span>
+          <h3>Xoá mục tiêu không đụng tới tiền</h3>
+          <p>
+            Xoá chỉ gỡ phần đánh dấu. Không giao dịch nào bị xoá, không số dư nào đổi &ndash; hộp
+            thoại xác nhận nói đúng điều đó trước khi bạn bấm.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="suc-chua">
+      <h2>Sức chứa của hũ</h2>
+      <p class="section-lede">
+        Đây là ràng buộc duy nhất nối mục tiêu với ngân sách: tổng mức góp hằng tháng của các mục
+        tiêu đang chạy trên một hũ không được vượt phần kế hoạch của chính hũ đó.
+      </p>
+
+      <div class="grid">
+        <div class="card">
+          <span class="label">Đang chạy</span>
+          <h3>Mục tiêu nào bị tính</h3>
+          <p>
+            Chỉ mục tiêu còn thiếu tiền mới chiếm chỗ. Mục tiêu đã đủ được bỏ ra khỏi phép cộng,
+            trả lại phần kế hoạch cho những mục tiêu còn lại.
+          </p>
+        </div>
+        <div class="card">
+          <span class="label">Khi lưu bị từ chối</span>
+          <h3>Một ngoại lệ có chủ ý</h3>
+          <p>
+            Nếu tổng sau khi lưu vượt sức chứa, MonMon từ chối &ndash; trừ khi lần lưu này
+            <em>không làm tổng tăng lên</em>. Nhờ vậy một hũ đã lỡ quá tải vẫn sửa xuống được,
+            thay vì kẹt cứng.
+          </p>
+        </div>
+        <div class="card">
+          <span class="label">Cảnh báo</span>
+          <h3>Quá tải thì nói ra</h3>
+          <p>
+            Khi phần trăm của hũ bị hạ xuống sau lúc đặt mục tiêu, màn hình Goals hiện cảnh báo
+            quá tải kèm số tiền vượt cho từng hũ. Không có gì bị chặn, chỉ là bạn được biết.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="trip">
+      <h2>Mục tiêu Trip</h2>
+      <p class="section-lede">
+        Trip là kiểu mục tiêu duy nhất còn có hành vi riêng: đủ tiền thì mở được một không gian
+        chi tiêu để theo dõi chuyến đi.
+      </p>
+
+      <ol class="steps">
+        <li>
+          <div>
+            <h3>Đủ tiền, hiện ở “Ready to spend”</h3>
+            <p>Mục tiêu Trip đã dành đủ và có hũ cấp vốn sẽ rời danh sách thường, sang khu vực sẵn sàng.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Bắt đầu chuyến đi</h3>
+            <p>
+              MonMon tạo một workspace chép lại tên, biểu tượng, màu và lấy số cần đạt làm ngân
+              sách chuyến đi. Không đồng nào được chuyển đi đâu cả. Mỗi mục tiêu chỉ mở được một
+              chuyến.
+            </p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Chi tiêu gắn thẻ chuyến đi</h3>
+            <p>
+              Khoản chi gắn chuyến đi vẫn là khoản chi bình thường, vẫn trừ số dư tài khoản như
+              mọi khoản khác. Đã tiêu, còn lại và phần vượt ngân sách đều suy từ chính những khoản
+              đó, nên không có chuyện đếm hai lần.
+            </p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Kết thúc hoặc huỷ</h3>
+            <p>
+              Kết thúc chỉ đóng dấu ngày hoàn thành; phần chưa tiêu không sinh ra khoản hoàn tiền
+              nào. Huỷ chỉ được phép khi chưa có giao dịch nào gắn vào chuyến.
+            </p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section id="xoa-hu">
+      <h2>Xoá hũ</h2>
+      <p class="section-lede">Hũ đứng giữa nhiều thứ, nên MonMon kiểm tra trước khi cho xoá.</p>
+      <ul class="limits">
+        <li><strong>Hũ được bảo vệ</strong> &ndash; vai trò savings và investment bị từ chối ngay.</li>
+        <li><strong>Hũ đang cấp vốn cho mục tiêu</strong> &ndash; bị từ chối; đổi hũ của mục tiêu trước.</li>
+        <li><strong>Hũ đang cấp vốn cho một chuyến đi</strong> &ndash; bị từ chối, kể cả chuyến đã hoàn thành.</li>
+        <li><strong>Danh mục đang trỏ vào hũ</strong> &ndash; được chuyển sang hũ dự phòng trong cùng một lần lưu, nên không danh mục nào bị bỏ rơi.</li>
+      </ul>
+    </section>
+
+    <section id="khong-lam">
+      <h2>Những gì MonMon không làm</h2>
+      <p class="section-lede">
+        Nhiều hành vi ở đây dễ bị hiểu nhầm theo hướng “app đang giữ tiền hộ”. Nó không giữ.
+      </p>
+      <ul class="limits">
+        <li><strong>Hũ không giữ số dư.</strong> Chia phần trăm chỉ là phép nhân trên thu nhập; không có giao dịch nào được tạo ra.</li>
+        <li><strong>Mục tiêu không phải tài sản.</strong> Số đã dành là tiền vốn đã nằm trong tài khoản của bạn, chỉ được đánh dấu là có chủ.</li>
+        <li><strong>Chuyến đi không phải ví.</strong> Ngân sách chuyến đi là con số chép lại từ mục tiêu, không phải tiền được tách ra.</li>
+        <li><strong>Không có chặn chi.</strong> Vượt hũ, vượt ngân sách chuyến đi đều ghi được; ứng dụng báo cho bạn, không cấm bạn.</li>
+        <li><strong>Không tự đổi lịch sử.</strong> Đổi phần trăm hôm nay không viết lại các khoản thu đã ghi trước đó.</li>
+      </ul>
+    </section>
+
+    <footer class="page-foot">
+      MonMon &middot; Hành vi mô tả ở đây khớp với mã nguồn trong <code>MonMon/Budget</code>,
+      <code>MonMon/Goals</code>, <code>MonMon/Trips</code> và <code>MonMon/IncomeAllocation</code>.
+      Cấu trúc dữ liệu phía dưới nằm ở trang <a href="architecture.html">Architecture</a>.
+    </footer>
+  </main>
+</body>
+</html>
