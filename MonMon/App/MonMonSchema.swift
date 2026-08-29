@@ -31,6 +31,7 @@ enum MonMonSchema {
             RecurringRule.self,
             BudgetJar.self,
             FinancialGoal.self,
+            TripWorkspace.self,
         ]
     }
 }

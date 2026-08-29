@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		Y10000000000000000000201 /* TripWorkspaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000101 /* TripWorkspaceTests.swift */; };
+		Y10000000000000000000202 /* TripWorkspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000102 /* TripWorkspace.swift */; };
+		Y10000000000000000000203 /* TripWorkspaceLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000103 /* TripWorkspaceLifecycle.swift */; };
 		X10000000000000000000201 /* IncomeAllocationSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = X10000000000000000000101 /* IncomeAllocationSnapshotTests.swift */; };
 		X10000000000000000000202 /* IncomeAllocationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = X10000000000000000000102 /* IncomeAllocationSnapshot.swift */; };
 		X10000000000000000000203 /* IncomeAllocationLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = X10000000000000000000103 /* IncomeAllocationLifecycleTests.swift */; };
@@ -391,6 +394,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		Y10000000000000000000101 /* TripWorkspaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspaceTests.swift; sourceTree = "<group>"; };
+		Y10000000000000000000102 /* TripWorkspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspace.swift; sourceTree = "<group>"; };
+		Y10000000000000000000103 /* TripWorkspaceLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspaceLifecycle.swift; sourceTree = "<group>"; };
 		X10000000000000000000101 /* IncomeAllocationSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeAllocationSnapshotTests.swift; sourceTree = "<group>"; };
 		X10000000000000000000102 /* IncomeAllocationSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeAllocationSnapshot.swift; sourceTree = "<group>"; };
 		X10000000000000000000103 /* IncomeAllocationLifecycleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeAllocationLifecycleTests.swift; sourceTree = "<group>"; };
@@ -799,6 +805,7 @@
 		A00000000000000000000012 /* MonMon */ = {
 			isa = PBXGroup;
 			children = (
+				Y10000000000000000000001 /* Trips */,
 				X10000000000000000000001 /* IncomeAllocation */,
 				V10000000000000000000001 /* Goals */,
 				U10000000000000000000001 /* Budget */,
@@ -832,6 +839,15 @@
 				X10000000000000000000107 /* IncomeAllocationTimelineView.swift */,
 			);
 			path = IncomeAllocation;
+			sourceTree = "<group>";
+		};
+		Y10000000000000000000001 /* Trips */ = {
+			isa = PBXGroup;
+			children = (
+				Y10000000000000000000102 /* TripWorkspace.swift */,
+				Y10000000000000000000103 /* TripWorkspaceLifecycle.swift */,
+			);
+			path = Trips;
 			sourceTree = "<group>";
 		};
 		V10000000000000000000001 /* Goals */ = {
@@ -889,6 +905,7 @@
 		A00000000000000000000015 /* MonMonTests */ = {
 			isa = PBXGroup;
 			children = (
+				Y10000000000000000000002 /* Trips */,
 				X10000000000000000000002 /* IncomeAllocation */,
 				V10000000000000000000002 /* Goals */,
 				U10000000000000000000002 /* Budget */,
@@ -917,6 +934,14 @@
 				X10000000000000000000105 /* IncomeAllocationTimelineTests.swift */,
 			);
 			path = IncomeAllocation;
+			sourceTree = "<group>";
+		};
+		Y10000000000000000000002 /* Trips */ = {
+			isa = PBXGroup;
+			children = (
+				Y10000000000000000000101 /* TripWorkspaceTests.swift */,
+			);
+			path = Trips;
 			sourceTree = "<group>";
 		};
 		V10000000000000000000002 /* Goals */ = {
@@ -1626,6 +1651,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				Y10000000000000000000202 /* TripWorkspace.swift in Sources */,
+				Y10000000000000000000203 /* TripWorkspaceLifecycle.swift in Sources */,
 				X10000000000000000000202 /* IncomeAllocationSnapshot.swift in Sources */,
 				X10000000000000000000204 /* IncomeAllocationLifecycle.swift in Sources */,
 				X10000000000000000000206 /* IncomeAllocationTimeline.swift in Sources */,
@@ -1855,6 +1882,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				Y10000000000000000000201 /* TripWorkspaceTests.swift in Sources */,
 				X10000000000000000000201 /* IncomeAllocationSnapshotTests.swift in Sources */,
 				X10000000000000000000203 /* IncomeAllocationLifecycleTests.swift in Sources */,
 				X10000000000000000000205 /* IncomeAllocationTimelineTests.swift in Sources */,

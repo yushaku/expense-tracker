@@ -47,14 +47,14 @@ Review + non-Simulator gates
 
 ### Phase 1: Workspace foundation
 
-- [ ] Task 1: Add RED tests for persistence, start eligibility, duplicate
+- [x] Task 1: Add RED tests for persistence, start eligibility, duplicate
   prevention, completion, and reopening.
-- [ ] Task 2: Implement the model, status, schema registration, and lifecycle.
+- [x] Task 2: Implement the model, status, schema registration, and lifecycle.
 
 ### Checkpoint: Lifecycle integrity
 
-- [ ] A fully funded Trip goal starts exactly one active workspace.
-- [ ] Completing and reopening mutate no ledger or goal amounts.
+- [x] A fully funded Trip goal starts exactly one active workspace.
+- [x] Completing and reopening mutate no ledger or goal amounts.
 
 ### Phase 2: Financial integration
 
