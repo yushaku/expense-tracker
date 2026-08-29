@@ -175,6 +175,53 @@ struct BudgetSummaryTests {
         #expect(snapshot.rows.first?.used == 250_000)
     }
 
+    @Test("A valid transaction override wins and a stale override keeps category routing")
+    func transactionOverrideRoutesBeforeCategory() throws {
+        let necessities = jar(id: UUID(), percent: 50)
+        let play = jar(id: UUID(), percent: 50)
+        let food = category(name: "Food", jarID: necessities.id)
+        let asOf = try date(2026, 8, 20)
+        let tripID = UUID()
+
+        let snapshot = BudgetSummary.snapshot(
+            monthContaining: asOf,
+            asOf: asOf,
+            jars: [necessities, play],
+            categories: [food],
+            recurringRules: [],
+            transactions: [
+                transaction(
+                    kind: .expense,
+                    amount: 300_000,
+                    date: try date(2026, 8, 12),
+                    categoryID: food.id,
+                    tripWorkspaceID: tripID,
+                    budgetJarOverrideID: play.id
+                ),
+                transaction(
+                    kind: .expense,
+                    amount: 200_000,
+                    date: try date(2026, 8, 13),
+                    categoryID: food.id,
+                    tripWorkspaceID: tripID,
+                    budgetJarOverrideID: UUID()
+                ),
+                transaction(
+                    kind: .expense,
+                    amount: 100_000,
+                    date: try date(2026, 8, 14),
+                    categoryID: food.id,
+                    budgetJarOverrideID: play.id
+                ),
+            ],
+            savingsDeposits: [],
+            fundHoldings: []
+        )
+
+        #expect(snapshot.rows.first { $0.jarID == necessities.id }?.used == 300_000)
+        #expect(snapshot.rows.first { $0.jarID == play.id }?.used == 300_000)
+    }
+
     private func date(_ year: Int, _ month: Int, _ day: Int) throws -> Date {
         try #require(calendar.date(from: DateComponents(year: year, month: month, day: day)))
     }
@@ -234,7 +281,9 @@ struct BudgetSummaryTests {
         kind: TransactionKind,
         amount: Decimal,
         date: Date,
-        categoryID: UUID? = nil
+        categoryID: UUID? = nil,
+        tripWorkspaceID: UUID? = nil,
+        budgetJarOverrideID: UUID? = nil
     ) -> MoneyTransaction {
         MoneyTransaction(
             id: UUID(),
@@ -246,7 +295,9 @@ struct BudgetSummaryTests {
             categoryID: categoryID,
             sourceRuleID: nil,
             currencyCode: VNDCurrency.code,
-            createdAt: date
+            createdAt: date,
+            tripWorkspaceID: tripWorkspaceID,
+            budgetJarOverrideID: budgetJarOverrideID
         )
     }
 }

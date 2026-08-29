@@ -5,6 +5,8 @@ enum TransactionFormError: Error, Equatable {
     case nonPositiveAmount
     case missingAccount
     case missingCategory
+    case tripRequiresExpense
+    case jarOverrideRequiresTrip
 }
 
 enum TransactionDefaults {
@@ -97,6 +99,8 @@ struct TransactionDraft: Equatable {
     var note: String
     var accountID: UUID?
     var categoryID: UUID?
+    var tripWorkspaceID: UUID?
+    var budgetJarOverrideID: UUID?
 
     init(
         kind: TransactionKind = .expense,
@@ -104,7 +108,9 @@ struct TransactionDraft: Equatable {
         occurredAt: Date,
         note: String = "",
         accountID: UUID? = nil,
-        categoryID: UUID? = nil
+        categoryID: UUID? = nil,
+        tripWorkspaceID: UUID? = nil,
+        budgetJarOverrideID: UUID? = nil
     ) {
         self.kind = kind
         self.amountText = amountText
@@ -112,6 +118,8 @@ struct TransactionDraft: Equatable {
         self.note = note
         self.accountID = accountID
         self.categoryID = categoryID
+        self.tripWorkspaceID = tripWorkspaceID
+        self.budgetJarOverrideID = budgetJarOverrideID
     }
 
     init(transaction: MoneyTransaction) {
@@ -121,7 +129,9 @@ struct TransactionDraft: Equatable {
             occurredAt: transaction.occurredAt,
             note: transaction.note,
             accountID: transaction.accountID,
-            categoryID: transaction.categoryID
+            categoryID: transaction.categoryID,
+            tripWorkspaceID: transaction.tripWorkspaceID,
+            budgetJarOverrideID: transaction.budgetJarOverrideID
         )
     }
 
@@ -133,6 +143,8 @@ struct TransactionDraft: Equatable {
         var note: String
         var accountID: UUID
         var categoryID: UUID
+        var tripWorkspaceID: UUID?
+        var budgetJarOverrideID: UUID?
     }
 
     /// The amount is always validated positive; `kind` alone carries direction,
@@ -154,13 +166,23 @@ struct TransactionDraft: Equatable {
             throw TransactionFormError.missingCategory
         }
 
+        guard tripWorkspaceID == nil || kind == .expense else {
+            throw TransactionFormError.tripRequiresExpense
+        }
+
+        guard budgetJarOverrideID == nil || tripWorkspaceID != nil else {
+            throw TransactionFormError.jarOverrideRequiresTrip
+        }
+
         return ValidatedValues(
             kind: kind,
             amount: amount,
             occurredAt: occurredAt,
             note: note.trimmingCharacters(in: .whitespacesAndNewlines),
             accountID: accountID,
-            categoryID: categoryID
+            categoryID: categoryID,
+            tripWorkspaceID: tripWorkspaceID,
+            budgetJarOverrideID: budgetJarOverrideID
         )
     }
 
@@ -177,7 +199,9 @@ struct TransactionDraft: Equatable {
             categoryID: values.categoryID,
             sourceRuleID: nil,
             currencyCode: VNDCurrency.code,
-            createdAt: createdAt
+            createdAt: createdAt,
+            tripWorkspaceID: values.tripWorkspaceID,
+            budgetJarOverrideID: values.budgetJarOverrideID
         )
     }
 
@@ -190,5 +214,7 @@ struct TransactionDraft: Equatable {
         transaction.note = values.note
         transaction.accountID = values.accountID
         transaction.categoryID = values.categoryID
+        transaction.tripWorkspaceID = values.tripWorkspaceID
+        transaction.budgetJarOverrideID = values.budgetJarOverrideID
     }
 }

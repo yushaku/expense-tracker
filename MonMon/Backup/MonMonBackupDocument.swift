@@ -131,6 +131,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
     var fundSales: [FundSaleRecord]
     var budgetJars: [BudgetJarRecord]
     var goals: [GoalRecord]
+    var tripWorkspaces: [TripWorkspaceRecord]
     var categories: [CategoryRecord]
     var transactions: [TransactionRecord]
     var pendingCaptures: [PendingCaptureRecord]
@@ -141,6 +142,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
     var preferences: Preferences
     private var includesBudgetJars: Bool
     private var includesGoals: Bool
+    private var includesTripWorkspaces: Bool
 
     private enum CodingKeys: String, CodingKey {
         case accounts
@@ -151,6 +153,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         case fundSales
         case budgetJars
         case goals
+        case tripWorkspaces
         case categories
         case transactions
         case pendingCaptures
@@ -170,6 +173,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         fundSales: [],
         budgetJars: [],
         goals: [],
+        tripWorkspaces: [],
         categories: [],
         transactions: [],
         pendingCaptures: [],
@@ -189,6 +193,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         fundSales: [FundSaleRecord],
         budgetJars: [BudgetJarRecord],
         goals: [GoalRecord],
+        tripWorkspaces: [TripWorkspaceRecord] = [],
         categories: [CategoryRecord],
         transactions: [TransactionRecord],
         pendingCaptures: [PendingCaptureRecord],
@@ -206,6 +211,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         self.fundSales = fundSales
         self.budgetJars = budgetJars
         self.goals = goals
+        self.tripWorkspaces = tripWorkspaces
         self.categories = categories
         self.transactions = transactions
         self.pendingCaptures = pendingCaptures
@@ -216,6 +222,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         self.preferences = preferences
         includesBudgetJars = true
         includesGoals = true
+        includesTripWorkspaces = true
     }
 
     init(from decoder: Decoder) throws {
@@ -240,6 +247,10 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
             try container.decodeIfPresent([BudgetJarRecord].self, forKey: .budgetJars) ?? []
         includesGoals = container.contains(.goals)
         goals = try container.decodeIfPresent([GoalRecord].self, forKey: .goals) ?? []
+        includesTripWorkspaces = container.contains(.tripWorkspaces)
+        tripWorkspaces =
+            try container.decodeIfPresent([TripWorkspaceRecord].self, forKey: .tripWorkspaces)
+            ?? []
         categories = try container.decode([CategoryRecord].self, forKey: .categories)
         transactions = try container.decode([TransactionRecord].self, forKey: .transactions)
         pendingCaptures = try container.decode(
@@ -267,6 +278,9 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         if includesGoals {
             try container.encode(goals, forKey: .goals)
         }
+        if includesTripWorkspaces {
+            try container.encode(tripWorkspaces, forKey: .tripWorkspaces)
+        }
         try container.encode(categories, forKey: .categories)
         try container.encode(transactions, forKey: .transactions)
         try container.encode(pendingCaptures, forKey: .pendingCaptures)
@@ -287,6 +301,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         result.fundSales = fundSales.backupSorted()
         result.budgetJars = budgetJars.backupSorted()
         result.goals = goals.backupSorted()
+        result.tripWorkspaces = tripWorkspaces.backupSorted()
         result.categories = categories.backupSorted()
         result.transactions = transactions.backupSorted()
         result.pendingCaptures = pendingCaptures.backupSorted()
@@ -300,7 +315,8 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
     var recordCount: Int {
         accounts.count + savingsDeposits.count + savingsWithdrawals.count
             + fundInstruments.count + fundHoldings.count + fundSales.count
-            + budgetJars.count + goals.count + categories.count + transactions.count
+            + budgetJars.count + goals.count + tripWorkspaces.count + categories.count
+            + transactions.count
             + pendingCaptures.count
             + transfers.count + debts.count + debtPayments.count + recurringRules.count
     }
@@ -431,6 +447,20 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         var createdAt: String
     }
 
+    struct TripWorkspaceRecord: Codable, Equatable, Sendable, MonMonBackupRecord {
+        var id: String
+        var sourceGoalID: String?
+        var name: String
+        var budgetAmount: String
+        var fundingJarID: String?
+        var symbolName: String
+        var colorName: String
+        var status: String
+        var startedAt: String
+        var completedAt: String?
+        var createdAt: String
+    }
+
     struct TransactionRecord: Codable, Equatable, Sendable, MonMonBackupRecord {
         var id: String
         var kind: String
@@ -444,6 +474,8 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         var createdAt: String
         var sourceImportID: String?
         var incomeAllocationSnapshot: String? = nil
+        var tripWorkspaceID: String? = nil
+        var budgetJarOverrideID: String? = nil
     }
 
     struct PendingCaptureRecord: Codable, Equatable, Sendable, MonMonBackupRecord {

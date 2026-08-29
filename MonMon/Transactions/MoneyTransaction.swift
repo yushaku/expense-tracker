@@ -30,6 +30,11 @@ final class MoneyTransaction {
     /// Frozen, versioned explanation of how an income was assigned across
     /// budget jars when it was recorded. Optional for legacy rows and expenses.
     var incomeAllocationSnapshot: String? = nil
+    /// Optional spending workspace. Only expense drafts may write this field.
+    var tripWorkspaceID: UUID? = nil
+    /// Explicit Budget routing for a Trip expense. A stale id is ignored by
+    /// Budget and falls back to the transaction category's current mapping.
+    var budgetJarOverrideID: UUID? = nil
 
     init(
         id: UUID,
@@ -43,7 +48,9 @@ final class MoneyTransaction {
         currencyCode: String,
         createdAt: Date,
         sourceImportID: String? = nil,
-        incomeAllocationSnapshot: String? = nil
+        incomeAllocationSnapshot: String? = nil,
+        tripWorkspaceID: UUID? = nil,
+        budgetJarOverrideID: UUID? = nil
     ) {
         self.id = id
         self.kind = kind
@@ -57,6 +64,8 @@ final class MoneyTransaction {
         self.createdAt = createdAt
         self.sourceImportID = sourceImportID
         self.incomeAllocationSnapshot = incomeAllocationSnapshot
+        self.tripWorkspaceID = tripWorkspaceID
+        self.budgetJarOverrideID = budgetJarOverrideID
     }
 }
 

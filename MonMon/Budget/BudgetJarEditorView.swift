@@ -403,6 +403,9 @@ struct BudgetJarEditorView: View {
         } catch BudgetJarStoreError.jarFundsGoals {
             modelContext.rollback()
             saveErrorMessage = "Move or delete this jar’s goals before deleting the jar."
+        } catch BudgetJarStoreError.jarFundsTrips {
+            modelContext.rollback()
+            saveErrorMessage = "This jar is part of Trip history and cannot be deleted."
         } catch {
             modelContext.rollback()
             saveErrorMessage = "Couldn’t delete this jar. Try again."

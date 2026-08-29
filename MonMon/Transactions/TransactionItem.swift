@@ -14,6 +14,8 @@ struct DeletedTransaction: Equatable, Identifiable {
     let createdAt: Date
     let sourceImportID: String?
     let incomeAllocationSnapshot: String?
+    let tripWorkspaceID: UUID?
+    let budgetJarOverrideID: UUID?
 
     init(_ transaction: MoneyTransaction) {
         id = transaction.id
@@ -28,6 +30,8 @@ struct DeletedTransaction: Equatable, Identifiable {
         createdAt = transaction.createdAt
         sourceImportID = transaction.sourceImportID
         incomeAllocationSnapshot = transaction.incomeAllocationSnapshot
+        tripWorkspaceID = transaction.tripWorkspaceID
+        budgetJarOverrideID = transaction.budgetJarOverrideID
     }
 
     func makeTransaction() -> MoneyTransaction {
@@ -43,7 +47,9 @@ struct DeletedTransaction: Equatable, Identifiable {
             currencyCode: currencyCode,
             createdAt: createdAt,
             sourceImportID: sourceImportID,
-            incomeAllocationSnapshot: incomeAllocationSnapshot
+            incomeAllocationSnapshot: incomeAllocationSnapshot,
+            tripWorkspaceID: tripWorkspaceID,
+            budgetJarOverrideID: budgetJarOverrideID
         )
     }
 }

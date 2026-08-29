@@ -53,6 +53,7 @@ struct MonMonBackupServiceTests {
         #expect(validated.payload.fundSales.count == 1)
         #expect(validated.payload.budgetJars.count == 3)
         #expect(validated.payload.goals.count == 1)
+        #expect(validated.payload.tripWorkspaces.count == 1)
         #expect(
             validated.payload.goals.single?.fundingJarID
                 == MonMonBackupScalar.uuid(fixture.savingsJarID)
@@ -63,12 +64,20 @@ struct MonMonBackupServiceTests {
                 == MonMonBackupScalar.uuid(fixture.jarID)
         )
         #expect(validated.payload.transactions.count == 1)
+        #expect(
+            validated.payload.transactions.single?.tripWorkspaceID
+                == MonMonBackupScalar.uuid(fixture.tripWorkspaceID)
+        )
+        #expect(
+            validated.payload.transactions.single?.budgetJarOverrideID
+                == MonMonBackupScalar.uuid(fixture.savingsJarID)
+        )
         #expect(validated.payload.pendingCaptures.count == 1)
         #expect(validated.payload.transfers.count == 1)
         #expect(validated.payload.debts.count == 1)
         #expect(validated.payload.debtPayments.count == 1)
         #expect(validated.payload.recurringRules.count == 1)
-        #expect(validated.payload.recordCount == 18)
+        #expect(validated.payload.recordCount == 19)
         #expect(validated.payload.transactions.single?.sourceImportID == importedSource)
         #expect(validated.payload.preferences.theme == AppTheme.dark.rawValue)
         #expect(validated.payload.preferences.language == AppLanguage.vietnamese.rawValue)
@@ -242,7 +251,7 @@ struct MonMonBackupServiceTests {
 
         let report = try restoreService.restore(validated)
 
-        #expect(report.restoredRecordCount == 18)
+        #expect(report.restoredRecordCount == 19)
         #expect(try destination.mainContext.fetchCount(FetchDescriptor<CashAccount>()) == 2)
         let restoredCredit = try #require(
             destination.mainContext.fetch(FetchDescriptor<CashAccount>()).first {
@@ -265,6 +274,17 @@ struct MonMonBackupServiceTests {
         #expect(restoredGoal.id == fixture.goalID)
         #expect(restoredGoal.fundingJarID == fixture.savingsJarID)
         #expect(restoredGoal.kind == .trip)
+        let restoredTrip = try #require(
+            destination.mainContext.fetch(FetchDescriptor<TripWorkspace>()).single
+        )
+        #expect(restoredTrip.id == fixture.tripWorkspaceID)
+        #expect(restoredTrip.sourceGoalID == fixture.goalID)
+        #expect(restoredTrip.fundingJarID == fixture.savingsJarID)
+        let restoredTransaction = try #require(
+            destination.mainContext.fetch(FetchDescriptor<MoneyTransaction>()).single
+        )
+        #expect(restoredTransaction.tripWorkspaceID == fixture.tripWorkspaceID)
+        #expect(restoredTransaction.budgetJarOverrideID == fixture.savingsJarID)
         let restoredCategory = try #require(
             destination.mainContext.fetch(FetchDescriptor<TransactionCategory>()).single
         )
@@ -504,6 +524,7 @@ struct MonMonBackupServiceTests {
         let holdingID = UUID()
         let debtID = UUID()
         let goalID = UUID()
+        let tripWorkspaceID = UUID()
 
         context.insert(
             CashAccount(
@@ -582,6 +603,21 @@ struct MonMonBackupServiceTests {
                 fundingJarID: savingsJarID,
                 symbolName: "airplane",
                 colorName: "sky",
+                createdAt: instant
+            )
+        )
+        context.insert(
+            TripWorkspace(
+                id: tripWorkspaceID,
+                sourceGoalID: goalID,
+                name: "Japan trip",
+                budgetAmount: 100_000_000,
+                fundingJarID: savingsJarID,
+                symbolName: "airplane",
+                colorName: "sky",
+                status: .active,
+                startedAt: instant,
+                completedAt: nil,
                 createdAt: instant
             )
         )
@@ -670,7 +706,9 @@ struct MonMonBackupServiceTests {
                 sourceRuleID: ruleID,
                 currencyCode: VNDCurrency.code,
                 createdAt: instant,
-                sourceImportID: importedSource
+                sourceImportID: importedSource,
+                tripWorkspaceID: tripWorkspaceID,
+                budgetJarOverrideID: savingsJarID
             )
         )
         context.insert(
@@ -746,7 +784,8 @@ struct MonMonBackupServiceTests {
             categoryID: categoryID,
             jarID: jarID,
             savingsJarID: savingsJarID,
-            goalID: goalID
+            goalID: goalID,
+            tripWorkspaceID: tripWorkspaceID
         )
     }
 }
@@ -758,6 +797,7 @@ private struct FixtureIDs {
     let jarID: UUID
     let savingsJarID: UUID
     let goalID: UUID
+    let tripWorkspaceID: UUID
 }
 
 extension Array {

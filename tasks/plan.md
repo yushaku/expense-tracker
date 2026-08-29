@@ -1,30 +1,30 @@
-# Implementation Plan: Income Allocation Timeline
+# Implementation Plan: Trip Workspace
 
 ## Overview
 
-Capture a frozen explanation beside each received income transaction and expose
-it as a month-selectable timeline inside Budget. Existing income is backfilled
-once as estimated; snapshot metadata never enters financial totals.
+Extend fully funded Trip goals into real-expense workspaces. A workspace is an
+overlay for explaining a trip; ordinary transactions remain the only source of
+truth for accounts, categories, and spending.
 
 ## Dependency Graph
 
 ```text
-Pure snapshot + versioned codec
+TripWorkspace model + lifecycle
     |
     v
-MoneyTransaction optional storage + edit/delete lifecycle
+Transaction trip link + jar override
     |
     v
-Manual, recurring, import, and capture creation boundaries
+Override-first Budget routing
     |
     v
-Legacy backfill + timeline preparation
+Derived Trip summary + integrity rules
     |
     v
-Accessible Budget timeline UI
+Goal entry + Trip list/detail/editor UI
     |
     v
-Complete backup/restore integration
+Backup/restore + reconciliation
     |
     v
 Review + non-Simulator gates
@@ -32,69 +32,81 @@ Review + non-Simulator gates
 
 ## Architecture Decisions
 
-- Embed one optional snapshot string in `MoneyTransaction`; avoid a second
-  persistent event graph whose lifecycle could drift from the ledger row.
-- Freeze jar UUID, presentation, percentage, and exact allocated amount. Jar
-  configuration remains editable without rewriting history.
-- Keep the feature explanatory only. Budget's live current-plan math and all
-  financial balances remain unchanged.
-- Capture new income at every production creation boundary. Backfill only
-  snapshot-less legacy income and label it estimated.
-- Use one canonical codec/validator for local reads and untrusted backup import.
+- Store one workspace plus UUID references; do not add a parallel ledger or a
+  synthetic transfer.
+- Freeze the funded budget and presentation at start, then derive every
+  spending value from linked expense transactions.
+- Keep transaction category and Budget routing separate: an explicit jar
+  override wins, otherwise the category mapping and existing fallback apply.
+- Completed trips remain editable for corrections; completion changes only
+  workspace state.
+- Decode new backup arrays and fields as optional so legacy backup documents
+  remain valid.
 
 ## Task List
 
-### Phase 1: Snapshot contract
+### Phase 1: Workspace foundation
 
-- [x] Task 1: Add RED tests for exact distribution, rounding, freezing, and amount refresh.
-- [x] Task 2: Implement the versioned snapshot, codec, and optional transaction storage.
-
-### Checkpoint: Snapshot foundation
-
-- [x] Focused pure tests pass.
-- [x] Snapshot round-trips without changing any ledger calculation.
-
-### Phase 2: Transaction lifecycle
-
-- [x] Task 3: Capture and refresh snapshots in manual transaction edit/create and undo.
-- [x] Task 4: Capture snapshots in recurring generation.
-- [x] Task 5: Capture snapshots in statement import and pending-capture commit.
-- [x] Task 6: Backfill missing legacy income idempotently as estimated.
+- [x] Task 1: Add RED tests for persistence, start eligibility, duplicate
+  prevention, completion, and reopening.
+- [x] Task 2: Implement the model, status, schema registration, and lifecycle.
 
 ### Checkpoint: Lifecycle integrity
 
-- [x] Every production income creation path is covered by an integration test.
-- [x] Edit, delete/undo, malformed data, and legacy backfill tests pass.
+- [x] A fully funded Trip goal starts exactly one active workspace.
+- [x] Completing and reopening mutate no ledger or goal amounts.
 
-### Phase 3: Owner experience and portability
+### Phase 2: Financial integration
 
-- [x] Task 7: Add timeline preparation and accessible month-selectable SwiftUI inside Budget.
-- [x] Task 8: Add English/Vietnamese copy and explicit historical-vs-current explanation.
-- [x] Task 9: Extend complete backup validation, export, and authoritative restore.
+- [x] Task 3: Preserve trip and jar-override metadata through transaction
+  create/edit/delete/undo paths.
+- [x] Task 4: Route Budget expenses by valid override before category mapping
+  and protect referenced jars.
+- [x] Task 5: Derive exact budget, spent, remaining, over-budget, and category
+  breakdowns from linked expenses only.
 
-### Phase 4: Completion
+### Checkpoint: Financial integrity
 
-- [x] Task 10: Run SwiftUI, quality, simplification, and security review.
-- [x] Task 11: Run focused/full tests, strict format lint, and compile-only iPhoneOS build.
-- [x] Task 12: Commit reviewable increments and hand back a clean feature branch.
+- [x] Trip totals reconcile exactly to ordinary expense transactions.
+- [x] Trip metadata does not change account totals or create money movement.
+
+### Phase 3: Owner experience
+
+- [x] Task 6: Add ready, active, and completed Trip sections with lifecycle
+  actions inside Goals.
+- [x] Task 7: Add Trip detail, category breakdown, linked transactions, and an
+  Add expense entry point.
+- [x] Task 8: Add Trip and jar-routing controls to the transaction editor.
+- [x] Task 9: Add English/Vietnamese copy and complete the SwiftUI correctness
+  and accessibility checklist.
+
+### Phase 4: Portability and completion
+
+- [x] Task 10: Extend complete backup/restore, validation, recovery, and store
+  reconciliation with legacy compatibility.
+- [x] Task 11: Run code-quality, simplification, and security reviews.
+- [x] Task 12: Run focused/full tests, strict format lint, and compile-only
+  iPhoneOS build.
+- [x] Task 13: Commit reviewable increments and hand back a clean feature
+  branch.
 
 ### Checkpoint: Complete
 
-- [x] All `SPEC-income-allocation-timeline.md` success criteria are met.
+- [x] All `SPEC-trip-workspace.md` success criteria are met.
 - [x] No Simulator, merge, push, or phone installation was performed.
 
 ## Risks and Mitigations
 
 | Risk | Impact | Mitigation |
 |---|---|---|
-| Snapshot money does not reconcile to income | High | Deterministic rounding plus explicit unallocated remainder and equality tests |
-| One creation path omits capture | High | Enumerate and integration-test manual, recurring, import, and capture boundaries |
-| Jar edits rewrite history | High | Store frozen presentation and percentage inside the snapshot |
-| Embedded JSON becomes malformed | High | Versioned codec, strict validator, no silent overwrite, backup rejection |
-| Snapshot starts affecting balances | High | Keep all existing summary inputs unchanged and add neutrality tests |
-| Legacy backup checksum changes | High | Encode the optional transaction field only when present and keep legacy tests |
+| Trip becomes a second balance | High | Persist no spent/remaining balance; derive from linked expenses |
+| Spending is counted twice | High | Keep existing account totals unchanged and add neutrality tests |
+| Category detail is lost | High | Store trip and jar override beside, never instead of, category |
+| Jar deletion rewrites history | High | Block deletion while any workspace references the jar |
+| Workspace deletion orphans metadata | High | Cancel only empty active workspaces; retain completed history |
+| Legacy backup stops importing | High | Optional decode defaults plus legacy validation/restore tests |
 
 ## Open Questions
 
-None. Projected future events and historical monthly Budget snapshots are
-explicitly deferred.
+None. Fund liquidation, shared trips, itinerary planning, and receipt/media
+storage remain explicitly deferred.

@@ -86,6 +86,49 @@ struct MoneyTransactionPersistenceTests {
         #expect(stored.incomeAllocationSnapshot == snapshot)
     }
 
+    @Test("Optional Trip routing metadata round trips through the store")
+    func tripMetadataRoundTrips() throws {
+        let container = try makeContainer()
+        let context = ModelContext(container)
+        let tripID = UUID()
+        let jarID = UUID()
+        let account = makeAccount(openingBalance: 10_000_000)
+        let transaction = MoneyTransaction(
+            id: UUID(),
+            kind: .expense,
+            amount: 2_000_000,
+            occurredAt: occurredAt,
+            note: "Hotel",
+            accountID: account.id,
+            categoryID: UUID(),
+            sourceRuleID: nil,
+            currencyCode: VNDCurrency.code,
+            createdAt: occurredAt,
+            tripWorkspaceID: tripID,
+            budgetJarOverrideID: jarID
+        )
+        context.insert(account)
+        context.insert(transaction)
+        try context.save()
+
+        let stored = try #require(try context.fetch(FetchDescriptor<MoneyTransaction>()).first)
+        #expect(stored.tripWorkspaceID == tripID)
+        #expect(stored.budgetJarOverrideID == jarID)
+        #expect(
+            CashBalanceSummary.available(
+                for: account,
+                deposits: [],
+                holdings: [],
+                withdrawals: [],
+                transactions: [stored],
+                transfers: [],
+                debts: [],
+                payments: [],
+                sales: []
+            ) == 8_000_000
+        )
+    }
+
     @Test("Recorded flow lowers and raises the account's available balance")
     func flowMovesTheStoredBalance() throws {
         let container = try makeContainer()
@@ -218,6 +261,8 @@ struct MoneyTransactionPersistenceTests {
         let categoryID = UUID()
         let ruleID = UUID()
         let snapshot = "{\"version\":1}"
+        let tripID = UUID()
+        let jarID = UUID()
         context.insert(account)
 
         let transaction = MoneyTransaction(
@@ -232,7 +277,9 @@ struct MoneyTransactionPersistenceTests {
             currencyCode: VNDCurrency.code,
             createdAt: occurredAt.addingTimeInterval(-60),
             sourceImportID: "statement-row",
-            incomeAllocationSnapshot: snapshot
+            incomeAllocationSnapshot: snapshot,
+            tripWorkspaceID: tripID,
+            budgetJarOverrideID: jarID
         )
         context.insert(transaction)
         try context.save()
@@ -254,5 +301,7 @@ struct MoneyTransactionPersistenceTests {
         #expect(restored.createdAt == occurredAt.addingTimeInterval(-60))
         #expect(restored.sourceImportID == "statement-row")
         #expect(restored.incomeAllocationSnapshot == snapshot)
+        #expect(restored.tripWorkspaceID == tripID)
+        #expect(restored.budgetJarOverrideID == jarID)
     }
 }

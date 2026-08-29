@@ -260,6 +260,48 @@ struct TransactionDraftTests {
         #expect(transaction.signedAmount == 5_000_000)
     }
 
+    @Test("A Trip expense preserves its workspace and jar override through editing")
+    func tripMetadataRoundTripsThroughDraft() throws {
+        let tripID = UUID()
+        let jarID = UUID()
+        var draft = makeDraft()
+        draft.tripWorkspaceID = tripID
+        draft.budgetJarOverrideID = jarID
+
+        let transaction = try draft.makeTransaction(id: UUID(), createdAt: occurredAt)
+        let editingDraft = TransactionDraft(transaction: transaction)
+
+        #expect(transaction.tripWorkspaceID == tripID)
+        #expect(transaction.budgetJarOverrideID == jarID)
+        #expect(editingDraft.tripWorkspaceID == tripID)
+        #expect(editingDraft.budgetJarOverrideID == jarID)
+
+        let replacementTripID = UUID()
+        let replacementJarID = UUID()
+        var updatedDraft = editingDraft
+        updatedDraft.tripWorkspaceID = replacementTripID
+        updatedDraft.budgetJarOverrideID = replacementJarID
+        try updatedDraft.apply(to: transaction)
+
+        #expect(transaction.tripWorkspaceID == replacementTripID)
+        #expect(transaction.budgetJarOverrideID == replacementJarID)
+    }
+
+    @Test("Income cannot join a Trip and an override cannot exist by itself")
+    func invalidTripMetadataIsRejected() {
+        var income = makeDraft(kind: .income)
+        income.tripWorkspaceID = UUID()
+        #expect(throws: TransactionFormError.tripRequiresExpense) {
+            _ = try income.makeTransaction(id: UUID(), createdAt: occurredAt)
+        }
+
+        var overrideOnly = makeDraft()
+        overrideOnly.budgetJarOverrideID = UUID()
+        #expect(throws: TransactionFormError.jarOverrideRequiresTrip) {
+            _ = try overrideOnly.makeTransaction(id: UUID(), createdAt: occurredAt)
+        }
+    }
+
     @Test("An unparsable amount is rejected")
     func unparsableAmountIsRejected() {
         let draft = makeDraft(amountText: "a lot")

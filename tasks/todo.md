@@ -102,12 +102,18 @@ Files: `MonMon/Backup/BackupRestoreView.swift`,
 - [x] Include goals in complete backup/restore while preserving legacy compatibility.
 - [x] Pass focused/full tests, format lint, review, and compile-only iPhoneOS build.
 
-## Trip Workspace — after Goal Envelopes
+## Trip Workspace — current branch
 
-- [ ] Give a trip separate saving and spending phases.
-- [ ] Attach transactions to a trip while preserving their ordinary categories.
-- [ ] Allow a trip transaction to override its category’s default jar.
-- [ ] Show total trip budget plus food, accommodation, and transport breakdowns.
+- [x] Start one workspace from a fully funded Trip goal.
+- [x] Keep saving in Goal and spending in an active/completed Trip lifecycle.
+- [x] Attach expense transactions while preserving account and category history.
+- [x] Let a Trip expense override its category’s default jar.
+- [x] Derive budget, spent, remaining, over-budget, and category breakdowns.
+- [x] Add ready/active/completed Trip list and detail UI inside Goals.
+- [x] Add completion, reopening, and safe empty cancellation.
+- [x] Protect linked transactions and referenced jars from destructive deletion.
+- [x] Include Trip data in complete backup/restore with legacy compatibility.
+- [x] Pass focused/full tests, review, format lint, and compile-only iPhoneOS build.
 
 ## Income Allocation Timeline — current branch
 

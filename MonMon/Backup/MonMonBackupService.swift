@@ -41,6 +41,16 @@ private extension MonMonBackupService {
             update: updateGoal
         )
         try reconcile(
+            current: context.fetch(FetchDescriptor<TripWorkspace>()),
+            records: payload.tripWorkspaces,
+            in: context,
+            modelID: \TripWorkspace.id,
+            createdAt: \TripWorkspace.createdAt,
+            recordID: { try MonMonBackupScalar.parseUUID($0.id) },
+            make: makeTripWorkspace,
+            update: updateTripWorkspace
+        )
+        try reconcile(
             current: context.fetch(FetchDescriptor<TransactionCategory>()),
             records: payload.categories,
             in: context,
@@ -310,6 +320,41 @@ private extension MonMonBackupService {
         model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
     }
 
+    func makeTripWorkspace(
+        _ record: MonMonBackupPayload.TripWorkspaceRecord
+    ) throws -> TripWorkspace {
+        TripWorkspace(
+            id: try MonMonBackupScalar.parseUUID(record.id),
+            sourceGoalID: try optionalUUID(record.sourceGoalID),
+            name: record.name,
+            budgetAmount: try MonMonBackupScalar.parseDecimal(record.budgetAmount),
+            fundingJarID: try optionalUUID(record.fundingJarID),
+            symbolName: record.symbolName,
+            colorName: record.colorName,
+            status: try enumValue(record.status),
+            startedAt: try MonMonBackupScalar.parseDate(record.startedAt),
+            completedAt: try optionalDate(record.completedAt),
+            createdAt: try MonMonBackupScalar.parseDate(record.createdAt)
+        )
+    }
+
+    func updateTripWorkspace(
+        _ model: TripWorkspace,
+        _ record: MonMonBackupPayload.TripWorkspaceRecord
+    ) throws {
+        model.id = try MonMonBackupScalar.parseUUID(record.id)
+        model.sourceGoalID = try optionalUUID(record.sourceGoalID)
+        model.name = record.name
+        model.budgetAmount = try MonMonBackupScalar.parseDecimal(record.budgetAmount)
+        model.fundingJarID = try optionalUUID(record.fundingJarID)
+        model.symbolName = record.symbolName
+        model.colorName = record.colorName
+        model.status = try enumValue(record.status)
+        model.startedAt = try MonMonBackupScalar.parseDate(record.startedAt)
+        model.completedAt = try optionalDate(record.completedAt)
+        model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
+    }
+
     func makeFundInstrument(
         _ record: MonMonBackupPayload.FundInstrumentRecord
     ) throws -> FundInstrument {
@@ -491,7 +536,9 @@ private extension MonMonBackupService {
             currencyCode: record.currencyCode,
             createdAt: try MonMonBackupScalar.parseDate(record.createdAt),
             sourceImportID: record.sourceImportID,
-            incomeAllocationSnapshot: record.incomeAllocationSnapshot
+            incomeAllocationSnapshot: record.incomeAllocationSnapshot,
+            tripWorkspaceID: try optionalUUID(record.tripWorkspaceID),
+            budgetJarOverrideID: try optionalUUID(record.budgetJarOverrideID)
         )
     }
 
@@ -511,6 +558,8 @@ private extension MonMonBackupService {
         model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
         model.sourceImportID = record.sourceImportID
         model.incomeAllocationSnapshot = record.incomeAllocationSnapshot
+        model.tripWorkspaceID = try optionalUUID(record.tripWorkspaceID)
+        model.budgetJarOverrideID = try optionalUUID(record.budgetJarOverrideID)
     }
 
     func makePendingCapture(
@@ -870,6 +919,9 @@ struct MonMonBackupService {
             fundSales: try context.fetch(FetchDescriptor<FundSale>()).map(fundSaleRecord),
             budgetJars: try context.fetch(FetchDescriptor<BudgetJar>()).map(budgetJarRecord),
             goals: try context.fetch(FetchDescriptor<FinancialGoal>()).map(goalRecord),
+            tripWorkspaces: try context.fetch(FetchDescriptor<TripWorkspace>()).map(
+                tripWorkspaceRecord
+            ),
             categories: try context.fetch(FetchDescriptor<TransactionCategory>()).map(
                 categoryRecord
             ),
@@ -1028,6 +1080,24 @@ struct MonMonBackupService {
         )
     }
 
+    private func tripWorkspaceRecord(
+        _ model: TripWorkspace
+    ) -> MonMonBackupPayload.TripWorkspaceRecord {
+        MonMonBackupPayload.TripWorkspaceRecord(
+            id: MonMonBackupScalar.uuid(model.id),
+            sourceGoalID: model.sourceGoalID.map(MonMonBackupScalar.uuid),
+            name: model.name,
+            budgetAmount: MonMonBackupScalar.decimal(model.budgetAmount),
+            fundingJarID: model.fundingJarID.map(MonMonBackupScalar.uuid),
+            symbolName: model.symbolName,
+            colorName: model.colorName,
+            status: model.status.rawValue,
+            startedAt: MonMonBackupScalar.date(model.startedAt),
+            completedAt: model.completedAt.map(MonMonBackupScalar.date),
+            createdAt: MonMonBackupScalar.date(model.createdAt)
+        )
+    }
+
     private func transactionRecord(
         _ model: MoneyTransaction
     ) -> MonMonBackupPayload.TransactionRecord {
@@ -1043,7 +1113,9 @@ struct MonMonBackupService {
             currencyCode: model.currencyCode,
             createdAt: MonMonBackupScalar.date(model.createdAt),
             sourceImportID: model.sourceImportID,
-            incomeAllocationSnapshot: model.incomeAllocationSnapshot
+            incomeAllocationSnapshot: model.incomeAllocationSnapshot,
+            tripWorkspaceID: model.tripWorkspaceID.map(MonMonBackupScalar.uuid),
+            budgetJarOverrideID: model.budgetJarOverrideID.map(MonMonBackupScalar.uuid)
         )
     }
 

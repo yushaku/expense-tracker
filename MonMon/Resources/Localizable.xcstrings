@@ -1,6 +1,150 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Trip spending": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chi tiêu chuyến đi" } } }
+    },
+    "No trip": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thuộc chuyến đi" } } }
+    },
+    "Budget jar": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ ngân sách" } } }
+    },
+    "Use category jar": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dùng hũ của danh mục" } } }
+    },
+    "The expense keeps its category. This choice only changes which jar pays for it.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khoản chi vẫn giữ nguyên danh mục. Lựa chọn này chỉ thay đổi hũ dùng để chi trả." } } }
+    },
+    "Only expenses can be added to a trip.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chỉ khoản chi mới có thể gắn vào chuyến đi." } } }
+    },
+    "Choose a trip before overriding its budget jar.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn chuyến đi trước khi đổi hũ ngân sách." } } }
+    },
+    "Couldn’t start this trip": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể bắt đầu chuyến đi" } } }
+    },
+    "This goal already has a trip workspace.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục tiêu này đã có không gian chi tiêu chuyến đi." } } }
+    },
+    "Check that this Trip goal is fully funded and has a funding jar.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Kiểm tra mục tiêu Du lịch đã đủ tiền và có hũ tài trợ." } } }
+    },
+    "Ready to spend": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sẵn sàng chi tiêu" } } }
+    },
+    "Active trips": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chuyến đi đang diễn ra" } } }
+    },
+    "Trip history": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lịch sử chuyến đi" } } }
+    },
+    "Opens this trip workspace": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mở không gian chi tiêu của chuyến đi này" } } }
+    },
+    "Trip unavailable": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không tìm thấy chuyến đi" } } }
+    },
+    "This trip is no longer in the current store.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chuyến đi này không còn trong dữ liệu hiện tại." } } }
+    },
+    "Trip budget": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngân sách chuyến đi" } } }
+    },
+    "Start spending": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bắt đầu chi tiêu" } } }
+    },
+    "Active trip": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chuyến đi đang diễn ra" } } }
+    },
+    "Completed trip": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chuyến đi đã hoàn tất" } } }
+    },
+    "Active": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang diễn ra" } } }
+    },
+    "Trip budget used": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngân sách chuyến đi đã sử dụng" } } }
+    },
+    "Spent": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã chi" } } }
+    },
+    "Over budget": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Vượt ngân sách" } } }
+    },
+    "Left to spend": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Còn có thể chi" } } }
+    },
+    "Complete this trip?": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hoàn tất chuyến đi này?" } } }
+    },
+    "Cancel this trip workspace?": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Huỷ không gian chi tiêu chuyến đi này?" } } }
+    },
+    "Complete trip": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hoàn tất chuyến đi" } } }
+    },
+    "Keep active": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiếp tục chuyến đi" } } }
+    },
+    "Cancel trip workspace": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Huỷ không gian chuyến đi" } } }
+    },
+    "Keep trip": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Giữ chuyến đi" } } }
+    },
+    "The trip moves to history. No account balance or transaction changes.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chuyến đi sẽ chuyển vào lịch sử. Số dư tài khoản và giao dịch không thay đổi." } } }
+    },
+    "This removes the empty workspace only. The funded goal remains ready to spend.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thao tác này chỉ xoá không gian trống. Mục tiêu đã đủ tiền vẫn sẵn sàng để chi tiêu." } } }
+    },
+    "Couldn’t update this trip. Try again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể cập nhật chuyến đi này. Hãy thử lại." } } }
+    },
+    "A trip with expenses cannot be cancelled.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể huỷ chuyến đi đã có khoản chi." } } }
+    },
+    "Couldn’t cancel this trip. Try again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể huỷ chuyến đi này. Hãy thử lại." } } }
+    },
+    "Only linked expenses reduce this budget.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chỉ các khoản chi được gắn vào chuyến đi mới làm giảm ngân sách này." } } }
+    },
+    "Spending by category": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chi tiêu theo danh mục" } } }
+    },
+    "Food, accommodation, transport, and other spending will appear here.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền ăn, chỗ ở, đi lại và các khoản chi khác sẽ xuất hiện tại đây." } } }
+    },
+    "Expenses: %lld": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số khoản chi: %lld" } } }
+    },
+    "Trip expenses": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khoản chi chuyến đi" } } }
+    },
+    "Add expense": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm khoản chi" } } }
+    },
+    "No trip expenses": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa có khoản chi chuyến đi" } } }
+    },
+    "Record an expense and keep its normal category.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi một khoản chi và giữ nguyên danh mục thông thường của nó." } } }
+    },
+    "Opens this trip expense for editing": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mở khoản chi chuyến đi này để chỉnh sửa" } } }
+    },
+    "The unused %@ is available to plan again. No refund or transfer was created.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "%@ chưa dùng có thể được phân bổ lại. Không có khoản hoàn tiền hay chuyển khoản nào được tạo." } } }
+    },
+    "Reopen trip": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mở lại chuyến đi" } } }
+    },
+    "This jar is part of Trip history and cannot be deleted.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ này thuộc lịch sử chuyến đi nên không thể xoá." } } }
+    },
     "Couldn’t update older income allocations. Try again.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể cập nhật phân bổ cho các khoản thu cũ. Hãy thử lại." } } }
     },
@@ -8604,6 +8748,9 @@
     "Financial goals": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục tiêu tài chính" } } }
     },
+    "Trip workspaces": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không gian chi tiêu chuyến đi" } } }
+    },
     "Unmapped expenses use %@.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khoản chi chưa gán sẽ dùng hũ %@." } } }
     },
@@ -8613,8 +8760,8 @@
     "Categories mapped here will move to another available jar.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Các danh mục đang gán vào đây sẽ chuyển sang một hũ còn lại." } } }
     },
-    "Export or replace every account, transaction, category, budget jar, financial goal, recurring rule, saving, investment, transfer, and debt on this device.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xuất hoặc thay thế toàn bộ tài khoản, giao dịch, danh mục, hũ ngân sách, mục tiêu tài chính, khoản định kỳ, tiết kiệm, đầu tư, chuyển khoản và khoản nợ trên thiết bị này." } } }
+    "Export or replace every account, transaction, category, budget jar, financial goal, trip workspace, recurring rule, saving, investment, transfer, and debt on this device.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xuất hoặc thay thế toàn bộ tài khoản, giao dịch, danh mục, hũ ngân sách, mục tiêu tài chính, không gian chi tiêu chuyến đi, khoản định kỳ, tiết kiệm, đầu tư, chuyển khoản và khoản nợ trên thiết bị này." } } }
     },
     "Goals": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục tiêu" } } }

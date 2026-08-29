@@ -34,12 +34,13 @@ enum StoreReconciler {
         var accounts = 0
         var budgetJars = 0
         var goals = 0
+        var trips = 0
         var transactions = 0
         var transfers = 0
 
         var isEmpty: Bool {
             categories == 0 && instruments == 0 && accounts == 0 && budgetJars == 0
-                && goals == 0 && transactions == 0 && transfers == 0
+                && goals == 0 && trips == 0 && transactions == 0 && transfers == 0
         }
     }
 
@@ -54,6 +55,7 @@ enum StoreReconciler {
         report.accounts = try foldAnchorAccounts(in: context)
         report.budgetJars = try foldBudgetJars(in: context)
         report.goals = try foldFinancialGoals(in: context)
+        report.trips = try foldTripWorkspaces(in: context)
         report.transactions = try foldGeneratedTransactions(in: context)
         report.transactions += try foldImportedTransactions(in: context)
         report.transfers = try foldImportedTransfers(in: context)
@@ -206,6 +208,41 @@ enum StoreReconciler {
         return folded
     }
 
+    /// A goal can become one spending workspace only. If two devices start the
+    /// same funded goal before syncing, the oldest workspace survives and all
+    /// linked expenses follow it. Workspaces without a source goal are matched
+    /// only by their own UUID so independent legacy records remain independent.
+    private static func foldTripWorkspaces(in context: ModelContext) throws -> Int {
+        let workspaces = try context.fetch(FetchDescriptor<TripWorkspace>())
+        let merges = DuplicateReconciler.merges(
+            in: workspaces,
+            key: { workspace in
+                if let sourceGoalID = workspace.sourceGoalID {
+                    return "goal|\(sourceGoalID.uuidString)"
+                }
+                return "workspace|\(workspace.id.uuidString)"
+            },
+            createdAt: \.createdAt,
+            id: \.id
+        )
+        guard !merges.isEmpty else { return 0 }
+
+        let transactions = try context.fetch(FetchDescriptor<MoneyTransaction>())
+        var folded = 0
+        for merge in merges {
+            let doomed = Set(merge.duplicates.map(\.id))
+            for transaction in transactions
+            where transaction.tripWorkspaceID.map(doomed.contains) == true {
+                transaction.tripWorkspaceID = merge.survivor.id
+            }
+            for duplicate in merge.duplicates {
+                context.delete(duplicate)
+                folded += 1
+            }
+        }
+        return folded
+    }
+
     /// Matched on the rule that wrote the transaction and the day it fell on —
     /// the same pair `RecurringGenerator` refuses to write twice.
     ///
@@ -237,6 +274,7 @@ enum StoreReconciler {
         var folded = 0
         for merge in merges {
             preserveIncomeAllocationSnapshot(in: merge)
+            preserveTripRoutingMetadata(in: merge)
             for duplicate in merge.duplicates {
                 context.delete(duplicate)
                 folded += 1
@@ -280,6 +318,7 @@ enum StoreReconciler {
         var folded = 0
         for merge in merges {
             preserveIncomeAllocationSnapshot(in: merge)
+            preserveTripRoutingMetadata(in: merge)
             for duplicate in merge.duplicates {
                 context.delete(duplicate)
                 folded += 1
@@ -310,6 +349,27 @@ enum StoreReconciler {
                 continue
             }
         }
+    }
+
+    private static func preserveTripRoutingMetadata(
+        in merge: DuplicateReconciler.Merge<MoneyTransaction>
+    ) {
+        guard merge.survivor.kind == .expense else { return }
+
+        if merge.survivor.tripWorkspaceID == nil {
+            guard let duplicate = merge.duplicates.first(where: { $0.tripWorkspaceID != nil })
+            else { return }
+            merge.survivor.tripWorkspaceID = duplicate.tripWorkspaceID
+            merge.survivor.budgetJarOverrideID = duplicate.budgetJarOverrideID
+            return
+        }
+
+        guard merge.survivor.budgetJarOverrideID == nil else { return }
+        merge.survivor.budgetJarOverrideID =
+            merge.duplicates.first {
+                $0.tripWorkspaceID == merge.survivor.tripWorkspaceID
+                    && $0.budgetJarOverrideID != nil
+            }?.budgetJarOverrideID
     }
 
     private enum TransferImportSide {

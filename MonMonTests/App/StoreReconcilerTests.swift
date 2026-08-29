@@ -369,6 +369,29 @@ struct StoreReconcilerTests {
         #expect(try context.fetchCount(FetchDescriptor<CashAccount>()) == 2)
     }
 
+    @Test("Two workspaces for one source goal fold and repoint Trip expenses")
+    func duplicateTripWorkspacesFoldAndRepointExpenses() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let goalID = UUID()
+        let survivor = tripWorkspace(sourceGoalID: goalID, createdAt: day0)
+        let duplicate = tripWorkspace(sourceGoalID: goalID, createdAt: day1)
+        let expense = generated(ruleID: nil, occurredAt: day1, createdAt: day1)
+        expense.tripWorkspaceID = duplicate.id
+        expense.budgetJarOverrideID = BudgetJarSeed.savingsID
+        context.insert(survivor)
+        context.insert(duplicate)
+        context.insert(expense)
+        try context.save()
+
+        let report = try StoreReconciler.reconcile(in: context)
+
+        #expect(report.trips == 1)
+        #expect(try context.fetch(FetchDescriptor<TripWorkspace>()).map(\.id) == [survivor.id])
+        #expect(expense.tripWorkspaceID == survivor.id)
+        #expect(expense.budgetJarOverrideID == BudgetJarSeed.savingsID)
+    }
+
     /// This runs on every launch and every return to the foreground, so a
     /// second pass has to find nothing left to do.
     @Test("Reconciling twice changes nothing the second time")
@@ -399,6 +422,22 @@ struct StoreReconcilerTests {
             endDate: nil,
             isPaused: false,
             lastGeneratedAt: nil,
+            createdAt: createdAt
+        )
+    }
+
+    private func tripWorkspace(sourceGoalID: UUID, createdAt: Date) -> TripWorkspace {
+        TripWorkspace(
+            id: UUID(),
+            sourceGoalID: sourceGoalID,
+            name: "Japan",
+            budgetAmount: 10_000_000,
+            fundingJarID: BudgetJarSeed.savingsID,
+            symbolName: "airplane",
+            colorName: "sky",
+            status: .active,
+            startedAt: createdAt,
+            completedAt: nil,
             createdAt: createdAt
         )
     }
@@ -529,6 +568,28 @@ struct StoreReconcilerTests {
         #expect(transactions.count == 1)
         #expect(remaining.id == survivor.id)
         #expect(remaining.incomeAllocationSnapshot == expectedSnapshot)
+    }
+
+    @Test("Folding duplicate expenses preserves Trip routing metadata")
+    func generatedExpenseFoldPreservesTripRouting() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let recurring = rule(categoryID: nil, createdAt: day0)
+        let survivor = generated(ruleID: recurring.id, occurredAt: day0, createdAt: day0)
+        let duplicate = generated(ruleID: recurring.id, occurredAt: day0, createdAt: day1)
+        duplicate.tripWorkspaceID = UUID()
+        duplicate.budgetJarOverrideID = UUID()
+        let expectedTripID = duplicate.tripWorkspaceID
+        let expectedJarID = duplicate.budgetJarOverrideID
+        context.insert(recurring)
+        context.insert(survivor)
+        context.insert(duplicate)
+        try context.save()
+
+        _ = try StoreReconciler.reconcile(in: context)
+
+        #expect(survivor.tripWorkspaceID == expectedTripID)
+        #expect(survivor.budgetJarOverrideID == expectedJarID)
     }
 
     @Test("One rule on two different days keeps both entries")
