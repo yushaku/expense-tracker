@@ -40,8 +40,9 @@ struct GoalListView: View {
                             plannedByJar: plannedByJar
                         )
 
-                        TripWorkspaceSections(
-                            collection: tripCollection,
+                        TripWorkspaceSection(
+                            title: "Active trips",
+                            workspaces: tripCollection.activeWorkspaces,
                             transactions: transactions,
                             categories: categories
                         )
@@ -56,6 +57,13 @@ struct GoalListView: View {
                                 onSelect: { editorMode = .edit($0) }
                             )
                         }
+
+                        TripWorkspaceSection(
+                            title: "History",
+                            workspaces: tripCollection.completedWorkspaces,
+                            transactions: transactions,
+                            categories: categories
+                        )
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
                     .padding(.horizontal, 20)
@@ -101,19 +109,21 @@ struct GoalListView: View {
     }
 }
 
-private struct TripWorkspaceSections: View {
-    let collection: TripWorkspaceCollection
+private struct TripWorkspaceSection: View {
+    let title: LocalizedStringKey
+    let workspaces: [TripWorkspace]
     let snapshots: [UUID: TripSummarySnapshot]
 
     init(
-        collection: TripWorkspaceCollection,
+        title: LocalizedStringKey,
+        workspaces: [TripWorkspace],
         transactions: [MoneyTransaction],
         categories: [TransactionCategory]
     ) {
-        self.collection = collection
+        self.title = title
+        self.workspaces = workspaces
         snapshots = Dictionary(
-            uniqueKeysWithValues: (collection.activeWorkspaces + collection.completedWorkspaces).map
-            { workspace in
+            uniqueKeysWithValues: workspaces.map { workspace in
                 (
                     workspace.id,
                     TripSummary.snapshot(
@@ -127,17 +137,6 @@ private struct TripWorkspaceSections: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            workspaceSection("Active trips", workspaces: collection.activeWorkspaces)
-            workspaceSection("Trip history", workspaces: collection.completedWorkspaces)
-        }
-    }
-
-    @ViewBuilder
-    private func workspaceSection(
-        _ title: LocalizedStringKey,
-        workspaces: [TripWorkspace]
-    ) -> some View {
         if !workspaces.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
                 Text(title)
@@ -207,7 +206,7 @@ private struct GoalCollection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             if !activeGoals.isEmpty {
-                section("In progress", goals: activeGoals)
+                section("Accumulating", goals: activeGoals)
             }
 
             if !completedGoals.isEmpty {
