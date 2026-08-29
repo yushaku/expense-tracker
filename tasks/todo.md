@@ -111,7 +111,21 @@ Files: `MonMon/Backup/BackupRestoreView.swift`,
 
 ## Later exploration
 
-- [ ] Income Allocation Timeline — explain each salary, bonus, and one-off allocation.
+### Income Allocation Timeline — current branch
+
+- [ ] Freeze a versioned jar-allocation snapshot on every new income transaction.
+- [ ] Reconcile every snapshot exactly to its transaction plus unallocated remainder.
+- [ ] Preserve snapshots through income edits and transaction delete/undo.
+- [ ] Capture manual, recurring, imported, and pending-capture income paths.
+- [ ] Backfill old income once and mark it as estimated.
+- [ ] Add an accessible month-selectable timeline inside Budget.
+- [ ] Distinguish recurring, imported, and one-off income events.
+- [ ] Explain that historical splits may differ from the current Budget setup.
+- [ ] Include snapshots in complete backup/restore with legacy compatibility.
+- [ ] Pass focused/full tests, review, format lint, and compile-only iPhoneOS build.
+
+### Remaining exploration
+
 - [ ] Historical monthly snapshots and explicit rollover rules.
 - [ ] Adaptive Coach — overspend warnings and reallocation suggestions.
 - [ ] Validate whether coaching is useful before adding notifications or automation.
