@@ -51,8 +51,14 @@ struct BudgetScreen: View {
                             noIncomeCard
                         }
 
-                        ForEach(snapshot.rows) { row in
-                            BudgetJarCard(row: row)
+                        ForEach(snapshot.rowsByAllocation) { row in
+                            NavigationLink {
+                                BudgetJarDetailView(row: row, asOf: asOf)
+                            } label: {
+                                BudgetJarCard(row: row)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityHint("Opens activity in this budget jar")
                         }
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
