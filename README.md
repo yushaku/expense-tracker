@@ -1,99 +1,59 @@
 # MonMon
 
-MonMon is a private personal-finance app for iPhone and Mac, built with SwiftUI
-and SwiftData and themed with Catppuccin — Latte in light, Frappé in dark. It is
-single-owner and offline by default: every balance is derived from what was
-recorded, never from a hand-edited number, and the only network calls it ever
-makes are market-price lookups the owner asks for.
+MonMon is a private personal-finance app for iPhone and Mac, built with SwiftUI and SwiftData and themed with Catppuccin — Latte in light, Frappé in dark. It is single-owner and offline by default: every balance is derived from what was recorded, never from a hand-edited number, and the only network calls it ever makes are market-price lookups the owner asks for.
 
 Read the docs before the code:
 
-| Page | What it covers |
-| --- | --- |
-| [`docs/smart-note.html`](docs/smart-note.html) | Owner's guide — recording transactions, voice capture, statement import, reports |
-| [`docs/budget-and-goals.html`](docs/budget-and-goals.html) | How jars split income, how goals earmark money inside them, what the app refuses to do |
-| [`docs/architecture.html`](docs/architecture.html) | The sixteen SwiftData models, their foreign keys, system boundaries, import flow |
-| [`docs/bank-transaction-auto-note-research.html`](docs/bank-transaction-auto-note-research.html) | Research behind automatic transaction notes |
+| Page                                                                                             | What it covers                                                                         |
+| ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| `[docs/smart-note.html](docs/smart-note.html)`                                                   | Owner's guide — recording transactions, voice capture, statement import, reports       |
+| `[docs/budget-and-goals.html](docs/budget-and-goals.html)`                                       | How jars split income, how goals earmark money inside them, what the app refuses to do |
+| `[docs/architecture.html](docs/architecture.html)`                                               | The sixteen SwiftData models, their foreign keys, system boundaries, import flow       |
+| `[docs/bank-transaction-auto-note-research.html](docs/bank-transaction-auto-note-research.html)` | Research behind automatic transaction notes                                            |
 
 ## Features
 
 ### Money in and out
 
-- **Accounts** — cash, bank, and credit-card accounts with a VND opening
-  balance. Only credit accounts may go negative.
-- **Income and expense** — every entry names one account and, optionally, one
-  category. The amount is always positive; direction comes from the kind.
-- **Transfers** — money moved between two of the owner's own accounts. Both
-  balances follow, total assets stay put.
-- **Debts** — money borrowed and lent, with the payments against them. The
-  account moves by exactly the principal; projected interest is shown, never
-  counted.
-- **Recurring rules** — rent, salary, a subscription, written once. The rule
-  holds no balance: it stamps out ordinary transactions, catching up on every
-  date that fell due, on launch and on returning to the foreground.
+- **Accounts** — cash, bank, and credit-card accounts with a VND opening balance. Only credit accounts may go negative.
+- **Income and expense** — every entry names one account and, optionally, one category. The amount is always positive; direction comes from the kind.
+- **Transfers** — money moved between two of the owner's own accounts. Both balances follow, total assets stay put.
+- **Debts** — money borrowed and lent, with the payments against them. The account moves by exactly the principal; projected interest is shown, never counted.
+- **Recurring rules** — rent, salary, a subscription, written once. The rule holds no balance: it stamps out ordinary transactions, catching up on every date that fell due, on launch and on returning to the foreground.
 
 ### Planning
 
-- **Budget jars** — six seeded jars split income by percentage, together no more
-  than 100%. A jar stores a percentage, never money.
-- **Jar routing** — an expense follows its category's jar, or a trip's explicit
-  override, or a fallback jar, so nothing drops out of the month's picture.
-- **Income allocation snapshots** — each income keeps a frozen, versioned record
-  of how it was split, so changing today's percentages cannot rewrite last
-  month's payslip.
-- **Goals** — a target amount earmarked *inside* a jar, never a second asset.
-  Progress, the required monthly figure, and the forecast date are all derived.
-  A goal may not commit more of a jar's monthly plan than the jar has.
-- **Trip workspaces** — a fully funded trip goal opens a spending lens. Tagged
-  expenses stay ordinary expenses, so spent and remaining are derived from money
-  that already counted once.
+- **Budget jars** — six seeded jars split income by percentage, together no more than 100%. A jar stores a percentage, never money.
+- **Jar routing** — an expense follows its category's jar, or a trip's explicit override, or a fallback jar, so nothing drops out of the month's picture.
+- **Income allocation snapshots** — each income keeps a frozen, versioned record of how it was split, so changing today's percentages cannot rewrite last month's payslip.
+- **Goals** — a target amount earmarked _inside_ a jar, never a second asset. Progress, the required monthly figure, and the forecast date are all derived. A goal may not commit more of a jar's monthly plan than the jar has.
+- **Trip workspaces** — a fully funded trip goal opens a spending lens. Tagged expenses stay ordinary expenses, so spent and remaining are derived from money that already counted once.
 
 ### Wealth
 
-- **Term deposits** (sổ tiết kiệm) — maturity dates, projected interest, an
-  optional funding account, and withdrawals that leave the opening terms
-  immutable.
-- **Funds, ETFs, and gold** — held in units or weight against a shared
-  instrument catalogue, showing cost basis, market value, and unrealized profit
-  or loss.
-- **Market valuation** — prices from Fmarket for open-ended funds, VNDIRECT for
-  listed ETFs, and the shop-buy side of a vang.today quote for gold. A fetch
-  happens when the owner asks, or when a screen opens onto a stale price —
-  never on a timer, never in the background, and never with anything but a
-  ticker or product code leaving the device.
-- **Total assets** — counts transferred money once and holds still through
-  borrowing, lending, and repaying.
+- **Term deposits** (sổ tiết kiệm) — maturity dates, projected interest, an optional funding account, and withdrawals that leave the opening terms immutable.
+- **Funds, ETFs, and gold** — held in units or weight against a shared instrument catalogue, showing cost basis, market value, and unrealized profit or loss.
+- **Market valuation** — prices from Fmarket for open-ended funds, VNDIRECT for listed ETFs, and the shop-buy side of a vang.today quote for gold. A fetch happens when the owner asks, or when a screen opens onto a stale price — never on a timer, never in the background, and never with anything but a ticker or product code leaving the device.
+- **Total assets** — counts transferred money once and holds still through borrowing, lending, and repaying.
 
 ### Capture without typing
 
-- **Quick capture** — an App Intent and Siri phrase that parses a spoken or
-  typed line into a transaction. A clean parse is saved outright; an incomplete
-  one is staged for review rather than guessed at.
+- **Quick capture** — an App Intent and Siri phrase that parses a spoken or typed line into a transaction. A clean parse is saved outright; an incomplete one is staged for review rather than guessed at.
 - **Quick-expense widget** — configurable one-tap presets on the Home Screen.
-- **Bank-statement import** — a PDF shared from the bank app lands in the
-  extension's inbox, is parsed off the main thread, reconciled against existing
-  data, reviewed row by row, and committed in a single atomic save. Every
-  imported row keeps a fingerprint, so re-importing the same statement cannot
-  duplicate it.
+- **Bank-statement import** — a PDF shared from the bank app lands in the extension's inbox, is parsed off the main thread, reconciled against existing data, reviewed row by row, and committed in a single atomic save. Every imported row keeps a fingerprint, so re-importing the same statement cannot duplicate it.
 
 ### Reports and review
 
-- Spending overview, category breakdown, net trend, and a transaction calendar
-  for the chosen period.
-- Search and filters across accounts, categories, and direction, with free-text
-  matching on notes, categories, and amounts.
+- Spending overview, category breakdown, net trend, and a transaction calendar for the chosen period.
+- Search and filters across accounts, categories, and direction, with free-text matching on notes, categories, and amounts.
 - Per-account detail with its own activity and spending sections.
 - Per-category and per-day transaction lists reachable from any chart.
 
 ### Data, sync, and privacy
 
-- **Optional iCloud sync** — a CloudKit mirror of the local store, off until the
-  owner turns it on, applied after a relaunch.
-- **Backup and restore** — a validated document covering every model, including
-  jars, goals, and trips, with a confirmation step before a restore replaces
-  what is on the device.
-- **App lock** — Face ID or Touch ID with device-passcode fallback, re-locking
-  after time in the background.
+- **Optional iCloud sync** — a CloudKit mirror of the local store, off until the owner turns it on, applied after a relaunch.
+- **Backup and restore** — a validated document covering every model, including jars, goals, and trips, with a confirmation step before a restore replaces what is on the device.
+- **App lock** — Face ID or Touch ID with device-passcode fallback, re-locking after time in the background.
 - **Language** — Vietnamese, English, or whatever the system is set to.
 
 ## Development
@@ -108,10 +68,8 @@ Read the docs before the code:
 ### Open the project
 
 ```sh
-rtk open MonMon.xcodeproj
+open MonMon.xcodeproj
 ```
-
-Use the shared `MonMon` scheme in Xcode.
 
 ### Build flavours
 
@@ -119,14 +77,14 @@ The build configuration picks the flavour, and the flavour owns every identifier
 that decides where data lives. A dev install and a prod install on the same phone
 share nothing.
 
-| | Dev (`Debug`) | Prod (`Release`) |
-| --- | --- | --- |
-| Home screen name | MonMon Dev | MonMon |
-| App icon | `AppIconDev` (DEV band) | `AppIcon` |
-| Bundle identifier | `com.sonlv.monmon.local.yushaku` | `com.sonlv.monmon.app` |
-| App group | `group.com.sonlv.monmon.local.yushaku` | `group.com.sonlv.monmon.app` |
-| CloudKit container | `iCloud.monmon.dev` | `iCloud.monmon` |
-| Push environment | `development` | `development` (see `APS_ENVIRONMENT` in `Config/Release.xcconfig`) |
+|                    | Dev (`Debug`)                          | Prod (`Release`)                                                   |
+| ------------------ | -------------------------------------- | ------------------------------------------------------------------ |
+| Home screen name   | MonMon Dev                             | MonMon                                                             |
+| App icon           | `AppIconDev` (DEV band)                | `AppIcon`                                                          |
+| Bundle identifier  | `com.sonlv.monmon.local.yushaku`       | `com.sonlv.monmon.app`                                             |
+| App group          | `group.com.sonlv.monmon.local.yushaku` | `group.com.sonlv.monmon.app`                                       |
+| CloudKit container | `iCloud.monmon.dev`                    | `iCloud.monmon`                                                    |
+| Push environment   | `development`                          | `development` (see `APS_ENVIRONMENT` in `Config/Release.xcconfig`) |
 
 The dev icon is derived art, not a hand-drawn second logo. Regenerate it from
 the real one with `swift scripts/make-dev-appicon.swift` whenever `AppIcon`
@@ -179,13 +137,6 @@ Build against the iPhone Simulator SDK without requiring an installed runtime:
 ```sh
 rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -sdk iphonesimulator -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=NO build
 ```
-
-### Branching
-
-Work flows one way: a branch, then `dev`, then `main`. `dev` is what gets
-installed on the phone for testing; `main` is what a prod build is cut from.
-Never commit straight to either. `AGENTS.md` holds the full agreement, including
-what agents may and may not do on the device.
 
 ### Test and format
 
