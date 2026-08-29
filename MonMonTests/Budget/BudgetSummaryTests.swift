@@ -222,6 +222,125 @@ struct BudgetSummaryTests {
         #expect(snapshot.rows.first { $0.jarID == play.id }?.used == 300_000)
     }
 
+    @Test("Budget rows show the largest allocation first and keep ties stable")
+    func displayRowsSortByAllocation() {
+        let snapshot = BudgetSnapshot(
+            month: Date(timeIntervalSince1970: 1_700_000_000),
+            plannedIncome: 0,
+            receivedIncome: 0,
+            projectedIncome: 0,
+            allocationPercent: 100,
+            rows: [
+                budgetRow(name: "First tie", percent: 20),
+                budgetRow(name: "Largest", percent: 50),
+                budgetRow(name: "Second tie", percent: 20),
+                budgetRow(name: "Smallest", percent: 10),
+            ]
+        )
+
+        #expect(
+            snapshot.rowsByAllocation.map(\.name)
+                == ["Largest", "First tie", "Second tie", "Smallest"]
+        )
+    }
+
+    @Test("Jar activity follows the same routing and month window as Budget")
+    func jarActivityUsesBudgetRouting() throws {
+        let necessities = jar(id: UUID(), percent: 50)
+        let play = jar(id: UUID(), percent: 50)
+        let food = category(name: "Food", jarID: necessities.id)
+        let asOf = try date(2026, 8, 20)
+        let tripID = UUID()
+        let mappedExpense = transaction(
+            kind: .expense,
+            amount: 200_000,
+            date: try date(2026, 8, 12),
+            categoryID: food.id
+        )
+        let tripExpense = transaction(
+            kind: .expense,
+            amount: 300_000,
+            date: try date(2026, 8, 13),
+            categoryID: food.id,
+            tripWorkspaceID: tripID,
+            budgetJarOverrideID: play.id
+        )
+        let futureExpense = transaction(
+            kind: .expense,
+            amount: 400_000,
+            date: try date(2026, 8, 21),
+            categoryID: food.id
+        )
+
+        let activity = BudgetJarActivity.snapshot(
+            for: necessities,
+            monthContaining: asOf,
+            asOf: asOf,
+            jars: [necessities, play],
+            categories: [food],
+            transactions: [mappedExpense, tripExpense, futureExpense],
+            savingsDeposits: [],
+            fundHoldings: []
+        )
+
+        #expect(activity.transactions.map(\.id) == [mappedExpense.id])
+        #expect(activity.savingsDeposits.isEmpty)
+        #expect(activity.fundHoldings.isEmpty)
+    }
+
+    @Test("Savings and funds appear only in their fixed system jars")
+    func systemJarActivityIncludesAssetContributions() throws {
+        let savings = jar(id: UUID(), percent: 50, role: .savings)
+        let investment = jar(id: UUID(), percent: 50, role: .investment)
+        let asOf = try date(2026, 8, 20)
+        let deposit = SavingsDeposit(
+            id: UUID(),
+            name: "Emergency fund",
+            principal: 5_000_000,
+            annualInterestRate: 5,
+            termMonths: 6,
+            openedAt: try date(2026, 8, 10),
+            currencyCode: VNDCurrency.code,
+            createdAt: asOf,
+            sourceAccountID: UUID()
+        )
+        let holding = FundHolding(
+            id: UUID(),
+            instrumentID: UUID(),
+            units: 100,
+            averageCostPerUnit: 20_000,
+            createdAt: asOf,
+            sourceAccountID: UUID(),
+            purchasedAt: try date(2026, 8, 11)
+        )
+
+        let savingsActivity = BudgetJarActivity.snapshot(
+            for: savings,
+            monthContaining: asOf,
+            asOf: asOf,
+            jars: [savings, investment],
+            categories: [],
+            transactions: [],
+            savingsDeposits: [deposit],
+            fundHoldings: [holding]
+        )
+        let investmentActivity = BudgetJarActivity.snapshot(
+            for: investment,
+            monthContaining: asOf,
+            asOf: asOf,
+            jars: [savings, investment],
+            categories: [],
+            transactions: [],
+            savingsDeposits: [deposit],
+            fundHoldings: [holding]
+        )
+
+        #expect(savingsActivity.savingsDeposits.map(\.id) == [deposit.id])
+        #expect(savingsActivity.fundHoldings.isEmpty)
+        #expect(investmentActivity.savingsDeposits.isEmpty)
+        #expect(investmentActivity.fundHoldings.map(\.id) == [holding.id])
+    }
+
     private func date(_ year: Int, _ month: Int, _ day: Int) throws -> Date {
         try #require(calendar.date(from: DateComponents(year: year, month: month, day: day)))
     }
@@ -298,6 +417,21 @@ struct BudgetSummaryTests {
             createdAt: date,
             tripWorkspaceID: tripWorkspaceID,
             budgetJarOverrideID: budgetJarOverrideID
+        )
+    }
+
+    private func budgetRow(name: String, percent: Decimal) -> BudgetJarSnapshot {
+        BudgetJarSnapshot(
+            jarID: UUID(),
+            name: name,
+            allocationPercent: percent,
+            role: .custom,
+            symbolName: "tag.fill",
+            colorName: "green",
+            planned: 0,
+            received: 0,
+            projected: 0,
+            used: 0
         )
     }
 }

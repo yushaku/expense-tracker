@@ -44,6 +44,7 @@
 		U10000000000000000000210 /* BudgetJarStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000110 /* BudgetJarStore.swift */; };
 		U10000000000000000000211 /* BudgetConfigurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000111 /* BudgetConfigurationView.swift */; };
 		U10000000000000000000212 /* BudgetJarEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000112 /* BudgetJarEditorView.swift */; };
+		U10000000000000000000213 /* BudgetJarDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000113 /* BudgetJarDetailView.swift */; };
 		J10000000000000000000201 /* QuickExpenseWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000102 /* QuickExpenseWidget.swift */; };
 		J10000000000000000000202 /* QuickExpensePreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000102 /* QuickExpensePreset.swift */; };
 		J10000000000000000000203 /* QuickExpenseIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000103 /* QuickExpenseIntent.swift */; };
@@ -437,6 +438,7 @@
 		U10000000000000000000110 /* BudgetJarStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetJarStore.swift; sourceTree = "<group>"; };
 		U10000000000000000000111 /* BudgetConfigurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetConfigurationView.swift; sourceTree = "<group>"; };
 		U10000000000000000000112 /* BudgetJarEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetJarEditorView.swift; sourceTree = "<group>"; };
+		U10000000000000000000113 /* BudgetJarDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetJarDetailView.swift; sourceTree = "<group>"; };
 		J10000000000000000000101 /* MonMonQuickExpenseWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MonMonQuickExpenseWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		J10000000000000000000102 /* QuickExpenseWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpenseWidget.swift; sourceTree = "<group>"; };
 		J10000000000000000000103 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -1001,6 +1003,7 @@
 				U10000000000000000000110 /* BudgetJarStore.swift */,
 				U10000000000000000000111 /* BudgetConfigurationView.swift */,
 				U10000000000000000000112 /* BudgetJarEditorView.swift */,
+				U10000000000000000000113 /* BudgetJarDetailView.swift */,
 			);
 			path = Budget;
 			sourceTree = "<group>";
@@ -1696,6 +1699,7 @@
 				U10000000000000000000210 /* BudgetJarStore.swift in Sources */,
 				U10000000000000000000211 /* BudgetConfigurationView.swift in Sources */,
 				U10000000000000000000212 /* BudgetJarEditorView.swift in Sources */,
+				U10000000000000000000213 /* BudgetJarDetailView.swift in Sources */,
 				W10000000000000000000205 /* QuickExpensePresetsCard.swift in Sources */,
 				W10000000000000000000206 /* QuickExpensePresetRow.swift in Sources */,
 				W10000000000000000000204 /* QuickExpensePresetDraft.swift in Sources */,

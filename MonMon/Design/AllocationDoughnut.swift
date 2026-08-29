@@ -9,6 +9,23 @@ struct AllocationDoughnutItem: Identifiable {
     let amount: Decimal
     let tint: Color
     let symbolName: String
+    let valueLabel: String?
+
+    init(
+        id: String,
+        name: String,
+        amount: Decimal,
+        tint: Color,
+        symbolName: String,
+        valueLabel: String? = nil
+    ) {
+        self.id = id
+        self.name = name
+        self.amount = amount
+        self.tint = tint
+        self.symbolName = symbolName
+        self.valueLabel = valueLabel
+    }
 }
 
 /// A ring of wedges with its total in the hole and a legend beside it, shared
@@ -18,6 +35,7 @@ struct AllocationDoughnut: View {
     let context: String
     let items: [AllocationDoughnutItem]
     let totalLabel: String
+    let totalValueLabel: String?
     let showsLegend: Bool
 
     /// The wedge the owner tapped, held by id rather than by index so a card
@@ -35,11 +53,13 @@ struct AllocationDoughnut: View {
         context: String,
         items: [AllocationDoughnutItem],
         totalLabel: String = "TOTAL",
+        totalValueLabel: String? = nil,
         showsLegend: Bool = true
     ) {
         self.context = context
         self.items = items
         self.totalLabel = totalLabel
+        self.totalValueLabel = totalValueLabel
         self.showsLegend = showsLegend
     }
 
@@ -132,7 +152,7 @@ struct AllocationDoughnut: View {
                     .minimumScaleFactor(0.6)
                     .contentTransition(.numericText())
 
-                Text(VNDCurrency.format(item.amount))
+                Text(valueLabel(for: item))
                     .font(.caption2.weight(.medium))
                     .monospacedDigit()
                     .lineLimit(1)
@@ -148,7 +168,7 @@ struct AllocationDoughnut: View {
                     .tracking(0.6)
                     .foregroundStyle(MonMonTheme.textSecondary)
 
-                Text(VNDCurrency.format(total))
+                Text(totalValueLabel ?? VNDCurrency.format(total))
                     .font(.subheadline.weight(.bold))
                     .monospacedDigit()
                     .lineLimit(1)
@@ -245,7 +265,7 @@ struct AllocationDoughnut: View {
                 Text(item.name)
                     .font(.subheadline.weight(.semibold))
 
-                Text(VNDCurrency.format(item.amount))
+                Text(valueLabel(for: item))
                     .font(.caption)
                     .monospacedDigit()
                     .lineLimit(1)
@@ -263,10 +283,14 @@ struct AllocationDoughnut: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel(
             """
-            \(item.name), \(VNDCurrency.format(item.amount)), \(percentLabel(for: item)) of \
+            \(item.name), \(valueLabel(for: item)), \(percentLabel(for: item)) of \
             \(context)
             """
         )
+    }
+
+    private func valueLabel(for item: AllocationDoughnutItem) -> String {
+        item.valueLabel ?? VNDCurrency.format(item.amount)
     }
 
     private func percentLabel(for item: AllocationDoughnutItem) -> String {

@@ -1,4 +1,3 @@
-import Charts
 import SwiftUI
 
 struct BudgetIncomeCard: View {
@@ -87,129 +86,52 @@ private struct BudgetAllocationOverview: View {
 
     let snapshot: BudgetSnapshot
 
-    private static let diameter: CGFloat = 168
-
     private var allocatedPercent: Decimal {
         min(max(snapshot.allocationPercent, 0), 100)
     }
 
-    private var chartRows: [BudgetJarSnapshot] {
-        snapshot.rows.filter { $0.allocationPercent > 0 }
+    private var items: [AllocationDoughnutItem] {
+        var result = snapshot.rowsByAllocation.map { row in
+            AllocationDoughnutItem(
+                id: row.jarID.uuidString,
+                name: row.name,
+                amount: row.allocationPercent,
+                tint: CategoryPalette.color(named: row.colorName),
+                symbolName: CategoryPalette.symbolName(row.symbolName),
+                valueLabel: VNDCurrency.format(row.projected)
+            )
+        }
+
+        if snapshot.unallocatedPercent > 0 {
+            let allocatedAmount = snapshot.rows.reduce(Decimal.zero) { $0 + $1.projected }
+            result.append(
+                AllocationDoughnutItem(
+                    id: "unallocated",
+                    name: AppText.string("Unallocated", in: locale),
+                    amount: snapshot.unallocatedPercent,
+                    tint: MonMonTheme.textMuted.opacity(0.42),
+                    symbolName: "circle.dashed",
+                    valueLabel: VNDCurrency.format(
+                        max(0, snapshot.projectedIncome - allocatedAmount)
+                    )
+                )
+            )
+        }
+
+        return result
     }
 
     var body: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 24) {
-                doughnut
-                legend
-            }
-
-            VStack(spacing: 18) {
-                doughnut
-                legend
-            }
-        }
-        .frame(maxWidth: .infinity)
+        AllocationDoughnut(
+            context: AppText.string("Budget allocation", in: locale),
+            items: items,
+            totalLabel: "Allocated",
+            totalValueLabel: "\(PercentInput.format(allocatedPercent))%"
+        )
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Budget allocation")
     }
-
-    private var doughnut: some View {
-        Chart {
-            ForEach(chartRows) { row in
-                SectorMark(
-                    angle: .value(
-                        "Allocation percentage",
-                        chartValue(row.allocationPercent)
-                    ),
-                    innerRadius: .ratio(0.62),
-                    outerRadius: .ratio(0.9),
-                    angularInset: 1.5
-                )
-                .cornerRadius(4)
-                .foregroundStyle(CategoryPalette.color(named: row.colorName))
-            }
-
-            if snapshot.unallocatedPercent > 0 {
-                SectorMark(
-                    angle: .value(
-                        "Unallocated percentage",
-                        chartValue(snapshot.unallocatedPercent)
-                    ),
-                    innerRadius: .ratio(0.62),
-                    outerRadius: .ratio(0.9),
-                    angularInset: 1.5
-                )
-                .cornerRadius(4)
-                .foregroundStyle(MonMonTheme.textMuted.opacity(0.42))
-            }
-        }
-        .chartLegend(.hidden)
-        .frame(width: Self.diameter, height: Self.diameter)
-        .overlay {
-            VStack(spacing: 2) {
-                Text("ALLOCATED")
-                    .font(.caption2.weight(.semibold))
-                    .tracking(0.6)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-
-                Text("\(PercentInput.format(allocatedPercent))%")
-                    .font(.headline.weight(.bold))
-                    .monospacedDigit()
-            }
-            .padding(.horizontal, 20)
-        }
-        // The rows beside or below the chart carry the same information in text.
-        .accessibilityHidden(true)
-    }
-
-    private var legend: some View {
-        VStack(spacing: 10) {
-            ForEach(snapshot.rows) { row in
-                legendRow(
-                    name: row.name,
-                    percent: row.allocationPercent,
-                    color: CategoryPalette.color(named: row.colorName)
-                )
-            }
-
-            if snapshot.unallocatedPercent > 0 {
-                legendRow(
-                    name: AppText.string("Unallocated", in: locale),
-                    percent: snapshot.unallocatedPercent,
-                    color: MonMonTheme.textMuted.opacity(0.42)
-                )
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private func legendRow(name: String, percent: Decimal, color: Color) -> some View {
-        HStack(spacing: 10) {
-            Circle()
-                .fill(color)
-                .frame(width: 10, height: 10)
-                .accessibilityHidden(true)
-
-            Text(name)
-                .font(.caption.weight(.medium))
-                .lineLimit(1)
-
-            Spacer(minLength: 8)
-
-            Text("\(PercentInput.format(percent))%")
-                .font(.caption.weight(.semibold))
-                .monospacedDigit()
-                .foregroundStyle(MonMonTheme.textSecondary)
-        }
-        .accessibilityElement(children: .combine)
-    }
-
-    private func chartValue(_ percent: Decimal) -> Double {
-        NSDecimalNumber(decimal: percent).doubleValue
-    }
 }
-
 struct BudgetJarCard: View {
     let row: BudgetJarSnapshot
 
@@ -235,36 +157,46 @@ struct BudgetJarCard: View {
                     .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(row.name)
-                        .font(.headline)
+                    HStack(spacing: 6) {
+                        Text(row.name)
+                            .font(.headline)
+                            .lineLimit(1)
+
+                        if row.role != .custom {
+                            Image(systemName: "lock.fill")
+                                .font(.caption2)
+                                .foregroundStyle(MonMonTheme.textMuted)
+                                .accessibilityLabel("System jar")
+                        }
+                    }
 
                     Text("\(PercentInput.format(row.allocationPercent))% allocation")
                         .font(.caption)
                         .foregroundStyle(MonMonTheme.textSecondary)
                 }
+                .layoutPriority(1)
 
                 Spacer(minLength: 8)
 
-                if row.role != .custom {
-                    Image(systemName: "lock.fill")
-                        .font(.caption)
-                        .foregroundStyle(MonMonTheme.textMuted)
-                        .accessibilityLabel("System jar")
-                }
-            }
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(row.remaining >= 0 ? "Left this month" : "Over budget")
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-
-                Text(VNDCurrency.format(row.remaining))
-                    .font(.system(.title2, design: .rounded, weight: .bold))
-                    .foregroundStyle(
-                        row.remaining >= 0 ? MonMonTheme.textPrimary : MonMonTheme.danger
+                HStack(spacing: 5) {
+                    Image(
+                        systemName: row.remaining >= 0
+                            ? "calendar" : "exclamationmark.triangle.fill"
                     )
-                    .monospacedDigit()
-                    .minimumScaleFactor(0.7)
+                    .accessibilityHidden(true)
+
+                    Text(VNDCurrency.format(row.remaining))
+                        .monospacedDigit()
+                }
+                .font(.subheadline.weight(.semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.65)
+                .foregroundStyle(
+                    row.remaining >= 0 ? MonMonTheme.textPrimary : MonMonTheme.danger
+                )
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(row.remaining >= 0 ? "Left this month" : "Over budget")
+                .accessibilityValue(VNDCurrency.format(row.remaining))
             }
 
             ProgressView(value: progress)
