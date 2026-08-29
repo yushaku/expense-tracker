@@ -30,6 +30,7 @@ enum MonMonSchema {
             Debt.self, DebtPayment.self,
             RecurringRule.self,
             BudgetJar.self,
+            FinancialGoal.self,
         ]
     }
 }

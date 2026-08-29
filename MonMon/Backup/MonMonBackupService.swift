@@ -31,6 +31,16 @@ private extension MonMonBackupService {
             update: updateBudgetJar
         )
         try reconcile(
+            current: context.fetch(FetchDescriptor<FinancialGoal>()),
+            records: payload.goals,
+            in: context,
+            modelID: \FinancialGoal.id,
+            createdAt: \FinancialGoal.createdAt,
+            recordID: { try MonMonBackupScalar.parseUUID($0.id) },
+            make: makeGoal,
+            update: updateGoal
+        )
+        try reconcile(
             current: context.fetch(FetchDescriptor<TransactionCategory>()),
             records: payload.categories,
             in: context,
@@ -264,6 +274,37 @@ private extension MonMonBackupService {
         model.name = record.name
         model.allocationPercent = try MonMonBackupScalar.parseDecimal(record.allocationPercent)
         model.role = try enumValue(record.role)
+        model.symbolName = record.symbolName
+        model.colorName = record.colorName
+        model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
+    }
+
+    func makeGoal(_ record: MonMonBackupPayload.GoalRecord) throws -> FinancialGoal {
+        FinancialGoal(
+            id: try MonMonBackupScalar.parseUUID(record.id),
+            name: record.name,
+            kind: try enumValue(record.kind),
+            targetAmount: try MonMonBackupScalar.parseDecimal(record.targetAmount),
+            earmarkedAmount: try MonMonBackupScalar.parseDecimal(record.earmarkedAmount),
+            targetDate: try MonMonBackupScalar.parseDate(record.targetDate),
+            monthlyContribution: try MonMonBackupScalar.parseDecimal(record.monthlyContribution),
+            fundingJarID: try MonMonBackupScalar.parseUUID(record.fundingJarID),
+            symbolName: record.symbolName,
+            colorName: record.colorName,
+            createdAt: try MonMonBackupScalar.parseDate(record.createdAt)
+        )
+    }
+
+    func updateGoal(_ model: FinancialGoal, _ record: MonMonBackupPayload.GoalRecord) throws {
+        model.id = try MonMonBackupScalar.parseUUID(record.id)
+        model.name = record.name
+        model.kind = try enumValue(record.kind)
+        model.targetAmount = try MonMonBackupScalar.parseDecimal(record.targetAmount)
+        model.earmarkedAmount = try MonMonBackupScalar.parseDecimal(record.earmarkedAmount)
+        model.targetDate = try MonMonBackupScalar.parseDate(record.targetDate)
+        model.monthlyContribution = try MonMonBackupScalar.parseDecimal(
+            record.monthlyContribution)
+        model.fundingJarID = try MonMonBackupScalar.parseUUID(record.fundingJarID)
         model.symbolName = record.symbolName
         model.colorName = record.colorName
         model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
@@ -826,6 +867,7 @@ struct MonMonBackupService {
             ),
             fundSales: try context.fetch(FetchDescriptor<FundSale>()).map(fundSaleRecord),
             budgetJars: try context.fetch(FetchDescriptor<BudgetJar>()).map(budgetJarRecord),
+            goals: try context.fetch(FetchDescriptor<FinancialGoal>()).map(goalRecord),
             categories: try context.fetch(FetchDescriptor<TransactionCategory>()).map(
                 categoryRecord
             ),
@@ -959,6 +1001,25 @@ struct MonMonBackupService {
             name: model.name,
             allocationPercent: MonMonBackupScalar.decimal(model.allocationPercent),
             role: model.role.rawValue,
+            symbolName: model.symbolName,
+            colorName: model.colorName,
+            createdAt: MonMonBackupScalar.date(model.createdAt)
+        )
+    }
+
+    private func goalRecord(_ model: FinancialGoal) throws -> MonMonBackupPayload.GoalRecord {
+        guard let fundingJarID = model.fundingJarID else {
+            throw MonMonBackupServiceError.invalidSnapshot
+        }
+        return MonMonBackupPayload.GoalRecord(
+            id: MonMonBackupScalar.uuid(model.id),
+            name: model.name,
+            kind: model.kind.rawValue,
+            targetAmount: MonMonBackupScalar.decimal(model.targetAmount),
+            earmarkedAmount: MonMonBackupScalar.decimal(model.earmarkedAmount),
+            targetDate: MonMonBackupScalar.date(model.targetDate),
+            monthlyContribution: MonMonBackupScalar.decimal(model.monthlyContribution),
+            fundingJarID: MonMonBackupScalar.uuid(fundingJarID),
             symbolName: model.symbolName,
             colorName: model.colorName,
             createdAt: MonMonBackupScalar.date(model.createdAt)

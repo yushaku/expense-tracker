@@ -33,12 +33,13 @@ enum StoreReconciler {
         var instruments = 0
         var accounts = 0
         var budgetJars = 0
+        var goals = 0
         var transactions = 0
         var transfers = 0
 
         var isEmpty: Bool {
             categories == 0 && instruments == 0 && accounts == 0 && budgetJars == 0
-                && transactions == 0 && transfers == 0
+                && goals == 0 && transactions == 0 && transfers == 0
         }
     }
 
@@ -52,6 +53,7 @@ enum StoreReconciler {
         report.instruments = try foldInstruments(in: context)
         report.accounts = try foldAnchorAccounts(in: context)
         report.budgetJars = try foldBudgetJars(in: context)
+        report.goals = try foldFinancialGoals(in: context)
         report.transactions = try foldGeneratedTransactions(in: context)
         report.transactions += try foldImportedTransactions(in: context)
         report.transfers = try foldImportedTransfers(in: context)
@@ -165,6 +167,29 @@ enum StoreReconciler {
         let jars = try context.fetch(FetchDescriptor<BudgetJar>())
         let merges = DuplicateReconciler.merges(
             in: jars,
+            key: { $0.id.uuidString },
+            createdAt: \.createdAt,
+            id: \.id
+        )
+
+        var folded = 0
+        for merge in merges {
+            for duplicate in merge.duplicates {
+                context.delete(duplicate)
+                folded += 1
+            }
+        }
+
+        return folded
+    }
+
+    /// Restore and CloudKit can materialize multiple physical rows carrying
+    /// one logical goal UUID. Goal references are UUID-based, so only the
+    /// duplicate row needs removing.
+    private static func foldFinancialGoals(in context: ModelContext) throws -> Int {
+        let goals = try context.fetch(FetchDescriptor<FinancialGoal>())
+        let merges = DuplicateReconciler.merges(
+            in: goals,
             key: { $0.id.uuidString },
             createdAt: \.createdAt,
             id: \.id
