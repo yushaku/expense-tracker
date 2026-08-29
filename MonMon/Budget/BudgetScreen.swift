@@ -23,6 +23,7 @@ struct BudgetScreen: View {
     private var fundHoldings: [FundHolding]
 
     @State private var isShowingRecurringIncome = false
+    @State private var isShowingConfiguration = false
 
     private let asOf: Date
 
@@ -58,6 +59,13 @@ struct BudgetScreen: View {
             .accessibilityIdentifier("budget")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
+                    Button("Setup", systemImage: "slider.horizontal.3") {
+                        isShowingConfiguration = true
+                    }
+                    .accessibilityIdentifier("budget-setup")
+                }
+
+                ToolbarItem(placement: .primaryAction) {
                     Button("Income", systemImage: "arrow.triangle.2.circlepath") {
                         isShowingRecurringIncome = true
                     }
@@ -66,6 +74,9 @@ struct BudgetScreen: View {
             }
             .appSheet(isPresented: $isShowingRecurringIncome) {
                 RecurringListView(asOf: asOf)
+            }
+            .appSheet(isPresented: $isShowingConfiguration) {
+                BudgetConfigurationView()
             }
             .tint(MonMonTheme.accent)
         }

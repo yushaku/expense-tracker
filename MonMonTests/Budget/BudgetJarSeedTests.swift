@@ -70,4 +70,77 @@ struct BudgetJarSeedTests {
         #expect(entertainment.budgetJarID == BudgetJarSeed.playID)
         #expect(salary.budgetJarID == nil)
     }
+
+    @Test("System jars cannot be deleted")
+    func systemJarsCannotBeDeleted() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let savings = BudgetJar(
+            id: UUID(),
+            name: "Savings",
+            allocationPercent: 10,
+            role: .savings,
+            symbolName: "building.columns.fill",
+            colorName: "yellow",
+            createdAt: referenceDate
+        )
+        context.insert(savings)
+        try context.save()
+
+        #expect(throws: BudgetJarStoreError.protectedJar) {
+            try BudgetJarStore.delete(
+                savings,
+                jars: [savings],
+                categories: [],
+                in: context
+            )
+        }
+        #expect(try context.fetchCount(FetchDescriptor<BudgetJar>()) == 1)
+    }
+
+    @Test("Deleting a custom jar reassigns its categories")
+    func deletingCustomJarReassignsCategories() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let necessities = BudgetJar(
+            id: BudgetJarSeed.necessitiesID,
+            name: "Necessities",
+            allocationPercent: 55,
+            role: .custom,
+            symbolName: "house.fill",
+            colorName: "blue",
+            createdAt: referenceDate
+        )
+        let play = BudgetJar(
+            id: UUID(),
+            name: "Play",
+            allocationPercent: 10,
+            role: .custom,
+            symbolName: "gamecontroller.fill",
+            colorName: "pink",
+            createdAt: referenceDate.addingTimeInterval(1)
+        )
+        let entertainment = TransactionCategory(
+            id: UUID(),
+            name: "Entertainment",
+            kind: .expense,
+            symbolName: "gamecontroller.fill",
+            colorName: "pink",
+            createdAt: referenceDate,
+            budgetJarID: play.id
+        )
+        [necessities, play].forEach(context.insert)
+        context.insert(entertainment)
+        try context.save()
+
+        try BudgetJarStore.delete(
+            play,
+            jars: [necessities, play],
+            categories: [entertainment],
+            in: context
+        )
+
+        #expect(entertainment.budgetJarID == necessities.id)
+        #expect(try context.fetchCount(FetchDescriptor<BudgetJar>()) == 1)
+    }
 }
