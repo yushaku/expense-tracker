@@ -14,10 +14,12 @@ struct PeriodRailTests {
 
     @Test("The rail walks in the unit the header is filtering by")
     func unitFollowsTheFilterScope() {
-        #expect(PeriodRailUnit(scope: .day) == .day)
-        #expect(PeriodRailUnit(scope: .month) == .month)
-        #expect(PeriodRailUnit(scope: .year) == .year)
-        #expect(PeriodRailUnit(scope: .custom) == .month)
+        let picked = TransactionRange.custom(from: date(2026, 2, 10), to: date(2026, 4, 3))
+
+        #expect(PeriodRailUnit(range: .day(containing: date(2026, 8, 15))) == .day)
+        #expect(PeriodRailUnit(range: .month(containing: date(2026, 8, 15))) == .month)
+        #expect(PeriodRailUnit(range: .year(containing: date(2026, 8, 15))) == .year)
+        #expect(PeriodRailUnit(range: picked) == .custom(picked))
     }
 
     @Test("A year filter offers years, marking the one on show")
@@ -52,15 +54,27 @@ struct PeriodRailTests {
         #expect(rail.periods.contains(date(2026, 8, 15)))
     }
 
-    @Test("A hand-picked range walks in months, starting where it starts")
-    func customFilterWalksInMonths() {
-        let rail = PeriodRailPeriods(
-            range: .custom(from: date(2026, 2, 10), to: date(2026, 4, 3)),
-            today: today
-        )
+    @Test("A hand-picked range is one entry naming both its ends")
+    func customFilterIsOneEntry() {
+        let picked = TransactionRange.custom(from: date(2026, 2, 10), to: date(2026, 4, 3))
+        let rail = PeriodRailPeriods(range: picked, today: today)
 
-        #expect(rail.unit == .month)
-        #expect(rail.selection == date(2026, 2, 1))
+        #expect(rail.unit == .custom(picked))
+        #expect(rail.periods == [picked.start])
+        #expect(rail.selection == picked.start)
+        #expect(
+            rail.unit.label(for: picked.start, in: Locale(identifier: "en"), today: today)
+                == picked.title(in: Locale(identifier: "en"))
+        )
+        #expect(rail.unit.identifier(for: picked.start) == "custom-2026-02-10-2026-04-03")
+    }
+
+    @Test("Tapping a hand-picked range keeps it rather than narrowing it")
+    func customFilterSurvivesATap() {
+        let picked = TransactionRange.custom(from: date(2026, 2, 10), to: date(2026, 4, 3))
+
+        #expect(PeriodRailUnit.custom(picked).range(containing: picked.start) == picked)
+        #expect(!PeriodRailUnit.custom(picked).marksNow(picked.start, now: picked.start))
     }
 
     @Test("A period beyond the calendars' bounds is still on the rail")

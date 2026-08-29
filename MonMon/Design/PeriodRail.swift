@@ -1,13 +1,19 @@
 import SwiftUI
 
-/// The unit a rail walks in: one entry per day, per month, or per year.
+/// The unit a rail walks in: one entry per day, per month, or per year, or the
+/// single entry a hand-picked span gets.
 ///
 /// It is the bridge between what the header is filtering by and what the rail
 /// offers, so the two can never disagree about how wide a step is.
-enum PeriodRailUnit: String, Equatable {
+enum PeriodRailUnit: Equatable {
     case day
     case month
     case year
+    /// A span picked by hand walks nowhere. Its two ends were chosen rather
+    /// than stepped to, so the rail names them and offers nothing either side:
+    /// a run of months through a span nobody asked for in months would invite
+    /// a tap that throws the span away.
+    case custom(TransactionRange)
 
     private static let dayTemplate = Date.FormatStyle().day().month(.abbreviated)
     private static let dayYearTemplate = Date.FormatStyle().day().month(.abbreviated).year()
@@ -18,21 +24,22 @@ enum PeriodRailUnit: String, Equatable {
     private static let monthYearTemplate = Date.FormatStyle().month(.abbreviated).year()
     private static let yearTemplate = Date.FormatStyle().year()
 
-    /// What a filtered period walks in. A hand-picked range has no unit of its
-    /// own, so it borrows months: the widest step that still fits inside the
-    /// spans an owner picks by hand.
-    init(scope: TransactionRangeScope) {
-        switch scope {
+    /// What a filtered period walks in, which is whatever the header asked for.
+    init(range: TransactionRange) {
+        switch range.scope {
         case .day:
             self = .day
-        case .month, .custom:
+        case .month:
             self = .month
         case .year:
             self = .year
+        case .custom:
+            self = .custom(range)
         }
     }
 
-    var component: Calendar.Component {
+    /// How wide one entry is. A hand-picked span has no unit, so it has none.
+    var component: Calendar.Component? {
         switch self {
         case .day:
             .day
@@ -40,7 +47,20 @@ enum PeriodRailUnit: String, Equatable {
             .month
         case .year:
             .year
+        case .custom:
+            nil
         }
+    }
+
+    /// Whether the clock is inside this entry, which is what the rail calls out
+    /// in the accent colour. A hand-picked span is never called out: it is the
+    /// only entry on the rail, so there is nothing to pick it out from.
+    func marksNow(_ period: Date, now: Date = .now) -> Bool {
+        guard let component else {
+            return false
+        }
+
+        return TransactionPeriod.calendar.isDate(period, equalTo: now, toGranularity: component)
     }
 
     /// The first instant of the period `date` falls in, which is what a rail
@@ -53,9 +73,13 @@ enum PeriodRailUnit: String, Equatable {
             TransactionPeriod.startOfMonth(for: date)
         case .year:
             TransactionPeriod.startOfYear(for: date)
+        case .custom(let range):
+            range.start
         }
     }
 
+    /// What a tap on an entry asks the header for. A hand-picked span asks for
+    /// itself: tapping the only entry cannot be a way to lose it.
     func range(containing date: Date) -> TransactionRange {
         switch self {
         case .day:
@@ -64,25 +88,31 @@ enum PeriodRailUnit: String, Equatable {
             .month(containing: date)
         case .year:
             .year(containing: date)
+        case .custom(let range):
+            range
         }
     }
 
     /// What the entry says. Days and months outside this year carry it; a year
-    /// is already unambiguous.
+    /// is already unambiguous; a hand-picked span names both its ends, since
+    /// neither one alone says what is being added up.
     func label(for period: Date, in locale: Locale, today: Date = .now) -> String {
         let calendar = TransactionPeriod.calendar
         let isThisYear =
             calendar.component(.year, from: period) == calendar.component(.year, from: today)
 
-        let template =
-            switch self {
-            case .day:
-                isThisYear ? Self.dayTemplate : Self.dayYearTemplate
-            case .month:
-                isThisYear ? Self.monthTemplate : Self.monthYearTemplate
-            case .year:
-                Self.yearTemplate
-            }
+        let template: Date.FormatStyle
+
+        switch self {
+        case .day:
+            template = isThisYear ? Self.dayTemplate : Self.dayYearTemplate
+        case .month:
+            template = isThisYear ? Self.monthTemplate : Self.monthYearTemplate
+        case .year:
+            template = Self.yearTemplate
+        case .custom(let range):
+            return range.title(in: locale)
+        }
 
         return TransactionPeriod.format(template, in: locale).format(period)
     }
@@ -97,9 +127,13 @@ enum PeriodRailUnit: String, Equatable {
             TransactionPeriod.title(for: period, in: locale)
         case .year:
             TransactionPeriod.format(Self.yearTemplate, in: locale).format(period)
+        case .custom(let range):
+            range.title(in: locale)
         }
     }
 
+    /// Only ever read for an entry the clock is inside, which a hand-picked
+    /// span never is.
     var currentPeriodNotice: LocalizedStringKey {
         switch self {
         case .day:
@@ -108,6 +142,8 @@ enum PeriodRailUnit: String, Equatable {
             "Current month"
         case .year:
             "Current year"
+        case .custom:
+            ""
         }
     }
 
@@ -131,7 +167,15 @@ enum PeriodRailUnit: String, Equatable {
             return String(format: "%04d-%02d", parts.year ?? 0, parts.month ?? 0)
         case .year:
             return String(format: "%04d", parts.year ?? 0)
+        case .custom(let range):
+            return "custom-\(Self.dayIdentifier(range.start))-\(Self.dayIdentifier(range.lastDay))"
         }
+    }
+
+    private static func dayIdentifier(_ date: Date) -> String {
+        let parts = TransactionPeriod.calendar.dateComponents([.year, .month, .day], from: date)
+
+        return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
     }
 }
 
@@ -139,15 +183,16 @@ enum PeriodRailUnit: String, Equatable {
 /// of them that period sits on.
 ///
 /// The filter is the authority: a screen showing a year is walked in years, one
-/// showing a day in days. The run always covers the period on show, so the
-/// entry the figures belong to is never off the end of the rail.
+/// showing a day in days, and one showing a hand-picked span gets that span
+/// alone. The run always covers the period on show, so the entry the figures
+/// belong to is never off the end of the rail.
 struct PeriodRailPeriods: Equatable {
     let unit: PeriodRailUnit
     let periods: [Date]
     let selection: Date
 
     init(range: TransactionRange, today: Date) {
-        let unit = PeriodRailUnit(scope: range.scope)
+        let unit = PeriodRailUnit(range: range)
         let selection = unit.start(of: range.start)
         let first = CalendarTheme.startMonth(from: today)
         let last = CalendarTheme.endMonth(from: today)
@@ -176,6 +221,8 @@ struct PeriodRailPeriods: Equatable {
                 from: min(first, selection),
                 through: max(last, selection)
             )
+        case .custom:
+            periods = [selection]
         }
     }
 }
@@ -232,11 +279,7 @@ struct PeriodRail: View {
 
     private func periodButton(_ period: Date) -> some View {
         let isSelected = period == selection
-        let isCurrent = TransactionPeriod.calendar.isDate(
-            period,
-            equalTo: .now,
-            toGranularity: unit.component
-        )
+        let isCurrent = unit.marksNow(period)
 
         return Button {
             onSelect(period)
@@ -249,6 +292,7 @@ struct PeriodRail: View {
                         )
                     )
                     .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                     .foregroundStyle(
                         isCurrent
                             ? MonMonTheme.accent
