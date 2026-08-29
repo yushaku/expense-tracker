@@ -33,11 +33,11 @@ in the default task files remains intact.
 
 ## Risks and Mitigations
 
-| Risk | Impact | Mitigation |
-|---|---|---|
-| Nested navigation blocks back/detail pushes | High | Remove the inner stack and use direct destinations |
-| Settled debts yield a zero-total chart | Medium | Render an explicit zero state when both totals are zero |
-| Colour alone conveys direction | Medium | Keep symbols, labels, amounts, percentages, and VoiceOver legend text |
+| Risk                                            | Impact | Mitigation                                                                   |
+| ----------------------------------------------- | ------ | ---------------------------------------------------------------------------- |
+| Nested navigation blocks back/detail pushes     | High   | Remove the inner stack and use direct destinations                           |
+| Settled debts yield a zero-total chart          | Medium | Render an explicit zero state when both totals are zero                      |
+| Colour alone conveys direction                  | Medium | Keep symbols, labels, amounts, percentages, and VoiceOver legend text        |
 | Wealth accidentally retains management controls | Medium | Remove editor state, add button, debt cards, and route registration together |
 
 ## Open Questions

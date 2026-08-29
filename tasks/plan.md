@@ -48,7 +48,7 @@ Review + non-Simulator gates
 ### Phase 1: Workspace foundation
 
 - [x] Task 1: Add RED tests for persistence, start eligibility, duplicate
-  prevention, completion, and reopening.
+      prevention, completion, and reopening.
 - [x] Task 2: Implement the model, status, schema registration, and lifecycle.
 
 ### Checkpoint: Lifecycle integrity
@@ -59,11 +59,11 @@ Review + non-Simulator gates
 ### Phase 2: Financial integration
 
 - [x] Task 3: Preserve trip and jar-override metadata through transaction
-  create/edit/delete/undo paths.
+      create/edit/delete/undo paths.
 - [x] Task 4: Route Budget expenses by valid override before category mapping
-  and protect referenced jars.
+      and protect referenced jars.
 - [x] Task 5: Derive exact budget, spent, remaining, over-budget, and category
-  breakdowns from linked expenses only.
+      breakdowns from linked expenses only.
 
 ### Checkpoint: Financial integrity
 
@@ -73,22 +73,22 @@ Review + non-Simulator gates
 ### Phase 3: Owner experience
 
 - [x] Task 6: Add ready, active, and completed Trip sections with lifecycle
-  actions inside Goals.
+      actions inside Goals.
 - [x] Task 7: Add Trip detail, category breakdown, linked transactions, and an
-  Add expense entry point.
+      Add expense entry point.
 - [x] Task 8: Add Trip and jar-routing controls to the transaction editor.
 - [x] Task 9: Add English/Vietnamese copy and complete the SwiftUI correctness
-  and accessibility checklist.
+      and accessibility checklist.
 
 ### Phase 4: Portability and completion
 
 - [x] Task 10: Extend complete backup/restore, validation, recovery, and store
-  reconciliation with legacy compatibility.
+      reconciliation with legacy compatibility.
 - [x] Task 11: Run code-quality, simplification, and security reviews.
 - [x] Task 12: Run focused/full tests, strict format lint, and compile-only
-  iPhoneOS build.
+      iPhoneOS build.
 - [x] Task 13: Commit reviewable increments and hand back a clean feature
-  branch.
+      branch.
 
 ### Checkpoint: Complete
 
@@ -97,14 +97,14 @@ Review + non-Simulator gates
 
 ## Risks and Mitigations
 
-| Risk | Impact | Mitigation |
-|---|---|---|
-| Trip becomes a second balance | High | Persist no spent/remaining balance; derive from linked expenses |
-| Spending is counted twice | High | Keep existing account totals unchanged and add neutrality tests |
-| Category detail is lost | High | Store trip and jar override beside, never instead of, category |
-| Jar deletion rewrites history | High | Block deletion while any workspace references the jar |
-| Workspace deletion orphans metadata | High | Cancel only empty active workspaces; retain completed history |
-| Legacy backup stops importing | High | Optional decode defaults plus legacy validation/restore tests |
+| Risk                                | Impact | Mitigation                                                      |
+| ----------------------------------- | ------ | --------------------------------------------------------------- |
+| Trip becomes a second balance       | High   | Persist no spent/remaining balance; derive from linked expenses |
+| Spending is counted twice           | High   | Keep existing account totals unchanged and add neutrality tests |
+| Category detail is lost             | High   | Store trip and jar override beside, never instead of, category  |
+| Jar deletion rewrites history       | High   | Block deletion while any workspace references the jar           |
+| Workspace deletion orphans metadata | High   | Cancel only empty active workspaces; retain completed history   |
+| Legacy backup stops importing       | High   | Optional decode defaults plus legacy validation/restore tests   |
 
 ## Open Questions
 

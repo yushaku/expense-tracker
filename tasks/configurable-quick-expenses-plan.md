@@ -19,9 +19,9 @@
 
 ## Risks
 
-| Risk | Mitigation |
-|---|---|
+| Risk                                    | Mitigation                                       |
+| --------------------------------------- | ------------------------------------------------ |
 | Existing custom presets are overwritten | Legacy migration tests preserve all three values |
-| Reducing count loses hidden presets | Always persist all nine presets |
-| Too many actions become hard to tap | Family caps of 3/6/9 and three-column grids |
-| App and widget disagree on ordering | Normalize by `QuickExpenseSlot.allCases` |
+| Reducing count loses hidden presets     | Always persist all nine presets                  |
+| Too many actions become hard to tap     | Family caps of 3/6/9 and three-column grids      |
+| App and widget disagree on ordering     | Normalize by `QuickExpenseSlot.allCases`         |
