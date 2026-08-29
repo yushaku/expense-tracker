@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="MonMon persistence schema, savings lifecycle, system boundaries, and bank-statement import flow.">
+  <meta name="description" content="MonMon persistence schema, the budget planning layer, savings lifecycle, system boundaries, and bank-statement import flow.">
   <link rel="stylesheet" href="assets/monmon-docs.css">
   <title>MonMon Architecture</title>
   <style>
@@ -29,6 +29,10 @@
       --e-debt: #8a5cc4;
       --e-recurring: #b06a2c;
       --e-import: #347c73;
+      --e-budget: #a8452f;
+      --e-goal: #7d8a2c;
+      --e-trip: #c0468f;
+      --e-capture: #6b7280;
       --ok: var(--docs-success);
       --warn: var(--docs-warning);
       --idle: var(--docs-muted);
@@ -53,6 +57,10 @@
         --e-debt: #b79be8;
         --e-recurring: #e0a06a;
         --e-import: #70cbbd;
+        --e-budget: #e08a72;
+        --e-goal: #c3cf62;
+        --e-trip: #ef8fce;
+        --e-capture: #a5adba;
       }
     }
 
@@ -66,6 +74,10 @@
       --e-debt: #b79be8;
       --e-recurring: #e0a06a;
       --e-import: #70cbbd;
+      --e-budget: #e08a72;
+      --e-goal: #c3cf62;
+      --e-trip: #ef8fce;
+      --e-capture: #a5adba;
     }
 
     body {
@@ -645,12 +657,16 @@
     <div class="eyebrow">MonMon &middot; persistence and data movement</div>
     <h1>Architecture map</h1>
     <p class="lede">
-      Eleven <code>@Model</code> types backed by SwiftData. Relationships are <strong>not</strong>
+      Sixteen <code>@Model</code> types backed by SwiftData, the set registered by
+      <code>MonMonSchema.models</code>. Relationships are <strong>not</strong>
       declared with <code>@Relationship</code> &mdash; every association is a hand-stored
       <code>UUID</code> foreign key, resolved in Swift at read time
-      (<code>accounts.first { $0.id == someID }</code>). Below the schema: the device, iCloud,
-      market-data and share-extension boundaries, the derived savings lifecycle, and the reviewed
-      bank-statement import path from a shared PDF to an atomic SwiftData save.
+      (<code>accounts.first { $0.id == someID }</code>). Money-moving records sit around the
+      <code>CashAccount</code> hub; the planning layer &mdash; jars, goals and trip workspaces
+      &mdash; holds no balance of its own and only earmarks or labels what those records already
+      say. Below the schema: the device, iCloud, market-data and share-extension boundaries, the
+      derived savings lifecycle, and the reviewed bank-statement import path from a shared PDF to
+      an atomic SwiftData save.
     </p>
   </header>
 
@@ -914,6 +930,16 @@
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">sourceImportID</span><span class="ftype">String?</span>
             <span class="badges"><span class="badge null">? &mdash; SHA-256 candidate provenance</span></span></li>
+          <li class="field"><span class="fname">incomeAllocationSnapshot</span><span class="ftype">String?</span>
+            <span class="badges"><span class="badge null">? &mdash; frozen jar split, JSON</span></span></li>
+          <li class="field key" data-anchor="MoneyTransaction.tripWorkspaceID">
+            <span class="fname">tripWorkspaceID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">? &mdash; expenses only</span></span>
+          </li>
+          <li class="field key" data-anchor="MoneyTransaction.budgetJarOverrideID">
+            <span class="fname">budgetJarOverrideID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">? &mdash; stale id falls back to the category</span></span>
+          </li>
         </ul>
         <div class="derived">
           <div class="derived-label">Derived &mdash; computed, not stored</div>
@@ -1053,6 +1079,10 @@
           </li>
           <li class="field"><span class="fname">symbolName</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">colorName</span><span class="ftype">String</span></li>
+          <li class="field key" data-anchor="TransactionCategory.budgetJarID">
+            <span class="fname">budgetJarID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">? &mdash; expense routing; income leaves it empty</span></span>
+          </li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
         </ul>
       </article>
@@ -1112,6 +1142,162 @@
         <div class="derived">
           <div class="derived-label">Derived &mdash; computed, not stored</div>
           <div class="derived-list">pendingOccurrences(asOf:limit:) &nbsp;&middot;&nbsp; nextOccurrence(after:) &nbsp;&middot;&nbsp; schedulePhrase</div>
+        </div>
+      </article>
+
+      <!-- ============ BudgetJar ============ -->
+      <article class="entity" id="BudgetJar" tabindex="0"
+               style="--e: var(--e-budget); grid-column: 1; grid-row: 7;">
+        <div class="e-head">
+          <div class="e-name">BudgetJar</div>
+          <div class="e-role">A share of income by percentage &mdash; a plan, never a balance</div>
+          <div class="e-file">MonMon/Budget/BudgetJar.swift</div>
+        </div>
+        <ul class="fields">
+          <li class="field key" data-anchor="BudgetJar.id">
+            <span class="fname">id</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge pk">PK</span></span>
+          </li>
+          <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
+          <li class="field">
+            <span class="fname">allocationPercent</span><span class="ftype">Decimal</span>
+            <span class="badges"><span class="badge null">every jar together may not pass 100</span></span>
+          </li>
+          <li class="field">
+            <span class="fname">role</span><span class="ftype">BudgetJarRole</span>
+            <span class="badges"><span class="badge enum">enum: custom | investment | savings</span></span>
+          </li>
+          <li class="field"><span class="fname">symbolName</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">colorName</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
+        </ul>
+        <div class="derived">
+          <div class="derived-label">Derived &mdash; computed, not stored</div>
+          <div class="derived-list">isProtected <span style="color:var(--muted)">(savings &amp; investment cannot be deleted)</span> &middot; GoalCommitment.snapshot(jarID:goals:plannedCapacity:)</div>
+        </div>
+      </article>
+
+      <!-- ============ FinancialGoal ============ -->
+      <article class="entity" id="FinancialGoal" tabindex="0"
+               style="--e: var(--e-goal); grid-column: 2; grid-row: 7;">
+        <div class="e-head">
+          <div class="e-name">FinancialGoal</div>
+          <div class="e-role">An earmark inside a jar &mdash; never a second asset</div>
+          <div class="e-file">MonMon/Goals/FinancialGoal.swift</div>
+        </div>
+        <ul class="fields">
+          <li class="field key" data-anchor="FinancialGoal.id">
+            <span class="fname">id</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge pk">PK</span></span>
+          </li>
+          <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
+          <li class="field">
+            <span class="fname">kind</span><span class="ftype">FinancialGoalKind</span>
+            <span class="badges"><span class="badge enum">enum: custom | home | trip | vehicle</span><span class="badge null">only .trip is behavioural</span></span>
+          </li>
+          <li class="field"><span class="fname">targetAmount</span><span class="ftype">Decimal</span></li>
+          <li class="field">
+            <span class="fname">earmarkedAmount</span><span class="ftype">Decimal</span>
+            <span class="badges"><span class="badge null">never above the target</span></span>
+          </li>
+          <li class="field"><span class="fname">targetDate</span><span class="ftype">Date</span></li>
+          <li class="field"><span class="fname">monthlyContribution</span><span class="ftype">Decimal</span></li>
+          <li class="field key" data-anchor="FinancialGoal.fundingJarID">
+            <span class="fname">fundingJarID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">? in the store, required by the editor</span></span>
+          </li>
+          <li class="field"><span class="fname">symbolName</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">colorName</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
+        </ul>
+        <div class="derived">
+          <div class="derived-label">Derived &mdash; computed, not stored</div>
+          <div class="derived-list">GoalProgress.snapshot(goal:asOf:) &nbsp;<span style="color:var(--muted)">(remainingAmount &middot; requiredMonthlyContribution &middot; forecastCompletionDate &middot; progress &middot; isComplete)</span> &middot; GoalCommitment.activeMonthlyContribution(for:)</div>
+        </div>
+      </article>
+
+      <!-- ============ TripWorkspace ============ -->
+      <article class="entity" id="TripWorkspace" tabindex="0"
+               style="--e: var(--e-trip); grid-column: 3; grid-row: 7;">
+        <div class="e-head">
+          <div class="e-name">TripWorkspace</div>
+          <div class="e-role">A spending lens over ordinary expenses &mdash; holds no money of its own</div>
+          <div class="e-file">MonMon/Trips/TripWorkspace.swift</div>
+        </div>
+        <ul class="fields">
+          <li class="field key" data-anchor="TripWorkspace.id">
+            <span class="fname">id</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge pk">PK</span></span>
+          </li>
+          <li class="field key" data-anchor="TripWorkspace.sourceGoalID">
+            <span class="fname">sourceGoalID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">? &mdash; the funded goal it started from</span></span>
+          </li>
+          <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
+          <li class="field">
+            <span class="fname">budgetAmount</span><span class="ftype">Decimal</span>
+            <span class="badges"><span class="badge null">copied from the goal's target at start</span></span>
+          </li>
+          <li class="field key" data-anchor="TripWorkspace.fundingJarID">
+            <span class="fname">fundingJarID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span></span>
+          </li>
+          <li class="field"><span class="fname">symbolName</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">colorName</span><span class="ftype">String</span></li>
+          <li class="field">
+            <span class="fname">status</span><span class="ftype">TripWorkspaceStatus</span>
+            <span class="badges"><span class="badge enum">enum: active | completed</span></span>
+          </li>
+          <li class="field"><span class="fname">startedAt</span><span class="ftype">Date</span></li>
+          <li class="field"><span class="fname">completedAt</span><span class="ftype">Date?</span>
+            <span class="badges"><span class="badge null">? &mdash; nil while active</span></span>
+          </li>
+          <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
+        </ul>
+        <div class="derived">
+          <div class="derived-label">Derived &mdash; computed, not stored</div>
+          <div class="derived-list">TripSummary.snapshot(workspace:transactions:categories:) &nbsp;<span style="color:var(--muted)">(spentAmount &middot; remainingAmount &middot; overBudgetAmount &middot; categoryBreakdown)</span></div>
+        </div>
+      </article>
+
+      <!-- ============ PendingTransactionCapture ============ -->
+      <article class="entity" id="PendingTransactionCapture" tabindex="0"
+               style="--e: var(--e-capture); grid-column: 2; grid-row: 8;">
+        <div class="e-head">
+          <div class="e-name">PendingTransactionCapture</div>
+          <div class="e-role">A parsed capture waiting for the owner &mdash; not money until it is confirmed</div>
+          <div class="e-file">MonMon/Transactions/PendingTransactionCapture.swift</div>
+        </div>
+        <ul class="fields">
+          <li class="field key"><span class="fname">id</span><span class="ftype">UUID</span>
+            <span class="badges"><span class="badge pk">PK</span></span></li>
+          <li class="field"><span class="fname">rawText</span><span class="ftype">String</span></li>
+          <li class="field">
+            <span class="fname">kind</span><span class="ftype">TransactionKind</span>
+            <span class="badges"><span class="badge enum">enum: income | expense</span></span>
+          </li>
+          <li class="field"><span class="fname">amount</span><span class="ftype">Decimal?</span>
+            <span class="badges"><span class="badge null">? &mdash; nil when the parse found none</span></span>
+          </li>
+          <li class="field"><span class="fname">occurredAt</span><span class="ftype">Date</span></li>
+          <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
+          <li class="field key" data-anchor="PendingTransactionCapture.accountID">
+            <span class="fname">accountID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span></span>
+          </li>
+          <li class="field key" data-anchor="PendingTransactionCapture.categoryID">
+            <span class="fname">categoryID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span></span>
+          </li>
+          <li class="field">
+            <span class="fname">issueCodes</span><span class="ftype">String</span>
+            <span class="badges"><span class="badge null">sorted, comma-joined issue raw values</span></span>
+          </li>
+          <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
+        </ul>
+        <div class="derived">
+          <div class="derived-label">Derived &mdash; computed, not stored</div>
+          <div class="derived-list">issues &nbsp;<span style="color:var(--muted)">(re-parsed from issueCodes)</span> &middot; draft</div>
         </div>
       </article>
     </div>
@@ -1462,7 +1648,78 @@
         account. Editor guards stop an account deletion while any cash-moving record names it;
         deleting a holding or debt removes its dependent sales or payments in the same save.
         Instrument deletion deliberately leaves its positions visible but unpriced rather than
-        deleting the owner's history.
+        deleting the owner's history. <code>BudgetJarStore.delete</code> guards the planning
+        layer the same way in Swift: a protected jar, a jar funding a goal, and a jar funding a
+        trip workspace all refuse deletion, and the categories that routed to a deleted jar are
+        moved to <code>BudgetJarRouting.fallback</code> in the same save.
+      </p>
+    </div>
+    <div class="note">
+      <h3>A jar is a percentage, not a pot</h3>
+      <p>
+        <code>BudgetJar</code> stores <code>allocationPercent</code> and no money. Every jar
+        together may not pass 100, checked by the draft rather than by a constraint. What a jar
+        planned is derived from income and its share; what a jar spent is derived from the
+        expenses whose category routes to it, or whose
+        <code>budgetJarOverrideID</code> names it directly. Deleting the jar therefore cannot
+        delete a balance, because the jar never held one.
+      </p>
+    </div>
+    <div class="note">
+      <h3>A goal is an earmark inside its jar</h3>
+      <p>
+        <code>FinancialGoal.earmarkedAmount</code> is money the jar already holds, spoken for.
+        It is never added to net worth as a second asset. The one cross-record rule is capacity:
+        <code>FinancialGoalDraft.validated</code> refuses a monthly contribution that would push
+        every active goal on a jar past that jar's planned amount, unless the save does not raise
+        the total &mdash; so a jar that is already overcommitted can still be edited downwards.
+        <em>Active</em> means <code>earmarkedAmount &lt; targetAmount</code>: a funded goal stops
+        competing for the plan. Progress, the required monthly figure and the forecast date are all derived by
+        <code>GoalProgress</code>, never stored.
+      </p>
+    </div>
+    <div class="note">
+      <h3>Why <code>kind</code> survives on a goal</h3>
+      <p>
+        <code>FinancialGoalKind</code> is no longer something the owner picks. A goal's symbol
+        and colour are chosen directly from <code>CategoryPalette</code>, the way a category's
+        are, so the enum stopped being a style preset. It stays on the model because
+        <code>.trip</code> is behavioural: <code>TripWorkspaceLifecycle.start</code> is the only
+        reader left, and it refuses any goal that is not a trip.
+      </p>
+    </div>
+    <div class="note">
+      <h3>A trip is a lens, not a wallet</h3>
+      <p>
+        A workspace starts only from a <code>.trip</code> goal that is fully funded and names a
+        jar, and it copies that goal's target into <code>budgetAmount</code> rather than moving
+        anything. Spending is ordinary expenses carrying <code>tripWorkspaceID</code>, so
+        <code>TripSummary</code> derives spent, remaining and over-budget from transactions that
+        already counted once. Completing a trip only stamps <code>completedAt</code>; cancelling
+        is refused outright while any transaction still points at it.
+      </p>
+    </div>
+    <div class="note">
+      <h3>The allocation snapshot is frozen on purpose</h3>
+      <p>
+        <code>MoneyTransaction.incomeAllocationSnapshot</code> is versioned JSON, not a live
+        reading: it records how an income was split across jars at the moment it was recorded,
+        so editing today's percentages cannot rewrite what last month's payslip did.
+        <code>IncomeAllocationLifecycle</code> re-scales an existing snapshot when the amount is
+        edited and marks a snapshot captured after the fact as estimated. Decoding rejects a
+        snapshot whose <code>sourceAmount</code> no longer matches its transaction.
+      </p>
+    </div>
+    <div class="note">
+      <h3>A capture is not money</h3>
+      <p>
+        <code>PendingTransactionCapture</code> is staged text with parsed guesses attached: its
+        amount, account and category are all optional because the parse is allowed to fail at
+        any of them, and <code>issueCodes</code> carries what it could not settle as a sorted,
+        comma-joined string rather than a relationship. A row only exists because the parse
+        came back incomplete: <code>TransactionCaptureService.commit</code> writes an ordinary
+        <code>MoneyTransaction</code> straight away when the capture is ready, and stages a
+        capture only when it is not. Nothing moves a balance until the owner finishes the row.
       </p>
     </div>
     <div class="note">
@@ -1560,8 +1817,10 @@
     <div class="note">
       <h3>Enums stored as String</h3>
       <p>
-        <code>CashAccountKind</code>, <code>TransactionKind</code>, <code>FundInstrumentKind</code>
-        and <code>DebtDirection</code> are all <code>String, Codable</code>. Raw values are stable across migrations
+        <code>CashAccountKind</code>, <code>TransactionKind</code>, <code>FundInstrumentKind</code>,
+        <code>DebtDirection</code>, <code>RecurrenceFrequency</code>, <code>BudgetJarRole</code>,
+        <code>FinancialGoalKind</code> and <code>TripWorkspaceStatus</code> are all
+        <code>String, Codable</code>. Raw values are stable across migrations
         and safe for CloudKit later.
       </p>
     </div>
@@ -1770,7 +2029,15 @@
       { from: 'RecurringRule', fromAnchor: 'RecurringRule.id', to: 'MoneyTransaction', toAnchor: 'MoneyTransaction.sourceRuleID', label: 'generates', dashed: true },
       { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'Debt', toAnchor: 'Debt.accountID', label: '1 : 0..N', dashed: true },
       { from: 'Debt', to: 'DebtPayment', toAnchor: 'DebtPayment.debtID', label: '1 : 0..N', dashed: true },
-      { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'DebtPayment', toAnchor: 'DebtPayment.accountID', label: '1 : 0..N', dashed: false }
+      { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'DebtPayment', toAnchor: 'DebtPayment.accountID', label: '1 : 0..N', dashed: false },
+      { from: 'BudgetJar', fromAnchor: 'BudgetJar.id', to: 'TransactionCategory', toAnchor: 'TransactionCategory.budgetJarID', label: 'routes', dashed: true },
+      { from: 'BudgetJar', fromAnchor: 'BudgetJar.id', to: 'FinancialGoal', toAnchor: 'FinancialGoal.fundingJarID', label: 'funds', dashed: true },
+      { from: 'BudgetJar', fromAnchor: 'BudgetJar.id', to: 'TripWorkspace', toAnchor: 'TripWorkspace.fundingJarID', label: 'funds', dashed: true },
+      { from: 'BudgetJar', fromAnchor: 'BudgetJar.id', to: 'MoneyTransaction', toAnchor: 'MoneyTransaction.budgetJarOverrideID', label: 'override', dashed: true },
+      { from: 'FinancialGoal', fromAnchor: 'FinancialGoal.id', to: 'TripWorkspace', toAnchor: 'TripWorkspace.sourceGoalID', label: 'starts', dashed: true },
+      { from: 'TripWorkspace', fromAnchor: 'TripWorkspace.id', to: 'MoneyTransaction', toAnchor: 'MoneyTransaction.tripWorkspaceID', label: 'tags', dashed: true },
+      { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'PendingTransactionCapture', toAnchor: 'PendingTransactionCapture.accountID', label: 'suggested', dashed: true },
+      { from: 'TransactionCategory', fromAnchor: 'TransactionCategory.id', to: 'PendingTransactionCapture', toAnchor: 'PendingTransactionCapture.categoryID', label: 'suggested', dashed: true }
     ]);
 
     wire('sysStage', 'sysEdges', '.node', [
