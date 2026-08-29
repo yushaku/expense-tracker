@@ -129,6 +129,82 @@ struct TripWorkspaceTests {
         #expect(stored.completedAt == nil)
     }
 
+    @Test("Only an empty active workspace can be cancelled")
+    func cancellationProtectsLinkedTransactions() throws {
+        let container = try ModelContainer(
+            for: Schema(MonMonSchema.models),
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let workspace = try TripWorkspaceLifecycle.start(
+            goal: makeGoal(),
+            existingWorkspaces: [],
+            id: UUID(),
+            startedAt: startedAt
+        )
+        container.mainContext.insert(workspace)
+        try container.mainContext.save()
+
+        let linked = MoneyTransaction(
+            id: UUID(),
+            kind: .expense,
+            amount: 100_000,
+            occurredAt: startedAt,
+            note: "Coffee",
+            accountID: UUID(),
+            categoryID: UUID(),
+            sourceRuleID: nil,
+            currencyCode: VNDCurrency.code,
+            createdAt: startedAt,
+            tripWorkspaceID: workspace.id
+        )
+        container.mainContext.insert(linked)
+        try container.mainContext.save()
+
+        #expect(throws: TripWorkspaceLifecycleError.workspaceHasTransactions) {
+            try TripWorkspaceLifecycle.cancel(
+                workspace,
+                transactions: [linked],
+                in: container.mainContext
+            )
+        }
+        #expect(try container.mainContext.fetchCount(FetchDescriptor<TripWorkspace>()) == 1)
+
+        container.mainContext.delete(linked)
+        try container.mainContext.save()
+        try TripWorkspaceLifecycle.cancel(
+            workspace,
+            transactions: [],
+            in: container.mainContext
+        )
+
+        #expect(try container.mainContext.fetchCount(FetchDescriptor<TripWorkspace>()) == 0)
+    }
+
+    @Test("Completed workspaces cannot be cancelled")
+    func completedWorkspaceCannotBeCancelled() throws {
+        let container = try ModelContainer(
+            for: Schema(MonMonSchema.models),
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let workspace = try TripWorkspaceLifecycle.start(
+            goal: makeGoal(),
+            existingWorkspaces: [],
+            id: UUID(),
+            startedAt: startedAt
+        )
+        TripWorkspaceLifecycle.complete(workspace, at: startedAt)
+        container.mainContext.insert(workspace)
+        try container.mainContext.save()
+
+        #expect(throws: TripWorkspaceLifecycleError.workspaceNotActive) {
+            try TripWorkspaceLifecycle.cancel(
+                workspace,
+                transactions: [],
+                in: container.mainContext
+            )
+        }
+    }
+
     private func makeGoal(
         kind: FinancialGoalKind = .trip,
         earmarkedAmount: Decimal = 30_000_000,

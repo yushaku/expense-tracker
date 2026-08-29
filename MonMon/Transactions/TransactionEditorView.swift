@@ -3,6 +3,7 @@ import SwiftUI
 
 enum TransactionEditorMode: Identifiable {
     case add
+    case addToTrip(TripWorkspace)
     case edit(MoneyTransaction)
     case review(PendingTransactionCapture)
 
@@ -10,6 +11,8 @@ enum TransactionEditorMode: Identifiable {
         switch self {
         case .add:
             "add"
+        case .addToTrip(let workspace):
+            "add-trip-\(workspace.id.uuidString)"
         case .edit(let transaction):
             transaction.id.uuidString
         case .review(let capture):
@@ -19,7 +22,7 @@ enum TransactionEditorMode: Identifiable {
 
     var editedTransaction: MoneyTransaction? {
         switch self {
-        case .add:
+        case .add, .addToTrip:
             nil
         case .edit(let transaction):
             transaction
@@ -53,6 +56,9 @@ struct TransactionEditorView: View {
     @Query(sort: \BudgetJar.createdAt, order: .forward)
     private var budgetJars: [BudgetJar]
 
+    @Query(sort: \TripWorkspace.startedAt, order: .reverse)
+    private var tripWorkspaces: [TripWorkspace]
+
     @AppStorage(TransactionDefaults.accountStorageKey)
     private var defaultTransactionAccountValue = ""
     @AppStorage(TransactionDefaults.categoryStorageKey)
@@ -74,6 +80,14 @@ struct TransactionEditorView: View {
         switch mode {
         case .add:
             _draft = State(initialValue: TransactionDraft(occurredAt: defaultDate))
+        case .addToTrip(let workspace):
+            _draft = State(
+                initialValue: TransactionDraft(
+                    occurredAt: defaultDate,
+                    tripWorkspaceID: workspace.id,
+                    budgetJarOverrideID: workspace.fundingJarID
+                )
+            )
         case .edit(let transaction):
             _draft = State(initialValue: TransactionDraft(transaction: transaction))
         case .review(let capture):
@@ -96,6 +110,8 @@ struct TransactionEditorView: View {
                 draft: $draft,
                 accounts: accounts,
                 categories: categories,
+                tripWorkspaces: tripWorkspaces,
+                budgetJars: budgetJars,
                 isEditing: mode.canDelete,
                 validationError: validationError,
                 saveErrorMessage: saveErrorMessage,
@@ -134,6 +150,23 @@ struct TransactionEditorView: View {
             }
             .onChange(of: draft.kind) { _, _ in
                 applyDefaultCategoryIfDirectionChanged()
+                if draft.kind == .income {
+                    TripTransactionSelection.apply(
+                        workspaceID: nil,
+                        workspaces: tripWorkspaces,
+                        to: &draft
+                    )
+                }
+            }
+            .onChange(of: draft.tripWorkspaceID) { oldValue, newValue in
+                guard oldValue != newValue else {
+                    return
+                }
+                TripTransactionSelection.apply(
+                    workspaceID: newValue,
+                    workspaces: tripWorkspaces,
+                    to: &draft
+                )
             }
             .onAppear {
                 applyDefaultsIfNeeded()

@@ -43,7 +43,12 @@ struct TripSummaryTests {
     @Test("Overspending is explicit and a deleted category remains counted")
     func overBudgetAndUncategorizedRemainVisible() {
         let workspace = trip(budget: 5_000_000)
-        let transaction = transaction(amount: 6_500_000, categoryID: UUID(), offset: 0)
+        let transaction = transaction(
+            amount: 6_500_000,
+            categoryID: UUID(),
+            tripID: workspace.id,
+            offset: 0
+        )
 
         let snapshot = TripSummary.snapshot(
             workspace: workspace,
@@ -58,18 +63,98 @@ struct TripSummaryTests {
         #expect(snapshot.categoryBreakdown.first?.amount == 6_500_000)
     }
 
-    private func trip(budget: Decimal) -> TripWorkspace {
-        TripWorkspace(
-            id: tripID,
+    @Test("Trip collection separates ready, active, and completed work")
+    func collectionSeparatesLifecycleStages() {
+        let ready = goal(name: "Ready", earmarked: 10_000_000)
+        let saving = goal(name: "Saving", earmarked: 4_000_000)
+        let jarless = goal(name: "No jar", earmarked: 10_000_000)
+        jarless.fundingJarID = nil
+        let alreadyStarted = goal(name: "Started", earmarked: 10_000_000)
+        let active = trip(budget: 10_000_000, sourceGoalID: alreadyStarted.id)
+        let completed = trip(
+            budget: 5_000_000,
             sourceGoalID: UUID(),
+            status: .completed
+        )
+
+        let collection = TripWorkspaceCollection.snapshot(
+            goals: [saving, ready, jarless, alreadyStarted],
+            workspaces: [completed, active]
+        )
+
+        #expect(collection.readyGoalIDs == [ready.id])
+        #expect(collection.activeWorkspaceIDs == [active.id])
+        #expect(collection.completedWorkspaceIDs == [completed.id])
+    }
+
+    @Test("Selecting a Trip defaults its jar and detaching clears Trip routing")
+    func transactionSelectionDefaultsAndClearsRouting() {
+        let active = trip(budget: 10_000_000)
+        let completed = trip(budget: 5_000_000, status: .completed)
+        var draft = TransactionDraft(
+            kind: .expense,
+            amountText: "100000",
+            occurredAt: occurredAt,
+            accountID: UUID(),
+            categoryID: UUID()
+        )
+
+        TripTransactionSelection.apply(
+            workspaceID: active.id,
+            workspaces: [completed, active],
+            to: &draft
+        )
+
+        #expect(draft.tripWorkspaceID == active.id)
+        #expect(draft.budgetJarOverrideID == active.fundingJarID)
+        #expect(
+            TripTransactionSelection.availableWorkspaces(
+                [completed, active],
+                selectedID: completed.id
+            ).map(\.id) == [active.id, completed.id]
+        )
+
+        TripTransactionSelection.apply(
+            workspaceID: nil,
+            workspaces: [completed, active],
+            to: &draft
+        )
+        #expect(draft.tripWorkspaceID == nil)
+        #expect(draft.budgetJarOverrideID == nil)
+    }
+
+    private func trip(
+        budget: Decimal,
+        sourceGoalID: UUID = UUID(),
+        status: TripWorkspaceStatus = .active
+    ) -> TripWorkspace {
+        TripWorkspace(
+            id: status == .active && budget == 10_000_000 ? tripID : UUID(),
+            sourceGoalID: sourceGoalID,
             name: "Da Nang",
             budgetAmount: budget,
             fundingJarID: BudgetJarSeed.savingsID,
             symbolName: "airplane",
             colorName: "sky",
-            status: .active,
+            status: status,
             startedAt: occurredAt,
-            completedAt: nil,
+            completedAt: status == .completed ? occurredAt : nil,
+            createdAt: occurredAt
+        )
+    }
+
+    private func goal(name: String, earmarked: Decimal) -> FinancialGoal {
+        FinancialGoal(
+            id: UUID(),
+            name: name,
+            kind: .trip,
+            targetAmount: 10_000_000,
+            earmarkedAmount: earmarked,
+            targetDate: occurredAt,
+            monthlyContribution: 1_000_000,
+            fundingJarID: BudgetJarSeed.savingsID,
+            symbolName: "airplane",
+            colorName: "sky",
             createdAt: occurredAt
         )
     }

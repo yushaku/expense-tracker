@@ -72,12 +72,12 @@ Review + non-Simulator gates
 
 ### Phase 3: Owner experience
 
-- [ ] Task 6: Add ready, active, and completed Trip sections with lifecycle
+- [x] Task 6: Add ready, active, and completed Trip sections with lifecycle
   actions inside Goals.
-- [ ] Task 7: Add Trip detail, category breakdown, linked transactions, and an
+- [x] Task 7: Add Trip detail, category breakdown, linked transactions, and an
   Add expense entry point.
-- [ ] Task 8: Add Trip and jar-routing controls to the transaction editor.
-- [ ] Task 9: Add English/Vietnamese copy and complete the SwiftUI correctness
+- [x] Task 8: Add Trip and jar-routing controls to the transaction editor.
+- [x] Task 9: Add English/Vietnamese copy and complete the SwiftUI correctness
   and accessibility checklist.
 
 ### Phase 4: Portability and completion

@@ -1,10 +1,13 @@
 import Foundation
+import SwiftData
 
 enum TripWorkspaceLifecycleError: Error, Equatable {
     case goalNotFullyFunded
     case missingFundingJar
     case notTripGoal
     case workspaceAlreadyExists
+    case workspaceHasTransactions
+    case workspaceNotActive
 }
 
 enum TripWorkspaceLifecycle {
@@ -50,5 +53,27 @@ enum TripWorkspaceLifecycle {
     static func reopen(_ workspace: TripWorkspace) {
         workspace.status = .active
         workspace.completedAt = nil
+    }
+
+    @MainActor
+    static func cancel(
+        _ workspace: TripWorkspace,
+        transactions: [MoneyTransaction],
+        in context: ModelContext
+    ) throws {
+        guard workspace.status == .active else {
+            throw TripWorkspaceLifecycleError.workspaceNotActive
+        }
+        guard !transactions.contains(where: { $0.tripWorkspaceID == workspace.id }) else {
+            throw TripWorkspaceLifecycleError.workspaceHasTransactions
+        }
+
+        context.delete(workspace)
+        do {
+            try context.save()
+        } catch {
+            context.rollback()
+            throw error
+        }
     }
 }

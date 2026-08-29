@@ -12,6 +12,10 @@
 		Y10000000000000000000203 /* TripWorkspaceLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000103 /* TripWorkspaceLifecycle.swift */; };
 		Y10000000000000000000204 /* TripSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000104 /* TripSummaryTests.swift */; };
 		Y10000000000000000000205 /* TripSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000105 /* TripSummary.swift */; };
+		Y10000000000000000000206 /* TripWorkspaceCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000106 /* TripWorkspaceCollection.swift */; };
+		Y10000000000000000000207 /* TripTransactionSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000107 /* TripTransactionSelection.swift */; };
+		Y10000000000000000000208 /* TripWorkspaceCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000108 /* TripWorkspaceCard.swift */; };
+		Y10000000000000000000209 /* TripDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000109 /* TripDetailView.swift */; };
 		X10000000000000000000201 /* IncomeAllocationSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = X10000000000000000000101 /* IncomeAllocationSnapshotTests.swift */; };
 		X10000000000000000000202 /* IncomeAllocationSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = X10000000000000000000102 /* IncomeAllocationSnapshot.swift */; };
 		X10000000000000000000203 /* IncomeAllocationLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = X10000000000000000000103 /* IncomeAllocationLifecycleTests.swift */; };
@@ -401,6 +405,10 @@
 		Y10000000000000000000103 /* TripWorkspaceLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspaceLifecycle.swift; sourceTree = "<group>"; };
 		Y10000000000000000000104 /* TripSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripSummaryTests.swift; sourceTree = "<group>"; };
 		Y10000000000000000000105 /* TripSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripSummary.swift; sourceTree = "<group>"; };
+		Y10000000000000000000106 /* TripWorkspaceCollection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspaceCollection.swift; sourceTree = "<group>"; };
+		Y10000000000000000000107 /* TripTransactionSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripTransactionSelection.swift; sourceTree = "<group>"; };
+		Y10000000000000000000108 /* TripWorkspaceCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspaceCard.swift; sourceTree = "<group>"; };
+		Y10000000000000000000109 /* TripDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripDetailView.swift; sourceTree = "<group>"; };
 		X10000000000000000000101 /* IncomeAllocationSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeAllocationSnapshotTests.swift; sourceTree = "<group>"; };
 		X10000000000000000000102 /* IncomeAllocationSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeAllocationSnapshot.swift; sourceTree = "<group>"; };
 		X10000000000000000000103 /* IncomeAllocationLifecycleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeAllocationLifecycleTests.swift; sourceTree = "<group>"; };
@@ -851,6 +859,10 @@
 				Y10000000000000000000102 /* TripWorkspace.swift */,
 				Y10000000000000000000103 /* TripWorkspaceLifecycle.swift */,
 				Y10000000000000000000105 /* TripSummary.swift */,
+				Y10000000000000000000106 /* TripWorkspaceCollection.swift */,
+				Y10000000000000000000107 /* TripTransactionSelection.swift */,
+				Y10000000000000000000108 /* TripWorkspaceCard.swift */,
+				Y10000000000000000000109 /* TripDetailView.swift */,
 			);
 			path = Trips;
 			sourceTree = "<group>";
@@ -1660,6 +1672,10 @@
 				Y10000000000000000000202 /* TripWorkspace.swift in Sources */,
 				Y10000000000000000000203 /* TripWorkspaceLifecycle.swift in Sources */,
 				Y10000000000000000000205 /* TripSummary.swift in Sources */,
+				Y10000000000000000000206 /* TripWorkspaceCollection.swift in Sources */,
+				Y10000000000000000000207 /* TripTransactionSelection.swift in Sources */,
+				Y10000000000000000000208 /* TripWorkspaceCard.swift in Sources */,
+				Y10000000000000000000209 /* TripDetailView.swift in Sources */,
 				X10000000000000000000202 /* IncomeAllocationSnapshot.swift in Sources */,
 				X10000000000000000000204 /* IncomeAllocationLifecycle.swift in Sources */,
 				X10000000000000000000206 /* IncomeAllocationTimeline.swift in Sources */,
