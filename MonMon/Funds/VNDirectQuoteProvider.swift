@@ -146,7 +146,6 @@ struct VNDirectQuoteProvider: FundCatalogueProvider {
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
         return request
     }
 
@@ -166,7 +165,6 @@ struct VNDirectQuoteProvider: FundCatalogueProvider {
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
         return request
     }
 }

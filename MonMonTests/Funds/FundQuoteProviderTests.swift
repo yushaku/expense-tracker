@@ -234,6 +234,24 @@ struct VNDirectQuoteProviderTests {
         #expect(transport.requestCount == 2)
     }
 
+    @Test("Requests accept VNDIRECT's text-labelled JSON replies")
+    func requestsDoNotDemandJSONContentNegotiation() async throws {
+        let (vndirect, transport) = provider([
+            "query=FUE": .init(FundQuoteFixtures.vndirectSearchFUE),
+            "query=E1": .init(FundQuoteFixtures.vndirectSearchE1),
+            "dchart/history": .init(FundQuoteFixtures.vndirectHistoryFUEVFVND),
+        ])
+
+        _ = try await vndirect.catalogue()
+        _ = try await vndirect.latestQuote(symbol: "FUEVFVND", asOf: asOf)
+
+        #expect(
+            transport.requests.allSatisfy {
+                $0.value(forHTTPHeaderField: "Accept") == nil
+            }
+        )
+    }
+
     @Test("A changed catalogue reply is a decoding failure")
     func changedCatalogueReplyFailsDecoding() async throws {
         let (vndirect, _) = provider([
