@@ -88,7 +88,7 @@ struct GoalListView: View {
     @State private var selectedGoalID: UUID?
     @State private var selectedFilter: GoalListFilter = .active
 
-    let plannedByJar: [UUID: Decimal]
+    let capacityByJar: [UUID: Decimal]
     let asOf: Date
 
     var body: some View {
@@ -116,7 +116,7 @@ struct GoalListView: View {
                 )
             }
             .navigationDestination(item: $selectedGoalID) { goalID in
-                GoalDetailView(goalID: goalID, plannedByJar: plannedByJar, asOf: asOf)
+                GoalDetailView(goalID: goalID, capacityByJar: capacityByJar, asOf: asOf)
             }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -127,7 +127,7 @@ struct GoalListView: View {
                 }
             }
             .appSheet(item: $editorMode) { mode in
-                GoalEditorView(mode: mode, plannedByJar: plannedByJar, asOf: asOf)
+                GoalEditorView(mode: mode, capacityByJar: capacityByJar, asOf: asOf)
             }
             .tint(MonMonTheme.accent)
             .accessibilityIdentifier("goal-list")
@@ -145,7 +145,7 @@ struct GoalListView: View {
             GoalCommitmentWarnings(
                 jars: jars,
                 goals: goals,
-                plannedByJar: plannedByJar
+                capacityByJar: capacityByJar
             )
 
             if listSnapshot.activeGoals.isEmpty {
@@ -391,12 +391,12 @@ private struct GoalCommitmentWarnings: View {
 
     let notices: [Notice]
 
-    init(jars: [BudgetJar], goals: [FinancialGoal], plannedByJar: [UUID: Decimal]) {
+    init(jars: [BudgetJar], goals: [FinancialGoal], capacityByJar: [UUID: Decimal]) {
         notices = jars.compactMap { jar in
             let snapshot = GoalCommitment.snapshot(
                 jarID: jar.id,
                 goals: goals,
-                plannedCapacity: plannedByJar[jar.id, default: .zero]
+                plannedCapacity: capacityByJar[jar.id, default: .zero]
             )
             guard snapshot.isOvercommitted else {
                 return nil

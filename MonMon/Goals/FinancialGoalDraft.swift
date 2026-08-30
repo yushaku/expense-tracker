@@ -72,7 +72,7 @@ struct FinancialGoalDraft: Equatable {
     func validated(
         jars: [BudgetJar],
         goals: [FinancialGoal],
-        plannedByJar: [UUID: Decimal],
+        capacityByJar: [UUID: Decimal],
         editedID: UUID?,
         asOf: Date,
         calendar: Calendar = .current
@@ -126,7 +126,7 @@ struct FinancialGoalDraft: Equatable {
             earmarkedAmount: earmarkedAmount,
             monthlyContribution: monthlyContribution
         )
-        let capacity = plannedByJar[fundingJarID, default: .zero]
+        let capacity = capacityByJar[fundingJarID, default: .zero]
         let totalAfterSave = otherCommitment + candidateCommitment
         let previousContribution =
             goals.first { $0.id == editedID && $0.fundingJarID == fundingJarID }
@@ -153,14 +153,14 @@ struct FinancialGoalDraft: Equatable {
         createdAt: Date,
         jars: [BudgetJar],
         goals: [FinancialGoal],
-        plannedByJar: [UUID: Decimal],
+        capacityByJar: [UUID: Decimal],
         asOf: Date,
         calendar: Calendar = .current
     ) throws -> FinancialGoal {
         let values = try validated(
             jars: jars,
             goals: goals,
-            plannedByJar: plannedByJar,
+            capacityByJar: capacityByJar,
             editedID: nil,
             asOf: asOf,
             calendar: calendar
@@ -183,14 +183,14 @@ struct FinancialGoalDraft: Equatable {
         to goal: FinancialGoal,
         jars: [BudgetJar],
         goals: [FinancialGoal],
-        plannedByJar: [UUID: Decimal],
+        capacityByJar: [UUID: Decimal],
         asOf: Date,
         calendar: Calendar = .current
     ) throws {
         let values = try validated(
             jars: jars,
             goals: goals,
-            plannedByJar: plannedByJar,
+            capacityByJar: capacityByJar,
             editedID: goal.id,
             asOf: asOf,
             calendar: calendar

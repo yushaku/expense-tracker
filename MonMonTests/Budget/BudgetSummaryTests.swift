@@ -250,19 +250,44 @@ struct BudgetSummaryTests {
         let savings = jar(percent: 50)
         let salary = recurringIncome(amount: 30_000_000, day: try date(2026, 8, 25))
 
-        let julyCapacity = BudgetSummary.plannedByJar(
+        let julyCapacity = BudgetSummary.goalCapacityByJar(
             monthContaining: try date(2026, 7, 1),
+            asOf: try date(2026, 8, 20),
             jars: [savings],
-            recurringRules: [salary]
+            recurringRules: [salary],
+            transactions: []
         )
-        let augustCapacity = BudgetSummary.plannedByJar(
+        let augustCapacity = BudgetSummary.goalCapacityByJar(
             monthContaining: try date(2026, 8, 20),
+            asOf: try date(2026, 8, 20),
             jars: [savings],
-            recurringRules: [salary]
+            recurringRules: [salary],
+            transactions: []
         )
 
         #expect(julyCapacity[savings.id] == 0)
         #expect(augustCapacity[savings.id] == 15_000_000)
+    }
+
+    @Test("Goal capacity includes income already received this month")
+    func goalCapacityIncludesReceivedIncome() throws {
+        let play = jar(percent: 10)
+        let asOf = try date(2026, 8, 20)
+        let receivedIncome = transaction(
+            kind: .income,
+            amount: 20_000_000,
+            date: try date(2026, 8, 10)
+        )
+
+        let capacity = BudgetSummary.goalCapacityByJar(
+            monthContaining: asOf,
+            asOf: asOf,
+            jars: [play],
+            recurringRules: [],
+            transactions: [receivedIncome]
+        )
+
+        #expect(capacity[play.id] == 2_000_000)
     }
 
     @Test("Jar activity follows the same routing and month window as Budget")

@@ -127,19 +127,32 @@ enum BudgetSummary {
         return recurringIncome(recurringRules, from: start, to: end)
     }
 
-    static func plannedByJar(
+    static func goalCapacityByJar(
         monthContaining month: Date,
+        asOf: Date,
         jars: [BudgetJar],
-        recurringRules: [RecurringRule]
+        recurringRules: [RecurringRule],
+        transactions: [MoneyTransaction]
     ) -> [UUID: Decimal] {
-        let plannedIncome = plannedIncome(
-            monthContaining: month,
-            recurringRules: recurringRules
+        let start = TransactionPeriod.startOfMonth(for: month)
+        let end = TransactionPeriod.endOfMonth(for: month)
+        let receivedIncome = receivedIncome(
+            transactions,
+            from: start,
+            to: end,
+            asOf: asOf
+        )
+        let projectedIncome = projectedIncome(
+            receivedIncome: receivedIncome,
+            recurringRules: recurringRules,
+            from: start,
+            to: end,
+            asOf: asOf
         )
 
         return Dictionary(
             uniqueKeysWithValues: jars.map { jar in
-                (jar.id, allocation(of: plannedIncome, percent: jar.allocationPercent))
+                (jar.id, allocation(of: projectedIncome, percent: jar.allocationPercent))
             }
         )
     }
@@ -161,20 +174,19 @@ enum BudgetSummary {
             from: start,
             to: end
         )
-        let receivedIncome =
-            transactions
-            .filter {
-                $0.kind == .income && contains($0.occurredAt, from: start, to: end, asOf: asOf)
-            }
-            .reduce(Decimal.zero) { $0 + $1.amount }
-        let projectedIncome =
-            receivedIncome
-            + futureRecurringIncome(
-                recurringRules,
-                from: start,
-                to: end,
-                after: asOf
-            )
+        let receivedIncome = receivedIncome(
+            transactions,
+            from: start,
+            to: end,
+            asOf: asOf
+        )
+        let projectedIncome = projectedIncome(
+            receivedIncome: receivedIncome,
+            recurringRules: recurringRules,
+            from: start,
+            to: end,
+            asOf: asOf
+        )
         let routing = BudgetTransactionRouting(jars: jars, categories: categories)
         var usedByJar: [UUID: Decimal] = [:]
 
@@ -238,6 +250,35 @@ enum BudgetSummary {
         rules.filter { $0.kind == .income && !$0.isPaused }.reduce(Decimal.zero) {
             $0 + Decimal(occurrences(of: $1, from: start, to: end).count) * $1.amount
         }
+    }
+
+    private static func receivedIncome(
+        _ transactions: [MoneyTransaction],
+        from start: Date,
+        to end: Date,
+        asOf: Date
+    ) -> Decimal {
+        transactions
+            .filter {
+                $0.kind == .income && contains($0.occurredAt, from: start, to: end, asOf: asOf)
+            }
+            .reduce(Decimal.zero) { $0 + $1.amount }
+    }
+
+    private static func projectedIncome(
+        receivedIncome: Decimal,
+        recurringRules: [RecurringRule],
+        from start: Date,
+        to end: Date,
+        asOf: Date
+    ) -> Decimal {
+        receivedIncome
+            + futureRecurringIncome(
+                recurringRules,
+                from: start,
+                to: end,
+                after: asOf
+            )
     }
 
     private static func futureRecurringIncome(

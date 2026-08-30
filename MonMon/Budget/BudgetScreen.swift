@@ -109,7 +109,7 @@ struct BudgetScreen: View {
                 BudgetConfigurationView(asOf: asOf)
             }
             .appSheet(isPresented: $isShowingGoals) {
-                GoalListView(plannedByJar: plannedByJar, asOf: asOf)
+                GoalListView(capacityByJar: goalCapacityByJar, asOf: asOf)
             }
             .appSheet(isPresented: $isShowingIncomeTimeline) {
                 IncomeAllocationTimelineView(asOf: asOf)
@@ -120,7 +120,7 @@ struct BudgetScreen: View {
                 }
             }
             .navigationDestination(item: $selectedGoalID) { goalID in
-                GoalDetailView(goalID: goalID, plannedByJar: plannedByJar, asOf: asOf)
+                GoalDetailView(goalID: goalID, capacityByJar: goalCapacityByJar, asOf: asOf)
             }
             .tint(MonMonTheme.accent)
         }
@@ -166,11 +166,13 @@ struct BudgetScreen: View {
         }
     }
 
-    private var plannedByJar: [UUID: Decimal] {
-        BudgetSummary.plannedByJar(
+    private var goalCapacityByJar: [UUID: Decimal] {
+        BudgetSummary.goalCapacityByJar(
             monthContaining: asOf,
+            asOf: asOf,
             jars: jars,
-            recurringRules: recurringRules
+            recurringRules: recurringRules,
+            transactions: transactions
         )
     }
 
@@ -178,7 +180,7 @@ struct BudgetScreen: View {
         GoalCommitment.snapshots(
             jarIDs: jars.map(\.id),
             goals: goals,
-            plannedByJar: plannedByJar
+            capacityByJar: goalCapacityByJar
         )
     }
 
