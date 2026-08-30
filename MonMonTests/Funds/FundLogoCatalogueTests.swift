@@ -1,3 +1,4 @@
+import AppKit
 import Testing
 
 @testable import MonMon
@@ -24,5 +25,12 @@ struct FundLogoCatalogueTests {
     @Test("Unknown symbols retain the existing fallbacks")
     func unknownSymbol() {
         #expect(FundLogoCatalogue.assetName(for: "UNKNOWN") == nil)
+    }
+
+    @Test("Every referenced logo is compiled into the asset catalogue")
+    func bundledAssetsExist() {
+        for assetName in FundLogoCatalogue.referencedAssetNames {
+            #expect(NSImage(named: NSImage.Name(assetName)) != nil, "Missing asset: \(assetName)")
+        }
     }
 }
