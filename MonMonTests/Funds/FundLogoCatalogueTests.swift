@@ -22,6 +22,20 @@ struct FundLogoCatalogueTests {
         )
     }
 
+    @Test("Every supported ETF has a bundled manager logo")
+    func supportedETFs() {
+        let symbols = [
+            "E1VFVN30", "FUEABVND", "FUEBFVND", "FUEDCMID", "FUEFCV50", "FUEIP100",
+            "FUEKIV30", "FUEKIVFS", "FUEKIVND", "FUEMAV30", "FUEMAVND", "FUEMITEC",
+            "FUESSV30", "FUESSV50", "FUESSVFL", "FUETCC50", "FUETPVND", "FUEVFVND",
+            "FUEVN100", "FUEVN50G",
+        ]
+
+        for symbol in symbols {
+            #expect(FundLogoCatalogue.assetName(for: symbol) != nil, "Missing ETF: \(symbol)")
+        }
+    }
+
     @Test("Unknown symbols retain the existing fallbacks")
     func unknownSymbol() {
         #expect(FundLogoCatalogue.assetName(for: "UNKNOWN") == nil)

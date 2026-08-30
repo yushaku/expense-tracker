@@ -10,7 +10,8 @@ logo and ticker-monogram fallbacks.
 ## Tech Stack and Structure
 
 - Swift 6 and SwiftUI in `MonMon/Funds/`.
-- Manager images in `MonMon/Resources/Assets.xcassets/FundManagers/`.
+- Manager image sets named `FundManager*.imageset` in
+  `MonMon/Resources/Assets.xcassets/`.
 - Pure ticker-to-asset lookup beside `FundLogoView`, covered by Swift Testing in
   `MonMonTests/Funds/`.
 - No SwiftData migration: the persisted optional `logoURL` remains compatible
@@ -67,4 +68,3 @@ ticker prefixes. Normalize lookup input by trimming and uppercasing.
 - A manager's funds and ETFs resolve to the same asset.
 - Unknown instruments still use their remote URL, then their monogram.
 - No persistence migration or new network request is introduced.
-
