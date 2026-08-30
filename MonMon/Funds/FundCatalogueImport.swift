@@ -199,10 +199,14 @@ final class FundCatalogueImport {
 
     private static let maximumConcurrentQuotes = 4
 
+    private enum QuoteOutcome: Sendable {
+        case candidate(FundInstrumentCandidate)
+        case failure(ImportFailure)
+    }
+
     private struct QuoteAttempt: Sendable {
         let index: Int
-        let candidate: FundInstrumentCandidate?
-        let failure: ImportFailure?
+        let outcome: QuoteOutcome
     }
 
     private func resolveETFQuotes(
@@ -234,31 +238,33 @@ final class FundCatalogueImport {
                             guard quote.symbol.uppercased() == candidate.symbol.uppercased() else {
                                 return QuoteAttempt(
                                     index: index,
-                                    candidate: nil,
-                                    failure: ImportFailure(
-                                        symbol: candidate.symbol,
-                                        error: .decoding
+                                    outcome: .failure(
+                                        ImportFailure(
+                                            symbol: candidate.symbol,
+                                            error: .decoding
+                                        )
                                     )
                                 )
                             }
                             return QuoteAttempt(
                                 index: index,
-                                candidate: candidate.with(quote: quote),
-                                failure: nil
+                                outcome: .candidate(candidate.with(quote: quote))
                             )
                         } catch let error as FundQuoteError {
                             return QuoteAttempt(
                                 index: index,
-                                candidate: nil,
-                                failure: ImportFailure(symbol: candidate.symbol, error: error)
+                                outcome: .failure(
+                                    ImportFailure(symbol: candidate.symbol, error: error)
+                                )
                             )
                         } catch {
                             return QuoteAttempt(
                                 index: index,
-                                candidate: nil,
-                                failure: ImportFailure(
-                                    symbol: candidate.symbol,
-                                    error: .transport
+                                outcome: .failure(
+                                    ImportFailure(
+                                        symbol: candidate.symbol,
+                                        error: .transport
+                                    )
                                 )
                             )
                         }
@@ -272,12 +278,18 @@ final class FundCatalogueImport {
         }
 
         attempts.sort { $0.index < $1.index }
-        return (
-            attempts.compactMap(\.candidate),
-            attempts.compactMap(\.failure)
-        )
+        var quotedCandidates: [FundInstrumentCandidate] = []
+        var failures: [ImportFailure] = []
+        for attempt in attempts {
+            switch attempt.outcome {
+            case .candidate(let candidate):
+                quotedCandidates.append(candidate)
+            case .failure(let failure):
+                failures.append(failure)
+            }
+        }
+        return (quotedCandidates, failures)
     }
-
 }
 
 private extension FundInstrumentCandidate {
