@@ -1,0 +1,399 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "MonMon · Thiết kế hệ thống",
+    "output": "system-design.html",
+    "repository": {
+      "url": "https://github.com/yushaku/expense-tracker",
+      "revision": "f98486aafbb2073783603e8b69321404d97c616a"
+    },
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "ghi-tien",
+        "label": "Đường ghi tiền",
+        "focus": [
+          "siri",
+          "widget",
+          "app",
+          "store"
+        ],
+        "note": "Mọi cách ghi giao dịch đều đi qua app rồi mới xuống kho SwiftData."
+      },
+      {
+        "id": "nhap-sao-ke",
+        "label": "Nhập sao kê",
+        "focus": [
+          "share",
+          "inbox",
+          "app",
+          "store"
+        ],
+        "note": "PDF chia sẻ từ app ngân hàng nằm ở hộp thư App Group cho tới khi được duyệt."
+      },
+      {
+        "id": "roi-may",
+        "label": "Những gì rời máy",
+        "focus": [
+          "store",
+          "cloud",
+          "backup",
+          "fmarket",
+          "vndirect",
+          "vang"
+        ],
+        "note": "Chỉ ba thứ rời thiết bị: bản sao CloudKit, tệp backup do người dùng xuất, và mã sản phẩm khi lấy giá."
+      }
+    ],
+    "viewBox": [
+      1340,
+      700
+    ]
+  },
+  "components": [
+    {
+      "id": "siri",
+      "type": "external",
+      "label": "Siri & Shortcuts",
+      "sublabel": "App Intents",
+      "pos": [
+        60,
+        200
+      ],
+      "size": [
+        180,
+        72
+      ],
+      "sources": [
+        {
+          "path": "MonMon/App/TransactionCaptureIntent.swift",
+          "label": "TransactionCaptureIntent"
+        }
+      ]
+    },
+    {
+      "id": "widget",
+      "type": "frontend",
+      "label": "Widget chi nhanh",
+      "sublabel": "Preset một chạm",
+      "pos": [
+        60,
+        320
+      ],
+      "size": [
+        180,
+        72
+      ],
+      "sources": [
+        {
+          "path": "MonMonQuickExpenseWidget/QuickExpenseWidget.swift",
+          "label": "QuickExpenseWidget"
+        }
+      ]
+    },
+    {
+      "id": "share",
+      "type": "frontend",
+      "label": "Share extension",
+      "sublabel": "Nhận PDF sao kê",
+      "pos": [
+        60,
+        450
+      ],
+      "size": [
+        180,
+        72
+      ],
+      "sources": [
+        {
+          "path": "MonMonShareExtension/ShareViewController.swift",
+          "label": "ShareViewController"
+        }
+      ]
+    },
+    {
+      "id": "inbox",
+      "type": "messagebus",
+      "label": "Hộp thư sao kê",
+      "sublabel": "App Group · manifest.json",
+      "pos": [
+        380,
+        450
+      ],
+      "size": [
+        200,
+        72
+      ],
+      "sources": [
+        {
+          "path": "MonMon/Imports/StatementIntakeStore.swift",
+          "label": "StatementIntakeStore"
+        }
+      ]
+    },
+    {
+      "id": "app",
+      "type": "frontend",
+      "label": "MonMon",
+      "sublabel": "SwiftUI · một chủ tài khoản",
+      "tag": "Face ID lock",
+      "pos": [
+        630,
+        250
+      ],
+      "size": [
+        220,
+        110
+      ],
+      "sources": [
+        {
+          "path": "MonMon/App/MonMonApp.swift",
+          "label": "MonMonApp"
+        },
+        {
+          "path": "MonMon/App/RootTabView.swift",
+          "label": "RootTabView"
+        }
+      ]
+    },
+    {
+      "id": "store",
+      "type": "database",
+      "label": "Kho SwiftData",
+      "sublabel": "16 @Model · khoá ngoại UUID",
+      "pos": [
+        1050,
+        265
+      ],
+      "size": [
+        210,
+        90
+      ],
+      "sources": [
+        {
+          "path": "MonMon/App/MonMonSchema.swift",
+          "label": "MonMonSchema.models"
+        }
+      ]
+    },
+    {
+      "id": "cloud",
+      "type": "cloud",
+      "label": "CloudKit private DB",
+      "sublabel": "Bản sao, mặc định tắt",
+      "pos": [
+        1050,
+        60
+      ],
+      "size": [
+        210,
+        84
+      ],
+      "sources": [
+        {
+          "path": "MonMon/Settings/CloudSync.swift",
+          "label": "CloudSync"
+        }
+      ]
+    },
+    {
+      "id": "backup",
+      "type": "external",
+      "label": "Tệp backup",
+      "sublabel": "Files · JSON được kiểm tra",
+      "pos": [
+        180,
+        580
+      ],
+      "size": [
+        210,
+        76
+      ],
+      "sources": [
+        {
+          "path": "MonMon/Backup/MonMonBackupService.swift",
+          "label": "MonMonBackupService"
+        }
+      ]
+    },
+    {
+      "id": "fmarket",
+      "type": "external",
+      "label": "Fmarket",
+      "sublabel": "NAV quỹ mở",
+      "pos": [
+        330,
+        96
+      ],
+      "size": [
+        190,
+        66
+      ]
+    },
+    {
+      "id": "vndirect",
+      "type": "external",
+      "label": "VNDIRECT",
+      "sublabel": "Giá ETF niêm yết",
+      "pos": [
+        560,
+        96
+      ],
+      "size": [
+        190,
+        66
+      ]
+    },
+    {
+      "id": "vang",
+      "type": "external",
+      "label": "vang.today",
+      "sublabel": "Giá vàng mua vào",
+      "pos": [
+        790,
+        96
+      ],
+      "size": [
+        190,
+        66
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "iPhone · bản Dev và Prod không dùng chung gì",
+      "wraps": [
+        "widget",
+        "share",
+        "inbox",
+        "app",
+        "store"
+      ]
+    },
+    {
+      "kind": "security-group",
+      "label": "Khoá Face ID · khoá lại sau thời gian ở nền",
+      "wraps": [
+        "app"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "siri-to-app",
+      "from": "siri",
+      "to": "app",
+      "label": "câu lệnh giọng nói",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "widget-to-app",
+      "from": "widget",
+      "to": "app",
+      "label": "RecordQuickExpenseIntent",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "share-to-inbox",
+      "from": "share",
+      "to": "inbox",
+      "label": "ghi PDF + manifest",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "inbox-to-app",
+      "from": "inbox",
+      "to": "app",
+      "label": "duyệt xong mới xoá",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "app-to-store",
+      "from": "app",
+      "to": "store",
+      "label": "đọc / ghi qua ModelContext",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelDx": 76
+    },
+    {
+      "id": "store-to-cloud",
+      "from": "store",
+      "to": "cloud",
+      "label": "mirror khi bật đồng bộ",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "app-to-backup",
+      "from": "app",
+      "to": "backup",
+      "label": "xuất / phục hồi thủ công",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "right"
+    },
+    {
+      "id": "app-to-fmarket",
+      "from": "app",
+      "to": "fmarket",
+      "label": "chỉ gửi mã quỹ",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "app-to-vndirect",
+      "from": "app",
+      "to": "vndirect",
+      "label": "chỉ gửi mã ETF",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "app-to-vang",
+      "from": "app",
+      "to": "vang",
+      "label": "chỉ gửi mã sản phẩm",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Trên máy",
+      "items": [
+        "SwiftUI, một chủ tài khoản, không có tài khoản đăng nhập",
+        "16 @Model SwiftData, quan hệ là khoá ngoại UUID nối trong Swift"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Đường vào",
+      "items": [
+        "Siri và widget chạy App Intent trên container của app",
+        "Parse xong mà thiếu dữ liệu thì thành mục chờ duyệt, không đoán bừa"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Đường ra",
+      "items": [
+        "CloudKit private database, mặc định tắt, bật xong phải mở lại app",
+        "Backup là tệp người dùng tự xuất, có bước xác nhận trước khi phục hồi"
+      ]
+    }
+  ]
+}
