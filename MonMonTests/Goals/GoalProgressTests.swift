@@ -75,7 +75,6 @@ struct GoalProgressTests {
         FinancialGoal(
             id: UUID(),
             name: "Home",
-            kind: .home,
             targetAmount: targetAmount,
             earmarkedAmount: earmarkedAmount,
             targetDate: targetDate,
@@ -132,7 +131,6 @@ struct GoalJarCommitmentTests {
         FinancialGoal(
             id: UUID(),
             name: "Goal",
-            kind: .custom,
             targetAmount: target,
             earmarkedAmount: earmarked,
             targetDate: Date(timeIntervalSince1970: 1_900_000_000),

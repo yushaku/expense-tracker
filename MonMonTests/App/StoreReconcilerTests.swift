@@ -325,7 +325,6 @@ struct StoreReconcilerTests {
                 FinancialGoal(
                     id: goalID,
                     name: "Japan trip",
-                    kind: .trip,
                     targetAmount: 100_000_000,
                     earmarkedAmount: 10_000_000,
                     targetDate: day1.addingTimeInterval(31_536_000),

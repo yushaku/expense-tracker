@@ -103,7 +103,6 @@ struct MonMonBackupServiceTests {
             FinancialGoal(
                 id: UUID(),
                 name: "Orphan goal",
-                kind: .custom,
                 targetAmount: 1_000,
                 earmarkedAmount: 0,
                 targetDate: instant.addingTimeInterval(31_536_000),
@@ -273,7 +272,6 @@ struct MonMonBackupServiceTests {
         )
         #expect(restoredGoal.id == fixture.goalID)
         #expect(restoredGoal.fundingJarID == fixture.savingsJarID)
-        #expect(restoredGoal.kind == .trip)
         let restoredTrip = try #require(
             destination.mainContext.fetch(FetchDescriptor<TripWorkspace>()).single
         )
@@ -595,7 +593,6 @@ struct MonMonBackupServiceTests {
             FinancialGoal(
                 id: goalID,
                 name: "Japan trip",
-                kind: .trip,
                 targetAmount: 100_000_000,
                 earmarkedAmount: 10_000_000,
                 targetDate: instant.addingTimeInterval(31_536_000),

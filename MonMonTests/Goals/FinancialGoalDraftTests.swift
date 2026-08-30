@@ -14,7 +14,6 @@ struct FinancialGoalDraftTests {
         let savings = jar(name: "Savings", percent: 10)
         let draft = FinancialGoalDraft(
             name: "  First home  ",
-            kind: .home,
             targetAmountText: "1000000000",
             earmarkedAmountText: "100000000",
             targetDate: futureDate(months: 24),
@@ -136,7 +135,6 @@ struct FinancialGoalDraftTests {
     private func draft(name: String = "Home", jarID: UUID?) -> FinancialGoalDraft {
         FinancialGoalDraft(
             name: name,
-            kind: .home,
             targetAmountText: "1000",
             earmarkedAmountText: "100",
             targetDate: futureDate(months: 12),
@@ -161,7 +159,6 @@ struct FinancialGoalDraftTests {
         FinancialGoal(
             id: UUID(),
             name: "Existing",
-            kind: .custom,
             targetAmount: 10_000,
             earmarkedAmount: 0,
             targetDate: futureDate(months: 12),
@@ -193,7 +190,6 @@ struct FinancialGoalPersistenceTests {
         let goal = FinancialGoal(
             id: UUID(),
             name: "Trip",
-            kind: .trip,
             targetAmount: 30_000_000,
             earmarkedAmount: 5_000_000,
             targetDate: Date(timeIntervalSince1970: 1_900_000_000),
@@ -211,7 +207,6 @@ struct FinancialGoalPersistenceTests {
         #expect(storedGoals.count == 1)
         let stored = try #require(storedGoals.first)
         #expect(stored.id == goal.id)
-        #expect(stored.kind == FinancialGoalKind.trip)
         #expect(stored.fundingJarID == BudgetJarSeed.savingsID)
         #expect(stored.monthlyContribution == 2_000_000)
     }

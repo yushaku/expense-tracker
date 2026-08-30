@@ -9,9 +9,9 @@ import Testing
 struct TripWorkspaceTests {
     private let startedAt = Date(timeIntervalSince1970: 1_800_000_000)
 
-    @Test("A partially funded general goal starts a workspace with its accumulated amount")
-    func partiallyFundedGeneralGoalStartsWorkspace() throws {
-        let goal = makeGoal(kind: .custom, earmarkedAmount: 12_000_000)
+    @Test("A partially funded goal starts a workspace with its accumulated amount")
+    func partiallyFundedGoalStartsWorkspace() throws {
+        let goal = makeGoal(earmarkedAmount: 12_000_000)
         let workspaceID = UUID()
 
         let workspace = try TripWorkspaceLifecycle.start(
@@ -198,14 +198,12 @@ struct TripWorkspaceTests {
     }
 
     private func makeGoal(
-        kind: FinancialGoalKind = .trip,
         earmarkedAmount: Decimal = 30_000_000,
         fundingJarID: UUID? = BudgetJarSeed.savingsID
     ) -> FinancialGoal {
         FinancialGoal(
             id: UUID(),
             name: "Da Nang",
-            kind: kind,
             targetAmount: 30_000_000,
             earmarkedAmount: earmarkedAmount,
             targetDate: Date(timeIntervalSince1970: 1_900_000_000),
