@@ -52,6 +52,11 @@ struct StatementImportCommitServiceTests {
                 == fixture.expenseCategoryID
         )
         #expect(stored.first { $0.sourceImportID == importB }?.kind == .income)
+        let storedIncome = try #require(stored.first { $0.sourceImportID == importB })
+        #expect(
+            try IncomeAllocationLifecycle.snapshot(in: storedIncome)?.allocatedAmount == 500_000
+        )
+        #expect(stored.first { $0.sourceImportID == importA }?.incomeAllocationSnapshot == nil)
     }
 
     @Test("An eligible link attaches provenance without creating a transaction")
@@ -432,6 +437,17 @@ struct StatementImportCommitServiceTests {
         )
         context.insert(category(id: expenseCategoryID, kind: .expense))
         context.insert(category(id: incomeCategoryID, kind: .income))
+        context.insert(
+            BudgetJar(
+                id: UUID(),
+                name: "Savings",
+                allocationPercent: 100,
+                role: .savings,
+                symbolName: "building.columns.fill",
+                colorName: "yellow",
+                createdAt: occurredAt
+            )
+        )
         try context.save()
         return Fixture(
             container: container,

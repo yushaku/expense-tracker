@@ -260,6 +260,48 @@ struct TransactionDraftTests {
         #expect(transaction.signedAmount == 5_000_000)
     }
 
+    @Test("A Trip expense preserves its workspace and jar override through editing")
+    func tripMetadataRoundTripsThroughDraft() throws {
+        let tripID = UUID()
+        let jarID = UUID()
+        var draft = makeDraft()
+        draft.tripWorkspaceID = tripID
+        draft.budgetJarOverrideID = jarID
+
+        let transaction = try draft.makeTransaction(id: UUID(), createdAt: occurredAt)
+        let editingDraft = TransactionDraft(transaction: transaction)
+
+        #expect(transaction.tripWorkspaceID == tripID)
+        #expect(transaction.budgetJarOverrideID == jarID)
+        #expect(editingDraft.tripWorkspaceID == tripID)
+        #expect(editingDraft.budgetJarOverrideID == jarID)
+
+        let replacementTripID = UUID()
+        let replacementJarID = UUID()
+        var updatedDraft = editingDraft
+        updatedDraft.tripWorkspaceID = replacementTripID
+        updatedDraft.budgetJarOverrideID = replacementJarID
+        try updatedDraft.apply(to: transaction)
+
+        #expect(transaction.tripWorkspaceID == replacementTripID)
+        #expect(transaction.budgetJarOverrideID == replacementJarID)
+    }
+
+    @Test("Income cannot join a Trip and an override cannot exist by itself")
+    func invalidTripMetadataIsRejected() {
+        var income = makeDraft(kind: .income)
+        income.tripWorkspaceID = UUID()
+        #expect(throws: TransactionFormError.tripRequiresExpense) {
+            _ = try income.makeTransaction(id: UUID(), createdAt: occurredAt)
+        }
+
+        var overrideOnly = makeDraft()
+        overrideOnly.budgetJarOverrideID = UUID()
+        #expect(throws: TransactionFormError.jarOverrideRequiresTrip) {
+            _ = try overrideOnly.makeTransaction(id: UUID(), createdAt: occurredAt)
+        }
+    }
+
     @Test("An unparsable amount is rejected")
     func unparsableAmountIsRejected() {
         let draft = makeDraft(amountText: "a lot")
@@ -360,5 +402,76 @@ struct TransactionDraftTests {
             try draft.apply(to: transaction)
         }
         #expect(transaction.amount == 200_000)
+    }
+}
+
+@Suite("Transaction detail links")
+struct TransactionDetailLinksTests {
+    @Test("Category link opens its report for the transaction month")
+    func categoryLinkUsesTransactionMonth() {
+        let categoryID = UUID()
+        let occurredAt = Date(timeIntervalSince1970: 1_709_251_200)
+        let transaction = MoneyTransaction(
+            id: UUID(),
+            kind: .expense,
+            amount: 100_000,
+            occurredAt: occurredAt,
+            note: "",
+            accountID: UUID(),
+            categoryID: categoryID,
+            sourceRuleID: nil,
+            currencyCode: VNDCurrency.code,
+            createdAt: occurredAt
+        )
+        let links = TransactionDetailLinks.resolve(
+            transaction: transaction,
+            categoryID: categoryID,
+            accountID: nil,
+            availableTripIDs: []
+        )
+
+        let period = links.categoryPeriod(for: transaction)
+
+        #expect(period?.categoryID == categoryID)
+        #expect(period?.kind == .expense)
+        #expect(period?.range == .month(containing: occurredAt))
+    }
+
+    @Test("Only existing related items become link targets")
+    func missingRelatedItemsAreNotLinked() {
+        let accountID = UUID()
+        let categoryID = UUID()
+        let tripID = UUID()
+        let transaction = MoneyTransaction(
+            id: UUID(),
+            kind: .expense,
+            amount: 100_000,
+            occurredAt: .now,
+            note: "",
+            accountID: accountID,
+            categoryID: categoryID,
+            sourceRuleID: nil,
+            currencyCode: VNDCurrency.code,
+            createdAt: .now,
+            tripWorkspaceID: tripID
+        )
+
+        let links = TransactionDetailLinks.resolve(
+            transaction: transaction,
+            categoryID: categoryID,
+            accountID: accountID,
+            availableTripIDs: [tripID]
+        )
+        let missing = TransactionDetailLinks.resolve(
+            transaction: transaction,
+            categoryID: nil,
+            accountID: nil,
+            availableTripIDs: []
+        )
+
+        #expect(links.categoryID == categoryID)
+        #expect(links.accountID == accountID)
+        #expect(links.tripWorkspaceID == tripID)
+        #expect(missing == TransactionDetailLinks())
     }
 }

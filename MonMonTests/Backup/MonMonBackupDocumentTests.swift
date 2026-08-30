@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 import Testing
 
@@ -101,6 +102,80 @@ struct MonMonBackupDocumentTests {
         #expect(record.creditLimit == nil)
     }
 
+    @Test("A legacy transaction record without an income snapshot still decodes")
+    func legacyTransactionRecordDecodes() throws {
+        let data = Data(
+            #"""
+            {
+              "id": "00000000-0000-0000-0000-000000000001",
+              "kind": "income",
+              "amount": "1000",
+              "occurredAt": "2023-11-14T22:13:20.125Z",
+              "note": "Salary",
+              "accountID": "00000000-0000-0000-0000-000000000002",
+              "categoryID": null,
+              "sourceRuleID": null,
+              "currencyCode": "VND",
+              "createdAt": "2023-11-14T22:13:20.125Z",
+              "sourceImportID": null
+            }
+            """#.utf8
+        )
+
+        let record = try JSONDecoder().decode(
+            MonMonBackupPayload.TransactionRecord.self,
+            from: data
+        )
+        let reencoded = try JSONEncoder().encode(record)
+        let reencodedJSON = String(decoding: reencoded, as: UTF8.self)
+
+        #expect(record.incomeAllocationSnapshot == nil)
+        #expect(record.tripWorkspaceID == nil)
+        #expect(record.budgetJarOverrideID == nil)
+        #expect(reencodedJSON.contains("incomeAllocationSnapshot") == false)
+        #expect(reencodedJSON.contains("tripWorkspaceID") == false)
+        #expect(reencodedJSON.contains("budgetJarOverrideID") == false)
+    }
+
+    @Test("A legacy payload without budget jars still decodes")
+    func legacyPayloadWithoutBudgetJarsDecodes() throws {
+        let data = try JSONEncoder().encode(LegacyPayload.empty)
+
+        let payload = try JSONDecoder().decode(MonMonBackupPayload.self, from: data)
+
+        #expect(payload.budgetJars.isEmpty)
+        #expect(payload.goals.isEmpty)
+        #expect(payload.tripWorkspaces.isEmpty)
+    }
+
+    @Test("A signed legacy document without budget jars still validates")
+    func signedLegacyDocumentValidates() throws {
+        let payload = LegacyPayload.empty
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        let digest = SHA256.hash(data: try encoder.encode(payload))
+            .map { String(format: "%02x", $0) }
+            .joined()
+        let legacy = LegacyDocument(
+            format: MonMonBackupDocument.currentFormat,
+            formatVersion: MonMonBackupDocument.currentVersion,
+            exportedAt: MonMonBackupScalar.date(instant),
+            appVersion: "1.0",
+            flavour: .dev,
+            payload: payload,
+            payloadSHA256: digest
+        )
+
+        let validated = try MonMonBackupValidator.decodeAndValidate(
+            encoder.encode(legacy),
+            expectedFlavour: .dev
+        )
+
+        #expect(validated.payload.budgetJars.isEmpty)
+        #expect(validated.payload.goals.isEmpty)
+        #expect(validated.payload.tripWorkspaces.isEmpty)
+    }
+
     private func account(id: UUID, name: String) -> MonMonBackupPayload.AccountRecord {
         MonMonBackupPayload.AccountRecord(
             id: MonMonBackupScalar.uuid(id),
@@ -112,6 +187,50 @@ struct MonMonBackupDocumentTests {
             createdAt: MonMonBackupScalar.date(instant)
         )
     }
+}
+
+private struct LegacyPayload: Encodable {
+    var accounts: [MonMonBackupPayload.AccountRecord]
+    var savingsDeposits: [MonMonBackupPayload.SavingsDepositRecord]
+    var savingsWithdrawals: [MonMonBackupPayload.SavingsWithdrawalRecord]
+    var fundInstruments: [MonMonBackupPayload.FundInstrumentRecord]
+    var fundHoldings: [MonMonBackupPayload.FundHoldingRecord]
+    var fundSales: [MonMonBackupPayload.FundSaleRecord]
+    var categories: [MonMonBackupPayload.CategoryRecord]
+    var transactions: [MonMonBackupPayload.TransactionRecord]
+    var pendingCaptures: [MonMonBackupPayload.PendingCaptureRecord]
+    var transfers: [MonMonBackupPayload.TransferRecord]
+    var debts: [MonMonBackupPayload.DebtRecord]
+    var debtPayments: [MonMonBackupPayload.DebtPaymentRecord]
+    var recurringRules: [MonMonBackupPayload.RecurringRuleRecord]
+    var preferences: MonMonBackupPayload.Preferences
+
+    static let empty = LegacyPayload(
+        accounts: [],
+        savingsDeposits: [],
+        savingsWithdrawals: [],
+        fundInstruments: [],
+        fundHoldings: [],
+        fundSales: [],
+        categories: [],
+        transactions: [],
+        pendingCaptures: [],
+        transfers: [],
+        debts: [],
+        debtPayments: [],
+        recurringRules: [],
+        preferences: .empty
+    )
+}
+
+private struct LegacyDocument: Encodable {
+    var format: String
+    var formatVersion: Int
+    var exportedAt: String
+    var appVersion: String
+    var flavour: MonMonBackupFlavour
+    var payload: LegacyPayload
+    var payloadSHA256: String
 }
 
 extension Array {

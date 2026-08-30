@@ -1,8 +1,9 @@
 import Charts
 import SwiftUI
 
-/// The period's spending or earning split by category: a doughnut, and a row
-/// per category below it that opens the transactions behind it.
+/// Spending or earning split by category: a doughnut, and a row per category
+/// below it. A period makes those rows open its transactions; a Trip leaves
+/// them read-only because its slices already represent the complete workspace.
 ///
 /// The doughnut carries no legend of its own. Every name it would have listed is
 /// already in the rows below, and tapping a wedge names it in the middle of the
@@ -13,8 +14,24 @@ struct CategoryBreakdownCard: View {
     @Binding var kind: TransactionKind
 
     let slices: [CategoryBreakdownSlice]
-    let range: TransactionRange
+    /// The report period behind each row. `nil` keeps the card read-only.
+    let range: TransactionRange?
     let showsKindPicker: Bool
+    let emptyStateMessage: LocalizedStringKey?
+
+    init(
+        kind: Binding<TransactionKind>,
+        slices: [CategoryBreakdownSlice],
+        range: TransactionRange? = nil,
+        showsKindPicker: Bool,
+        emptyStateMessage: LocalizedStringKey? = nil
+    ) {
+        _kind = kind
+        self.slices = slices
+        self.range = range
+        self.showsKindPicker = showsKindPicker
+        self.emptyStateMessage = emptyStateMessage
+    }
 
     /// The wedge the owner tapped, held by id rather than by index so a period
     /// that reorders its categories keeps the same one picked.
@@ -212,23 +229,28 @@ struct CategoryBreakdownCard: View {
     private var categoryRows: some View {
         VStack(spacing: 10) {
             ForEach(slices) { slice in
-                NavigationLink(
-                    value: CategoryPeriod(
-                        categoryID: slice.categoryID,
-                        kind: kind,
-                        range: range
-                    )
-                ) {
-                    row(slice)
+                if let range {
+                    NavigationLink(
+                        value: CategoryPeriod(
+                            categoryID: slice.categoryID,
+                            kind: kind,
+                            range: range
+                        )
+                    ) {
+                        row(slice, showsDisclosure: true)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("breakdown-\(slice.id)")
+                    .accessibilityHint("Opens this category's transactions.")
+                } else {
+                    row(slice, showsDisclosure: false)
+                        .accessibilityIdentifier("breakdown-\(slice.id)")
                 }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("breakdown-\(slice.id)")
-                .accessibilityHint("Opens this category's transactions.")
             }
         }
     }
 
-    private func row(_ slice: CategoryBreakdownSlice) -> some View {
+    private func row(_ slice: CategoryBreakdownSlice, showsDisclosure: Bool) -> some View {
         HStack(spacing: 14) {
             Image(systemName: slice.symbolName)
                 .font(.footnote.weight(.bold))
@@ -265,10 +287,12 @@ struct CategoryBreakdownCard: View {
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
 
-            Image(systemName: "chevron.right")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(MonMonTheme.textMuted)
-                .accessibilityHidden(true)
+            if showsDisclosure {
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textMuted)
+                    .accessibilityHidden(true)
+            }
         }
         .padding(.vertical, 4)
         .contentShape(Rectangle())
@@ -286,9 +310,17 @@ struct CategoryBreakdownCard: View {
     }
 
     private var emptyState: some View {
-        Text(
-            "No \(kind.displayName(in: locale).lowercased()) recorded \(range.phrase(in: locale))."
-        )
+        Group {
+            if let emptyStateMessage {
+                Text(emptyStateMessage)
+            } else if let range {
+                Text(
+                    "No \(kind.displayName(in: locale).lowercased()) recorded \(range.phrase(in: locale))."
+                )
+            } else {
+                Text("No \(kind.displayName(in: locale).lowercased()) recorded.")
+            }
+        }
         .font(.subheadline)
         .foregroundStyle(MonMonTheme.textSecondary)
         .frame(maxWidth: .infinity, alignment: .leading)

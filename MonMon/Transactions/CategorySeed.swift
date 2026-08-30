@@ -44,6 +44,8 @@ enum CategorySeed {
         UUID(uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, index))
     }
 
+    static let entertainmentID = seedID(6)
+
     static let templates: [Template] = [
         Template(
             id: seedID(1),
@@ -81,7 +83,7 @@ enum CategorySeed {
             colorName: "red"
         ),
         Template(
-            id: seedID(6),
+            id: entertainmentID,
             nameKey: "Entertainment",
             kind: .expense,
             symbolName: "gamecontroller.fill",

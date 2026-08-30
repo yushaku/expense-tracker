@@ -13,6 +13,9 @@ struct DeletedTransaction: Equatable, Identifiable {
     let currencyCode: String
     let createdAt: Date
     let sourceImportID: String?
+    let incomeAllocationSnapshot: String?
+    let tripWorkspaceID: UUID?
+    let budgetJarOverrideID: UUID?
 
     init(_ transaction: MoneyTransaction) {
         id = transaction.id
@@ -26,6 +29,9 @@ struct DeletedTransaction: Equatable, Identifiable {
         currencyCode = transaction.currencyCode
         createdAt = transaction.createdAt
         sourceImportID = transaction.sourceImportID
+        incomeAllocationSnapshot = transaction.incomeAllocationSnapshot
+        tripWorkspaceID = transaction.tripWorkspaceID
+        budgetJarOverrideID = transaction.budgetJarOverrideID
     }
 
     func makeTransaction() -> MoneyTransaction {
@@ -40,7 +46,10 @@ struct DeletedTransaction: Equatable, Identifiable {
             sourceRuleID: sourceRuleID,
             currencyCode: currencyCode,
             createdAt: createdAt,
-            sourceImportID: sourceImportID
+            sourceImportID: sourceImportID,
+            incomeAllocationSnapshot: incomeAllocationSnapshot,
+            tripWorkspaceID: tripWorkspaceID,
+            budgetJarOverrideID: budgetJarOverrideID
         )
     }
 }
@@ -285,6 +294,7 @@ struct TransactionItem: View {
     let transaction: MoneyTransaction
     let category: TransactionCategory?
     let account: CashAccount?
+    let tripName: String?
     let showsDate: Bool
     let accessibilityIdentifier: String
 
@@ -292,12 +302,14 @@ struct TransactionItem: View {
         transaction: MoneyTransaction,
         category: TransactionCategory?,
         account: CashAccount?,
+        tripName: String? = nil,
         showsDate: Bool = true,
         accessibilityIdentifier: String
     ) {
         self.transaction = transaction
         self.category = category
         self.account = account
+        self.tripName = tripName
         self.showsDate = showsDate
         self.accessibilityIdentifier = accessibilityIdentifier
     }
@@ -318,6 +330,7 @@ struct TransactionItem: View {
                 transaction: transaction,
                 category: category,
                 account: account,
+                tripName: tripName,
                 showsDate: showsDate
             )
         }

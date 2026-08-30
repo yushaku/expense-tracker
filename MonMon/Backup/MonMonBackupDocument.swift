@@ -129,6 +129,9 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
     var fundInstruments: [FundInstrumentRecord]
     var fundHoldings: [FundHoldingRecord]
     var fundSales: [FundSaleRecord]
+    var budgetJars: [BudgetJarRecord]
+    var goals: [GoalRecord]
+    var tripWorkspaces: [TripWorkspaceRecord]
     var categories: [CategoryRecord]
     var transactions: [TransactionRecord]
     var pendingCaptures: [PendingCaptureRecord]
@@ -137,6 +140,29 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
     var debtPayments: [DebtPaymentRecord]
     var recurringRules: [RecurringRuleRecord]
     var preferences: Preferences
+    private var includesBudgetJars: Bool
+    private var includesGoals: Bool
+    private var includesTripWorkspaces: Bool
+
+    private enum CodingKeys: String, CodingKey {
+        case accounts
+        case savingsDeposits
+        case savingsWithdrawals
+        case fundInstruments
+        case fundHoldings
+        case fundSales
+        case budgetJars
+        case goals
+        case tripWorkspaces
+        case categories
+        case transactions
+        case pendingCaptures
+        case transfers
+        case debts
+        case debtPayments
+        case recurringRules
+        case preferences
+    }
 
     static let empty = MonMonBackupPayload(
         accounts: [],
@@ -145,6 +171,9 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         fundInstruments: [],
         fundHoldings: [],
         fundSales: [],
+        budgetJars: [],
+        goals: [],
+        tripWorkspaces: [],
         categories: [],
         transactions: [],
         pendingCaptures: [],
@@ -155,6 +184,113 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         preferences: .empty
     )
 
+    init(
+        accounts: [AccountRecord],
+        savingsDeposits: [SavingsDepositRecord],
+        savingsWithdrawals: [SavingsWithdrawalRecord],
+        fundInstruments: [FundInstrumentRecord],
+        fundHoldings: [FundHoldingRecord],
+        fundSales: [FundSaleRecord],
+        budgetJars: [BudgetJarRecord],
+        goals: [GoalRecord],
+        tripWorkspaces: [TripWorkspaceRecord] = [],
+        categories: [CategoryRecord],
+        transactions: [TransactionRecord],
+        pendingCaptures: [PendingCaptureRecord],
+        transfers: [TransferRecord],
+        debts: [DebtRecord],
+        debtPayments: [DebtPaymentRecord],
+        recurringRules: [RecurringRuleRecord],
+        preferences: Preferences
+    ) {
+        self.accounts = accounts
+        self.savingsDeposits = savingsDeposits
+        self.savingsWithdrawals = savingsWithdrawals
+        self.fundInstruments = fundInstruments
+        self.fundHoldings = fundHoldings
+        self.fundSales = fundSales
+        self.budgetJars = budgetJars
+        self.goals = goals
+        self.tripWorkspaces = tripWorkspaces
+        self.categories = categories
+        self.transactions = transactions
+        self.pendingCaptures = pendingCaptures
+        self.transfers = transfers
+        self.debts = debts
+        self.debtPayments = debtPayments
+        self.recurringRules = recurringRules
+        self.preferences = preferences
+        includesBudgetJars = true
+        includesGoals = true
+        includesTripWorkspaces = true
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        accounts = try container.decode([AccountRecord].self, forKey: .accounts)
+        savingsDeposits = try container.decode(
+            [SavingsDepositRecord].self,
+            forKey: .savingsDeposits
+        )
+        savingsWithdrawals = try container.decode(
+            [SavingsWithdrawalRecord].self,
+            forKey: .savingsWithdrawals
+        )
+        fundInstruments = try container.decode(
+            [FundInstrumentRecord].self,
+            forKey: .fundInstruments
+        )
+        fundHoldings = try container.decode([FundHoldingRecord].self, forKey: .fundHoldings)
+        fundSales = try container.decode([FundSaleRecord].self, forKey: .fundSales)
+        includesBudgetJars = container.contains(.budgetJars)
+        budgetJars =
+            try container.decodeIfPresent([BudgetJarRecord].self, forKey: .budgetJars) ?? []
+        includesGoals = container.contains(.goals)
+        goals = try container.decodeIfPresent([GoalRecord].self, forKey: .goals) ?? []
+        includesTripWorkspaces = container.contains(.tripWorkspaces)
+        tripWorkspaces =
+            try container.decodeIfPresent([TripWorkspaceRecord].self, forKey: .tripWorkspaces)
+            ?? []
+        categories = try container.decode([CategoryRecord].self, forKey: .categories)
+        transactions = try container.decode([TransactionRecord].self, forKey: .transactions)
+        pendingCaptures = try container.decode(
+            [PendingCaptureRecord].self,
+            forKey: .pendingCaptures
+        )
+        transfers = try container.decode([TransferRecord].self, forKey: .transfers)
+        debts = try container.decode([DebtRecord].self, forKey: .debts)
+        debtPayments = try container.decode([DebtPaymentRecord].self, forKey: .debtPayments)
+        recurringRules = try container.decode([RecurringRuleRecord].self, forKey: .recurringRules)
+        preferences = try container.decode(Preferences.self, forKey: .preferences)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(accounts, forKey: .accounts)
+        try container.encode(savingsDeposits, forKey: .savingsDeposits)
+        try container.encode(savingsWithdrawals, forKey: .savingsWithdrawals)
+        try container.encode(fundInstruments, forKey: .fundInstruments)
+        try container.encode(fundHoldings, forKey: .fundHoldings)
+        try container.encode(fundSales, forKey: .fundSales)
+        if includesBudgetJars {
+            try container.encode(budgetJars, forKey: .budgetJars)
+        }
+        if includesGoals {
+            try container.encode(goals, forKey: .goals)
+        }
+        if includesTripWorkspaces {
+            try container.encode(tripWorkspaces, forKey: .tripWorkspaces)
+        }
+        try container.encode(categories, forKey: .categories)
+        try container.encode(transactions, forKey: .transactions)
+        try container.encode(pendingCaptures, forKey: .pendingCaptures)
+        try container.encode(transfers, forKey: .transfers)
+        try container.encode(debts, forKey: .debts)
+        try container.encode(debtPayments, forKey: .debtPayments)
+        try container.encode(recurringRules, forKey: .recurringRules)
+        try container.encode(preferences, forKey: .preferences)
+    }
+
     func sorted() -> MonMonBackupPayload {
         var result = self
         result.accounts = accounts.backupSorted()
@@ -163,6 +299,9 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         result.fundInstruments = fundInstruments.backupSorted()
         result.fundHoldings = fundHoldings.backupSorted()
         result.fundSales = fundSales.backupSorted()
+        result.budgetJars = budgetJars.backupSorted()
+        result.goals = goals.backupSorted()
+        result.tripWorkspaces = tripWorkspaces.backupSorted()
         result.categories = categories.backupSorted()
         result.transactions = transactions.backupSorted()
         result.pendingCaptures = pendingCaptures.backupSorted()
@@ -176,7 +315,9 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
     var recordCount: Int {
         accounts.count + savingsDeposits.count + savingsWithdrawals.count
             + fundInstruments.count + fundHoldings.count + fundSales.count
-            + categories.count + transactions.count + pendingCaptures.count
+            + budgetJars.count + goals.count + tripWorkspaces.count + categories.count
+            + transactions.count
+            + pendingCaptures.count
             + transfers.count + debts.count + debtPayments.count + recurringRules.count
     }
 
@@ -279,6 +420,52 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         var symbolName: String
         var colorName: String
         var createdAt: String
+        var budgetJarID: String? = nil
+    }
+
+    struct BudgetJarRecord: Codable, Equatable, Sendable, MonMonBackupRecord {
+        var id: String
+        var name: String
+        var allocationPercent: String
+        var role: String
+        var symbolName: String
+        var colorName: String
+        var createdAt: String
+    }
+
+    struct GoalRecord: Codable, Equatable, Sendable, MonMonBackupRecord {
+        var id: String
+        var name: String
+        var targetAmount: String
+        var earmarkedAmount: String
+        var targetDate: String
+        var monthlyContribution: String
+        var fundingJarID: String
+        var symbolName: String
+        var colorName: String
+        var createdAt: String
+        var contributions: [GoalContributionRecord]? = nil
+        var archivedAt: String? = nil
+    }
+
+    struct GoalContributionRecord: Codable, Equatable, Sendable {
+        var id: String
+        var amount: String
+        var occurredAt: String
+    }
+
+    struct TripWorkspaceRecord: Codable, Equatable, Sendable, MonMonBackupRecord {
+        var id: String
+        var sourceGoalID: String?
+        var name: String
+        var budgetAmount: String
+        var fundingJarID: String?
+        var symbolName: String
+        var colorName: String
+        var status: String
+        var startedAt: String
+        var completedAt: String?
+        var createdAt: String
     }
 
     struct TransactionRecord: Codable, Equatable, Sendable, MonMonBackupRecord {
@@ -293,6 +480,9 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         var currencyCode: String
         var createdAt: String
         var sourceImportID: String?
+        var incomeAllocationSnapshot: String? = nil
+        var tripWorkspaceID: String? = nil
+        var budgetJarOverrideID: String? = nil
     }
 
     struct PendingCaptureRecord: Codable, Equatable, Sendable, MonMonBackupRecord {

@@ -50,6 +50,7 @@ enum RecurringGenerator {
         }
 
         let transactions = try context.fetch(FetchDescriptor<MoneyTransaction>())
+        let jars = try context.fetch(FetchDescriptor<BudgetJar>())
         var written = existingKeys(in: transactions)
         var report = Report()
 
@@ -75,20 +76,24 @@ enum RecurringGenerator {
                 }
                 written.insert(key)
 
-                context.insert(
-                    MoneyTransaction(
-                        id: UUID(),
-                        kind: rule.kind,
-                        amount: rule.amount,
-                        occurredAt: occurredAt,
-                        note: rule.note,
-                        accountID: rule.accountID,
-                        categoryID: rule.categoryID,
-                        sourceRuleID: rule.id,
-                        currencyCode: rule.currencyCode,
-                        createdAt: asOf
-                    )
+                let transaction = MoneyTransaction(
+                    id: UUID(),
+                    kind: rule.kind,
+                    amount: rule.amount,
+                    occurredAt: occurredAt,
+                    note: rule.note,
+                    accountID: rule.accountID,
+                    categoryID: rule.categoryID,
+                    sourceRuleID: rule.id,
+                    currencyCode: rule.currencyCode,
+                    createdAt: asOf
                 )
+                try IncomeAllocationLifecycle.captureNew(
+                    on: transaction,
+                    jars: jars,
+                    capturedAt: asOf
+                )
+                context.insert(transaction)
                 inserted += 1
             }
 

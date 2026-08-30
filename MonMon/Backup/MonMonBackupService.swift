@@ -21,6 +21,36 @@ private extension MonMonBackupService {
             update: updateAccount
         )
         try reconcile(
+            current: context.fetch(FetchDescriptor<BudgetJar>()),
+            records: payload.budgetJars,
+            in: context,
+            modelID: \BudgetJar.id,
+            createdAt: \BudgetJar.createdAt,
+            recordID: { try MonMonBackupScalar.parseUUID($0.id) },
+            make: makeBudgetJar,
+            update: updateBudgetJar
+        )
+        try reconcile(
+            current: context.fetch(FetchDescriptor<FinancialGoal>()),
+            records: payload.goals,
+            in: context,
+            modelID: \FinancialGoal.id,
+            createdAt: \FinancialGoal.createdAt,
+            recordID: { try MonMonBackupScalar.parseUUID($0.id) },
+            make: makeGoal,
+            update: updateGoal
+        )
+        try reconcile(
+            current: context.fetch(FetchDescriptor<TripWorkspace>()),
+            records: payload.tripWorkspaces,
+            in: context,
+            modelID: \TripWorkspace.id,
+            createdAt: \TripWorkspace.createdAt,
+            recordID: { try MonMonBackupScalar.parseUUID($0.id) },
+            make: makeTripWorkspace,
+            update: updateTripWorkspace
+        )
+        try reconcile(
             current: context.fetch(FetchDescriptor<TransactionCategory>()),
             records: payload.categories,
             in: context,
@@ -140,6 +170,10 @@ private extension MonMonBackupService {
             make: makeDebtPayment,
             update: updateDebtPayment
         )
+
+        if payload.budgetJars.isEmpty {
+            BudgetJarSeed.seedIfNeeded(in: context, saveChanges: false)
+        }
     }
 
     func reconcile<Model, Record>(
@@ -212,7 +246,8 @@ private extension MonMonBackupService {
             kind: try enumValue(record.kind),
             symbolName: record.symbolName,
             colorName: record.colorName,
-            createdAt: try MonMonBackupScalar.parseDate(record.createdAt)
+            createdAt: try MonMonBackupScalar.parseDate(record.createdAt),
+            budgetJarID: try optionalUUID(record.budgetJarID)
         )
     }
 
@@ -225,6 +260,101 @@ private extension MonMonBackupService {
         model.kind = try enumValue(record.kind)
         model.symbolName = record.symbolName
         model.colorName = record.colorName
+        model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
+        model.budgetJarID = try optionalUUID(record.budgetJarID)
+    }
+
+    func makeBudgetJar(_ record: MonMonBackupPayload.BudgetJarRecord) throws -> BudgetJar {
+        BudgetJar(
+            id: try MonMonBackupScalar.parseUUID(record.id),
+            name: record.name,
+            allocationPercent: try MonMonBackupScalar.parseDecimal(record.allocationPercent),
+            role: try enumValue(record.role),
+            symbolName: record.symbolName,
+            colorName: record.colorName,
+            createdAt: try MonMonBackupScalar.parseDate(record.createdAt)
+        )
+    }
+
+    func updateBudgetJar(
+        _ model: BudgetJar,
+        _ record: MonMonBackupPayload.BudgetJarRecord
+    ) throws {
+        model.id = try MonMonBackupScalar.parseUUID(record.id)
+        model.name = record.name
+        model.allocationPercent = try MonMonBackupScalar.parseDecimal(record.allocationPercent)
+        model.role = try enumValue(record.role)
+        model.symbolName = record.symbolName
+        model.colorName = record.colorName
+        model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
+    }
+
+    func makeGoal(_ record: MonMonBackupPayload.GoalRecord) throws -> FinancialGoal {
+        let goal = FinancialGoal(
+            id: try MonMonBackupScalar.parseUUID(record.id),
+            name: record.name,
+            targetAmount: try MonMonBackupScalar.parseDecimal(record.targetAmount),
+            earmarkedAmount: try MonMonBackupScalar.parseDecimal(record.earmarkedAmount),
+            targetDate: try MonMonBackupScalar.parseDate(record.targetDate),
+            monthlyContribution: try MonMonBackupScalar.parseDecimal(record.monthlyContribution),
+            fundingJarID: try MonMonBackupScalar.parseUUID(record.fundingJarID),
+            symbolName: record.symbolName,
+            colorName: record.colorName,
+            createdAt: try MonMonBackupScalar.parseDate(record.createdAt)
+        )
+        try restoreContributions(record.contributions, on: goal)
+        goal.archivedAt = try optionalDate(record.archivedAt)
+        return goal
+    }
+
+    func updateGoal(_ model: FinancialGoal, _ record: MonMonBackupPayload.GoalRecord) throws {
+        model.id = try MonMonBackupScalar.parseUUID(record.id)
+        model.name = record.name
+        model.targetAmount = try MonMonBackupScalar.parseDecimal(record.targetAmount)
+        model.earmarkedAmount = try MonMonBackupScalar.parseDecimal(record.earmarkedAmount)
+        model.targetDate = try MonMonBackupScalar.parseDate(record.targetDate)
+        model.monthlyContribution = try MonMonBackupScalar.parseDecimal(
+            record.monthlyContribution)
+        model.fundingJarID = try MonMonBackupScalar.parseUUID(record.fundingJarID)
+        model.symbolName = record.symbolName
+        model.colorName = record.colorName
+        model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
+        try restoreContributions(record.contributions, on: model)
+        model.archivedAt = try optionalDate(record.archivedAt)
+    }
+
+    func makeTripWorkspace(
+        _ record: MonMonBackupPayload.TripWorkspaceRecord
+    ) throws -> TripWorkspace {
+        TripWorkspace(
+            id: try MonMonBackupScalar.parseUUID(record.id),
+            sourceGoalID: try optionalUUID(record.sourceGoalID),
+            name: record.name,
+            budgetAmount: try MonMonBackupScalar.parseDecimal(record.budgetAmount),
+            fundingJarID: try optionalUUID(record.fundingJarID),
+            symbolName: record.symbolName,
+            colorName: record.colorName,
+            status: try enumValue(record.status),
+            startedAt: try MonMonBackupScalar.parseDate(record.startedAt),
+            completedAt: try optionalDate(record.completedAt),
+            createdAt: try MonMonBackupScalar.parseDate(record.createdAt)
+        )
+    }
+
+    func updateTripWorkspace(
+        _ model: TripWorkspace,
+        _ record: MonMonBackupPayload.TripWorkspaceRecord
+    ) throws {
+        model.id = try MonMonBackupScalar.parseUUID(record.id)
+        model.sourceGoalID = try optionalUUID(record.sourceGoalID)
+        model.name = record.name
+        model.budgetAmount = try MonMonBackupScalar.parseDecimal(record.budgetAmount)
+        model.fundingJarID = try optionalUUID(record.fundingJarID)
+        model.symbolName = record.symbolName
+        model.colorName = record.colorName
+        model.status = try enumValue(record.status)
+        model.startedAt = try MonMonBackupScalar.parseDate(record.startedAt)
+        model.completedAt = try optionalDate(record.completedAt)
         model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
     }
 
@@ -408,7 +538,10 @@ private extension MonMonBackupService {
             sourceRuleID: try optionalUUID(record.sourceRuleID),
             currencyCode: record.currencyCode,
             createdAt: try MonMonBackupScalar.parseDate(record.createdAt),
-            sourceImportID: record.sourceImportID
+            sourceImportID: record.sourceImportID,
+            incomeAllocationSnapshot: record.incomeAllocationSnapshot,
+            tripWorkspaceID: try optionalUUID(record.tripWorkspaceID),
+            budgetJarOverrideID: try optionalUUID(record.budgetJarOverrideID)
         )
     }
 
@@ -427,6 +560,9 @@ private extension MonMonBackupService {
         model.currencyCode = record.currencyCode
         model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
         model.sourceImportID = record.sourceImportID
+        model.incomeAllocationSnapshot = record.incomeAllocationSnapshot
+        model.tripWorkspaceID = try optionalUUID(record.tripWorkspaceID)
+        model.budgetJarOverrideID = try optionalUUID(record.budgetJarOverrideID)
     }
 
     func makePendingCapture(
@@ -784,6 +920,11 @@ struct MonMonBackupService {
                 fundHoldingRecord
             ),
             fundSales: try context.fetch(FetchDescriptor<FundSale>()).map(fundSaleRecord),
+            budgetJars: try context.fetch(FetchDescriptor<BudgetJar>()).map(budgetJarRecord),
+            goals: try context.fetch(FetchDescriptor<FinancialGoal>()).map(goalRecord),
+            tripWorkspaces: try context.fetch(FetchDescriptor<TripWorkspace>()).map(
+                tripWorkspaceRecord
+            ),
             categories: try context.fetch(FetchDescriptor<TransactionCategory>()).map(
                 categoryRecord
             ),
@@ -904,6 +1045,80 @@ struct MonMonBackupService {
             kind: model.kind.rawValue,
             symbolName: model.symbolName,
             colorName: model.colorName,
+            createdAt: MonMonBackupScalar.date(model.createdAt),
+            budgetJarID: model.budgetJarID.map(MonMonBackupScalar.uuid)
+        )
+    }
+
+    private func budgetJarRecord(
+        _ model: BudgetJar
+    ) -> MonMonBackupPayload.BudgetJarRecord {
+        MonMonBackupPayload.BudgetJarRecord(
+            id: MonMonBackupScalar.uuid(model.id),
+            name: model.name,
+            allocationPercent: MonMonBackupScalar.decimal(model.allocationPercent),
+            role: model.role.rawValue,
+            symbolName: model.symbolName,
+            colorName: model.colorName,
+            createdAt: MonMonBackupScalar.date(model.createdAt)
+        )
+    }
+
+    private func restoreContributions(
+        _ records: [MonMonBackupPayload.GoalContributionRecord]?,
+        on goal: FinancialGoal
+    ) throws {
+        let contributions = try (records ?? []).map { record in
+            GoalContribution(
+                id: try MonMonBackupScalar.parseUUID(record.id),
+                amount: try MonMonBackupScalar.parseDecimal(record.amount),
+                occurredAt: try MonMonBackupScalar.parseDate(record.occurredAt)
+            )
+        }
+        try GoalContributionStore.replace(entries: contributions, on: goal)
+    }
+
+    private func goalRecord(_ model: FinancialGoal) throws -> MonMonBackupPayload.GoalRecord {
+        guard let fundingJarID = model.fundingJarID else {
+            throw MonMonBackupServiceError.invalidSnapshot
+        }
+        return MonMonBackupPayload.GoalRecord(
+            id: MonMonBackupScalar.uuid(model.id),
+            name: model.name,
+            targetAmount: MonMonBackupScalar.decimal(model.targetAmount),
+            earmarkedAmount: MonMonBackupScalar.decimal(model.earmarkedAmount),
+            targetDate: MonMonBackupScalar.date(model.targetDate),
+            monthlyContribution: MonMonBackupScalar.decimal(model.monthlyContribution),
+            fundingJarID: MonMonBackupScalar.uuid(fundingJarID),
+            symbolName: model.symbolName,
+            colorName: model.colorName,
+            createdAt: MonMonBackupScalar.date(model.createdAt),
+            contributions: try GoalContributionStore.validatedEntries(for: model).map {
+                contribution in
+                MonMonBackupPayload.GoalContributionRecord(
+                    id: MonMonBackupScalar.uuid(contribution.id),
+                    amount: MonMonBackupScalar.decimal(contribution.amount),
+                    occurredAt: MonMonBackupScalar.date(contribution.occurredAt)
+                )
+            },
+            archivedAt: model.archivedAt.map(MonMonBackupScalar.date)
+        )
+    }
+
+    private func tripWorkspaceRecord(
+        _ model: TripWorkspace
+    ) -> MonMonBackupPayload.TripWorkspaceRecord {
+        MonMonBackupPayload.TripWorkspaceRecord(
+            id: MonMonBackupScalar.uuid(model.id),
+            sourceGoalID: model.sourceGoalID.map(MonMonBackupScalar.uuid),
+            name: model.name,
+            budgetAmount: MonMonBackupScalar.decimal(model.budgetAmount),
+            fundingJarID: model.fundingJarID.map(MonMonBackupScalar.uuid),
+            symbolName: model.symbolName,
+            colorName: model.colorName,
+            status: model.status.rawValue,
+            startedAt: MonMonBackupScalar.date(model.startedAt),
+            completedAt: model.completedAt.map(MonMonBackupScalar.date),
             createdAt: MonMonBackupScalar.date(model.createdAt)
         )
     }
@@ -922,7 +1137,10 @@ struct MonMonBackupService {
             sourceRuleID: model.sourceRuleID.map(MonMonBackupScalar.uuid),
             currencyCode: model.currencyCode,
             createdAt: MonMonBackupScalar.date(model.createdAt),
-            sourceImportID: model.sourceImportID
+            sourceImportID: model.sourceImportID,
+            incomeAllocationSnapshot: model.incomeAllocationSnapshot,
+            tripWorkspaceID: model.tripWorkspaceID.map(MonMonBackupScalar.uuid),
+            budgetJarOverrideID: model.budgetJarOverrideID.map(MonMonBackupScalar.uuid)
         )
     }
 

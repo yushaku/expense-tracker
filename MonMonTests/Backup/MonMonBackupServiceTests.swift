@@ -51,14 +51,35 @@ struct MonMonBackupServiceTests {
         #expect(validated.payload.fundInstruments.count == 1)
         #expect(validated.payload.fundHoldings.count == 1)
         #expect(validated.payload.fundSales.count == 1)
+        #expect(validated.payload.budgetJars.count == 3)
+        #expect(validated.payload.goals.count == 1)
+        #expect(validated.payload.tripWorkspaces.count == 1)
+        #expect(
+            validated.payload.goals.single?.fundingJarID
+                == MonMonBackupScalar.uuid(fixture.savingsJarID)
+        )
+        #expect(validated.payload.goals.single?.contributions?.single?.amount == "2000000")
+        #expect(validated.payload.goals.single?.archivedAt != nil)
         #expect(validated.payload.categories.count == 1)
+        #expect(
+            validated.payload.categories.single?.budgetJarID
+                == MonMonBackupScalar.uuid(fixture.jarID)
+        )
         #expect(validated.payload.transactions.count == 1)
+        #expect(
+            validated.payload.transactions.single?.tripWorkspaceID
+                == MonMonBackupScalar.uuid(fixture.tripWorkspaceID)
+        )
+        #expect(
+            validated.payload.transactions.single?.budgetJarOverrideID
+                == MonMonBackupScalar.uuid(fixture.savingsJarID)
+        )
         #expect(validated.payload.pendingCaptures.count == 1)
         #expect(validated.payload.transfers.count == 1)
         #expect(validated.payload.debts.count == 1)
         #expect(validated.payload.debtPayments.count == 1)
         #expect(validated.payload.recurringRules.count == 1)
-        #expect(validated.payload.recordCount == 14)
+        #expect(validated.payload.recordCount == 19)
         #expect(validated.payload.transactions.single?.sourceImportID == importedSource)
         #expect(validated.payload.preferences.theme == AppTheme.dark.rawValue)
         #expect(validated.payload.preferences.language == AppLanguage.vietnamese.rawValue)
@@ -75,6 +96,122 @@ struct MonMonBackupServiceTests {
                 == fixture.bankID.uuidString
         )
         #expect(try container.mainContext.fetchCount(FetchDescriptor<MoneyTransaction>()) == 1)
+    }
+
+    @Test("Export rejects a goal without its required funding jar")
+    func exportRejectsGoalWithoutFundingJar() throws {
+        let container = try makeContainer()
+        container.mainContext.insert(
+            FinancialGoal(
+                id: UUID(),
+                name: "Orphan goal",
+                targetAmount: 1_000,
+                earmarkedAmount: 0,
+                targetDate: instant.addingTimeInterval(31_536_000),
+                monthlyContribution: 100,
+                fundingJarID: nil,
+                symbolName: "target",
+                colorName: "green",
+                createdAt: instant
+            )
+        )
+        try container.mainContext.save()
+
+        #expect(throws: MonMonBackupServiceError.invalidSnapshot) {
+            _ = try service(container: container, defaults: makeDefaults()).makeDocument(
+                exportedAt: instant,
+                appVersion: "1.0",
+                flavour: .dev
+            )
+        }
+    }
+
+    @Test("An income allocation snapshot survives export and restore")
+    func incomeAllocationSnapshotRoundTrips() throws {
+        let source = try makeContainer()
+        let account = CashAccount(
+            id: UUID(),
+            name: "Bank",
+            kind: .normal,
+            openingBalance: 0,
+            currencyCode: VNDCurrency.code,
+            createdAt: instant
+        )
+        let category = TransactionCategory(
+            id: UUID(),
+            name: "Salary",
+            kind: .income,
+            symbolName: "banknote.fill",
+            colorName: "green",
+            createdAt: instant
+        )
+        let savingsJar = BudgetJar(
+            id: UUID(),
+            name: "Savings",
+            allocationPercent: 50,
+            role: .savings,
+            symbolName: "building.columns.fill",
+            colorName: "yellow",
+            createdAt: instant
+        )
+        let investmentJar = BudgetJar(
+            id: UUID(),
+            name: "Investment",
+            allocationPercent: 50,
+            role: .investment,
+            symbolName: "chart.line.uptrend.xyaxis",
+            colorName: "blue",
+            createdAt: instant
+        )
+        let transaction = MoneyTransaction(
+            id: UUID(),
+            kind: .income,
+            amount: 1_000,
+            occurredAt: instant,
+            note: "Salary",
+            accountID: account.id,
+            categoryID: category.id,
+            sourceRuleID: nil,
+            currencyCode: VNDCurrency.code,
+            createdAt: instant
+        )
+        try IncomeAllocationLifecycle.captureNew(
+            on: transaction,
+            jars: [savingsJar, investmentJar],
+            capturedAt: instant
+        )
+        source.mainContext.insert(account)
+        source.mainContext.insert(category)
+        source.mainContext.insert(savingsJar)
+        source.mainContext.insert(investmentJar)
+        source.mainContext.insert(transaction)
+        try source.mainContext.save()
+
+        let document = try service(container: source, defaults: makeDefaults()).makeDocument(
+            exportedAt: instant,
+            appVersion: "1.0",
+            flavour: .dev
+        )
+        #expect(
+            document.payload.transactions.single?.incomeAllocationSnapshot
+                == transaction.incomeAllocationSnapshot
+        )
+
+        let destination = try makeContainer()
+        let recoveryURL = temporaryRecoveryURL()
+        defer { try? FileManager.default.removeItem(at: recoveryURL) }
+        let validated = try MonMonBackupValidator.validate(document, expectedFlavour: .dev)
+        _ = try service(
+            container: destination,
+            defaults: makeDefaults(),
+            recoveryURL: recoveryURL
+        ).restore(validated)
+        let restored = try #require(
+            destination.mainContext.fetch(FetchDescriptor<MoneyTransaction>()).single
+        )
+
+        #expect(restored.incomeAllocationSnapshot == transaction.incomeAllocationSnapshot)
+        #expect(try IncomeAllocationLifecycle.snapshot(in: restored)?.allocatedAmount == 1_000)
     }
 
     @Test("Restore replaces every model, writes preferences, and is idempotent")
@@ -115,7 +252,7 @@ struct MonMonBackupServiceTests {
 
         let report = try restoreService.restore(validated)
 
-        #expect(report.restoredRecordCount == 14)
+        #expect(report.restoredRecordCount == 19)
         #expect(try destination.mainContext.fetchCount(FetchDescriptor<CashAccount>()) == 2)
         let restoredCredit = try #require(
             destination.mainContext.fetch(FetchDescriptor<CashAccount>()).first {
@@ -125,6 +262,35 @@ struct MonMonBackupServiceTests {
         #expect(restoredCredit.creditLimit == 20_000)
         #expect(try destination.mainContext.fetchCount(FetchDescriptor<MoneyTransaction>()) == 1)
         #expect(try destination.mainContext.fetchCount(FetchDescriptor<RecurringRule>()) == 1)
+        let restoredJar = try #require(
+            destination.mainContext.fetch(FetchDescriptor<BudgetJar>()).first {
+                $0.id == fixture.jarID
+            }
+        )
+        #expect(restoredJar.id == fixture.jarID)
+        #expect(restoredJar.role == .custom)
+        let restoredGoal = try #require(
+            destination.mainContext.fetch(FetchDescriptor<FinancialGoal>()).single
+        )
+        #expect(restoredGoal.id == fixture.goalID)
+        #expect(restoredGoal.fundingJarID == fixture.savingsJarID)
+        #expect(GoalContributionStore.entries(for: restoredGoal).single?.amount == 2_000_000)
+        #expect(restoredGoal.archivedAt == instant.addingTimeInterval(172_800))
+        let restoredTrip = try #require(
+            destination.mainContext.fetch(FetchDescriptor<TripWorkspace>()).single
+        )
+        #expect(restoredTrip.id == fixture.tripWorkspaceID)
+        #expect(restoredTrip.sourceGoalID == fixture.goalID)
+        #expect(restoredTrip.fundingJarID == fixture.savingsJarID)
+        let restoredTransaction = try #require(
+            destination.mainContext.fetch(FetchDescriptor<MoneyTransaction>()).single
+        )
+        #expect(restoredTransaction.tripWorkspaceID == fixture.tripWorkspaceID)
+        #expect(restoredTransaction.budgetJarOverrideID == fixture.savingsJarID)
+        let restoredCategory = try #require(
+            destination.mainContext.fetch(FetchDescriptor<TransactionCategory>()).single
+        )
+        #expect(restoredCategory.budgetJarID == fixture.jarID)
         #expect(
             destinationDefaults.string(forKey: TransactionDefaults.accountStorageKey)
                 == fixture.bankID.uuidString
@@ -278,6 +444,44 @@ struct MonMonBackupServiceTests {
         #expect(restored.creditLimit == 0)
     }
 
+    @Test("Restoring a legacy payload seeds the six default budget jars")
+    func legacyRestoreSeedsBudgetJars() throws {
+        let incoming = try MonMonBackupDocument.make(
+            payload: .empty,
+            exportedAt: instant,
+            appVersion: "1.0",
+            flavour: .dev
+        )
+        let validated = try MonMonBackupValidator.validate(incoming, expectedFlavour: .dev)
+        let destination = try makeContainer()
+        BudgetJarSeed.seedIfNeeded(
+            in: destination.mainContext,
+            createdAt: instant,
+            locale: Locale(identifier: "en")
+        )
+        let oldJar = try #require(
+            destination.mainContext.fetch(FetchDescriptor<BudgetJar>()).first {
+                $0.id == BudgetJarSeed.necessitiesID
+            }
+        )
+        oldJar.name = "Old jar"
+        try destination.mainContext.save()
+        let recoveryURL = temporaryRecoveryURL()
+        defer { try? FileManager.default.removeItem(at: recoveryURL) }
+
+        _ = try service(
+            container: destination,
+            defaults: makeDefaults(),
+            recoveryURL: recoveryURL
+        ).restore(validated)
+
+        let jars = try destination.mainContext.fetch(FetchDescriptor<BudgetJar>())
+        #expect(jars.count == 6)
+        #expect(jars.contains { $0.role == .savings })
+        #expect(jars.contains { $0.role == .investment })
+        #expect(!jars.contains { $0.name == "Old jar" })
+    }
+
     private func makeContainer() throws -> ModelContainer {
         try ModelContainer(
             for: Schema(MonMonSchema.models),
@@ -313,11 +517,16 @@ struct MonMonBackupServiceTests {
         let bankID = UUID()
         let walletID = UUID()
         let categoryID = UUID()
+        let jarID = UUID()
+        let investmentJarID = UUID()
+        let savingsJarID = UUID()
         let ruleID = UUID()
         let instrumentID = UUID()
         let depositID = UUID()
         let holdingID = UUID()
         let debtID = UUID()
+        let goalID = UUID()
+        let tripWorkspaceID = UUID()
 
         context.insert(
             CashAccount(
@@ -341,12 +550,81 @@ struct MonMonBackupServiceTests {
             )
         )
         context.insert(
+            BudgetJar(
+                id: jarID,
+                name: "Necessities",
+                allocationPercent: 55,
+                role: .custom,
+                symbolName: "house.fill",
+                colorName: "blue",
+                createdAt: instant
+            )
+        )
+        context.insert(
+            BudgetJar(
+                id: investmentJarID,
+                name: "Investment",
+                allocationPercent: 10,
+                role: .investment,
+                symbolName: "chart.line.uptrend.xyaxis",
+                colorName: "mauve",
+                createdAt: instant.addingTimeInterval(1)
+            )
+        )
+        context.insert(
+            BudgetJar(
+                id: savingsJarID,
+                name: "Savings",
+                allocationPercent: 10,
+                role: .savings,
+                symbolName: "building.columns.fill",
+                colorName: "yellow",
+                createdAt: instant.addingTimeInterval(2)
+            )
+        )
+        context.insert(
             TransactionCategory(
                 id: categoryID,
                 name: "Food",
                 kind: .expense,
                 symbolName: "fork.knife",
                 colorName: "orange",
+                createdAt: instant,
+                budgetJarID: jarID
+            )
+        )
+        let goal = FinancialGoal(
+            id: goalID,
+            name: "Japan trip",
+            targetAmount: 10_000_000,
+            earmarkedAmount: 8_000_000,
+            targetDate: instant.addingTimeInterval(31_536_000),
+            monthlyContribution: 5_000_000,
+            fundingJarID: savingsJarID,
+            symbolName: "airplane",
+            colorName: "sky",
+            createdAt: instant
+        )
+        try GoalContributionStore.record(
+            amount: 2_000_000,
+            on: goal,
+            id: UUID(),
+            occurredAt: instant.addingTimeInterval(86_400)
+        )
+        goal.archivedAt = instant.addingTimeInterval(172_800)
+        context.insert(goal)
+        context.insert(
+            TripWorkspace(
+                id: tripWorkspaceID,
+                sourceGoalID: goalID,
+                name: "Japan trip",
+                budgetAmount: 10_000_000,
+                fundingJarID: savingsJarID,
+                symbolName: "airplane",
+                colorName: "sky",
+                status: .active,
+                startedAt: instant,
+                completedAt: nil,
                 createdAt: instant
             )
         )
@@ -435,7 +713,9 @@ struct MonMonBackupServiceTests {
                 sourceRuleID: ruleID,
                 currencyCode: VNDCurrency.code,
                 createdAt: instant,
-                sourceImportID: importedSource
+                sourceImportID: importedSource,
+                tripWorkspaceID: tripWorkspaceID,
+                budgetJarOverrideID: savingsJarID
             )
         )
         context.insert(
@@ -505,7 +785,15 @@ struct MonMonBackupServiceTests {
             )
         )
         try context.save()
-        return FixtureIDs(bankID: bankID, walletID: walletID, categoryID: categoryID)
+        return FixtureIDs(
+            bankID: bankID,
+            walletID: walletID,
+            categoryID: categoryID,
+            jarID: jarID,
+            savingsJarID: savingsJarID,
+            goalID: goalID,
+            tripWorkspaceID: tripWorkspaceID
+        )
     }
 }
 
@@ -513,6 +801,10 @@ private struct FixtureIDs {
     let bankID: UUID
     let walletID: UUID
     let categoryID: UUID
+    let jarID: UUID
+    let savingsJarID: UUID
+    let goalID: UUID
+    let tripWorkspaceID: UUID
 }
 
 extension Array {

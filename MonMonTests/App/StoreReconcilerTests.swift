@@ -288,6 +288,64 @@ struct StoreReconcilerTests {
         #expect(remaining.first?.createdAt == day0)
     }
 
+    @Test("Two copies of a seeded budget jar fold into one")
+    func twoSeededBudgetJarsFoldIntoOne() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        for createdAt in [day0, day1] {
+            context.insert(
+                BudgetJar(
+                    id: BudgetJarSeed.savingsID,
+                    name: "Savings",
+                    allocationPercent: 10,
+                    role: .savings,
+                    symbolName: "building.columns.fill",
+                    colorName: "yellow",
+                    createdAt: createdAt
+                )
+            )
+        }
+        try context.save()
+
+        let report = try StoreReconciler.reconcile(in: context)
+
+        #expect(report.budgetJars == 1)
+        let remaining = try context.fetch(FetchDescriptor<BudgetJar>())
+        #expect(remaining.count == 1)
+        #expect(remaining.first?.createdAt == day0)
+    }
+
+    @Test("Two physical copies of one financial goal fold into one")
+    func duplicateFinancialGoalsFoldIntoOne() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let goalID = UUID()
+        for createdAt in [day0, day1] {
+            context.insert(
+                FinancialGoal(
+                    id: goalID,
+                    name: "Japan trip",
+                    targetAmount: 100_000_000,
+                    earmarkedAmount: 10_000_000,
+                    targetDate: day1.addingTimeInterval(31_536_000),
+                    monthlyContribution: 5_000_000,
+                    fundingJarID: BudgetJarSeed.savingsID,
+                    symbolName: "airplane",
+                    colorName: "sky",
+                    createdAt: createdAt
+                )
+            )
+        }
+        try context.save()
+
+        let report = try StoreReconciler.reconcile(in: context)
+
+        #expect(report.goals == 1)
+        let remaining = try context.fetch(FetchDescriptor<FinancialGoal>())
+        #expect(remaining.count == 1)
+        #expect(remaining.first?.createdAt == day0)
+    }
+
     @Test("Distinct accounts are never folded together")
     func distinctAccountsSurvive() throws {
         let container = try makeContainer()
@@ -308,6 +366,29 @@ struct StoreReconcilerTests {
 
         #expect(try StoreReconciler.reconcile(in: context).isEmpty)
         #expect(try context.fetchCount(FetchDescriptor<CashAccount>()) == 2)
+    }
+
+    @Test("Two workspaces for one source goal fold and repoint Trip expenses")
+    func duplicateTripWorkspacesFoldAndRepointExpenses() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let goalID = UUID()
+        let survivor = tripWorkspace(sourceGoalID: goalID, createdAt: day0)
+        let duplicate = tripWorkspace(sourceGoalID: goalID, createdAt: day1)
+        let expense = generated(ruleID: nil, occurredAt: day1, createdAt: day1)
+        expense.tripWorkspaceID = duplicate.id
+        expense.budgetJarOverrideID = BudgetJarSeed.savingsID
+        context.insert(survivor)
+        context.insert(duplicate)
+        context.insert(expense)
+        try context.save()
+
+        let report = try StoreReconciler.reconcile(in: context)
+
+        #expect(report.trips == 1)
+        #expect(try context.fetch(FetchDescriptor<TripWorkspace>()).map(\.id) == [survivor.id])
+        #expect(expense.tripWorkspaceID == survivor.id)
+        #expect(expense.budgetJarOverrideID == BudgetJarSeed.savingsID)
     }
 
     /// This runs on every launch and every return to the foreground, so a
@@ -344,6 +425,22 @@ struct StoreReconcilerTests {
         )
     }
 
+    private func tripWorkspace(sourceGoalID: UUID, createdAt: Date) -> TripWorkspace {
+        TripWorkspace(
+            id: UUID(),
+            sourceGoalID: sourceGoalID,
+            name: "Japan",
+            budgetAmount: 10_000_000,
+            fundingJarID: BudgetJarSeed.savingsID,
+            symbolName: "airplane",
+            colorName: "sky",
+            status: .active,
+            startedAt: createdAt,
+            completedAt: nil,
+            createdAt: createdAt
+        )
+    }
+
     private func generated(
         ruleID: UUID?,
         occurredAt: Date,
@@ -363,6 +460,18 @@ struct StoreReconcilerTests {
             currencyCode: VNDCurrency.code,
             createdAt: createdAt,
             sourceImportID: sourceImportID
+        )
+    }
+
+    private func allocationJar() -> BudgetJar {
+        BudgetJar(
+            id: UUID(),
+            name: "Savings",
+            allocationPercent: 100,
+            role: .savings,
+            symbolName: "building.columns.fill",
+            colorName: "yellow",
+            createdAt: day0
         )
     }
 
@@ -429,6 +538,57 @@ struct StoreReconcilerTests {
         let remaining = try context.fetch(FetchDescriptor<MoneyTransaction>())
         #expect(remaining.count == 1)
         #expect(remaining.first?.id == survivor.id)
+    }
+
+    @Test("Folding generated income preserves a valid allocation snapshot")
+    func generatedIncomeFoldPreservesSnapshot() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let recurring = rule(categoryID: nil, createdAt: day0)
+        context.insert(recurring)
+        let survivor = generated(ruleID: recurring.id, occurredAt: day0, createdAt: day0)
+        survivor.kind = .income
+        let duplicate = generated(ruleID: recurring.id, occurredAt: day0, createdAt: day1)
+        duplicate.kind = .income
+        try IncomeAllocationLifecycle.captureNew(
+            on: duplicate,
+            jars: [allocationJar()],
+            capturedAt: day1
+        )
+        let expectedSnapshot = duplicate.incomeAllocationSnapshot
+        context.insert(survivor)
+        context.insert(duplicate)
+        try context.save()
+
+        _ = try StoreReconciler.reconcile(in: context)
+
+        let transactions = try context.fetch(FetchDescriptor<MoneyTransaction>())
+        let remaining = try #require(transactions.first)
+        #expect(transactions.count == 1)
+        #expect(remaining.id == survivor.id)
+        #expect(remaining.incomeAllocationSnapshot == expectedSnapshot)
+    }
+
+    @Test("Folding duplicate expenses preserves Trip routing metadata")
+    func generatedExpenseFoldPreservesTripRouting() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let recurring = rule(categoryID: nil, createdAt: day0)
+        let survivor = generated(ruleID: recurring.id, occurredAt: day0, createdAt: day0)
+        let duplicate = generated(ruleID: recurring.id, occurredAt: day0, createdAt: day1)
+        duplicate.tripWorkspaceID = UUID()
+        duplicate.budgetJarOverrideID = UUID()
+        let expectedTripID = duplicate.tripWorkspaceID
+        let expectedJarID = duplicate.budgetJarOverrideID
+        context.insert(recurring)
+        context.insert(survivor)
+        context.insert(duplicate)
+        try context.save()
+
+        _ = try StoreReconciler.reconcile(in: context)
+
+        #expect(survivor.tripWorkspaceID == expectedTripID)
+        #expect(survivor.budgetJarOverrideID == expectedJarID)
     }
 
     @Test("One rule on two different days keeps both entries")

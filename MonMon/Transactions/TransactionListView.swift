@@ -3,6 +3,7 @@ import SwiftUI
 
 private enum SpendingDestination: Hashable {
     case accounts
+    case trip(UUID)
 }
 
 struct TransactionListView: View {
@@ -18,6 +19,9 @@ struct TransactionListView: View {
 
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
+
+    @Query(sort: \TripWorkspace.startedAt, order: .reverse)
+    private var tripWorkspaces: [TripWorkspace]
 
     @Query(sort: \PendingTransactionCapture.createdAt, order: .reverse)
     private var pendingCaptures: [PendingTransactionCapture]
@@ -65,6 +69,22 @@ struct TransactionListView: View {
                         } else {
                             quickActions
 
+                            if let featuredTrip {
+                                NavigationLink(value: SpendingDestination.trip(featuredTrip.id)) {
+                                    TripWorkspaceCard(
+                                        workspace: featuredTrip,
+                                        snapshot: TripSummary.snapshot(
+                                            workspace: featuredTrip,
+                                            transactions: transactions,
+                                            categories: categories
+                                        )
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityHint("Opens this trip workspace")
+                                .accessibilityIdentifier("spending-featured-trip")
+                            }
+
                             transactionsSection
                         }
                     }
@@ -109,6 +129,16 @@ struct TransactionListView: View {
                 switch destination {
                 case .accounts:
                     AccountsScreen()
+                case .trip(let workspaceID):
+                    if let workspace = tripWorkspaces.first(where: { $0.id == workspaceID }) {
+                        TripDetailView(workspace: workspace)
+                    } else {
+                        ContentUnavailableView(
+                            "Trip unavailable",
+                            systemImage: "airplane",
+                            description: Text("This trip is no longer in the current store.")
+                        )
+                    }
                 }
             }
             .navigationDestination(for: AccountDetailRoute.self) { route in
@@ -257,6 +287,8 @@ struct TransactionListView: View {
             }
             .frame(width: 32, height: 32)
         }
+        .buttonStyle(.plain)
+        .headerIconStyle()
         .accessibilityLabel(importInboxAccessibilityLabel)
         .accessibilityIdentifier("open-import-inbox")
     }
@@ -382,6 +414,10 @@ struct TransactionListView: View {
 
     private var accountNames: [UUID: String] {
         Dictionary(uniqueKeysWithValues: accounts.map { ($0.id, $0.name) })
+    }
+
+    private var featuredTrip: TripWorkspace? {
+        SpendingFeaturedTrip.select(from: tripWorkspaces)
     }
 
     /// The three things the owner sets up rather than records: what a

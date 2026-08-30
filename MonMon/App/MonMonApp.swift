@@ -45,6 +45,7 @@ struct MonMonApp: App {
         AccountSeed.seedDefaultBankIfNeeded(in: modelContainer.mainContext)
         AccountSeed.ensureUnassignedExists(in: modelContainer.mainContext)
         CategorySeed.seedIfEmpty(in: modelContainer.mainContext)
+        BudgetJarSeed.seedIfNeeded(in: modelContainer.mainContext)
 
         do {
             try StoreReconciler.reconcile(in: modelContainer.mainContext)

@@ -27,6 +27,32 @@ struct TransactionCaptureServiceTests {
         #expect(pending.isEmpty)
     }
 
+    @Test("A ready income captures its current jar allocation")
+    func readyIncomeCapturesAllocation() throws {
+        let fixture = try makeFixture()
+        let capture = ParsedTransactionCapture(
+            rawText: "Lương 5 triệu",
+            kind: .income,
+            amount: 5_000_000,
+            occurredAt: now,
+            note: "Lương",
+            accountID: fixture.accountID,
+            categoryID: fixture.incomeCategoryID,
+            issues: []
+        )
+
+        let result = try fixture.service.commit(capture, createdAt: now)
+        let context = ModelContext(fixture.container)
+        let transaction = try #require(
+            context.fetch(FetchDescriptor<MoneyTransaction>()).first
+        )
+
+        #expect(result.disposition == .transaction)
+        #expect(
+            try IncomeAllocationLifecycle.snapshot(in: transaction)?.allocatedAmount == 5_000_000
+        )
+    }
+
     @Test("An uncertain capture is staged without changing financial records")
     func uncertainCaptureIsStaged() throws {
         let fixture = try makeFixture()
@@ -274,6 +300,17 @@ struct TransactionCaptureServiceTests {
                 symbolName: "banknote.fill",
                 colorName: "green",
                 createdAt: now.addingTimeInterval(2)
+            )
+        )
+        context.insert(
+            BudgetJar(
+                id: UUID(),
+                name: "Savings",
+                allocationPercent: 100,
+                role: .savings,
+                symbolName: "building.columns.fill",
+                colorName: "yellow",
+                createdAt: now.addingTimeInterval(3)
             )
         )
         try context.save()

@@ -1,10 +1,51 @@
+import SwiftData
 import SwiftUI
+
+struct TransactionDetailLinks: Equatable {
+    var categoryID: UUID? = nil
+    var accountID: UUID? = nil
+    var tripWorkspaceID: UUID? = nil
+
+    static func resolve(
+        transaction: MoneyTransaction,
+        categoryID: UUID?,
+        accountID: UUID?,
+        availableTripIDs: Set<UUID>
+    ) -> TransactionDetailLinks {
+        TransactionDetailLinks(
+            categoryID: categoryID == transaction.categoryID ? categoryID : nil,
+            accountID: accountID == transaction.accountID ? accountID : nil,
+            tripWorkspaceID: transaction.tripWorkspaceID.flatMap {
+                availableTripIDs.contains($0) ? $0 : nil
+            }
+        )
+    }
+
+    func categoryPeriod(for transaction: MoneyTransaction) -> CategoryPeriod? {
+        categoryID.map {
+            CategoryPeriod(
+                categoryID: $0,
+                kind: transaction.kind,
+                range: .month(containing: transaction.occurredAt)
+            )
+        }
+    }
+}
+
+private enum TransactionDetailDestination: Hashable {
+    case category(CategoryPeriod)
+    case account(UUID)
+    case trip(UUID)
+}
 
 /// A quick read of one transaction list item. Editing remains in the full
 /// editor; this sheet is read-only so a tap never changes money by accident.
 struct TransactionDetailSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
+
+    @Query(sort: \TripWorkspace.startedAt, order: .reverse)
+    private var tripWorkspaces: [TripWorkspace]
 
     let transaction: MoneyTransaction
     let category: TransactionCategory?
@@ -14,6 +55,7 @@ struct TransactionDetailSheet: View {
 
     @State private var isConfirmingDelete = false
     @State private var isShowingDeleteError = false
+    @State private var selectedDetent = PresentationDetent.medium
 
     private static let dateTemplate = Date.FormatStyle()
         .weekday(.wide)
@@ -57,6 +99,24 @@ struct TransactionDetailSheet: View {
                     .accessibilityIdentifier("close-transaction-details")
                 }
             }
+            .navigationDestination(for: TransactionDetailDestination.self) { destination in
+                switch destination {
+                case .category(let period):
+                    CategoryTransactionsView(period: period)
+                case .account(let accountID):
+                    AccountDetailView(route: AccountDetailRoute(accountID: accountID))
+                case .trip(let workspaceID):
+                    if let workspace = tripWorkspaces.first(where: { $0.id == workspaceID }) {
+                        TripDetailView(workspace: workspace)
+                    } else {
+                        ContentUnavailableView(
+                            "Trip unavailable",
+                            systemImage: "airplane",
+                            description: Text("This trip is no longer in the current store.")
+                        )
+                    }
+                }
+            }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 actions
             }
@@ -84,53 +144,54 @@ struct TransactionDetailSheet: View {
             .foregroundStyle(MonMonTheme.textPrimary)
             .preferredColorScheme(MonMonTheme.colorScheme)
         }
-        // One height, so a drag downwards leaves in one motion rather than
-        // stopping halfway at a second one.
-        .presentationDetents([.large])
+        .presentationDetents([.medium, .large], selection: $selectedDetent)
         .presentationDragIndicator(.visible)
         .accessibilityIdentifier("transaction-details")
     }
 
     private var hero: some View {
-        VStack(spacing: 12) {
+        HStack(spacing: 14) {
             Image(systemName: symbolName)
-                .font(.system(size: 24, weight: .semibold))
+                .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(tint)
-                .frame(width: 58, height: 58)
-                .background(tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 18))
+                .frame(width: 48, height: 48)
+                .background(tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 14))
                 .accessibilityHidden(true)
 
-            Text("\(transaction.kind.signLabel)\(VNDCurrency.format(transaction.amount))")
-                .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.58)
-                .foregroundStyle(
-                    transaction.kind == .income ? MonMonTheme.gain : MonMonTheme.textPrimary
-                )
+            VStack(alignment: .leading, spacing: 4) {
+                Text("\(transaction.kind.signLabel)\(VNDCurrency.format(transaction.amount))")
+                    .font(.system(.title2, design: .rounded, weight: .bold))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.64)
+                    .foregroundStyle(
+                        transaction.kind == .income ? MonMonTheme.gain : MonMonTheme.textPrimary
+                    )
 
-            Text(categoryName)
-                .font(.headline)
-                .foregroundStyle(MonMonTheme.textSecondary)
-                .lineLimit(2)
-                .multilineTextAlignment(.center)
+                Text("\(transaction.kind.displayName(in: locale)) • \(formattedDate)")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .lineLimit(2)
+            }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 8)
         .accessibilityElement(children: .combine)
     }
 
     private var details: some View {
         TransactionDetailCard(
-            type: transaction.kind.displayName(in: locale),
-            typeImage: transaction.kind.symbolName,
             category: categoryName,
             categoryImage: symbolName,
             account: accountName,
             accountImage: account?.kind.iconName ?? "wallet.bifold",
-            date: TransactionPeriod.format(Self.dateTemplate, in: locale)
-                .format(transaction.occurredAt),
-            note: note
+            trip: tripName,
+            note: note,
+            categoryDestination: links.categoryPeriod(for: transaction).map(
+                TransactionDetailDestination.category
+            ),
+            accountDestination: links.accountID.map(TransactionDetailDestination.account),
+            tripDestination: links.tripWorkspaceID.map(TransactionDetailDestination.trip)
         )
     }
 
@@ -151,9 +212,27 @@ struct TransactionDetailSheet: View {
         account?.name ?? AppText.string("Unknown account", in: locale)
     }
 
-    private var note: String {
+    private var note: String? {
         let trimmed = transaction.note.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? AppText.string("No note", in: locale) : trimmed
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private var tripName: String? {
+        guard let workspaceID = transaction.tripWorkspaceID else { return nil }
+        return tripWorkspaces.first { $0.id == workspaceID }?.name
+    }
+
+    private var formattedDate: String {
+        TransactionPeriod.format(Self.dateTemplate, in: locale).format(transaction.occurredAt)
+    }
+
+    private var links: TransactionDetailLinks {
+        TransactionDetailLinks.resolve(
+            transaction: transaction,
+            categoryID: category?.id,
+            accountID: account?.id,
+            availableTripIDs: Set(tripWorkspaces.map(\.id))
+        )
     }
 
     private var symbolName: String {
@@ -175,28 +254,51 @@ struct TransactionDetailSheet: View {
 }
 
 private struct TransactionDetailCard: View {
-    let type: String
-    let typeImage: String
     let category: String
     let categoryImage: String
     let account: String
     let accountImage: String
-    let date: String
-    let note: String
+    let trip: String?
+    let note: String?
+    let categoryDestination: TransactionDetailDestination?
+    let accountDestination: TransactionDetailDestination?
+    let tripDestination: TransactionDetailDestination?
 
     var body: some View {
         VStack(spacing: 0) {
-            row(title: "Type", value: type, systemImage: typeImage)
+            destinationRow(
+                title: "Category",
+                value: category,
+                systemImage: categoryImage,
+                destination: categoryDestination
+            )
             divider
-            row(title: "Category", value: category, systemImage: categoryImage)
-            divider
-            row(title: "Account", value: account, systemImage: accountImage)
-            divider
-            row(title: "Date", value: date, systemImage: "calendar")
-            divider
-            row(title: "Note", value: note, systemImage: "note.text")
+            destinationRow(
+                title: "Account",
+                value: account,
+                systemImage: accountImage,
+                destination: accountDestination
+            )
+            if let trip {
+                divider
+                destinationRow(
+                    title: "Trip",
+                    value: trip,
+                    systemImage: "airplane",
+                    destination: tripDestination
+                )
+            }
+            if let note {
+                divider
+                rowContent(
+                    title: "Note",
+                    value: note,
+                    systemImage: "note.text",
+                    showsDisclosure: false
+                )
+            }
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 14)
         .background(MonMonTheme.surface)
         .clipShape(RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous))
         .overlay {
@@ -209,35 +311,68 @@ private struct TransactionDetailCard: View {
         Divider().overlay(MonMonTheme.border)
     }
 
-    private func row(
+    @ViewBuilder
+    private func destinationRow(
         title: LocalizedStringKey,
         value: String,
-        systemImage: String
+        systemImage: String,
+        destination: TransactionDetailDestination?
     ) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: systemImage)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(MonMonTheme.accent)
-                .frame(width: 34, height: 34)
-                .background(
-                    MonMonTheme.accent.opacity(0.14), in: RoundedRectangle(cornerRadius: 10)
+        if let destination {
+            NavigationLink(value: destination) {
+                rowContent(
+                    title: title,
+                    value: value,
+                    systemImage: systemImage,
+                    showsDisclosure: true
                 )
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint("Opens linked details")
+        } else {
+            rowContent(
+                title: title,
+                value: value,
+                systemImage: systemImage,
+                showsDisclosure: false
+            )
+        }
+    }
+
+    private func rowContent(
+        title: LocalizedStringKey,
+        value: String,
+        systemImage: String,
+        showsDisclosure: Bool
+    ) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: systemImage)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(MonMonTheme.accent)
+                .frame(width: 24)
                 .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
+            Text(title)
+                .font(.subheadline)
+                .foregroundStyle(MonMonTheme.textSecondary)
 
-                Text(value)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(MonMonTheme.textPrimary)
-                    .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 12)
+
+            Text(value)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(MonMonTheme.textPrimary)
+                .multilineTextAlignment(.trailing)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if showsDisclosure {
+                Image(systemName: "chevron.right")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textMuted)
+                    .accessibilityHidden(true)
             }
-
-            Spacer(minLength: 0)
         }
-        .padding(.vertical, 12)
+        .padding(.vertical, 11)
+        .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
     }
 }

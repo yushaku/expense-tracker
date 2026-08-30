@@ -7,6 +7,8 @@ struct TransactionEditorForm: View {
 
     let accounts: [CashAccount]
     let categories: [TransactionCategory]
+    let tripWorkspaces: [TripWorkspace]
+    let budgetJars: [BudgetJar]
     let isEditing: Bool
     let validationError: TransactionFormError?
     let saveErrorMessage: LocalizedStringKey?
@@ -22,6 +24,10 @@ struct TransactionEditorForm: View {
                     introduction
                     amountCard
                     detailsCard
+
+                    if showsTripRouting {
+                        tripRoutingCard
+                    }
 
                     if let saveErrorMessage {
                         errorBanner(saveErrorMessage)
@@ -146,6 +152,87 @@ struct TransactionEditorForm: View {
                 }
             }
         }
+    }
+
+    private var tripRoutingCard: some View {
+        card {
+            VStack(alignment: .leading, spacing: 18) {
+                sectionHeader("Trip spending", systemImage: "airplane")
+
+                HStack(alignment: .top, spacing: 12) {
+                    tripPickerField
+
+                    if draft.tripWorkspaceID != nil {
+                        budgetJarPickerField
+                    }
+                }
+
+                if draft.tripWorkspaceID != nil {
+                    Text(
+                        "The expense keeps its category. This choice only changes which jar pays for it."
+                    )
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                }
+
+                if let tripRoutingErrorMessage {
+                    validationMessage(
+                        tripRoutingErrorMessage,
+                        id: "transaction-trip-error"
+                    )
+                }
+            }
+        }
+    }
+
+    private var tripPickerField: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            fieldLabel("Trip")
+
+            Picker("Trip", selection: $draft.tripWorkspaceID) {
+                Text("No trip")
+                    .tag(UUID?.none)
+
+                ForEach(availableTripWorkspaces) { workspace in
+                    Text(workspace.name)
+                        .tag(UUID?.some(workspace.id))
+                }
+            }
+            .labelsHidden()
+            .accessibilityIdentifier("transaction-trip")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var budgetJarPickerField: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            fieldLabel("Budget jar")
+
+            Picker("Budget jar", selection: $draft.budgetJarOverrideID) {
+                Text("Use category jar")
+                    .tag(UUID?.none)
+
+                ForEach(budgetJars) { jar in
+                    Text(jar.name)
+                        .tag(UUID?.some(jar.id))
+                }
+            }
+            .labelsHidden()
+            .accessibilityIdentifier("transaction-trip-jar")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var showsTripRouting: Bool {
+        draft.kind == .expense
+            && (!availableTripWorkspaces.isEmpty || draft.tripWorkspaceID != nil)
+    }
+
+    private var availableTripWorkspaces: [TripWorkspace] {
+        TripTransactionSelection.availableWorkspaces(
+            tripWorkspaces,
+            selectedID: draft.tripWorkspaceID
+        )
     }
 
     private var categoryField: some View {
@@ -310,5 +397,16 @@ struct TransactionEditorForm: View {
 
     private var categoryErrorMessage: LocalizedStringKey? {
         validationError == .missingCategory ? "Pick a category." : nil
+    }
+
+    private var tripRoutingErrorMessage: LocalizedStringKey? {
+        switch validationError {
+        case .tripRequiresExpense:
+            "Only expenses can be added to a trip."
+        case .jarOverrideRequiresTrip:
+            "Choose a trip before overriding its budget jar."
+        default:
+            nil
+        }
     }
 }

@@ -61,6 +61,18 @@ struct RecurringGeneratorTests {
             .sorted { $0.occurredAt < $1.occurredAt }
     }
 
+    private func makeJar(percent: Decimal) -> BudgetJar {
+        BudgetJar(
+            id: UUID(),
+            name: "Savings",
+            allocationPercent: percent,
+            role: .savings,
+            symbolName: "building.columns.fill",
+            colorName: "yellow",
+            createdAt: Date(timeIntervalSince1970: 1)
+        )
+    }
+
     @Test("An empty store generates nothing")
     func emptyStoreGeneratesNothing() throws {
         let container = try makeContainer()
@@ -109,6 +121,7 @@ struct RecurringGeneratorTests {
             anchorDate: try day(2026, 8, 25)
         )
         context.insert(rule)
+        context.insert(makeJar(percent: 100))
 
         try RecurringGenerator.generate(in: context, asOf: try day(2026, 8, 25))
 
@@ -120,6 +133,8 @@ struct RecurringGeneratorTests {
         #expect(written.categoryID == categoryID)
         #expect(written.currencyCode == VNDCurrency.code)
         #expect(written.sourceRuleID == rule.id)
+        #expect(try IncomeAllocationLifecycle.snapshot(in: written)?.allocatedAmount == 25_000_000)
+        #expect(try IncomeAllocationLifecycle.snapshot(in: written)?.isEstimated == false)
     }
 
     @Test("Running again writes nothing")

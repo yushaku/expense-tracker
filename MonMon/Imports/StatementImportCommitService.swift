@@ -65,6 +65,7 @@ struct StatementImportCommitService {
 
         let accounts = try context.fetch(FetchDescriptor<CashAccount>())
         let categories = try context.fetch(FetchDescriptor<TransactionCategory>())
+        let jars = try context.fetch(FetchDescriptor<BudgetJar>())
         let transactions = try context.fetch(FetchDescriptor<MoneyTransaction>())
         let transfers = try context.fetch(FetchDescriptor<AccountTransfer>())
         let statementAccountIsValid = accounts.contains {
@@ -158,6 +159,11 @@ struct StatementImportCommitService {
                     throw StatementImportCommitError.invalidRequest
                 }
                 transaction.sourceImportID = sourceID.rawValue
+                try IncomeAllocationLifecycle.captureNew(
+                    on: transaction,
+                    jars: jars,
+                    capturedAt: createdAt
+                )
                 newTransactions.append(transaction)
                 report.createdTransactionCount += 1
 

@@ -37,6 +37,9 @@ struct MonMonBackupCounts: Equatable, Sendable {
     var fundInstruments: Int
     var fundHoldings: Int
     var fundSales: Int
+    var budgetJars: Int
+    var goals: Int
+    var tripWorkspaces: Int
     var categories: Int
     var transactions: Int
     var pendingCaptures: Int
@@ -52,6 +55,9 @@ struct MonMonBackupCounts: Equatable, Sendable {
         fundInstruments = payload.fundInstruments.count
         fundHoldings = payload.fundHoldings.count
         fundSales = payload.fundSales.count
+        budgetJars = payload.budgetJars.count
+        goals = payload.goals.count
+        tripWorkspaces = payload.tripWorkspaces.count
         categories = payload.categories.count
         transactions = payload.transactions.count
         pendingCaptures = payload.pendingCaptures.count
@@ -71,7 +77,9 @@ struct MonMonBackupPreview: Equatable, Sendable {
     var incomingRecordCount: Int {
         counts.accounts + counts.savingsDeposits + counts.savingsWithdrawals
             + counts.fundInstruments + counts.fundHoldings + counts.fundSales
-            + counts.categories + counts.transactions + counts.pendingCaptures
+            + counts.budgetJars + counts.goals + counts.tripWorkspaces + counts.categories
+            + counts.transactions
+            + counts.pendingCaptures
             + counts.transfers + counts.debts + counts.debtPayments + counts.recurringRules
     }
 }
@@ -207,11 +215,61 @@ private struct PayloadChecker {
             }
             try currency(record.currencyCode)
         }
+        try validateUniqueRecords(payload.budgetJars) { record in
+            try scalarIDAndDate(record.id, record.createdAt)
+            try require(BudgetJarRole(rawValue: record.role) != nil)
+            try require(
+                !record.name.isEmpty && !record.symbolName.isEmpty && !record.colorName.isEmpty)
+            let allocation = try MonMonBackupScalar.parseDecimal(record.allocationPercent)
+            try require(allocation >= .zero && allocation <= 100)
+        }
+        try validateUniqueRecords(payload.goals) { record in
+            try scalarIDAndDate(record.id, record.createdAt)
+            try require(
+                !record.name.isEmpty && !record.symbolName.isEmpty && !record.colorName.isEmpty)
+            let target = try MonMonBackupScalar.parseDecimal(record.targetAmount)
+            let earmarked = try MonMonBackupScalar.parseDecimal(record.earmarkedAmount)
+            try require(target > .zero)
+            try require(earmarked >= .zero && earmarked <= target)
+            try date(record.targetDate)
+            try nonnegative(record.monthlyContribution)
+            try uuid(record.fundingJarID)
+            try optionalDate(record.archivedAt)
+            if record.archivedAt != nil {
+                try require(earmarked == target)
+            }
+            var contributionIDs = Set<String>()
+            for contribution in record.contributions ?? [] {
+                try scalarIDAndDate(contribution.id, contribution.occurredAt)
+                try positive(contribution.amount)
+                try require(contributionIDs.insert(contribution.id).inserted)
+            }
+        }
+        try validateUniqueRecords(payload.tripWorkspaces) { record in
+            try scalarIDAndDate(record.id, record.createdAt)
+            try optionalUUID(record.sourceGoalID)
+            try require(
+                !record.name.isEmpty && !record.symbolName.isEmpty && !record.colorName.isEmpty)
+            try positive(record.budgetAmount)
+            try optionalUUID(record.fundingJarID)
+            guard let status = TripWorkspaceStatus(rawValue: record.status) else {
+                throw MonMonBackupValidationError.invalidPayload
+            }
+            try date(record.startedAt)
+            try optionalDate(record.completedAt)
+            switch status {
+            case .active:
+                try require(record.completedAt == nil)
+            case .completed:
+                try require(record.completedAt != nil)
+            }
+        }
         try validateUniqueRecords(payload.categories) { record in
             try scalarIDAndDate(record.id, record.createdAt)
             try require(TransactionKind(rawValue: record.kind) != nil)
             try require(
                 !record.name.isEmpty && !record.symbolName.isEmpty && !record.colorName.isEmpty)
+            try optionalUUID(record.budgetJarID)
         }
         try validateUniqueRecords(payload.fundInstruments) { record in
             try scalarIDAndDate(record.id, record.createdAt)
@@ -265,7 +323,9 @@ private struct PayloadChecker {
         }
         try validateUniqueRecords(payload.transactions) { record in
             try scalarIDAndDate(record.id, record.createdAt)
-            try require(TransactionKind(rawValue: record.kind) != nil)
+            guard let kind = TransactionKind(rawValue: record.kind) else {
+                throw MonMonBackupValidationError.invalidPayload
+            }
             try positive(record.amount)
             try date(record.occurredAt)
             try uuid(record.accountID)
@@ -273,6 +333,21 @@ private struct PayloadChecker {
             try optionalUUID(record.sourceRuleID)
             try currency(record.currencyCode)
             try importHash(record.sourceImportID)
+            try optionalUUID(record.tripWorkspaceID)
+            try optionalUUID(record.budgetJarOverrideID)
+            try require(record.tripWorkspaceID != nil || record.budgetJarOverrideID == nil)
+            try require(record.tripWorkspaceID == nil || kind == .expense)
+            if let encodedSnapshot = record.incomeAllocationSnapshot {
+                let snapshot: IncomeAllocationSnapshot
+                do {
+                    snapshot = try IncomeAllocationSnapshotCodec.decode(encodedSnapshot)
+                } catch {
+                    throw MonMonBackupValidationError.invalidPayload
+                }
+                let transactionAmount = try MonMonBackupScalar.parseDecimal(record.amount)
+                try require(kind == .income)
+                try require(snapshot.sourceAmount == transactionAmount)
+            }
         }
         try validateUniqueRecords(payload.pendingCaptures) { record in
             try scalarIDAndDate(record.id, record.createdAt)
@@ -376,11 +451,29 @@ private struct PayloadChecker {
         let accounts = Set(payload.accounts.map(\.id))
         let categories = Dictionary(
             uniqueKeysWithValues: payload.categories.map { ($0.id, $0.kind) })
+        let budgetJars = Set(payload.budgetJars.map(\.id))
+        let goals = Set(payload.goals.map(\.id))
+        let tripWorkspaces = Set(payload.tripWorkspaces.map(\.id))
         let instruments = Set(payload.fundInstruments.map(\.id))
         let deposits = Set(payload.savingsDeposits.map(\.id))
         let holdings = Set(payload.fundHoldings.map(\.id))
         let debts = Set(payload.debts.map(\.id))
         let rules = Set(payload.recurringRules.map(\.id))
+
+        for record in payload.categories {
+            if let budgetJarID = record.budgetJarID {
+                try requiredReference(budgetJarID, validIDs: budgetJars)
+            }
+        }
+        for record in payload.goals {
+            try requiredReference(record.fundingJarID, validIDs: budgetJars)
+        }
+        for record in payload.tripWorkspaces {
+            // A workspace may start from any funded goal, so the source goal's
+            // kind carries no rule here — only its existence does.
+            optionalReference(record.sourceGoalID, validIDs: goals)
+            optionalReference(record.fundingJarID, validIDs: budgetJars)
+        }
 
         for record in payload.savingsDeposits {
             optionalReference(record.sourceAccountID, validIDs: accounts)
@@ -401,6 +494,8 @@ private struct PayloadChecker {
             try requiredReference(record.accountID, validIDs: accounts)
             try categoryReference(record.categoryID, kind: record.kind, categories: categories)
             optionalReference(record.sourceRuleID, validIDs: rules)
+            optionalReference(record.tripWorkspaceID, validIDs: tripWorkspaces)
+            optionalReference(record.budgetJarOverrideID, validIDs: budgetJars)
         }
         for record in payload.pendingCaptures {
             optionalReference(record.accountID, validIDs: accounts)
@@ -424,6 +519,24 @@ private struct PayloadChecker {
     }
 
     private func validateAggregateLimits() throws {
+        let totalAllocation = try payload.budgetJars.reduce(Decimal.zero) { total, record in
+            total + (try MonMonBackupScalar.parseDecimal(record.allocationPercent))
+        }
+
+        let sourceGoalIDs = payload.tripWorkspaces.compactMap(\.sourceGoalID)
+        try require(Set(sourceGoalIDs).count == sourceGoalIDs.count)
+        try require(totalAllocation <= 100)
+
+        if !payload.budgetJars.isEmpty {
+            try require(
+                payload.budgetJars.filter { $0.role == BudgetJarRole.savings.rawValue }.count == 1
+            )
+            try require(
+                payload.budgetJars.filter { $0.role == BudgetJarRole.investment.rawValue }.count
+                    == 1
+            )
+        }
+
         let holdingUnits = try Dictionary(
             uniqueKeysWithValues: payload.fundHoldings.map {
                 ($0.id, try MonMonBackupScalar.parseDecimal($0.units))
@@ -606,6 +719,9 @@ extension MonMonBackupPayload.SavingsWithdrawalRecord: BackupIdentified {}
 extension MonMonBackupPayload.FundInstrumentRecord: BackupIdentified {}
 extension MonMonBackupPayload.FundHoldingRecord: BackupIdentified {}
 extension MonMonBackupPayload.FundSaleRecord: BackupIdentified {}
+extension MonMonBackupPayload.BudgetJarRecord: BackupIdentified {}
+extension MonMonBackupPayload.GoalRecord: BackupIdentified {}
+extension MonMonBackupPayload.TripWorkspaceRecord: BackupIdentified {}
 extension MonMonBackupPayload.CategoryRecord: BackupIdentified {}
 extension MonMonBackupPayload.TransactionRecord: BackupIdentified {}
 extension MonMonBackupPayload.PendingCaptureRecord: BackupIdentified {}

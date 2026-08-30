@@ -272,12 +272,11 @@ struct DateRangeFilterButton: View {
         } label: {
             Image(systemName: systemImage)
                 .font(.footnote.weight(.bold))
-                .foregroundStyle(MonMonTheme.accent)
                 .frame(width: 30, height: 30)
-                .background(MonMonTheme.accent.opacity(0.16), in: Circle())
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)
+        .headerIconStyle()
         .accessibilityLabel("Filter by date")
         .accessibilityValue(range.title(in: locale))
         .accessibilityIdentifier(identifier("period-filter"))

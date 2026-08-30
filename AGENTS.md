@@ -8,7 +8,7 @@ All agents and sub-agents working in this repository must follow this workflow.
 - Run `scripts/run-iphone.sh Yushaku` only from `dev`, after a branch has been merged into it. A change sitting on its own branch is not put on the phone: the phone carries what `dev` says it carries.
 - The iPhone must be connected, unlocked, and have Developer Mode enabled. If it is unavailable, locked, or busy preparing, report that blocker and wait; do not silently fall back to a Simulator.
 - Report only whether build, install, and launch succeeded. The user performs and owns hands-on UI and acceptance testing on the physical device.
-- Unit tests, format lint, and non-Simulator build checks remain quality gates before commit or merge unless the user explicitly waives them. Compiling a branch without installing it is how those checks run before a merge.
+- Format lint, unit tests, and a compile check remain quality gates before commit or merge unless the user explicitly waives them. See the quality gates section below for how to run them cheaply. Compiling a branch without installing it is how those checks run before a merge; compiling against the simulator SDK is a compile check, not Simulator validation.
 
 ## Branching
 
@@ -48,6 +48,35 @@ without saying which flavour is going onto the phone.
 dev variant with `swift scripts/make-dev-appicon.swift` rather than editing
 `AppIconDev.appiconset` by hand.
 
+
+## Quality gates
+
+Three gates, cheapest first. All of them use the fixed
+`-derivedDataPath /tmp/MonMonDerivedData` from the build and test sections of
+`README.md`: that is what makes a repeat run incremental instead of near-cold.
+Measured on this project, the whole loop is about five seconds warm.
+
+- **Format** — `xcrun swift-format lint -r MonMon MonMonTests`. A second or
+so, and it is the gate most often forgotten.
+- **Tests** — run them on `platform=macOS,arch=arm64`, not on an iPhone
+Simulator. The suite is unit tests and in-memory SwiftData, so a Mac runs all of
+it in seconds, while a Simulator destination clones and boots a device first and
+costs minutes. Narrow with `-only-testing:` while iterating; run the whole suite
+before committing.
+- **Compile for iOS** — the `-sdk iphonesimulator` build with
+`CODE_SIGNING_ALLOWED=NO`. It catches the iOS-only code a Mac test run cannot:
+the widget, the share extension, App Intents. A signed device build
+(`-destination 'generic/platform=iOS'`) is slower and belongs before a merge or
+an install, not in the edit loop.
+
+Two things that cost real time when ignored:
+
+- Run one `xcodebuild` per shell command. Two in a single line pay the build and
+startup cost twice.
+- A failure on one destination and not another is a fact about the destination.
+`LanguageResolutionTests` and the timing-sensitive `CloudSyncTests` both fail
+under a Simulator and pass on a Mac. Re-run the other way before reporting a
+failure as a bug.
 
 
 ## SwiftUI
