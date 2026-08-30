@@ -17,6 +17,10 @@ struct BudgetJarSnapshot: Identifiable, Equatable {
     var remaining: Decimal {
         projected - used
     }
+
+    var expectedRemainingIncome: Decimal {
+        max(0, projected - received)
+    }
 }
 
 struct BudgetSnapshot: Equatable {

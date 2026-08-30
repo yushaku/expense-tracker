@@ -286,7 +286,7 @@ struct BudgetJarCard: View {
             }
         } label: {
             HStack(alignment: .firstTextBaseline, spacing: 6) {
-                metric("Allocated", amount: row.projected)
+                metric("Projected", amount: row.projected)
 
                 Image(
                     systemName: isShowingAvailableBreakdown ? "chevron.up" : "chevron.down"
@@ -299,29 +299,30 @@ struct BudgetJarCard: View {
         }
         .buttonStyle(.plain)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityLabel("Allocated")
+        .accessibilityLabel("Projected")
         .accessibilityValue(VNDCurrency.format(row.projected))
         .accessibilityHint(
             isShowingAvailableBreakdown
-                ? "Hides planned and received amounts" : "Shows planned and received amounts"
+                ? "Hides received and expected remaining income"
+                : "Shows received and expected remaining income"
         )
     }
 
     private var availableBreakdown: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
-            breakdownTerm("Planned", amount: row.planned)
+            breakdownTerm("Received", amount: row.received)
 
             Text("+")
                 .font(.caption.weight(.bold))
                 .foregroundStyle(MonMonTheme.textMuted)
                 .accessibilityHidden(true)
 
-            breakdownTerm("Received", amount: row.received)
+            breakdownTerm("Expected remaining", amount: row.expectedRemainingIncome)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
-            "Planned \(VNDCurrency.format(row.planned)) plus received \(VNDCurrency.format(row.received))"
+            "Received \(VNDCurrency.format(row.received)) plus expected remaining \(VNDCurrency.format(row.expectedRemainingIncome))"
         )
     }
 
