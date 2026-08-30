@@ -112,16 +112,16 @@
 
 **Acceptance criteria:**
 
-- [ ] Saving, pausing through edit, or deleting a rule rebuilds recurring requests only after persistence succeeds.
-- [ ] Scheduling failure does not roll back a successfully persisted financial rule and is surfaced through coordinator state.
-- [ ] No unrelated behavior or files change.
+- [x] Saving, pausing through edit, or deleting a rule rebuilds recurring requests only after persistence succeeds.
+- [x] Scheduling failure does not roll back a successfully persisted financial rule and is surfaced through coordinator state.
+- [x] No unrelated behavior or files change.
 
 **Verification:**
 
-- [ ] Focused notification tests pass.
-- [ ] Full macOS test suite passes.
-- [ ] Format lint and iOS compile pass.
-- [ ] SwiftUI correctness and five-axis code review pass before commit.
+- [x] Focused notification tests pass.
+- [x] Full macOS test suite passes.
+- [x] Format lint and iOS compile pass.
+- [x] SwiftUI correctness and five-axis code review pass before commit.
 
 **Dependencies:** Task 4.
 

@@ -102,6 +102,19 @@ struct NotificationCoordinatorTests {
         #expect(coordinator.authorizationStatus == .denied)
     }
 
+    @Test("Authorization framework errors remain actionable")
+    func authorizationErrorIsSurfaced() async {
+        let client = FakeNotificationCenterClient()
+        client.authorizationError = StubError.failed
+        let coordinator = NotificationCoordinator(client: client)
+
+        let isAuthorized = await coordinator.authorizeIfNeeded()
+
+        #expect(!isAuthorized)
+        #expect(coordinator.authorizationStatus == .notDetermined)
+        #expect(coordinator.failure == .authorization)
+    }
+
     @Test("Reconciliation replaces only MonMon requests")
     func reconciliationIsScoped() async throws {
         let client = FakeNotificationCenterClient()

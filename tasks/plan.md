@@ -59,15 +59,15 @@ Notification-center client + coordinator
 ### Phase 3: User configuration and rule changes
 
 - [x] Task 4: Add the accessible Settings card, permission feedback, time controls, and localization.
-- [ ] Task 5: Refresh recurring requests immediately after successful rule save or deletion.
+- [x] Task 5: Refresh recurring requests immediately after successful rule save or deletion.
 
 ### Checkpoint: Complete
 
-- [ ] Format lint passes.
-- [ ] Full macOS test suite passes.
-- [ ] iOS compile check passes.
-- [ ] SwiftUI correctness checklist and code review find no blocking issue.
-- [ ] The feature branch is committed and ready for user review; it is not merged or installed.
+- [x] Format lint passes.
+- [x] Full macOS test suite passes.
+- [x] iOS compile check passes.
+- [x] SwiftUI correctness checklist and code review find no blocking issue.
+- [x] The feature branch is committed and ready for user review; it is not merged or installed.
 
 ## Verification Commands
 

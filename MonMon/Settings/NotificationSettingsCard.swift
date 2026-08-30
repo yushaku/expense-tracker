@@ -19,6 +19,7 @@ struct NotificationSettingsCard: View {
         NotificationPreferences.defaultRecurringTime.minuteOfDay
 
     @State private var isUpdating = false
+    @State private var pendingReconciliation: Task<Void, Never>?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -193,8 +194,11 @@ struct NotificationSettingsCard: View {
             isUpdating = true
             defer { isUpdating = false }
 
-            if enabled, !(await coordinator.authorizeIfNeeded()) {
-                rollback()
+            if enabled {
+                guard await coordinator.authorizeIfNeeded() else {
+                    rollback()
+                    return
+                }
             }
 
             await coordinator.reconcile(in: modelContext, locale: locale)
@@ -202,7 +206,14 @@ struct NotificationSettingsCard: View {
     }
 
     private func reconcile() {
-        Task { @MainActor in
+        pendingReconciliation?.cancel()
+        pendingReconciliation = Task { @MainActor in
+            do {
+                try await Task.sleep(for: .milliseconds(300))
+            } catch {
+                return
+            }
+
             await coordinator.reconcile(in: modelContext, locale: locale)
         }
     }
