@@ -281,6 +281,8 @@
 		A00000000000000000000957 /* FundCatalogueImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000956 /* FundCatalogueImport.swift */; };
 		A00000000000000000000959 /* FundCatalogueImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000958 /* FundCatalogueImportView.swift */; };
 		A00000000000000000000961 /* FundCatalogueImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000960 /* FundCatalogueImportTests.swift */; };
+		A00000000000000000000963 /* FundLogoCatalogueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000962 /* FundLogoCatalogueTests.swift */; };
+		A00000000000000000000965 /* FundLogoCatalogue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000964 /* FundLogoCatalogue.swift */; };
 		A00000000000000000000972 /* CloudSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000970 /* CloudSync.swift */; };
 		A00000000000000000000973 /* CloudSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000971 /* CloudSyncTests.swift */; };
 		A00000000000000000000981 /* VangTodayQuoteProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000980 /* VangTodayQuoteProvider.swift */; };
@@ -680,6 +682,8 @@
 		A00000000000000000000956 /* FundCatalogueImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundCatalogueImport.swift; sourceTree = "<group>"; };
 		A00000000000000000000958 /* FundCatalogueImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundCatalogueImportView.swift; sourceTree = "<group>"; };
 		A00000000000000000000960 /* FundCatalogueImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundCatalogueImportTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000962 /* FundLogoCatalogueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundLogoCatalogueTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000964 /* FundLogoCatalogue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundLogoCatalogue.swift; sourceTree = "<group>"; };
 		A00000000000000000000970 /* CloudSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSync.swift; sourceTree = "<group>"; };
 		A00000000000000000000971 /* CloudSyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000980 /* VangTodayQuoteProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VangTodayQuoteProvider.swift; sourceTree = "<group>"; };
@@ -1177,6 +1181,7 @@
 				A00000000000000000000151 /* FundSection.swift */,
 				A00000000000000000000152 /* FundHoldingCard.swift */,
 				A00000000000000000000F40 /* FundLogoView.swift */,
+				A00000000000000000000964 /* FundLogoCatalogue.swift */,
 				A00000000000000000000153 /* FundEditorView.swift */,
 				A00000000000000000000154 /* FundEditorForm.swift */,
 			);
@@ -1200,6 +1205,7 @@
 				A00000000000000000000950 /* FundQuoteProviderTests.swift */,
 				A00000000000000000000954 /* FundPriceRefresherTests.swift */,
 				A00000000000000000000960 /* FundCatalogueImportTests.swift */,
+				A00000000000000000000962 /* FundLogoCatalogueTests.swift */,
 				A00000000000000000000982 /* VangTodayQuoteProviderTests.swift */,
 				A00000000000000000000986 /* GoldWeightTests.swift */,
 				A00000000000000000000158 /* FundSummaryTests.swift */,
@@ -1885,6 +1891,7 @@
 				A00000000000000000000240 /* FundSection.swift in Sources */,
 				A00000000000000000000241 /* FundHoldingCard.swift in Sources */,
 				A00000000000000000000F41 /* FundLogoView.swift in Sources */,
+				A00000000000000000000965 /* FundLogoCatalogue.swift in Sources */,
 				A00000000000000000000242 /* FundEditorView.swift in Sources */,
 				A00000000000000000000243 /* FundEditorForm.swift in Sources */,
 				A00000000000000000000840 /* DebtDirection.swift in Sources */,
@@ -1996,6 +2003,7 @@
 				A00000000000000000000951 /* FundQuoteProviderTests.swift in Sources */,
 				A00000000000000000000955 /* FundPriceRefresherTests.swift in Sources */,
 				A00000000000000000000961 /* FundCatalogueImportTests.swift in Sources */,
+				A00000000000000000000963 /* FundLogoCatalogueTests.swift in Sources */,
 				A00000000000000000000983 /* VangTodayQuoteProviderTests.swift in Sources */,
 				A00000000000000000000987 /* GoldWeightTests.swift in Sources */,
 				A00000000000000000000247 /* FundSummaryTests.swift in Sources */,
