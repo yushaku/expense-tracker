@@ -1,6 +1,6 @@
-# ETF Catalogue Import
+# Bundled Fund Manager Logos
 
-- [x] Add and test the VNDIRECT ETF catalogue contract.
-- [x] Add and test quote-backed partial catalogue imports.
-- [x] Add the import-source picker and ETF-specific catalogue presentation.
-- [x] Run format, unit-test, iOS compile, review, and commit gates.
+- [ ] Add a tested ticker-to-manager asset catalogue.
+- [ ] Bundle and validate current fund-manager artwork.
+- [ ] Prefer bundled logos while retaining remote and monogram fallbacks.
+- [ ] Run review, format, full unit-test, iOS compile, and commit gates.
