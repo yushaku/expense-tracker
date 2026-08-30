@@ -599,8 +599,11 @@
           <dt>Received = thu nhập đã ghi trong tháng × phần trăm hũ</dt>
           <dd>Tiền thật đã vào, tính đến hôm nay.</dd>
 
-          <dt>Projected = (Received + phần định kỳ còn lại của tháng) × phần trăm hũ</dt>
-          <dd>Đây là con số <em>Left</em> lấy làm gốc, nên hũ vẫn nói đúng khi lương chưa về.</dd>
+          <dt>Projected = Received + (phần định kỳ còn lại của tháng × phần trăm hũ)</dt>
+          <dd>
+            Đây là con số <em>Left</em> lấy làm gốc. Khi mở chi tiết, thẻ hũ tách rõ phần đã
+            nhận và phần còn dự kiến về, nên không nhầm Projected với tiền đã có.
+          </dd>
 
           <dt>Used = chi tiêu định tuyến về hũ, cộng hoạt động theo vai trò</dt>
           <dd>Hũ savings cộng tiền gốc sổ tiết kiệm mở trong tháng; hũ investment cộng giá vốn khoản quỹ mua trong tháng.</dd>
@@ -867,6 +870,10 @@
             <li>Mức góp cần thiết = phần còn thiếu chia đều cho số tháng đến ngày đích, làm tròn lên.</li>
             <li>Ngày dự kiến hoàn thành suy từ mức góp bạn đặt.</li>
           </ul>
+          <p>
+            Ngay khi nhập kế hoạch, màn hình cho biết mức góp hiện tại có kịp ngày đích hay còn
+            thiếu bao nhiêu mỗi tháng. Nút gợi ý có thể điền thẳng mức góp cần thiết trước khi lưu.
+          </p>
         </div>
         <div class="card">
           <span class="label">Tích luỹ</span>
@@ -896,7 +903,8 @@
       <h2>Sức chứa của hũ</h2>
       <p class="section-lede">
         Đây là ràng buộc duy nhất nối mục tiêu với ngân sách: tổng mức góp hằng tháng của các mục
-        tiêu đang chạy trên một hũ không được vượt phần kế hoạch của chính hũ đó.
+        tiêu đang chạy trên một hũ không được vượt phần kế hoạch của chính hũ đó. Sức chứa luôn
+        lấy từ <strong>tháng hiện tại</strong>, kể cả khi bạn đang xem Budget của tháng khác.
       </p>
 
       <figure>
