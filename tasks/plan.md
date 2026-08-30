@@ -58,7 +58,7 @@ Notification-center client + coordinator
 
 ### Phase 3: User configuration and rule changes
 
-- [ ] Task 4: Add the accessible Settings card, permission feedback, time controls, and localization.
+- [x] Task 4: Add the accessible Settings card, permission feedback, time controls, and localization.
 - [ ] Task 5: Refresh recurring requests immediately after successful rule save or deletion.
 
 ### Checkpoint: Complete

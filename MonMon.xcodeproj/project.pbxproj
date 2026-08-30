@@ -185,6 +185,7 @@
 		A00000000000000000000277 /* AppLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000188 /* AppLock.swift */; };
 		A00000000000000000000278 /* LockScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000189 /* LockScreenView.swift */; };
 		A00000000000000000000279 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000190 /* SettingsView.swift */; };
+		N10000000000000000000205 /* NotificationSettingsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000105 /* NotificationSettingsCard.swift */; };
 		A00000000000000000000280 /* AppLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000191 /* AppLockTests.swift */; };
 		A00000000000000000000281 /* FloatingAddButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000192 /* FloatingAddButton.swift */; };
 		A00000000000000000000282 /* Percentage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000193 /* Percentage.swift */; };
@@ -593,6 +594,7 @@
 		A00000000000000000000188 /* AppLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLock.swift; sourceTree = "<group>"; };
 		A00000000000000000000189 /* LockScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenView.swift; sourceTree = "<group>"; };
 		A00000000000000000000190 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		N10000000000000000000105 /* NotificationSettingsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsCard.swift; sourceTree = "<group>"; };
 		A00000000000000000000191 /* AppLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000192 /* FloatingAddButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingAddButton.swift; sourceTree = "<group>"; };
 		A00000000000000000000193 /* Percentage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Percentage.swift; sourceTree = "<group>"; };
@@ -1339,6 +1341,7 @@
 				A00000000000000000000970 /* CloudSync.swift */,
 				A00000000000000000000189 /* LockScreenView.swift */,
 				A00000000000000000000190 /* SettingsView.swift */,
+				N10000000000000000000105 /* NotificationSettingsCard.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -1823,6 +1826,7 @@
 				A0000000000000000000080E /* PeriodGridPicker.swift in Sources */,
 				A00000000000000000000802 /* SegmentedTabs.swift in Sources */,
 				A00000000000000000000279 /* SettingsView.swift in Sources */,
+				N10000000000000000000205 /* NotificationSettingsCard.swift in Sources */,
 				A00000000000000000000278 /* LockScreenView.swift in Sources */,
 				A00000000000000000000277 /* AppLock.swift in Sources */,
 				A00000000000000000000972 /* CloudSync.swift in Sources */,

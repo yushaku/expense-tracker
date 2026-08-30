@@ -85,15 +85,15 @@
 
 **Acceptance criteria:**
 
-- [ ] Daily and recurring toggles are independent and each reveals its own time picker only while enabled.
-- [ ] Enable/time/language changes reconcile requests; denial rolls back an ineffective toggle and explains how to grant access.
-- [ ] Native controls have clear labels, identifiers, Dynamic Type behavior, and logical VoiceOver order.
+- [x] Daily and recurring toggles are independent and each reveals its own time picker only while enabled.
+- [x] Enable/time/language changes reconcile requests; denial rolls back an ineffective toggle and explains how to grant access.
+- [x] Native controls have clear labels, identifiers, Dynamic Type behavior, and logical VoiceOver order.
 
 **Verification:**
 
-- [ ] Notification coordinator tests still pass.
-- [ ] Settings preview and iOS target compile.
-- [ ] String Catalog contains complete English and Vietnamese entries for the new UI and notification content.
+- [x] Notification coordinator tests still pass.
+- [x] Settings preview dependencies and iOS target compile.
+- [x] String Catalog contains complete English and Vietnamese entries for the new UI and notification content.
 
 **Dependencies:** Task 3.
 
