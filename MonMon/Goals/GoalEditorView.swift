@@ -313,6 +313,14 @@ private struct GoalEditorForm: View {
                         .accessibilityIdentifier("goal-monthly")
                 }
 
+                if let planPreview {
+                    GoalPlanPreview(snapshot: planPreview) {
+                        draft.monthlyContributionText = VNDCurrency.formatPlain(
+                            planPreview.requiredMonthlyContribution
+                        )
+                    }
+                }
+
                 Text("Jar plan this month: \(VNDCurrency.format(plannedCapacity))")
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
@@ -510,5 +518,107 @@ private struct GoalEditorForm: View {
 
     private var jarError: LocalizedStringKey? {
         validationError == .missingFundingJar ? "Choose a funding jar." : nil
+    }
+
+    private var planPreview: GoalProgressSnapshot? {
+        guard
+            let targetAmount = VNDCurrency.parse(draft.targetAmountText),
+            targetAmount > 0,
+            let earmarkedAmount = VNDCurrency.parse(draft.earmarkedAmountText),
+            earmarkedAmount >= 0,
+            earmarkedAmount <= targetAmount,
+            let monthlyContribution = VNDCurrency.parse(draft.monthlyContributionText),
+            monthlyContribution >= 0
+        else {
+            return nil
+        }
+
+        return GoalProgress.snapshot(
+            targetAmount: targetAmount,
+            earmarkedAmount: earmarkedAmount,
+            targetDate: draft.targetDate,
+            monthlyContribution: monthlyContribution,
+            asOf: minimumTargetDate
+        )
+    }
+}
+
+private struct GoalPlanPreview: View {
+    let snapshot: GoalProgressSnapshot
+    let onUseRequiredContribution: () -> Void
+
+    private var tint: Color {
+        snapshot.isOnTrack ? MonMonTheme.accent : MonMonTheme.danger
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            statusLabel
+
+            if !snapshot.isComplete {
+                Text(
+                    "Required for the target date: \(VNDCurrency.format(snapshot.requiredMonthlyContribution)) per month."
+                )
+                .font(.caption)
+                .foregroundStyle(MonMonTheme.textSecondary)
+
+                forecast
+            }
+
+            if !snapshot.isOnTrack {
+                Button(action: onUseRequiredContribution) {
+                    Label {
+                        Text(
+                            "Use \(VNDCurrency.format(snapshot.requiredMonthlyContribution)) per month"
+                        )
+                    } icon: {
+                        Image(systemName: "arrow.up.circle.fill")
+                    }
+                }
+                .buttonStyle(.bordered)
+                .accessibilityIdentifier("goal-use-required-monthly")
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(tint.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("goal-plan-health")
+    }
+
+    @ViewBuilder
+    private var statusLabel: some View {
+        if snapshot.isComplete {
+            Label("Target fully earmarked", systemImage: "checkmark.circle.fill")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(tint)
+        } else if snapshot.isOnTrack {
+            Label("On track for the target date", systemImage: "checkmark.circle.fill")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(tint)
+        } else {
+            Label {
+                Text(
+                    "Add \(VNDCurrency.format(snapshot.monthlyContributionShortfall)) per month to stay on track"
+                )
+            } icon: {
+                Image(systemName: "exclamationmark.triangle.fill")
+            }
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(tint)
+        }
+    }
+
+    @ViewBuilder
+    private var forecast: some View {
+        if let date = snapshot.forecastCompletionDate {
+            Text("Current plan finishes \(date, format: .dateTime.month().year()).")
+                .font(.caption)
+                .foregroundStyle(MonMonTheme.textSecondary)
+        } else {
+            Text("Set a monthly contribution to get a completion forecast.")
+                .font(.caption)
+                .foregroundStyle(MonMonTheme.textSecondary)
+        }
     }
 }

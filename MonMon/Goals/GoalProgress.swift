@@ -6,6 +6,11 @@ struct GoalProgressSnapshot: Equatable {
     let forecastCompletionDate: Date?
     let progress: Double
     let isComplete: Bool
+    let monthlyContributionShortfall: Decimal
+
+    var isOnTrack: Bool {
+        isComplete || monthlyContributionShortfall == 0
+    }
 }
 
 enum GoalProgress {
@@ -14,21 +19,40 @@ enum GoalProgress {
         asOf: Date,
         calendar: Calendar = .current
     ) -> GoalProgressSnapshot {
-        let remaining = max(0, goal.targetAmount - goal.earmarkedAmount)
+        snapshot(
+            targetAmount: goal.targetAmount,
+            earmarkedAmount: goal.earmarkedAmount,
+            targetDate: goal.targetDate,
+            monthlyContribution: goal.monthlyContribution,
+            asOf: asOf,
+            calendar: calendar
+        )
+    }
+
+    static func snapshot(
+        targetAmount: Decimal,
+        earmarkedAmount: Decimal,
+        targetDate: Date,
+        monthlyContribution: Decimal,
+        asOf: Date,
+        calendar: Calendar = .current
+    ) -> GoalProgressSnapshot {
+        let remaining = max(0, targetAmount - earmarkedAmount)
         let isComplete = remaining == 0
         let required =
             isComplete
             ? Decimal.zero
             : divideRoundingUp(
                 remaining,
-                by: monthsThrough(goal.targetDate, from: asOf, calendar: calendar)
+                by: monthsThrough(targetDate, from: asOf, calendar: calendar)
             )
+        let shortfall = isComplete ? Decimal.zero : max(0, required - monthlyContribution)
 
         let progress: Double
-        if goal.targetAmount > 0 {
+        if targetAmount > 0 {
             progress = min(
                 max(
-                    NSDecimalNumber(decimal: goal.earmarkedAmount / goal.targetAmount)
+                    NSDecimalNumber(decimal: earmarkedAmount / targetAmount)
                         .doubleValue,
                     0
                 ),
@@ -43,12 +67,13 @@ enum GoalProgress {
             requiredMonthlyContribution: required,
             forecastCompletionDate: forecastDate(
                 remaining: remaining,
-                monthlyContribution: goal.monthlyContribution,
+                monthlyContribution: monthlyContribution,
                 asOf: asOf,
                 calendar: calendar
             ),
             progress: progress,
-            isComplete: isComplete
+            isComplete: isComplete,
+            monthlyContributionShortfall: shortfall
         )
     }
 

@@ -26,6 +26,25 @@ struct GoalProgressTests {
         #expect(snapshot.requiredMonthlyContribution == 300)
         #expect(snapshot.forecastCompletionDate == date(2027, 3, 31))
         #expect(snapshot.progress == 0.1)
+        #expect(snapshot.monthlyContributionShortfall == 0)
+        #expect(snapshot.isOnTrack)
+    }
+
+    @Test("Plan health reports the extra monthly contribution needed")
+    func planHealthReportsMonthlyShortfall() {
+        let snapshot = GoalProgress.snapshot(
+            targetAmount: 1_000,
+            earmarkedAmount: 100,
+            targetDate: date(2027, 3, 31),
+            monthlyContribution: 200,
+            asOf: date(2027, 1, 15),
+            calendar: calendar
+        )
+
+        #expect(snapshot.requiredMonthlyContribution == 300)
+        #expect(snapshot.monthlyContributionShortfall == 100)
+        #expect(!snapshot.isOnTrack)
+        #expect(snapshot.forecastCompletionDate == date(2027, 5, 31))
     }
 
     @Test("Required monthly contribution rounds up to a whole dong")
