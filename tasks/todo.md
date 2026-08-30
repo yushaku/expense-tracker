@@ -59,15 +59,15 @@
 
 **Acceptance criteria:**
 
-- [ ] The app owns one stable coordinator instance using `@State` with `@Observable`.
-- [ ] Launch and every active transition refresh permission and reconcile both namespaces without prompting.
-- [ ] Debug previews receive a self-contained coordinator dependency.
+- [x] The app owns one stable coordinator instance using `@State` with `@Observable`.
+- [x] Launch and every active transition refresh permission and reconcile both namespaces without prompting.
+- [x] Debug previews receive a self-contained coordinator dependency.
 
 **Verification:**
 
-- [ ] Existing app tests pass.
-- [ ] iOS compile succeeds.
-- [ ] Source inspection confirms no launch-time authorization request.
+- [x] Existing app tests pass.
+- [x] iOS compile succeeds.
+- [x] Source inspection confirms no launch-time authorization request.
 
 **Dependencies:** Task 2.
 

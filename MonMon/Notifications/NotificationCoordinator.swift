@@ -1,8 +1,10 @@
 import Foundation
 import Observation
+import SwiftData
 
 enum NotificationCoordinatorFailure: Equatable, Sendable {
     case authorization
+    case dataLoading
     case scheduling
 }
 
@@ -87,5 +89,41 @@ final class NotificationCoordinator {
                 failure = .scheduling
             }
         }
+    }
+
+    func reconcile(
+        in modelContext: ModelContext,
+        defaults: UserDefaults = .standard,
+        now: Date = .now,
+        locale: Locale = AppLanguage.stored.locale
+    ) async {
+        let rules: [RecurringRule]
+        do {
+            rules = try modelContext.fetch(FetchDescriptor<RecurringRule>())
+        } catch {
+            failure = .dataLoading
+            return
+        }
+
+        await reconcile(
+            preferences: NotificationPreferences(defaults: defaults),
+            recurringRules: rules.map(RecurringReminderRule.init),
+            now: now,
+            locale: locale
+        )
+    }
+}
+
+extension RecurringReminderRule {
+    init(_ rule: RecurringRule) {
+        self.init(
+            id: rule.id,
+            name: rule.note,
+            frequency: rule.frequency,
+            interval: rule.interval,
+            anchorDate: rule.anchorDate,
+            endDate: rule.endDate,
+            isPaused: rule.isPaused
+        )
     }
 }
