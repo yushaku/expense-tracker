@@ -9,9 +9,12 @@
 /* Begin PBXBuildFile section */
 		N10000000000000000000201 /* NotificationPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000101 /* NotificationPreferences.swift */; };
 		N10000000000000000000202 /* NotificationPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000102 /* NotificationPlan.swift */; };
+		N10000000000000000000203 /* NotificationCenterClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000103 /* NotificationCenterClient.swift */; };
+		N10000000000000000000204 /* NotificationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000104 /* NotificationCoordinator.swift */; };
 		N10000000000000000000211 /* NotificationPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000111 /* NotificationPreferencesTests.swift */; };
 		N10000000000000000000212 /* DailyExpenseReminderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000112 /* DailyExpenseReminderTests.swift */; };
 		N10000000000000000000213 /* RecurringDueReminderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000113 /* RecurringDueReminderTests.swift */; };
+		N10000000000000000000214 /* NotificationCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000114 /* NotificationCoordinatorTests.swift */; };
 		Y10000000000000000000201 /* TripWorkspaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000101 /* TripWorkspaceTests.swift */; };
 		Y10000000000000000000202 /* TripWorkspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000102 /* TripWorkspace.swift */; };
 		Y10000000000000000000203 /* TripWorkspaceLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000103 /* TripWorkspaceLifecycle.swift */; };
@@ -410,9 +413,12 @@
 /* Begin PBXFileReference section */
 		N10000000000000000000101 /* NotificationPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPreferences.swift; sourceTree = "<group>"; };
 		N10000000000000000000102 /* NotificationPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPlan.swift; sourceTree = "<group>"; };
+		N10000000000000000000103 /* NotificationCenterClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterClient.swift; sourceTree = "<group>"; };
+		N10000000000000000000104 /* NotificationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCoordinator.swift; sourceTree = "<group>"; };
 		N10000000000000000000111 /* NotificationPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPreferencesTests.swift; sourceTree = "<group>"; };
 		N10000000000000000000112 /* DailyExpenseReminderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyExpenseReminderTests.swift; sourceTree = "<group>"; };
 		N10000000000000000000113 /* RecurringDueReminderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringDueReminderTests.swift; sourceTree = "<group>"; };
+		N10000000000000000000114 /* NotificationCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCoordinatorTests.swift; sourceTree = "<group>"; };
 		Y10000000000000000000101 /* TripWorkspaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspaceTests.swift; sourceTree = "<group>"; };
 		Y10000000000000000000102 /* TripWorkspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspace.swift; sourceTree = "<group>"; };
 		Y10000000000000000000103 /* TripWorkspaceLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspaceLifecycle.swift; sourceTree = "<group>"; };
@@ -1002,6 +1008,8 @@
 			children = (
 				N10000000000000000000101 /* NotificationPreferences.swift */,
 				N10000000000000000000102 /* NotificationPlan.swift */,
+				N10000000000000000000103 /* NotificationCenterClient.swift */,
+				N10000000000000000000104 /* NotificationCoordinator.swift */,
 			);
 			path = Notifications;
 			sourceTree = "<group>";
@@ -1012,6 +1020,7 @@
 				N10000000000000000000111 /* NotificationPreferencesTests.swift */,
 				N10000000000000000000112 /* DailyExpenseReminderTests.swift */,
 				N10000000000000000000113 /* RecurringDueReminderTests.swift */,
+				N10000000000000000000114 /* NotificationCoordinatorTests.swift */,
 			);
 			path = Notifications;
 			sourceTree = "<group>";
@@ -1711,6 +1720,8 @@
 			files = (
 				N10000000000000000000201 /* NotificationPreferences.swift in Sources */,
 				N10000000000000000000202 /* NotificationPlan.swift in Sources */,
+				N10000000000000000000203 /* NotificationCenterClient.swift in Sources */,
+				N10000000000000000000204 /* NotificationCoordinator.swift in Sources */,
 				Y10000000000000000000202 /* TripWorkspace.swift in Sources */,
 				Y10000000000000000000203 /* TripWorkspaceLifecycle.swift in Sources */,
 				Y10000000000000000000205 /* TripSummary.swift in Sources */,
@@ -1952,6 +1963,7 @@
 				N10000000000000000000211 /* NotificationPreferencesTests.swift in Sources */,
 				N10000000000000000000212 /* DailyExpenseReminderTests.swift in Sources */,
 				N10000000000000000000213 /* RecurringDueReminderTests.swift in Sources */,
+				N10000000000000000000214 /* NotificationCoordinatorTests.swift in Sources */,
 				Y10000000000000000000201 /* TripWorkspaceTests.swift in Sources */,
 				Y10000000000000000000204 /* TripSummaryTests.swift in Sources */,
 				X10000000000000000000201 /* IncomeAllocationSnapshotTests.swift in Sources */,

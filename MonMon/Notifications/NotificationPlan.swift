@@ -3,6 +3,10 @@ import Foundation
 enum NotificationIdentifier {
     static let dailyExpense = "monmon.notification.daily-expense"
     static let recurringPrefix = "monmon.notification.recurring."
+
+    static func isOwned(_ identifier: String) -> Bool {
+        identifier == dailyExpense || identifier.hasPrefix(recurringPrefix)
+    }
 }
 
 struct NotificationContentPlan: Equatable, Sendable {

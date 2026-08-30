@@ -33,15 +33,15 @@
 
 **Acceptance criteria:**
 
-- [ ] Enabling from undetermined status requests only alert and sound authorization.
-- [ ] Denied/revoked status produces no plan and reports an actionable state to Settings.
-- [ ] Reconciliation adds current requests, removes stale MonMon requests, and preserves unrelated pending requests.
+- [x] Enabling from undetermined status requests only alert and sound authorization.
+- [x] Denied/revoked status produces no plan and reports an actionable state to Settings.
+- [x] Reconciliation adds current requests, removes stale MonMon requests, and preserves unrelated pending requests.
 
 **Verification:**
 
-- [ ] RED coordinator tests fail before implementation.
-- [ ] `NotificationCoordinatorTests` pass with an in-memory client.
-- [ ] iOS compile succeeds under strict concurrency.
+- [x] RED coordinator tests fail before implementation.
+- [x] `NotificationCoordinatorTests` pass with an in-memory client.
+- [x] iOS compile succeeds under strict concurrency.
 
 **Dependencies:** Task 1.
 

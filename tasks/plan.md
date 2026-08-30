@@ -47,12 +47,12 @@ Notification-center client + coordinator
 
 ### Phase 2: System scheduling boundary
 
-- [ ] Task 2: Implement and test authorization plus scoped request reconciliation.
+- [x] Task 2: Implement and test authorization plus scoped request reconciliation.
 - [ ] Task 3: Own the coordinator at app scope and reconcile on launch/active transitions.
 
 ### Checkpoint: Scheduling
 
-- [ ] Coordinator tests pass with an in-memory client.
+- [x] Coordinator tests pass with an in-memory client.
 - [ ] App compiles for iOS under Swift 6 strict concurrency.
 - [ ] Launch does not request notification permission.
 
