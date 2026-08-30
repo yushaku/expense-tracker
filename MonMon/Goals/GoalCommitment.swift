@@ -19,6 +19,25 @@ struct GoalCommitmentSnapshot: Equatable {
 }
 
 enum GoalCommitment {
+    static func snapshots(
+        jarIDs: [UUID],
+        goals: [FinancialGoal],
+        plannedByJar: [UUID: Decimal]
+    ) -> [UUID: GoalCommitmentSnapshot] {
+        Dictionary(
+            uniqueKeysWithValues: jarIDs.map { jarID in
+                (
+                    jarID,
+                    snapshot(
+                        jarID: jarID,
+                        goals: goals,
+                        plannedCapacity: plannedByJar[jarID, default: .zero]
+                    )
+                )
+            }
+        )
+    }
+
     static func snapshot(
         jarID: UUID,
         goals: [FinancialGoal],

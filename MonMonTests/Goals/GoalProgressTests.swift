@@ -118,6 +118,27 @@ struct GoalProgressTests {
 
 @Suite("Goal jar commitment")
 struct GoalJarCommitmentTests {
+    @Test("Every jar gets goal commitment and available capacity")
+    func commitmentsAreGroupedByJar() {
+        let savingsID = UUID()
+        let playID = UUID()
+        let goals = [
+            goal(jarID: savingsID, target: 10_000, earmarked: 1_000, monthly: 600),
+            goal(jarID: playID, target: 5_000, earmarked: 500, monthly: 200),
+        ]
+
+        let snapshots = GoalCommitment.snapshots(
+            jarIDs: [savingsID, playID],
+            goals: goals,
+            plannedByJar: [savingsID: 1_000, playID: 500]
+        )
+
+        #expect(snapshots[savingsID]?.committedAmount == 600)
+        #expect(snapshots[savingsID]?.availableAmount == 400)
+        #expect(snapshots[playID]?.committedAmount == 200)
+        #expect(snapshots[playID]?.availableAmount == 300)
+    }
+
     @Test("Several active goals commit one jar plan exactly once")
     func activeGoalsAreAggregated() {
         let jarID = UUID()

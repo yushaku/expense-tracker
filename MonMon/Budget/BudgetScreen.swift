@@ -56,7 +56,8 @@ struct BudgetScreen: View {
                             BudgetIncomeCard(
                                 snapshot: snapshot,
                                 monthTitle: monthTitle,
-                                onOpenTimeline: { isShowingIncomeTimeline = true }
+                                onOpenTimeline: { isShowingIncomeTimeline = true },
+                                onOpenSetup: { isShowingConfiguration = true }
                             )
 
                             if snapshot.plannedIncome == 0 && snapshot.receivedIncome == 0 {
@@ -66,6 +67,7 @@ struct BudgetScreen: View {
                             ForEach(snapshot.rowsByAllocation) { row in
                                 BudgetJarCard(
                                     row: row,
+                                    goalCommitment: goalCommitmentsByJar[row.jarID],
                                     onOpenDetails: { selectedJarID = row.jarID }
                                 )
                             }
@@ -169,6 +171,14 @@ struct BudgetScreen: View {
             monthContaining: asOf,
             jars: jars,
             recurringRules: recurringRules
+        )
+    }
+
+    private var goalCommitmentsByJar: [UUID: GoalCommitmentSnapshot] {
+        GoalCommitment.snapshots(
+            jarIDs: jars.map(\.id),
+            goals: goals,
+            plannedByJar: plannedByJar
         )
     }
 

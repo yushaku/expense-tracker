@@ -4,6 +4,7 @@ struct BudgetIncomeCard: View {
     let snapshot: BudgetSnapshot
     let monthTitle: String
     let onOpenTimeline: () -> Void
+    let onOpenSetup: () -> Void
 
     @State private var isShowingIncomeBreakdown = false
 
@@ -41,12 +42,16 @@ struct BudgetIncomeCard: View {
             BudgetAllocationOverview(snapshot: snapshot)
 
             if snapshot.unallocatedPercent > 0 {
-                Label(
-                    "\(PercentInput.format(snapshot.unallocatedPercent))% is not allocated yet",
-                    systemImage: "exclamationmark.circle.fill"
-                )
+                Button(action: onOpenSetup) {
+                    Label(
+                        "\(PercentInput.format(snapshot.unallocatedPercent))% is not allocated yet",
+                        systemImage: "exclamationmark.circle.fill"
+                    )
+                }
+                .buttonStyle(.plain)
                 .font(.caption.weight(.medium))
-                .foregroundStyle(MonMonTheme.textSecondary)
+                .foregroundStyle(MonMonTheme.accent)
+                .accessibilityHint("Opens Budget setup")
                 .accessibilityIdentifier("budget-unallocated")
             }
         }
@@ -167,6 +172,7 @@ private struct BudgetAllocationOverview: View {
 }
 struct BudgetJarCard: View {
     let row: BudgetJarSnapshot
+    var goalCommitment: GoalCommitmentSnapshot? = nil
     var onOpenDetails: (() -> Void)? = nil
 
     @State private var isShowingAvailableBreakdown = false
@@ -200,6 +206,10 @@ struct BudgetJarCard: View {
             if isShowingAvailableBreakdown {
                 availableBreakdown
                     .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+
+            if let goalCommitment, goalCommitment.goalCount > 0 {
+                BudgetGoalCommitmentSummary(snapshot: goalCommitment)
             }
         }
         .padding(18)
@@ -360,5 +370,48 @@ struct BudgetJarCard: View {
                 .minimumScaleFactor(0.6)
         }
         .frame(maxWidth: .infinity, alignment: isTrailing ? .trailing : .leading)
+    }
+}
+
+private struct BudgetGoalCommitmentSummary: View {
+    let snapshot: GoalCommitmentSnapshot
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Divider()
+                .overlay(MonMonTheme.border)
+
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                metric("Committed to goals", amount: snapshot.committedAmount)
+
+                Spacer(minLength: 8)
+
+                metric(
+                    snapshot.isOvercommitted ? "Over capacity" : "Available for new goals",
+                    amount: snapshot.isOvercommitted
+                        ? snapshot.overcommittedAmount : snapshot.availableAmount,
+                    isWarning: snapshot.isOvercommitted
+                )
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("budget-goal-commitment")
+    }
+
+    private func metric(
+        _ title: LocalizedStringKey,
+        amount: Decimal,
+        isWarning: Bool = false
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(title)
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(MonMonTheme.textMuted)
+
+            Text(VNDCurrency.format(amount))
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(isWarning ? MonMonTheme.danger : MonMonTheme.textPrimary)
+                .monospacedDigit()
+        }
     }
 }
