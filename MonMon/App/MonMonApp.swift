@@ -9,13 +9,16 @@ struct MonMonApp: App {
     @State private var appLock: AppLock
     @State private var appRoute: AppRoute
     @State private var cloudSync = CloudSync()
+    @State private var notificationCoordinator: NotificationCoordinator
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
         let appLock = AppLock()
         let appRoute = AppRoute()
+        let notificationCoordinator = NotificationCoordinator()
         _appLock = State(initialValue: appLock)
         _appRoute = State(initialValue: appRoute)
+        _notificationCoordinator = State(initialValue: notificationCoordinator)
 
         let modelContainer: ModelContainer
         do {
@@ -88,7 +91,11 @@ struct MonMonApp: App {
                 .environment(appLock)
                 .environment(appRoute)
                 .environment(cloudSync)
-                .task { cloudSync.startObserving() }
+                .environment(notificationCoordinator)
+                .task {
+                    cloudSync.startObserving()
+                    await notificationCoordinator.reconcile(in: container.mainContext)
+                }
                 // Duplicates arrive when synchronisation lands, which is after
                 // launch, so reconciling only in `init` would miss the case it
                 // exists for. Coming back to the app is the next moment the
@@ -102,6 +109,9 @@ struct MonMonApp: App {
                     // since the app was opened — an app left running overnight
                     // would otherwise not record today until it was relaunched.
                     _ = try? RecurringGenerator.generate(in: container.mainContext)
+                    Task {
+                        await notificationCoordinator.reconcile(in: container.mainContext)
+                    }
                 }
         }
         .modelContainer(container)

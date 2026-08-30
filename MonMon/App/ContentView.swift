@@ -61,6 +61,7 @@ struct ContentView: View {
             .modelContainer(PreviewData.populated)
             .environment(AppLock(isLocked: false))
             .environment(AppRoute())
+            .environment(NotificationCoordinator())
     }
 
     #Preview("App · empty") {
@@ -68,5 +69,6 @@ struct ContentView: View {
             .modelContainer(PreviewData.empty)
             .environment(AppLock(isLocked: false))
             .environment(AppRoute())
+            .environment(NotificationCoordinator())
     }
 #endif

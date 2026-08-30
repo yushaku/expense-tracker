@@ -6,7 +6,7 @@ import SwiftUI
 /// Shaped like `TransactionKind`: a `String` raw value that is never renamed,
 /// because the store keeps it. The `Calendar` arithmetic lives here rather than
 /// in `RecurrenceSchedule` so adding a frequency is one case, not two.
-enum RecurrenceFrequency: String, Codable, CaseIterable, Identifiable {
+enum RecurrenceFrequency: String, Codable, CaseIterable, Identifiable, Sendable {
     case daily
     case weekly
     case monthly
