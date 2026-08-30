@@ -110,7 +110,7 @@ extension FundInstrumentCandidate {
     ]
 }
 
-enum FundQuoteError: Error, Equatable {
+enum FundQuoteError: Error, Equatable, Sendable {
     /// The provider has no such symbol.
     case symbolNotFound
     /// The symbol exists but carries no usable data point.

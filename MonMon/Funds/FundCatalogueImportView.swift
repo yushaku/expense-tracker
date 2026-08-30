@@ -379,12 +379,20 @@ struct FundCatalogueImportView: View {
     }
 
     private func addChosen() {
+        Task { await importChosen() }
+    }
+
+    private func importChosen() async {
         saveErrorMessage = nil
         // Everything ticked, even if the search has since narrowed the list.
         let picked = importer.importable.filter { chosen.contains($0.symbol) }
 
         do {
-            try importer.importing(picked, into: modelContext, existing: instruments)
+            _ = try await importer.importing(
+                picked,
+                into: modelContext,
+                existing: instruments
+            )
             dismiss()
         } catch {
             modelContext.rollback()
