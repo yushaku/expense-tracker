@@ -162,7 +162,7 @@ struct GoalJarCommitmentTests {
         let snapshots = GoalCommitment.snapshots(
             jarIDs: [savingsID, playID],
             goals: goals,
-            plannedByJar: [savingsID: 1_000, playID: 500]
+            capacityByJar: [savingsID: 1_000, playID: 500]
         )
 
         #expect(snapshots[savingsID]?.committedAmount == 600)

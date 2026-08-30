@@ -230,7 +230,7 @@ struct GoalDetailView: View {
     private var tripWorkspaces: [TripWorkspace]
 
     let goalID: UUID
-    let plannedByJar: [UUID: Decimal]
+    let capacityByJar: [UUID: Decimal]
     let asOf: Date
 
     @State private var editorMode: GoalEditorMode?
@@ -300,7 +300,7 @@ struct GoalDetailView: View {
             }
         }
         .appSheet(item: $editorMode) { mode in
-            GoalEditorView(mode: mode, plannedByJar: plannedByJar, asOf: asOf)
+            GoalEditorView(mode: mode, capacityByJar: capacityByJar, asOf: asOf)
         }
         .appSheet(isPresented: $isShowingContribution) {
             if let goal {
