@@ -1,6 +1,25 @@
 import SwiftData
 import SwiftUI
 
+struct FundInstrumentImportOption: Identifiable {
+    let source: FundQuoteSource
+
+    var id: String { source.rawValue }
+
+    var title: LocalizedStringKey {
+        switch source {
+        case .fmarket:
+            "Fmarket — Open-ended funds"
+        case .vndirect:
+            "VNDIRECT — ETFs"
+        case .vangToday:
+            "vang.today — Gold products"
+        case .manual:
+            "Add by hand"
+        }
+    }
+}
+
 enum FundInstrumentListScope: String, Identifiable {
     case all
     case funds
@@ -21,16 +40,18 @@ enum FundInstrumentListScope: String, Identifiable {
 
     var defaultKind: FundInstrumentKind { kinds[0] }
 
-    var importSource: FundQuoteSource {
+    var importOptions: [FundInstrumentImportOption] {
         switch self {
-        case .all, .funds:
-            .fmarket
+        case .all:
+            [.init(source: .fmarket), .init(source: .vndirect), .init(source: .vangToday)]
+        case .funds:
+            [.init(source: .fmarket), .init(source: .vndirect)]
         case .gold:
-            .vangToday
+            [.init(source: .vangToday)]
         }
     }
 
-    var title: String {
+    var title: LocalizedStringKey {
         switch self {
         case .all:
             "Instruments"
@@ -41,21 +62,25 @@ enum FundInstrumentListScope: String, Identifiable {
         }
     }
 
-    var emptyDescription: String {
+    var emptyDescription: LocalizedStringKey {
         switch self {
         case .all, .funds:
-            "Add from Fmarket to import open-ended funds with their NAV, or add one by hand."
+            "Import open-ended funds from Fmarket or listed ETFs from VNDIRECT, or add one by hand."
         case .gold:
             "Add from vang.today to import gold products with shop prices, or add one by hand."
         }
     }
 
     @MainActor
-    func makeImporter() -> FundCatalogueImport {
-        switch importSource {
+    func makeImporter(source: FundQuoteSource) -> FundCatalogueImport {
+        switch source {
+        case .fmarket:
+            FundCatalogueImport(provider: FmarketQuoteProvider())
+        case .vndirect:
+            FundCatalogueImport(provider: VNDirectQuoteProvider())
         case .vangToday:
             FundCatalogueImport(provider: VangTodayQuoteProvider())
-        case .manual, .fmarket, .vndirect:
+        case .manual:
             FundCatalogueImport()
         }
     }
@@ -85,7 +110,8 @@ struct FundInstrumentListView: View {
 
     @State private var editorMode: FundInstrumentEditorMode?
     @State private var refresher = FundPriceRefresher()
-    @State private var isImporting = false
+    @State private var importSource: FundQuoteSource?
+    @State private var isChoosingImportSource = false
     @State private var fmarketPage: WebPage?
 
     let scope: FundInstrumentListScope
@@ -141,13 +167,31 @@ struct FundInstrumentListView: View {
             .appSheet(item: $editorMode) { mode in
                 FundInstrumentEditorView(mode: mode, kinds: scope.kinds)
             }
-            .appSheet(isPresented: $isImporting) {
+            .appSheet(item: $importSource) { source in
                 FundCatalogueImportView(
-                    title: "Add from \(scope.importSource.displayName)",
-                    importer: scope.makeImporter()
+                    title: "Add from \(source.displayName)",
+                    importer: scope.makeImporter(source: source)
                 )
             }
             .webPage($fmarketPage)
+            .confirmationDialog(
+                "Choose an import source",
+                isPresented: $isChoosingImportSource,
+                titleVisibility: .visible
+            ) {
+                ForEach(scope.importOptions) { option in
+                    Button {
+                        importSource = option.source
+                    } label: {
+                        Text(option.title)
+                    }
+                    .accessibilityIdentifier("import-from-\(option.source.rawValue)")
+                }
+
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Open-ended funds use Fmarket NAV; listed ETFs use VNDIRECT closing prices.")
+            }
         }
         .tint(MonMonTheme.accent)
     }
@@ -318,12 +362,12 @@ struct FundInstrumentListView: View {
             .disabled(refresher.isRunning || !canRefresh)
 
             actionButton(
-                title: scope.importSource.displayName,
+                title: importActionTitle,
                 systemImage: "square.and.arrow.down",
-                accessibilityLabel: "Add from \(scope.importSource.displayName(in: locale))",
-                identifier: scope == .gold ? "import-from-vang-today" : "import-from-fmarket"
+                accessibilityLabel: importAccessibilityLabel,
+                identifier: scope == .gold ? "import-from-vang-today" : "choose-import-source"
             ) {
-                isImporting = true
+                chooseImportSource()
             }
 
             actionButton(
@@ -334,6 +378,25 @@ struct FundInstrumentListView: View {
             ) {
                 editorMode = .add
             }
+        }
+    }
+
+    private var importActionTitle: LocalizedStringKey {
+        scope.importOptions.count == 1 ? scope.importOptions[0].source.displayName : "Import"
+    }
+
+    private var importAccessibilityLabel: String {
+        guard scope.importOptions.count == 1, let option = scope.importOptions.first else {
+            return AppText.string("Choose an import source", in: locale)
+        }
+        return AppText.string("Add from \(option.source.displayName(in: locale))", in: locale)
+    }
+
+    private func chooseImportSource() {
+        if scope.importOptions.count == 1 {
+            importSource = scope.importOptions[0].source
+        } else {
+            isChoosingImportSource = true
         }
     }
 

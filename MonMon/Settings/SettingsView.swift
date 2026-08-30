@@ -219,7 +219,7 @@ struct SettingsView: View {
 
                 instrumentButton(
                     title: "Funds & ETFs",
-                    subtitle: "Manage catalogue prices and Fmarket imports",
+                    subtitle: "Manage catalogue prices and Fmarket or VNDIRECT imports",
                     systemImage: "chart.line.uptrend.xyaxis",
                     tint: MonMonTheme.funds,
                     scope: .funds
@@ -240,8 +240,8 @@ struct SettingsView: View {
     }
 
     private func instrumentButton(
-        title: String,
-        subtitle: String,
+        title: LocalizedStringKey,
+        subtitle: LocalizedStringKey,
         systemImage: String,
         tint: Color,
         scope: FundInstrumentListScope
@@ -279,7 +279,6 @@ struct SettingsView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(title). \(subtitle)")
         .accessibilityHint("Opens instrument management")
         .accessibilityIdentifier("settings-\(scope.rawValue)-instruments")
     }

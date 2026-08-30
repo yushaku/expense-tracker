@@ -16,6 +16,8 @@ struct FundCatalogueImportView: View {
     @State private var chosen: Set<String> = []
     @State private var searchText = ""
     @State private var saveErrorMessage: LocalizedStringKey?
+    @State private var failedSymbols: [String] = []
+    @State private var isSaving = false
 
     init(title: String, importer: FundCatalogueImport) {
         self.title = title
@@ -43,17 +45,27 @@ struct FundCatalogueImportView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .disabled(isSaving)
                         .accessibilityIdentifier("cancel-import")
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add \(chosen.count)", action: addChosen)
-                        .disabled(chosen.isEmpty)
-                        .accessibilityIdentifier("confirm-import")
+                    Button(action: addChosen) {
+                        if isSaving {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Text("Add \(chosen.count)")
+                        }
+                    }
+                    .disabled(chosen.isEmpty || isSaving)
+                    .accessibilityLabel(confirmAccessibilityLabel)
+                    .accessibilityIdentifier("confirm-import")
                 }
             }
         }
         .tint(MonMonTheme.accent)
+        .interactiveDismissDisabled(isSaving)
         .task { await importer.load(existing: instruments) }
     }
 
@@ -93,6 +105,15 @@ struct FundCatalogueImportView: View {
                 LazyVStack(alignment: .leading, spacing: 10) {
                     header
 
+                    if let quoteFailureMessage {
+                        message(
+                            quoteFailureMessage,
+                            systemImage: "exclamationmark.circle.fill",
+                            tint: MonMonTheme.danger,
+                            id: "quote-import-error"
+                        )
+                    }
+
                     if let saveErrorMessage {
                         message(
                             saveErrorMessage,
@@ -105,13 +126,7 @@ struct FundCatalogueImportView: View {
                     if shown.isEmpty {
                         noMatches
                     } else {
-                        ForEach(groups) { group in
-                            ownerHeader(group)
-
-                            ForEach(group.funds) { candidate in
-                                row(candidate)
-                            }
-                        }
+                        candidateContent
                     }
                 }
                 .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -129,6 +144,23 @@ struct FundCatalogueImportView: View {
 
     private var groups: [FundCatalogueImport.OwnerGroup] {
         FundCatalogueImport.grouped(shown)
+    }
+
+    @ViewBuilder
+    private var candidateContent: some View {
+        if isETF {
+            ForEach(shown) { candidate in
+                row(candidate)
+            }
+        } else {
+            ForEach(groups) { group in
+                ownerHeader(group)
+
+                ForEach(group.funds) { candidate in
+                    row(candidate)
+                }
+            }
+        }
     }
 
     /// Tapping a manager takes all of its funds, which is the whole point of
@@ -186,14 +218,16 @@ struct FundCatalogueImportView: View {
                 .font(.subheadline)
                 .foregroundStyle(MonMonTheme.textSecondary)
 
-            Text(
-                """
-                Grouped by \(groupNoun) · \(groupCountText). Tap a \(groupNoun) to \
-                take all of its \(itemNoun).
-                """
-            )
-            .font(.caption)
-            .foregroundStyle(MonMonTheme.textSecondary)
+            if !isETF {
+                Text(
+                    """
+                    Grouped by \(groupNoun) · \(groupCountText). Tap a \(groupNoun) to \
+                    take all of its \(itemNoun).
+                    """
+                )
+                .font(.caption)
+                .foregroundStyle(MonMonTheme.textSecondary)
+            }
 
             searchField
 
@@ -221,17 +255,32 @@ struct FundCatalogueImportView: View {
         let total = importer.importable.count
         guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             if isGold {
-                return """
+                return AppText.string(
+                    """
                     \(total) gold products, each with the shop buy price \(providerName) \
                     publishes. Pick the ones you hold — nothing is added until you do.
-                    """
+                    """,
+                    in: locale
+                )
             }
-            return """
+            if isETF {
+                return AppText.string(
+                    """
+                    \(total) HOSE-listed ETFs. Pick the ones you hold — their closing prices are \
+                    fetched before they are added.
+                    """,
+                    in: locale
+                )
+            }
+            return AppText.string(
+                """
                 \(total) open-ended funds, each with the NAV Fmarket publishes. Pick the ones you \
                 hold — nothing is added until you do.
-                """
+                """,
+                in: locale
+            )
         }
-        return "\(shown.count) of \(total) \(itemNoun) match."
+        return AppText.string("\(shown.count) of \(total) \(itemNoun) match.", in: locale)
     }
 
     private var groupCountText: String {
@@ -365,7 +414,10 @@ struct FundCatalogueImportView: View {
 
     private func dayText(_ candidate: FundInstrumentCandidate) -> String {
         guard let day = candidate.priceAsOf else {
-            return "Refresh will fetch it"
+            return AppText.string(
+                key: isETF ? "Close fetched when added" : "Refresh will fetch it",
+                in: locale
+            )
         }
         return TransactionPeriod.day(day, in: locale)
     }
@@ -379,40 +431,73 @@ struct FundCatalogueImportView: View {
     }
 
     private func addChosen() {
+        guard !isSaving else { return }
+        isSaving = true
         Task { await importChosen() }
     }
 
     private func importChosen() async {
+        defer { isSaving = false }
         saveErrorMessage = nil
+        failedSymbols = []
         // Everything ticked, even if the search has since narrowed the list.
         let picked = importer.importable.filter { chosen.contains($0.symbol) }
 
         do {
-            _ = try await importer.importing(
+            let result = try await importer.importing(
                 picked,
                 into: modelContext,
                 existing: instruments
             )
-            dismiss()
+            chosen.subtract(result.addedSymbols)
+            failedSymbols = result.failures.map(\.symbol)
+
+            if result.failures.isEmpty {
+                dismiss()
+            }
         } catch {
             modelContext.rollback()
             saveErrorMessage = "Couldn’t save these \(itemNoun). Try again."
         }
     }
 
+    private var confirmAccessibilityLabel: Text {
+        if isSaving {
+            Text("Fetching closing prices")
+        } else {
+            Text("Add \(chosen.count)")
+        }
+    }
+
+    private var quoteFailureMessage: LocalizedStringKey? {
+        guard !failedSymbols.isEmpty else { return nil }
+        let symbols = failedSymbols.joined(separator: ", ")
+        return "Couldn’t fetch a closing price for \(symbols). Try Add again."
+    }
+
     private var isGold: Bool { importer.source == .vangToday }
+    private var isETF: Bool { importer.source == .vndirect }
     private var providerName: String { importer.source.displayName(in: locale) }
     /// The nouns this screen builds its sentences from, in the language on
     /// show. Vietnamese does not change a noun for number, so one word answers
     /// for both counts.
     private var itemNoun: String {
-        AppText.string(key: isGold ? "gold products" : "funds", in: locale)
+        if isGold {
+            return AppText.string(key: "gold products", in: locale)
+        }
+        return AppText.string(key: isETF ? "ETFs" : "funds", in: locale)
     }
 
     private var groupNoun: String {
         AppText.string(key: isGold ? "brands" : "managers", in: locale)
     }
     private var searchPlaceholder: String {
-        isGold ? "Code, name or brand" : "Ticker, name or manager"
+        if isGold {
+            return AppText.string("Code, name or brand", in: locale)
+        }
+        return AppText.string(
+            key: isETF ? "Ticker or name" : "Ticker, name or manager",
+            in: locale
+        )
     }
 }
