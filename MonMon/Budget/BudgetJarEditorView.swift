@@ -38,6 +38,7 @@ struct BudgetJarEditorView: View {
     private var goals: [FinancialGoal]
 
     private let mode: BudgetJarEditorMode
+    private let plannedIncome: Decimal
 
     @State private var draft: BudgetJarDraft
     @State private var validationError: BudgetJarFormError?
@@ -47,8 +48,9 @@ struct BudgetJarEditorView: View {
     private let symbolColumns = [GridItem(.adaptive(minimum: 52), spacing: 10)]
     private let colorColumns = [GridItem(.adaptive(minimum: 44), spacing: 10)]
 
-    init(mode: BudgetJarEditorMode) {
+    init(mode: BudgetJarEditorMode, plannedIncome: Decimal) {
         self.mode = mode
+        self.plannedIncome = plannedIncome
 
         switch mode {
         case .add:
@@ -201,6 +203,15 @@ struct BudgetJarEditorView: View {
 
                     if let allocationErrorMessage {
                         validationMessage(allocationErrorMessage)
+                    }
+
+                    if let allocationImpact {
+                        BudgetJarAllocationImpactPreview(
+                            currentPercent: mode.editedJar?.allocationPercent ?? .zero,
+                            proposedPercent: PercentInput.parse(draft.allocationText) ?? .zero,
+                            plannedIncome: plannedIncome,
+                            impact: allocationImpact
+                        )
                     }
                 }
             }
@@ -355,6 +366,23 @@ struct BudgetJarEditorView: View {
         }
     }
 
+    private var allocationImpact: BudgetJarAllocationImpact? {
+        guard
+            let proposedPercent = PercentInput.parse(draft.allocationText),
+            proposedPercent >= 0
+        else {
+            return nil
+        }
+
+        return BudgetJarImpact.snapshot(
+            jarID: mode.editedJar?.id,
+            currentPercent: mode.editedJar?.allocationPercent ?? .zero,
+            proposedPercent: proposedPercent,
+            plannedIncome: plannedIncome,
+            goals: goals
+        )
+    }
+
     private func save() {
         validationError = nil
         saveErrorMessage = nil
@@ -409,6 +437,67 @@ struct BudgetJarEditorView: View {
         } catch {
             modelContext.rollback()
             saveErrorMessage = "Couldn’t delete this jar. Try again."
+        }
+    }
+}
+
+private struct BudgetJarAllocationImpactPreview: View {
+    let currentPercent: Decimal
+    let proposedPercent: Decimal
+    let plannedIncome: Decimal
+    let impact: BudgetJarAllocationImpact
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(
+                "\(PercentInput.format(currentPercent))% → \(PercentInput.format(proposedPercent))%"
+            )
+            .font(.caption.weight(.semibold))
+
+            if plannedIncome > 0 {
+                Text(
+                    "\(VNDCurrency.format(impact.currentMonthlyAmount)) → \(VNDCurrency.format(impact.proposedMonthlyAmount)) per month"
+                )
+                .font(.subheadline.weight(.semibold))
+                .monospacedDigit()
+
+                changeLabel
+            } else {
+                Text("Add recurring income to preview the monthly amount.")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            }
+
+            if let commitment = impact.goalCommitment, commitment.isOvercommitted {
+                Label {
+                    Text(
+                        "Over goal capacity by \(VNDCurrency.format(commitment.overcommittedAmount)): \(impact.affectedGoalNames.formatted())"
+                    )
+                } icon: {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                }
+                .font(.caption)
+                .foregroundStyle(MonMonTheme.danger)
+            }
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(MonMonTheme.canvas, in: RoundedRectangle(cornerRadius: 10))
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("budget-jar-impact")
+    }
+
+    @ViewBuilder
+    private var changeLabel: some View {
+        if impact.monthlyChange > 0 {
+            Text("+\(VNDCurrency.format(impact.monthlyChange)) per month")
+                .foregroundStyle(MonMonTheme.accent)
+        } else if impact.monthlyChange < 0 {
+            Text("−\(VNDCurrency.format(-impact.monthlyChange)) per month")
+                .foregroundStyle(MonMonTheme.danger)
+        } else {
+            Text("No monthly change")
+                .foregroundStyle(MonMonTheme.textSecondary)
         }
     }
 }

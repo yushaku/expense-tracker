@@ -234,6 +234,16 @@ private struct PayloadChecker {
             try date(record.targetDate)
             try nonnegative(record.monthlyContribution)
             try uuid(record.fundingJarID)
+            try optionalDate(record.archivedAt)
+            if record.archivedAt != nil {
+                try require(earmarked == target)
+            }
+            var contributionIDs = Set<String>()
+            for contribution in record.contributions ?? [] {
+                try scalarIDAndDate(contribution.id, contribution.occurredAt)
+                try positive(contribution.amount)
+                try require(contributionIDs.insert(contribution.id).inserted)
+            }
         }
         try validateUniqueRecords(payload.tripWorkspaces) { record in
             try scalarIDAndDate(record.id, record.createdAt)

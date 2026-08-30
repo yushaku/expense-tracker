@@ -38,6 +38,7 @@ struct BudgetSummaryTests {
         #expect(snapshot.projectedIncome == 37_000_000)
         #expect(snapshot.rows.count == 1)
         #expect(snapshot.rows.first?.received == 7_000_000)
+        #expect(snapshot.rows.first?.expectedRemainingIncome == 30_000_000)
         #expect(snapshot.rows.first?.remaining == 37_000_000)
     }
 
@@ -242,6 +243,26 @@ struct BudgetSummaryTests {
             snapshot.rowsByAllocation.map(\.name)
                 == ["Largest", "First tie", "Second tie", "Smallest"]
         )
+    }
+
+    @Test("Goal capacity can stay anchored to the current month")
+    func goalCapacityUsesRequestedMonth() throws {
+        let savings = jar(percent: 50)
+        let salary = recurringIncome(amount: 30_000_000, day: try date(2026, 8, 25))
+
+        let julyCapacity = BudgetSummary.plannedByJar(
+            monthContaining: try date(2026, 7, 1),
+            jars: [savings],
+            recurringRules: [salary]
+        )
+        let augustCapacity = BudgetSummary.plannedByJar(
+            monthContaining: try date(2026, 8, 20),
+            jars: [savings],
+            recurringRules: [salary]
+        )
+
+        #expect(julyCapacity[savings.id] == 0)
+        #expect(augustCapacity[savings.id] == 15_000_000)
     }
 
     @Test("Jar activity follows the same routing and month window as Budget")

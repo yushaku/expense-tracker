@@ -105,3 +105,65 @@ struct BudgetJarDraft: Equatable {
         jar.colorName = values.colorName
     }
 }
+
+struct BudgetJarAllocationImpact: Equatable {
+    let currentMonthlyAmount: Decimal
+    let proposedMonthlyAmount: Decimal
+    let goalCommitment: GoalCommitmentSnapshot?
+    let affectedGoalNames: [String]
+
+    var monthlyChange: Decimal {
+        proposedMonthlyAmount - currentMonthlyAmount
+    }
+}
+
+enum BudgetJarImpact {
+    static func snapshot(
+        jarID: UUID?,
+        currentPercent: Decimal,
+        proposedPercent: Decimal,
+        plannedIncome: Decimal,
+        goals: [FinancialGoal]
+    ) -> BudgetJarAllocationImpact {
+        let currentMonthlyAmount = BudgetSummary.allocation(
+            of: plannedIncome,
+            percent: currentPercent
+        )
+        let proposedMonthlyAmount = BudgetSummary.allocation(
+            of: plannedIncome,
+            percent: proposedPercent
+        )
+
+        guard let jarID else {
+            return BudgetJarAllocationImpact(
+                currentMonthlyAmount: currentMonthlyAmount,
+                proposedMonthlyAmount: proposedMonthlyAmount,
+                goalCommitment: nil,
+                affectedGoalNames: []
+            )
+        }
+
+        let commitment = GoalCommitment.snapshot(
+            jarID: jarID,
+            goals: goals,
+            plannedCapacity: proposedMonthlyAmount
+        )
+        let affectedGoalNames =
+            commitment.isOvercommitted
+            ? goals
+                .filter {
+                    $0.fundingJarID == jarID
+                        && GoalCommitment.activeMonthlyContribution(for: $0) > 0
+                }
+                .sorted { $0.createdAt < $1.createdAt }
+                .map(\.name)
+            : []
+
+        return BudgetJarAllocationImpact(
+            currentMonthlyAmount: currentMonthlyAmount,
+            proposedMonthlyAmount: proposedMonthlyAmount,
+            goalCommitment: commitment,
+            affectedGoalNames: affectedGoalNames
+        )
+    }
+}

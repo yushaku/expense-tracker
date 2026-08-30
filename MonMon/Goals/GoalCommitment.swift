@@ -19,6 +19,25 @@ struct GoalCommitmentSnapshot: Equatable {
 }
 
 enum GoalCommitment {
+    static func snapshots(
+        jarIDs: [UUID],
+        goals: [FinancialGoal],
+        plannedByJar: [UUID: Decimal]
+    ) -> [UUID: GoalCommitmentSnapshot] {
+        Dictionary(
+            uniqueKeysWithValues: jarIDs.map { jarID in
+                (
+                    jarID,
+                    snapshot(
+                        jarID: jarID,
+                        goals: goals,
+                        plannedCapacity: plannedByJar[jarID, default: .zero]
+                    )
+                )
+            }
+        )
+    }
+
     static func snapshot(
         jarID: UUID,
         goals: [FinancialGoal],
@@ -37,7 +56,8 @@ enum GoalCommitment {
     }
 
     static func activeMonthlyContribution(for goal: FinancialGoal) -> Decimal {
-        goal.earmarkedAmount < goal.targetAmount ? max(0, goal.monthlyContribution) : 0
+        goal.archivedAt == nil && goal.earmarkedAmount < goal.targetAmount
+            ? max(0, goal.monthlyContribution) : 0
     }
 
     static func activeMonthlyContribution(

@@ -5,6 +5,51 @@ import Testing
 
 @Suite("Budget jar draft")
 struct BudgetJarDraftTests {
+    @Test("Allocation impact previews the monthly money change")
+    func allocationImpactPreviewsMoneyChange() {
+        let impact = BudgetJarImpact.snapshot(
+            jarID: nil,
+            currentPercent: 10,
+            proposedPercent: 15,
+            plannedIncome: 30_000_000,
+            goals: []
+        )
+
+        #expect(impact.currentMonthlyAmount == 3_000_000)
+        #expect(impact.proposedMonthlyAmount == 4_500_000)
+        #expect(impact.monthlyChange == 1_500_000)
+        #expect(impact.affectedGoalNames.isEmpty)
+    }
+
+    @Test("Allocation impact names goals when proposed capacity is too small")
+    func allocationImpactNamesAffectedGoals() {
+        let savings = jar(name: "Savings", percent: 15)
+        let macbook = FinancialGoal(
+            id: UUID(),
+            name: "Macbook",
+            targetAmount: 30_000_000,
+            earmarkedAmount: 10_000_000,
+            targetDate: .now,
+            monthlyContribution: 4_000_000,
+            fundingJarID: savings.id,
+            symbolName: "laptopcomputer",
+            colorName: "green",
+            createdAt: .now
+        )
+
+        let impact = BudgetJarImpact.snapshot(
+            jarID: savings.id,
+            currentPercent: 15,
+            proposedPercent: 10,
+            plannedIncome: 30_000_000,
+            goals: [macbook]
+        )
+
+        #expect(impact.monthlyChange == -1_500_000)
+        #expect(impact.goalCommitment?.overcommittedAmount == 1_000_000)
+        #expect(impact.affectedGoalNames == ["Macbook"])
+    }
+
     @Test("A jar cannot push total allocation above one hundred percent")
     func totalCannotExceedOneHundred() {
         let existing = [jar(name: "Needs", percent: 90)]
