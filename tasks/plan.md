@@ -1,70 +1,92 @@
-# Implementation Plan: Bundled Fund Manager Logos
+# Implementation Plan: Notification Reminders
 
-## Objective
+## Overview
 
-Show a stable, offline fund-manager mark for known open-ended funds and ETFs.
-The same manager asset is shared by every instrument it manages. Bundled assets
-take precedence over provider URLs; unknown tickers retain the existing remote
-logo and ticker-monogram fallbacks.
+Add two opt-in local reminder types to MonMon: an unconditional daily expense-entry reminder and one privacy-safe reminder for each recurring item due that day. Both are configured in Settings, scheduled without a server, and reconciled whenever their inputs change or the app becomes active.
 
-## Tech Stack and Structure
+Approved capability map: `CAPABILITY-MAP-notification-reminders.md`.
 
-- Swift 6 and SwiftUI in `MonMon/Funds/`.
-- Manager image sets named `FundManager*.imageset` in
-  `MonMon/Resources/Assets.xcassets/`.
-- Pure ticker-to-asset lookup beside `FundLogoView`, covered by Swift Testing in
-  `MonMonTests/Funds/`.
-- No SwiftData migration: the persisted optional `logoURL` remains compatible
-  and serves only as the second-choice fallback.
+## Architecture Decisions
 
-## Code Style
+- Persist two enabled flags and two minute-of-day integers in device-local `UserDefaults`. Defaults are off, 20:00 daily, and 09:00 recurring.
+- Keep schedule calculation in pure `Sendable` value types. They take preferences, locale, calendar, current time, and recurring rule values explicitly; they never read SwiftData or `UNUserNotificationCenter`.
+- Put authorization and pending-request side effects in one `@MainActor @Observable` coordinator owned by `MonMonApp` with `@State` and injected through the SwiftUI environment.
+- Hide `UNUserNotificationCenter` behind a narrow client so coordinator decisions are testable with an in-memory fake under Swift 6 strict concurrency.
+- Use one stable repeating calendar request for the daily reminder. Its hour follows the device's local time zone.
+- Use one-shot requests for recurring occurrences because MonMon's arbitrary intervals, inclusive end dates, and month-end clamping cannot be represented faithfully by one repeating system trigger.
+- Use MonMon's existing `Asia/Ho_Chi_Minh` financial calendar for recurring due dates and keep only the nearest 60 recurring occurrences.
+- Namespace identifiers as MonMon daily or MonMon recurring. Reconciliation removes only stale identifiers in its own namespace and preserves other app requests.
+- Resolve notification title/body with `AppText` and the stored `AppLanguage` at reconciliation time. A language change therefore rebuilds pending content.
+- Request `.alert` and `.sound` only after an owner enables a reminder. A denied/revoked status disables ineffective reminder controls and exposes a native route to iOS Settings.
 
-```swift
-if let assetName = FundLogoCatalogue.assetName(for: symbol) {
-    Image(assetName)
-} else if let url = logoURL.flatMap(URL.init(string:)) {
-    AsyncImage(url: url) { phase in /* existing fallback */ }
-}
+## Dependency Graph
+
+```text
+Preferences + pure plans
+        │
+        ├── Daily planner
+        └── Recurring planner ── existing RecurrenceSchedule
+                    │
+Notification-center client + coordinator
+                    │
+          App lifecycle ownership
+                    │
+        Settings UI + recurring editor refresh
 ```
 
-Use explicit symbol groups per manager rather than guessing ownership from
-ticker prefixes. Normalize lookup input by trimming and uppercasing.
+## Task List
 
-## Commands
+### Phase 1: Deterministic notification domain
 
-- Format: `xcrun swift-format lint -r MonMon MonMonTests`
-- Focused tests: macOS `xcodebuild test` with
-  `-only-testing:MonMonTests/FundLogoCatalogueTests`
-- Full tests: macOS `xcodebuild test` using `/tmp/MonMonDerivedData`
-- iOS compile: `xcodebuild build -sdk iphonesimulator` with signing disabled
+- [ ] Task 1: Implement preferences and pure daily/recurring plans with RED/GREEN tests.
 
-## Testing Strategy
+### Checkpoint: Domain
 
-- RED/GREEN unit tests for representative open-ended funds, ETFs, input
-  normalization, unknown tickers, and the existence of every referenced asset.
-- Compile the complete iOS target graph so the asset catalogue is validated for
-  the app, widget, and share extension.
-- Runtime/UI acceptance remains on the physical iPhone after merge into `dev`.
+- [ ] Focused notification planning tests pass on macOS.
+- [ ] No framework or persistence side effects exist in plan tests.
 
-## Boundaries
+### Phase 2: System scheduling boundary
 
-- Always: prefer bundled assets, keep remote and monogram fallbacks, preserve
-  decorative-image accessibility behavior.
-- Ask first: add a dependency, change the SwiftData schema, or replace brand
-  artwork with generated approximations.
-- Never: infer a manager from a broad prefix, make logo availability block fund
-  import, or run UI validation in an iPhone Simulator.
+- [ ] Task 2: Implement and test authorization plus scoped request reconciliation.
+- [ ] Task 3: Own the coordinator at app scope and reconcile on launch/active transitions.
 
-## Implementation Order
+### Checkpoint: Scheduling
 
-1. Add and test the normalized ticker-to-manager asset catalogue.
-2. Add bundled manager artwork and verify every catalogue reference resolves.
-3. Prefer bundled assets in `FundLogoView` while preserving both fallbacks.
-4. Run review, format, full unit-test, and iOS compile gates.
+- [ ] Coordinator tests pass with an in-memory client.
+- [ ] App compiles for iOS under Swift 6 strict concurrency.
+- [ ] Launch does not request notification permission.
 
-## Success Criteria
+### Phase 3: User configuration and rule changes
 
-- Known open-ended funds and ETFs display their bundled manager logo offline.
-- A manager's funds and ETFs resolve to the same asset.
-- Unknown instruments still use their remote URL, then their monogram.
-- No persistence migration or new network request is introduced.
+- [ ] Task 4: Add the accessible Settings card, permission feedback, time controls, and localization.
+- [ ] Task 5: Refresh recurring requests immediately after successful rule save or deletion.
+
+### Checkpoint: Complete
+
+- [ ] Format lint passes.
+- [ ] Full macOS test suite passes.
+- [ ] iOS compile check passes.
+- [ ] SwiftUI correctness checklist and code review find no blocking issue.
+- [ ] The feature branch is committed and ready for user review; it is not merged or installed.
+
+## Verification Commands
+
+- Format: `rtk xcrun swift-format lint -r MonMon MonMonTests`
+- Notification tests: `rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO -only-testing:MonMonTests/NotificationPreferencesTests -only-testing:MonMonTests/DailyExpenseReminderTests -only-testing:MonMonTests/RecurringDueReminderTests -only-testing:MonMonTests/NotificationCoordinatorTests test`
+- Full tests: `rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO test`
+- iOS compile: `rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -sdk iphonesimulator -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=NO build`
+
+## Risks and Mitigations
+
+| Risk | Impact | Mitigation |
+|---|---|---|
+| Swift 6 rejects framework callback isolation or non-Sendable values. | High | Keep the observable coordinator main-actor isolated, translate framework objects at the client boundary, and run the iOS compile gate after Task 2. |
+| A calendar/time-zone conversion schedules the wrong recurring day. | High | Reuse the existing recurrence calendar, plan from deterministic dates, and test today-before-time, today-after-time, month-end, interval, and end-date cases. |
+| Permission is revoked outside MonMon. | Medium | Refresh system authorization whenever the app becomes active and reconcile/remove ineffective requests. |
+| Editing rules leaves obsolete requests pending. | High | Use stable namespaced identifiers and replace the recurring namespace after save, delete, launch, active transition, or settings change. |
+| Many recurring occurrences crowd the system queue. | Medium | Sort globally and keep only the nearest 60 one-shot recurring requests plus the single repeating daily request. |
+| Notification text uses the previous app language. | Low | Resolve content from stored language every reconciliation and trigger reconciliation when language changes. |
+
+## Open Questions
+
+None. Capability boundaries and user-visible defaults are approved.
