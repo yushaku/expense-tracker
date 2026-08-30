@@ -508,7 +508,8 @@
         </div>
         <figcaption>
           Đây là bộ hũ tạo sẵn khi kho dữ liệu còn trống. Bạn sửa được hết, miễn tổng không vượt
-          100%; phần chưa dùng hiện dưới nhãn <strong>Unallocated</strong> trên màn hình Budget.
+          100%. Khi còn phần chưa dùng, <strong>Unallocated</strong> là một nút dẫn thẳng tới
+          Budget Setup để bạn hoàn tất phân bổ, thay vì chỉ là một con số để đọc.
         </figcaption>
       </figure>
 
@@ -520,6 +521,11 @@
             Màn hình sửa hũ có đúng ba việc: đặt tên, đặt <em>Monthly allocation</em>, và chọn
             biểu tượng cùng màu ở thẻ <em>Style</em>. Tổng phần trăm của tất cả các hũ không được
             vượt 100 &ndash; bản nháp từ chối lưu chứ không tự cắt bớt của hũ khác.
+          </p>
+          <p>
+            Trước khi lưu phần trăm mới, thẻ xem trước đổi phần trăm đó thành chênh lệch tiền
+            theo thu nhập kế hoạch tháng hiện tại. Nếu sức chứa giảm, nó cũng gọi tên những mục
+            tiêu có thể mất chỗ để bạn quyết định với đủ ngữ cảnh.
           </p>
         </div>
         <div class="card">
@@ -880,12 +886,32 @@
           <h3>Không tự cộng mỗi tháng</h3>
           <p>
             Đặt mức góp 1.000.000 ₫ mỗi tháng <em>không</em> làm số đã dành tự tăng thêm một
-            triệu khi sang tháng. Số đã dành chỉ đổi khi bạn mở mục tiêu ra và sửa ô
-            <em>Already earmarked</em>.
+            triệu khi sang tháng. Khi thực sự dành thêm tiền, mở chi tiết mục tiêu và chọn
+            <em>Mark contribution</em>; MonMon cộng khoản đó vào số đã dành và giữ lịch sử theo
+            ngày. Số đã dành ban đầu vẫn được giữ riêng và không còn là ô sửa tuỳ ý về sau.
           </p>
           <p>
             Mức góp hằng tháng chỉ dùng để tính ngày dự kiến hoàn thành và để cộng vào sức chứa
-            của hũ. Ứng dụng nói bạn nên để dành bao nhiêu, không để dành hộ bạn.
+            của hũ. Một contribution là metadata kế hoạch, <strong>không tạo giao dịch</strong>,
+            không đổi số dư tài khoản và không làm tài sản ròng tăng lên.
+          </p>
+        </div>
+        <div class="card">
+          <span class="label">Ưu tiên hành động</span>
+          <h3>Nhìn thẻ là biết bước tiếp theo</h3>
+          <p>
+            Mỗi thẻ mục tiêu đặt trạng thái hành động lên trước: <em>On track</em> khi kế hoạch
+            đang kịp, <em>Needs … this month</em> khi mức góp còn thiếu, và <em>Ready to use</em>
+            khi đã đủ tiền. Bạn không cần tự đối chiếu ba con số để hiểu tình trạng.
+          </p>
+        </div>
+        <div class="card">
+          <span class="label">Tổ chức danh sách</span>
+          <h3>Lọc và lưu trữ mục tiêu đã xong</h3>
+          <p>
+            Menu <em>Show</em> tách danh sách thành <em>Active</em>, <em>Completed</em>,
+            <em>Trips</em> và <em>Archived</em>. Chỉ mục tiêu đã đạt đích mới archive được; restore
+            đưa nó trở lại nhóm Completed mà vẫn giữ nguyên số đã dành và lịch sử contribution.
           </p>
         </div>
         <div class="card">
@@ -961,6 +987,15 @@
           <p>
             Khi phần trăm của hũ bị hạ xuống sau lúc đặt mục tiêu, màn hình Goals hiện cảnh báo
             quá tải kèm số tiền vượt cho từng hũ. Không có gì bị chặn, chỉ là bạn được biết.
+          </p>
+        </div>
+        <div class="card">
+          <span class="label">Ngay trên Budget</span>
+          <h3>Cam kết và phần còn nhận mục tiêu mới</h3>
+          <p>
+            Mỗi thẻ hũ hiện <em>Committed to goals</em> và <em>Available for new goals</em> bên
+            cạnh các số ngân sách. Nếu cam kết vượt sức chứa, phần còn lại đổi thành cảnh báo
+            quá tải để vấn đề hiện đúng nơi bạn đang cân chỉnh phần trăm.
           </p>
         </div>
       </div>
