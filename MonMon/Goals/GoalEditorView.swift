@@ -35,7 +35,7 @@ struct GoalEditorView: View {
     private var goals: [FinancialGoal]
 
     private let mode: GoalEditorMode
-    private let plannedByJar: [UUID: Decimal]
+    private let capacityByJar: [UUID: Decimal]
     private let asOf: Date
 
     @State private var draft: FinancialGoalDraft
@@ -43,9 +43,9 @@ struct GoalEditorView: View {
     @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
 
-    init(mode: GoalEditorMode, plannedByJar: [UUID: Decimal], asOf: Date) {
+    init(mode: GoalEditorMode, capacityByJar: [UUID: Decimal], asOf: Date) {
         self.mode = mode
-        self.plannedByJar = plannedByJar
+        self.capacityByJar = capacityByJar
         self.asOf = asOf
 
         switch mode {
@@ -71,7 +71,7 @@ struct GoalEditorView: View {
             GoalEditorForm(
                 draft: $draft,
                 jars: jars,
-                plannedCapacity: draft.fundingJarID.flatMap { plannedByJar[$0] } ?? .zero,
+                plannedCapacity: draft.fundingJarID.flatMap { capacityByJar[$0] } ?? .zero,
                 isEditing: mode.editedGoal != nil,
                 validationError: validationError,
                 saveErrorMessage: saveErrorMessage,
@@ -121,7 +121,7 @@ struct GoalEditorView: View {
                     to: goal,
                     jars: jars,
                     goals: goals,
-                    plannedByJar: plannedByJar,
+                    capacityByJar: capacityByJar,
                     asOf: asOf
                 )
             } else {
@@ -131,7 +131,7 @@ struct GoalEditorView: View {
                         createdAt: .now,
                         jars: jars,
                         goals: goals,
-                        plannedByJar: plannedByJar,
+                        capacityByJar: capacityByJar,
                         asOf: asOf
                     )
                 )

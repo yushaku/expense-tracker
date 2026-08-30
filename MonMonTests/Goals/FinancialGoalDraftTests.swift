@@ -26,7 +26,7 @@ struct FinancialGoalDraftTests {
             createdAt: asOf,
             jars: [savings],
             goals: [],
-            plannedByJar: [savings.id: 10_000_000],
+            capacityByJar: [savings.id: 10_000_000],
             asOf: asOf,
             calendar: calendar
         )
@@ -44,33 +44,33 @@ struct FinancialGoalDraftTests {
 
         #expect(throws: FinancialGoalFormError.emptyName) {
             _ = try draft(name: " ", jarID: savings.id).validated(
-                jars: [savings], goals: [], plannedByJar: [:], editedID: nil,
+                jars: [savings], goals: [], capacityByJar: [:], editedID: nil,
                 asOf: asOf, calendar: calendar)
         }
         #expect(throws: FinancialGoalFormError.nonPositiveTargetAmount) {
             var value = draft(jarID: savings.id)
             value.targetAmountText = "0"
             _ = try value.validated(
-                jars: [savings], goals: [], plannedByJar: [:], editedID: nil,
+                jars: [savings], goals: [], capacityByJar: [:], editedID: nil,
                 asOf: asOf, calendar: calendar)
         }
         #expect(throws: FinancialGoalFormError.earmarkedExceedsTarget) {
             var value = draft(jarID: savings.id)
             value.earmarkedAmountText = "2000"
             _ = try value.validated(
-                jars: [savings], goals: [], plannedByJar: [:], editedID: nil,
+                jars: [savings], goals: [], capacityByJar: [:], editedID: nil,
                 asOf: asOf, calendar: calendar)
         }
         #expect(throws: FinancialGoalFormError.targetDateInPast) {
             var value = draft(jarID: savings.id)
             value.targetDate = calendar.date(byAdding: .day, value: -1, to: asOf)!
             _ = try value.validated(
-                jars: [savings], goals: [], plannedByJar: [:], editedID: nil,
+                jars: [savings], goals: [], capacityByJar: [:], editedID: nil,
                 asOf: asOf, calendar: calendar)
         }
         #expect(throws: FinancialGoalFormError.missingFundingJar) {
             _ = try draft(jarID: UUID()).validated(
-                jars: [savings], goals: [], plannedByJar: [:], editedID: nil,
+                jars: [savings], goals: [], capacityByJar: [:], editedID: nil,
                 asOf: asOf, calendar: calendar)
         }
     }
@@ -86,7 +86,7 @@ struct FinancialGoalDraftTests {
             _ = try value.validated(
                 jars: [savings],
                 goals: [existing],
-                plannedByJar: [savings.id: 1_000],
+                capacityByJar: [savings.id: 1_000],
                 editedID: nil,
                 asOf: asOf,
                 calendar: calendar
@@ -104,7 +104,7 @@ struct FinancialGoalDraftTests {
         let validated = try value.validated(
             jars: [savings],
             goals: [existing],
-            plannedByJar: [savings.id: 1_000],
+            capacityByJar: [savings.id: 1_000],
             editedID: existing.id,
             asOf: asOf,
             calendar: calendar
@@ -123,7 +123,7 @@ struct FinancialGoalDraftTests {
         let validated = try value.validated(
             jars: [savings],
             goals: [existing],
-            plannedByJar: [savings.id: 1_000],
+            capacityByJar: [savings.id: 1_000],
             editedID: existing.id,
             asOf: asOf,
             calendar: calendar

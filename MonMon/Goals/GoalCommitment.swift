@@ -22,7 +22,7 @@ enum GoalCommitment {
     static func snapshots(
         jarIDs: [UUID],
         goals: [FinancialGoal],
-        plannedByJar: [UUID: Decimal]
+        capacityByJar: [UUID: Decimal]
     ) -> [UUID: GoalCommitmentSnapshot] {
         Dictionary(
             uniqueKeysWithValues: jarIDs.map { jarID in
@@ -31,7 +31,7 @@ enum GoalCommitment {
                     snapshot(
                         jarID: jarID,
                         goals: goals,
-                        plannedCapacity: plannedByJar[jarID, default: .zero]
+                        plannedCapacity: capacityByJar[jarID, default: .zero]
                     )
                 )
             }
