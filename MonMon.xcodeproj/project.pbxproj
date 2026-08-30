@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		N10000000000000000000201 /* NotificationPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000101 /* NotificationPreferences.swift */; };
+		N10000000000000000000202 /* NotificationPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000102 /* NotificationPlan.swift */; };
+		N10000000000000000000211 /* NotificationPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000111 /* NotificationPreferencesTests.swift */; };
+		N10000000000000000000212 /* DailyExpenseReminderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000112 /* DailyExpenseReminderTests.swift */; };
+		N10000000000000000000213 /* RecurringDueReminderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000113 /* RecurringDueReminderTests.swift */; };
 		Y10000000000000000000201 /* TripWorkspaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000101 /* TripWorkspaceTests.swift */; };
 		Y10000000000000000000202 /* TripWorkspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000102 /* TripWorkspace.swift */; };
 		Y10000000000000000000203 /* TripWorkspaceLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000103 /* TripWorkspaceLifecycle.swift */; };
@@ -403,6 +408,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		N10000000000000000000101 /* NotificationPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPreferences.swift; sourceTree = "<group>"; };
+		N10000000000000000000102 /* NotificationPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPlan.swift; sourceTree = "<group>"; };
+		N10000000000000000000111 /* NotificationPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPreferencesTests.swift; sourceTree = "<group>"; };
+		N10000000000000000000112 /* DailyExpenseReminderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyExpenseReminderTests.swift; sourceTree = "<group>"; };
+		N10000000000000000000113 /* RecurringDueReminderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringDueReminderTests.swift; sourceTree = "<group>"; };
 		Y10000000000000000000101 /* TripWorkspaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspaceTests.swift; sourceTree = "<group>"; };
 		Y10000000000000000000102 /* TripWorkspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspace.swift; sourceTree = "<group>"; };
 		Y10000000000000000000103 /* TripWorkspaceLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspaceLifecycle.swift; sourceTree = "<group>"; };
@@ -823,6 +833,7 @@
 		A00000000000000000000012 /* MonMon */ = {
 			isa = PBXGroup;
 			children = (
+				N10000000000000000000001 /* Notifications */,
 				Y10000000000000000000001 /* Trips */,
 				X10000000000000000000001 /* IncomeAllocation */,
 				V10000000000000000000001 /* Goals */,
@@ -928,6 +939,7 @@
 		A00000000000000000000015 /* MonMonTests */ = {
 			isa = PBXGroup;
 			children = (
+				N10000000000000000000002 /* Notifications */,
 				Y10000000000000000000002 /* Trips */,
 				X10000000000000000000002 /* IncomeAllocation */,
 				V10000000000000000000002 /* Goals */,
@@ -983,6 +995,25 @@
 				W10000000000000000000101 /* QuickExpensePresetStoreTests.swift */,
 			);
 			path = QuickExpense;
+			sourceTree = "<group>";
+		};
+		N10000000000000000000001 /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				N10000000000000000000101 /* NotificationPreferences.swift */,
+				N10000000000000000000102 /* NotificationPlan.swift */,
+			);
+			path = Notifications;
+			sourceTree = "<group>";
+		};
+		N10000000000000000000002 /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				N10000000000000000000111 /* NotificationPreferencesTests.swift */,
+				N10000000000000000000112 /* DailyExpenseReminderTests.swift */,
+				N10000000000000000000113 /* RecurringDueReminderTests.swift */,
+			);
+			path = Notifications;
 			sourceTree = "<group>";
 		};
 		U10000000000000000000002 /* Budget */ = {
@@ -1678,6 +1709,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				N10000000000000000000201 /* NotificationPreferences.swift in Sources */,
+				N10000000000000000000202 /* NotificationPlan.swift in Sources */,
 				Y10000000000000000000202 /* TripWorkspace.swift in Sources */,
 				Y10000000000000000000203 /* TripWorkspaceLifecycle.swift in Sources */,
 				Y10000000000000000000205 /* TripSummary.swift in Sources */,
@@ -1916,6 +1949,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				N10000000000000000000211 /* NotificationPreferencesTests.swift in Sources */,
+				N10000000000000000000212 /* DailyExpenseReminderTests.swift in Sources */,
+				N10000000000000000000213 /* RecurringDueReminderTests.swift in Sources */,
 				Y10000000000000000000201 /* TripWorkspaceTests.swift in Sources */,
 				Y10000000000000000000204 /* TripSummaryTests.swift in Sources */,
 				X10000000000000000000201 /* IncomeAllocationSnapshotTests.swift in Sources */,

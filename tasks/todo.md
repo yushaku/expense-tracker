@@ -6,14 +6,14 @@
 
 **Acceptance criteria:**
 
-- [ ] Defaults are disabled, daily is 20:00, and recurring is 09:00.
-- [ ] Daily planning yields exactly one stable repeating request only when enabled and authorized.
-- [ ] Recurring planning respects pause, anchor, interval, month-end clamping, inclusive end date, configured fire time, deterministic identifiers, global ordering, and the nearest-60 ceiling.
+- [x] Defaults are disabled, daily is 20:00, and recurring is 09:00.
+- [x] Daily planning yields exactly one stable repeating request only when enabled and authorized.
+- [x] Recurring planning respects pause, anchor, interval, month-end clamping, inclusive end date, configured fire time, deterministic identifiers, global ordering, and the nearest-60 ceiling.
 
 **Verification:**
 
-- [ ] RED tests fail before production logic exists.
-- [ ] Focused macOS tests pass for `NotificationPreferencesTests`, `DailyExpenseReminderTests`, and `RecurringDueReminderTests`.
+- [x] RED tests fail before production logic exists.
+- [x] Focused macOS tests pass for `NotificationPreferencesTests`, `DailyExpenseReminderTests`, and `RecurringDueReminderTests`.
 
 **Dependencies:** None.
 

@@ -38,12 +38,12 @@ Notification-center client + coordinator
 
 ### Phase 1: Deterministic notification domain
 
-- [ ] Task 1: Implement preferences and pure daily/recurring plans with RED/GREEN tests.
+- [x] Task 1: Implement preferences and pure daily/recurring plans with RED/GREEN tests.
 
 ### Checkpoint: Domain
 
-- [ ] Focused notification planning tests pass on macOS.
-- [ ] No framework or persistence side effects exist in plan tests.
+- [x] Focused notification planning tests pass on macOS.
+- [x] No framework or persistence side effects exist in plan tests.
 
 ### Phase 2: System scheduling boundary
 
