@@ -1,0 +1,1068 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tab Tài sản của MonMon: sổ tiết kiệm, quỹ, ETF và vàng — lot bất biến, giá thị trường lấy khi được hỏi, và một con số ròng không đếm trùng đồng nào. Kèm sơ đồ.">
+  <link rel="stylesheet" href="assets/monmon-docs.css">
+  <title>MonMon — Tài sản</title>
+  <style>
+    :root {
+      --w-cash: #1e66f5;
+      --w-savings: #df8e1d;
+      --w-funds: #8839ef;
+      --w-gold: #d97706;
+      --w-lent: #179299;
+      --w-borrowed: #b04458;
+      --w-overdraft: #9a6a12;
+      --w-gain: #2f7a52;
+      --w-loss: #b04458;
+      --w-track: var(--docs-surface-3);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --w-cash: #8caaee;
+        --w-savings: #e5c890;
+        --w-funds: #ca9ee6;
+        --w-gold: #ef9f76;
+        --w-lent: #81c8be;
+        --w-borrowed: #e17c8f;
+        --w-overdraft: #d5a544;
+        --w-gain: #5fbd85;
+        --w-loss: #e17c8f;
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --w-cash: #8caaee;
+      --w-savings: #e5c890;
+      --w-funds: #ca9ee6;
+      --w-gold: #ef9f76;
+      --w-lent: #81c8be;
+      --w-borrowed: #e17c8f;
+      --w-overdraft: #d5a544;
+      --w-gain: #5fbd85;
+      --w-loss: #e17c8f;
+    }
+
+    .page {
+      width: min(1120px, calc(100% - var(--docs-page-gutter) - var(--docs-page-gutter)));
+      margin: 0 auto;
+      padding: var(--docs-page-padding-top) 0 var(--docs-page-padding-bottom);
+    }
+
+    a { color: var(--docs-accent); }
+    code {
+      padding: 2px 6px;
+      background: var(--docs-surface-2);
+      border-radius: var(--docs-radius-xs);
+      font-family: var(--docs-mono);
+      font-size: .9em;
+    }
+
+    .hero { max-width: 860px; }
+    .eyebrow {
+      margin-bottom: var(--docs-space-2);
+      color: var(--docs-accent);
+      font-size: var(--docs-label-size);
+      font-weight: 750;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .lede {
+      margin-top: var(--docs-space-4);
+      color: var(--docs-text-2);
+      font-size: var(--docs-type-xl);
+      line-height: 1.5;
+      text-wrap: pretty;
+    }
+
+    section { margin-top: var(--docs-section-gap); scroll-margin-top: 20px; }
+    section > p, section > ul, section > ol { max-width: 78ch; }
+    section > p { margin-top: var(--docs-space-4); color: var(--docs-text-2); }
+    section > ul, section > ol { margin-top: var(--docs-space-4); padding-left: 1.2em; color: var(--docs-text-2); }
+    section li + li { margin-top: var(--docs-space-2); }
+    section li strong { color: var(--docs-text); }
+
+    h2 { margin-top: var(--docs-space-2); }
+    h3 {
+      margin-top: var(--docs-space-6);
+      font-size: var(--docs-type-xl);
+      letter-spacing: -.015em;
+    }
+    .section-kicker {
+      color: var(--docs-muted);
+      font-size: var(--docs-label-size);
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    figure {
+      margin-top: var(--docs-space-5);
+      padding: var(--docs-card-padding);
+      background: var(--docs-surface);
+      border: 1px solid var(--docs-border);
+      border-radius: var(--docs-radius-lg);
+      box-shadow: var(--docs-shadow);
+    }
+    figure .scroll { overflow-x: auto; }
+    figure svg { width: 100%; height: auto; min-width: 520px; font-family: var(--docs-sans); }
+    figcaption {
+      margin-top: var(--docs-space-4);
+      padding-top: var(--docs-space-3);
+      border-top: 1px solid var(--docs-border);
+      color: var(--docs-muted);
+      font-size: var(--docs-type-md);
+      text-wrap: pretty;
+    }
+    figcaption b { color: var(--docs-text-2); font-weight: 700; }
+
+    .fig-label {
+      display: inline-block;
+      margin-bottom: var(--docs-space-3);
+      color: var(--docs-muted);
+      font-size: var(--docs-type-xs);
+      font-weight: 750;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    /* SVG primitives shared by every diagram. */
+    .s-box { fill: var(--docs-surface-2); stroke: var(--docs-border-strong); stroke-width: 1; }
+    .s-box-accent { fill: var(--docs-accent-soft); stroke: var(--docs-accent); stroke-width: 1; }
+    .s-box-plain { fill: none; stroke: var(--docs-border-strong); stroke-width: 1; stroke-dasharray: 4 4; }
+    .s-t { fill: var(--docs-text); font-size: 13px; font-weight: 650; }
+    .s-t2 { fill: var(--docs-text-2); font-size: 12px; }
+    .s-t3 { fill: var(--docs-muted); font-size: 11px; }
+    .s-mono { font-family: var(--docs-mono); font-size: 11px; fill: var(--docs-text-2); }
+    .s-line { stroke: var(--docs-border-strong); stroke-width: 1.5; fill: none; }
+    .s-line-soft { stroke: var(--docs-border); stroke-width: 1; fill: none; }
+    .s-dash { stroke: var(--docs-edge); stroke-width: 1.4; fill: none; stroke-dasharray: 5 4; }
+    .s-gain { fill: var(--w-gain); }
+    .s-loss { fill: var(--w-loss); }
+    .s-cash { fill: var(--w-cash); }
+    .s-savings { fill: var(--w-savings); }
+    .s-funds { fill: var(--w-funds); }
+    .s-gold { fill: var(--w-gold); }
+    .s-lent { fill: var(--w-lent); }
+    .s-borrowed { fill: var(--w-borrowed); }
+    .s-overdraft { fill: var(--w-overdraft); }
+    .s-track { fill: var(--w-track); }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--docs-grid-gap);
+      margin-top: var(--docs-space-5);
+    }
+    .card {
+      padding: var(--docs-card-padding);
+      background: var(--docs-surface);
+      border: 1px solid var(--docs-border);
+      border-radius: var(--docs-radius-md);
+    }
+    .card h4 { font-size: var(--docs-type-lg); letter-spacing: -.01em; }
+    .card p { margin-top: var(--docs-space-2); color: var(--docs-text-2); font-size: var(--docs-type-md); }
+    .card .metric {
+      display: block;
+      margin-bottom: var(--docs-space-1);
+      color: var(--docs-muted);
+      font-size: var(--docs-type-xs);
+      font-weight: 750;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .table-wrap { overflow-x: auto; margin-top: var(--docs-space-5); }
+    table { width: 100%; min-width: 560px; border-collapse: collapse; font-size: var(--docs-type-md); }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--docs-border);
+      text-align: left;
+      vertical-align: top;
+    }
+    th { color: var(--docs-muted); font-size: var(--docs-type-xs); letter-spacing: .08em; text-transform: uppercase; }
+    td { color: var(--docs-text-2); }
+    td:first-child { color: var(--docs-text); font-weight: 650; }
+    td.num { font-family: var(--docs-mono); text-align: right; white-space: nowrap; }
+
+    .callout {
+      margin-top: var(--docs-space-5);
+      padding: var(--docs-space-4) var(--docs-space-5);
+      background: var(--docs-info-soft);
+      border-left: 3px solid var(--docs-info);
+      border-radius: var(--docs-radius-sm);
+      color: var(--docs-text-2);
+      font-size: var(--docs-type-md);
+    }
+    .callout.warn { background: var(--docs-warning-soft); border-left-color: var(--docs-warning); }
+    .callout b { color: var(--docs-text); }
+
+    .legend { display: flex; flex-wrap: wrap; gap: var(--docs-space-3); margin-top: var(--docs-space-4); }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--docs-text-2);
+      font-size: var(--docs-type-sm);
+    }
+    .legend i { width: 11px; height: 11px; border-radius: 3px; }
+
+    footer {
+      margin-top: var(--docs-section-gap);
+      padding-top: var(--docs-space-5);
+      border-top: 1px solid var(--docs-border);
+      color: var(--docs-muted);
+      font-size: var(--docs-type-md);
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <nav class="docs-nav" aria-label="Tài liệu MonMon">
+      <a class="docs-nav-brand" href="smart-note.html">MonMon Docs</a>
+      <ul class="docs-nav-list">
+        <li><a href="smart-note.html">Hướng dẫn sử dụng</a></li>
+        <li><a href="budget-and-goals.html">Ngân sách &amp; mục tiêu</a></li>
+        <li><a href="wealth.html" aria-current="page">Tài sản</a></li>
+        <li><a href="system-design.html">Thiết kế hệ thống</a></li>
+        <li><a href="bank-transaction-auto-note-research.html">Nghiên cứu</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
+      </ul>
+    </nav>
+
+    <header class="hero">
+      <p class="eyebrow">MonMon / Tài sản</p>
+      <h1>Tiền để dành, và một con số ròng không đếm trùng đồng nào</h1>
+      <p class="lede">Tab Tài sản gom ba thứ tiền đã rời khỏi ví: sổ tiết kiệm, quỹ mở và ETF, vàng vật chất. Trang này mô tả từng phần hoạt động ra sao, tại sao một lot đã mua không bao giờ bị viết lại, và vì sao bán một vị thế không làm tài sản ròng nhảy một đồng nào.</p>
+    </header>
+
+    <section id="ban-do">
+      <p class="section-kicker">01 — Bản đồ</p>
+      <h2>Màn hình Tài sản là một bản tóm tắt, không phải bản sao</h2>
+      <p><code>WealthView</code> vẽ toàn bộ những gì chủ sở hữu có trong một khung hình: vòng phân bổ, đường tăng trưởng, rồi ba khối tóm tắt. Chi tiết nằm sâu hơn một lớp. Mỗi hàng tóm tắt mang theo một <em>route</em> chứ không mang theo view đích, vì hàng đó nằm trong một lazy stack có thể được dựng lại bất cứ lúc nào các con số phía trên đổi — và một view đích gắn vào hàng sẽ bị đá ra khỏi stack cùng với nó.</p>
+
+      <figure>
+        <span class="fig-label">Hình 1 — Cấu trúc màn hình</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 430" role="img" aria-label="Sơ đồ cấu trúc màn hình Tài sản">
+            <rect class="s-box-accent" x="340" y="14" width="220" height="46" rx="10"/>
+            <text class="s-t" x="450" y="34" text-anchor="middle">Tab Tài sản</text>
+            <text class="s-mono" x="450" y="50" text-anchor="middle">WealthView</text>
+
+            <path class="s-line" d="M450 60 L450 78 M200 78 L700 78 M200 78 L200 96 M700 78 L700 96"/>
+            <path class="s-line" d="M450 78 L450 168"/>
+
+            <rect class="s-box" x="60" y="96" width="280" height="56" rx="10"/>
+            <text class="s-t" x="200" y="118" text-anchor="middle">Vòng phân bổ tài sản</text>
+            <text class="s-mono" x="200" y="136" text-anchor="middle">AssetAllocationCard</text>
+
+            <rect class="s-box" x="560" y="96" width="280" height="56" rx="10"/>
+            <text class="s-t" x="700" y="118" text-anchor="middle">Đường tăng trưởng 12 tháng</text>
+            <text class="s-mono" x="700" y="136" text-anchor="middle">AssetGrowthCard</text>
+
+            <rect class="s-box" x="30" y="168" width="250" height="50" rx="10"/>
+            <text class="s-t" x="155" y="190" text-anchor="middle">Tài khoản</text>
+            <text class="s-t3" x="155" y="207" text-anchor="middle">tiền mặt · ngân hàng · thẻ</text>
+
+            <rect class="s-box" x="325" y="168" width="250" height="50" rx="10"/>
+            <text class="s-t" x="450" y="190" text-anchor="middle">Đầu tư</text>
+            <text class="s-t3" x="450" y="207" text-anchor="middle">tiền đã gửi đi chỗ khác</text>
+
+            <rect class="s-box" x="620" y="168" width="250" height="50" rx="10"/>
+            <text class="s-t" x="745" y="190" text-anchor="middle">Nợ</text>
+            <text class="s-t3" x="745" y="207" text-anchor="middle">đi vay · cho vay</text>
+
+            <path class="s-line" d="M450 152 L450 168"/>
+            <path class="s-line-soft" d="M155 218 L155 250 M450 218 L450 250 M745 218 L745 250"/>
+
+            <text class="s-t3" x="450" y="243" text-anchor="middle">một lần push — AppRoute</text>
+
+            <rect class="s-box-plain" x="30" y="250" width="250" height="60" rx="10"/>
+            <text class="s-t2" x="155" y="276" text-anchor="middle">AccountsScreen</text>
+            <text class="s-t3" x="155" y="294" text-anchor="middle">số dư suy ra, không gõ tay</text>
+
+            <rect class="s-box-plain" x="325" y="250" width="250" height="152" rx="10"/>
+            <text class="s-t2" x="450" y="274" text-anchor="middle">InvestmentsScreen</text>
+            <rect class="s-box" x="345" y="288" width="210" height="30" rx="8"/>
+            <text class="s-t2" x="450" y="308" text-anchor="middle">Sổ tiết kiệm</text>
+            <rect class="s-box" x="345" y="324" width="210" height="30" rx="8"/>
+            <text class="s-t2" x="450" y="344" text-anchor="middle">Quỹ &amp; ETF</text>
+            <rect class="s-box" x="345" y="360" width="210" height="30" rx="8"/>
+            <text class="s-t2" x="450" y="380" text-anchor="middle">Vàng</text>
+
+            <rect class="s-box-plain" x="620" y="250" width="250" height="60" rx="10"/>
+            <text class="s-t2" x="745" y="276" text-anchor="middle">DebtDetailView</text>
+            <text class="s-t3" x="745" y="294" text-anchor="middle">gốc và các lần trả</text>
+          </svg>
+        </div>
+        <figcaption>Ba segment của <b>InvestmentsScreen</b> chia theo cách định giá, không theo cách sắp xếp cho đẹp: sổ tiết kiệm trả một lãi suất đã nêu, quỹ và ETF có giá thị trường, vàng có giá hai chiều của tiệm. Nút thêm đổi theo segment đang mở nên việc thêm luôn cách danh sách đúng một chạm.</figcaption>
+      </figure>
+    </section>
+
+    <section id="mo-hinh">
+      <p class="section-kicker">02 — Mô hình</p>
+      <h2>Sáu model, không quan hệ SwiftData nào</h2>
+      <p>Mọi liên kết ở đây là một <code>UUID</code> lưu phẳng, join lại trong Swift. Đó không phải sự lười: schema phải chạy được trên CloudKit, mà CloudKit đòi mọi thuộc tính hoặc optional hoặc có giá trị mặc định, và cấm thuộc tính unique. Hệ quả phải sống chung: một <code>instrumentID</code> có thể trỏ vào thứ đã bị xoá, nên mọi nơi đọc nó đều phải quyết định hiển thị gì cho trạng thái đó — <code>FundSummary.unpriced</code> báo cáo vị thế ấy thay vì định giá nó bằng một cái giá nó không có.</p>
+
+      <figure>
+        <span class="fig-label">Hình 2 — Khoá ngoại của phần Tài sản</span>
+        <div class="scroll">
+          <svg viewBox="0 0 920 400" role="img" aria-label="Sơ đồ quan hệ giữa các model tài sản">
+            <rect class="s-box-accent" x="30" y="160" width="180" height="76" rx="10"/>
+            <text class="s-t" x="120" y="188" text-anchor="middle">CashAccount</text>
+            <text class="s-mono" x="120" y="206" text-anchor="middle">openingBalance</text>
+            <text class="s-t3" x="120" y="224" text-anchor="middle">số dư suy ra hoàn toàn</text>
+
+            <rect class="s-box" x="350" y="30" width="200" height="70" rx="10"/>
+            <text class="s-t" x="450" y="56" text-anchor="middle">SavingsDeposit</text>
+            <text class="s-mono" x="450" y="74" text-anchor="middle">principal · rate · term</text>
+            <text class="s-t3" x="450" y="91" text-anchor="middle">bất biến sau khi mở</text>
+
+            <rect class="s-box" x="690" y="30" width="200" height="70" rx="10"/>
+            <text class="s-t" x="790" y="56" text-anchor="middle">SavingsWithdrawal</text>
+            <text class="s-mono" x="790" y="74" text-anchor="middle">principal · amountReceived</text>
+            <text class="s-t3" x="790" y="91" text-anchor="middle">có ngày, xoá được</text>
+
+            <rect class="s-box" x="350" y="160" width="200" height="70" rx="10"/>
+            <text class="s-t" x="450" y="186" text-anchor="middle">FundHolding</text>
+            <text class="s-mono" x="450" y="204" text-anchor="middle">units · averageCostPerUnit</text>
+            <text class="s-t3" x="450" y="221" text-anchor="middle">một lot, không bị viết lại</text>
+
+            <rect class="s-box" x="690" y="160" width="200" height="70" rx="10"/>
+            <text class="s-t" x="790" y="186" text-anchor="middle">FundSale</text>
+            <text class="s-mono" x="790" y="204" text-anchor="middle">units · pricePerUnit</text>
+            <text class="s-t3" x="790" y="221" text-anchor="middle">giá bán của chủ, không đổi</text>
+
+            <rect class="s-box" x="350" y="300" width="200" height="70" rx="10"/>
+            <text class="s-t" x="450" y="326" text-anchor="middle">FundInstrument</text>
+            <text class="s-mono" x="450" y="344" text-anchor="middle">symbol · price · priceAsOf</text>
+            <text class="s-t3" x="450" y="361" text-anchor="middle">một mã, đúng một giá</text>
+
+            <path class="s-line" d="M210 180 L280 180 L280 65 L350 65"/>
+            <text class="s-t3" x="288" y="120">sourceAccountID</text>
+
+            <path class="s-line" d="M210 200 L280 200 L280 195 L350 195"/>
+            <text class="s-t3" x="222" y="216">sourceAccountID</text>
+
+            <path class="s-line" d="M690 65 L640 65 L640 65 L550 65"/>
+            <text class="s-t3" x="578" y="55" text-anchor="middle">depositID</text>
+
+            <path class="s-line" d="M690 195 L550 195"/>
+            <text class="s-t3" x="620" y="186" text-anchor="middle">holdingID</text>
+
+            <path class="s-line" d="M450 300 L450 230"/>
+            <text class="s-t3" x="458" y="268">instrumentID</text>
+
+            <path class="s-dash" d="M790 100 L790 130 L250 130 L250 160"/>
+            <text class="s-t3" x="520" y="123" text-anchor="middle">destinationAccountID — tiền về ví</text>
+
+            <path class="s-dash" d="M890 195 L905 195 L905 260 L120 260 L120 236"/>
+            <text class="s-t3" x="520" y="275" text-anchor="middle">proceedsAccountID — tiền bán về ví</text>
+          </svg>
+        </div>
+        <figcaption>Nét liền là tiền đi ra khỏi ví, nét đứt là tiền quay về. <b>Không</b> mũi tên nào là một SwiftData relationship — tất cả là <code>UUID</code> phẳng, join trong Swift, nên mọi mã đọc chúng đều phải xử lý được trường hợp đầu kia đã biến mất.</figcaption>
+      </figure>
+
+      <div class="grid-2">
+        <div class="card">
+          <span class="metric">Quy tắc 1</span>
+          <h4>Số mở đầu không bao giờ bị viết lại</h4>
+          <p><code>CashAccount.openingBalance</code>, <code>SavingsDeposit.principal</code> và <code>FundHolding.units</code> đứng yên vĩnh viễn. Mọi thay đổi sau đó là một bản ghi có ngày riêng. Đây là điều kiện để dựng lại được quá khứ.</p>
+        </div>
+        <div class="card">
+          <span class="metric">Quy tắc 2</span>
+          <h4>Giá thuộc về mã, không thuộc về vị thế</h4>
+          <p>Giá nằm trên <code>FundInstrument</code>. Nếu nó nằm trên từng lot, hai lần mua cùng một mã có thể mang hai giá khác nhau tại cùng một thời điểm, và tài sản ròng sẽ sai mà không có gì trên màn hình giải thích.</p>
+        </div>
+        <div class="card">
+          <span class="metric">Quy tắc 3</span>
+          <h4>Bán không phải là thu nhập</h4>
+          <p><code>FundSale</code> không mang danh mục và không vào tổng chi tiêu, giống <code>AccountTransfer</code> và <code>DebtPayment</code>. Bán là tài sản hoá thành tiền mặt; khoản lãi đó đã nằm trong tài sản ròng từ trước dưới dạng lãi chưa thực hiện.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="lot">
+      <p class="section-kicker">03 — Lot</p>
+      <h2>Bán không làm nhỏ lại thứ đã mua</h2>
+      <p>Một <code>FundHolding</code> ghi lại một lần mua: bao nhiêu đơn vị, giá vốn trung bình bao nhiêu, mua bằng tài khoản nào, ngày nào. Khi bán, MonMon <em>không</em> trừ bớt <code>units</code> của lot. Nó ghi một <code>FundSale</code> riêng, và phần còn nắm giữ được suy ra: <code>units</code> trừ đi tất cả những gì đã bán.</p>
+      <p>Cách này đắt hơn một dòng code, và mua lại được ba thứ mà một lot co lại không thể có: phép tính tiền mặt không cần thêm số hạng nào, quá khứ dựng lại được, và thứ đã mua vẫn đọc được sau khi nó không còn.</p>
+
+      <figure>
+        <span class="fig-label">Hình 3 — Một lot sau khi bán một phần</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 340" role="img" aria-label="Sơ đồ đơn vị và giá vốn của một lot đã bán một phần">
+            <text class="s-t" x="20" y="26">Lot: mua 1.000 đơn vị @ 30.000 ₫</text>
+
+            <text class="s-t3" x="20" y="62">đơn vị</text>
+            <rect class="s-track" x="140" y="46" width="740" height="34" rx="6"/>
+            <rect class="s-track" x="140" y="46" width="296" height="34" rx="6" opacity=".55"/>
+            <rect class="s-funds" x="436" y="46" width="444" height="34" rx="6" opacity=".85"/>
+            <text class="s-t2" x="288" y="68" text-anchor="middle" fill="var(--docs-text-2)">đã bán 400</text>
+            <text x="658" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">còn giữ 600</text>
+            <path class="s-dash" d="M436 40 L436 320"/>
+
+            <text class="s-t3" x="20" y="122">costBasis</text>
+            <rect class="s-box" x="140" y="106" width="740" height="30" rx="6"/>
+            <text class="s-t2" x="510" y="126" text-anchor="middle">30.000.000 ₫ — nguyên vẹn, vì đây là số tiền thật sự đã rời tài khoản</text>
+
+            <text class="s-t3" x="20" y="176">remaining</text>
+            <text class="s-t3" x="20" y="190">CostBasis</text>
+            <rect class="s-funds" x="436" y="160" width="444" height="30" rx="6" opacity=".22"/>
+            <rect class="s-box-plain" x="140" y="160" width="296" height="30" rx="6"/>
+            <text class="s-t2" x="658" y="180" text-anchor="middle">18.000.000 ₫</text>
+            <text class="s-t3" x="288" y="180" text-anchor="middle">12.000.000 ₫ đã chốt</text>
+
+            <text class="s-t3" x="20" y="230">marketValue</text>
+            <text class="s-t3" x="20" y="244">@ 34.200 ₫</text>
+            <rect class="s-funds" x="436" y="214" width="444" height="30" rx="6" opacity=".55"/>
+            <text x="658" y="234" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">20.520.000 ₫</text>
+
+            <text class="s-t3" x="20" y="288">lãi</text>
+            <rect class="s-gain" x="436" y="272" width="120" height="30" rx="6" opacity=".85"/>
+            <text x="496" y="292" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">+2.520.000</text>
+            <text class="s-t3" x="566" y="292">chưa thực hiện — còn đổi theo giá</text>
+            <rect class="s-gain" x="200" y="272" width="120" height="30" rx="6" opacity=".85"/>
+            <text x="260" y="292" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">+1.200.000</text>
+            <text class="s-t3" x="140" y="320">đã thực hiện — bán 400 @ 33.000 ₫, không giá nào về sau làm nó đổi</text>
+          </svg>
+        </div>
+        <figcaption><code>costBasis</code> và <code>remainingCostBasis</code> là hai con số khác nhau và cả hai đều cần: cái đầu khớp với số tiền đã rời tài khoản, cái sau là thứ mà giá trị thị trường được đo lại. Lãi chưa thực hiện và lãi đã thực hiện cũng đứng riêng, vì một cái còn đổi được và một cái thì không — gọi chung là "chưa thực hiện" sẽ nói sai về nửa số liệu.</figcaption>
+      </figure>
+    </section>
+
+    <section id="vong-tien">
+      <p class="section-kicker">04 — Dòng tiền</p>
+      <h2>Một vòng mua rồi bán hết, tài khoản chỉ nhúc nhích đúng phần lãi</h2>
+      <p><code>CashBalanceSummary.available</code> luôn trừ đi <code>fundedAmount</code> — giá vốn gốc của mọi lot mà tài khoản đã mua — và cộng vào <code>FundSaleSummary.netFlow</code>, tức tiền bán về. Hai số hạng đó không bao giờ bù trừ cho nhau trong code; chúng bù trừ trong kết quả.</p>
+
+      <figure>
+        <span class="fig-label">Hình 4 — Số dư khả dụng qua một vòng đầy đủ</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 340" role="img" aria-label="Biểu đồ thác nước số dư tài khoản qua một vòng mua bán">
+            <path class="s-line-soft" d="M50 104 L860 104 M50 236 L860 236 M50 178 L860 178 M50 91 L860 91"/>
+            <path class="s-line" d="M50 280 L860 280"/>
+
+            <rect class="s-cash" x="60" y="104" width="120" height="176" rx="5" opacity=".8"/>
+            <text class="s-t2" x="120" y="300" text-anchor="middle">số dư đầu</text>
+            <text class="s-mono" x="120" y="316" text-anchor="middle">100.000.000</text>
+
+            <rect class="s-loss" x="220" y="104" width="120" height="132" rx="5" opacity=".8"/>
+            <text class="s-t2" x="280" y="300" text-anchor="middle">mua 1.000 đv</text>
+            <text class="s-mono" x="280" y="316" text-anchor="middle">−30.000.000</text>
+            <text class="s-t3" x="280" y="96" text-anchor="middle">fundedAmount</text>
+
+            <rect class="s-gain" x="380" y="178" width="120" height="58" rx="5" opacity=".8"/>
+            <text class="s-t2" x="440" y="300" text-anchor="middle">bán 400 @ 33.000</text>
+            <text class="s-mono" x="440" y="316" text-anchor="middle">+13.200.000</text>
+
+            <rect class="s-gain" x="540" y="91" width="120" height="87" rx="5" opacity=".8"/>
+            <text class="s-t2" x="600" y="300" text-anchor="middle">bán 600 @ 33.000</text>
+            <text class="s-mono" x="600" y="316" text-anchor="middle">+19.800.000</text>
+
+            <rect class="s-cash" x="700" y="91" width="120" height="189" rx="5" opacity=".8"/>
+            <text class="s-t2" x="760" y="300" text-anchor="middle">số dư cuối</text>
+            <text class="s-mono" x="760" y="316" text-anchor="middle">103.000.000</text>
+
+            <path class="s-dash" d="M180 104 L220 104 M340 236 L380 236 M500 178 L540 178 M660 91 L700 91"/>
+
+            <path class="s-line" d="M836 104 L836 91"/>
+            <text class="s-t" x="846" y="76">+3.000.000 ₫</text>
+            <text class="s-t3" x="846" y="60">đúng bằng lãi đã thực hiện</text>
+          </svg>
+        </div>
+        <figcaption>Lot vẫn giữ nguyên giá vốn 30.000.000 ₫ bị trừ khỏi ví, hai lần bán cộng lại 33.000.000 ₫, và phần chênh 3.000.000 ₫ là tất cả những gì tài khoản thay đổi sau một vòng. Nếu bán làm co lot lại, tiền vốn sẽ được trả về hai lần.</figcaption>
+      </figure>
+
+      <div class="callout">
+        <b>Vì sao tài sản ròng không nhảy khi bán.</b> Ngay tại thời điểm bán, ba thứ xảy ra cùng lúc và triệt tiêu nhau: giá vốn gốc vẫn bị trừ khỏi phần tiền mặt, tiền bán được cộng vào đó, và giá trị thị trường giảm đúng số đơn vị đã đi. Ở giá hiện tại, tổng bằng không. Khoản lãi không mất đi — nó chuyển từ <em>lãi chưa thực hiện</em> thành <em>tiền mặt đang cầm</em>.
+      </div>
+    </section>
+
+    <section id="gop-lot">
+      <p class="section-kicker">05 — Gộp</p>
+      <h2>Mua đều hàng tháng là một quyết định ghi nhiều lần</h2>
+      <p>Danh sách hiển thị một thẻ cho mỗi mã, không phải một thẻ cho mỗi lần mua. <code>FundPositionGroup</code> cộng đơn vị còn giữ, cộng giá vốn của phần còn mở, và chia ra giá vốn trung bình có trọng số — một lệnh mua lớn kéo nó xa hơn một lệnh nhỏ. Các lần mua riêng lẻ vẫn nguyên vẹn phía sau thẻ, vì đó là nơi ngày mua và tài khoản nguồn sống.</p>
+
+      <figure>
+        <span class="fig-label">Hình 5 — Ba lần mua, một thẻ</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 290" role="img" aria-label="Sơ đồ gộp ba lot thành một nhóm vị thế">
+            <text class="s-t3" x="20" y="24">FundHolding — mỗi lần mua một bản ghi</text>
+
+            <rect class="s-box" x="20" y="38" width="290" height="52" rx="10"/>
+            <text class="s-t2" x="36" y="60">Tháng 3 · 300 đv @ 28.000</text>
+            <text class="s-mono" x="36" y="78">8.400.000 ₫ · ví Techcombank</text>
+
+            <rect class="s-box" x="20" y="102" width="290" height="52" rx="10"/>
+            <text class="s-t2" x="36" y="124">Tháng 4 · 400 đv @ 30.000</text>
+            <text class="s-mono" x="36" y="142">12.000.000 ₫ · ví Techcombank</text>
+
+            <rect class="s-box" x="20" y="166" width="290" height="52" rx="10"/>
+            <text class="s-t2" x="36" y="188">Tháng 5 · 300 đv @ 32.000</text>
+            <text class="s-mono" x="36" y="206">9.600.000 ₫ · ví tiền mặt</text>
+
+            <path class="s-line" d="M310 64 L360 64 L360 128 M310 128 L360 128 M310 192 L360 192 L360 128 M360 128 L410 128"/>
+            <text class="s-t3" x="335" y="248" text-anchor="middle">groups(by: instrumentID)</text>
+
+            <rect class="s-box-accent" x="410" y="38" width="470" height="180" rx="12"/>
+            <text class="s-t" x="430" y="66">FUEVFVND</text>
+            <text class="s-t3" x="430" y="84">3 vị thế · quỹ ETF · VNDIRECT</text>
+
+            <text class="s-t3" x="430" y="116">đơn vị còn giữ</text>
+            <text class="s-t" x="700" y="116" text-anchor="end">1.000</text>
+            <text class="s-t3" x="430" y="140">giá vốn trung bình</text>
+            <text class="s-t" x="700" y="140" text-anchor="end">30.000 ₫</text>
+            <text class="s-t3" x="430" y="164">giá hiện tại</text>
+            <text class="s-t" x="700" y="164" text-anchor="end">34.200 ₫</text>
+            <text class="s-t3" x="430" y="188">giá trị thị trường</text>
+            <text class="s-t" x="700" y="188" text-anchor="end">34.200.000 ₫</text>
+
+            <rect class="s-gain" x="730" y="96" width="130" height="72" rx="10" opacity=".85"/>
+            <text x="795" y="128" text-anchor="middle" font-size="17" font-weight="750" fill="#fff">+14,0%</text>
+            <text x="795" y="150" text-anchor="middle" font-size="12" fill="#fff">+4.200.000 ₫</text>
+            <text class="s-t3" x="795" y="192" text-anchor="middle">chưa thực hiện</text>
+          </svg>
+        </div>
+        <figcaption>Tỷ suất tính trên số đã cộng, không phải trung bình cộng các tỷ suất của từng lot — cách sau sẽ cân một lệnh mua tượng trưng ngang với lệnh mua gánh cả vị thế. Nhóm không còn đơn vị nào và đã từng bán thì rơi xuống cuối danh sách; nhóm chưa từng giữ gì không phải là "đã đóng", nó rỗng.</figcaption>
+      </figure>
+    </section>
+
+    <section id="tiet-kiem">
+      <p class="section-kicker">06 — Sổ tiết kiệm</p>
+      <h2>Lãi đơn, trả cuối kỳ, và một sổ không bao giờ bị sửa</h2>
+      <p>Sổ tiết kiệm Việt Nam trả lãi đơn tại ngày đáo hạn. <code>SavingsInterest</code> làm đúng phép đó và làm tròn về đồng — không cộng dồn, không ghép lãi, không đoán.</p>
+
+      <figure>
+        <span class="fig-label">Hình 6 — Lãi dự kiến của một sổ 12 tháng</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 250" role="img" aria-label="Công thức và biểu đồ lãi sổ tiết kiệm">
+            <rect class="s-box" x="20" y="20" width="860" height="52" rx="10"/>
+            <text class="s-mono" x="450" y="43" text-anchor="middle" font-size="14">interest = principal × rate ÷ 100 × days ÷ 365</text>
+            <text class="s-t3" x="450" y="62" text-anchor="middle">days đếm theo lịch Asia/Ho_Chi_Minh, từ ngày mở đến ngày đáo hạn</text>
+
+            <text class="s-t3" x="20" y="112">gốc</text>
+            <rect class="s-savings" x="120" y="96" width="600" height="34" rx="6" opacity=".8"/>
+            <text x="420" y="118" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">200.000.000 ₫</text>
+
+            <text class="s-t3" x="20" y="164">lãi 5,6%/năm</text>
+            <rect class="s-gain" x="720" y="148" width="34" height="34" rx="6" opacity=".85"/>
+            <text class="s-t2" x="766" y="170">11.200.000 ₫ &nbsp;·&nbsp; 365 ngày</text>
+
+            <text class="s-t3" x="20" y="216">đáo hạn</text>
+            <rect class="s-savings" x="120" y="200" width="600" height="34" rx="6" opacity=".35"/>
+            <rect class="s-gain" x="720" y="200" width="34" height="34" rx="6" opacity=".35"/>
+            <text class="s-t" x="770" y="222">211.200.000 ₫</text>
+
+            <path class="s-dash" d="M720 90 L720 240"/>
+          </svg>
+        </div>
+        <figcaption>Lãi dự kiến được <b>hiển thị</b>, không bao giờ được <b>cộng</b> vào tài sản ròng. Tài sản ròng đếm sổ tiết kiệm theo gốc còn lại; tiền lãi chỉ trở thành thật khi nó về tài khoản qua một lần rút.</figcaption>
+      </figure>
+
+      <h3>Rút tiền là bản ghi mới, không phải một lần sửa sổ</h3>
+      <p>Một <code>SavingsWithdrawal</code> mang gốc rút ra và số tiền thực nhận. Chênh lệch giữa hai con số là lãi đã thực hiện — có thể nhỏ hơn lãi dự kiến khi tất toán trước hạn, và MonMon không tranh cãi với con số của ngân hàng: nó lưu đúng cái chủ sở hữu nhận.</p>
+
+      <figure>
+        <span class="fig-label">Hình 7 — Ba trạng thái của một sổ</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 260" role="img" aria-label="Máy trạng thái của sổ tiết kiệm">
+            <rect class="s-box-accent" x="60" y="90" width="180" height="66" rx="12"/>
+            <text class="s-t" x="150" y="118" text-anchor="middle">Đang gửi</text>
+            <text class="s-mono" x="150" y="136" text-anchor="middle">active</text>
+
+            <rect class="s-box" x="370" y="30" width="180" height="66" rx="12"/>
+            <text class="s-t" x="460" y="58" text-anchor="middle">Đã đáo hạn</text>
+            <text class="s-mono" x="460" y="76" text-anchor="middle">matured</text>
+
+            <rect class="s-box" x="680" y="90" width="180" height="66" rx="12"/>
+            <text class="s-t" x="770" y="118" text-anchor="middle">Đã tất toán</text>
+            <text class="s-mono" x="770" y="136" text-anchor="middle">settled</text>
+
+            <path class="s-line" d="M240 108 L370 66"/>
+            <text class="s-t3" x="250" y="86">hôm nay ≥ ngày đáo hạn</text>
+
+            <path class="s-line" d="M550 66 L680 108"/>
+            <text class="s-t3" x="562" y="86">rút hết gốc</text>
+
+            <path class="s-dash" d="M240 138 L680 138"/>
+            <text class="s-t3" x="460" y="158" text-anchor="middle">tất toán trước hạn — lãi thực nhận thấp hơn lãi dự kiến</text>
+
+            <rect class="s-box-plain" x="60" y="196" width="800" height="44" rx="10"/>
+            <text class="s-t3" x="80" y="223">Thứ tự danh sách: đã đáo hạn lên đầu (cần xử lý), rồi đang gửi, rồi đã tất toán. Cùng trạng thái thì ngày đáo hạn gần nhất đứng trước.</text>
+          </svg>
+        </div>
+        <figcaption>Trạng thái được suy ra tại thời điểm đọc từ gốc còn lại và ngày đáo hạn — không có cột <code>status</code> nào trong store để lệch pha với thực tế.</figcaption>
+      </figure>
+    </section>
+
+    <section id="gia">
+      <p class="section-kicker">07 — Giá thị trường</p>
+      <h2>Không có timer, không có background task</h2>
+      <p>Đây là chỗ duy nhất trong ứng dụng gọi ra mạng. Nó chỉ gọi khi chủ sở hữu bấm Làm mới, hoặc khi một màn hình mở ra đúng vào con số đã cũ. Thứ đi ra ngoài chỉ là một mã chứng khoán — không số dư, không số đơn vị, không giá vốn, không tên tài khoản. Transport là <code>URLSession</code> ephemeral: không cache đĩa, không cookie, không kho credential, timeout 10 giây.</p>
+
+      <figure>
+        <span class="fig-label">Hình 8 — Loại tài sản quyết định nguồn giá</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 260" role="img" aria-label="Sơ đồ định tuyến nhà cung cấp giá theo loại tài sản">
+            <text class="s-t3" x="40" y="26">FundInstrumentKind</text>
+            <text class="s-t3" x="340" y="26">FundQuoteRouter</text>
+            <text class="s-t3" x="620" y="26">endpoint</text>
+
+            <rect class="s-funds" x="40" y="40" width="180" height="52" rx="10" opacity=".2"/>
+            <text class="s-t" x="60" y="63">Quỹ mở</text>
+            <text class="s-t3" x="60" y="81">NAV công bố T+1</text>
+
+            <rect class="s-funds" x="40" y="104" width="180" height="52" rx="10" opacity=".2"/>
+            <text class="s-t" x="60" y="127">ETF niêm yết</text>
+            <text class="s-t3" x="60" y="145">giá đóng cửa HOSE</text>
+
+            <rect class="s-gold" x="40" y="168" width="180" height="52" rx="10" opacity=".2"/>
+            <text class="s-t" x="60" y="191">Vàng</text>
+            <text class="s-t3" x="60" y="209">giá tiệm, hai chiều</text>
+
+            <rect class="s-box" x="340" y="40" width="200" height="52" rx="10"/>
+            <text class="s-t" x="440" y="63" text-anchor="middle">FmarketQuoteProvider</text>
+            <text class="s-t3" x="440" y="81" text-anchor="middle">NAV · tên quỹ · logo</text>
+
+            <rect class="s-box" x="340" y="104" width="200" height="52" rx="10"/>
+            <text class="s-t" x="440" y="127" text-anchor="middle">VNDirectQuoteProvider</text>
+            <text class="s-t3" x="440" y="145" text-anchor="middle">nhân giá × 1.000</text>
+
+            <rect class="s-box" x="340" y="168" width="200" height="52" rx="10"/>
+            <text class="s-t" x="440" y="191" text-anchor="middle">VangTodayQuoteProvider</text>
+            <text class="s-t3" x="440" y="209" text-anchor="middle">mua vào / bán ra</text>
+
+            <rect class="s-box-plain" x="620" y="40" width="260" height="52" rx="10"/>
+            <text class="s-mono" x="636" y="64">api.fmarket.vn</text>
+            <text class="s-t3" x="636" y="81">/res/products/filter · get-nav-history</text>
+
+            <rect class="s-box-plain" x="620" y="104" width="260" height="52" rx="10"/>
+            <text class="s-mono" x="636" y="128">dchart-api.vndirect.com.vn</text>
+            <text class="s-t3" x="636" y="145">/dchart/history · symbols · search</text>
+
+            <rect class="s-box-plain" x="620" y="168" width="260" height="52" rx="10"/>
+            <text class="s-mono" x="636" y="192">vang.today</text>
+            <text class="s-t3" x="636" y="209">/api/prices</text>
+
+            <path class="s-line" d="M220 66 L340 66 M220 130 L340 130 M220 194 L340 194"/>
+            <path class="s-line" d="M540 66 L620 66 M540 130 L620 130 M540 194 L620 194"/>
+
+          </svg>
+        </div>
+        <figcaption>Đường đi chọn theo <code>kind</code> mà chủ sở hữu đặt, <b>không bao giờ</b> theo thứ nhà cung cấp nói về mã đó. VNDIRECT trả VESAF như một ETF niêm yết HOSE, mà nó không phải; cả hai endpoint đều sẵn sàng trả lời cho một mã chúng mô tả sai.</figcaption>
+      </figure>
+
+      <h3>Một giá "hiện tại" là giá của ngày mới nhất nó có thể mang</h3>
+      <p><code>TradingCalendar</code> không hỏi đồng hồ, nó nhận ngày cần xét làm tham số. HOSE giao dịch 09:00–15:00 các ngày trong tuần. Ngày lễ <em>không</em> được mô hình hoá: một tuần Tết sẽ báo mọi giá là cũ, điều đó trung thực với những gì ứng dụng biết và tốt hơn một bảng ngày lễ cứng sẽ âm thầm sai vào một năm nào đó.</p>
+
+      <figure>
+        <span class="fig-label">Hình 9 — Giá mới nhất mỗi loại có thể có, xét vào 10:00 sáng thứ Hai</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 250" role="img" aria-label="Trục thời gian độ mới của giá theo từng loại tài sản">
+            <path class="s-line" d="M120 60 L860 60"/>
+            <g class="s-t3" text-anchor="middle">
+              <text x="180" y="46">T5</text>
+              <text x="300" y="46">T6</text>
+              <text x="420" y="46">T7</text>
+              <text x="540" y="46">CN</text>
+              <text x="700" y="46">T2 · 10:00</text>
+            </g>
+            <g>
+              <circle class="s-track" cx="180" cy="60" r="5"/>
+              <circle class="s-track" cx="300" cy="60" r="5"/>
+              <circle class="s-track" cx="420" cy="60" r="5" opacity=".4"/>
+              <circle class="s-track" cx="540" cy="60" r="5" opacity=".4"/>
+              <circle class="s-box-accent" cx="700" cy="60" r="6"/>
+            </g>
+            <text class="s-t3" x="480" y="80" text-anchor="middle">nghỉ — không có phiên</text>
+
+            <text class="s-t2" x="20" y="122">Vàng</text>
+            <rect class="s-gold" x="660" y="106" width="80" height="24" rx="6" opacity=".8"/>
+            <text class="s-t3" x="756" y="123">hôm nay — tiệm báo giá cả cuối tuần</text>
+
+            <text class="s-t2" x="20" y="166">ETF</text>
+            <rect class="s-funds" x="260" y="150" width="80" height="24" rx="6" opacity=".7"/>
+            <text class="s-t3" x="356" y="167">phiên đã đóng gần nhất — chưa tới 15:00 nên hôm nay chưa tính</text>
+
+            <text class="s-t2" x="20" y="210">Quỹ mở</text>
+            <rect class="s-funds" x="140" y="194" width="80" height="24" rx="6" opacity=".45"/>
+            <text class="s-t3" x="236" y="211">lùi thêm một phiên — Fmarket công bố NAV ở T+1, nên giá của T5 vẫn là mới nhất có thể</text>
+          </svg>
+        </div>
+        <figcaption>Một giá cũ hơn ô được tô là <em>stale</em>, và chỉ khi đó màn hình mở ra mới tự gọi mạng. Mở lại màn hình khi mọi giá đã đúng ngày thì im lặng hoàn toàn, không spinner, không request.</figcaption>
+      </figure>
+
+      <h3>Năm lý do để không gọi ra ngoài</h3>
+
+      <figure>
+        <span class="fig-label">Hình 10 — Đường đi của một mã qua refreshOne</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 400" role="img" aria-label="Cây quyết định làm mới giá một mã">
+            <rect class="s-box-accent" x="30" y="20" width="200" height="44" rx="10"/>
+            <text class="s-t" x="130" y="48" text-anchor="middle">một mã trong danh mục</text>
+
+            <g>
+              <rect class="s-box" x="30" y="84" width="200" height="40" rx="8"/>
+              <text class="s-t2" x="130" y="109" text-anchor="middle">tự động lấy giá?</text>
+              <rect class="s-box" x="30" y="148" width="200" height="40" rx="8"/>
+              <text class="s-t2" x="130" y="173" text-anchor="middle">còn giữ đơn vị nào?</text>
+              <rect class="s-box" x="30" y="212" width="200" height="40" rx="8"/>
+              <text class="s-t2" x="130" y="237" text-anchor="middle">giá đã cũ?</text>
+              <rect class="s-box" x="30" y="276" width="200" height="40" rx="8"/>
+              <text class="s-t2" x="130" y="301" text-anchor="middle">đã hỏi trong 15 phút?</text>
+              <rect class="s-box-accent" x="30" y="340" width="200" height="44" rx="10"/>
+              <text class="s-t" x="130" y="368" text-anchor="middle">gọi provider</text>
+            </g>
+            <path class="s-line" d="M130 64 L130 84 M130 124 L130 148 M130 188 L130 212 M130 252 L130 276 M130 316 L130 340"/>
+
+            <g>
+              <rect class="s-box-plain" x="300" y="86" width="230" height="36" rx="8"/>
+              <text class="s-t3" x="316" y="109">automaticQuotesOff — chủ tắt</text>
+              <rect class="s-box-plain" x="300" y="150" width="230" height="36" rx="8"/>
+              <text class="s-t3" x="316" y="173">notHeld — không ai giữ nó</text>
+              <rect class="s-box-plain" x="300" y="214" width="230" height="36" rx="8"/>
+              <text class="s-t3" x="316" y="237">alreadyCurrent — đã đúng ngày</text>
+              <rect class="s-box-plain" x="300" y="278" width="230" height="36" rx="8"/>
+              <text class="s-t3" x="316" y="301">askedTooRecently — sàn 15 phút</text>
+            </g>
+            <path class="s-dash" d="M230 104 L300 104 M230 168 L300 168 M230 232 L300 232 M230 296 L300 296"/>
+
+            <rect class="s-gain" x="600" y="330" width="270" height="44" rx="10" opacity=".18"/>
+            <text class="s-t" x="620" y="358">updated — ghi giá, ngày, nguồn</text>
+
+            <g>
+              <rect class="s-box-plain" x="600" y="86" width="270" height="36" rx="8"/>
+              <text class="s-t3" x="616" y="109">symbolNotFound — không có mã này</text>
+              <rect class="s-box-plain" x="600" y="132" width="270" height="36" rx="8"/>
+              <text class="s-t3" x="616" y="155">noQuoteAvailable — chưa công bố giá</text>
+              <rect class="s-box-plain" x="600" y="178" width="270" height="36" rx="8"/>
+              <text class="s-t3" x="616" y="201">transport — mất mạng, thử lại 1 lần</text>
+              <rect class="s-box-plain" x="600" y="224" width="270" height="36" rx="8"/>
+              <text class="s-t3" x="616" y="247">decoding — provider đổi kiểu trả lời</text>
+              <rect class="s-box-plain" x="600" y="270" width="270" height="36" rx="8"/>
+              <text class="s-t3" x="616" y="293">rateLimited — chặn ngay tại máy</text>
+            </g>
+            <path class="s-dash" d="M230 362 L600 362"/>
+            <path class="s-line-soft" d="M560 352 L560 104 L600 104 M560 150 L600 150 M560 196 L600 196 M560 242 L600 242 M560 288 L600 288"/>
+            <text class="s-t3" x="392" y="384" text-anchor="middle">một mã hỏng không chặn các mã còn lại</text>
+          </svg>
+        </div>
+        <figcaption>Thất bại <b>không ghi gì cả</b>: giá cũ, ngày của nó, nguồn và thời điểm lấy đều đứng nguyên. Một con số cũ mà chủ sở hữu nhìn thấy tốt hơn một ô trống. Nếu <code>context.save()</code> hỏng, toàn bộ được rollback và mọi kết quả "đã cập nhật" bị hạ xuống thành lỗi — không có gì trên màn hình được phép nói dối rằng nó đã lưu.</figcaption>
+      </figure>
+
+      <div class="callout warn">
+        <b>Số thập phân không bao giờ đi qua số thực nhị phân.</b> <code>JSONSerialization</code> trả về <code>NSNumber</code>. Cả <code>decimalValue</code> lẫn <code>stringValue</code> đều mang theo sai số: một NAV 9348.31 quay ra thành "9348.310000000001". <code>JSONReader</code> đọc qua <code>Double.description</code> — chuỗi ngắn nhất round-trip lại đúng số — rồi dựng <code>Decimal</code> từ đó. Giá bằng 0 hoặc âm bị coi là phản hồi hỏng, không phải một cái giá.
+      </div>
+    </section>
+
+    <section id="import">
+      <p class="section-kicker">08 — Nhập danh mục</p>
+      <h2>Chọn từ danh sách, thay vì gõ mã, tên và giá</h2>
+      <p>Mở màn hình nhập <em>chính là</em> lời đồng ý gọi mạng. Cả danh mục về trong một request, nên gõ tìm kiếm sau đó không tốn thêm request nào — bộ lọc bỏ dấu và bỏ hoa thường, vì tên quỹ tiếng Việt dài và không ai gõ dấu vào ô tìm kiếm. Không có gì được ghi cho tới khi có thứ được chọn.</p>
+
+      <figure>
+        <span class="fig-label">Hình 11 — Luồng nhập danh mục</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 300" role="img" aria-label="Luồng nhập danh mục quỹ và ETF">
+            <rect class="s-box-accent" x="20" y="30" width="170" height="56" rx="10"/>
+            <text class="s-t" x="105" y="54" text-anchor="middle">Mở màn hình</text>
+            <text class="s-t3" x="105" y="72" text-anchor="middle">= lời đồng ý</text>
+
+            <rect class="s-box" x="230" y="30" width="180" height="56" rx="10"/>
+            <text class="s-t2" x="320" y="54" text-anchor="middle">catalogue()</text>
+            <text class="s-t3" x="320" y="72" text-anchor="middle">một request, cả danh sách</text>
+
+            <rect class="s-box" x="450" y="30" width="180" height="56" rx="10"/>
+            <text class="s-t2" x="540" y="54" text-anchor="middle">lọc &amp; nhóm</text>
+            <text class="s-t3" x="540" y="72" text-anchor="middle">theo công ty quản lý quỹ</text>
+
+            <rect class="s-box" x="670" y="30" width="210" height="56" rx="10"/>
+            <text class="s-t2" x="775" y="54" text-anchor="middle">chủ sở hữu chọn</text>
+            <text class="s-t3" x="775" y="72" text-anchor="middle">mã đã có được đánh dấu</text>
+
+            <path class="s-line" d="M190 58 L230 58 M410 58 L450 58 M630 58 L670 58"/>
+            <path class="s-line" d="M775 86 L775 118 L120 118 L120 150"/>
+
+            <rect class="s-box" x="20" y="150" width="380" height="60" rx="10"/>
+            <text class="s-t2" x="40" y="176">Quỹ mở — listing đã kèm NAV</text>
+            <text class="s-t3" x="40" y="196">ghi thẳng, nguồn Fmarket, kèm logo công ty quản lý</text>
+
+            <rect class="s-box" x="440" y="150" width="440" height="60" rx="10"/>
+            <text class="s-t2" x="460" y="176">ETF — listing chỉ có danh tính, không có giá</text>
+            <text class="s-t3" x="460" y="196">hỏi giá đóng cửa theo lô tối đa 4 mã trước khi ghi</text>
+
+            <path class="s-line" d="M660 210 L660 240"/>
+            <rect class="s-box-plain" x="440" y="240" width="440" height="46" rx="10"/>
+            <text class="s-t3" x="460" y="268">mã không lấy được giá thì bị báo lỗi, không được ghi ở giá 0</text>
+
+            <path class="s-line" d="M200 210 L200 240"/>
+            <rect class="s-box-plain" x="20" y="240" width="380" height="46" rx="10"/>
+            <text class="s-t3" x="40" y="268">không có giá thì ghi ở 0 và bật tự động — lần Làm mới sau lấp vào</text>
+          </svg>
+        </div>
+        <figcaption>Một mã ETF hỏng không chặn phần còn lại của lựa chọn. Tên công ty quản lý bị cắt phần pháp lý trước khi làm tiêu đề nhóm — 26 dòng "CÔNG TY CỔ PHẦN QUẢN LÝ QUỸ …" chồng lên nhau là một bức tường của cùng tám chữ, thứ phân biệt chúng nằm ở đuôi.</figcaption>
+      </figure>
+    </section>
+
+    <section id="phan-bo">
+      <p class="section-kicker">09 — Phân bổ</p>
+      <h2>Vòng tròn và con số ở giữa không thể mâu thuẫn nhau</h2>
+      <p><code>AssetAllocation</code> chia đúng những nhóm mà <code>AssetSummary.netWorth</code> cộng lại. Một vòng doughnut không vẽ được miếng âm, và vẽ nó theo độ lớn sẽ khiến khoản nợ trông như tài sản — nên tài khoản âm và tiền đi vay bị giữ ngoài vòng, rồi báo cáo riêng. Tiền cho vay thì ngược lại, có miếng của nó: đó là tài sản chủ sở hữu có quyền đòi nhưng không tiêu được, bỏ nó ra sẽ làm vòng tròn lệch khỏi con số ở giữa đúng bằng số tiền đã cho vay.</p>
+
+      <figure>
+        <span class="fig-label">Hình 12 — Vòng tài sản, và phần bị trừ ra</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 300" role="img" aria-label="Vòng phân bổ tài sản và các khoản nợ">
+            <g transform="rotate(-90 140 150)" fill="none" stroke-width="34">
+              <circle cx="140" cy="150" r="100" stroke="var(--w-savings)" stroke-dasharray="248.25 628.32" stroke-dashoffset="0"/>
+              <circle cx="140" cy="150" r="100" stroke="var(--w-gold)" stroke-dasharray="151.44 628.32" stroke-dashoffset="-248.25"/>
+              <circle cx="140" cy="150" r="100" stroke="var(--w-cash)" stroke-dasharray="148.95 628.32" stroke-dashoffset="-399.69"/>
+              <circle cx="140" cy="150" r="100" stroke="var(--w-funds)" stroke-dasharray="42.45 628.32" stroke-dashoffset="-548.64"/>
+              <circle cx="140" cy="150" r="100" stroke="var(--w-lent)" stroke-dasharray="37.24 628.32" stroke-dashoffset="-591.09"/>
+            </g>
+            <text class="s-t3" x="140" y="138" text-anchor="middle">tài sản ròng</text>
+            <text class="s-t" x="140" y="164" text-anchor="middle" font-size="20">448.200.000 ₫</text>
+
+            <g>
+              <rect class="s-savings" x="320" y="40" width="12" height="12" rx="3"/>
+              <text class="s-t2" x="344" y="51">Tiết kiệm — gốc còn lại</text>
+              <text class="s-mono" x="700" y="51" text-anchor="end">200.000.000</text>
+              <text class="s-t3" x="770" y="51" text-anchor="end">39,5%</text>
+
+              <rect class="s-gold" x="320" y="76" width="12" height="12" rx="3"/>
+              <text class="s-t2" x="344" y="87">Vàng — giá tiệm mua vào</text>
+              <text class="s-mono" x="700" y="87" text-anchor="end">122.000.000</text>
+              <text class="s-t3" x="770" y="87" text-anchor="end">24,1%</text>
+
+              <rect class="s-cash" x="320" y="112" width="12" height="12" rx="3"/>
+              <text class="s-t2" x="344" y="123">Tiền mặt — chỉ tài khoản dương</text>
+              <text class="s-mono" x="700" y="123" text-anchor="end">120.000.000</text>
+              <text class="s-t3" x="770" y="123" text-anchor="end">23,7%</text>
+
+              <rect class="s-funds" x="320" y="148" width="12" height="12" rx="3"/>
+              <text class="s-t2" x="344" y="159">Quỹ &amp; ETF — giá trị thị trường</text>
+              <text class="s-mono" x="700" y="159" text-anchor="end">34.200.000</text>
+              <text class="s-t3" x="770" y="159" text-anchor="end">6,8%</text>
+
+              <rect class="s-lent" x="320" y="184" width="12" height="12" rx="3"/>
+              <text class="s-t2" x="344" y="195">Cho vay — còn phải đòi</text>
+              <text class="s-mono" x="700" y="195" text-anchor="end">30.000.000</text>
+              <text class="s-t3" x="770" y="195" text-anchor="end">5,9%</text>
+
+              <path class="s-line-soft" d="M320 212 L780 212"/>
+              <text class="s-t2" x="344" y="232">Tổng tài sản vẽ được</text>
+              <text class="s-mono" x="700" y="232" text-anchor="end">506.200.000</text>
+
+              <rect class="s-borrowed" x="320" y="250" width="12" height="12" rx="3"/>
+              <text class="s-t2" x="344" y="261">Đi vay còn nợ</text>
+              <text class="s-mono" x="700" y="261" text-anchor="end">−50.000.000</text>
+
+              <rect class="s-overdraft" x="320" y="274" width="12" height="12" rx="3"/>
+              <text class="s-t2" x="344" y="285">Tài khoản âm · dư nợ thẻ</text>
+              <text class="s-mono" x="700" y="285" text-anchor="end">−8.000.000</text>
+            </g>
+          </svg>
+        </div>
+        <figcaption>Bất biến giữ cho hai phần khớp nhau: <code>netWorth == tổng miếng − nợ phải trả</code>. Hai nguồn nợ không bao giờ chồng lấn — một cái thẻ tín dụng bị âm và một khoản vay người thân là hai nghĩa vụ riêng.</figcaption>
+      </figure>
+
+      <h3>Vì sao chuyển khoản, đi vay và trả nợ không làm con số này nhúc nhích</h3>
+      <figure>
+        <span class="fig-label">Hình 13 — Công thức tài sản ròng</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 210" role="img" aria-label="Công thức tài sản ròng theo từng thành phần">
+            <rect class="s-cash" x="20" y="30" width="180" height="60" rx="10" opacity=".2"/>
+            <text class="s-t" x="110" y="55" text-anchor="middle">tiền khả dụng</text>
+            <text class="s-t3" x="110" y="74" text-anchor="middle">mọi tài khoản, kể cả âm</text>
+
+            <text class="s-t" x="215" y="66" text-anchor="middle" font-size="20">+</text>
+
+            <rect class="s-savings" x="230" y="30" width="150" height="60" rx="10" opacity=".2"/>
+            <text class="s-t" x="305" y="55" text-anchor="middle">gốc tiết kiệm</text>
+            <text class="s-t3" x="305" y="74" text-anchor="middle">còn lại, không lãi</text>
+
+            <text class="s-t" x="395" y="66" text-anchor="middle" font-size="20">+</text>
+
+            <rect class="s-funds" x="410" y="30" width="180" height="60" rx="10" opacity=".2"/>
+            <text class="s-t" x="500" y="55" text-anchor="middle">giá trị thị trường</text>
+            <text class="s-t3" x="500" y="74" text-anchor="middle">quỹ · ETF · vàng</text>
+
+            <text class="s-t" x="605" y="66" text-anchor="middle" font-size="20">+</text>
+
+            <rect class="s-lent" x="620" y="30" width="120" height="60" rx="10" opacity=".2"/>
+            <text class="s-t" x="680" y="55" text-anchor="middle">cho vay</text>
+            <text class="s-t3" x="680" y="74" text-anchor="middle">còn phải đòi</text>
+
+            <text class="s-t" x="755" y="66" text-anchor="middle" font-size="20">−</text>
+
+            <rect class="s-borrowed" x="770" y="30" width="110" height="60" rx="10" opacity=".2"/>
+            <text class="s-t" x="825" y="55" text-anchor="middle">đi vay</text>
+            <text class="s-t3" x="825" y="74" text-anchor="middle">còn phải trả</text>
+
+            <rect class="s-box-plain" x="20" y="118" width="420" height="72" rx="10"/>
+            <text class="s-t2" x="40" y="144">Chuyển khoản nội bộ: 0</text>
+            <text class="s-t3" x="40" y="164">tiền ra khỏi ví này là tiền vào ví kia, cả hai đều đã nằm trong số hạng đầu</text>
+            <text class="s-t3" x="40" y="181">— cùng lý do, mua một vị thế cũng không đổi tổng: tiền chuyển thành đơn vị</text>
+
+            <rect class="s-box-plain" x="460" y="118" width="420" height="72" rx="10"/>
+            <text class="s-t2" x="480" y="144">Vay và trả nợ: 0</text>
+            <text class="s-t3" x="480" y="164">vay làm tiền mặt tăng và phần phải trả tăng bằng đúng số đó</text>
+            <text class="s-t3" x="480" y="181">— chỉ ghi một khoản nợ không gắn tài khoản mới làm con số này giảm, và đúng như vậy</text>
+          </svg>
+        </div>
+        <figcaption>Tiền cho vay tính theo phần <b>còn phải đòi</b> trong khi sổ tiết kiệm tính theo <b>gốc</b>. Không mâu thuẫn: gốc sổ nằm im tới đáo hạn, còn phần khoản vay đã được trả thì đã về tiền mặt rồi, đếm cả hai là đếm hai lần. Lãi dự kiến bị bỏ ra khỏi cả hai.</figcaption>
+      </figure>
+    </section>
+
+    <section id="lich-su">
+      <p class="section-kicker">10 — Lịch sử</p>
+      <h2>Mười hai tháng dựng lại từ những bản ghi có ngày</h2>
+      <p>Không có bảng lịch sử nào trong store. <code>AssetHistory</code> lấy mốc cuối mỗi tháng, lọc mọi bản ghi xuống những gì đã tồn tại tính đến mốc đó, rồi chạy lại đúng phép tính tài sản ròng. Đường và các dải thành phần đọc từ cùng một tập đã lọc, nên chúng không thể bất đồng về một tháng nào.</p>
+
+      <figure>
+        <span class="fig-label">Hình 14 — Tài sản ròng 12 tháng gần nhất</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 300" role="img" aria-label="Đường tài sản ròng 12 tháng">
+            <path class="s-line-soft" d="M60 230 L860 230 M60 174 L860 174 M60 118 L860 118 M60 62 L860 62"/>
+            <text class="s-t3" x="20" y="234">150tr</text>
+            <text class="s-t3" x="20" y="178">250tr</text>
+            <text class="s-t3" x="20" y="122">350tr</text>
+            <text class="s-t3" x="20" y="66">450tr</text>
+
+            <polyline class="s-line" style="stroke: var(--docs-accent); stroke-width: 2.5"
+              points="60,207 133,199 205,195 278,179 351,169 424,167 496,151 569,140 642,135 715,116 787,88 860,62"/>
+            <g fill="var(--docs-accent)">
+              <circle cx="60" cy="207" r="3.5"/><circle cx="133" cy="199" r="3.5"/>
+              <circle cx="205" cy="195" r="3.5"/><circle cx="278" cy="179" r="3.5"/>
+              <circle cx="351" cy="169" r="3.5"/><circle cx="424" cy="167" r="3.5"/>
+              <circle cx="496" cy="151" r="3.5"/><circle cx="569" cy="140" r="3.5"/>
+              <circle cx="642" cy="135" r="3.5"/><circle cx="715" cy="116" r="3.5"/>
+              <circle cx="787" cy="88" r="3.5"/><circle cx="860" cy="62" r="5"/>
+            </g>
+            <text class="s-t" x="860" y="46" text-anchor="end">448,2tr</text>
+
+            <text class="s-t3" x="60" y="250">cuối mỗi tháng · tối đa 12 mốc · mốc cuối là bây giờ</text>
+
+            <rect class="s-box-plain" x="60" y="262" width="800" height="30" rx="8"/>
+            <text class="s-mono" x="76" y="282">accounts · deposits · withdrawals · holdings · transactions · transfers · debts · payments · sales &nbsp;⟶&nbsp; lọc theo ngày ≤ mốc</text>
+          </svg>
+        </div>
+        <figcaption>Việc bán được ghi là một bản ghi riêng có ngày chính là điều làm việc này chạy đúng: một tháng kết thúc trước khi vị thế bị đóng vẫn hiện nó đang được giữ. Nếu bán làm co lot lại, mọi tháng trong quá khứ sẽ âm thầm được tính lại như thể vị thế chưa từng lớn như vậy.</figcaption>
+      </figure>
+
+      <div class="callout warn">
+        <b>Một giới hạn được nói thẳng.</b> Store không lưu giá lịch sử. Vị thế quỹ và vàng ở mọi mốc trong quá khứ đều được định giá theo giá <em>hiện tại</em> trong danh mục. Đường biểu diễn phản ánh việc mua, bán và dòng tiền đúng theo ngày của chúng; nó không phải là một bản dựng lại giá thị trường của từng tháng.
+      </div>
+    </section>
+
+    <section id="vang">
+      <p class="section-kicker">11 — Vàng</p>
+      <h2>Chủ sở hữu nghĩ bằng chỉ, store nghĩ bằng lượng</h2>
+      <p>Giá tiệm được yết theo lượng, và đó là đơn vị được lưu. Ô nhập nhận số chỉ vì đó là cách người ta nói. <code>GoldWeight</code> đứng đúng ở ranh giới ấy: form quy đổi, store thì không. Một lệnh bán vàng cũng ghi bằng lượng, không bao giờ bằng chỉ.</p>
+
+      <figure>
+        <span class="fig-label">Hình 15 — Quy đổi và giá hai chiều</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 200" role="img" aria-label="Quy đổi chỉ sang lượng và giá hai chiều của vàng">
+            <rect class="s-box-accent" x="20" y="30" width="200" height="60" rx="10"/>
+            <text class="s-t" x="120" y="56" text-anchor="middle">ô nhập</text>
+            <text class="s-mono" x="120" y="76" text-anchor="middle">35 chỉ</text>
+
+            <path class="s-line" d="M220 60 L320 60"/>
+            <text class="s-t3" x="270" y="50" text-anchor="middle">÷ 10</text>
+
+            <rect class="s-box" x="320" y="30" width="200" height="60" rx="10"/>
+            <text class="s-t" x="420" y="56" text-anchor="middle">store</text>
+            <text class="s-mono" x="420" y="76" text-anchor="middle">3,5 lượng</text>
+
+            <path class="s-line" d="M520 60 L620 60"/>
+            <text class="s-t3" x="570" y="50" text-anchor="middle">× giá mua vào</text>
+
+            <rect class="s-gold" x="620" y="30" width="260" height="60" rx="10" opacity=".2"/>
+            <text class="s-t" x="750" y="56" text-anchor="middle">giá trị thị trường</text>
+            <text class="s-mono" x="750" y="76" text-anchor="middle">3,5 × 122.000.000 ₫</text>
+
+            <rect class="s-box-plain" x="20" y="118" width="420" height="66" rx="10"/>
+            <text class="s-t2" x="40" y="144">Định giá theo chiều tiệm MUA</text>
+            <text class="s-t3" x="40" y="166">là số chủ sở hữu sẽ nhận nếu bán hôm nay, không phải giá phải trả để mua</text>
+
+            <rect class="s-box-plain" x="460" y="118" width="420" height="66" rx="10"/>
+            <text class="s-t2" x="480" y="144">Chiều tiệm BÁN được lưu riêng</text>
+            <text class="s-t3" x="480" y="166">askPricePerUnit — hiển thị chênh lệch, không bao giờ vào tài sản ròng</text>
+          </svg>
+        </div>
+        <figcaption>Vàng cũng là loại duy nhất coi giá hôm nay là mới nhất có thể — tiệm báo giá cả cuối tuần, nên nó không có khái niệm phiên đã đóng như ETF.</figcaption>
+      </figure>
+    </section>
+
+    <section id="tu-choi">
+      <p class="section-kicker">12 — Ranh giới</p>
+      <h2>Những gì phần Tài sản cố tình không làm</h2>
+      <p>Một danh sách các phép cộng bị từ chối thường nói về ứng dụng nhiều hơn danh sách tính năng.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Không làm</th><th>Vì sao</th><th>Thay vào đó</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Cộng lãi dự kiến vào tài sản ròng</td>
+              <td>Tiền chưa về thì chưa phải tiền của chủ sở hữu.</td>
+              <td>Hiển thị lãi dự kiến trên thẻ sổ; tài sản ròng đếm gốc còn lại.</td>
+            </tr>
+            <tr>
+              <td>Sửa số dư bằng tay</td>
+              <td>Một con số gõ tay là một nguồn sự thật thứ hai, và nó sẽ lệch.</td>
+              <td>Mọi số dư suy ra từ số mở đầu cộng các bản ghi có ngày.</td>
+            </tr>
+            <tr>
+              <td>Lấy giá theo lịch, nền, hoặc định kỳ</td>
+              <td>Ứng dụng offline theo mặc định; mạng chỉ chạy khi chủ sở hữu đang nhìn con số nó sẽ sửa.</td>
+              <td>Bấm Làm mới, hoặc mở màn hình đúng vào giá đã cũ. Sàn 15 phút cho mỗi mã.</td>
+            </tr>
+            <tr>
+              <td>Bán quá số đang giữ</td>
+              <td><code>FundSaleDraft</code> chặn ngay tại form.</td>
+              <td>Nếu store bị sửa tay tạo ra số âm, số âm đó được hiện ra chứ không bị kẹp về 0.</td>
+            </tr>
+            <tr>
+              <td>Định giá một vị thế mất mã</td>
+              <td>Bịa một cái giá tệ hơn là thiếu một con số.</td>
+              <td><code>unpriced</code> báo cáo vị thế đó và chỉ nêu giá vốn — con số duy nhất trung thực còn lại.</td>
+            </tr>
+            <tr>
+              <td>Tin loại tài sản do nhà cung cấp khai</td>
+              <td>VNDIRECT trả VESAF như ETF niêm yết HOSE, mà nó không phải.</td>
+              <td>Loại do chủ sở hữu đặt, và chính nó chọn nhà cung cấp.</td>
+            </tr>
+            <tr>
+              <td>Tính ngày lễ vào lịch giao dịch</td>
+              <td>Một bảng ngày lễ cứng sẽ âm thầm sai vào một năm nào đó.</td>
+              <td>Tuần Tết báo mọi giá là cũ — trung thực với những gì ứng dụng biết.</td>
+            </tr>
+            <tr>
+              <td>Cho việc bán vào tổng chi tiêu</td>
+              <td>Bán là tài sản hoá thành tiền, không phải thu nhập.</td>
+              <td><code>FundSale</code> không mang danh mục, giống chuyển khoản và trả nợ.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <b>Chỉ một mã đi ra khỏi máy.</b> Không số dư, không số đơn vị, không giá vốn, không tên tài khoản, không thứ gì nhận dạng chủ sở hữu. Ba endpoint được biên dịch cứng vào ứng dụng; không có endpoint nào cấu hình được lúc chạy.
+      </div>
+    </section>
+
+    <footer>
+      <p>Số liệu trong mọi hình là ví dụ dựng để minh hoạ phép tính, không phải dữ liệu thật.</p>
+      <p>Xem thêm: <a href="budget-and-goals.html">Ngân sách &amp; mục tiêu</a> cho phía chi tiêu, <a href="architecture.html">Architecture</a> cho toàn bộ mô hình dữ liệu và ranh giới hệ thống.</p>
+    </footer>
+  </main>
+</body>
+</html>
