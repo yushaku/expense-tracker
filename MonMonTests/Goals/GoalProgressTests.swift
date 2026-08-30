@@ -47,6 +47,38 @@ struct GoalProgressTests {
         #expect(snapshot.forecastCompletionDate == date(2027, 5, 31))
     }
 
+    @Test("Goal action status prioritizes the next decision")
+    func actionStatusPrioritizesNextDecision() {
+        let needsMore = GoalProgress.snapshot(
+            targetAmount: 1_000,
+            earmarkedAmount: 100,
+            targetDate: date(2027, 3, 31),
+            monthlyContribution: 200,
+            asOf: date(2027, 1, 15),
+            calendar: calendar
+        )
+        let onTrack = GoalProgress.snapshot(
+            targetAmount: 1_000,
+            earmarkedAmount: 100,
+            targetDate: date(2027, 3, 31),
+            monthlyContribution: 300,
+            asOf: date(2027, 1, 15),
+            calendar: calendar
+        )
+        let ready = GoalProgress.snapshot(
+            targetAmount: 1_000,
+            earmarkedAmount: 1_000,
+            targetDate: date(2027, 3, 31),
+            monthlyContribution: 0,
+            asOf: date(2027, 1, 15),
+            calendar: calendar
+        )
+
+        #expect(needsMore.actionStatus == .needsMonthly(100))
+        #expect(onTrack.actionStatus == .onTrack)
+        #expect(ready.actionStatus == .readyToUse)
+    }
+
     @Test("Required monthly contribution rounds up to a whole dong")
     func requiredMonthlyRoundsUp() {
         let goal = makeGoal(

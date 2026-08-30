@@ -31,6 +31,7 @@ struct GoalCard: View {
         VStack(alignment: .leading, spacing: 16) {
             header
             progressSection
+            GoalActionStatusBanner(status: snapshot.actionStatus, tint: tint)
             amountMetrics
             forecastSection
         }
@@ -153,6 +154,53 @@ struct GoalCard: View {
                 .minimumScaleFactor(0.6)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private struct GoalActionStatusBanner: View {
+    let status: GoalActionStatus
+    let tint: Color
+
+    private var statusTint: Color {
+        switch status {
+        case .needsMonthly:
+            MonMonTheme.danger
+        case .onTrack, .readyToUse:
+            tint
+        }
+    }
+
+    var body: some View {
+        Label {
+            switch status {
+            case .onTrack:
+                Text("On track")
+            case .needsMonthly(let amount):
+                Text("Needs \(VNDCurrency.format(amount)) more this month")
+            case .readyToUse:
+                Text("Ready to use")
+            }
+        } icon: {
+            Image(systemName: systemImage)
+        }
+        .font(.subheadline.weight(.semibold))
+        .foregroundStyle(statusTint)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(statusTint.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
+        .accessibilityIdentifier("goal-action-status")
+    }
+
+    private var systemImage: String {
+        switch status {
+        case .onTrack:
+            "checkmark.circle.fill"
+        case .needsMonthly:
+            "exclamationmark.triangle.fill"
+        case .readyToUse:
+            "arrow.up.forward.circle.fill"
+        }
     }
 }
 

@@ -1,5 +1,11 @@
 import Foundation
 
+enum GoalActionStatus: Equatable {
+    case onTrack
+    case needsMonthly(Decimal)
+    case readyToUse
+}
+
 struct GoalProgressSnapshot: Equatable {
     let remainingAmount: Decimal
     let requiredMonthlyContribution: Decimal
@@ -10,6 +16,16 @@ struct GoalProgressSnapshot: Equatable {
 
     var isOnTrack: Bool {
         isComplete || monthlyContributionShortfall == 0
+    }
+
+    var actionStatus: GoalActionStatus {
+        if isComplete {
+            return .readyToUse
+        }
+        if monthlyContributionShortfall > 0 {
+            return .needsMonthly(monthlyContributionShortfall)
+        }
+        return .onTrack
     }
 }
 
