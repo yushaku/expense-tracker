@@ -269,3 +269,81 @@ struct GoalContributionTests {
         )
     }
 }
+
+@Suite("Goal archive and filters")
+struct GoalArchiveTests {
+    @Test("Only completed goals can be archived and restored")
+    func archiveRequiresCompletion() throws {
+        let incomplete = goal(name: "Camera", target: 10_000, earmarked: 5_000)
+        let complete = goal(name: "Macbook", target: 10_000, earmarked: 10_000)
+        let archivedAt = Date(timeIntervalSince1970: 1_950_000_000)
+
+        #expect(throws: GoalArchiveError.goalIsIncomplete) {
+            try GoalArchive.archive(incomplete, at: archivedAt)
+        }
+
+        try GoalArchive.archive(complete, at: archivedAt)
+        #expect(complete.archivedAt == archivedAt)
+        #expect(GoalCommitment.activeMonthlyContribution(for: complete) == 0)
+        #expect(
+            GoalActionStatus.resolve(
+                progress: GoalProgress.snapshot(goal: complete, asOf: archivedAt),
+                isArchived: true
+            ) == .archived
+        )
+
+        GoalArchive.restore(complete)
+        #expect(complete.archivedAt == nil)
+    }
+
+    @Test("Goal list snapshot separates active completed trips and archived")
+    func listSnapshotSeparatesFilters() {
+        let active = goal(name: "Camera", target: 10_000, earmarked: 5_000)
+        let complete = goal(name: "Macbook", target: 10_000, earmarked: 10_000)
+        let archived = goal(name: "Old goal", target: 5_000, earmarked: 5_000)
+        archived.archivedAt = Date(timeIntervalSince1970: 1_950_000_000)
+        let tripGoal = goal(name: "Japan", target: 20_000, earmarked: 20_000)
+        let trip = TripWorkspace(
+            id: UUID(),
+            sourceGoalID: tripGoal.id,
+            name: "Japan",
+            budgetAmount: 20_000,
+            fundingJarID: tripGoal.fundingJarID,
+            symbolName: "airplane",
+            colorName: "sky",
+            status: .active,
+            startedAt: Date(timeIntervalSince1970: 1_940_000_000),
+            completedAt: nil,
+            createdAt: Date(timeIntervalSince1970: 1_940_000_000)
+        )
+
+        let snapshot = GoalListSnapshot.snapshot(
+            goals: [active, complete, archived, tripGoal],
+            workspaces: [trip]
+        )
+
+        #expect(snapshot.activeGoals.map(\.id) == [active.id])
+        #expect(snapshot.completedGoals.map(\.id) == [complete.id])
+        #expect(snapshot.archivedGoals.map(\.id) == [archived.id])
+        #expect(snapshot.activeTrips.map(\.id) == [trip.id])
+    }
+
+    private func goal(
+        name: String,
+        target: Decimal,
+        earmarked: Decimal
+    ) -> FinancialGoal {
+        FinancialGoal(
+            id: UUID(),
+            name: name,
+            targetAmount: target,
+            earmarkedAmount: earmarked,
+            targetDate: Date(timeIntervalSince1970: 2_000_000_000),
+            monthlyContribution: 1_000,
+            fundingJarID: UUID(),
+            symbolName: "target",
+            colorName: "blue",
+            createdAt: Date(timeIntervalSince1970: 1_800_000_000)
+        )
+    }
+}

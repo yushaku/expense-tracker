@@ -303,6 +303,7 @@ private extension MonMonBackupService {
             createdAt: try MonMonBackupScalar.parseDate(record.createdAt)
         )
         try restoreContributions(record.contributions, on: goal)
+        goal.archivedAt = try optionalDate(record.archivedAt)
         return goal
     }
 
@@ -319,6 +320,7 @@ private extension MonMonBackupService {
         model.colorName = record.colorName
         model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
         try restoreContributions(record.contributions, on: model)
+        model.archivedAt = try optionalDate(record.archivedAt)
     }
 
     func makeTripWorkspace(
@@ -1098,7 +1100,8 @@ struct MonMonBackupService {
                     amount: MonMonBackupScalar.decimal(contribution.amount),
                     occurredAt: MonMonBackupScalar.date(contribution.occurredAt)
                 )
-            }
+            },
+            archivedAt: model.archivedAt.map(MonMonBackupScalar.date)
         )
     }
 

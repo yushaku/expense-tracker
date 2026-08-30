@@ -445,6 +445,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         var colorName: String
         var createdAt: String
         var contributions: [GoalContributionRecord]? = nil
+        var archivedAt: String? = nil
     }
 
     struct GoalContributionRecord: Codable, Equatable, Sendable {

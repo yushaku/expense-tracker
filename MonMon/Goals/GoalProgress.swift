@@ -4,6 +4,14 @@ enum GoalActionStatus: Equatable {
     case onTrack
     case needsMonthly(Decimal)
     case readyToUse
+    case archived
+
+    static func resolve(
+        progress: GoalProgressSnapshot,
+        isArchived: Bool
+    ) -> GoalActionStatus {
+        isArchived ? .archived : progress.actionStatus
+    }
 }
 
 struct GoalProgressSnapshot: Equatable {

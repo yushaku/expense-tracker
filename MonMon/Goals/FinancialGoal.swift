@@ -15,6 +15,7 @@ final class FinancialGoal {
     var colorName: String = CategoryPalette.defaultColorName
     var createdAt: Date = Date(timeIntervalSince1970: 0)
     var contributionHistoryData: Data?
+    var archivedAt: Date?
 
     init(
         id: UUID,
@@ -27,7 +28,8 @@ final class FinancialGoal {
         symbolName: String,
         colorName: String,
         createdAt: Date,
-        contributionHistoryData: Data? = nil
+        contributionHistoryData: Data? = nil,
+        archivedAt: Date? = nil
     ) {
         self.id = id
         self.name = name
@@ -40,6 +42,24 @@ final class FinancialGoal {
         self.colorName = CategoryPalette.colorName(colorName)
         self.createdAt = createdAt
         self.contributionHistoryData = contributionHistoryData
+        self.archivedAt = archivedAt
+    }
+}
+
+enum GoalArchiveError: Error, Equatable {
+    case goalIsIncomplete
+}
+
+enum GoalArchive {
+    static func archive(_ goal: FinancialGoal, at date: Date) throws {
+        guard goal.earmarkedAmount >= goal.targetAmount else {
+            throw GoalArchiveError.goalIsIncomplete
+        }
+        goal.archivedAt = date
+    }
+
+    static func restore(_ goal: FinancialGoal) {
+        goal.archivedAt = nil
     }
 }
 

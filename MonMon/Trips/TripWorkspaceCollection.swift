@@ -17,7 +17,8 @@ struct TripWorkspaceCollection {
         let usableGoals =
             goals
             .filter {
-                $0.earmarkedAmount > 0
+                $0.archivedAt == nil
+                    && $0.earmarkedAmount > 0
                     && $0.fundingJarID != nil
                     && !startedGoalIDs.contains($0.id)
             }

@@ -56,7 +56,8 @@ enum GoalCommitment {
     }
 
     static func activeMonthlyContribution(for goal: FinancialGoal) -> Decimal {
-        goal.earmarkedAmount < goal.targetAmount ? max(0, goal.monthlyContribution) : 0
+        goal.archivedAt == nil && goal.earmarkedAmount < goal.targetAmount
+            ? max(0, goal.monthlyContribution) : 0
     }
 
     static func activeMonthlyContribution(

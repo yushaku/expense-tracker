@@ -31,7 +31,13 @@ struct GoalCard: View {
         VStack(alignment: .leading, spacing: 16) {
             header
             progressSection
-            GoalActionStatusBanner(status: snapshot.actionStatus, tint: tint)
+            GoalActionStatusBanner(
+                status: GoalActionStatus.resolve(
+                    progress: snapshot,
+                    isArchived: goal.archivedAt != nil
+                ),
+                tint: tint
+            )
             amountMetrics
             forecastSection
         }
@@ -167,6 +173,8 @@ private struct GoalActionStatusBanner: View {
             MonMonTheme.danger
         case .onTrack, .readyToUse:
             tint
+        case .archived:
+            MonMonTheme.textSecondary
         }
     }
 
@@ -179,6 +187,8 @@ private struct GoalActionStatusBanner: View {
                 Text("Needs \(VNDCurrency.format(amount)) more this month")
             case .readyToUse:
                 Text("Ready to use")
+            case .archived:
+                Text("Archived")
             }
         } icon: {
             Image(systemName: systemImage)
@@ -200,6 +210,8 @@ private struct GoalActionStatusBanner: View {
             "exclamationmark.triangle.fill"
         case .readyToUse:
             "arrow.up.forward.circle.fill"
+        case .archived:
+            "archivebox.fill"
         }
     }
 }
@@ -271,11 +283,19 @@ struct GoalDetailView: View {
         .navigationTitle(goal?.name ?? String(localized: "Goal"))
         .toolbar {
             if let goal {
-                ToolbarItem(placement: .primaryAction) {
-                    Button("Edit goal", systemImage: "pencil") {
-                        editorMode = .edit(goal)
+                if goal.archivedAt == nil {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button("Edit goal", systemImage: "pencil") {
+                            editorMode = .edit(goal)
+                        }
+                        .accessibilityIdentifier("goal-detail-edit")
                     }
-                    .accessibilityIdentifier("goal-detail-edit")
+                }
+
+                if goal.archivedAt != nil || goal.earmarkedAmount >= goal.targetAmount {
+                    ToolbarItem(placement: .secondaryAction) {
+                        GoalArchiveMenu(goal: goal)
+                    }
                 }
             }
         }
@@ -457,6 +477,69 @@ struct GoalDetailView: View {
             startErrorMessage = "Choose a funding jar before using this goal."
         } catch {
             startErrorMessage = "Couldn’t save your changes. Please try again."
+        }
+    }
+}
+
+private struct GoalArchiveMenu: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+
+    let goal: FinancialGoal
+
+    @State private var isConfirmingArchive = false
+    @State private var updateFailed = false
+
+    var body: some View {
+        Menu("More", systemImage: "ellipsis.circle") {
+            if goal.archivedAt == nil {
+                Button("Archive goal", systemImage: "archivebox") {
+                    isConfirmingArchive = true
+                }
+            } else {
+                Button("Restore goal", systemImage: "arrow.uturn.backward.circle") {
+                    restore()
+                }
+            }
+        }
+        .accessibilityIdentifier("goal-more-actions")
+        .confirmationDialog(
+            "Archive this goal?",
+            isPresented: $isConfirmingArchive,
+            titleVisibility: .visible
+        ) {
+            Button("Archive", role: .destructive) { archive() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text(
+                "The goal moves out of active views. Its earmark and contribution history stay intact."
+            )
+        }
+        .alert("Couldn’t update this goal", isPresented: $updateFailed) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Your changes were not saved. Please try again.")
+        }
+    }
+
+    private func archive() {
+        do {
+            try GoalArchive.archive(goal, at: .now)
+            try modelContext.save()
+            dismiss()
+        } catch {
+            modelContext.rollback()
+            updateFailed = true
+        }
+    }
+
+    private func restore() {
+        GoalArchive.restore(goal)
+        do {
+            try modelContext.save()
+        } catch {
+            modelContext.rollback()
+            updateFailed = true
         }
     }
 }

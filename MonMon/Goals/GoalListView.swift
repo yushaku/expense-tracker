@@ -5,6 +5,69 @@ private struct GoalTripDestination: Hashable {
     let workspaceID: UUID
 }
 
+struct GoalListSnapshot {
+    let activeGoals: [FinancialGoal]
+    let completedGoals: [FinancialGoal]
+    let archivedGoals: [FinancialGoal]
+    let activeTrips: [TripWorkspace]
+    let completedTrips: [TripWorkspace]
+
+    static func snapshot(
+        goals: [FinancialGoal],
+        workspaces: [TripWorkspace]
+    ) -> GoalListSnapshot {
+        let startedGoalIDs = Set(workspaces.compactMap(\.sourceGoalID))
+        let visibleGoals = goals.filter {
+            $0.archivedAt == nil && !startedGoalIDs.contains($0.id)
+        }
+        let trips = TripWorkspaceCollection.snapshot(goals: goals, workspaces: workspaces)
+
+        return GoalListSnapshot(
+            activeGoals:
+                visibleGoals
+                .filter { $0.earmarkedAmount < $0.targetAmount }
+                .sorted { $0.createdAt < $1.createdAt },
+            completedGoals:
+                visibleGoals
+                .filter { $0.earmarkedAmount >= $0.targetAmount }
+                .sorted { $0.createdAt < $1.createdAt },
+            archivedGoals:
+                goals
+                .filter { $0.archivedAt != nil }
+                .sorted { ($0.archivedAt ?? $0.createdAt) > ($1.archivedAt ?? $1.createdAt) },
+            activeTrips: trips.activeWorkspaces,
+            completedTrips: trips.completedWorkspaces
+        )
+    }
+}
+
+private enum GoalListFilter: String, CaseIterable, Identifiable {
+    case active
+    case completed
+    case trips
+    case archived
+
+    var id: String { rawValue }
+
+    var title: LocalizedStringResource {
+        switch self {
+        case .active: "Active"
+        case .completed: "Completed"
+        case .trips: "Trips"
+        case .archived: "Archived"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .active: "target"
+        case .completed: "checkmark.circle.fill"
+        case .trips: "airplane"
+        case .archived: "archivebox.fill"
+        }
+    }
+}
+
 struct GoalListView: View {
     @Query(sort: \FinancialGoal.createdAt, order: .forward)
     private var goals: [FinancialGoal]
@@ -23,6 +86,7 @@ struct GoalListView: View {
 
     @State private var editorMode: GoalEditorMode?
     @State private var selectedGoalID: UUID?
+    @State private var selectedFilter: GoalListFilter = .active
 
     let plannedByJar: [UUID: Decimal]
     let asOf: Date
@@ -35,36 +99,8 @@ struct GoalListView: View {
 
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                        GoalCommitmentWarnings(
-                            jars: jars,
-                            goals: goals,
-                            plannedByJar: plannedByJar
-                        )
-
-                        TripWorkspaceSection(
-                            title: "Active trips",
-                            workspaces: tripCollection.activeWorkspaces,
-                            transactions: transactions,
-                            categories: categories
-                        )
-
-                        if goalsForGoalSections.isEmpty && !hasTripContent {
-                            GoalEmptyState { editorMode = .add }
-                        } else if !goalsForGoalSections.isEmpty {
-                            GoalCollection(
-                                goals: goalsForGoalSections,
-                                jars: jars,
-                                asOf: asOf,
-                                onSelect: { selectedGoalID = $0.id }
-                            )
-                        }
-
-                        TripWorkspaceSection(
-                            title: "History",
-                            workspaces: tripCollection.completedWorkspaces,
-                            transactions: transactions,
-                            categories: categories
-                        )
+                        GoalFilterMenu(selection: $selectedFilter)
+                        filteredContent
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
                     .padding(.horizontal, 20)
@@ -98,18 +134,130 @@ struct GoalListView: View {
         }
     }
 
-    private var tripCollection: TripWorkspaceCollection {
-        TripWorkspaceCollection.snapshot(goals: goals, workspaces: tripWorkspaces)
+    private var listSnapshot: GoalListSnapshot {
+        GoalListSnapshot.snapshot(goals: goals, workspaces: tripWorkspaces)
     }
 
-    private var goalsForGoalSections: [FinancialGoal] {
-        let hiddenGoalIDs = Set(tripWorkspaces.compactMap(\.sourceGoalID))
-        return goals.filter { !hiddenGoalIDs.contains($0.id) }
+    @ViewBuilder
+    private var filteredContent: some View {
+        switch selectedFilter {
+        case .active:
+            GoalCommitmentWarnings(
+                jars: jars,
+                goals: goals,
+                plannedByJar: plannedByJar
+            )
+
+            if listSnapshot.activeGoals.isEmpty {
+                GoalEmptyState { editorMode = .add }
+            } else {
+                goalCollection(title: "Accumulating", goals: listSnapshot.activeGoals)
+            }
+        case .completed:
+            if listSnapshot.completedGoals.isEmpty {
+                filteredEmptyState(
+                    "No completed goals",
+                    systemImage: "checkmark.circle",
+                    description: "Goals that reach their target will appear here."
+                )
+            } else {
+                goalCollection(title: "Completed", goals: listSnapshot.completedGoals)
+            }
+        case .trips:
+            if listSnapshot.activeTrips.isEmpty && listSnapshot.completedTrips.isEmpty {
+                filteredEmptyState(
+                    "No trips yet",
+                    systemImage: "airplane",
+                    description: "Start a spending workspace from a funded goal."
+                )
+            } else {
+                TripWorkspaceSection(
+                    title: "Active trips",
+                    workspaces: listSnapshot.activeTrips,
+                    transactions: transactions,
+                    categories: categories
+                )
+                TripWorkspaceSection(
+                    title: "History",
+                    workspaces: listSnapshot.completedTrips,
+                    transactions: transactions,
+                    categories: categories
+                )
+            }
+        case .archived:
+            if listSnapshot.archivedGoals.isEmpty {
+                filteredEmptyState(
+                    "No archived goals",
+                    systemImage: "archivebox",
+                    description: "Archived completed goals will appear here."
+                )
+            } else {
+                goalCollection(title: "Archived", goals: listSnapshot.archivedGoals)
+            }
+        }
     }
 
-    private var hasTripContent: Bool {
-        !tripCollection.activeWorkspaces.isEmpty
-            || !tripCollection.completedWorkspaces.isEmpty
+    private func goalCollection(
+        title: LocalizedStringKey,
+        goals: [FinancialGoal]
+    ) -> some View {
+        GoalCollection(
+            title: title,
+            goals: goals,
+            jars: jars,
+            asOf: asOf,
+            onSelect: { selectedGoalID = $0.id }
+        )
+    }
+
+    private func filteredEmptyState(
+        _ title: LocalizedStringKey,
+        systemImage: String,
+        description: LocalizedStringKey
+    ) -> some View {
+        ContentUnavailableView(
+            title,
+            systemImage: systemImage,
+            description: Text(description)
+        )
+    }
+}
+
+private struct GoalFilterMenu: View {
+    @Binding var selection: GoalListFilter
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Text("Show")
+                .font(.subheadline)
+                .foregroundStyle(MonMonTheme.textSecondary)
+
+            Spacer(minLength: 8)
+
+            Menu {
+                ForEach(GoalListFilter.allCases) { filter in
+                    Button {
+                        selection = filter
+                    } label: {
+                        Label(filter.title, systemImage: filter.systemImage)
+                    }
+                    .accessibilityAddTraits(selection == filter ? .isSelected : [])
+                }
+            } label: {
+                Label(selection.title, systemImage: selection.systemImage)
+                    .font(.subheadline.weight(.semibold))
+            }
+            .accessibilityLabel("Goal filter")
+            .accessibilityValue(Text(selection.title))
+            .accessibilityIdentifier("goal-filter")
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 14))
+        .overlay {
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(MonMonTheme.border, lineWidth: 1)
+        }
     }
 }
 
@@ -188,38 +336,27 @@ private struct TripDestinationView: View {
 }
 
 private struct GoalCollection: View {
-    let activeGoals: [FinancialGoal]
-    let completedGoals: [FinancialGoal]
+    let title: LocalizedStringKey
+    let goals: [FinancialGoal]
     let jarNames: [UUID: String]
     let asOf: Date
     let onSelect: (FinancialGoal) -> Void
 
     init(
+        title: LocalizedStringKey,
         goals: [FinancialGoal],
         jars: [BudgetJar],
         asOf: Date,
         onSelect: @escaping (FinancialGoal) -> Void
     ) {
-        activeGoals = goals.filter { $0.earmarkedAmount < $0.targetAmount }
-        completedGoals = goals.filter { $0.earmarkedAmount >= $0.targetAmount }
+        self.title = title
+        self.goals = goals
         jarNames = Dictionary(uniqueKeysWithValues: jars.map { ($0.id, $0.name) })
         self.asOf = asOf
         self.onSelect = onSelect
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            if !activeGoals.isEmpty {
-                section("Accumulating", goals: activeGoals)
-            }
-
-            if !completedGoals.isEmpty {
-                section("Completed", goals: completedGoals)
-            }
-        }
-    }
-
-    private func section(_ title: LocalizedStringKey, goals: [FinancialGoal]) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(title)
                 .font(.title3.weight(.semibold))
@@ -237,7 +374,7 @@ private struct GoalCollection: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("goal-\(goal.id.uuidString)")
-                .accessibilityHint("Opens this goal for editing")
+                .accessibilityHint("Opens this goal's details")
             }
         }
     }

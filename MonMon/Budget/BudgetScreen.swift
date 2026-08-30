@@ -185,7 +185,9 @@ struct BudgetScreen: View {
     private var inProgressGoals: [FinancialGoal] {
         let startedGoalIDs = Set(tripWorkspaces.compactMap(\.sourceGoalID))
         return goals.filter {
-            $0.earmarkedAmount < $0.targetAmount && !startedGoalIDs.contains($0.id)
+            $0.archivedAt == nil
+                && $0.earmarkedAmount < $0.targetAmount
+                && !startedGoalIDs.contains($0.id)
         }
     }
 
