@@ -1,13 +1,12 @@
 import SwiftUI
 
-/// The badge an instrument is recognised by: its manager's logo when the
-/// catalogue carried one, and the first two letters of the ticker when it did
-/// not.
+/// The badge an instrument is recognised by: its bundled manager logo when the
+/// local catalogue knows the ticker, its provider logo otherwise, and finally
+/// the first two letters of the ticker.
 ///
-/// The image is fetched at render rather than stored, so a logo the provider
-/// replaces is simply the next one shown. Nothing depends on it arriving: every
-/// failure — no URL, no connection, a reply that is not an image — lands on the
-/// monogram, which is what this badge showed before logos existed.
+/// Bundled artwork lets ETFs and open-ended funds managed by the same company
+/// share one stable identity without changing persisted models. Nothing depends
+/// on a remote image arriving: every failure lands on the monogram.
 struct FundLogoView: View {
     let symbol: String
     /// As stored on `FundInstrument`, or as the catalogue offered it. `nil`
@@ -32,7 +31,15 @@ struct FundLogoView: View {
 
     @ViewBuilder
     private var content: some View {
-        if let url = logoURL.flatMap(URL.init(string:)) {
+        if let assetName = FundLogoCatalogue.assetName(for: symbol) {
+            ZStack {
+                Color.white
+                Image(assetName)
+                    .resizable()
+                    .scaledToFit()
+                    .padding(size * 0.08)
+            }
+        } else if let url = logoURL.flatMap(URL.init(string:)) {
             AsyncImage(url: url) { phase in
                 if let image = phase.image {
                     // Filled, not fitted: these are square-ish company marks on
@@ -67,9 +74,10 @@ struct FundLogoView: View {
 
 #Preview {
     HStack(spacing: 14) {
+        FundLogoView(symbol: "FUEVFVND", logoURL: nil)
         FundLogoView(symbol: "VESAF", logoURL: nil)
         FundLogoView(symbol: "", logoURL: nil)
-        FundLogoView(symbol: "VEOF", logoURL: nil, size: 32)
+        FundLogoView(symbol: "UNKNOWN", logoURL: nil, size: 32)
     }
     .padding()
     .background(MonMonTheme.canvas)
