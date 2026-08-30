@@ -4,6 +4,15 @@
     "%lld HOSE-listed ETFs. Pick the ones you hold — their closing prices are fetched before they are added.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "%lld ETF niêm yết trên HOSE. Chọn các quỹ bạn đang nắm giữ — giá đóng cửa sẽ được lấy trước khi thêm." } } }
     },
+    "Add from Fmarket": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm từ Fmarket" } } }
+    },
+    "Add from VNDIRECT": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm từ VNDIRECT" } } }
+    },
+    "Add Gold from vang.today": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm vàng từ vang.today" } } }
+    },
     "Choose an import source": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn nguồn nhập" } } }
     },

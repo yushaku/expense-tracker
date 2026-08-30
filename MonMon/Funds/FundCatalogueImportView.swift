@@ -11,7 +11,7 @@ struct FundCatalogueImportView: View {
     @Query(sort: \FundInstrument.symbol, order: .forward)
     private var instruments: [FundInstrument]
 
-    private let title: String
+    private let title: LocalizedStringKey
     @State private var importer: FundCatalogueImport
     @State private var chosen: Set<String> = []
     @State private var searchText = ""
@@ -19,7 +19,7 @@ struct FundCatalogueImportView: View {
     @State private var failedSymbols: [String] = []
     @State private var isSaving = false
 
-    init(title: String, importer: FundCatalogueImport) {
+    init(title: LocalizedStringKey, importer: FundCatalogueImport) {
         self.title = title
         _importer = State(initialValue: importer)
     }

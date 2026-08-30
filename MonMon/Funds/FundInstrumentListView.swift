@@ -18,6 +18,19 @@ struct FundInstrumentImportOption: Identifiable {
             "Add by hand"
         }
     }
+
+    var sheetTitle: LocalizedStringKey {
+        switch source {
+        case .fmarket:
+            "Add from Fmarket"
+        case .vndirect:
+            "Add from VNDIRECT"
+        case .vangToday:
+            "Add Gold from vang.today"
+        case .manual:
+            "Add instrument"
+        }
+    }
 }
 
 enum FundInstrumentListScope: String, Identifiable {
@@ -168,8 +181,9 @@ struct FundInstrumentListView: View {
                 FundInstrumentEditorView(mode: mode, kinds: scope.kinds)
             }
             .appSheet(item: $importSource) { source in
+                let option = FundInstrumentImportOption(source: source)
                 FundCatalogueImportView(
-                    title: "Add from \(source.displayName)",
+                    title: option.sheetTitle,
                     importer: scope.makeImporter(source: source)
                 )
             }
