@@ -163,7 +163,6 @@ struct TripSummaryTests {
         FinancialGoal(
             id: UUID(),
             name: name,
-            kind: .custom,
             targetAmount: 10_000_000,
             earmarkedAmount: earmarked,
             targetDate: occurredAt,

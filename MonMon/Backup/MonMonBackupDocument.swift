@@ -436,7 +436,6 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
     struct GoalRecord: Codable, Equatable, Sendable, MonMonBackupRecord {
         var id: String
         var name: String
-        var kind: String
         var targetAmount: String
         var earmarkedAmount: String
         var targetDate: String

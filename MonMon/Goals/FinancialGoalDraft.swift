@@ -16,7 +16,6 @@ enum FinancialGoalFormError: Error, Equatable {
 
 struct FinancialGoalDraft: Equatable {
     var name: String
-    var kind: FinancialGoalKind
     var targetAmountText: String
     var earmarkedAmountText: String
     var targetDate: Date
@@ -27,7 +26,6 @@ struct FinancialGoalDraft: Equatable {
 
     init(
         name: String = "",
-        kind: FinancialGoalKind = .custom,
         targetAmountText: String = "",
         earmarkedAmountText: String = "0",
         targetDate: Date,
@@ -37,20 +35,19 @@ struct FinancialGoalDraft: Equatable {
         colorName: String? = nil
     ) {
         self.name = name
-        self.kind = kind
         self.targetAmountText = targetAmountText
         self.earmarkedAmountText = earmarkedAmountText
         self.targetDate = targetDate
         self.monthlyContributionText = monthlyContributionText
         self.fundingJarID = fundingJarID
-        self.symbolName = CategoryPalette.symbolName(symbolName ?? kind.symbolName)
-        self.colorName = CategoryPalette.colorName(colorName ?? kind.colorName)
+        self.symbolName = CategoryPalette.symbolName(
+            symbolName ?? CategoryPalette.defaultSymbolName)
+        self.colorName = CategoryPalette.colorName(colorName ?? CategoryPalette.defaultColorName)
     }
 
     init(goal: FinancialGoal) {
         self.init(
             name: goal.name,
-            kind: goal.kind,
             targetAmountText: VNDCurrency.formatPlain(goal.targetAmount),
             earmarkedAmountText: VNDCurrency.formatPlain(goal.earmarkedAmount),
             targetDate: goal.targetDate,
@@ -63,7 +60,6 @@ struct FinancialGoalDraft: Equatable {
 
     struct ValidatedValues: Equatable {
         var name: String
-        var kind: FinancialGoalKind
         var targetAmount: Decimal
         var earmarkedAmount: Decimal
         var targetDate: Date
@@ -142,7 +138,6 @@ struct FinancialGoalDraft: Equatable {
 
         return ValidatedValues(
             name: trimmedName,
-            kind: kind,
             targetAmount: targetAmount,
             earmarkedAmount: earmarkedAmount,
             targetDate: targetDate,
@@ -173,7 +168,6 @@ struct FinancialGoalDraft: Equatable {
         return FinancialGoal(
             id: id,
             name: values.name,
-            kind: values.kind,
             targetAmount: values.targetAmount,
             earmarkedAmount: values.earmarkedAmount,
             targetDate: values.targetDate,
@@ -202,7 +196,6 @@ struct FinancialGoalDraft: Equatable {
             calendar: calendar
         )
         goal.name = values.name
-        goal.kind = values.kind
         goal.targetAmount = values.targetAmount
         goal.earmarkedAmount = values.earmarkedAmount
         goal.targetDate = values.targetDate

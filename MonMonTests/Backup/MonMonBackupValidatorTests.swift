@@ -168,13 +168,7 @@ struct MonMonBackupValidatorTests {
             budgetJar(id: savingsJarID, role: .savings),
         ]
         payload.goals = [goal(id: otherID, jarID: savingsJarID)]
-        payload.goals[0].kind = "unknown"
 
-        #expect(throws: MonMonBackupValidationError.invalidPayload) {
-            try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
-        }
-
-        payload.goals[0].kind = FinancialGoalKind.trip.rawValue
         payload.goals[0].fundingJarID = MonMonBackupScalar.uuid(UUID())
         #expect(throws: MonMonBackupValidationError.invalidReference) {
             try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
@@ -403,7 +397,6 @@ struct MonMonBackupValidatorTests {
         MonMonBackupPayload.GoalRecord(
             id: MonMonBackupScalar.uuid(id),
             name: "Trip",
-            kind: FinancialGoalKind.trip.rawValue,
             targetAmount: "1000",
             earmarkedAmount: "100",
             targetDate: MonMonBackupScalar.date(instant.addingTimeInterval(31_536_000)),

@@ -293,7 +293,6 @@ private extension MonMonBackupService {
         FinancialGoal(
             id: try MonMonBackupScalar.parseUUID(record.id),
             name: record.name,
-            kind: try enumValue(record.kind),
             targetAmount: try MonMonBackupScalar.parseDecimal(record.targetAmount),
             earmarkedAmount: try MonMonBackupScalar.parseDecimal(record.earmarkedAmount),
             targetDate: try MonMonBackupScalar.parseDate(record.targetDate),
@@ -308,7 +307,6 @@ private extension MonMonBackupService {
     func updateGoal(_ model: FinancialGoal, _ record: MonMonBackupPayload.GoalRecord) throws {
         model.id = try MonMonBackupScalar.parseUUID(record.id)
         model.name = record.name
-        model.kind = try enumValue(record.kind)
         model.targetAmount = try MonMonBackupScalar.parseDecimal(record.targetAmount)
         model.earmarkedAmount = try MonMonBackupScalar.parseDecimal(record.earmarkedAmount)
         model.targetDate = try MonMonBackupScalar.parseDate(record.targetDate)
@@ -1068,7 +1066,6 @@ struct MonMonBackupService {
         return MonMonBackupPayload.GoalRecord(
             id: MonMonBackupScalar.uuid(model.id),
             name: model.name,
-            kind: model.kind.rawValue,
             targetAmount: MonMonBackupScalar.decimal(model.targetAmount),
             earmarkedAmount: MonMonBackupScalar.decimal(model.earmarkedAmount),
             targetDate: MonMonBackupScalar.date(model.targetDate),

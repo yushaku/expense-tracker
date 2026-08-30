@@ -185,7 +185,6 @@ struct BudgetJarSeedTests {
         let goal = FinancialGoal(
             id: UUID(),
             name: "First home",
-            kind: .home,
             targetAmount: 1_000_000_000,
             earmarkedAmount: 100_000_000,
             targetDate: referenceDate.addingTimeInterval(31_536_000),

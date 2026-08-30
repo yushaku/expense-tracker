@@ -225,7 +225,6 @@ private struct PayloadChecker {
         }
         try validateUniqueRecords(payload.goals) { record in
             try scalarIDAndDate(record.id, record.createdAt)
-            try require(FinancialGoalKind(rawValue: record.kind) != nil)
             try require(
                 !record.name.isEmpty && !record.symbolName.isEmpty && !record.colorName.isEmpty)
             let target = try MonMonBackupScalar.parseDecimal(record.targetAmount)
@@ -443,7 +442,7 @@ private struct PayloadChecker {
         let categories = Dictionary(
             uniqueKeysWithValues: payload.categories.map { ($0.id, $0.kind) })
         let budgetJars = Set(payload.budgetJars.map(\.id))
-        let goals = Dictionary(uniqueKeysWithValues: payload.goals.map { ($0.id, $0.kind) })
+        let goals = Set(payload.goals.map(\.id))
         let tripWorkspaces = Set(payload.tripWorkspaces.map(\.id))
         let instruments = Set(payload.fundInstruments.map(\.id))
         let deposits = Set(payload.savingsDeposits.map(\.id))
@@ -460,13 +459,9 @@ private struct PayloadChecker {
             try requiredReference(record.fundingJarID, validIDs: budgetJars)
         }
         for record in payload.tripWorkspaces {
-            if let sourceGoalID = record.sourceGoalID {
-                if let goalKind = goals[sourceGoalID] {
-                    try require(goalKind == FinancialGoalKind.trip.rawValue)
-                } else {
-                    hasDanglingOptionalReference = true
-                }
-            }
+            // A workspace may start from any funded goal, so the source goal's
+            // kind carries no rule here — only its existence does.
+            optionalReference(record.sourceGoalID, validIDs: goals)
             optionalReference(record.fundingJarID, validIDs: budgetJars)
         }
 
