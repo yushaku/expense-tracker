@@ -26,8 +26,8 @@ Read the docs before the code:
 - **Budget jars** — six seeded jars split income by percentage, together no more than 100%. A jar stores a percentage, never money.
 - **Jar routing** — an expense follows its category's jar, or a trip's explicit override, or a fallback jar, so nothing drops out of the month's picture.
 - **Income allocation snapshots** — each income keeps a frozen, versioned record of how it was split, so changing today's percentages cannot rewrite last month's payslip.
-- **Goals** — a target amount earmarked _inside_ a jar, never a second asset. Progress, the required monthly figure, and the forecast date are all derived. A goal may not commit more of a jar's monthly plan than the jar has.
-- **Trip workspaces** — a fully funded trip goal opens a spending lens. Tagged expenses stay ordinary expenses, so spent and remaining are derived from money that already counted once.
+- **Goals** — a target amount earmarked _inside_ a jar, never a second asset. Progress, the required monthly figure, and the forecast date are all derived; the earmarked amount itself only changes when the owner edits it. A goal may not commit more of a jar's monthly plan than the jar has.
+- **Trip workspaces** — a goal with money set aside opens a spending lens whose budget is that earmarked amount. Tagged expenses stay ordinary expenses, so spent and remaining are derived from money that already counted once.
 
 ### Wealth
 

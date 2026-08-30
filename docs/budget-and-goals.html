@@ -362,7 +362,7 @@
           <li><a href="#snapshot">Ảnh chụp phân bổ</a></li>
           <li><a href="#muc-tieu">Mục tiêu</a></li>
           <li><a href="#suc-chua">Sức chứa của hũ</a></li>
-          <li><a href="#trip">Mục tiêu Trip</a></li>
+          <li><a href="#trip">Chuyến đi</a></li>
           <li><a href="#xoa-hu">Xoá hũ</a></li>
           <li><a href="#khong-lam">Những gì MonMon không làm</a></li>
         </ul>
@@ -832,7 +832,7 @@
             <div class="bar-name">Đà Nẵng<span class="sub">đích 12.000.000 ₫</span></div>
             <div class="bar-track">
               <div class="bar-fill" style="width:100%;background:var(--jar-education)"></div>
-              <span class="bar-value">đủ tiền · sẵn sàng mở chuyến đi</span>
+              <span class="bar-value">đủ tiền · ngân sách chuyến sẽ là 12.000.000 ₫</span>
             </div>
           </div>
         </div>
@@ -854,8 +854,9 @@
             <li><strong>Style</strong> &ndash; biểu tượng và màu, chọn tay như khi tạo danh mục.</li>
           </ul>
           <p>
-            Không còn ô “Purpose”: trước đây nó chỉ dùng để suy ra biểu tượng và màu, nên giờ bạn
-            chọn thẳng cái mình muốn.
+            Không còn ô “Purpose”: nó chỉ dùng để suy ra biểu tượng và màu, nên giờ bạn chọn
+            thẳng cái mình muốn. Mục tiêu cũng không còn lưu “loại” nữa &ndash; mọi mục tiêu đều
+            như nhau, và chuyến đi mở được từ bất kỳ mục tiêu nào có tiền.
           </p>
         </div>
         <div class="card">
@@ -866,6 +867,19 @@
             <li>Mức góp cần thiết = phần còn thiếu chia đều cho số tháng đến ngày đích, làm tròn lên.</li>
             <li>Ngày dự kiến hoàn thành suy từ mức góp bạn đặt.</li>
           </ul>
+        </div>
+        <div class="card">
+          <span class="label">Tích luỹ</span>
+          <h3>Không tự cộng mỗi tháng</h3>
+          <p>
+            Đặt mức góp 1.000.000 ₫ mỗi tháng <em>không</em> làm số đã dành tự tăng thêm một
+            triệu khi sang tháng. Số đã dành chỉ đổi khi bạn mở mục tiêu ra và sửa ô
+            <em>Already earmarked</em>.
+          </p>
+          <p>
+            Mức góp hằng tháng chỉ dùng để tính ngày dự kiến hoàn thành và để cộng vào sức chứa
+            của hũ. Ứng dụng nói bạn nên để dành bao nhiêu, không để dành hộ bạn.
+          </p>
         </div>
         <div class="card">
           <span class="label">Xoá</span>
@@ -945,10 +959,10 @@
     </section>
 
     <section id="trip">
-      <h2>Mục tiêu Trip</h2>
+      <h2>Chuyến đi</h2>
       <p class="section-lede">
-        Trip là kiểu mục tiêu duy nhất còn có hành vi riêng: đủ tiền thì mở được một không gian
-        chi tiêu để theo dõi chuyến đi.
+        Bất kỳ mục tiêu nào đã dành được tiền và có hũ cấp vốn đều mở được một không gian chi
+        tiêu. Không cần đủ số đích: ngân sách của chuyến chính là số bạn đã dành tới lúc mở.
       </p>
 
       <figure>
@@ -957,19 +971,19 @@
         <div class="fig-scroll">
           <svg class="diagram" viewBox="0 0 900 340" style="width:100%;min-width:680px" role="img" aria-labelledby="d4-title d4-desc">
             <title id="d4-title">Vòng đời của một chuyến đi</title>
-            <desc id="d4-desc">Mục tiêu đang tích luỹ, khi đã dành đủ và có hũ cấp vốn thì sang trạng thái sẵn sàng. Bắt đầu chuyến sẽ tạo workspace đang mở. Từ đó có thể kết thúc, và mở lại. Huỷ chỉ được phép khi chưa có giao dịch nào gắn thẻ.</desc>
+            <desc id="d4-desc">Mục tiêu chưa dành được đồng nào thì chưa mở chuyến được. Dành được tiền và có hũ cấp vốn là mở được, ngân sách chuyến bằng số đã dành. Từ chuyến đang mở có thể kết thúc rồi mở lại. Huỷ chỉ được phép khi chưa có giao dịch nào gắn thẻ.</desc>
 
             <rect class="box" x="24" y="120" width="176" height="72" rx="14"/>
-            <text class="t-strong" x="44" y="150">Đang tích luỹ</text>
-            <text class="t-muted" x="44" y="172">đã dành &lt; đích</text>
+            <text class="t-strong" x="44" y="150">Chưa có tiền</text>
+            <text class="t-muted" x="44" y="172">đã dành = 0</text>
 
             <path class="edge" d="M200 156 L292 156"/>
             <rect class="edge-label-bg" x="202" y="120" width="94" height="32" rx="4"/>
-            <text class="edge-label" x="206" y="134">đã dành ≥ đích</text>
+            <text class="edge-label" x="206" y="134">đã dành &gt; 0</text>
             <text class="edge-label" x="206" y="148">và có hũ</text>
 
             <rect class="box box-out" x="300" y="120" width="176" height="72" rx="14"/>
-            <text class="t-strong" x="320" y="150">Sẵn sàng</text>
+            <text class="t-strong" x="320" y="150">Mở được chuyến</text>
             <text class="t-muted" x="320" y="172">“Ready to spend”</text>
 
             <path class="edge" d="M476 156 L516 156"/>
@@ -979,7 +993,7 @@
             <rect class="box box-plan" x="520" y="112" width="192" height="88" rx="14"/>
             <text class="t-strong" x="540" y="140">Chuyến đang mở</text>
             <text class="t-muted" x="540" y="162">chép tên, biểu tượng, màu</text>
-            <text class="t-muted" x="540" y="180">ngân sách = số cần đạt</text>
+            <text class="t-muted" x="540" y="180">ngân sách = số đã dành</text>
 
             <path class="edge" d="M712 140 C770 140 792 120 792 96 L792 84"/>
             <rect class="edge-label-bg" x="716" y="104" width="70" height="18" rx="4"/>
@@ -1099,6 +1113,7 @@
         <li><strong>Chuyến đi không phải ví.</strong> Ngân sách chuyến đi là con số chép lại từ mục tiêu, không phải tiền được tách ra.</li>
         <li><strong>Không có chặn chi.</strong> Vượt hũ, vượt ngân sách chuyến đi đều ghi được; ứng dụng báo cho bạn, không cấm bạn.</li>
         <li><strong>Không tự đổi lịch sử.</strong> Đổi phần trăm hôm nay không viết lại các khoản thu đã ghi trước đó.</li>
+        <li><strong>Không tự để dành.</strong> Mục tiêu không tự cộng mức góp mỗi tháng; số đã dành là con số bạn tự cập nhật.</li>
       </ul>
     </section>
 
