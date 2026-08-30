@@ -444,6 +444,13 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         var symbolName: String
         var colorName: String
         var createdAt: String
+        var contributions: [GoalContributionRecord]? = nil
+    }
+
+    struct GoalContributionRecord: Codable, Equatable, Sendable {
+        var id: String
+        var amount: String
+        var occurredAt: String
     }
 
     struct TripWorkspaceRecord: Codable, Equatable, Sendable, MonMonBackupRecord {

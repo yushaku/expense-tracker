@@ -22,6 +22,7 @@ struct GoalListView: View {
     private var categories: [TransactionCategory]
 
     @State private var editorMode: GoalEditorMode?
+    @State private var selectedGoalID: UUID?
 
     let plannedByJar: [UUID: Decimal]
     let asOf: Date
@@ -54,7 +55,7 @@ struct GoalListView: View {
                                 goals: goalsForGoalSections,
                                 jars: jars,
                                 asOf: asOf,
-                                onSelect: { editorMode = .edit($0) }
+                                onSelect: { selectedGoalID = $0.id }
                             )
                         }
 
@@ -77,6 +78,9 @@ struct GoalListView: View {
                     workspaceID: destination.workspaceID,
                     workspaces: tripWorkspaces
                 )
+            }
+            .navigationDestination(item: $selectedGoalID) { goalID in
+                GoalDetailView(goalID: goalID, plannedByJar: plannedByJar, asOf: asOf)
             }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {

@@ -214,3 +214,58 @@ struct GoalJarCommitmentTests {
         )
     }
 }
+
+@Suite("Goal contributions")
+struct GoalContributionTests {
+    @Test("Marking a contribution updates earmarked metadata and records history")
+    func contributionUpdatesGoalAndHistory() throws {
+        let goal = makeGoal(earmarked: 2_000)
+        let contributionID = UUID()
+        let occurredAt = Date(timeIntervalSince1970: 1_900_000_000)
+
+        try GoalContributionStore.record(
+            amount: 3_000,
+            on: goal,
+            id: contributionID,
+            occurredAt: occurredAt
+        )
+
+        #expect(goal.earmarkedAmount == 5_000)
+        #expect(
+            GoalContributionStore.entries(for: goal) == [
+                GoalContribution(id: contributionID, amount: 3_000, occurredAt: occurredAt)
+            ]
+        )
+    }
+
+    @Test("A contribution cannot exceed the goal remainder")
+    func contributionCannotExceedRemainder() {
+        let goal = makeGoal(earmarked: 9_000)
+
+        #expect(throws: GoalContributionError.exceedsRemaining) {
+            try GoalContributionStore.record(
+                amount: 2_000,
+                on: goal,
+                id: UUID(),
+                occurredAt: .now
+            )
+        }
+        #expect(goal.earmarkedAmount == 9_000)
+        #expect(GoalContributionStore.entries(for: goal).isEmpty)
+    }
+
+    private func makeGoal(earmarked: Decimal) -> FinancialGoal {
+        FinancialGoal(
+            id: UUID(),
+            name: "Macbook",
+            targetAmount: 10_000,
+            earmarkedAmount: earmarked,
+            targetDate: Date(timeIntervalSince1970: 2_000_000_000),
+            monthlyContribution: 1_000,
+            fundingJarID: UUID(),
+            symbolName: "laptopcomputer",
+            colorName: "blue",
+            createdAt: Date(timeIntervalSince1970: 1_800_000_000)
+        )
+    }
+}

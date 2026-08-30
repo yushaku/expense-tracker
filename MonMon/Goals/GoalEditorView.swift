@@ -276,9 +276,30 @@ private struct GoalEditorForm: View {
                         .accessibilityIdentifier("goal-target")
                 }
 
-                field("Already earmarked", error: earmarkedError) {
-                    VNDTextField(text: $draft.earmarkedAmountText)
-                        .accessibilityIdentifier("goal-earmarked")
+                if isEditing {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Already earmarked")
+                            .font(.subheadline.weight(.medium))
+
+                        Text(
+                            VNDCurrency.format(
+                                VNDCurrency.parse(draft.earmarkedAmountText) ?? .zero
+                            )
+                        )
+                        .font(.body.weight(.semibold))
+                        .monospacedDigit()
+
+                        Text("Use Mark contribution from the goal details to update this amount.")
+                            .font(.caption)
+                            .foregroundStyle(MonMonTheme.textSecondary)
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("goal-earmarked-read-only")
+                } else {
+                    field("Already earmarked", error: earmarkedError) {
+                        VNDTextField(text: $draft.earmarkedAmountText)
+                            .accessibilityIdentifier("goal-earmarked")
+                    }
                 }
             }
         }

@@ -223,6 +223,7 @@ struct GoalDetailView: View {
 
     @State private var editorMode: GoalEditorMode?
     @State private var isShowingUseOptions = false
+    @State private var isShowingContribution = false
     @State private var selectedWorkspaceID: UUID?
     @State private var startErrorMessage: LocalizedStringKey?
 
@@ -247,6 +248,10 @@ struct GoalDetailView: View {
                             )
 
                             detailsCard(goal)
+                            GoalContributionCard(
+                                goal: goal,
+                                onMarkContribution: { isShowingContribution = true }
+                            )
                             useAmountCard(goal)
                         }
                         .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -276,6 +281,11 @@ struct GoalDetailView: View {
         }
         .appSheet(item: $editorMode) { mode in
             GoalEditorView(mode: mode, plannedByJar: plannedByJar, asOf: asOf)
+        }
+        .appSheet(isPresented: $isShowingContribution) {
+            if let goal {
+                GoalContributionEditor(goal: goal)
+            }
         }
         .navigationDestination(item: $selectedWorkspaceID) { workspaceID in
             if let workspace = tripWorkspaces.first(where: { $0.id == workspaceID }) {
@@ -447,6 +457,154 @@ struct GoalDetailView: View {
             startErrorMessage = "Choose a funding jar before using this goal."
         } catch {
             startErrorMessage = "Couldn’t save your changes. Please try again."
+        }
+    }
+}
+
+private struct GoalContributionCard: View {
+    let goal: FinancialGoal
+    let onMarkContribution: () -> Void
+
+    private var entries: [GoalContribution] {
+        GoalContributionStore.entries(for: goal).reversed()
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Text("Contributions")
+                    .font(.headline)
+
+                Spacer(minLength: 8)
+
+                if goal.earmarkedAmount < goal.targetAmount {
+                    Button("Mark contribution", systemImage: "plus.circle.fill") {
+                        onMarkContribution()
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .accessibilityIdentifier("goal-mark-contribution")
+                }
+            }
+
+            if entries.isEmpty {
+                Text("New contributions will appear here. The starting earmark is kept separate.")
+                    .font(.subheadline)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            } else {
+                ForEach(entries) { entry in
+                    HStack(alignment: .firstTextBaseline, spacing: 12) {
+                        Text(entry.occurredAt, format: .dateTime.day().month().year())
+                            .font(.subheadline)
+                            .foregroundStyle(MonMonTheme.textSecondary)
+
+                        Spacer(minLength: 12)
+
+                        Text("+\(VNDCurrency.format(entry.amount))")
+                            .font(.subheadline.weight(.semibold))
+                            .monospacedDigit()
+                    }
+                    .accessibilityElement(children: .combine)
+
+                    if entry.id != entries.last?.id {
+                        Divider()
+                            .overlay(MonMonTheme.border)
+                    }
+                }
+            }
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 18))
+        .overlay {
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(MonMonTheme.border, lineWidth: 1)
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("goal-contributions")
+    }
+}
+
+private struct GoalContributionEditor: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+
+    let goal: FinancialGoal
+
+    @State private var amountText = ""
+    @State private var occurredAt = Date.now
+    @State private var errorMessage: LocalizedStringKey?
+
+    private var remaining: Decimal {
+        max(0, goal.targetAmount - goal.earmarkedAmount)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Contribution") {
+                    VNDTextField(text: $amountText)
+                        .accessibilityLabel("Contribution amount")
+                        .accessibilityIdentifier("goal-contribution-amount")
+
+                    DatePicker(
+                        "Date",
+                        selection: $occurredAt,
+                        in: ...Date.now,
+                        displayedComponents: .date
+                    )
+                    .accessibilityIdentifier("goal-contribution-date")
+
+                    Text("Remaining: \(VNDCurrency.format(remaining))")
+                        .font(.caption)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                }
+
+                if let errorMessage {
+                    Section {
+                        Label(errorMessage, systemImage: "exclamationmark.circle.fill")
+                            .foregroundStyle(MonMonTheme.danger)
+                    }
+                }
+            }
+            .navigationTitle("Mark contribution")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") { save() }
+                        .fontWeight(.semibold)
+                        .accessibilityIdentifier("goal-contribution-save")
+                }
+            }
+            .tint(MonMonTheme.accent)
+        }
+    }
+
+    private func save() {
+        errorMessage = nil
+        guard let amount = VNDCurrency.parse(amountText) else {
+            errorMessage = "Enter a valid contribution amount."
+            return
+        }
+
+        do {
+            try GoalContributionStore.record(
+                amount: amount,
+                on: goal,
+                id: UUID(),
+                occurredAt: occurredAt
+            )
+            try modelContext.save()
+            dismiss()
+        } catch GoalContributionError.nonPositiveAmount {
+            errorMessage = "The contribution must be greater than zero."
+        } catch GoalContributionError.exceedsRemaining {
+            errorMessage = "The contribution cannot exceed the remaining goal amount."
+        } catch {
+            modelContext.rollback()
+            errorMessage = "Couldn’t save this contribution. Try again."
         }
     }
 }

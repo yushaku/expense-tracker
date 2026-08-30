@@ -290,7 +290,7 @@ private extension MonMonBackupService {
     }
 
     func makeGoal(_ record: MonMonBackupPayload.GoalRecord) throws -> FinancialGoal {
-        FinancialGoal(
+        let goal = FinancialGoal(
             id: try MonMonBackupScalar.parseUUID(record.id),
             name: record.name,
             targetAmount: try MonMonBackupScalar.parseDecimal(record.targetAmount),
@@ -302,6 +302,8 @@ private extension MonMonBackupService {
             colorName: record.colorName,
             createdAt: try MonMonBackupScalar.parseDate(record.createdAt)
         )
+        try restoreContributions(record.contributions, on: goal)
+        return goal
     }
 
     func updateGoal(_ model: FinancialGoal, _ record: MonMonBackupPayload.GoalRecord) throws {
@@ -316,6 +318,7 @@ private extension MonMonBackupService {
         model.symbolName = record.symbolName
         model.colorName = record.colorName
         model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
+        try restoreContributions(record.contributions, on: model)
     }
 
     func makeTripWorkspace(
@@ -1059,6 +1062,20 @@ struct MonMonBackupService {
         )
     }
 
+    private func restoreContributions(
+        _ records: [MonMonBackupPayload.GoalContributionRecord]?,
+        on goal: FinancialGoal
+    ) throws {
+        let contributions = try (records ?? []).map { record in
+            GoalContribution(
+                id: try MonMonBackupScalar.parseUUID(record.id),
+                amount: try MonMonBackupScalar.parseDecimal(record.amount),
+                occurredAt: try MonMonBackupScalar.parseDate(record.occurredAt)
+            )
+        }
+        try GoalContributionStore.replace(entries: contributions, on: goal)
+    }
+
     private func goalRecord(_ model: FinancialGoal) throws -> MonMonBackupPayload.GoalRecord {
         guard let fundingJarID = model.fundingJarID else {
             throw MonMonBackupServiceError.invalidSnapshot
@@ -1073,7 +1090,15 @@ struct MonMonBackupService {
             fundingJarID: MonMonBackupScalar.uuid(fundingJarID),
             symbolName: model.symbolName,
             colorName: model.colorName,
-            createdAt: MonMonBackupScalar.date(model.createdAt)
+            createdAt: MonMonBackupScalar.date(model.createdAt),
+            contributions: try GoalContributionStore.validatedEntries(for: model).map {
+                contribution in
+                MonMonBackupPayload.GoalContributionRecord(
+                    id: MonMonBackupScalar.uuid(contribution.id),
+                    amount: MonMonBackupScalar.decimal(contribution.amount),
+                    occurredAt: MonMonBackupScalar.date(contribution.occurredAt)
+                )
+            }
         )
     }
 

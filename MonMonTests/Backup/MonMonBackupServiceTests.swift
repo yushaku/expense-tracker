@@ -58,6 +58,7 @@ struct MonMonBackupServiceTests {
             validated.payload.goals.single?.fundingJarID
                 == MonMonBackupScalar.uuid(fixture.savingsJarID)
         )
+        #expect(validated.payload.goals.single?.contributions?.single?.amount == "2000000")
         #expect(validated.payload.categories.count == 1)
         #expect(
             validated.payload.categories.single?.budgetJarID
@@ -272,6 +273,7 @@ struct MonMonBackupServiceTests {
         )
         #expect(restoredGoal.id == fixture.goalID)
         #expect(restoredGoal.fundingJarID == fixture.savingsJarID)
+        #expect(GoalContributionStore.entries(for: restoredGoal).single?.amount == 2_000_000)
         let restoredTrip = try #require(
             destination.mainContext.fetch(FetchDescriptor<TripWorkspace>()).single
         )
@@ -589,20 +591,25 @@ struct MonMonBackupServiceTests {
                 budgetJarID: jarID
             )
         )
-        context.insert(
-            FinancialGoal(
-                id: goalID,
-                name: "Japan trip",
-                targetAmount: 100_000_000,
-                earmarkedAmount: 10_000_000,
-                targetDate: instant.addingTimeInterval(31_536_000),
-                monthlyContribution: 5_000_000,
-                fundingJarID: savingsJarID,
-                symbolName: "airplane",
-                colorName: "sky",
-                createdAt: instant
-            )
+        let goal = FinancialGoal(
+            id: goalID,
+            name: "Japan trip",
+            targetAmount: 100_000_000,
+            earmarkedAmount: 8_000_000,
+            targetDate: instant.addingTimeInterval(31_536_000),
+            monthlyContribution: 5_000_000,
+            fundingJarID: savingsJarID,
+            symbolName: "airplane",
+            colorName: "sky",
+            createdAt: instant
         )
+        try GoalContributionStore.record(
+            amount: 2_000_000,
+            on: goal,
+            id: UUID(),
+            occurredAt: instant.addingTimeInterval(86_400)
+        )
+        context.insert(goal)
         context.insert(
             TripWorkspace(
                 id: tripWorkspaceID,
