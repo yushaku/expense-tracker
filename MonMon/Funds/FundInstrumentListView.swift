@@ -6,19 +6,6 @@ struct FundInstrumentImportOption: Identifiable {
 
     var id: String { source.rawValue }
 
-    var title: LocalizedStringKey {
-        switch source {
-        case .fmarket:
-            "Fmarket — Open-ended funds"
-        case .vndirect:
-            "VNDIRECT — ETFs"
-        case .vangToday:
-            "vang.today — Gold products"
-        case .manual:
-            "Add by hand"
-        }
-    }
-
     var sheetTitle: LocalizedStringKey {
         switch source {
         case .fmarket:
@@ -124,7 +111,6 @@ struct FundInstrumentListView: View {
     @State private var editorMode: FundInstrumentEditorMode?
     @State private var refresher = FundPriceRefresher()
     @State private var importSource: FundQuoteSource?
-    @State private var isChoosingImportSource = false
     @State private var fmarketPage: WebPage?
 
     let scope: FundInstrumentListScope
@@ -188,24 +174,6 @@ struct FundInstrumentListView: View {
                 )
             }
             .webPage($fmarketPage)
-            .confirmationDialog(
-                "Choose an import source",
-                isPresented: $isChoosingImportSource,
-                titleVisibility: .visible
-            ) {
-                ForEach(scope.importOptions) { option in
-                    Button {
-                        importSource = option.source
-                    } label: {
-                        Text(option.title)
-                    }
-                    .accessibilityIdentifier("import-from-\(option.source.rawValue)")
-                }
-
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("Open-ended funds use Fmarket NAV; listed ETFs use VNDIRECT closing prices.")
-            }
         }
         .tint(MonMonTheme.accent)
     }
@@ -355,13 +323,13 @@ struct FundInstrumentListView: View {
         .accessibilityIdentifier("open-fmarket-\(symbol.lowercased())")
     }
 
-    /// Refresh and the two ways of adding an instrument, in the content rather than the
-    /// toolbar. macOS collapses a toolbar's extra primary actions into an
+    /// Refresh, direct imports, and manual add stay in the content rather than
+    /// the toolbar. macOS collapses extra primary toolbar actions into an
     /// overflow, which is how Refresh managed to ship invisible.
     ///
-    /// One row, three equal shares, short labels: spelled out in full the three
-    /// wrapped to three stacked rows on an iPhone and cost more height than the
-    /// first fund card. The full wording stays in the accessibility labels.
+    /// Refresh and manual add use icons so each provider can have its own import
+    /// button without wrapping the row. Full wording stays available to
+    /// accessibility technologies.
     private var actionBar: some View {
         HStack(spacing: 8) {
             actionButton(
@@ -369,81 +337,73 @@ struct FundInstrumentListView: View {
                 systemImage: "arrow.clockwise",
                 accessibilityLabel: "Refresh prices",
                 identifier: "refresh-quotes",
-                isProminent: true
+                isProminent: true,
+                showsTitle: false
             ) {
                 refresh()
             }
             .disabled(refresher.isRunning || !canRefresh)
 
-            actionButton(
-                title: importActionTitle,
-                systemImage: "square.and.arrow.down",
-                accessibilityLabel: importAccessibilityLabel,
-                identifier: scope == .gold ? "import-from-vang-today" : "choose-import-source"
-            ) {
-                chooseImportSource()
+            ForEach(scope.importOptions) { option in
+                actionButton(
+                    title: option.source.displayName,
+                    systemImage: "square.and.arrow.down",
+                    accessibilityLabel: option.sheetTitle,
+                    identifier: "import-from-\(option.source.rawValue)"
+                ) {
+                    importSource = option.source
+                }
             }
 
             actionButton(
                 title: "Add",
                 systemImage: "plus",
                 accessibilityLabel: "Add by hand",
-                identifier: "add-instrument"
+                identifier: "add-instrument",
+                showsTitle: false
             ) {
                 editorMode = .add
             }
         }
     }
 
-    private var importActionTitle: LocalizedStringKey {
-        scope.importOptions.count == 1 ? scope.importOptions[0].source.displayName : "Import"
-    }
-
-    private var importAccessibilityLabel: String {
-        guard scope.importOptions.count == 1, let option = scope.importOptions.first else {
-            return AppText.string("Choose an import source", in: locale)
-        }
-        return AppText.string("Add from \(option.source.displayName(in: locale))", in: locale)
-    }
-
-    private func chooseImportSource() {
-        if scope.importOptions.count == 1 {
-            importSource = scope.importOptions[0].source
-        } else {
-            isChoosingImportSource = true
-        }
-    }
-
     private func actionButton(
         title: LocalizedStringKey,
         systemImage: String,
-        accessibilityLabel: String,
+        accessibilityLabel: LocalizedStringKey,
         identifier: String,
         isProminent: Bool = false,
+        showsTitle: Bool = true,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
-            Label(title, systemImage: systemImage)
-                .font(.subheadline.weight(.semibold))
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 11)
-                .frame(maxWidth: .infinity)
-                .background {
-                    if isProminent {
-                        Capsule().fill(MonMonTheme.accent.opacity(0.16))
-                    } else {
-                        Capsule()
-                            .fill(MonMonTheme.surface)
-                            .overlay(Capsule().stroke(MonMonTheme.border, lineWidth: 1))
-                    }
+            Group {
+                if showsTitle {
+                    Label(title, systemImage: systemImage)
+                } else {
+                    Image(systemName: systemImage)
                 }
-                .contentShape(Capsule())
+            }
+            .font(.subheadline.weight(.semibold))
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 11)
+            .frame(maxWidth: .infinity)
+            .background {
+                if isProminent {
+                    Capsule().fill(MonMonTheme.accent.opacity(0.16))
+                } else {
+                    Capsule()
+                        .fill(MonMonTheme.surface)
+                        .overlay(Capsule().stroke(MonMonTheme.border, lineWidth: 1))
+                }
+            }
+            .contentShape(Capsule())
         }
         .buttonStyle(.plain)
         .foregroundStyle(isProminent ? MonMonTheme.accent : MonMonTheme.textPrimary)
-        .accessibilityLabel(accessibilityLabel)
+        .accessibilityLabel(Text(accessibilityLabel))
         .accessibilityIdentifier(identifier)
     }
 
