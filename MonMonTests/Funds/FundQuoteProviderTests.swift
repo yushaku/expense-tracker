@@ -219,6 +219,33 @@ struct VNDirectQuoteProviderTests {
         #expect(candidates.first?.name == "Quỹ ETF DCVFMVN DIAMOND")
     }
 
+    @Test("Catalogue combines the HOSE ETF symbol families")
+    func catalogueCombinesListedHOSEETFs() async throws {
+        let (vndirect, transport) = provider([
+            "query=FUE": .init(FundQuoteFixtures.vndirectSearchFUE),
+            "query=E1": .init(FundQuoteFixtures.vndirectSearchE1),
+        ])
+
+        let candidates = try await vndirect.catalogue()
+
+        #expect(candidates.map(\.symbol) == ["E1VFVN30", "FUESSVFL", "FUEVFVND"])
+        #expect(candidates.allSatisfy { $0.kind == .etf })
+        #expect(candidates.first { $0.symbol == "FUEVFVND" }?.name == "Quỹ ETF DCVFMVN DIAMOND")
+        #expect(transport.requestCount == 2)
+    }
+
+    @Test("A changed catalogue reply is a decoding failure")
+    func changedCatalogueReplyFailsDecoding() async throws {
+        let (vndirect, _) = provider([
+            "query=FUE": .init(#"{"rows":[]}"#),
+            "query=E1": .init(FundQuoteFixtures.vndirectSearchE1),
+        ])
+
+        await #expect(throws: FundQuoteError.decoding) {
+            try await vndirect.catalogue()
+        }
+    }
+
     /// The endpoint answers for open-ended funds too, and describes them wrongly.
     /// A candidate's kind must come from which provider produced it, never from
     /// what the reply claims.

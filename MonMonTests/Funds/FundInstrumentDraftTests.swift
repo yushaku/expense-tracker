@@ -147,11 +147,11 @@ struct FundInstrumentDraftTests {
     func instrumentListScopesSeparateKinds() {
         #expect(FundInstrumentListScope.funds.kinds == [.fund, .etf])
         #expect(FundInstrumentListScope.funds.defaultKind == .fund)
-        #expect(FundInstrumentListScope.funds.importSource == .fmarket)
+        #expect(FundInstrumentListScope.funds.importOptions.map(\.source) == [.fmarket, .vndirect])
 
         #expect(FundInstrumentListScope.gold.kinds == [.gold])
         #expect(FundInstrumentListScope.gold.defaultKind == .gold)
-        #expect(FundInstrumentListScope.gold.importSource == .vangToday)
+        #expect(FundInstrumentListScope.gold.importOptions.map(\.source) == [.vangToday])
     }
 
     @Test("The combined instrument list continues to include every kind")
