@@ -245,6 +245,26 @@ struct BudgetSummaryTests {
         )
     }
 
+    @Test("Goal capacity can stay anchored to the current month")
+    func goalCapacityUsesRequestedMonth() throws {
+        let savings = jar(percent: 50)
+        let salary = recurringIncome(amount: 30_000_000, day: try date(2026, 8, 25))
+
+        let julyCapacity = BudgetSummary.plannedByJar(
+            monthContaining: try date(2026, 7, 1),
+            jars: [savings],
+            recurringRules: [salary]
+        )
+        let augustCapacity = BudgetSummary.plannedByJar(
+            monthContaining: try date(2026, 8, 20),
+            jars: [savings],
+            recurringRules: [salary]
+        )
+
+        #expect(julyCapacity[savings.id] == 0)
+        #expect(augustCapacity[savings.id] == 15_000_000)
+    }
+
     @Test("Jar activity follows the same routing and month window as Budget")
     func jarActivityUsesBudgetRouting() throws {
         let necessities = jar(id: UUID(), percent: 50)

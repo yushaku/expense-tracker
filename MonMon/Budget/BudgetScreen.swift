@@ -165,7 +165,11 @@ struct BudgetScreen: View {
     }
 
     private var plannedByJar: [UUID: Decimal] {
-        Dictionary(uniqueKeysWithValues: snapshot.rows.map { ($0.jarID, $0.planned) })
+        BudgetSummary.plannedByJar(
+            monthContaining: asOf,
+            jars: jars,
+            recurringRules: recurringRules
+        )
     }
 
     private var inProgressGoals: [FinancialGoal] {

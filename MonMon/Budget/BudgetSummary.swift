@@ -118,6 +118,22 @@ private struct BudgetTransactionRouting {
 }
 
 enum BudgetSummary {
+    static func plannedByJar(
+        monthContaining month: Date,
+        jars: [BudgetJar],
+        recurringRules: [RecurringRule]
+    ) -> [UUID: Decimal] {
+        let start = TransactionPeriod.startOfMonth(for: month)
+        let end = TransactionPeriod.endOfMonth(for: month)
+        let plannedIncome = recurringIncome(recurringRules, from: start, to: end)
+
+        return Dictionary(
+            uniqueKeysWithValues: jars.map { jar in
+                (jar.id, allocation(of: plannedIncome, percent: jar.allocationPercent))
+            }
+        )
+    }
+
     static func snapshot(
         monthContaining month: Date,
         asOf: Date,
