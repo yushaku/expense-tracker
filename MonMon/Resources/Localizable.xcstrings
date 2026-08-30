@@ -1,6 +1,99 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@ is due today.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "%@ đến hạn hôm nay." } } }
+    },
+    "A recurring item is due today.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Một khoản định kỳ đến hạn hôm nay." } } }
+    },
+    "Couldn’t update notification reminders. Try again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể cập nhật lời nhắc. Hãy thử lại." } } }
+    },
+    "Daily expense reminder": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhắc nhập chi tiêu hằng ngày" } } }
+    },
+    "Daily spending reminder": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhắc nhập chi tiêu hằng ngày" } } }
+    },
+    "Notifications": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thông báo" } } }
+    },
+    "Notifications are turned off in iPhone Settings.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thông báo đang bị tắt trong Cài đặt iPhone." } } }
+    },
+    "Notifies you for each active recurring item due that day.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thông báo từng khoản định kỳ đang hoạt động đến hạn trong ngày." } } }
+    },
+    "Open iPhone Settings": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mở Cài đặt iPhone" } } }
+    },
+    "Recurring due reminders": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhắc khoản định kỳ đến hạn" } } }
+    },
+    "Recurring item due": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khoản định kỳ đến hạn" } } }
+    },
+    "Reminder time": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Giờ nhắc" } } }
+    },
+    "Reminds you every day even if you already recorded spending.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhắc bạn mỗi ngày dù đã ghi chi tiêu." } } }
+    },
+    "Take a moment to record today's spending.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dành một chút thời gian để ghi chi tiêu hôm nay." } } }
+    },
+    "%lld HOSE-listed ETFs. Pick the ones you hold — their closing prices are fetched before they are added.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "%lld ETF niêm yết trên HOSE. Chọn các quỹ bạn đang nắm giữ — giá đóng cửa sẽ được lấy trước khi thêm." } } }
+    },
+    "Add from Fmarket": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm từ Fmarket" } } }
+    },
+    "Add from VNDIRECT": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm từ VNDIRECT" } } }
+    },
+    "Add Gold from vang.today": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm vàng từ vang.today" } } }
+    },
+    "Choose an import source": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn nguồn nhập" } } }
+    },
+    "Close fetched when added": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Giá đóng cửa sẽ được lấy khi thêm" } } }
+    },
+    "Couldn’t fetch a closing price for %@. Try Add again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể lấy giá đóng cửa cho %@. Hãy thử Thêm lại." } } }
+    },
+    "ETFs": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "ETF" } } }
+    },
+    "Fetching closing prices": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang lấy giá đóng cửa" } } }
+    },
+    "Fmarket — Open-ended funds": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Fmarket — Quỹ mở" } } }
+    },
+    "Import": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập" } } }
+    },
+    "Import open-ended funds from Fmarket or listed ETFs from VNDIRECT, or add one by hand.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập quỹ mở từ Fmarket hoặc ETF niêm yết từ VNDIRECT, hoặc thêm thủ công." } } }
+    },
+    "Manage catalogue prices and Fmarket or VNDIRECT imports": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Quản lý giá danh mục và nhập từ Fmarket hoặc VNDIRECT" } } }
+    },
+    "Open-ended funds use Fmarket NAV; listed ETFs use VNDIRECT closing prices.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Quỹ mở dùng NAV từ Fmarket; ETF niêm yết dùng giá đóng cửa từ VNDIRECT." } } }
+    },
+    "Ticker or name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mã hoặc tên" } } }
+    },
+    "VNDIRECT — ETFs": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "VNDIRECT — ETF" } } }
+    },
+    "vang.today — Gold products": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "vang.today — Sản phẩm vàng" } } }
+    },
     "Trip: %@": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chuyến đi: %@" } } }
     },

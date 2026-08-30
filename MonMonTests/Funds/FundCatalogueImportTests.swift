@@ -4,6 +4,31 @@ import Testing
 
 @testable import MonMon
 
+private struct QuoteBackedETFProvider: FundCatalogueProvider {
+    let source = FundQuoteSource.vndirect
+    let candidates: [FundInstrumentCandidate]
+    let quotes: [String: FundQuote]
+    let failedSymbols: Set<String>
+
+    func catalogue() async throws -> [FundInstrumentCandidate] {
+        candidates
+    }
+
+    func latestQuote(symbol: String, asOf: Date) async throws -> FundQuote {
+        if failedSymbols.contains(symbol) {
+            throw FundQuoteError.noQuoteAvailable
+        }
+        guard let quote = quotes[symbol] else {
+            throw FundQuoteError.symbolNotFound
+        }
+        return quote
+    }
+
+    func search(_ query: String) async throws -> [FundInstrumentCandidate] {
+        candidates.filter { $0.symbol.contains(query.uppercased()) }
+    }
+}
+
 @Suite("Fund catalogue import")
 @MainActor
 struct FundCatalogueImportTests {
@@ -74,14 +99,14 @@ struct FundCatalogueImportTests {
         await importer.load(existing: [])
         let stamped = Date(timeIntervalSince1970: 1_787_500_000)
 
-        let added = try importer.importing(
+        let result = try await importer.importing(
             importer.importable,
             into: context,
             existing: [],
             createdAt: stamped
         )
 
-        #expect(added == 4)
+        #expect(result.addedCount == 4)
 
         let saved = try context.fetch(FetchDescriptor<FundInstrument>())
         let vesaf = try #require(saved.first { $0.symbol == "VESAF" })
@@ -106,7 +131,7 @@ struct FundCatalogueImportTests {
         let importer = importer(FundQuoteFixtures.fmarketCatalogue)
         await importer.load(existing: [])
 
-        try importer.importing(importer.importable, into: context, existing: [])
+        _ = try await importer.importing(importer.importable, into: context, existing: [])
 
         let saved = try context.fetch(FetchDescriptor<FundInstrument>())
         let vesaf = try #require(saved.first { $0.symbol == "VESAF" })
@@ -131,13 +156,13 @@ struct FundCatalogueImportTests {
         let importer = importer(FundQuoteFixtures.fmarketCatalogue)
         await importer.load(existing: [existing])
 
-        let added = try importer.importing(
+        let result = try await importer.importing(
             importer.candidates,
             into: context,
             existing: [existing]
         )
 
-        #expect(added == 3)
+        #expect(result.addedCount == 3)
         let saved = try context.fetch(FetchDescriptor<FundInstrument>())
         #expect(saved.count == 4)
         // The stored price is untouched; the listing does not overwrite it.
@@ -202,14 +227,14 @@ struct FundCatalogueImportTests {
         await importer.load(existing: [])
         let stamped = Date(timeIntervalSince1970: 1_787_500_000)
 
-        let added = try importer.importing(
+        let result = try await importer.importing(
             importer.importable,
             into: context,
             existing: [],
             createdAt: stamped
         )
 
-        #expect(added == 2)
+        #expect(result.addedCount == 2)
         let saved = try context.fetch(FetchDescriptor<FundInstrument>())
         let sjc = try #require(saved.first { $0.symbol == "SJL1L10" })
         #expect(sjc.kind == .gold)
@@ -217,6 +242,65 @@ struct FundCatalogueImportTests {
         #expect(sjc.currentPricePerUnit == 147_000_000)
         #expect(sjc.askPricePerUnit == 150_000_000)
         #expect(sjc.priceFetchedAt == stamped)
+    }
+
+    @Test("ETF import saves valid closes and reports failed symbols")
+    func etfImportPartiallySucceedsWithoutZeroPrices() async throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let quoteDay = Date(timeIntervalSince1970: 1_787_270_400)
+        let stamped = Date(timeIntervalSince1970: 1_787_500_000)
+        let candidates = [
+            FundInstrumentCandidate(symbol: "E1VFVN30", name: "DCVFMVN30", kind: .etf),
+            FundInstrumentCandidate(symbol: "FUESSVFL", name: "VNFIN LEAD", kind: .etf),
+            FundInstrumentCandidate(symbol: "FUEVFVND", name: "VN DIAMOND", kind: .etf),
+        ]
+        let provider = QuoteBackedETFProvider(
+            candidates: candidates,
+            quotes: [
+                "E1VFVN30": FundQuote(
+                    symbol: "E1VFVN30",
+                    pricePerUnit: 24_500,
+                    asOf: quoteDay,
+                    source: .vndirect
+                ),
+                "FUEVFVND": FundQuote(
+                    symbol: "FUEVFVND",
+                    pricePerUnit: 34_200,
+                    asOf: quoteDay,
+                    source: .vndirect
+                ),
+            ],
+            failedSymbols: ["FUESSVFL"]
+        )
+        let importer = FundCatalogueImport(provider: provider)
+        await importer.load(existing: [])
+
+        let result = try await importer.importing(
+            importer.importable,
+            into: context,
+            existing: [],
+            createdAt: stamped
+        )
+
+        #expect(result.addedSymbols == ["E1VFVN30", "FUEVFVND"])
+        #expect(
+            result.failures == [
+                FundCatalogueImport.ImportFailure(
+                    symbol: "FUESSVFL",
+                    error: .noQuoteAvailable
+                )
+            ]
+        )
+        #expect(importer.alreadyHeld == ["E1VFVN30", "FUEVFVND"])
+
+        let saved = try context.fetch(FetchDescriptor<FundInstrument>())
+        #expect(saved.map(\.symbol).sorted() == ["E1VFVN30", "FUEVFVND"])
+        #expect(saved.allSatisfy { $0.kind == .etf })
+        #expect(saved.allSatisfy { $0.source == .vndirect })
+        #expect(saved.allSatisfy { $0.currentPricePerUnit > 0 })
+        #expect(saved.allSatisfy { $0.priceAsOf == quoteDay })
+        #expect(saved.allSatisfy { $0.priceFetchedAt == stamped })
     }
 }
 

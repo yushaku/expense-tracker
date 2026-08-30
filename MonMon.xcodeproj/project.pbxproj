@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		N10000000000000000000201 /* NotificationPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000101 /* NotificationPreferences.swift */; };
+		N10000000000000000000202 /* NotificationPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000102 /* NotificationPlan.swift */; };
+		N10000000000000000000203 /* NotificationCenterClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000103 /* NotificationCenterClient.swift */; };
+		N10000000000000000000204 /* NotificationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000104 /* NotificationCoordinator.swift */; };
+		N10000000000000000000211 /* NotificationPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000111 /* NotificationPreferencesTests.swift */; };
+		N10000000000000000000212 /* DailyExpenseReminderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000112 /* DailyExpenseReminderTests.swift */; };
+		N10000000000000000000213 /* RecurringDueReminderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000113 /* RecurringDueReminderTests.swift */; };
+		N10000000000000000000214 /* NotificationCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000114 /* NotificationCoordinatorTests.swift */; };
 		Y10000000000000000000201 /* TripWorkspaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000101 /* TripWorkspaceTests.swift */; };
 		Y10000000000000000000202 /* TripWorkspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000102 /* TripWorkspace.swift */; };
 		Y10000000000000000000203 /* TripWorkspaceLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000103 /* TripWorkspaceLifecycle.swift */; };
@@ -177,6 +185,7 @@
 		A00000000000000000000277 /* AppLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000188 /* AppLock.swift */; };
 		A00000000000000000000278 /* LockScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000189 /* LockScreenView.swift */; };
 		A00000000000000000000279 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000190 /* SettingsView.swift */; };
+		N10000000000000000000205 /* NotificationSettingsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000105 /* NotificationSettingsCard.swift */; };
 		A00000000000000000000280 /* AppLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000191 /* AppLockTests.swift */; };
 		A00000000000000000000281 /* FloatingAddButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000192 /* FloatingAddButton.swift */; };
 		A00000000000000000000282 /* Percentage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000193 /* Percentage.swift */; };
@@ -281,6 +290,8 @@
 		A00000000000000000000957 /* FundCatalogueImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000956 /* FundCatalogueImport.swift */; };
 		A00000000000000000000959 /* FundCatalogueImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000958 /* FundCatalogueImportView.swift */; };
 		A00000000000000000000961 /* FundCatalogueImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000960 /* FundCatalogueImportTests.swift */; };
+		A00000000000000000000963 /* FundLogoCatalogueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000962 /* FundLogoCatalogueTests.swift */; };
+		A00000000000000000000965 /* FundLogoCatalogue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000964 /* FundLogoCatalogue.swift */; };
 		A00000000000000000000972 /* CloudSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000970 /* CloudSync.swift */; };
 		A00000000000000000000973 /* CloudSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000971 /* CloudSyncTests.swift */; };
 		A00000000000000000000981 /* VangTodayQuoteProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000980 /* VangTodayQuoteProvider.swift */; };
@@ -401,6 +412,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		N10000000000000000000101 /* NotificationPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPreferences.swift; sourceTree = "<group>"; };
+		N10000000000000000000102 /* NotificationPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPlan.swift; sourceTree = "<group>"; };
+		N10000000000000000000103 /* NotificationCenterClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterClient.swift; sourceTree = "<group>"; };
+		N10000000000000000000104 /* NotificationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCoordinator.swift; sourceTree = "<group>"; };
+		N10000000000000000000111 /* NotificationPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPreferencesTests.swift; sourceTree = "<group>"; };
+		N10000000000000000000112 /* DailyExpenseReminderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyExpenseReminderTests.swift; sourceTree = "<group>"; };
+		N10000000000000000000113 /* RecurringDueReminderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringDueReminderTests.swift; sourceTree = "<group>"; };
+		N10000000000000000000114 /* NotificationCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCoordinatorTests.swift; sourceTree = "<group>"; };
 		Y10000000000000000000101 /* TripWorkspaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspaceTests.swift; sourceTree = "<group>"; };
 		Y10000000000000000000102 /* TripWorkspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspace.swift; sourceTree = "<group>"; };
 		Y10000000000000000000103 /* TripWorkspaceLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspaceLifecycle.swift; sourceTree = "<group>"; };
@@ -575,6 +594,7 @@
 		A00000000000000000000188 /* AppLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLock.swift; sourceTree = "<group>"; };
 		A00000000000000000000189 /* LockScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenView.swift; sourceTree = "<group>"; };
 		A00000000000000000000190 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		N10000000000000000000105 /* NotificationSettingsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsCard.swift; sourceTree = "<group>"; };
 		A00000000000000000000191 /* AppLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000192 /* FloatingAddButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingAddButton.swift; sourceTree = "<group>"; };
 		A00000000000000000000193 /* Percentage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Percentage.swift; sourceTree = "<group>"; };
@@ -680,6 +700,8 @@
 		A00000000000000000000956 /* FundCatalogueImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundCatalogueImport.swift; sourceTree = "<group>"; };
 		A00000000000000000000958 /* FundCatalogueImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundCatalogueImportView.swift; sourceTree = "<group>"; };
 		A00000000000000000000960 /* FundCatalogueImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundCatalogueImportTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000962 /* FundLogoCatalogueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundLogoCatalogueTests.swift; sourceTree = "<group>"; };
+		A00000000000000000000964 /* FundLogoCatalogue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundLogoCatalogue.swift; sourceTree = "<group>"; };
 		A00000000000000000000970 /* CloudSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSync.swift; sourceTree = "<group>"; };
 		A00000000000000000000971 /* CloudSyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000980 /* VangTodayQuoteProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VangTodayQuoteProvider.swift; sourceTree = "<group>"; };
@@ -819,6 +841,7 @@
 		A00000000000000000000012 /* MonMon */ = {
 			isa = PBXGroup;
 			children = (
+				N10000000000000000000001 /* Notifications */,
 				Y10000000000000000000001 /* Trips */,
 				X10000000000000000000001 /* IncomeAllocation */,
 				V10000000000000000000001 /* Goals */,
@@ -924,6 +947,7 @@
 		A00000000000000000000015 /* MonMonTests */ = {
 			isa = PBXGroup;
 			children = (
+				N10000000000000000000002 /* Notifications */,
 				Y10000000000000000000002 /* Trips */,
 				X10000000000000000000002 /* IncomeAllocation */,
 				V10000000000000000000002 /* Goals */,
@@ -979,6 +1003,28 @@
 				W10000000000000000000101 /* QuickExpensePresetStoreTests.swift */,
 			);
 			path = QuickExpense;
+			sourceTree = "<group>";
+		};
+		N10000000000000000000001 /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				N10000000000000000000101 /* NotificationPreferences.swift */,
+				N10000000000000000000102 /* NotificationPlan.swift */,
+				N10000000000000000000103 /* NotificationCenterClient.swift */,
+				N10000000000000000000104 /* NotificationCoordinator.swift */,
+			);
+			path = Notifications;
+			sourceTree = "<group>";
+		};
+		N10000000000000000000002 /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				N10000000000000000000111 /* NotificationPreferencesTests.swift */,
+				N10000000000000000000112 /* DailyExpenseReminderTests.swift */,
+				N10000000000000000000113 /* RecurringDueReminderTests.swift */,
+				N10000000000000000000114 /* NotificationCoordinatorTests.swift */,
+			);
+			path = Notifications;
 			sourceTree = "<group>";
 		};
 		U10000000000000000000002 /* Budget */ = {
@@ -1177,6 +1223,7 @@
 				A00000000000000000000151 /* FundSection.swift */,
 				A00000000000000000000152 /* FundHoldingCard.swift */,
 				A00000000000000000000F40 /* FundLogoView.swift */,
+				A00000000000000000000964 /* FundLogoCatalogue.swift */,
 				A00000000000000000000153 /* FundEditorView.swift */,
 				A00000000000000000000154 /* FundEditorForm.swift */,
 			);
@@ -1200,6 +1247,7 @@
 				A00000000000000000000950 /* FundQuoteProviderTests.swift */,
 				A00000000000000000000954 /* FundPriceRefresherTests.swift */,
 				A00000000000000000000960 /* FundCatalogueImportTests.swift */,
+				A00000000000000000000962 /* FundLogoCatalogueTests.swift */,
 				A00000000000000000000982 /* VangTodayQuoteProviderTests.swift */,
 				A00000000000000000000986 /* GoldWeightTests.swift */,
 				A00000000000000000000158 /* FundSummaryTests.swift */,
@@ -1293,6 +1341,7 @@
 				A00000000000000000000970 /* CloudSync.swift */,
 				A00000000000000000000189 /* LockScreenView.swift */,
 				A00000000000000000000190 /* SettingsView.swift */,
+				N10000000000000000000105 /* NotificationSettingsCard.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -1672,6 +1721,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				N10000000000000000000201 /* NotificationPreferences.swift in Sources */,
+				N10000000000000000000202 /* NotificationPlan.swift in Sources */,
+				N10000000000000000000203 /* NotificationCenterClient.swift in Sources */,
+				N10000000000000000000204 /* NotificationCoordinator.swift in Sources */,
 				Y10000000000000000000202 /* TripWorkspace.swift in Sources */,
 				Y10000000000000000000203 /* TripWorkspaceLifecycle.swift in Sources */,
 				Y10000000000000000000205 /* TripSummary.swift in Sources */,
@@ -1773,6 +1826,7 @@
 				A0000000000000000000080E /* PeriodGridPicker.swift in Sources */,
 				A00000000000000000000802 /* SegmentedTabs.swift in Sources */,
 				A00000000000000000000279 /* SettingsView.swift in Sources */,
+				N10000000000000000000205 /* NotificationSettingsCard.swift in Sources */,
 				A00000000000000000000278 /* LockScreenView.swift in Sources */,
 				A00000000000000000000277 /* AppLock.swift in Sources */,
 				A00000000000000000000972 /* CloudSync.swift in Sources */,
@@ -1885,6 +1939,7 @@
 				A00000000000000000000240 /* FundSection.swift in Sources */,
 				A00000000000000000000241 /* FundHoldingCard.swift in Sources */,
 				A00000000000000000000F41 /* FundLogoView.swift in Sources */,
+				A00000000000000000000965 /* FundLogoCatalogue.swift in Sources */,
 				A00000000000000000000242 /* FundEditorView.swift in Sources */,
 				A00000000000000000000243 /* FundEditorForm.swift in Sources */,
 				A00000000000000000000840 /* DebtDirection.swift in Sources */,
@@ -1909,6 +1964,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				N10000000000000000000211 /* NotificationPreferencesTests.swift in Sources */,
+				N10000000000000000000212 /* DailyExpenseReminderTests.swift in Sources */,
+				N10000000000000000000213 /* RecurringDueReminderTests.swift in Sources */,
+				N10000000000000000000214 /* NotificationCoordinatorTests.swift in Sources */,
 				Y10000000000000000000201 /* TripWorkspaceTests.swift in Sources */,
 				Y10000000000000000000204 /* TripSummaryTests.swift in Sources */,
 				X10000000000000000000201 /* IncomeAllocationSnapshotTests.swift in Sources */,
@@ -1996,6 +2055,7 @@
 				A00000000000000000000951 /* FundQuoteProviderTests.swift in Sources */,
 				A00000000000000000000955 /* FundPriceRefresherTests.swift in Sources */,
 				A00000000000000000000961 /* FundCatalogueImportTests.swift in Sources */,
+				A00000000000000000000963 /* FundLogoCatalogueTests.swift in Sources */,
 				A00000000000000000000983 /* VangTodayQuoteProviderTests.swift in Sources */,
 				A00000000000000000000987 /* GoldWeightTests.swift in Sources */,
 				A00000000000000000000247 /* FundSummaryTests.swift in Sources */,

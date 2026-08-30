@@ -8,6 +8,9 @@ Read the docs before the code:
 | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
 | `[docs/smart-note.html](docs/smart-note.html)`                                                   | Owner's guide — recording transactions, voice capture, statement import, reports       |
 | `[docs/budget-and-goals.html](docs/budget-and-goals.html)`                                       | How jars split income, how goals earmark money inside them, what the app refuses to do |
+| `[docs/accounts.html](docs/accounts.html)`                                                       | Accounts — derived balances, asset allocation, net worth, twelve-month history         |
+| `[docs/savings.html](docs/savings.html)`                                                         | Term deposits — simple interest, the three states, withdrawals as records              |
+| `[docs/funds.html](docs/funds.html)`                                                             | Funds, ETFs and gold — immutable lots, sales, market pricing, catalogue import         |
 | `[docs/architecture.html](docs/architecture.html)`                                               | The sixteen SwiftData models, their foreign keys, system boundaries, import flow       |
 | `[docs/bank-transaction-auto-note-research.html](docs/bank-transaction-auto-note-research.html)` | Research behind automatic transaction notes                                            |
 
@@ -34,6 +37,7 @@ Read the docs before the code:
 - **Term deposits** (sổ tiết kiệm) — maturity dates, projected interest, an optional funding account, and withdrawals that leave the opening terms immutable.
 - **Funds, ETFs, and gold** — held in units or weight against a shared instrument catalogue, showing cost basis, market value, and unrealized profit or loss.
 - **Market valuation** — prices from Fmarket for open-ended funds, VNDIRECT for listed ETFs, and the shop-buy side of a vang.today quote for gold. A fetch happens when the owner asks, or when a screen opens onto a stale price — never on a timer, never in the background, and never with anything but a ticker or product code leaving the device.
+- **Instrument catalogue imports** — add open-ended funds from Fmarket, HOSE-listed ETFs from VNDIRECT, or gold products from vang.today. ETF rows are saved only after VNDIRECT returns a valid closing price; an unavailable ticker does not block the rest of the selection.
 - **Total assets** — counts transferred money once and holds still through borrowing, lending, and repaying.
 
 ### Capture without typing

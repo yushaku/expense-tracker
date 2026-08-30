@@ -27,6 +27,7 @@ enum RecurringEditorMode: Identifiable {
 struct RecurringEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(NotificationCoordinator.self) private var notificationCoordinator
 
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
@@ -195,6 +196,7 @@ struct RecurringEditorView: View {
             // it owes is recorded now rather than at the next launch, because a
             // rule the owner just wrote should show its entries straight away.
             try RecurringGenerator.generate(in: modelContext, asOf: asOf)
+            reconcileNotifications()
             dismiss()
         } catch {
             modelContext.rollback()
@@ -214,10 +216,17 @@ struct RecurringEditorView: View {
 
         do {
             try modelContext.save()
+            reconcileNotifications()
             dismiss()
         } catch {
             modelContext.rollback()
             saveErrorMessage = "Couldn’t delete this rule. Try again."
+        }
+    }
+
+    private func reconcileNotifications() {
+        Task {
+            await notificationCoordinator.reconcile(in: modelContext)
         }
     }
 }

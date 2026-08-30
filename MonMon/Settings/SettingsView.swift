@@ -5,6 +5,7 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(AppLock.self) private var appLock
     @Environment(CloudSync.self) private var cloudSync
+    @Environment(NotificationCoordinator.self) private var notificationCoordinator
     @Environment(\.modelContext) private var modelContext
 
     @Environment(\.locale) private var locale
@@ -23,6 +24,7 @@ struct SettingsView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                         appearanceCard
+                        notificationCard
                         voiceCaptureCard
                         instrumentsCard
                         securityCard
@@ -40,6 +42,14 @@ struct SettingsView: View {
             .tint(MonMonTheme.accent)
             .appSheet(item: $instrumentScope) { scope in
                 FundInstrumentListView(scope: scope)
+            }
+            .onChange(of: language) { _, newLanguage in
+                Task {
+                    await notificationCoordinator.reconcile(
+                        in: modelContext,
+                        locale: newLanguage.locale
+                    )
+                }
             }
         }
     }
@@ -110,6 +120,12 @@ struct SettingsView: View {
                         .accessibilityIdentifier("biometric-lock-error")
                 }
             }
+        }
+    }
+
+    private var notificationCard: some View {
+        card {
+            NotificationSettingsCard()
         }
     }
 
@@ -219,7 +235,7 @@ struct SettingsView: View {
 
                 instrumentButton(
                     title: "Funds & ETFs",
-                    subtitle: "Manage catalogue prices and Fmarket imports",
+                    subtitle: "Manage catalogue prices and Fmarket or VNDIRECT imports",
                     systemImage: "chart.line.uptrend.xyaxis",
                     tint: MonMonTheme.funds,
                     scope: .funds
@@ -240,8 +256,8 @@ struct SettingsView: View {
     }
 
     private func instrumentButton(
-        title: String,
-        subtitle: String,
+        title: LocalizedStringKey,
+        subtitle: LocalizedStringKey,
         systemImage: String,
         tint: Color,
         scope: FundInstrumentListScope
@@ -279,7 +295,6 @@ struct SettingsView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(title). \(subtitle)")
         .accessibilityHint("Opens instrument management")
         .accessibilityIdentifier("settings-\(scope.rawValue)-instruments")
     }
@@ -450,6 +465,7 @@ struct SettingsView: View {
         SettingsView()
             .environment(AppLock(isLocked: false))
             .environment(CloudSync())
+            .environment(NotificationCoordinator())
             .modelContainer(PreviewData.populated)
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)

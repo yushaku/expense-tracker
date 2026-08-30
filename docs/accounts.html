@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tài khoản tiền mặt, ngân hàng và thẻ tín dụng trong MonMon: số dư suy ra từ bản ghi có ngày, phân bổ tài sản, tài sản ròng và lịch sử 12 tháng. Kèm sơ đồ.">
+  <link rel="stylesheet" href="assets/monmon-docs.css">
+  <title>MonMon — Quản lý tài khoản</title>
+  <style>
+    :root {
+      --w-cash: #1e66f5;
+      --w-savings: #df8e1d;
+      --w-funds: #8839ef;
+      --w-gold: #d97706;
+      --w-lent: #179299;
+      --w-borrowed: #b04458;
+      --w-overdraft: #9a6a12;
+      --w-gain: #2f7a52;
+      --w-loss: #b04458;
+      --w-track: var(--docs-surface-3);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --w-cash: #8caaee;
+        --w-savings: #e5c890;
+        --w-funds: #ca9ee6;
+        --w-gold: #ef9f76;
+        --w-lent: #81c8be;
+        --w-borrowed: #e17c8f;
+        --w-overdraft: #d5a544;
+        --w-gain: #5fbd85;
+        --w-loss: #e17c8f;
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --w-cash: #8caaee;
+      --w-savings: #e5c890;
+      --w-funds: #ca9ee6;
+      --w-gold: #ef9f76;
+      --w-lent: #81c8be;
+      --w-borrowed: #e17c8f;
+      --w-overdraft: #d5a544;
+      --w-gain: #5fbd85;
+      --w-loss: #e17c8f;
+    }
+
+    .page {
+      width: min(1120px, calc(100% - var(--docs-page-gutter) - var(--docs-page-gutter)));
+      margin: 0 auto;
+      padding: var(--docs-page-padding-top) 0 var(--docs-page-padding-bottom);
+    }
+
+    a { color: var(--docs-accent); }
+    code {
+      padding: 2px 6px;
+      background: var(--docs-surface-2);
+      border-radius: var(--docs-radius-xs);
+      font-family: var(--docs-mono);
+      font-size: .9em;
+    }
+
+    .hero { max-width: 860px; }
+    .eyebrow {
+      margin-bottom: var(--docs-space-2);
+      color: var(--docs-accent);
+      font-size: var(--docs-label-size);
+      font-weight: 750;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .lede {
+      margin-top: var(--docs-space-4);
+      color: var(--docs-text-2);
+      font-size: var(--docs-type-xl);
+      line-height: 1.5;
+      text-wrap: pretty;
+    }
+
+    section { margin-top: var(--docs-section-gap); scroll-margin-top: 20px; }
+    section > p, section > ul, section > ol { max-width: 78ch; }
+    section > p { margin-top: var(--docs-space-4); color: var(--docs-text-2); }
+    section > ul, section > ol { margin-top: var(--docs-space-4); padding-left: 1.2em; color: var(--docs-text-2); }
+    section li + li { margin-top: var(--docs-space-2); }
+    section li strong { color: var(--docs-text); }
+
+    h2 { margin-top: var(--docs-space-2); }
+    h3 {
+      margin-top: var(--docs-space-6);
+      font-size: var(--docs-type-xl);
+      letter-spacing: -.015em;
+    }
+    .section-kicker {
+      color: var(--docs-muted);
+      font-size: var(--docs-label-size);
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    figure {
+      margin-top: var(--docs-space-5);
+      padding: var(--docs-card-padding);
+      background: var(--docs-surface);
+      border: 1px solid var(--docs-border);
+      border-radius: var(--docs-radius-lg);
+      box-shadow: var(--docs-shadow);
+    }
+    figure .scroll { overflow-x: auto; }
+    figure svg { width: 100%; height: auto; min-width: 520px; font-family: var(--docs-sans); }
+    figcaption {
+      margin-top: var(--docs-space-4);
+      padding-top: var(--docs-space-3);
+      border-top: 1px solid var(--docs-border);
+      color: var(--docs-muted);
+      font-size: var(--docs-type-md);
+      text-wrap: pretty;
+    }
+    figcaption b { color: var(--docs-text-2); font-weight: 700; }
+
+    .fig-label {
+      display: inline-block;
+      margin-bottom: var(--docs-space-3);
+      color: var(--docs-muted);
+      font-size: var(--docs-type-xs);
+      font-weight: 750;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    /* SVG primitives shared by every diagram. */
+    .s-box { fill: var(--docs-surface-2); stroke: var(--docs-border-strong); stroke-width: 1; }
+    .s-box-accent { fill: var(--docs-accent-soft); stroke: var(--docs-accent); stroke-width: 1; }
+    .s-box-plain { fill: none; stroke: var(--docs-border-strong); stroke-width: 1; stroke-dasharray: 4 4; }
+    .s-t { fill: var(--docs-text); font-size: 13px; font-weight: 650; }
+    .s-t2 { fill: var(--docs-text-2); font-size: 12px; }
+    .s-t3 { fill: var(--docs-muted); font-size: 11px; }
+    .s-mono { font-family: var(--docs-mono); font-size: 11px; fill: var(--docs-text-2); }
+    .s-line { stroke: var(--docs-border-strong); stroke-width: 1.5; fill: none; }
+    .s-line-soft { stroke: var(--docs-border); stroke-width: 1; fill: none; }
+    .s-dash { stroke: var(--docs-edge); stroke-width: 1.4; fill: none; stroke-dasharray: 5 4; }
+    .s-gain { fill: var(--w-gain); }
+    .s-loss { fill: var(--w-loss); }
+    .s-cash { fill: var(--w-cash); }
+    .s-savings { fill: var(--w-savings); }
+    .s-funds { fill: var(--w-funds); }
+    .s-gold { fill: var(--w-gold); }
+    .s-lent { fill: var(--w-lent); }
+    .s-borrowed { fill: var(--w-borrowed); }
+    .s-overdraft { fill: var(--w-overdraft); }
+    .s-track { fill: var(--w-track); }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--docs-grid-gap);
+      margin-top: var(--docs-space-5);
+    }
+    .card {
+      padding: var(--docs-card-padding);
+      background: var(--docs-surface);
+      border: 1px solid var(--docs-border);
+      border-radius: var(--docs-radius-md);
+    }
+    .card h4 { font-size: var(--docs-type-lg); letter-spacing: -.01em; }
+    .card p { margin-top: var(--docs-space-2); color: var(--docs-text-2); font-size: var(--docs-type-md); }
+    .card .metric {
+      display: block;
+      margin-bottom: var(--docs-space-1);
+      color: var(--docs-muted);
+      font-size: var(--docs-type-xs);
+      font-weight: 750;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .table-wrap { overflow-x: auto; margin-top: var(--docs-space-5); }
+    table { width: 100%; min-width: 560px; border-collapse: collapse; font-size: var(--docs-type-md); }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--docs-border);
+      text-align: left;
+      vertical-align: top;
+    }
+    th { color: var(--docs-muted); font-size: var(--docs-type-xs); letter-spacing: .08em; text-transform: uppercase; }
+    td { color: var(--docs-text-2); }
+    td:first-child { color: var(--docs-text); font-weight: 650; }
+    td.num { font-family: var(--docs-mono); text-align: right; white-space: nowrap; }
+
+    .callout {
+      margin-top: var(--docs-space-5);
+      padding: var(--docs-space-4) var(--docs-space-5);
+      background: var(--docs-info-soft);
+      border-left: 3px solid var(--docs-info);
+      border-radius: var(--docs-radius-sm);
+      color: var(--docs-text-2);
+      font-size: var(--docs-type-md);
+    }
+    .callout.warn { background: var(--docs-warning-soft); border-left-color: var(--docs-warning); }
+    .callout b { color: var(--docs-text); }
+
+    .legend { display: flex; flex-wrap: wrap; gap: var(--docs-space-3); margin-top: var(--docs-space-4); }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--docs-text-2);
+      font-size: var(--docs-type-sm);
+    }
+    .legend i { width: 11px; height: 11px; border-radius: 3px; }
+
+    footer {
+      margin-top: var(--docs-section-gap);
+      padding-top: var(--docs-space-5);
+      border-top: 1px solid var(--docs-border);
+      color: var(--docs-muted);
+      font-size: var(--docs-type-md);
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <nav class="docs-nav" aria-label="Tài liệu MonMon">
+      <a class="docs-nav-brand" href="smart-note.html">MonMon Docs</a>
+      <ul class="docs-nav-list">
+        <li><a href="smart-note.html">Hướng dẫn sử dụng</a></li>
+        <li><a href="budget-and-goals.html">Ngân sách &amp; mục tiêu</a></li>
+        <li><a href="accounts.html" aria-current="page">Tài khoản</a></li>
+        <li><a href="savings.html">Tiết kiệm</a></li>
+        <li><a href="funds.html">Quỹ &amp; vàng</a></li>
+        <li><a href="system-design.html">Thiết kế hệ thống</a></li>
+        <li><a href="bank-transaction-auto-note-research.html">Nghiên cứu</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
+      </ul>
+    </nav>
+
+    <header class="hero">
+      <p class="eyebrow">MonMon / Tài khoản</p>
+      <h1>Quản lý tài khoản: số dư là kết quả, không phải ô nhập</h1>
+      <p class="lede">Mỗi tài khoản chỉ nhận đúng một con số nhập tay là số dư mở đầu. Từ thời điểm đó, số dư khả dụng luôn được suy ra từ các bản ghi có ngày. Tài liệu này mô tả công thức số dư, cách các nhóm tài sản được tổng hợp thành tài sản ròng, và cách mười hai tháng lịch sử được tái dựng.</p>
+    </header>
+
+    <section id="ban-do">
+      <p class="section-kicker">01 — Bản đồ</p>
+      <h2>Màn hình Tài sản là lớp tổng hợp, không phải bản sao của các danh sách</h2>
+      <p><code>WealthView</code> trình bày toàn bộ tài sản trong một khung hình: vòng phân bổ, đường tăng trưởng, rồi ba khối tóm tắt cho tài khoản, đầu tư và nợ. Mọi chi tiết nằm sâu hơn đúng một lớp điều hướng. Mỗi hàng tóm tắt mang theo một <em>route</em> thay vì mang theo màn hình đích: hàng nằm trong một lazy stack được dựng lại mỗi khi các con số phía trên thay đổi, nên một màn hình đích gắn trực tiếp vào hàng sẽ bị gỡ khỏi ngăn xếp cùng với nó.</p>
+
+      <figure>
+        <span class="fig-label">Hình 1 — Cấu trúc màn hình</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 430" role="img" aria-label="Sơ đồ cấu trúc màn hình Tài sản">
+            <rect class="s-box-accent" x="340" y="14" width="220" height="46" rx="10"/>
+            <text class="s-t" x="450" y="34" text-anchor="middle">Tab Tài sản</text>
+            <text class="s-mono" x="450" y="50" text-anchor="middle">WealthView</text>
+
+            <path class="s-line" d="M450 60 L450 78 M200 78 L700 78 M200 78 L200 96 M700 78 L700 96"/>
+            <path class="s-line" d="M450 78 L450 168"/>
+
+            <rect class="s-box" x="60" y="96" width="280" height="56" rx="10"/>
+            <text class="s-t" x="200" y="118" text-anchor="middle">Vòng phân bổ tài sản</text>
+            <text class="s-mono" x="200" y="136" text-anchor="middle">AssetAllocationCard</text>
+
+            <rect class="s-box" x="560" y="96" width="280" height="56" rx="10"/>
+            <text class="s-t" x="700" y="118" text-anchor="middle">Đường tăng trưởng 12 tháng</text>
+            <text class="s-mono" x="700" y="136" text-anchor="middle">AssetGrowthCard</text>
+
+            <rect class="s-box" x="30" y="168" width="250" height="50" rx="10"/>
+            <text class="s-t" x="155" y="190" text-anchor="middle">Tài khoản</text>
+            <text class="s-t3" x="155" y="207" text-anchor="middle">tiền mặt · ngân hàng · thẻ tín dụng</text>
+
+            <rect class="s-box" x="325" y="168" width="250" height="50" rx="10"/>
+            <text class="s-t" x="450" y="190" text-anchor="middle">Đầu tư</text>
+            <text class="s-t3" x="450" y="207" text-anchor="middle">tiền đã chuyển sang tài sản khác</text>
+
+            <rect class="s-box" x="620" y="168" width="250" height="50" rx="10"/>
+            <text class="s-t" x="745" y="190" text-anchor="middle">Nợ</text>
+            <text class="s-t3" x="745" y="207" text-anchor="middle">đi vay · cho vay</text>
+
+            <path class="s-line" d="M450 152 L450 168"/>
+            <path class="s-line-soft" d="M155 218 L155 250 M450 218 L450 250 M745 218 L745 250"/>
+
+            <text class="s-t3" x="450" y="243" text-anchor="middle">một lần push — AppRoute</text>
+
+            <rect class="s-box-plain" x="30" y="250" width="250" height="60" rx="10"/>
+            <text class="s-t2" x="155" y="276" text-anchor="middle">AccountsScreen</text>
+            <text class="s-t3" x="155" y="294" text-anchor="middle">số dư suy ra, không nhập tay</text>
+
+            <rect class="s-box-plain" x="325" y="250" width="250" height="152" rx="10"/>
+            <text class="s-t2" x="450" y="274" text-anchor="middle">InvestmentsScreen</text>
+            <rect class="s-box" x="345" y="288" width="210" height="30" rx="8"/>
+            <text class="s-t2" x="450" y="308" text-anchor="middle">Sổ tiết kiệm</text>
+            <rect class="s-box" x="345" y="324" width="210" height="30" rx="8"/>
+            <text class="s-t2" x="450" y="344" text-anchor="middle">Quỹ &amp; ETF</text>
+            <rect class="s-box" x="345" y="360" width="210" height="30" rx="8"/>
+            <text class="s-t2" x="450" y="380" text-anchor="middle">Vàng</text>
+
+            <rect class="s-box-plain" x="620" y="250" width="250" height="60" rx="10"/>
+            <text class="s-t2" x="745" y="276" text-anchor="middle">DebtDetailView</text>
+            <text class="s-t3" x="745" y="294" text-anchor="middle">gốc và các lần trả</text>
+          </svg>
+        </div>
+        <figcaption>Ba segment của <b>InvestmentsScreen</b> được chia theo cơ chế định giá, không theo cách nhóm cho gọn: sổ tiết kiệm trả lãi suất đã cam kết, chứng chỉ quỹ và ETF có giá thị trường, vàng có giá hai chiều do tiệm công bố. Nút thêm đổi theo segment đang mở, nên thao tác thêm luôn cách danh sách đúng một chạm.</figcaption>
+      </figure>
+    </section>
+
+    <section id="so-du">
+      <p class="section-kicker">02 — Số dư</p>
+      <h2>Số dư khả dụng được suy ra, không được lưu</h2>
+      <p><code>CashAccount.openingBalance</code> là mốc bắt đầu theo dõi và không bao giờ bị ghi đè. Mọi biến động sau đó đều là bản ghi có ngày ở một phân hệ khác, và số dư khả dụng là tổng của chúng. Không thành phần nào trong công thức có giá trị mặc định: một tham số bị bỏ sót sẽ làm số dư sai trong khi ứng dụng vẫn tin rằng đã kiểm tra đủ.</p>
+
+      <figure>
+        <span class="fig-label">Hình 2 — Công thức số dư khả dụng</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 330" role="img" aria-label="Các thành phần cấu thành số dư khả dụng của một tài khoản">
+            <rect class="s-box-accent" x="20" y="16" width="860" height="34" rx="8"/>
+            <text class="s-t" x="40" y="39">openingBalance — mốc bắt đầu theo dõi, không bao giờ bị ghi đè</text>
+
+            <g>
+              <text class="s-gain" x="34" y="83" font-size="18">+</text>
+              <text class="s-t2" x="70" y="83">thu và chi đã ghi nhận</text>
+              <text class="s-mono" x="880" y="83" text-anchor="end">TransactionSummary.netFlow</text>
+              <path class="s-line-soft" d="M20 96 L880 96"/>
+
+              <text x="34" y="123" class="s-gain" font-size="18">+</text>
+              <text class="s-t2" x="70" y="123">chuyển khoản nội bộ, cả hai chiều</text>
+              <text class="s-mono" x="880" y="123" text-anchor="end">TransferSummary.netFlow</text>
+              <path class="s-line-soft" d="M20 136 L880 136"/>
+
+              <text x="34" y="163" class="s-gain" font-size="18">+</text>
+              <text class="s-t2" x="70" y="163">tiền vay, tiền cho vay và các lần trả nợ</text>
+              <text class="s-mono" x="880" y="163" text-anchor="end">DebtSummary.netFlow</text>
+              <path class="s-line-soft" d="M20 176 L880 176"/>
+
+              <text x="34" y="203" class="s-gain" font-size="18">+</text>
+              <text class="s-t2" x="70" y="203">tiền bán chứng chỉ quỹ, ETF và vàng</text>
+              <text class="s-mono" x="880" y="203" text-anchor="end">FundSaleSummary.netFlow</text>
+              <path class="s-line-soft" d="M20 216 L880 216"/>
+
+              <text x="34" y="243" class="s-gain" font-size="18">+</text>
+              <text class="s-t2" x="70" y="243">tiền rút từ sổ tiết kiệm, gồm cả lãi thực nhận</text>
+              <text class="s-mono" x="880" y="243" text-anchor="end">SavingsWithdrawalSummary.netFlow</text>
+              <path class="s-line-soft" d="M20 256 L880 256"/>
+
+              <text x="34" y="283" class="s-loss" font-size="18">−</text>
+              <text class="s-t2" x="70" y="283">tiền đã gửi tiết kiệm và tiền đã mua tài sản, theo giá vốn gốc</text>
+              <text class="s-mono" x="880" y="283" text-anchor="end">fundedAmount</text>
+            </g>
+
+            <rect class="s-box-accent" x="20" y="296" width="860" height="34" rx="8"/>
+            <text class="s-t" x="40" y="319">= số dư khả dụng — con số mọi màn hình và mọi ràng buộc đều đọc</text>
+          </svg>
+        </div>
+        <figcaption><code>fundedAmount</code> luôn giữ nguyên giá vốn gốc của khoản đã mua, kể cả sau khi vị thế được bán hết. Phần tiền quay về được cộng riêng qua <code>FundSaleSummary.netFlow</code>, nên một vòng mua và bán trọn vẹn chỉ làm số dư đổi đúng phần lãi. Chi tiết ở <a href="funds.html#vong-tien">Quản lý quỹ, ETF và vàng</a>.</figcaption>
+      </figure>
+
+      <h3>Chỉ tài khoản tín dụng được phép âm</h3>
+      <p>Hệ thống phân biệt hai loại tài khoản. Tài khoản thường — tiền mặt và tài khoản ngân hàng — không được xuống dưới 0, vì tiền không tồn tại thì không chi được. Thẻ tín dụng được phép âm, và phần âm đó là dư nợ chứ không phải tài sản.</p>
+
+      <figure>
+        <span class="fig-label">Hình 3 — Hai loại tài khoản</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 220" role="img" aria-label="So sánh tài khoản thường và tài khoản tín dụng">
+            <rect class="s-box" x="20" y="20" width="410" height="180" rx="12"/>
+            <text class="s-t" x="44" y="52">Tài khoản thường</text>
+            <text class="s-mono" x="44" y="72">CashAccountKind.normal</text>
+            <text class="s-t3" x="44" y="98">tiền mặt · tài khoản ngân hàng</text>
+            <rect class="s-track" x="44" y="118" width="360" height="26" rx="6"/>
+            <rect class="s-cash" x="44" y="118" width="240" height="26" rx="6" opacity=".8"/>
+            <text class="s-t3" x="44" y="168">số dư khả dụng không được xuống dưới 0</text>
+            <text class="s-t3" x="44" y="186">form chặn ngay khi số dư nguồn không đủ</text>
+
+            <rect class="s-box" x="470" y="20" width="410" height="180" rx="12"/>
+            <text class="s-t" x="494" y="52">Thẻ tín dụng</text>
+            <text class="s-mono" x="494" y="72">CashAccountKind.credit</text>
+            <text class="s-t3" x="494" y="98">hạn mức 50.000.000 ₫ · dư nợ 8.000.000 ₫</text>
+            <rect class="s-track" x="494" y="118" width="360" height="26" rx="6"/>
+            <rect class="s-overdraft" x="494" y="118" width="58" height="26" rx="6" opacity=".8"/>
+            <text class="s-t3" x="494" y="168">hạn mức khả dụng = max(0, hạn mức + số dư) = 42.000.000 ₫</text>
+            <text class="s-t3" x="494" y="186">phần âm là nghĩa vụ phải trả, không phải tài sản</text>
+          </svg>
+        </div>
+        <figcaption>Hạn mức tín dụng là khả năng vay, không phải tiền của chủ sở hữu, nên nó không tham gia vào bất kỳ phép tính tài sản nào. Phần dư nợ được báo cáo ở nhóm nợ phải trả cùng với tiền đi vay.</figcaption>
+      </figure>
+    </section>
+
+    <section id="mo-hinh">
+      <p class="section-kicker">03 — Mô hình</p>
+      <h2>Sáu thực thể, liên kết bằng khoá ngoại phẳng</h2>
+      <p>Mọi liên kết đều là một <code>UUID</code> lưu phẳng và được join trong Swift. Ràng buộc này đến từ yêu cầu đồng bộ: schema phải chạy được trên CloudKit, mà CloudKit bắt mọi thuộc tính phải optional hoặc có giá trị mặc định, đồng thời không cho phép thuộc tính unique. Hệ quả cần chấp nhận là một <code>instrumentID</code> vẫn có thể trỏ tới bản ghi đã bị xoá, nên mọi nơi đọc nó đều phải xử lý trạng thái đó: <code>FundSummary.unpriced</code> liệt kê vị thế mất mã thay vì định giá nó theo một mức giá không tồn tại.</p>
+
+      <figure>
+        <span class="fig-label">Hình 4 — Khoá ngoại của phần Tài sản</span>
+        <div class="scroll">
+          <svg viewBox="0 0 920 400" role="img" aria-label="Sơ đồ quan hệ giữa các model tài sản">
+            <rect class="s-box-accent" x="30" y="160" width="180" height="76" rx="10"/>
+            <text class="s-t" x="120" y="188" text-anchor="middle">CashAccount</text>
+            <text class="s-mono" x="120" y="206" text-anchor="middle">openingBalance</text>
+            <text class="s-t3" x="120" y="224" text-anchor="middle">số dư suy ra hoàn toàn</text>
+
+            <rect class="s-box" x="350" y="30" width="200" height="70" rx="10"/>
+            <text class="s-t" x="450" y="56" text-anchor="middle">SavingsDeposit</text>
+            <text class="s-mono" x="450" y="74" text-anchor="middle">principal · rate · term</text>
+            <text class="s-t3" x="450" y="91" text-anchor="middle">bất biến sau khi mở</text>
+
+            <rect class="s-box" x="690" y="30" width="200" height="70" rx="10"/>
+            <text class="s-t" x="790" y="56" text-anchor="middle">SavingsWithdrawal</text>
+            <text class="s-mono" x="790" y="74" text-anchor="middle">principal · amountReceived</text>
+            <text class="s-t3" x="790" y="91" text-anchor="middle">có ngày, sửa và xoá được</text>
+
+            <rect class="s-box" x="350" y="160" width="200" height="70" rx="10"/>
+            <text class="s-t" x="450" y="186" text-anchor="middle">FundHolding</text>
+            <text class="s-mono" x="450" y="204" text-anchor="middle">units · averageCostPerUnit</text>
+            <text class="s-t3" x="450" y="221" text-anchor="middle">một lot, không bị ghi đè</text>
+
+            <rect class="s-box" x="690" y="160" width="200" height="70" rx="10"/>
+            <text class="s-t" x="790" y="186" text-anchor="middle">FundSale</text>
+            <text class="s-mono" x="790" y="204" text-anchor="middle">units · pricePerUnit</text>
+            <text class="s-t3" x="790" y="221" text-anchor="middle">giá bán đã chốt, không đổi</text>
+
+            <rect class="s-box" x="350" y="300" width="200" height="70" rx="10"/>
+            <text class="s-t" x="450" y="326" text-anchor="middle">FundInstrument</text>
+            <text class="s-mono" x="450" y="344" text-anchor="middle">symbol · price · priceAsOf</text>
+            <text class="s-t3" x="450" y="361" text-anchor="middle">một mã, đúng một giá</text>
+
+            <path class="s-line" d="M210 180 L280 180 L280 65 L350 65"/>
+            <text class="s-t3" x="288" y="120">sourceAccountID</text>
+
+            <path class="s-line" d="M210 200 L280 200 L280 195 L350 195"/>
+            <text class="s-t3" x="222" y="216">sourceAccountID</text>
+
+            <path class="s-line" d="M690 65 L640 65 L640 65 L550 65"/>
+            <text class="s-t3" x="578" y="55" text-anchor="middle">depositID</text>
+
+            <path class="s-line" d="M690 195 L550 195"/>
+            <text class="s-t3" x="620" y="186" text-anchor="middle">holdingID</text>
+
+            <path class="s-line" d="M450 300 L450 230"/>
+            <text class="s-t3" x="458" y="268">instrumentID</text>
+
+            <path class="s-dash" d="M790 100 L790 130 L250 130 L250 160"/>
+            <text class="s-t3" x="520" y="123" text-anchor="middle">destinationAccountID — tiền về ví</text>
+
+            <path class="s-dash" d="M890 195 L905 195 L905 260 L120 260 L120 236"/>
+            <text class="s-t3" x="520" y="275" text-anchor="middle">proceedsAccountID — tiền bán về ví</text>
+          </svg>
+        </div>
+        <figcaption>Nét liền là dòng tiền ra khỏi tài khoản, nét đứt là dòng tiền quay về. <b>Không</b> mũi tên nào là quan hệ SwiftData: tất cả đều là <code>UUID</code> phẳng, nên mọi đoạn mã đọc chúng đều phải xử lý được trường hợp bản ghi ở đầu kia đã bị xoá.</figcaption>
+      </figure>
+
+      <div class="grid-2">
+        <div class="card">
+          <span class="metric">Quy tắc 1</span>
+          <h4>Giá trị mở đầu không bao giờ bị ghi đè</h4>
+          <p><code>CashAccount.openingBalance</code>, <code>SavingsDeposit.principal</code> và <code>FundHolding.units</code> giữ nguyên trọn đời. Mọi biến động sau đó là một bản ghi độc lập có ngày. Đây là điều kiện để tái dựng số liệu tại bất kỳ thời điểm nào trong quá khứ.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="phan-bo">
+      <p class="section-kicker">04 — Phân bổ</p>
+      <h2>Vòng phân bổ và con số ở tâm luôn khớp nhau</h2>
+      <p><code>AssetAllocation</code> chia theo đúng các nhóm mà <code>AssetSummary.netWorth</code> cộng lại. Biểu đồ vành khuyên không biểu diễn được giá trị âm, và vẽ theo trị tuyệt đối sẽ khiến khoản nợ trông như tài sản; vì vậy tài khoản âm và tiền đi vay được đưa ra khỏi vòng rồi báo cáo riêng. Tiền cho vay thì ngược lại, vẫn có phần của nó: đây là tài sản chủ sở hữu có quyền đòi nhưng chưa sử dụng được, và bỏ nó ra sẽ làm vòng lệch khỏi con số ở tâm đúng bằng số tiền đã cho vay.</p>
+
+      <figure>
+        <span class="fig-label">Hình 5 — Vòng tài sản, và phần bị trừ ra</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 300" role="img" aria-label="Vòng phân bổ tài sản và các khoản nợ">
+            <g transform="rotate(-90 140 150)" fill="none" stroke-width="34">
+              <circle cx="140" cy="150" r="100" stroke="var(--w-savings)" stroke-dasharray="248.25 628.32" stroke-dashoffset="0"/>
+              <circle cx="140" cy="150" r="100" stroke="var(--w-gold)" stroke-dasharray="151.44 628.32" stroke-dashoffset="-248.25"/>
+              <circle cx="140" cy="150" r="100" stroke="var(--w-cash)" stroke-dasharray="148.95 628.32" stroke-dashoffset="-399.69"/>
+              <circle cx="140" cy="150" r="100" stroke="var(--w-funds)" stroke-dasharray="42.45 628.32" stroke-dashoffset="-548.64"/>
+              <circle cx="140" cy="150" r="100" stroke="var(--w-lent)" stroke-dasharray="37.24 628.32" stroke-dashoffset="-591.09"/>
+            </g>
+            <text class="s-t3" x="140" y="138" text-anchor="middle">tài sản ròng</text>
+            <text class="s-t" x="140" y="164" text-anchor="middle" font-size="20">448.200.000 ₫</text>
+
+            <g>
+              <rect class="s-savings" x="320" y="40" width="12" height="12" rx="3"/>
+              <text class="s-t2" x="344" y="51">Tiết kiệm — gốc còn lại</text>
+              <text class="s-mono" x="700" y="51" text-anchor="end">200.000.000</text>
+              <text class="s-t3" x="770" y="51" text-anchor="end">39,5%</text>
+
+              <rect class="s-gold" x="320" y="76" width="12" height="12" rx="3"/>
+              <text class="s-t2" x="344" y="87">Vàng — giá tiệm mua vào</text>
+              <text class="s-mono" x="700" y="87" text-anchor="end">122.000.000</text>
+              <text class="s-t3" x="770" y="87" text-anchor="end">24,1%</text>
+
+              <rect class="s-cash" x="320" y="112" width="12" height="12" rx="3"/>
+              <text class="s-t2" x="344" y="123">Tiền mặt — chỉ tài khoản dương</text>
+              <text class="s-mono" x="700" y="123" text-anchor="end">120.000.000</text>
+              <text class="s-t3" x="770" y="123" text-anchor="end">23,7%</text>
+
+              <rect class="s-funds" x="320" y="148" width="12" height="12" rx="3"/>
+              <text class="s-t2" x="344" y="159">Quỹ &amp; ETF — giá trị thị trường</text>
+              <text class="s-mono" x="700" y="159" text-anchor="end">34.200.000</text>
+              <text class="s-t3" x="770" y="159" text-anchor="end">6,8%</text>
+
+              <rect class="s-lent" x="320" y="184" width="12" height="12" rx="3"/>
+              <text class="s-t2" x="344" y="195">Cho vay — còn phải đòi</text>
+              <text class="s-mono" x="700" y="195" text-anchor="end">30.000.000</text>
+              <text class="s-t3" x="770" y="195" text-anchor="end">5,9%</text>
+
+              <path class="s-line-soft" d="M320 212 L780 212"/>
+              <text class="s-t2" x="344" y="232">Tổng tài sản vẽ được</text>
+              <text class="s-mono" x="700" y="232" text-anchor="end">506.200.000</text>
+
+              <rect class="s-borrowed" x="320" y="250" width="12" height="12" rx="3"/>
+              <text class="s-t2" x="344" y="261">Đi vay còn nợ</text>
+              <text class="s-mono" x="700" y="261" text-anchor="end">−50.000.000</text>
+
+              <rect class="s-overdraft" x="320" y="274" width="12" height="12" rx="3"/>
+              <text class="s-t2" x="344" y="285">Tài khoản âm · dư nợ thẻ</text>
+              <text class="s-mono" x="700" y="285" text-anchor="end">−8.000.000</text>
+            </g>
+          </svg>
+        </div>
+        <figcaption>Bất biến giữ hai phần khớp nhau: <code>netWorth == tổng các phần − nợ phải trả</code>. Cách định giá từng nhóm nằm ở <a href="savings.html">Quản lý tiết kiệm</a> và <a href="funds.html">Quản lý quỹ, ETF và vàng</a>. Hai nguồn nợ không chồng lấn: dư nợ thẻ tín dụng và khoản vay cá nhân là hai nghĩa vụ độc lập.</figcaption>
+      </figure>
+
+      <h3>Vì sao chuyển khoản, đi vay và trả nợ không làm thay đổi tài sản ròng</h3>
+      <figure>
+        <span class="fig-label">Hình 6 — Công thức tài sản ròng</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 210" role="img" aria-label="Công thức tài sản ròng theo từng thành phần">
+            <rect class="s-cash" x="20" y="30" width="180" height="60" rx="10" opacity=".2"/>
+            <text class="s-t" x="110" y="55" text-anchor="middle">tiền khả dụng</text>
+            <text class="s-t3" x="110" y="74" text-anchor="middle">mọi tài khoản, kể cả âm</text>
+
+            <text class="s-t" x="215" y="66" text-anchor="middle" font-size="20">+</text>
+
+            <rect class="s-savings" x="230" y="30" width="150" height="60" rx="10" opacity=".2"/>
+            <text class="s-t" x="305" y="55" text-anchor="middle">gốc tiết kiệm</text>
+            <text class="s-t3" x="305" y="74" text-anchor="middle">còn lại, không lãi</text>
+
+            <text class="s-t" x="395" y="66" text-anchor="middle" font-size="20">+</text>
+
+            <rect class="s-funds" x="410" y="30" width="180" height="60" rx="10" opacity=".2"/>
+            <text class="s-t" x="500" y="55" text-anchor="middle">giá trị thị trường</text>
+            <text class="s-t3" x="500" y="74" text-anchor="middle">quỹ · ETF · vàng</text>
+
+            <text class="s-t" x="605" y="66" text-anchor="middle" font-size="20">+</text>
+
+            <rect class="s-lent" x="620" y="30" width="120" height="60" rx="10" opacity=".2"/>
+            <text class="s-t" x="680" y="55" text-anchor="middle">cho vay</text>
+            <text class="s-t3" x="680" y="74" text-anchor="middle">còn phải đòi</text>
+
+            <text class="s-t" x="755" y="66" text-anchor="middle" font-size="20">−</text>
+
+            <rect class="s-borrowed" x="770" y="30" width="110" height="60" rx="10" opacity=".2"/>
+            <text class="s-t" x="825" y="55" text-anchor="middle">đi vay</text>
+            <text class="s-t3" x="825" y="74" text-anchor="middle">còn phải trả</text>
+
+            <rect class="s-box-plain" x="20" y="118" width="420" height="72" rx="10"/>
+            <text class="s-t2" x="40" y="144">Chuyển khoản nội bộ: 0</text>
+            <text class="s-t3" x="40" y="164">tiền ra khỏi ví này là tiền vào ví kia, cả hai đều đã nằm trong số hạng đầu</text>
+            <text class="s-t3" x="40" y="181">— cùng lý do, mua một vị thế cũng không đổi tổng: tiền chuyển thành đơn vị</text>
+
+            <rect class="s-box-plain" x="460" y="118" width="420" height="72" rx="10"/>
+            <text class="s-t2" x="480" y="144">Vay và trả nợ: 0</text>
+            <text class="s-t3" x="480" y="164">vay làm tiền mặt tăng và phần phải trả tăng bằng đúng số đó</text>
+            <text class="s-t3" x="480" y="181">— chỉ khoản nợ ghi nhận mà không gắn tài khoản mới làm giảm con số này, và điều đó là đúng</text>
+          </svg>
+        </div>
+        <figcaption>Tiền cho vay được tính theo phần <b>còn phải đòi</b>, trong khi sổ tiết kiệm được tính theo <b>gốc</b>. Hai cách tính này không mâu thuẫn: gốc sổ nằm nguyên tới ngày đáo hạn, còn phần khoản vay đã hoàn trả thì đã nằm trong tiền mặt, nên ghi nhận cả hai là đếm hai lần. Lãi dự kiến được loại khỏi cả hai chỉ tiêu.</figcaption>
+      </figure>
+    </section>
+
+    <section id="lich-su">
+      <p class="section-kicker">05 — Lịch sử</p>
+      <h2>Mười hai tháng được tái dựng từ các bản ghi có ngày</h2>
+      <p>Store không lưu bảng lịch sử. <code>AssetHistory</code> lấy mốc cuối mỗi tháng, lọc dữ liệu xuống những bản ghi đã tồn tại tính đến mốc đó, rồi chạy lại đúng công thức tài sản ròng. Đường tổng và các dải thành phần cùng đọc từ một tập dữ liệu đã lọc, nên không thể lệch nhau ở bất kỳ tháng nào.</p>
+
+      <figure>
+        <span class="fig-label">Hình 7 — Tài sản ròng 12 tháng gần nhất</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 300" role="img" aria-label="Đường tài sản ròng 12 tháng">
+            <path class="s-line-soft" d="M60 230 L860 230 M60 174 L860 174 M60 118 L860 118 M60 62 L860 62"/>
+            <text class="s-t3" x="20" y="234">150tr</text>
+            <text class="s-t3" x="20" y="178">250tr</text>
+            <text class="s-t3" x="20" y="122">350tr</text>
+            <text class="s-t3" x="20" y="66">450tr</text>
+
+            <polyline class="s-line" style="stroke: var(--docs-accent); stroke-width: 2.5"
+              points="60,207 133,199 205,195 278,179 351,169 424,167 496,151 569,140 642,135 715,116 787,88 860,62"/>
+            <g fill="var(--docs-accent)">
+              <circle cx="60" cy="207" r="3.5"/><circle cx="133" cy="199" r="3.5"/>
+              <circle cx="205" cy="195" r="3.5"/><circle cx="278" cy="179" r="3.5"/>
+              <circle cx="351" cy="169" r="3.5"/><circle cx="424" cy="167" r="3.5"/>
+              <circle cx="496" cy="151" r="3.5"/><circle cx="569" cy="140" r="3.5"/>
+              <circle cx="642" cy="135" r="3.5"/><circle cx="715" cy="116" r="3.5"/>
+              <circle cx="787" cy="88" r="3.5"/><circle cx="860" cy="62" r="5"/>
+            </g>
+            <text class="s-t" x="860" y="46" text-anchor="end">448,2tr</text>
+
+            <text class="s-t3" x="60" y="250">cuối mỗi tháng · tối đa 12 mốc · mốc cuối là bây giờ</text>
+
+            <rect class="s-box-plain" x="60" y="262" width="800" height="30" rx="8"/>
+            <text class="s-mono" x="76" y="282">accounts · deposits · withdrawals · holdings · transactions · transfers · debts · payments · sales &nbsp;⟶&nbsp; lọc theo ngày ≤ mốc</text>
+          </svg>
+        </div>
+        <figcaption>Việc ghi mỗi lần bán thành một bản ghi riêng có ngày là điều kiện để cơ chế này chạy đúng: một tháng kết thúc trước khi vị thế được đóng vẫn thể hiện vị thế đang nắm giữ. Nếu việc bán làm giảm <code>units</code> của lot, mọi tháng trong quá khứ sẽ bị tính lại như thể vị thế chưa từng có quy mô đó.</figcaption>
+      </figure>
+
+      <div class="callout warn">
+        <b>Giới hạn đã biết.</b> Store không lưu giá lịch sử, nên vị thế quỹ và vàng ở mọi mốc quá khứ đều được định giá theo mức giá <em>hiện tại</em> trong danh mục. Đường biểu diễn phản ánh đúng ngày của các giao dịch mua, bán và dòng tiền, nhưng không phải là bản tái dựng giá thị trường của từng tháng.
+      </div>
+    </section>
+
+    <section id="ranh-gioi">
+      <p class="section-kicker">06 — Ranh giới</p>
+      <h2>Phạm vi loại trừ có chủ đích</h2>
+      <p>Danh sách những gì hệ thống từ chối làm với số dư thường mô tả sản phẩm chính xác hơn danh sách tính năng.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Không làm</th><th>Vì sao</th><th>Thay vào đó</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Sửa số dư bằng tay</td>
+              <td>Một số dư nhập tay tạo ra nguồn dữ liệu thứ hai và sẽ lệch khỏi sổ.</td>
+              <td>Mọi số dư được suy ra từ giá trị mở đầu cộng các bản ghi có ngày.</td>
+            </tr>
+            <tr>
+              <td>Cho tài khoản thường xuống âm</td>
+              <td>Tiền không tồn tại thì không chi được; chỉ hạn mức tín dụng mới là khả năng vay hợp lệ.</td>
+              <td>Form kiểm tra trên số dư khả dụng đã suy ra; riêng thẻ tín dụng được phép âm.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>
+      <p>Số liệu trong các hình là ví dụ minh hoạ cho công thức, không phải dữ liệu thật.</p>
+      <p>Tài liệu liên quan: <a href="savings.html">Quản lý tiết kiệm</a>, <a href="funds.html">Quản lý quỹ, ETF và vàng</a>, <a href="budget-and-goals.html">Ngân sách &amp; mục tiêu</a>, <a href="architecture.html">Architecture</a>.</p>
+    </footer>
+  </main>
+</body>
+</html>

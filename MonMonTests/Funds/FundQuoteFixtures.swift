@@ -138,6 +138,41 @@ enum FundQuoteFixtures {
         {"name":"VESAF","symbol":"VESAF","exchange-traded":"HOSE","exchange-listed":"HOSE",
          "session":"0900-1500","description":"VINACAPITAL VN100 ETF","type":"IFC"}
         """
+
+    /// `GET /dchart/search?query=FUE...`, trimmed to two listed ETFs and rows
+    /// that look similar but must not enter the catalogue.
+    static let vndirectSearchFUE = """
+        [
+          {"symbol":"FUEVFVND","full_name":"FUEVFVND",
+           "description":"Quỹ ETF DCVFMVN DIAMOND","exchange":"HOSE",
+           "type":"QUỸ HOÁN ĐỔI DM"},
+          {"symbol":"FUESSVFL","full_name":"FUESSVFL",
+           "description":"SSIAM VNFIN LEAD","exchange":"HOSE",
+           "type":"QUỸ HOÁN ĐỔI DM"},
+          {"symbol":"FUCVREIT","full_name":"FUCVREIT",
+           "description":"Quỹ BĐS Techcom VN","exchange":"HOSE",
+           "type":"CHỨNG CHỈ QUỸ"},
+          {"symbol":"FUEHNX30","full_name":"FUEHNX30",
+           "description":"ETF on another exchange","exchange":"HNX",
+           "type":"QUỸ HOÁN ĐỔI DM"}
+        ]
+        """
+
+    /// The `E1` family currently contains HOSE's original ETF ticker. A
+    /// duplicate proves the combined catalogue is stable when families overlap.
+    static let vndirectSearchE1 = """
+        [
+          {"symbol":"E1VFVN30","full_name":"E1VFVN30",
+           "description":"Quỹ ETF DCVFMVN30","exchange":"HOSE",
+           "type":"QUỸ HOÁN ĐỔI DM"},
+          {"symbol":"FUEVFVND","full_name":"FUEVFVND",
+           "description":"Quỹ ETF DCVFMVN DIAMOND","exchange":"HOSE",
+           "type":"QUỸ HOÁN ĐỔI DM"},
+          {"symbol":"E12","full_name":"E12",
+           "description":"Xây dựng điện VNECO12","exchange":"UPCOM",
+           "type":"CỔ PHIẾU"}
+        ]
+        """
 }
 
 /// Serves recorded replies, and records what was asked for so a test can assert

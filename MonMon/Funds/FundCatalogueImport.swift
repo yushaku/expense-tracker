@@ -10,6 +10,18 @@ import SwiftData
 @MainActor
 @Observable
 final class FundCatalogueImport {
+    struct ImportFailure: Equatable, Sendable {
+        let symbol: String
+        let error: FundQuoteError
+    }
+
+    struct ImportResult: Equatable, Sendable {
+        let addedSymbols: [String]
+        let failures: [ImportFailure]
+
+        var addedCount: Int { addedSymbols.count }
+    }
+
     enum Phase: Equatable {
         case idle
         case loading
@@ -124,18 +136,32 @@ final class FundCatalogueImport {
     /// Fmarket; one it did not is written at zero with automatic quotes on, so
     /// the next Refresh fills it in rather than the owner having to.
     ///
-    /// - Returns: how many were added.
+    /// ETF catalogue rows carry identity but no price. They are quoted in
+    /// bounded batches before insertion, and a failed symbol is reported rather
+    /// than written at zero. Other catalogue providers keep their listing data.
     @discardableResult
     func importing(
         _ chosen: [FundInstrumentCandidate],
         into context: ModelContext,
         existing: [FundInstrument],
         createdAt: Date = .now
-    ) throws -> Int {
-        var catalogue = existing
-        var added = 0
+    ) async throws -> ImportResult {
+        var reservedSymbols = Set(existing.map { $0.symbol.uppercased() })
+        var candidates: [FundInstrumentCandidate] = []
 
         for candidate in chosen {
+            let symbol = candidate.symbol.uppercased()
+            guard reservedSymbols.insert(symbol).inserted else {
+                continue
+            }
+            candidates.append(candidate)
+        }
+
+        let resolved = await resolveETFQuotes(for: candidates, asOf: createdAt)
+        var catalogue = existing
+        var addedSymbols: [String] = []
+
+        for candidate in resolved.candidates {
             let symbol = candidate.symbol.uppercased()
             guard catalogue.matching(symbol: symbol) == nil else {
                 continue
@@ -160,15 +186,124 @@ final class FundCatalogueImport {
             )
             context.insert(instrument)
             catalogue.append(instrument)
-            added += 1
+            addedSymbols.append(symbol)
         }
 
-        if added > 0 {
+        if !addedSymbols.isEmpty {
             try context.save()
         }
 
-        alreadyHeld.formUnion(chosen.map { $0.symbol.uppercased() })
-        return added
+        alreadyHeld.formUnion(addedSymbols)
+        return ImportResult(addedSymbols: addedSymbols, failures: resolved.failures)
+    }
+
+    private static let maximumConcurrentQuotes = 4
+
+    private enum QuoteOutcome: Sendable {
+        case candidate(FundInstrumentCandidate)
+        case failure(ImportFailure)
+    }
+
+    private struct QuoteAttempt: Sendable {
+        let index: Int
+        let outcome: QuoteOutcome
+    }
+
+    private func resolveETFQuotes(
+        for candidates: [FundInstrumentCandidate],
+        asOf: Date
+    ) async -> (candidates: [FundInstrumentCandidate], failures: [ImportFailure]) {
+        guard provider.source == .vndirect else {
+            return (candidates, [])
+        }
+
+        let indexed = Array(candidates.enumerated())
+        let quoteProvider = provider
+        var attempts: [QuoteAttempt] = []
+
+        for start in stride(
+            from: 0,
+            to: indexed.count,
+            by: Self.maximumConcurrentQuotes
+        ) {
+            let end = min(start + Self.maximumConcurrentQuotes, indexed.count)
+            await withTaskGroup(of: QuoteAttempt.self) { group in
+                for (index, candidate) in indexed[start..<end] {
+                    group.addTask {
+                        do {
+                            let quote = try await quoteProvider.latestQuote(
+                                symbol: candidate.symbol,
+                                asOf: asOf
+                            )
+                            guard quote.symbol.uppercased() == candidate.symbol.uppercased() else {
+                                return QuoteAttempt(
+                                    index: index,
+                                    outcome: .failure(
+                                        ImportFailure(
+                                            symbol: candidate.symbol,
+                                            error: .decoding
+                                        )
+                                    )
+                                )
+                            }
+                            return QuoteAttempt(
+                                index: index,
+                                outcome: .candidate(candidate.with(quote: quote))
+                            )
+                        } catch let error as FundQuoteError {
+                            return QuoteAttempt(
+                                index: index,
+                                outcome: .failure(
+                                    ImportFailure(symbol: candidate.symbol, error: error)
+                                )
+                            )
+                        } catch {
+                            return QuoteAttempt(
+                                index: index,
+                                outcome: .failure(
+                                    ImportFailure(
+                                        symbol: candidate.symbol,
+                                        error: .transport
+                                    )
+                                )
+                            )
+                        }
+                    }
+                }
+
+                for await attempt in group {
+                    attempts.append(attempt)
+                }
+            }
+        }
+
+        attempts.sort { $0.index < $1.index }
+        var quotedCandidates: [FundInstrumentCandidate] = []
+        var failures: [ImportFailure] = []
+        for attempt in attempts {
+            switch attempt.outcome {
+            case .candidate(let candidate):
+                quotedCandidates.append(candidate)
+            case .failure(let failure):
+                failures.append(failure)
+            }
+        }
+        return (quotedCandidates, failures)
+    }
+}
+
+private extension FundInstrumentCandidate {
+    func with(quote: FundQuote) -> FundInstrumentCandidate {
+        FundInstrumentCandidate(
+            symbol: symbol,
+            name: name,
+            kind: kind,
+            pricePerUnit: quote.pricePerUnit,
+            askPricePerUnit: quote.askPricePerUnit,
+            priceAsOf: quote.asOf,
+            owner: owner,
+            logoURL: logoURL
+        )
     }
 }
 

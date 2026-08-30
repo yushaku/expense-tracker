@@ -4,9 +4,10 @@ import Foundation
 ///
 /// A TradingView UDF endpoint: plain GET, no authentication, no service level
 /// and no licence to reuse the data. Verified working on 2026-08-21.
-struct VNDirectQuoteProvider: FundQuoteProvider {
+struct VNDirectQuoteProvider: FundCatalogueProvider {
     static let historyURL = URL.constant("https://dchart-api.vndirect.com.vn/dchart/history")
     static let symbolsURL = URL.constant("https://dchart-api.vndirect.com.vn/dchart/symbols")
+    static let searchURL = URL.constant("https://dchart-api.vndirect.com.vn/dchart/search")
 
     /// Closes are quoted in thousands of đồng: `34.2` is 34,200 ₫.
     static let priceScale: Decimal = 1_000
@@ -83,6 +84,71 @@ struct VNDirectQuoteProvider: FundQuoteProvider {
         return [FundInstrumentCandidate(symbol: wanted, name: name, kind: .etf)]
     }
 
+    /// Every currently listed HOSE ETF that VNDIRECT's symbol search offers.
+    ///
+    /// The endpoint refuses an empty query, so the catalogue combines the two
+    /// ticker families HOSE uses: modern `FUE…` symbols and the original
+    /// `E1VFVN30`. Classification is accepted here because this is a provider
+    /// catalogue boundary; the exact-symbol search above still treats the
+    /// owner's selected kind as authoritative.
+    func catalogue() async throws -> [FundInstrumentCandidate] {
+        async let fue = catalogue(matching: "FUE")
+        async let e1 = catalogue(matching: "E1")
+
+        let combined = try await fue + e1
+        var candidatesBySymbol: [String: FundInstrumentCandidate] = [:]
+        for candidate in combined {
+            candidatesBySymbol[candidate.symbol] = candidate
+        }
+        return candidatesBySymbol.values.sorted { $0.symbol < $1.symbol }
+    }
+
+    private func catalogue(matching query: String) async throws
+        -> [FundInstrumentCandidate]
+    {
+        let rows = try JSONReader.array(
+            try await transport.json(catalogueSearchRequest(query: query))
+        )
+
+        return try rows.compactMap { value in
+            let row = try JSONReader.object(value)
+            let exchange = try JSONReader.string(row["exchange"])
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .uppercased()
+            let type = try JSONReader.string(row["type"])
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .uppercased()
+
+            guard exchange == "HOSE", type == "QUỸ HOÁN ĐỔI DM" else {
+                return nil
+            }
+
+            let symbol = try JSONReader.string(row["symbol"])
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .uppercased()
+            let name = try JSONReader.string(row["description"])
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !symbol.isEmpty, !name.isEmpty else {
+                throw FundQuoteError.decoding
+            }
+
+            return FundInstrumentCandidate(symbol: symbol, name: name, kind: .etf)
+        }
+    }
+
+    private func catalogueSearchRequest(query: String) -> URLRequest {
+        let url = Self.searchURL.appending(queryItems: [
+            URLQueryItem(name: "query", value: query),
+            URLQueryItem(name: "type", value: ""),
+            URLQueryItem(name: "exchange", value: "HOSE"),
+            URLQueryItem(name: "limit", value: "100"),
+        ])
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        return request
+    }
+
     private func historyRequest(symbol: String, asOf: Date) -> URLRequest {
         let calendar = TradingCalendar.calendar
         let to = calendar.startOfDay(for: asOf).addingTimeInterval(24 * 60 * 60)
@@ -99,7 +165,6 @@ struct VNDirectQuoteProvider: FundQuoteProvider {
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
         return request
     }
 }

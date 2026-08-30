@@ -1,6 +1,25 @@
 import SwiftData
 import SwiftUI
 
+struct FundInstrumentImportOption: Identifiable {
+    let source: FundQuoteSource
+
+    var id: String { source.rawValue }
+
+    var sheetTitle: LocalizedStringKey {
+        switch source {
+        case .fmarket:
+            "Add from Fmarket"
+        case .vndirect:
+            "Add from VNDIRECT"
+        case .vangToday:
+            "Add Gold from vang.today"
+        case .manual:
+            "Add instrument"
+        }
+    }
+}
+
 enum FundInstrumentListScope: String, Identifiable {
     case all
     case funds
@@ -21,16 +40,18 @@ enum FundInstrumentListScope: String, Identifiable {
 
     var defaultKind: FundInstrumentKind { kinds[0] }
 
-    var importSource: FundQuoteSource {
+    var importOptions: [FundInstrumentImportOption] {
         switch self {
-        case .all, .funds:
-            .fmarket
+        case .all:
+            [.init(source: .fmarket), .init(source: .vndirect), .init(source: .vangToday)]
+        case .funds:
+            [.init(source: .fmarket), .init(source: .vndirect)]
         case .gold:
-            .vangToday
+            [.init(source: .vangToday)]
         }
     }
 
-    var title: String {
+    var title: LocalizedStringKey {
         switch self {
         case .all:
             "Instruments"
@@ -41,21 +62,25 @@ enum FundInstrumentListScope: String, Identifiable {
         }
     }
 
-    var emptyDescription: String {
+    var emptyDescription: LocalizedStringKey {
         switch self {
         case .all, .funds:
-            "Add from Fmarket to import open-ended funds with their NAV, or add one by hand."
+            "Import open-ended funds from Fmarket or listed ETFs from VNDIRECT, or add one by hand."
         case .gold:
             "Add from vang.today to import gold products with shop prices, or add one by hand."
         }
     }
 
     @MainActor
-    func makeImporter() -> FundCatalogueImport {
-        switch importSource {
+    func makeImporter(source: FundQuoteSource) -> FundCatalogueImport {
+        switch source {
+        case .fmarket:
+            FundCatalogueImport(provider: FmarketQuoteProvider())
+        case .vndirect:
+            FundCatalogueImport(provider: VNDirectQuoteProvider())
         case .vangToday:
             FundCatalogueImport(provider: VangTodayQuoteProvider())
-        case .manual, .fmarket, .vndirect:
+        case .manual:
             FundCatalogueImport()
         }
     }
@@ -85,7 +110,7 @@ struct FundInstrumentListView: View {
 
     @State private var editorMode: FundInstrumentEditorMode?
     @State private var refresher = FundPriceRefresher()
-    @State private var isImporting = false
+    @State private var importSource: FundQuoteSource?
     @State private var fmarketPage: WebPage?
 
     let scope: FundInstrumentListScope
@@ -141,10 +166,11 @@ struct FundInstrumentListView: View {
             .appSheet(item: $editorMode) { mode in
                 FundInstrumentEditorView(mode: mode, kinds: scope.kinds)
             }
-            .appSheet(isPresented: $isImporting) {
+            .appSheet(item: $importSource) { source in
+                let option = FundInstrumentImportOption(source: source)
                 FundCatalogueImportView(
-                    title: "Add from \(scope.importSource.displayName)",
-                    importer: scope.makeImporter()
+                    title: option.sheetTitle,
+                    importer: scope.makeImporter(source: source)
                 )
             }
             .webPage($fmarketPage)
@@ -297,13 +323,13 @@ struct FundInstrumentListView: View {
         .accessibilityIdentifier("open-fmarket-\(symbol.lowercased())")
     }
 
-    /// Refresh and the two ways of adding an instrument, in the content rather than the
-    /// toolbar. macOS collapses a toolbar's extra primary actions into an
+    /// Refresh, direct imports, and manual add stay in the content rather than
+    /// the toolbar. macOS collapses extra primary toolbar actions into an
     /// overflow, which is how Refresh managed to ship invisible.
     ///
-    /// One row, three equal shares, short labels: spelled out in full the three
-    /// wrapped to three stacked rows on an iPhone and cost more height than the
-    /// first fund card. The full wording stays in the accessibility labels.
+    /// Refresh and manual add use icons so each provider can have its own import
+    /// button without wrapping the row. Full wording stays available to
+    /// accessibility technologies.
     private var actionBar: some View {
         HStack(spacing: 8) {
             actionButton(
@@ -311,26 +337,30 @@ struct FundInstrumentListView: View {
                 systemImage: "arrow.clockwise",
                 accessibilityLabel: "Refresh prices",
                 identifier: "refresh-quotes",
-                isProminent: true
+                isProminent: true,
+                showsTitle: false
             ) {
                 refresh()
             }
             .disabled(refresher.isRunning || !canRefresh)
 
-            actionButton(
-                title: scope.importSource.displayName,
-                systemImage: "square.and.arrow.down",
-                accessibilityLabel: "Add from \(scope.importSource.displayName(in: locale))",
-                identifier: scope == .gold ? "import-from-vang-today" : "import-from-fmarket"
-            ) {
-                isImporting = true
+            ForEach(scope.importOptions) { option in
+                actionButton(
+                    title: option.source.displayName,
+                    systemImage: "square.and.arrow.down",
+                    accessibilityLabel: option.sheetTitle,
+                    identifier: "import-from-\(option.source.rawValue)"
+                ) {
+                    importSource = option.source
+                }
             }
 
             actionButton(
                 title: "Add",
                 systemImage: "plus",
                 accessibilityLabel: "Add by hand",
-                identifier: "add-instrument"
+                identifier: "add-instrument",
+                showsTitle: false
             ) {
                 editorMode = .add
             }
@@ -340,33 +370,40 @@ struct FundInstrumentListView: View {
     private func actionButton(
         title: LocalizedStringKey,
         systemImage: String,
-        accessibilityLabel: String,
+        accessibilityLabel: LocalizedStringKey,
         identifier: String,
         isProminent: Bool = false,
+        showsTitle: Bool = true,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
-            Label(title, systemImage: systemImage)
-                .font(.subheadline.weight(.semibold))
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 11)
-                .frame(maxWidth: .infinity)
-                .background {
-                    if isProminent {
-                        Capsule().fill(MonMonTheme.accent.opacity(0.16))
-                    } else {
-                        Capsule()
-                            .fill(MonMonTheme.surface)
-                            .overlay(Capsule().stroke(MonMonTheme.border, lineWidth: 1))
-                    }
+            Group {
+                if showsTitle {
+                    Label(title, systemImage: systemImage)
+                } else {
+                    Image(systemName: systemImage)
                 }
-                .contentShape(Capsule())
+            }
+            .font(.subheadline.weight(.semibold))
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 11)
+            .frame(maxWidth: .infinity)
+            .background {
+                if isProminent {
+                    Capsule().fill(MonMonTheme.accent.opacity(0.16))
+                } else {
+                    Capsule()
+                        .fill(MonMonTheme.surface)
+                        .overlay(Capsule().stroke(MonMonTheme.border, lineWidth: 1))
+                }
+            }
+            .contentShape(Capsule())
         }
         .buttonStyle(.plain)
         .foregroundStyle(isProminent ? MonMonTheme.accent : MonMonTheme.textPrimary)
-        .accessibilityLabel(accessibilityLabel)
+        .accessibilityLabel(Text(accessibilityLabel))
         .accessibilityIdentifier(identifier)
     }
 
