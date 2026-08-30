@@ -3,10 +3,49 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Cách MonMon chia thu nhập vào hũ ngân sách, cách mục tiêu để dành bên trong hũ, và những gì ứng dụng cố tình không làm.">
+  <meta name="description" content="Cách MonMon chia thu nhập vào hũ ngân sách, cách mục tiêu để dành bên trong hũ, và những gì ứng dụng cố tình không làm — kèm sơ đồ và biểu đồ.">
   <link rel="stylesheet" href="assets/monmon-docs.css">
   <title>MonMon — Ngân sách và mục tiêu</title>
   <style>
+    /* Màu hũ lấy đúng bảng màu Catppuccin mà ứng dụng đang dùng:
+       Latte cho nền sáng, Frappé cho nền tối. */
+    :root {
+      --jar-necessities: #1e66f5;
+      --jar-investment: #8839ef;
+      --jar-education: #179299;
+      --jar-savings: #df8e1d;
+      --jar-play: #ea76cb;
+      --jar-giving: #fe640b;
+      --jar-empty: var(--docs-surface-3);
+      --plane-plan: #8839ef;
+      --plane-real: #179299;
+      --chart-track: var(--docs-surface-3);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --jar-necessities: #8caaee;
+        --jar-investment: #ca9ee6;
+        --jar-education: #81c8be;
+        --jar-savings: #e5c890;
+        --jar-play: #f4b8e4;
+        --jar-giving: #ef9f76;
+        --plane-plan: #ca9ee6;
+        --plane-real: #81c8be;
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --jar-necessities: #8caaee;
+      --jar-investment: #ca9ee6;
+      --jar-education: #81c8be;
+      --jar-savings: #e5c890;
+      --jar-play: #f4b8e4;
+      --jar-giving: #ef9f76;
+      --plane-plan: #ca9ee6;
+      --plane-real: #81c8be;
+    }
+
     .page {
       width: min(1040px, calc(100% - var(--docs-page-gutter) - var(--docs-page-gutter)));
       margin: 0 auto;
@@ -18,7 +57,7 @@
 
     .hero { max-width: 840px; }
 
-    .eyebrow, .label, .step-label {
+    .eyebrow, .label, .fig-label {
       font-family: var(--docs-mono);
       font-size: var(--docs-type-xs);
       letter-spacing: .08em;
@@ -67,6 +106,146 @@
     .card li + li { margin-top: var(--docs-space-1); }
     .card .label { display: block; margin-bottom: var(--docs-space-2); color: var(--docs-muted); }
 
+    /* ---- khung hình vẽ dùng chung ---- */
+
+    figure {
+      margin-top: var(--docs-space-5);
+      padding: var(--docs-space-5);
+      background: var(--docs-surface);
+      border: 1px solid var(--docs-border);
+      border-radius: var(--docs-radius-lg);
+    }
+
+    figure .fig-label { display: block; margin-bottom: var(--docs-space-1); color: var(--docs-muted); }
+    figure h3 { margin-bottom: var(--docs-space-2); font-size: var(--docs-type-lg); letter-spacing: -.01em; }
+    figure > p { max-width: 72ch; color: var(--docs-text-2); font-size: var(--docs-type-md); }
+    figcaption { margin-top: var(--docs-space-4); color: var(--docs-muted); font-size: var(--docs-type-sm); }
+    figcaption strong { color: var(--docs-text-2); }
+
+    .fig-scroll { margin-top: var(--docs-space-4); overflow-x: auto; }
+    .fig-scroll svg { display: block; height: auto; }
+
+    /* ---- sơ đồ SVG ---- */
+
+    .diagram { font-family: var(--docs-sans); }
+    .diagram .box { fill: var(--docs-surface-2); stroke: var(--docs-border-strong); stroke-width: 1; }
+    .diagram .box-plan { fill: color-mix(in srgb, var(--plane-plan) 12%, var(--docs-surface)); stroke: var(--plane-plan); }
+    .diagram .box-real { fill: color-mix(in srgb, var(--plane-real) 12%, var(--docs-surface)); stroke: var(--plane-real); }
+    .diagram .box-decide { fill: var(--docs-surface); stroke: var(--docs-accent); stroke-width: 1.5; }
+    .diagram .box-out { fill: var(--docs-accent-soft); stroke: var(--docs-accent); }
+    .diagram .box-stop { fill: var(--docs-danger-soft); stroke: var(--docs-danger); }
+    .diagram .plane { fill: none; stroke: var(--docs-border); stroke-width: 1; stroke-dasharray: 5 5; }
+    .diagram .t { fill: var(--docs-text); font-size: 13px; }
+    .diagram .t-strong { fill: var(--docs-text); font-size: 13.5px; font-weight: 650; }
+    .diagram .t-muted { fill: var(--docs-muted); font-size: 11px; }
+    .diagram .t-mono { fill: var(--docs-muted); font-family: var(--docs-mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; }
+    .diagram .edge { fill: none; stroke: var(--docs-edge); stroke-width: 1.6; marker-end: url(#tip); }
+    .diagram .edge-yes { stroke: var(--docs-success); marker-end: url(#tip-yes); }
+    .diagram .edge-no { stroke: var(--docs-danger); marker-end: url(#tip-no); }
+    .diagram .edge-back { stroke-dasharray: 5 4; }
+    .diagram .edge-label { fill: var(--docs-text-2); font-size: 11.5px; }
+    .diagram .edge-label-bg { fill: var(--docs-surface); }
+
+    /* ---- donut phân bổ ---- */
+
+    .donut-row { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: var(--docs-space-5); align-items: center; margin-top: var(--docs-space-4); }
+    .donut { width: 200px; height: 200px; }
+    .donut circle { fill: none; stroke-width: 26; transition: opacity .15s ease, stroke-width .15s ease; }
+    .donut .track { stroke: var(--chart-track); stroke-width: 26; }
+    .donut-center-value { fill: var(--docs-text); font-size: 26px; font-weight: 700; text-anchor: middle; }
+    .donut-center-label { fill: var(--docs-muted); font-size: 11px; letter-spacing: .08em; text-anchor: middle; text-transform: uppercase; font-family: var(--docs-mono); }
+    .donut.has-focus circle.seg { opacity: .28; }
+    .donut.has-focus circle.seg.on { opacity: 1; stroke-width: 30; }
+
+    .legend { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+    .legend button {
+      display: grid;
+      grid-template-columns: 12px minmax(0, 1fr) auto;
+      gap: var(--docs-space-3);
+      align-items: center;
+      width: 100%;
+      padding: 8px 10px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--docs-radius-sm);
+      color: var(--docs-text-2);
+      font-size: var(--docs-type-md);
+      text-align: left;
+      cursor: pointer;
+    }
+    .legend button:hover, .legend button[aria-pressed="true"] { background: var(--docs-surface-2); border-color: var(--docs-border); color: var(--docs-text); }
+    .legend .swatch { width: 12px; height: 12px; border-radius: 3px; }
+    .legend .pct { font-family: var(--docs-mono); font-size: var(--docs-type-md); color: var(--docs-text); }
+    .legend .role { color: var(--docs-muted); font-size: var(--docs-type-sm); }
+
+    /* ---- thanh ngang, thước đo ---- */
+
+    .bars { display: grid; gap: var(--docs-space-4); margin-top: var(--docs-space-4); }
+    .bar-row { display: grid; grid-template-columns: minmax(96px, 132px) minmax(0, 1fr); gap: var(--docs-space-4); align-items: center; }
+    .bar-name { font-size: var(--docs-type-md); }
+    .bar-name .sub { display: block; color: var(--docs-muted); font-size: var(--docs-type-sm); }
+    .bar-track { position: relative; height: 34px; background: color-mix(in srgb, var(--chart-track) 40%, transparent); border: 1px solid var(--docs-border); border-radius: var(--docs-radius-sm); overflow: hidden; }
+    .bar-zone { position: absolute; inset: 0 auto 0 0; background: var(--chart-track); transition: width .35s ease; }
+    .bar-fill { position: absolute; inset: 0 auto 0 0; border-radius: var(--docs-radius-sm) 0 0 var(--docs-radius-sm); transition: width .35s ease; }
+    .bar-over { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, var(--docs-danger) 0 6px, color-mix(in srgb, var(--docs-danger) 55%, transparent) 6px 12px); transition: left .35s ease, width .35s ease; }
+    .bar-tick { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--docs-text); opacity: .55; transition: left .35s ease; }
+    .bar-value { position: absolute; top: 50%; right: 8px; transform: translateY(-50%); padding: 2px 8px; background: color-mix(in srgb, var(--docs-surface) 88%, transparent); border-radius: var(--docs-radius-pill); font-family: var(--docs-mono); font-size: var(--docs-type-sm); color: var(--docs-text); white-space: nowrap; }
+    .bar-scale-note { margin-top: var(--docs-space-3); color: var(--docs-muted); font-size: var(--docs-type-sm); }
+    .bar-legend { display: flex; flex-wrap: wrap; gap: var(--docs-space-4); margin-top: var(--docs-space-4); color: var(--docs-muted); font-size: var(--docs-type-sm); }
+    .bar-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .key { width: 14px; height: 10px; border-radius: 2px; }
+    .key-used { background: var(--jar-necessities); }
+    .key-track { background: var(--chart-track); border: 1px solid var(--docs-border); }
+    .key-tick { width: 2px; height: 14px; background: var(--docs-text); opacity: .55; border-radius: 1px; }
+    .key-over { background: repeating-linear-gradient(135deg, var(--docs-danger) 0 4px, transparent 4px 8px); }
+
+    .switch { display: flex; flex-wrap: wrap; gap: var(--docs-space-2); margin-top: var(--docs-space-4); }
+    .switch button {
+      min-height: var(--docs-control-height);
+      padding: 6px 14px;
+      background: var(--docs-surface-2);
+      border: 1px solid var(--docs-border);
+      border-radius: var(--docs-radius-pill);
+      color: var(--docs-text-2);
+      font-size: var(--docs-type-md);
+      cursor: pointer;
+    }
+    .switch button[aria-pressed="true"] { background: var(--docs-accent-soft); border-color: var(--docs-accent); color: var(--docs-accent); font-weight: 650; }
+
+    /* ---- máy tính chia thu nhập ---- */
+
+    .calc { margin-top: var(--docs-space-4); }
+    .calc-head { display: flex; flex-wrap: wrap; gap: var(--docs-space-4); align-items: baseline; justify-content: space-between; }
+    .calc-amount { font-family: var(--docs-mono); font-size: clamp(22px, 3.4vw, 30px); color: var(--docs-text); }
+    .calc input[type="range"] { width: 100%; margin-top: var(--docs-space-3); accent-color: var(--docs-accent); }
+    .calc-scale { display: flex; justify-content: space-between; color: var(--docs-muted); font-size: var(--docs-type-sm); }
+
+    .split-table { width: 100%; margin-top: var(--docs-space-4); border-collapse: collapse; font-size: var(--docs-type-md); }
+    .split-table th, .split-table td { padding: 9px 12px; border-bottom: 1px solid var(--docs-border); text-align: left; }
+    .split-table th { color: var(--docs-muted); font-size: var(--docs-type-xs); letter-spacing: .06em; text-transform: uppercase; font-weight: 600; }
+    .split-table td:last-child, .split-table th:last-child { text-align: right; font-family: var(--docs-mono); }
+    .split-table tfoot td { border-bottom: none; font-weight: 700; }
+    .split-table .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; border-radius: 3px; vertical-align: baseline; }
+
+    /* ---- thước sức chứa ---- */
+
+    .meters { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--docs-grid-gap); margin-top: var(--docs-space-4); }
+    .meter { padding: var(--docs-space-4); background: var(--docs-surface-2); border-radius: var(--docs-radius-md); }
+    .meter h4 { font-size: var(--docs-type-md); }
+    .meter .state { font-family: var(--docs-mono); font-size: var(--docs-type-xs); letter-spacing: .06em; text-transform: uppercase; }
+    .meter.ok .state { color: var(--docs-success); }
+    .meter.over .state { color: var(--docs-danger); }
+    .meter-track { position: relative; height: 30px; margin-top: var(--docs-space-3); background: var(--docs-surface); border: 1px solid var(--docs-border); border-radius: var(--docs-radius-sm); overflow: hidden; }
+    .meter-seg { position: absolute; top: 0; bottom: 0; }
+    .meter-cap { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--docs-text); opacity: .6; }
+    .meter-cap-note { margin-top: var(--docs-space-2); color: var(--docs-muted); font-size: var(--docs-type-sm); }
+    .meter-legend { margin-top: var(--docs-space-3); color: var(--docs-text-2); font-size: var(--docs-type-sm); }
+    .meter-legend li { list-style: none; }
+    .meter-legend li + li { margin-top: 3px; }
+    .meter-legend .k { display: inline-block; width: 10px; height: 10px; margin-right: 7px; border-radius: 2px; }
+
+    /* ---- các khối chữ ---- */
+
     .jar-table { width: 100%; margin-top: var(--docs-space-5); border-collapse: collapse; font-size: var(--docs-type-md); }
     .jar-table caption { margin-bottom: var(--docs-space-2); color: var(--docs-muted); font-size: var(--docs-type-sm); text-align: left; }
     .jar-table th, .jar-table td { padding: 10px 12px; border-bottom: 1px solid var(--docs-border); text-align: left; }
@@ -75,13 +254,7 @@
     .jar-table tfoot td { border-bottom: none; font-weight: 700; }
     .table-scroll { overflow-x: auto; }
 
-    .formula {
-      margin-top: var(--docs-space-5);
-      padding: var(--docs-space-5);
-      background: var(--docs-surface-2);
-      border-radius: var(--docs-radius-lg);
-    }
-
+    .formula { margin-top: var(--docs-space-5); padding: var(--docs-space-5); background: var(--docs-surface-2); border-radius: var(--docs-radius-lg); }
     .formula dl { display: grid; gap: var(--docs-space-3); }
     .formula dt { font-family: var(--docs-mono); font-size: var(--docs-type-md); color: var(--docs-accent); }
     .formula dd { color: var(--docs-text-2); font-size: var(--docs-type-md); }
@@ -137,11 +310,23 @@
     }
     .limits strong { color: var(--docs-text); }
 
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
     footer.page-foot { margin-top: var(--docs-section-gap); padding-top: var(--docs-space-4); border-top: 1px solid var(--docs-border); color: var(--docs-muted); font-size: var(--docs-type-sm); }
 
+    @media (max-width: 640px) {
+      .donut-row { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+      .legend { width: 100%; }
+      .bar-row { grid-template-columns: minmax(0, 1fr); gap: var(--docs-space-2); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .bar-fill, .bar-over, .bar-tick, .donut circle { transition: none; }
+    }
+
     @media print {
-      .docs-nav, .toc { display: none; }
-      .card, .steps > li, .limits li { box-shadow: none; break-inside: avoid; }
+      .docs-nav, .toc, .switch, .calc input { display: none; }
+      .card, .steps > li, .limits li, figure { box-shadow: none; break-inside: avoid; }
     }
   </style>
 </head>
@@ -168,9 +353,12 @@
       <nav class="toc" aria-label="Mục lục">
         <span class="label">Nội dung</span>
         <ul>
+          <li><a href="#hai-lop">Hai lớp</a></li>
           <li><a href="#hu">Hũ ngân sách</a></li>
+          <li><a href="#chia">Thử chia thu nhập</a></li>
           <li><a href="#con-so">Bốn con số của một hũ</a></li>
           <li><a href="#dinh-tuyen">Chi tiêu rơi vào hũ nào</a></li>
+          <li><a href="#snapshot">Ảnh chụp phân bổ</a></li>
           <li><a href="#muc-tieu">Mục tiêu</a></li>
           <li><a href="#suc-chua">Sức chứa của hũ</a></li>
           <li><a href="#trip">Mục tiêu Trip</a></li>
@@ -180,6 +368,107 @@
       </nav>
     </header>
 
+    <section id="hai-lop">
+      <h2>Hai lớp</h2>
+      <p class="section-lede">
+        Bên dưới là bản ghi tiền thật: tài khoản, giao dịch, khoản thu. Bên trên là lớp kế hoạch:
+        hũ, mục tiêu, chuyến đi. Mũi tên chỉ đi lên &ndash; lớp trên đọc lớp dưới rồi tính, và
+        không bao giờ viết ngược xuống.
+      </p>
+
+      <figure>
+        <span class="fig-label">Sơ đồ 1</span>
+        <h3>Kế hoạch đọc từ tiền thật, không tạo ra tiền</h3>
+        <div class="fig-scroll">
+          <svg class="diagram" viewBox="0 0 900 420" style="width:100%;min-width:640px" role="img" aria-labelledby="d1-title d1-desc">
+            <title id="d1-title">Hai lớp dữ liệu trong MonMon</title>
+            <desc id="d1-desc">Lớp bản ghi tiền thật gồm tài khoản, giao dịch thu chi, chuyển khoản và quy tắc định kỳ. Lớp kế hoạch gồm hũ ngân sách, mục tiêu và chuyến đi, được tính ra từ lớp dưới. Không có mũi tên nào đi từ lớp kế hoạch xuống tạo giao dịch.</desc>
+            <defs>
+              <marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M0,1 L9,5 L0,9 z" fill="var(--docs-edge)"/>
+              </marker>
+              <marker id="tip-yes" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M0,1 L9,5 L0,9 z" fill="var(--docs-success)"/>
+              </marker>
+              <marker id="tip-no" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M0,1 L9,5 L0,9 z" fill="var(--docs-danger)"/>
+              </marker>
+            </defs>
+
+            <rect class="plane" x="16" y="16" width="868" height="150" rx="14"/>
+            <text class="t-mono" x="866" y="42" text-anchor="end">Lớp kế hoạch · tính ra, không lưu</text>
+
+            <rect class="box box-plan" x="44" y="60" width="230" height="80" rx="12"/>
+            <text class="t-strong" x="64" y="90">Hũ ngân sách</text>
+            <text class="t-muted" x="64" y="112">Planned · Received · Projected</text>
+            <text class="t-muted" x="64" y="128">Used · Left</text>
+
+            <rect class="box box-plan" x="316" y="60" width="230" height="80" rx="12"/>
+            <text class="t-strong" x="336" y="90">Mục tiêu</text>
+            <text class="t-muted" x="336" y="112">Đánh dấu tiền trong hũ</text>
+            <text class="t-muted" x="336" y="128">Tiến độ · mức góp cần thiết</text>
+
+            <rect class="box box-plan" x="588" y="60" width="252" height="80" rx="12"/>
+            <text class="t-strong" x="608" y="90">Chuyến đi</text>
+            <text class="t-muted" x="608" y="112">Ống kính lọc chi tiêu</text>
+            <text class="t-muted" x="608" y="128">Đã tiêu · còn lại · vượt</text>
+
+            <rect class="plane" x="16" y="254" width="868" height="150" rx="14"/>
+            <text class="t-mono" x="34" y="280">Bản ghi tiền thật · lưu trong máy</text>
+
+            <rect class="box box-real" x="44" y="298" width="196" height="76" rx="12"/>
+            <text class="t-strong" x="64" y="328">Tài khoản</text>
+            <text class="t-muted" x="64" y="350">Số dư theo giao dịch</text>
+
+            <rect class="box box-real" x="266" y="298" width="196" height="76" rx="12"/>
+            <text class="t-strong" x="286" y="328">Khoản thu</text>
+            <text class="t-muted" x="286" y="350">Kèm ảnh chụp phân bổ</text>
+
+            <rect class="box box-real" x="488" y="298" width="196" height="76" rx="12"/>
+            <text class="t-strong" x="508" y="328">Khoản chi</text>
+            <text class="t-muted" x="508" y="350">Có danh mục, có thể gắn trip</text>
+
+            <rect class="box box-real" x="710" y="298" width="130" height="76" rx="12"/>
+            <text class="t-strong" x="730" y="328">Định kỳ</text>
+            <text class="t-muted" x="730" y="350">Sinh giao dịch</text>
+
+            <path class="edge" d="M364 298 C364 250 190 214 159 144"/>
+            <path class="edge" d="M586 298 C586 252 230 224 159 144"/>
+            <path class="edge" d="M775 374 L775 392 L364 392 L364 378"/>
+            <path class="edge" d="M431 60 C431 28 159 28 159 58"/>
+            <path class="edge" d="M586 298 C640 250 714 206 714 144"/>
+
+            <rect class="edge-label-bg" x="182" y="206" width="176" height="18" rx="4"/>
+            <text class="edge-label" x="188" y="220">nhân phần trăm: Planned, Received</text>
+
+            <rect class="edge-label-bg" x="228" y="230" width="120" height="18" rx="4"/>
+            <text class="edge-label" x="234" y="244">cộng lại thành Used</text>
+
+            <rect class="edge-label-bg" x="470" y="383" width="118" height="18" rx="4"/>
+            <text class="edge-label" x="476" y="397">sinh giao dịch</text>
+
+            <rect class="edge-label-bg" x="600" y="216" width="132" height="18" rx="4"/>
+            <text class="edge-label" x="606" y="230">lọc theo thẻ chuyến đi</text>
+
+            <rect class="edge-label-bg" x="210" y="20" width="170" height="18" rx="4"/>
+            <text class="edge-label" x="216" y="34">đánh dấu tiền trong hũ</text>
+
+            <g>
+              <path class="edge edge-no" d="M470 150 L470 244" stroke-dasharray="6 5" marker-end="url(#tip-no)"/>
+              <line x1="452" y1="180" x2="488" y2="214" stroke="var(--docs-danger)" stroke-width="2.4"/>
+              <line x1="488" y1="180" x2="452" y2="214" stroke="var(--docs-danger)" stroke-width="2.4"/>
+              <rect class="edge-label-bg" x="496" y="188" width="238" height="18" rx="4"/>
+              <text class="edge-label" x="502" y="202">không có: kế hoạch không tạo giao dịch</text>
+            </g>
+          </svg>
+        </div>
+        <figcaption>
+          Vì mũi tên chỉ đi một chiều, xoá một hũ hay một mục tiêu không thể xoá tiền &ndash; và
+          <strong>đổi phần trăm cũng không thể sinh ra tiền</strong>.
+        </figcaption>
+      </figure>
+    </section>
+
     <section id="hu">
       <h2>Hũ ngân sách</h2>
       <p class="section-lede">
@@ -187,25 +476,40 @@
         Hũ không lưu số dư. Lần đầu mở ứng dụng, MonMon tạo sẵn sáu hũ cộng lại vừa đúng 100%.
       </p>
 
-      <div class="table-scroll">
-        <table class="jar-table">
-          <caption>Sáu hũ mặc định, tạo một lần khi kho dữ liệu còn trống</caption>
-          <thead>
-            <tr><th scope="col">Hũ</th><th scope="col">Vai trò</th><th scope="col">Phần trăm</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>Necessities</td><td>custom</td><td>55%</td></tr>
-            <tr><td>Investment</td><td>investment</td><td>10%</td></tr>
-            <tr><td>Education</td><td>custom</td><td>10%</td></tr>
-            <tr><td>Savings</td><td>savings</td><td>10%</td></tr>
-            <tr><td>Play</td><td>custom</td><td>10%</td></tr>
-            <tr><td>Giving</td><td>custom</td><td>5%</td></tr>
-          </tbody>
-          <tfoot>
-            <tr><td>Tổng</td><td></td><td>100%</td></tr>
-          </tfoot>
-        </table>
-      </div>
+      <figure>
+        <span class="fig-label">Biểu đồ 1</span>
+        <h3>Sáu hũ mặc định chia hết 100%</h3>
+        <p>Chạm hoặc dùng bàn phím trên một hũ trong chú giải để làm nổi phần của nó.</p>
+        <div class="donut-row">
+          <svg class="donut" id="donut" viewBox="0 0 200 200" role="img" aria-labelledby="donut-title">
+            <title id="donut-title">Phân bổ mặc định: Necessities 55%, Investment 10%, Education 10%, Savings 10%, Play 10%, Giving 5%</title>
+            <circle class="track" cx="100" cy="100" r="72"/>
+            <g transform="rotate(-90 100 100)">
+              <circle class="seg" data-jar="necessities" cx="100" cy="100" r="72" stroke="var(--jar-necessities)" stroke-dasharray="246.9 205.5" stroke-dashoffset="0"/>
+              <circle class="seg" data-jar="investment" cx="100" cy="100" r="72" stroke="var(--jar-investment)" stroke-dasharray="43.2 409.2" stroke-dashoffset="-248.9"/>
+              <circle class="seg" data-jar="education" cx="100" cy="100" r="72" stroke="var(--jar-education)" stroke-dasharray="43.2 409.2" stroke-dashoffset="-294.1"/>
+              <circle class="seg" data-jar="savings" cx="100" cy="100" r="72" stroke="var(--jar-savings)" stroke-dasharray="43.2 409.2" stroke-dashoffset="-339.4"/>
+              <circle class="seg" data-jar="play" cx="100" cy="100" r="72" stroke="var(--jar-play)" stroke-dasharray="43.2 409.2" stroke-dashoffset="-384.6"/>
+              <circle class="seg" data-jar="giving" cx="100" cy="100" r="72" stroke="var(--jar-giving)" stroke-dasharray="20.6 431.8" stroke-dashoffset="-429.8"/>
+            </g>
+            <text class="donut-center-value" x="100" y="98">100%</text>
+            <text class="donut-center-label" x="100" y="118">đã phân bổ</text>
+          </svg>
+
+          <ul class="legend" id="legend">
+            <li><button type="button" aria-pressed="false" data-jar="necessities"><span class="swatch" style="background:var(--jar-necessities)"></span><span>Necessities <span class="role">· custom</span></span><span class="pct">55%</span></button></li>
+            <li><button type="button" aria-pressed="false" data-jar="investment"><span class="swatch" style="background:var(--jar-investment)"></span><span>Investment <span class="role">· investment</span></span><span class="pct">10%</span></button></li>
+            <li><button type="button" aria-pressed="false" data-jar="education"><span class="swatch" style="background:var(--jar-education)"></span><span>Education <span class="role">· custom</span></span><span class="pct">10%</span></button></li>
+            <li><button type="button" aria-pressed="false" data-jar="savings"><span class="swatch" style="background:var(--jar-savings)"></span><span>Savings <span class="role">· savings</span></span><span class="pct">10%</span></button></li>
+            <li><button type="button" aria-pressed="false" data-jar="play"><span class="swatch" style="background:var(--jar-play)"></span><span>Play <span class="role">· custom</span></span><span class="pct">10%</span></button></li>
+            <li><button type="button" aria-pressed="false" data-jar="giving"><span class="swatch" style="background:var(--jar-giving)"></span><span>Giving <span class="role">· custom</span></span><span class="pct">5%</span></button></li>
+          </ul>
+        </div>
+        <figcaption>
+          Đây là bộ hũ tạo sẵn khi kho dữ liệu còn trống. Bạn sửa được hết, miễn tổng không vượt
+          100%; phần chưa dùng hiện dưới nhãn <strong>Unallocated</strong> trên màn hình Budget.
+        </figcaption>
+      </figure>
 
       <div class="grid">
         <div class="card">
@@ -216,7 +520,6 @@
             biểu tượng cùng màu ở thẻ <em>Style</em>. Tổng phần trăm của tất cả các hũ không được
             vượt 100 &ndash; bản nháp từ chối lưu chứ không tự cắt bớt của hũ khác.
           </p>
-          <p>Phần trăm chưa dùng hết hiện ở thẻ <em>Budget allocation</em> dưới nhãn <em>Unallocated</em>.</p>
         </div>
         <div class="card">
           <span class="label">Vai trò</span>
@@ -238,6 +541,46 @@
           </p>
         </div>
       </div>
+    </section>
+
+    <section id="chia">
+      <h2>Thử chia thu nhập</h2>
+      <p class="section-lede">
+        Phép chia chỉ là nhân phần trăm rồi làm tròn về đồng. Kéo thanh trượt để xem sáu hũ mặc
+        định chia một khoản thu nhập bất kỳ &ndash; đúng công thức ứng dụng dùng.
+      </p>
+
+      <figure>
+        <span class="fig-label">Công cụ</span>
+        <h3>Máy chia thu nhập theo phần trăm hũ</h3>
+        <div class="calc">
+          <div class="calc-head">
+            <label for="income">Thu nhập của tháng</label>
+            <output class="calc-amount" id="income-out" for="income">30.000.000 ₫</output>
+          </div>
+          <input type="range" id="income" min="0" max="80000000" step="500000" value="30000000"
+                 aria-describedby="income-help">
+          <div class="calc-scale"><span>0 ₫</span><span>80.000.000 ₫</span></div>
+          <p id="income-help" class="sr-only">Kéo để đổi số tiền; bảng bên dưới cập nhật theo.</p>
+
+          <div class="table-scroll">
+            <table class="split-table">
+              <caption class="sr-only">Số tiền mỗi hũ nhận được theo thu nhập đã chọn</caption>
+              <thead>
+                <tr><th scope="col">Hũ</th><th scope="col">Phần trăm</th><th scope="col">Số tiền</th></tr>
+              </thead>
+              <tbody id="split-body"></tbody>
+              <tfoot>
+                <tr><td>Tổng</td><td>100%</td><td id="split-total">30.000.000 ₫</td></tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+        <figcaption>
+          Làm tròn về đồng theo từng hũ, giống <code>BudgetSummary</code>. Không đồng nào được
+          chuyển đi đâu &ndash; đây chỉ là phép nhân trên khoản thu bạn đã ghi.
+        </figcaption>
+      </figure>
     </section>
 
     <section id="con-so">
@@ -263,6 +606,37 @@
         </dl>
       </div>
 
+      <figure>
+        <span class="fig-label">Biểu đồ 2 · ví dụ minh hoạ</span>
+        <h3>Một tháng có hai nguồn thu, nhìn ở hai thời điểm</h3>
+        <p>
+          Ví dụ: lương 20.000.000 ₫ ngày 5 và freelance 10.000.000 ₫ ngày 25, đều là quy tắc định
+          kỳ. Chiều dài thanh là <em>Projected</em>, phần tô là <em>Used</em>, vạch đứng là
+          <em>Received</em>. Số liệu dựng để minh hoạ, không phải dữ liệu thật.
+        </p>
+
+        <div class="switch" role="group" aria-label="Chọn thời điểm trong tháng">
+          <button type="button" data-phase="mid" aria-pressed="true">Ngày 15 · freelance chưa về</button>
+          <button type="button" data-phase="end" aria-pressed="false">Ngày 30 · đã về đủ</button>
+        </div>
+
+        <div class="bars" id="phase-bars"></div>
+
+        <p class="bar-scale-note">Ba thanh dùng chung một thang đo, nên so được hũ này với hũ kia.</p>
+
+        <div class="bar-legend">
+          <span><i class="key key-track"></i> Projected · nền đậm (sức chi của hũ)</span>
+          <span><i class="key key-used"></i> Used</span>
+          <span><i class="key key-tick"></i> Received</span>
+          <span><i class="key key-over"></i> Vượt kế hoạch</span>
+        </div>
+
+        <figcaption id="phase-note">
+          Ngày 15, <strong>Received</strong> mới bằng hai phần ba <strong>Projected</strong>: hũ
+          vẫn tính theo cả tháng, nên bạn không bị nhầm là mình còn ít tiền hơn thực tế.
+        </figcaption>
+      </figure>
+
       <div class="callout">
         <h3>Left có thể âm, và đó là ý đồ</h3>
         <p>
@@ -279,6 +653,69 @@
         Bạn không gán giao dịch cho hũ. Bạn gán <strong>danh mục</strong> cho hũ, một lần, rồi mọi
         chi tiêu mang danh mục đó tự đi theo.
       </p>
+
+      <figure>
+        <span class="fig-label">Sơ đồ 2</span>
+        <h3>Ba câu hỏi, theo đúng thứ tự này</h3>
+        <div class="fig-scroll">
+          <svg class="diagram" viewBox="0 0 900 430" style="width:100%;min-width:660px" role="img" aria-labelledby="d2-title d2-desc">
+            <title id="d2-title">Luồng quyết định hũ cho một khoản chi</title>
+            <desc id="d2-desc">Một khoản chi lần lượt qua ba câu hỏi: có ghi đè hũ của chuyến đi hợp lệ không, danh mục có gán hũ hợp lệ không, và nếu đều không thì rơi về hũ dự phòng theo thứ tự Necessities, hũ custom đầu tiên, hũ đầu tiên.</desc>
+
+            <rect class="box" x="24" y="176" width="150" height="66" rx="12"/>
+            <text class="t-strong" x="44" y="204">Một khoản chi</text>
+            <text class="t-muted" x="44" y="224">đã ghi vào tài khoản</text>
+
+            <path class="edge" d="M174 209 L228 209"/>
+
+            <path class="box box-decide" d="M370 132 L512 209 L370 286 L228 209 Z"/>
+            <text class="t" x="370" y="196" text-anchor="middle">Có gắn chuyến đi</text>
+            <text class="t" x="370" y="214" text-anchor="middle">và chọn hũ riêng?</text>
+            <text class="t-muted" x="370" y="234" text-anchor="middle">hũ đó còn tồn tại</text>
+
+            <path class="edge edge-yes" d="M370 122 L370 100 L642 100 L642 88"/>
+            <rect class="edge-label-bg" x="452" y="82" width="34" height="18" rx="4"/>
+            <text class="edge-label" x="458" y="96">có</text>
+
+            <path class="edge edge-no" d="M512 209 L566 209"/>
+            <rect class="edge-label-bg" x="516" y="186" width="46" height="18" rx="4"/>
+            <text class="edge-label" x="522" y="200">không</text>
+
+            <path class="box box-decide" d="M708 132 L850 209 L708 286 L566 209 Z"/>
+            <text class="t" x="708" y="200" text-anchor="middle">Danh mục của nó</text>
+            <text class="t" x="708" y="218" text-anchor="middle">có gán hũ?</text>
+
+            <rect class="box box-out" x="546" y="24" width="192" height="60" rx="12"/>
+            <text class="t-strong" x="566" y="50">Hũ được chọn riêng</text>
+            <text class="t-muted" x="566" y="70">chỉ chi tiêu của chuyến đi</text>
+
+            <path class="edge edge-yes" d="M850 209 L872 209 L872 330 L738 330"/>
+            <rect class="edge-label-bg" x="854" y="240" width="34" height="18" rx="4"/>
+            <text class="edge-label" x="860" y="254">có</text>
+
+            <rect class="box box-out" x="546" y="300" width="192" height="60" rx="12"/>
+            <text class="t-strong" x="566" y="326">Hũ của danh mục</text>
+            <text class="t-muted" x="566" y="346">đường đi thường ngày</text>
+
+            <path class="edge edge-no" d="M708 286 L708 296 L708 380 L462 380"/>
+            <rect class="edge-label-bg" x="712" y="352" width="46" height="18" rx="4"/>
+            <text class="edge-label" x="718" y="366">không</text>
+
+            <rect class="box box-out" x="228" y="330" width="234" height="80" rx="12"/>
+            <text class="t-strong" x="248" y="356">Hũ dự phòng</text>
+            <text class="t-muted" x="248" y="376">Necessities, nếu còn</text>
+            <text class="t-muted" x="248" y="394">rồi hũ custom đầu, rồi hũ đầu</text>
+
+            <path class="edge edge-back" d="M546 62 C486 62 448 118 424 150"/>
+            <rect class="edge-label-bg" x="404" y="112" width="150" height="18" rx="4"/>
+            <text class="edge-label" x="410" y="126">hũ đã xoá: hỏi tiếp</text>
+          </svg>
+        </div>
+        <figcaption>
+          Không nhánh nào kết thúc bằng “không thuộc hũ nào”. Tiền luôn hiện ở đâu đó trên bảng
+          ngân sách, kể cả khi bạn chưa thiết lập gì.
+        </figcaption>
+      </figure>
 
       <ol class="steps">
         <li>
@@ -304,33 +741,72 @@
             <h3>Hũ dự phòng</h3>
             <p>
               Chi tiêu chưa có danh mục, hoặc danh mục chưa gán hũ, rơi về hũ dự phòng: Necessities
-              nếu còn, không thì hũ <code>custom</code> đầu tiên, không nữa thì hũ đầu tiên. Tiền
-              không bao giờ biến mất khỏi bảng ngân sách vì thiếu thiết lập.
+              nếu còn, không thì hũ <code>custom</code> đầu tiên, không nữa thì hũ đầu tiên.
             </p>
           </div>
         </li>
       </ol>
+    </section>
 
-      <div class="grid">
-        <div class="card">
-          <span class="label">Thu nhập</span>
-          <h3>Ảnh chụp phân bổ được đóng băng</h3>
-          <p>
-            Khi bạn ghi một khoản thu, MonMon lưu kèm bản phân bổ theo phần trăm <em>tại thời điểm
-            đó</em>. Đổi phần trăm hôm nay không viết lại lịch sử: khoản lương tháng trước vẫn kể
-            đúng câu chuyện tháng trước.
-          </p>
-          <p>Sửa số tiền của khoản thu thì bản phân bổ cũ được co giãn lại theo tỉ lệ cũ, không lấy phần trăm mới.</p>
+    <section id="snapshot">
+      <h2>Ảnh chụp phân bổ</h2>
+      <p class="section-lede">
+        Mỗi khoản thu mang theo bản phân bổ của chính nó, chụp tại lúc ghi. Đổi phần trăm về sau
+        không viết lại quá khứ.
+      </p>
+
+      <figure>
+        <span class="fig-label">Sơ đồ 3</span>
+        <h3>Đổi phần trăm hôm nay, tháng trước vẫn nguyên</h3>
+        <div class="fig-scroll">
+          <svg class="diagram" viewBox="0 0 900 300" style="width:100%;min-width:660px" role="img" aria-labelledby="d3-title d3-desc">
+            <title id="d3-title">Dòng thời gian của ảnh chụp phân bổ</title>
+            <desc id="d3-desc">Tháng 6 ghi lương và chụp phân bổ 55/10/10/10/10/5. Tháng 7 chủ tài khoản đổi phần trăm sang 45/20. Tháng 8 ghi lương mới và chụp theo phần trăm mới. Khoản lương tháng 6 vẫn giữ ảnh chụp cũ.</desc>
+
+            <line x1="40" y1="150" x2="860" y2="150" stroke="var(--docs-border-strong)" stroke-width="2"/>
+            <circle cx="150" cy="150" r="7" fill="var(--docs-accent)"/>
+            <circle cx="450" cy="150" r="7" fill="var(--docs-warning)"/>
+            <circle cx="750" cy="150" r="7" fill="var(--docs-accent)"/>
+
+            <text class="t-mono" x="150" y="180" text-anchor="middle">Tháng 6</text>
+            <text class="t-mono" x="450" y="180" text-anchor="middle">Tháng 7</text>
+            <text class="t-mono" x="750" y="180" text-anchor="middle">Tháng 8</text>
+
+            <rect class="box box-real" x="40" y="40" width="220" height="80" rx="12"/>
+            <text class="t-strong" x="60" y="66">Ghi lương 20 triệu</text>
+            <text class="t-muted" x="60" y="88">chụp 55 / 10 / 10 / 10 / 10 / 5</text>
+            <text class="t-muted" x="60" y="106">đóng băng cùng giao dịch</text>
+            <path class="edge" d="M150 120 L150 142"/>
+
+            <rect class="box" x="340" y="40" width="220" height="80" rx="12" stroke="var(--docs-warning)" fill="var(--docs-warning-soft)"/>
+            <text class="t-strong" x="360" y="66">Bạn đổi phần trăm</text>
+            <text class="t-muted" x="360" y="88">Necessities 55% xuống 45%</text>
+            <text class="t-muted" x="360" y="106">Investment 10% lên 20%</text>
+            <path class="edge" d="M450 120 L450 142"/>
+
+            <rect class="box box-real" x="640" y="40" width="220" height="80" rx="12"/>
+            <text class="t-strong" x="660" y="66">Ghi lương 20 triệu</text>
+            <text class="t-muted" x="660" y="88">chụp 45 / 20 / 10 / 10 / 10 / 5</text>
+            <text class="t-muted" x="660" y="106">ảnh mới, cho khoản mới</text>
+            <path class="edge" d="M750 120 L750 142"/>
+
+            <rect class="box box-plan" x="40" y="206" width="380" height="66" rx="12"/>
+            <text class="t-strong" x="60" y="232">Khoản thu tháng 6 vẫn giữ ảnh cũ</text>
+            <text class="t-muted" x="60" y="254">timeline tháng 6 không đổi một đồng nào</text>
+
+            <rect class="box box-plan" x="480" y="206" width="380" height="66" rx="12"/>
+            <text class="t-strong" x="500" y="232">Sửa số tiền thì co giãn theo tỉ lệ cũ</text>
+            <text class="t-muted" x="500" y="254">không lấy phần trăm hiện tại áp lại</text>
+
+            <path class="edge edge-back" d="M150 158 L150 200"/>
+            <path class="edge edge-back" d="M750 158 L670 200"/>
+          </svg>
         </div>
-        <div class="card">
-          <span class="label">Xem lại</span>
-          <h3>Mở một hũ để xem vì sao</h3>
-          <p>
-            Chạm vào hũ để thấy danh sách những gì đã tính vào <em>Used</em> trong tháng: giao dịch
-            đã định tuyến về đây, cộng sổ tiết kiệm hoặc khoản quỹ nếu đó là hũ được bảo vệ.
-          </p>
-        </div>
-      </div>
+        <figcaption>
+          Ảnh chụp có đánh phiên bản và có cờ <em>ước lượng</em> cho các khoản được chụp bù về sau,
+          nên bạn luôn phân biệt được số nào là ghi ngay lúc đó.
+        </figcaption>
+      </figure>
     </section>
 
     <section id="muc-tieu">
@@ -339,6 +815,32 @@
         Một mục tiêu là khoản tiền đã có chủ <em>bên trong</em> một hũ. Nó không phải tài sản thứ
         hai và không bao giờ được cộng thêm vào tài sản ròng.
       </p>
+
+      <figure>
+        <span class="fig-label">Biểu đồ 3 · ví dụ minh hoạ</span>
+        <h3>Ba con số tự suy ra từ hai con số bạn nhập</h3>
+        <div class="bars">
+          <div class="bar-row">
+            <div class="bar-name">Macbook<span class="sub">đích 30.000.000 ₫</span></div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:60%;background:var(--jar-savings)"></div>
+              <span class="bar-value">đã dành 18.000.000 ₫ · còn 12.000.000 ₫</span>
+            </div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-name">Đà Nẵng<span class="sub">đích 12.000.000 ₫</span></div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:100%;background:var(--jar-education)"></div>
+              <span class="bar-value">đủ tiền · sẵn sàng mở chuyến đi</span>
+            </div>
+          </div>
+        </div>
+        <figcaption>
+          Với Macbook, còn 12 triệu và ngày đích cách đây 4 tháng thì mức góp cần thiết là
+          <strong>3.000.000 ₫ mỗi tháng</strong> &ndash; chia đều rồi làm tròn lên, để tháng cuối
+          không bị thiếu. Mục tiêu đủ tiền thôi chiếm phần kế hoạch hằng tháng của hũ.
+        </figcaption>
+      </figure>
 
       <div class="grid">
         <div class="card">
@@ -363,7 +865,6 @@
             <li>Mức góp cần thiết = phần còn thiếu chia đều cho số tháng đến ngày đích, làm tròn lên.</li>
             <li>Ngày dự kiến hoàn thành suy từ mức góp bạn đặt.</li>
           </ul>
-          <p>Mục tiêu đã đủ tiền chuyển sang mục <em>Completed</em> và thôi đòi phần kế hoạch hằng tháng.</p>
         </div>
         <div class="card">
           <span class="label">Xoá</span>
@@ -383,6 +884,45 @@
         tiêu đang chạy trên một hũ không được vượt phần kế hoạch của chính hũ đó.
       </p>
 
+      <figure>
+        <span class="fig-label">Biểu đồ 4 · ví dụ minh hoạ</span>
+        <h3>Hũ Savings có 3.000.000 ₫ kế hoạch mỗi tháng</h3>
+        <p class="meter-cap-note">Hai thước dùng chung một thang đo; vạch đứng là mốc kế hoạch 3.000.000 ₫.</p>
+
+        <div class="meters">
+          <div class="meter ok">
+            <h4>Còn chỗ <span class="state">· lưu được</span></h4>
+            <div class="meter-track" role="img" aria-label="Đã cam kết 2 triệu trên 3 triệu kế hoạch, còn trống 1 triệu">
+              <div class="meter-seg" style="left:0;width:57.1%;background:var(--jar-savings)"></div>
+              <div class="meter-cap" style="left:85.7%"></div>
+            </div>
+            <ul class="meter-legend">
+              <li><i class="k" style="background:var(--jar-savings)"></i> Macbook · 2.000.000 ₫</li>
+              <li><i class="k" style="background:var(--chart-track)"></i> còn trống · 1.000.000 ₫</li>
+            </ul>
+          </div>
+          <div class="meter over">
+            <h4>Quá tải <span class="state">· lưu bị từ chối</span></h4>
+            <div class="meter-track" role="img" aria-label="Đã cam kết 3,5 triệu trên 3 triệu kế hoạch, vượt 500 nghìn">
+              <div class="meter-seg" style="left:0;width:57.1%;background:var(--jar-savings)"></div>
+              <div class="meter-seg" style="left:57.1%;width:28.6%;background:var(--jar-education)"></div>
+              <div class="meter-seg" style="left:85.7%;width:14.3%;background:repeating-linear-gradient(135deg,var(--docs-danger) 0 6px,transparent 6px 12px)"></div>
+              <div class="meter-cap" style="left:85.7%"></div>
+            </div>
+            <ul class="meter-legend">
+              <li><i class="k" style="background:var(--jar-savings)"></i> Macbook · 2.000.000 ₫</li>
+              <li><i class="k" style="background:var(--jar-education)"></i> Đà Nẵng · 1.000.000 ₫</li>
+              <li><i class="k" style="background:var(--docs-danger)"></i> phần vượt · 500.000 ₫</li>
+            </ul>
+          </div>
+        </div>
+        <figcaption>
+          Thanh thứ hai là lúc bạn thêm mục tiêu thứ ba, hoặc hạ phần trăm của hũ sau khi đã đặt
+          mục tiêu. MonMon chỉ chặn <strong>lần lưu làm tổng tăng lên</strong>; sửa xuống thì luôn
+          được, để một hũ lỡ quá tải không kẹt cứng.
+        </figcaption>
+      </figure>
+
       <div class="grid">
         <div class="card">
           <span class="label">Đang chạy</span>
@@ -390,15 +930,6 @@
           <p>
             Chỉ mục tiêu còn thiếu tiền mới chiếm chỗ. Mục tiêu đã đủ được bỏ ra khỏi phép cộng,
             trả lại phần kế hoạch cho những mục tiêu còn lại.
-          </p>
-        </div>
-        <div class="card">
-          <span class="label">Khi lưu bị từ chối</span>
-          <h3>Một ngoại lệ có chủ ý</h3>
-          <p>
-            Nếu tổng sau khi lưu vượt sức chứa, MonMon từ chối &ndash; trừ khi lần lưu này
-            <em>không làm tổng tăng lên</em>. Nhờ vậy một hũ đã lỡ quá tải vẫn sửa xuống được,
-            thay vì kẹt cứng.
           </p>
         </div>
         <div class="card">
@@ -419,48 +950,135 @@
         chi tiêu để theo dõi chuyến đi.
       </p>
 
-      <ol class="steps">
-        <li>
-          <div>
-            <h3>Đủ tiền, hiện ở “Ready to spend”</h3>
-            <p>Mục tiêu Trip đã dành đủ và có hũ cấp vốn sẽ rời danh sách thường, sang khu vực sẵn sàng.</p>
-          </div>
-        </li>
-        <li>
-          <div>
-            <h3>Bắt đầu chuyến đi</h3>
-            <p>
-              MonMon tạo một workspace chép lại tên, biểu tượng, màu và lấy số cần đạt làm ngân
-              sách chuyến đi. Không đồng nào được chuyển đi đâu cả. Mỗi mục tiêu chỉ mở được một
-              chuyến.
-            </p>
-          </div>
-        </li>
-        <li>
-          <div>
-            <h3>Chi tiêu gắn thẻ chuyến đi</h3>
-            <p>
-              Khoản chi gắn chuyến đi vẫn là khoản chi bình thường, vẫn trừ số dư tài khoản như
-              mọi khoản khác. Đã tiêu, còn lại và phần vượt ngân sách đều suy từ chính những khoản
-              đó, nên không có chuyện đếm hai lần.
-            </p>
-          </div>
-        </li>
-        <li>
-          <div>
-            <h3>Kết thúc hoặc huỷ</h3>
-            <p>
-              Kết thúc chỉ đóng dấu ngày hoàn thành; phần chưa tiêu không sinh ra khoản hoàn tiền
-              nào. Huỷ chỉ được phép khi chưa có giao dịch nào gắn vào chuyến.
-            </p>
-          </div>
-        </li>
-      </ol>
+      <figure>
+        <span class="fig-label">Sơ đồ 4</span>
+        <h3>Bốn trạng thái, và điều kiện để đi tiếp</h3>
+        <div class="fig-scroll">
+          <svg class="diagram" viewBox="0 0 900 340" style="width:100%;min-width:680px" role="img" aria-labelledby="d4-title d4-desc">
+            <title id="d4-title">Vòng đời của một chuyến đi</title>
+            <desc id="d4-desc">Mục tiêu đang tích luỹ, khi đã dành đủ và có hũ cấp vốn thì sang trạng thái sẵn sàng. Bắt đầu chuyến sẽ tạo workspace đang mở. Từ đó có thể kết thúc, và mở lại. Huỷ chỉ được phép khi chưa có giao dịch nào gắn thẻ.</desc>
+
+            <rect class="box" x="24" y="120" width="176" height="72" rx="14"/>
+            <text class="t-strong" x="44" y="150">Đang tích luỹ</text>
+            <text class="t-muted" x="44" y="172">đã dành &lt; đích</text>
+
+            <path class="edge" d="M200 156 L292 156"/>
+            <rect class="edge-label-bg" x="202" y="120" width="94" height="32" rx="4"/>
+            <text class="edge-label" x="206" y="134">đã dành ≥ đích</text>
+            <text class="edge-label" x="206" y="148">và có hũ</text>
+
+            <rect class="box box-out" x="300" y="120" width="176" height="72" rx="14"/>
+            <text class="t-strong" x="320" y="150">Sẵn sàng</text>
+            <text class="t-muted" x="320" y="172">“Ready to spend”</text>
+
+            <path class="edge" d="M476 156 L516 156"/>
+            <rect class="edge-label-bg" x="452" y="118" width="66" height="18" rx="4"/>
+            <text class="edge-label" x="458" y="132">bắt đầu</text>
+
+            <rect class="box box-plan" x="520" y="112" width="192" height="88" rx="14"/>
+            <text class="t-strong" x="540" y="140">Chuyến đang mở</text>
+            <text class="t-muted" x="540" y="162">chép tên, biểu tượng, màu</text>
+            <text class="t-muted" x="540" y="180">ngân sách = số cần đạt</text>
+
+            <path class="edge" d="M712 140 C770 140 792 120 792 96 L792 84"/>
+            <rect class="edge-label-bg" x="716" y="104" width="70" height="18" rx="4"/>
+            <text class="edge-label" x="722" y="118">kết thúc</text>
+
+            <rect class="box box-out" x="700" y="24" width="176" height="60" rx="14"/>
+            <text class="t-strong" x="720" y="50">Đã hoàn thành</text>
+            <text class="t-muted" x="720" y="70">đóng dấu ngày kết thúc</text>
+
+            <path class="edge edge-back" d="M700 62 C640 62 620 92 620 108"/>
+            <rect class="edge-label-bg" x="596" y="72" width="62" height="18" rx="4"/>
+            <text class="edge-label" x="602" y="86">mở lại</text>
+
+            <path class="edge edge-no" d="M616 200 L616 262"/>
+            <rect class="edge-label-bg" x="624" y="216" width="238" height="34" rx="4"/>
+            <text class="edge-label" x="630" y="230">huỷ · chỉ khi chưa có giao dịch nào</text>
+            <text class="edge-label" x="630" y="246">gắn thẻ chuyến đi</text>
+
+            <rect class="box box-stop" x="520" y="262" width="192" height="56" rx="14"/>
+            <text class="t-strong" x="540" y="288">Xoá chuyến</text>
+            <text class="t-muted" x="540" y="308">mục tiêu quay lại danh sách</text>
+
+            <rect class="box" x="24" y="240" width="420" height="70" rx="14"/>
+            <text class="t-strong" x="44" y="266">Trong suốt vòng đời: không đồng nào được chuyển</text>
+            <text class="t-muted" x="44" y="288">chi tiêu của chuyến vẫn là chi tiêu thường, vẫn trừ số dư tài khoản như mọi khoản khác</text>
+          </svg>
+        </div>
+        <figcaption>
+          Mỗi mục tiêu chỉ mở được một chuyến. Kết thúc chuyến không sinh khoản hoàn tiền cho phần
+          chưa tiêu &ndash; phần đó vốn vẫn nằm trong tài khoản của bạn từ đầu đến cuối.
+        </figcaption>
+      </figure>
     </section>
 
     <section id="xoa-hu">
       <h2>Xoá hũ</h2>
       <p class="section-lede">Hũ đứng giữa nhiều thứ, nên MonMon kiểm tra trước khi cho xoá.</p>
+
+      <figure>
+        <span class="fig-label">Sơ đồ 5</span>
+        <h3>Ba cửa kiểm tra, rồi một bước dọn dẹp</h3>
+        <div class="fig-scroll">
+          <svg class="diagram" viewBox="0 78 900 182" style="width:100%;min-width:680px" role="img" aria-labelledby="d5-title d5-desc">
+            <title id="d5-title">Điều kiện xoá một hũ ngân sách</title>
+            <desc id="d5-desc">Yêu cầu xoá lần lượt qua ba cửa: hũ được bảo vệ, hũ đang cấp vốn cho mục tiêu, hũ đang cấp vốn cho chuyến đi. Nếu qua hết, các danh mục trỏ vào hũ được chuyển sang hũ dự phòng rồi hũ mới bị xoá trong cùng một lần lưu.</desc>
+
+            <rect class="box" x="16" y="96" width="140" height="64" rx="12"/>
+            <text class="t-strong" x="36" y="124">Bấm xoá hũ</text>
+            <text class="t-muted" x="36" y="144">trên màn hình sửa</text>
+
+            <path class="edge" d="M156 128 L192 128"/>
+
+            <rect class="box box-decide" x="192" y="96" width="150" height="64" rx="12"/>
+            <text class="t" x="267" y="122" text-anchor="middle">Vai trò savings</text>
+            <text class="t" x="267" y="140" text-anchor="middle">hay investment?</text>
+
+            <path class="edge edge-yes" d="M342 128 L382 128"/>
+            <rect class="edge-label-bg" x="340" y="102" width="46" height="18" rx="4"/>
+            <text class="edge-label" x="346" y="116">không</text>
+
+            <rect class="box box-decide" x="382" y="96" width="150" height="64" rx="12"/>
+            <text class="t" x="457" y="122" text-anchor="middle">Đang cấp vốn</text>
+            <text class="t" x="457" y="140" text-anchor="middle">cho mục tiêu?</text>
+
+            <path class="edge edge-yes" d="M532 128 L572 128"/>
+            <rect class="edge-label-bg" x="530" y="102" width="46" height="18" rx="4"/>
+            <text class="edge-label" x="536" y="116">không</text>
+
+            <rect class="box box-decide" x="572" y="96" width="150" height="64" rx="12"/>
+            <text class="t" x="647" y="122" text-anchor="middle">Đang cấp vốn</text>
+            <text class="t" x="647" y="140" text-anchor="middle">cho chuyến đi?</text>
+
+            <path class="edge edge-yes" d="M722 128 L762 128"/>
+            <rect class="edge-label-bg" x="718" y="102" width="46" height="18" rx="4"/>
+            <text class="edge-label" x="724" y="116">không</text>
+            <rect class="box box-out" x="762" y="88" width="126" height="80" rx="12"/>
+            <text class="t-strong" x="782" y="116">Xoá được</text>
+            <text class="t-muted" x="782" y="138">danh mục chuyển</text>
+            <text class="t-muted" x="782" y="154">sang hũ dự phòng</text>
+
+            <path class="edge edge-no" d="M267 160 L267 200"/>
+            <rect class="edge-label-bg" x="272" y="168" width="30" height="18" rx="4"/>
+            <text class="edge-label" x="278" y="182">có</text>
+            <path class="edge edge-no" d="M457 160 L457 200"/>
+            <rect class="edge-label-bg" x="462" y="168" width="30" height="18" rx="4"/>
+            <text class="edge-label" x="468" y="182">có</text>
+            <path class="edge edge-no" d="M647 160 L647 200"/>
+            <rect class="edge-label-bg" x="652" y="168" width="30" height="18" rx="4"/>
+            <text class="edge-label" x="658" y="182">có</text>
+
+            <rect class="box box-stop" x="192" y="200" width="530" height="46" rx="12"/>
+            <text class="t-strong" x="212" y="222">Từ chối &ndash; hũ giữ nguyên, không có gì bị xoá</text>
+            <text class="t-muted" x="212" y="240">đổi hũ của mục tiêu hoặc chuyến đi trước, rồi thử lại</text>
+          </svg>
+        </div>
+        <figcaption>
+          Cửa thứ ba tính cả chuyến đã hoàn thành, vì lịch sử của chuyến vẫn trỏ về hũ đó.
+        </figcaption>
+      </figure>
+
       <ul class="limits">
         <li><strong>Hũ được bảo vệ</strong> &ndash; vai trò savings và investment bị từ chối ngay.</li>
         <li><strong>Hũ đang cấp vốn cho mục tiêu</strong> &ndash; bị từ chối; đổi hũ của mục tiêu trước.</li>
@@ -486,8 +1104,174 @@
     <footer class="page-foot">
       MonMon &middot; Hành vi mô tả ở đây khớp với mã nguồn trong <code>MonMon/Budget</code>,
       <code>MonMon/Goals</code>, <code>MonMon/Trips</code> và <code>MonMon/IncomeAllocation</code>.
-      Cấu trúc dữ liệu phía dưới nằm ở trang <a href="architecture.html">Architecture</a>.
+      Các số liệu trong biểu đồ 2, 3 và 4 là ví dụ dựng để minh hoạ. Cấu trúc dữ liệu phía dưới
+      nằm ở trang <a href="architecture.html">Architecture</a>.
     </footer>
   </main>
+
+  <script>
+    (function () {
+      var vnd = new Intl.NumberFormat('vi-VN');
+      function money(n) { return vnd.format(Math.round(n)) + ' ₫'; }
+
+      /* ---- donut: chú giải làm nổi từng phần ---- */
+      var donut = document.getElementById('donut');
+      var legend = document.getElementById('legend');
+      if (donut && legend) {
+        var segments = Array.prototype.slice.call(donut.querySelectorAll('.seg'));
+        var buttons = Array.prototype.slice.call(legend.querySelectorAll('button'));
+
+        function highlight(jar) {
+          donut.classList.toggle('has-focus', !!jar);
+          segments.forEach(function (s) { s.classList.toggle('on', s.dataset.jar === jar); });
+          buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.jar === jar)); });
+        }
+
+        buttons.forEach(function (b) {
+          b.addEventListener('click', function () {
+            highlight(b.getAttribute('aria-pressed') === 'true' ? null : b.dataset.jar);
+          });
+          b.addEventListener('mouseenter', function () { highlight(b.dataset.jar); });
+          b.addEventListener('focus', function () { highlight(b.dataset.jar); });
+        });
+        legend.addEventListener('mouseleave', function () {
+          if (!buttons.some(function (b) { return b === document.activeElement; })) highlight(null);
+        });
+      }
+
+      /* ---- máy chia thu nhập ---- */
+      var JARS = [
+        { name: 'Necessities', percent: 55, color: 'var(--jar-necessities)' },
+        { name: 'Investment', percent: 10, color: 'var(--jar-investment)' },
+        { name: 'Education', percent: 10, color: 'var(--jar-education)' },
+        { name: 'Savings', percent: 10, color: 'var(--jar-savings)' },
+        { name: 'Play', percent: 10, color: 'var(--jar-play)' },
+        { name: 'Giving', percent: 5, color: 'var(--jar-giving)' }
+      ];
+
+      var income = document.getElementById('income');
+      var incomeOut = document.getElementById('income-out');
+      var splitBody = document.getElementById('split-body');
+      var splitTotal = document.getElementById('split-total');
+
+      if (income && splitBody) {
+        JARS.forEach(function (jar) {
+          var row = document.createElement('tr');
+          row.innerHTML = '<td><span class="dot" style="background:' + jar.color + '"></span>' + jar.name +
+            '</td><td>' + jar.percent + '%</td><td data-amount="' + jar.percent + '"></td>';
+          splitBody.appendChild(row);
+        });
+
+        var cells = Array.prototype.slice.call(splitBody.querySelectorAll('[data-amount]'));
+
+        function renderSplit() {
+          var amount = Number(income.value);
+          incomeOut.textContent = money(amount);
+          var total = 0;
+          cells.forEach(function (cell) {
+            var share = Math.round(amount * Number(cell.dataset.amount) / 100);
+            total += share;
+            cell.textContent = money(share);
+          });
+          splitTotal.textContent = money(total);
+        }
+
+        income.addEventListener('input', renderSplit);
+        renderSplit();
+      }
+
+      /* ---- biểu đồ Projected / Used / Received theo hai thời điểm ---- */
+      var PHASES = {
+        mid: {
+          receivedIncome: 20000000,
+          projectedIncome: 30000000,
+          note: 'Ngày 15, <strong>Received</strong> mới bằng hai phần ba <strong>Projected</strong>: hũ vẫn tính theo cả tháng, nên bạn không bị nhầm là mình còn ít tiền hơn thực tế.'
+        },
+        end: {
+          receivedIncome: 30000000,
+          projectedIncome: 30000000,
+          note: 'Ngày 30, freelance đã về nên <strong>Received</strong> trùng <strong>Projected</strong>. Chiều dài thanh không đổi suốt tháng &ndash; chỉ có vạch Received chạy tới.'
+        }
+      };
+
+      var ROWS = [
+        { name: 'Necessities', percent: 55, used: 12400000, color: 'var(--jar-necessities)' },
+        { name: 'Play', percent: 10, used: 3600000, color: 'var(--jar-play)' },
+        { name: 'Savings', percent: 10, used: 3000000, color: 'var(--jar-savings)', hint: 'gồm sổ tiết kiệm' }
+      ];
+
+      var barsHost = document.getElementById('phase-bars');
+      var phaseNote = document.getElementById('phase-note');
+      var phaseButtons = Array.prototype.slice.call(document.querySelectorAll('[data-phase]'));
+
+      if (barsHost) {
+        ROWS.forEach(function (row) {
+          var wrap = document.createElement('div');
+          wrap.className = 'bar-row';
+          wrap.innerHTML =
+            '<div class="bar-name">' + row.name + '<span class="sub">' + row.percent + '%' +
+            (row.hint ? ' · ' + row.hint : '') + '</span></div>' +
+            '<div class="bar-track"><div class="bar-zone"></div><div class="bar-fill"></div>' +
+            '<div class="bar-over" hidden></div>' +
+            '<div class="bar-tick"></div><span class="bar-value"></span></div>';
+          barsHost.appendChild(wrap);
+        });
+
+        var trackNodes = Array.prototype.slice.call(barsHost.querySelectorAll('.bar-track'));
+
+        function renderPhase(key) {
+          var phase = PHASES[key];
+          var scale = ROWS.reduce(function (max, row) {
+            return Math.max(max, Math.round(phase.projectedIncome * row.percent / 100), row.used);
+          }, 0) || 1;
+
+          ROWS.forEach(function (row, i) {
+            var projected = Math.round(phase.projectedIncome * row.percent / 100);
+            var received = Math.round(phase.receivedIncome * row.percent / 100);
+            var track = trackNodes[i];
+            var zone = track.querySelector('.bar-zone');
+            var fill = track.querySelector('.bar-fill');
+            var over = track.querySelector('.bar-over');
+            var tick = track.querySelector('.bar-tick');
+            var value = track.querySelector('.bar-value');
+
+            var usedWidth = Math.min(row.used, projected) / scale * 100;
+            zone.style.width = (projected / scale * 100) + '%';
+            fill.style.width = usedWidth + '%';
+            fill.style.background = row.color;
+
+            if (row.used > projected) {
+              over.hidden = false;
+              over.style.left = usedWidth + '%';
+              over.style.width = ((row.used - projected) / scale * 100) + '%';
+            } else {
+              over.hidden = true;
+            }
+
+            tick.style.left = (received / scale * 100) + '%';
+
+            var left = projected - row.used;
+            value.textContent = money(row.used) + ' / ' + money(projected) +
+              (left < 0 ? ' · vượt ' + money(-left) : ' · còn ' + money(left));
+            track.setAttribute('role', 'img');
+            track.setAttribute('aria-label',
+              row.name + ': Projected ' + money(projected) + ', Received ' + money(received) +
+              ', Used ' + money(row.used) +
+              (left < 0 ? ', vượt ' + money(-left) : ', còn lại ' + money(left)));
+          });
+
+          phaseNote.innerHTML = phase.note;
+          phaseButtons.forEach(function (b) {
+            b.setAttribute('aria-pressed', String(b.dataset.phase === key));
+          });
+        }
+
+        phaseButtons.forEach(function (b) {
+          b.addEventListener('click', function () { renderPhase(b.dataset.phase); });
+        });
+        renderPhase('mid');
+      }
+    })();
+  </script>
 </body>
 </html>
