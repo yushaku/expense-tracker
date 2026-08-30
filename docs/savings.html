@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Sổ tiết kiệm có kỳ hạn trong MonMon: lãi đơn trả cuối kỳ, ba trạng thái suy ra, rút tiền là bản ghi mới, và cách sổ tham gia vào số dư và tài sản ròng. Kèm sơ đồ.">
+  <link rel="stylesheet" href="assets/monmon-docs.css">
+  <title>MonMon — Quản lý tiết kiệm</title>
+  <style>
+    :root {
+      --w-cash: #1e66f5;
+      --w-savings: #df8e1d;
+      --w-funds: #8839ef;
+      --w-gold: #d97706;
+      --w-lent: #179299;
+      --w-borrowed: #b04458;
+      --w-overdraft: #9a6a12;
+      --w-gain: #2f7a52;
+      --w-loss: #b04458;
+      --w-track: var(--docs-surface-3);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --w-cash: #8caaee;
+        --w-savings: #e5c890;
+        --w-funds: #ca9ee6;
+        --w-gold: #ef9f76;
+        --w-lent: #81c8be;
+        --w-borrowed: #e17c8f;
+        --w-overdraft: #d5a544;
+        --w-gain: #5fbd85;
+        --w-loss: #e17c8f;
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --w-cash: #8caaee;
+      --w-savings: #e5c890;
+      --w-funds: #ca9ee6;
+      --w-gold: #ef9f76;
+      --w-lent: #81c8be;
+      --w-borrowed: #e17c8f;
+      --w-overdraft: #d5a544;
+      --w-gain: #5fbd85;
+      --w-loss: #e17c8f;
+    }
+
+    .page {
+      width: min(1120px, calc(100% - var(--docs-page-gutter) - var(--docs-page-gutter)));
+      margin: 0 auto;
+      padding: var(--docs-page-padding-top) 0 var(--docs-page-padding-bottom);
+    }
+
+    a { color: var(--docs-accent); }
+    code {
+      padding: 2px 6px;
+      background: var(--docs-surface-2);
+      border-radius: var(--docs-radius-xs);
+      font-family: var(--docs-mono);
+      font-size: .9em;
+    }
+
+    .hero { max-width: 860px; }
+    .eyebrow {
+      margin-bottom: var(--docs-space-2);
+      color: var(--docs-accent);
+      font-size: var(--docs-label-size);
+      font-weight: 750;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .lede {
+      margin-top: var(--docs-space-4);
+      color: var(--docs-text-2);
+      font-size: var(--docs-type-xl);
+      line-height: 1.5;
+      text-wrap: pretty;
+    }
+
+    section { margin-top: var(--docs-section-gap); scroll-margin-top: 20px; }
+    section > p, section > ul, section > ol { max-width: 78ch; }
+    section > p { margin-top: var(--docs-space-4); color: var(--docs-text-2); }
+    section > ul, section > ol { margin-top: var(--docs-space-4); padding-left: 1.2em; color: var(--docs-text-2); }
+    section li + li { margin-top: var(--docs-space-2); }
+    section li strong { color: var(--docs-text); }
+
+    h2 { margin-top: var(--docs-space-2); }
+    h3 {
+      margin-top: var(--docs-space-6);
+      font-size: var(--docs-type-xl);
+      letter-spacing: -.015em;
+    }
+    .section-kicker {
+      color: var(--docs-muted);
+      font-size: var(--docs-label-size);
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    figure {
+      margin-top: var(--docs-space-5);
+      padding: var(--docs-card-padding);
+      background: var(--docs-surface);
+      border: 1px solid var(--docs-border);
+      border-radius: var(--docs-radius-lg);
+      box-shadow: var(--docs-shadow);
+    }
+    figure .scroll { overflow-x: auto; }
+    figure svg { width: 100%; height: auto; min-width: 520px; font-family: var(--docs-sans); }
+    figcaption {
+      margin-top: var(--docs-space-4);
+      padding-top: var(--docs-space-3);
+      border-top: 1px solid var(--docs-border);
+      color: var(--docs-muted);
+      font-size: var(--docs-type-md);
+      text-wrap: pretty;
+    }
+    figcaption b { color: var(--docs-text-2); font-weight: 700; }
+
+    .fig-label {
+      display: inline-block;
+      margin-bottom: var(--docs-space-3);
+      color: var(--docs-muted);
+      font-size: var(--docs-type-xs);
+      font-weight: 750;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    /* SVG primitives shared by every diagram. */
+    .s-box { fill: var(--docs-surface-2); stroke: var(--docs-border-strong); stroke-width: 1; }
+    .s-box-accent { fill: var(--docs-accent-soft); stroke: var(--docs-accent); stroke-width: 1; }
+    .s-box-plain { fill: none; stroke: var(--docs-border-strong); stroke-width: 1; stroke-dasharray: 4 4; }
+    .s-t { fill: var(--docs-text); font-size: 13px; font-weight: 650; }
+    .s-t2 { fill: var(--docs-text-2); font-size: 12px; }
+    .s-t3 { fill: var(--docs-muted); font-size: 11px; }
+    .s-mono { font-family: var(--docs-mono); font-size: 11px; fill: var(--docs-text-2); }
+    .s-line { stroke: var(--docs-border-strong); stroke-width: 1.5; fill: none; }
+    .s-line-soft { stroke: var(--docs-border); stroke-width: 1; fill: none; }
+    .s-dash { stroke: var(--docs-edge); stroke-width: 1.4; fill: none; stroke-dasharray: 5 4; }
+    .s-gain { fill: var(--w-gain); }
+    .s-loss { fill: var(--w-loss); }
+    .s-cash { fill: var(--w-cash); }
+    .s-savings { fill: var(--w-savings); }
+    .s-funds { fill: var(--w-funds); }
+    .s-gold { fill: var(--w-gold); }
+    .s-lent { fill: var(--w-lent); }
+    .s-borrowed { fill: var(--w-borrowed); }
+    .s-overdraft { fill: var(--w-overdraft); }
+    .s-track { fill: var(--w-track); }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--docs-grid-gap);
+      margin-top: var(--docs-space-5);
+    }
+    .card {
+      padding: var(--docs-card-padding);
+      background: var(--docs-surface);
+      border: 1px solid var(--docs-border);
+      border-radius: var(--docs-radius-md);
+    }
+    .card h4 { font-size: var(--docs-type-lg); letter-spacing: -.01em; }
+    .card p { margin-top: var(--docs-space-2); color: var(--docs-text-2); font-size: var(--docs-type-md); }
+    .card .metric {
+      display: block;
+      margin-bottom: var(--docs-space-1);
+      color: var(--docs-muted);
+      font-size: var(--docs-type-xs);
+      font-weight: 750;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .table-wrap { overflow-x: auto; margin-top: var(--docs-space-5); }
+    table { width: 100%; min-width: 560px; border-collapse: collapse; font-size: var(--docs-type-md); }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--docs-border);
+      text-align: left;
+      vertical-align: top;
+    }
+    th { color: var(--docs-muted); font-size: var(--docs-type-xs); letter-spacing: .08em; text-transform: uppercase; }
+    td { color: var(--docs-text-2); }
+    td:first-child { color: var(--docs-text); font-weight: 650; }
+    td.num { font-family: var(--docs-mono); text-align: right; white-space: nowrap; }
+
+    .callout {
+      margin-top: var(--docs-space-5);
+      padding: var(--docs-space-4) var(--docs-space-5);
+      background: var(--docs-info-soft);
+      border-left: 3px solid var(--docs-info);
+      border-radius: var(--docs-radius-sm);
+      color: var(--docs-text-2);
+      font-size: var(--docs-type-md);
+    }
+    .callout.warn { background: var(--docs-warning-soft); border-left-color: var(--docs-warning); }
+    .callout b { color: var(--docs-text); }
+
+    .legend { display: flex; flex-wrap: wrap; gap: var(--docs-space-3); margin-top: var(--docs-space-4); }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--docs-text-2);
+      font-size: var(--docs-type-sm);
+    }
+    .legend i { width: 11px; height: 11px; border-radius: 3px; }
+
+    footer {
+      margin-top: var(--docs-section-gap);
+      padding-top: var(--docs-space-5);
+      border-top: 1px solid var(--docs-border);
+      color: var(--docs-muted);
+      font-size: var(--docs-type-md);
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <nav class="docs-nav" aria-label="Tài liệu MonMon">
+      <a class="docs-nav-brand" href="smart-note.html">MonMon Docs</a>
+      <ul class="docs-nav-list">
+        <li><a href="smart-note.html">Hướng dẫn sử dụng</a></li>
+        <li><a href="budget-and-goals.html">Ngân sách &amp; mục tiêu</a></li>
+        <li><a href="accounts.html">Tài khoản</a></li>
+        <li><a href="savings.html" aria-current="page">Tiết kiệm</a></li>
+        <li><a href="funds.html">Quỹ &amp; vàng</a></li>
+        <li><a href="system-design.html">Thiết kế hệ thống</a></li>
+        <li><a href="bank-transaction-auto-note-research.html">Nghiên cứu</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
+      </ul>
+    </nav>
+
+    <header class="hero">
+      <p class="eyebrow">MonMon / Tiết kiệm</p>
+      <h1>Quản lý sổ tiết kiệm</h1>
+      <p class="lede">Một sổ tiết kiệm được mở đúng một lần. Mọi biến động sau đó — rút một phần, tất toán đúng hạn hay trước hạn — đều là bản ghi độc lập có ngày. Tài liệu này mô tả công thức lãi, ba trạng thái của sổ, và cách sổ tham gia vào số dư tài khoản cũng như tài sản ròng.</p>
+    </header>
+
+    <section id="tiet-kiem">
+      <p class="section-kicker">01 — Nghiệp vụ</p>
+      <h2>Lãi đơn, trả cuối kỳ, sổ gốc không bị sửa</h2>
+      <p>Sổ tiết kiệm có kỳ hạn tại Việt Nam trả lãi đơn vào ngày đáo hạn. <code>SavingsInterest</code> áp dụng đúng công thức đó và làm tròn về đồng: không cộng dồn, không nhập lãi vào gốc, không suy đoán.</p>
+
+      <figure>
+        <span class="fig-label">Hình 1 — Lãi dự kiến của một sổ 12 tháng</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 250" role="img" aria-label="Công thức và biểu đồ lãi sổ tiết kiệm">
+            <rect class="s-box" x="20" y="20" width="860" height="52" rx="10"/>
+            <text class="s-mono" x="450" y="43" text-anchor="middle" font-size="14">interest = principal × rate ÷ 100 × days ÷ 365</text>
+            <text class="s-t3" x="450" y="62" text-anchor="middle">days đếm theo lịch Asia/Ho_Chi_Minh, từ ngày mở đến ngày đáo hạn</text>
+
+            <text class="s-t3" x="20" y="112">gốc</text>
+            <rect class="s-savings" x="120" y="96" width="600" height="34" rx="6" opacity=".8"/>
+            <text x="420" y="118" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">200.000.000 ₫</text>
+
+            <text class="s-t3" x="20" y="164">lãi 5,6%/năm</text>
+            <rect class="s-gain" x="720" y="148" width="34" height="34" rx="6" opacity=".85"/>
+            <text class="s-t2" x="766" y="170">11.200.000 ₫ &nbsp;·&nbsp; 365 ngày</text>
+
+            <text class="s-t3" x="20" y="216">đáo hạn</text>
+            <rect class="s-savings" x="120" y="200" width="600" height="34" rx="6" opacity=".35"/>
+            <rect class="s-gain" x="720" y="200" width="34" height="34" rx="6" opacity=".35"/>
+            <text class="s-t" x="770" y="222">211.200.000 ₫</text>
+
+            <path class="s-dash" d="M720 90 L720 240"/>
+          </svg>
+        </div>
+        <figcaption>Lãi dự kiến chỉ được <b>hiển thị</b>, không bao giờ được <b>cộng</b> vào <a href="accounts.html#phan-bo">tài sản ròng</a>. Tài sản ròng ghi nhận sổ tiết kiệm theo gốc còn lại; tiền lãi chỉ được ghi nhận khi thực nhận qua một lần rút.</figcaption>
+      </figure>
+
+      <h3>Rút tiền là một bản ghi mới, không phải một lần sửa sổ</h3>
+      <p>Mỗi <code>SavingsWithdrawal</code> ghi phần gốc rút ra và số tiền thực nhận. Chênh lệch giữa hai giá trị là lãi đã thực hiện, và có thể thấp hơn lãi dự kiến khi tất toán trước hạn. MonMon không tính lại theo cách riêng mà lưu đúng số tiền ngân hàng đã chi trả.</p>
+
+      <figure>
+        <span class="fig-label">Hình 2 — Ba trạng thái của một sổ</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 260" role="img" aria-label="Máy trạng thái của sổ tiết kiệm">
+            <rect class="s-box-accent" x="60" y="90" width="180" height="66" rx="12"/>
+            <text class="s-t" x="150" y="118" text-anchor="middle">Đang gửi</text>
+            <text class="s-mono" x="150" y="136" text-anchor="middle">active</text>
+
+            <rect class="s-box" x="370" y="30" width="180" height="66" rx="12"/>
+            <text class="s-t" x="460" y="58" text-anchor="middle">Đã đáo hạn</text>
+            <text class="s-mono" x="460" y="76" text-anchor="middle">matured</text>
+
+            <rect class="s-box" x="680" y="90" width="180" height="66" rx="12"/>
+            <text class="s-t" x="770" y="118" text-anchor="middle">Đã tất toán</text>
+            <text class="s-mono" x="770" y="136" text-anchor="middle">settled</text>
+
+            <path class="s-line" d="M240 108 L370 66"/>
+            <text class="s-t3" x="250" y="86">hôm nay ≥ ngày đáo hạn</text>
+
+            <path class="s-line" d="M550 66 L680 108"/>
+            <text class="s-t3" x="562" y="86">rút hết gốc</text>
+
+            <path class="s-dash" d="M240 138 L680 138"/>
+            <text class="s-t3" x="460" y="158" text-anchor="middle">tất toán trước hạn — lãi thực nhận thấp hơn lãi dự kiến</text>
+
+            <rect class="s-box-plain" x="60" y="196" width="800" height="44" rx="10"/>
+            <text class="s-t3" x="80" y="223">Thứ tự danh sách: đã đáo hạn lên đầu (cần xử lý), rồi đang gửi, rồi đã tất toán. Cùng trạng thái thì ngày đáo hạn gần nhất đứng trước.</text>
+          </svg>
+        </div>
+        <figcaption>Trạng thái được suy ra tại thời điểm đọc, từ gốc còn lại và ngày đáo hạn. Store không lưu cột <code>status</code>, nên không có giá trị nào có thể lệch pha với dữ liệu thực tế.</figcaption>
+      </figure>
+    </section>
+
+    <section id="dong-tien">
+      <p class="section-kicker">02 — Dòng tiền</p>
+      <h2>Một sổ chạm vào hai tài khoản, tại hai thời điểm</h2>
+      <p>Khi mở sổ, phần gốc rời tài khoản nguồn và được ghi nhận qua <code>fundedAmount</code>. Khi rút, số tiền thực nhận vào tài khoản đích và được ghi nhận qua <code>SavingsWithdrawalSummary.netFlow</code>. Hai bút toán này độc lập, nên một lần tất toán trước hạn với lãi thấp hơn dự kiến không cần sửa lại bất cứ điều gì đã ghi trước đó.</p>
+
+      <figure>
+        <span class="fig-label">Hình 3 — Vòng đời một sổ tiết kiệm</span>
+        <div class="scroll">
+          <svg viewBox="0 0 900 280" role="img" aria-label="Dòng tiền của một sổ tiết kiệm từ khi mở đến khi tất toán">
+            <rect class="s-box-accent" x="20" y="40" width="220" height="64" rx="12"/>
+            <text class="s-t" x="130" y="68" text-anchor="middle">Tài khoản nguồn</text>
+            <text class="s-mono" x="130" y="88" text-anchor="middle">−200.000.000 ₫</text>
+
+            <rect class="s-savings" x="340" y="40" width="220" height="64" rx="12" opacity=".2"/>
+            <text class="s-t" x="450" y="68" text-anchor="middle">Sổ tiết kiệm</text>
+            <text class="s-mono" x="450" y="88" text-anchor="middle">gốc 200.000.000 ₫ · 5,6%</text>
+
+            <rect class="s-box-accent" x="660" y="40" width="220" height="64" rx="12"/>
+            <text class="s-t" x="770" y="68" text-anchor="middle">Tài khoản đích</text>
+            <text class="s-mono" x="770" y="88" text-anchor="middle">+205.000.000 ₫</text>
+
+            <path class="s-line" d="M240 72 L340 72"/>
+            <text class="s-t3" x="290" y="62" text-anchor="middle">mở sổ</text>
+            <path class="s-line" d="M560 72 L660 72"/>
+            <text class="s-t3" x="610" y="62" text-anchor="middle">rút</text>
+
+            <rect class="s-box" x="20" y="140" width="270" height="112" rx="12"/>
+            <text class="s-t2" x="40" y="168">Trong thời gian gửi</text>
+            <text class="s-t3" x="40" y="192">số dư khả dụng: −200.000.000</text>
+            <text class="s-t3" x="40" y="212">tài sản ròng: +200.000.000 ở nhóm</text>
+            <text class="s-t3" x="40" y="230">tiết kiệm — tổng không đổi</text>
+
+            <rect class="s-box" x="315" y="140" width="270" height="112" rx="12"/>
+            <text class="s-t2" x="335" y="168">Lãi dự kiến 11.200.000 ₫</text>
+            <text class="s-t3" x="335" y="192">chỉ hiển thị trên thẻ sổ</text>
+            <text class="s-t3" x="335" y="212">không cộng vào tài sản ròng,</text>
+            <text class="s-t3" x="335" y="230">không cộng vào số dư</text>
+
+            <rect class="s-box" x="610" y="140" width="270" height="112" rx="12"/>
+            <text class="s-t2" x="630" y="168">Khi tất toán</text>
+            <text class="s-t3" x="630" y="192">thực nhận 205.000.000</text>
+            <text class="s-t3" x="630" y="212">lãi đã thực hiện 5.000.000</text>
+            <text class="s-t3" x="630" y="230">gốc còn lại về 0 — sổ đã tất toán</text>
+          </svg>
+        </div>
+        <figcaption>Tài sản ròng ghi nhận sổ theo <b>gốc còn lại</b>, không theo giá trị đáo hạn. Vì vậy việc mở sổ không làm tài sản ròng thay đổi, và chỉ phần lãi thực nhận mới làm nó tăng, đúng vào ngày tiền về tài khoản.</figcaption>
+      </figure>
+    </section>
+
+    <section id="ranh-gioi">
+      <p class="section-kicker">03 — Ranh giới</p>
+      <h2>Phạm vi loại trừ có chủ đích</h2>
+      <p>Sổ tiết kiệm là phân hệ dễ báo cáo quá tay nhất, nên phạm vi loại trừ ở đây được nêu rõ.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Không làm</th><th>Vì sao</th><th>Thay vào đó</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Cộng lãi dự kiến vào tài sản ròng</td>
+              <td>Khoản lãi chưa thực nhận thì chưa thuộc về chủ sở hữu.</td>
+              <td>Hiển thị lãi dự kiến trên thẻ sổ; tài sản ròng đếm gốc còn lại.</td>
+            </tr>
+            <tr>
+              <td>Tự tính lại số tiền tất toán trước hạn</td>
+              <td>Cách áp lãi không kỳ hạn và phí phạt khác nhau giữa các ngân hàng, ứng dụng không có cơ sở để tái lập.</td>
+              <td>Lưu đúng số tiền thực nhận trên <code>SavingsWithdrawal</code>; chênh lệch so với gốc là lãi đã thực hiện.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>
+      <p>Số liệu trong các hình là ví dụ minh hoạ cho công thức, không phải dữ liệu thật.</p>
+      <p>Tài liệu liên quan: <a href="accounts.html">Quản lý tài khoản</a>, <a href="funds.html">Quản lý quỹ, ETF và vàng</a>, <a href="budget-and-goals.html">Ngân sách &amp; mục tiêu</a>, <a href="architecture.html">Architecture</a>.</p>
+    </footer>
+  </main>
+</body>
+</html>

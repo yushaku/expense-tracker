@@ -8,6 +8,9 @@ Read the docs before the code:
 | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
 | `[docs/smart-note.html](docs/smart-note.html)`                                                   | Owner's guide — recording transactions, voice capture, statement import, reports       |
 | `[docs/budget-and-goals.html](docs/budget-and-goals.html)`                                       | How jars split income, how goals earmark money inside them, what the app refuses to do |
+| `[docs/accounts.html](docs/accounts.html)`                                                       | Accounts — derived balances, asset allocation, net worth, twelve-month history         |
+| `[docs/savings.html](docs/savings.html)`                                                         | Term deposits — simple interest, the three states, withdrawals as records              |
+| `[docs/funds.html](docs/funds.html)`                                                             | Funds, ETFs and gold — immutable lots, sales, market pricing, catalogue import         |
 | `[docs/architecture.html](docs/architecture.html)`                                               | The sixteen SwiftData models, their foreign keys, system boundaries, import flow       |
 | `[docs/bank-transaction-auto-note-research.html](docs/bank-transaction-auto-note-research.html)` | Research behind automatic transaction notes                                            |
 
