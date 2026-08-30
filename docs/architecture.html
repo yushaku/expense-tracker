@@ -1193,10 +1193,6 @@
             <span class="badges"><span class="badge pk">PK</span></span>
           </li>
           <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
-          <li class="field">
-            <span class="fname">kind</span><span class="ftype">FinancialGoalKind</span>
-            <span class="badges"><span class="badge enum">enum: custom | home | trip | vehicle</span><span class="badge null">unread by the app; backup still checks it</span></span>
-          </li>
           <li class="field"><span class="fname">targetAmount</span><span class="ftype">Decimal</span></li>
           <li class="field">
             <span class="fname">earmarkedAmount</span><span class="ftype">Decimal</span>
@@ -1684,16 +1680,16 @@
       </p>
     </div>
     <div class="note">
-      <h3><code>kind</code> outlived its last reader</h3>
+      <h3>A goal has no kind</h3>
       <p>
-        <code>FinancialGoalKind</code> is not something the owner picks, and nothing in the app
-        branches on it any more: a goal's symbol and colour come straight from
-        <code>CategoryPalette</code>, and <code>TripWorkspaceLifecycle.start</code> dropped its
-        trip check when any funded goal became able to open a workspace. One reader survives
-        outside the app &mdash; <code>MonMonBackupValidator</code> still requires a workspace's
-        source goal to carry <code>kind == "trip"</code>. Every goal written today is
-        <code>.custom</code>, so a backup taken after starting a trip fails that check on
-        restore. The enum stays on the model until those two ends are made to agree.
+        <code>FinancialGoalKind</code> is gone. It began as a style preset, lost that job when
+        symbol and colour became a direct choice from <code>CategoryPalette</code>, and lost its
+        last behavioural reader when <code>TripWorkspaceLifecycle.start</code> stopped asking for
+        a trip goal. What remained was a field the owner could not set, every new record carrying
+        the same value, and one stale rule in <code>MonMonBackupValidator</code> that rejected a
+        workspace whose source goal was not <code>.trip</code> &mdash; which every goal written
+        today would have failed. Removing the field removed the rule with it: a workspace's
+        source goal now only has to exist.
       </p>
     </div>
     <div class="note">
@@ -1826,9 +1822,8 @@
       <h3>Enums stored as String</h3>
       <p>
         <code>CashAccountKind</code>, <code>TransactionKind</code>, <code>FundInstrumentKind</code>,
-        <code>DebtDirection</code>, <code>RecurrenceFrequency</code>, <code>BudgetJarRole</code>,
-        <code>FinancialGoalKind</code> and <code>TripWorkspaceStatus</code> are all
-        <code>String, Codable</code>. Raw values are stable across migrations
+        <code>DebtDirection</code>, <code>RecurrenceFrequency</code>, <code>BudgetJarRole</code>
+        and <code>TripWorkspaceStatus</code> are all <code>String, Codable</code>. Raw values are stable across migrations
         and safe for CloudKit later.
       </p>
     </div>
