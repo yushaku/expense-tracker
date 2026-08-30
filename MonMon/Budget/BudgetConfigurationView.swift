@@ -10,7 +10,16 @@ struct BudgetConfigurationView: View {
     @Query(sort: \TransactionCategory.createdAt, order: .forward)
     private var categories: [TransactionCategory]
 
+    @Query(sort: \RecurringRule.createdAt, order: .forward)
+    private var recurringRules: [RecurringRule]
+
     @State private var editorMode: BudgetJarEditorMode?
+
+    private let asOf: Date
+
+    init(asOf: Date = .now) {
+        self.asOf = asOf
+    }
 
     var body: some View {
         #if os(macOS)
@@ -58,7 +67,7 @@ struct BudgetConfigurationView: View {
                 }
             }
             .appSheet(item: $editorMode) { mode in
-                BudgetJarEditorView(mode: mode)
+                BudgetJarEditorView(mode: mode, plannedIncome: plannedIncome)
             }
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
@@ -220,6 +229,13 @@ struct BudgetConfigurationView: View {
 
     private var allocationProgress: Double {
         min(1, NSDecimalNumber(decimal: allocationTotal).doubleValue / 100)
+    }
+
+    private var plannedIncome: Decimal {
+        BudgetSummary.plannedIncome(
+            monthContaining: asOf,
+            recurringRules: recurringRules
+        )
     }
 }
 

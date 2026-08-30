@@ -118,14 +118,24 @@ private struct BudgetTransactionRouting {
 }
 
 enum BudgetSummary {
+    static func plannedIncome(
+        monthContaining month: Date,
+        recurringRules: [RecurringRule]
+    ) -> Decimal {
+        let start = TransactionPeriod.startOfMonth(for: month)
+        let end = TransactionPeriod.endOfMonth(for: month)
+        return recurringIncome(recurringRules, from: start, to: end)
+    }
+
     static func plannedByJar(
         monthContaining month: Date,
         jars: [BudgetJar],
         recurringRules: [RecurringRule]
     ) -> [UUID: Decimal] {
-        let start = TransactionPeriod.startOfMonth(for: month)
-        let end = TransactionPeriod.endOfMonth(for: month)
-        let plannedIncome = recurringIncome(recurringRules, from: start, to: end)
+        let plannedIncome = plannedIncome(
+            monthContaining: month,
+            recurringRules: recurringRules
+        )
 
         return Dictionary(
             uniqueKeysWithValues: jars.map { jar in
@@ -271,7 +281,7 @@ enum BudgetSummary {
         date >= start && date < end && date <= asOf
     }
 
-    private static func allocation(of amount: Decimal, percent: Decimal) -> Decimal {
+    static func allocation(of amount: Decimal, percent: Decimal) -> Decimal {
         var input = amount * percent / 100
         var result = Decimal.zero
         NSDecimalRound(&result, &input, 0, .plain)

@@ -106,7 +106,7 @@ struct BudgetScreen: View {
                 RecurringListView(asOf: asOf)
             }
             .appSheet(isPresented: $isShowingConfiguration) {
-                BudgetConfigurationView()
+                BudgetConfigurationView(asOf: asOf)
             }
             .appSheet(isPresented: $isShowingGoals) {
                 GoalListView(plannedByJar: plannedByJar, asOf: asOf)
