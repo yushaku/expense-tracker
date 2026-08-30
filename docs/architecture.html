@@ -1195,7 +1195,7 @@
           <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">kind</span><span class="ftype">FinancialGoalKind</span>
-            <span class="badges"><span class="badge enum">enum: custom | home | trip | vehicle</span><span class="badge null">only .trip is behavioural</span></span>
+            <span class="badges"><span class="badge enum">enum: custom | home | trip | vehicle</span><span class="badge null">unread by the app; backup still checks it</span></span>
           </li>
           <li class="field"><span class="fname">targetAmount</span><span class="ftype">Decimal</span></li>
           <li class="field">
@@ -1238,7 +1238,7 @@
           <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">budgetAmount</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge null">copied from the goal's target at start</span></span>
+            <span class="badges"><span class="badge null">copied from the goal's earmarked amount at start</span></span>
           </li>
           <li class="field key" data-anchor="TripWorkspace.fundingJarID">
             <span class="fname">fundingJarID</span><span class="ftype">UUID?</span>
@@ -1677,25 +1677,31 @@
         the total &mdash; so a jar that is already overcommitted can still be edited downwards.
         <em>Active</em> means <code>earmarkedAmount &lt; targetAmount</code>: a funded goal stops
         competing for the plan. Progress, the required monthly figure and the forecast date are all derived by
-        <code>GoalProgress</code>, never stored.
+        <code>GoalProgress</code>, never stored. Nothing accrues on its own either:
+        <code>earmarkedAmount</code> has exactly one writer,
+        <code>FinancialGoalDraft.apply</code>, so a monthly contribution is a plan the owner
+        types, not a scheduled transfer.
       </p>
     </div>
     <div class="note">
-      <h3>Why <code>kind</code> survives on a goal</h3>
+      <h3><code>kind</code> outlived its last reader</h3>
       <p>
-        <code>FinancialGoalKind</code> is no longer something the owner picks. A goal's symbol
-        and colour are chosen directly from <code>CategoryPalette</code>, the way a category's
-        are, so the enum stopped being a style preset. It stays on the model because
-        <code>.trip</code> is behavioural: <code>TripWorkspaceLifecycle.start</code> is the only
-        reader left, and it refuses any goal that is not a trip.
+        <code>FinancialGoalKind</code> is not something the owner picks, and nothing in the app
+        branches on it any more: a goal's symbol and colour come straight from
+        <code>CategoryPalette</code>, and <code>TripWorkspaceLifecycle.start</code> dropped its
+        trip check when any funded goal became able to open a workspace. One reader survives
+        outside the app &mdash; <code>MonMonBackupValidator</code> still requires a workspace's
+        source goal to carry <code>kind == "trip"</code>. Every goal written today is
+        <code>.custom</code>, so a backup taken after starting a trip fails that check on
+        restore. The enum stays on the model until those two ends are made to agree.
       </p>
     </div>
     <div class="note">
       <h3>A trip is a lens, not a wallet</h3>
       <p>
-        A workspace starts only from a <code>.trip</code> goal that is fully funded and names a
-        jar, and it copies that goal's target into <code>budgetAmount</code> rather than moving
-        anything. Spending is ordinary expenses carrying <code>tripWorkspaceID</code>, so
+        A workspace starts from any goal that has money set aside and names a jar &mdash; no
+        minimum, no goal kind &mdash; and it copies that goal's <em>earmarked</em> amount into
+        <code>budgetAmount</code> rather than moving anything. Spending is ordinary expenses carrying <code>tripWorkspaceID</code>, so
         <code>TripSummary</code> derives spent, remaining and over-budget from transactions that
         already counted once. Completing a trip only stamps <code>completedAt</code>; cancelling
         is refused outright while any transaction still points at it.
