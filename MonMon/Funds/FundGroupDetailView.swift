@@ -70,9 +70,13 @@ struct FundGroupDetailView: View {
             }
         }
         .appSheet(item: $editorMode) { mode in
+            // The kinds follow the instrument this group is held in, so editing
+            // a coin offers coins. A group whose instrument has been deleted
+            // offers everything: the position has to be repointed at something,
+            // and narrowing the list would hide the only right answer.
             FundEditorView(
                 mode: mode,
-                kinds: group.instrument?.kind == .gold ? [.gold] : [.fund, .etf]
+                kinds: group.instrument?.kind.editorKinds ?? FundInstrumentKind.allCases
             )
         }
         .appSheet(item: $saleEditorMode) { mode in

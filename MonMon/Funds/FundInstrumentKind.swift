@@ -52,6 +52,24 @@ enum FundInstrumentKind: String, Codable, CaseIterable, Sendable {
         LocalizedStringKey(priceLabelKey)
     }
 
+    /// The kinds an editor opened on this one may choose between.
+    ///
+    /// A fund and an ETF share a picker because they are the same shape of
+    /// thing: units bought through a broker, quoted per unit. Gold and coins do
+    /// not join them. Each is entered differently — gold in chỉ, a coin to
+    /// eight decimal places — and offering the others would let a position be
+    /// repointed at something it is not.
+    var editorKinds: [FundInstrumentKind] {
+        switch self {
+        case .fund, .etf:
+            [.fund, .etf]
+        case .gold:
+            [.gold]
+        case .crypto:
+            [.crypto]
+        }
+    }
+
     func priceLabel(in locale: Locale) -> String {
         AppText.string(key: priceLabelKey, in: locale)
     }

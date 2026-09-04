@@ -1,6 +1,24 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Add coin": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm coin" } } }
+    },
+    "Edit coin": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sửa coin" } } }
+    },
+    "The coins you hold": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đồng coin bạn đang giữ" } } }
+    },
+    "Pick a coin, then say how much of it you own.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn một đồng coin, rồi cho biết bạn giữ bao nhiêu." } } }
+    },
+    "Pick the coin this position is held in.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn đồng coin mà vị thế này đang nắm giữ." } } }
+    },
+    "No coin in the catalogue yet. Add one from CoinGecko.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Danh mục chưa có đồng coin nào. Thêm một cái từ CoinGecko." } } }
+    },
     "Manage coins and CoinGecko imports": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Quản lý đồng coin và nhập từ CoinGecko" } } }
     },
