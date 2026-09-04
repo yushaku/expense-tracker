@@ -71,6 +71,9 @@ enum MonMonTheme {
     static let credit = Hue.peach
     static let savings = Hue.yellow
     static let funds = Hue.mauve
+    /// Coins. Held alongside funds and gold in the same ring, so it takes the
+    /// last hue those had not claimed rather than a shade of either.
+    static let crypto = Hue.lavender
     /// Money lent out. It has to read as an asset without reading as
     /// spendable cash, a term deposit, a market gain, or a bank account, so
     /// it takes the one hue none of those had claimed. Money borrowed reuses

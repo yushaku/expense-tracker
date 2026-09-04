@@ -310,6 +310,8 @@ extension AssetAllocationSlice.Kind {
             MonMonTheme.funds
         case .gold:
             MonMonTheme.Hue.peach
+        case .crypto:
+            MonMonTheme.crypto
         case .lent:
             MonMonTheme.lent
         }
@@ -325,6 +327,8 @@ extension AssetAllocationSlice.Kind {
             "chart.line.uptrend.xyaxis"
         case .gold:
             "seal.fill"
+        case .crypto:
+            "bitcoinsign.circle.fill"
         case .lent:
             "tray.and.arrow.up.fill"
         }

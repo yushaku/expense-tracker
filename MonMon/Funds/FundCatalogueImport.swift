@@ -31,6 +31,10 @@ final class FundCatalogueImport {
 
     private(set) var phase: Phase = .idle
     private(set) var candidates: [FundInstrumentCandidate] = []
+    /// Whether a remote lookup is in flight for the text being typed.
+    private(set) var isSearchingRemotely = false
+    /// Why the last remote lookup came back with nothing, when it failed.
+    private(set) var remoteSearchFailure: FundQuoteError?
     /// Tickers already in the catalogue, so the list can mark them rather than
     /// offering a duplicate the draft would reject anyway.
     private(set) var alreadyHeld: Set<String> = []
@@ -52,6 +56,68 @@ final class FundCatalogueImport {
     /// typing costs nothing.
     func matching(_ query: String) -> [FundInstrumentCandidate] {
         Self.filter(importable, matching: query)
+    }
+
+    /// Whether this provider's listing is a page rather than the whole list, so
+    /// a search matching nothing locally is worth asking about.
+    ///
+    /// Only CoinGecko. Fmarket returns every open-ended fund and vang.today
+    /// every gold product, so there is nothing beyond what already arrived;
+    /// asking again would spend a request to be told the same thing.
+    var offersRemoteSearch: Bool {
+        provider.source == .coinGecko
+    }
+
+    /// The shortest query worth sending. One character matches thousands of
+    /// coins and says nothing about which one is wanted.
+    static let remoteSearchMinimumLength = 2
+
+    /// Asks the provider for entries the loaded page does not carry, and folds
+    /// what comes back into the list already on screen.
+    ///
+    /// Only when the local filter found nothing: the catalogue page holds the
+    /// coins somebody is likely to be holding, and a query it answers needs no
+    /// request. Results are merged rather than replacing the page, so ticking
+    /// a found coin and then clearing the search does not lose it.
+    func searchRemotely(_ query: String) async {
+        let wanted = query.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard offersRemoteSearch,
+            wanted.count >= Self.remoteSearchMinimumLength,
+            !isSearchingRemotely,
+            matching(wanted).isEmpty
+        else {
+            return
+        }
+
+        isSearchingRemotely = true
+        remoteSearchFailure = nil
+        defer { isSearchingRemotely = false }
+
+        do {
+            merge(try await provider.search(wanted))
+        } catch let error as FundQuoteError {
+            remoteSearchFailure = error
+        } catch {
+            remoteSearchFailure = .transport
+        }
+    }
+
+    /// Adds entries the list does not already carry, keyed by ticker because
+    /// that is what `alreadyHeld` and the catalogue's own uniqueness rule use.
+    private func merge(_ found: [FundInstrumentCandidate]) {
+        var known = Set(candidates.map { $0.symbol.uppercased() })
+        var merged = candidates
+
+        for candidate in found where known.insert(candidate.symbol.uppercased()).inserted {
+            merged.append(candidate)
+        }
+
+        guard merged.count != candidates.count else {
+            return
+        }
+
+        candidates = merged.sorted { $0.symbol < $1.symbol }
     }
 
     /// Matches a ticker or any word of the name, ignoring case and accents.
@@ -181,6 +247,7 @@ final class FundCatalogueImport {
                 priceFetchedAt: candidate.pricePerUnit == nil ? nil : createdAt,
                 autoQuoteEnabled: true,
                 logoURL: candidate.logoURL,
+                providerID: candidate.providerID,
                 currencyCode: VNDCurrency.code,
                 createdAt: createdAt
             )
@@ -209,15 +276,31 @@ final class FundCatalogueImport {
         let outcome: QuoteOutcome
     }
 
+    /// Providers whose listing carries identity but no price, so a chosen row
+    /// has to be quoted before it can be written.
+    ///
+    /// VNDIRECT's ETF catalogue names tickers only. CoinGecko's search does the
+    /// same for coins outside the catalogue page it returns priced. Everything
+    /// else arrives priced by its listing.
+    private static let unpricedListingSources: Set<FundQuoteSource> = [.vndirect, .coinGecko]
+
     private func resolveETFQuotes(
         for candidates: [FundInstrumentCandidate],
         asOf: Date
     ) async -> (candidates: [FundInstrumentCandidate], failures: [ImportFailure]) {
-        guard provider.source == .vndirect else {
+        guard Self.unpricedListingSources.contains(provider.source) else {
             return (candidates, [])
         }
 
-        let indexed = Array(candidates.enumerated())
+        // A row the listing already priced is left alone; only the ones with
+        // nothing to show are asked about.
+        let priced = candidates.filter { $0.pricePerUnit != nil }
+        let unpriced = candidates.filter { $0.pricePerUnit == nil }
+        guard !unpriced.isEmpty else {
+            return (candidates, [])
+        }
+
+        let indexed = Array(unpriced.enumerated())
         let quoteProvider = provider
         var attempts: [QuoteAttempt] = []
 
@@ -233,6 +316,7 @@ final class FundCatalogueImport {
                         do {
                             let quote = try await quoteProvider.latestQuote(
                                 symbol: candidate.symbol,
+                                providerID: candidate.providerID,
                                 asOf: asOf
                             )
                             guard quote.symbol.uppercased() == candidate.symbol.uppercased() else {
@@ -288,7 +372,9 @@ final class FundCatalogueImport {
                 failures.append(failure)
             }
         }
-        return (quotedCandidates, failures)
+        // The order the owner ticked them in is not worth preserving here; the
+        // catalogue is written sorted either way.
+        return (priced + quotedCandidates, failures)
     }
 }
 
@@ -302,7 +388,8 @@ private extension FundInstrumentCandidate {
             askPricePerUnit: quote.askPricePerUnit,
             priceAsOf: quote.asOf,
             owner: owner,
-            logoURL: logoURL
+            logoURL: logoURL,
+            providerID: providerID
         )
     }
 }
