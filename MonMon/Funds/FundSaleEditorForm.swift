@@ -208,6 +208,11 @@ struct FundSaleEditorForm: View {
                         .monospacedDigit()
                         .multilineTextAlignment(.trailing)
                         .accessibilityLabel("Sale price per unit")
+
+                    Text("/ \(AppText.string(key: policy.priceUnitLabelKey, in: locale))")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                        .accessibilityHidden(true)
                 }
                 .padding(16)
                 .background(

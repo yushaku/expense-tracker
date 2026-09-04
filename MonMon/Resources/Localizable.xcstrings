@@ -1,6 +1,12 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "unit": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "đơn vị" } } }
+    },
+    "lượng": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "lượng" } } }
+    },
     "Filled in from today's buy price. Change it to what you actually paid.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Điền sẵn theo giá mua hôm nay. Sửa lại thành số bạn thực trả." } } }
     },
@@ -6959,16 +6965,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bắt đầu"
-          }
-        }
-      }
-    },
-    "Stored as %@ lượng": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lưu dưới dạng %@ lượng"
           }
         }
       }

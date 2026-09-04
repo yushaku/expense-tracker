@@ -90,13 +90,6 @@ struct FundInstrumentPolicy: Equatable, Sendable {
                 ? GoldWeight.label(luong: storedUnits)
                 : entryDescription(storedUnits, locale: locale)
         }
-
-        func storageCaption(fromEntryText text: String) -> LocalizedStringKey? {
-            guard usesGoldSummary, let units = storedUnits(fromEntryText: text) else {
-                return nil
-            }
-            return "Stored as \(UnitQuantity.format(units)) lượng"
-        }
     }
 
     enum Fee: Equatable, Sendable {
@@ -173,6 +166,10 @@ struct FundInstrumentPolicy: Equatable, Sendable {
     let fee: Fee?
     let supportsSwap: Bool
     let quoteStyle: QuoteStyle
+    /// What one unit of price is quoted against, in the owner's words. Not the
+    /// same as the entry unit: gold is bought in chỉ and quoted per lượng, and
+    /// a form that shows one without the other reads as a tenfold error.
+    let priceUnitLabelKey: String
     let marketPriceLabelKey: String
     let instrumentPriceFieldTitleKey: String
     let salePriceTitleKey: String
@@ -201,6 +198,7 @@ enum FundInstrumentKind: String, Codable, CaseIterable, Sendable {
                 fee: nil,
                 supportsSwap: false,
                 quoteStyle: .averageCost,
+                priceUnitLabelKey: "unit",
                 marketPriceLabelKey: "NAV",
                 instrumentPriceFieldTitleKey: "NAV per unit",
                 salePriceTitleKey: "Price per unit",
@@ -216,6 +214,7 @@ enum FundInstrumentKind: String, Codable, CaseIterable, Sendable {
                 fee: nil,
                 supportsSwap: false,
                 quoteStyle: .averageCost,
+                priceUnitLabelKey: "unit",
                 marketPriceLabelKey: "Close",
                 instrumentPriceFieldTitleKey: "Market price per unit",
                 salePriceTitleKey: "Price per unit",
@@ -231,6 +230,7 @@ enum FundInstrumentKind: String, Codable, CaseIterable, Sendable {
                 fee: .shopDeduction,
                 supportsSwap: false,
                 quoteStyle: .shopBuy,
+                priceUnitLabelKey: "lượng",
                 marketPriceLabelKey: "Buy",
                 instrumentPriceFieldTitleKey: "Shop buy price per lượng",
                 salePriceTitleKey: "Price per lượng",
@@ -246,6 +246,7 @@ enum FundInstrumentKind: String, Codable, CaseIterable, Sendable {
                 fee: nil,
                 supportsSwap: true,
                 quoteStyle: .averageCost,
+                priceUnitLabelKey: "coin",
                 marketPriceLabelKey: "Price",
                 instrumentPriceFieldTitleKey: "Market price per coin",
                 salePriceTitleKey: "Price per coin",

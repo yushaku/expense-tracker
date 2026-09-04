@@ -141,26 +141,25 @@ struct FundEditorForm: View {
                 VStack(alignment: .leading, spacing: 8) {
                     fieldLabel(instrumentPolicy.quantity.holdingFieldTitle)
 
-                    unitsTextField
-                        .textFieldStyle(.plain)
-                        .font(.system(.title2, design: .rounded, weight: .semibold))
-                        .monospacedDigit()
-                        .padding(16)
-                        .background(
-                            MonMonTheme.field,
-                            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        )
+                    HStack(spacing: 12) {
+                        unitsTextField
+                            .textFieldStyle(.plain)
+                            .font(.system(.title2, design: .rounded, weight: .semibold))
+                            .monospacedDigit()
+
+                        Text(instrumentPolicy.quantity.entryUnitLabel)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(MonMonTheme.textSecondary)
+                            .accessibilityHidden(true)
+                    }
+                    .padding(16)
+                    .background(
+                        MonMonTheme.field,
+                        in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    )
 
                     if let unitsErrorMessage {
                         validationMessage(unitsErrorMessage, id: "fund-units-error")
-                    }
-
-                    if let storageCaption = instrumentPolicy.quantity.storageCaption(
-                        fromEntryText: draft.unitsText
-                    ) {
-                        Text(storageCaption)
-                            .font(.caption)
-                            .foregroundStyle(MonMonTheme.textSecondary)
                     }
                 }
 
@@ -187,6 +186,11 @@ struct FundEditorForm: View {
                             .monospacedDigit()
                             .multilineTextAlignment(.trailing)
                             .accessibilityLabel(averageCostLabel)
+
+                        Text(perPriceUnitLabel)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(MonMonTheme.textSecondary)
+                            .accessibilityHidden(true)
                     }
                     .padding(14)
                     .background(
@@ -209,6 +213,19 @@ struct FundEditorForm: View {
                         .foregroundStyle(MonMonTheme.textSecondary)
                         .accessibilityIdentifier("fund-average-cost-hint")
                     }
+                }
+
+                if let costWorkingText {
+                    Text(costWorkingText)
+                        .font(.footnote)
+                        .foregroundStyle(MonMonTheme.textPrimary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(14)
+                        .background(
+                            MonMonTheme.field,
+                            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        )
+                        .accessibilityIdentifier("fund-cost-working")
                 }
 
                 if draft.costCurrency == .usd {
@@ -400,6 +417,53 @@ struct FundEditorForm: View {
     /// Dollars are offered where things are actually bought in them. Vietnamese
     /// funds, ETFs and gold are bought in đồng, so a currency switch on those
     /// forms would be a box to ignore rather than a feature.
+    private var perPriceUnitLabel: String {
+        "/ \(AppText.string(key: instrumentPolicy.priceUnitLabelKey, in: locale))"
+    }
+
+    /// The purchase spelled out: how much, at what, for how much altogether.
+    ///
+    /// Gold is the reason this exists. It is bought in chỉ and quoted per
+    /// lượng, so two adjacent boxes hold numbers in different units and nothing
+    /// on screen related them — "2" and "150.000.000" reads as a purchase ten
+    /// times the size of the one being recorded. This line does the conversion
+    /// where it can be seen, and ends on the figure that actually leaves the
+    /// funding account.
+    ///
+    /// `nil` until both boxes hold something usable, so it never shows a
+    /// confident zero.
+    private var costWorkingText: String? {
+        guard
+            let storedUnits = instrumentPolicy.quantity.storedUnits(
+                fromEntryText: draft.unitsText
+            ), storedUnits > 0, let perUnit = averageCostPerUnitInDong, perUnit > 0
+        else {
+            return nil
+        }
+
+        let quantity = instrumentPolicy.quantity.summaryValue(storedUnits: storedUnits)
+        let priceUnit = AppText.string(key: instrumentPolicy.priceUnitLabelKey, in: locale)
+        let total = FundValuation.costBasis(units: storedUnits, averageCostPerUnit: perUnit)
+
+        return "\(quantity) × \(VNDCurrency.formatUnitPrice(perUnit)) ₫/\(priceUnit)"
+            + " = \(VNDCurrency.formatPlain(total)) ₫"
+    }
+
+    /// The typed cost in đồng, whichever currency it was typed in.
+    private var averageCostPerUnitInDong: Decimal? {
+        switch draft.costCurrency {
+        case .vnd:
+            return VNDCurrency.parse(draft.averageCostText)
+        case .usd:
+            guard let dollars = USDPrice.parse(draft.averageCostText),
+                let rate = VNDCurrency.parse(draft.exchangeRateText)
+            else {
+                return nil
+            }
+            return USDPrice.inDong(dollars, rate: rate)
+        }
+    }
+
     private var offersDollarEntry: Bool { instrumentPolicy.allowsDollarPriceEntry }
 
     private var averageCostLabel: LocalizedStringKey {
