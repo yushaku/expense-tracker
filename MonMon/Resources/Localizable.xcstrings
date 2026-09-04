@@ -1,6 +1,15 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "At today's prices that is about %@. Use it": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Theo giá hôm nay thì khoảng %@. Dùng số này" } } }
+    },
+    "This is what both sides are booked at: the gain the coin you gave settles, and what the coin you got cost.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đây là mức ghi sổ cho cả hai chiều: lãi/lỗ mà coin bạn đưa ra chốt lại, và giá vốn của coin bạn nhận về." } } }
+    },
+    "Filled in from today's %@ price. It is what both sides are booked at — the gain %@ settles, and what the coin you got cost. Change it if the trade went through at a different price.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Điền sẵn theo giá %@ hôm nay. Đây là mức ghi sổ cho cả hai chiều — lãi/lỗ mà %@ chốt lại, và giá vốn của coin bạn nhận về. Sửa lại nếu lệnh khớp ở giá khác." } } }
+    },
     "Swap coins": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đổi coin" } } }
     },
@@ -48,9 +57,6 @@
     },
     "Value of this swap": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Giá trị lần đổi này" } } }
-    },
-    "One figure settles both sides, so a swap can neither create nor lose value.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Một con số cho cả hai chiều, nên đổi coin không thể sinh ra hay làm mất giá trị." } } }
     },
     "Swapped on": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đổi ngày" } } }

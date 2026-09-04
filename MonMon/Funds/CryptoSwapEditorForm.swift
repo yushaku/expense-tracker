@@ -15,6 +15,12 @@ struct CryptoSwapEditorForm: View {
     /// The coins that can be received. Excludes the one being given, because a
     /// swap into the same coin is not a trade.
     let receivableInstruments: [FundInstrument]
+    /// The coin chosen to receive, when one has been.
+    var receivedInstrument: FundInstrument?
+    /// How much of it today's prices say the given units would buy. A
+    /// suggestion under the field, never in it.
+    var marketImpliedUnitsReceived: Decimal?
+    var onUseImpliedUnitsReceived: () -> Void = {}
     let isEditing: Bool
     let validationError: CryptoSwapFormError?
     let saveErrorMessage: LocalizedStringKey?
@@ -127,8 +133,31 @@ struct CryptoSwapEditorForm: View {
                 if let message = quantityReceivedErrorMessage {
                     validationMessage(message, id: "swap-units-received-error")
                 }
+
+                // Not filled in for you: what came back is a fact off an
+                // exchange screen, and a guess left in that box would quietly
+                // become the position. Offered to tap instead.
+                if let impliedUnitsDescription {
+                    Button(action: onUseImpliedUnitsReceived) {
+                        Text("At today's prices that is about \(impliedUnitsDescription). Use it")
+                            .font(.caption)
+                            .foregroundStyle(MonMonTheme.accent)
+                            .multilineTextAlignment(.leading)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("swap-use-implied-units")
+                }
             }
         }
+    }
+
+    /// The suggested quantity with its ticker, or `nil` when no coin is chosen
+    /// or nothing has a price to work from.
+    private var impliedUnitsDescription: String? {
+        guard let marketImpliedUnitsReceived, let receivedInstrument else {
+            return nil
+        }
+        return "\(UnitQuantity.format(marketImpliedUnitsReceived)) \(receivedInstrument.symbol)"
     }
 
     /// One field, and the reason it is one field rather than two.
@@ -171,7 +200,7 @@ struct CryptoSwapEditorForm: View {
                     exchangeRateField
                 }
 
-                Text("One figure settles both sides, so a swap can neither create nor lose value.")
+                Text(valueExplanation)
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
 
@@ -320,6 +349,20 @@ struct CryptoSwapEditorForm: View {
     }
 
     // MARK: - Derived copy
+
+    /// What this field is for, in the owner's terms rather than the schema's.
+    ///
+    /// The question it answers first is "why am I being asked this at all",
+    /// which the field's own name does not: the two quantities are facts off an
+    /// exchange screen, and this is the đồng they get booked at.
+    private var valueExplanation: LocalizedStringKey {
+        guard let symbol = givenInstrument?.symbol else {
+            return
+                "This is what both sides are booked at: the gain the coin you gave settles, and what the coin you got cost."
+        }
+        return
+            "Filled in from today's \(symbol) price. It is what both sides are booked at — the gain \(symbol) settles, and what the coin you got cost. Change it if the trade went through at a different price."
+    }
 
     /// The trade's worth in đồng, whichever currency it was typed in.
     private var valueInDong: Decimal? {

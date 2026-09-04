@@ -53,6 +53,10 @@ struct CryptoSwapEditorView: View {
     @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
     @State private var rateLoader = USDExchangeRateLoader()
+    /// The last value this view filled in. While the box still holds it, the
+    /// figure is the app's and may be re-derived; once it differs, it is the
+    /// owner's and is left alone.
+    @State private var autofilledValueText = ""
 
     init(mode: CryptoSwapEditorMode, defaultDate: Date = .now) {
         self.mode = mode
@@ -90,6 +94,13 @@ struct CryptoSwapEditorView: View {
                 givenInstrument: givenInstrument,
                 remainingUnits: displayedRemainingUnits,
                 receivableInstruments: receivableInstruments,
+                receivedInstrument: receivedInstrument,
+                marketImpliedUnitsReceived: marketImpliedUnitsReceived,
+                onUseImpliedUnitsReceived: {
+                    if let implied = marketImpliedUnitsReceived {
+                        draft.unitsReceivedText = UnitQuantity.format(implied)
+                    }
+                },
                 isEditing: mode.editedSale != nil,
                 validationError: validationError,
                 saveErrorMessage: saveErrorMessage,
@@ -98,6 +109,11 @@ struct CryptoSwapEditorView: View {
             )
             .navigationTitle(mode.editedSale == nil ? "Swap coins" : "Edit swap")
             .task { fillFromStore() }
+            // The value follows what was given up. It is re-derived while the
+            // box still holds what this view put there, and left alone the
+            // moment the owner types over it — a figure somebody corrected must
+            // not be quietly replaced by the next keystroke elsewhere.
+            .onChange(of: valueInputs) { _, _ in refillValue() }
             // See `FundEditorView.convertCost(from:to:)` for why this converts
             // rather than leaving a đồng figure to be read as dollars.
             .onChange(of: draft.valueCurrency) { previous, current in
@@ -155,6 +171,73 @@ struct CryptoSwapEditorView: View {
         givenHolding.flatMap { instruments.matching($0) }
     }
 
+    private var receivedInstrument: FundInstrument? {
+        guard let id = draft.receivedInstrumentID else {
+            return nil
+        }
+        return instruments.first { $0.id == id }
+    }
+
+    /// What the given units are worth at today's published price.
+    ///
+    /// Taken from the coin given up rather than the one received, because that
+    /// is what the trade cost: whatever the owner got for it, they gave this
+    /// much away. A trade done under the published price then shows as an
+    /// unrealized loss on the new position, which is what paying a spread is.
+    private var marketValueGiven: Decimal? {
+        guard let price = givenInstrument?.currentPricePerUnit, price > 0,
+            let units = UnitQuantity.parse(draft.unitsGivenText), units > 0
+        else {
+            return nil
+        }
+        return FundValuation.marketValue(units: units, pricePerUnit: price)
+    }
+
+    /// How much of the received coin that value buys at its published price.
+    /// Offered as a suggestion only: what was actually received is a fact off
+    /// an exchange screen, and a guess in that field would become the position.
+    private var marketImpliedUnitsReceived: Decimal? {
+        guard let marketValueGiven,
+            let price = receivedInstrument?.currentPricePerUnit,
+            price > 0
+        else {
+            return nil
+        }
+        return marketValueGiven / price
+    }
+
+    /// What the derived value depends on. Kept as one value so a single
+    /// `onChange` covers every input to it.
+    private var valueInputs: String {
+        "\(draft.unitsGivenText)|\(draft.valueCurrency.rawValue)|\(draft.exchangeRateText)"
+    }
+
+    /// Re-derives the value, unless the owner has typed over it.
+    private func refillValue() {
+        guard draft.valueText.isEmpty || draft.valueText == autofilledValueText else {
+            return
+        }
+        guard let marketValueGiven else {
+            return
+        }
+
+        let text: String
+        switch draft.valueCurrency {
+        case .vnd:
+            text = VNDCurrency.formatPlain(marketValueGiven)
+        case .usd:
+            guard let rate = VNDCurrency.parse(draft.exchangeRateText), rate > 0,
+                let dollars = USDPrice.inDollars(marketValueGiven, rate: rate)
+            else {
+                return
+            }
+            text = USDPrice.format(dollars)
+        }
+
+        draft.valueText = text
+        autofilledValueText = text
+    }
+
     /// Every coin in the catalogue but the one being given up.
     private var receivableInstruments: [FundInstrument] {
         instruments.filter { $0.kind == .crypto && $0.id != givenInstrument?.id }
@@ -186,14 +269,10 @@ struct CryptoSwapEditorView: View {
             return
         }
 
-        // Today's price for the whole lot, so the common case — swapping all of
-        // it — needs no arithmetic. Only ever fills an empty field.
+        // The whole lot, because swapping all of it is the common case. The
+        // value follows from it through the same path every later change uses.
         draft.unitsGivenText = UnitQuantity.format(displayedRemainingUnits)
-        if let price = givenInstrument?.currentPricePerUnit, price > 0 {
-            draft.valueText = VNDCurrency.formatPlain(
-                FundValuation.marketValue(units: displayedRemainingUnits, pricePerUnit: price)
-            )
-        }
+        refillValue()
     }
 
     private func convertValue(
