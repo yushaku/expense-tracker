@@ -808,6 +808,8 @@
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">purchasedAt</span><span class="ftype">Date?</span>
             <span class="badges"><span class="badge null">? &mdash; falls back to createdAt</span></span></li>
+          <li class="field"><span class="fname">purchaseExchangeRate</span><span class="ftype">Decimal?</span>
+            <span class="badges"><span class="badge null">₫ per $ when the cost was typed in dollars</span></span></li>
           <li class="field key" data-anchor="FundHolding.instrumentID">
             <span class="fname">instrumentID</span><span class="ftype">UUID?</span>
             <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span></span>
@@ -819,7 +821,7 @@
         </ul>
         <div class="derived">
           <div class="derived-label">Derived &mdash; computed, not stored</div>
-          <div class="derived-list">boughtOn &middot; remainingUnits &middot; costBasis &middot; realized / unrealized P&amp;L &middot; marketValue</div>
+          <div class="derived-list">boughtOn &middot; remainingUnits &middot; costBasis &middot; realized / unrealized P&amp;L &middot; marketValue &middot; averageCostPerUnitInDollars</div>
         </div>
       </article>
 
@@ -898,11 +900,13 @@
           <li class="field"><span class="fname">soldAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">exchangeRate</span><span class="ftype">Decimal?</span>
+            <span class="badges"><span class="badge null">₫ per $ when the price was typed in dollars</span></span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
         </ul>
         <div class="derived">
           <div class="derived-label">Derived &mdash; computed, not stored</div>
-          <div class="derived-list">proceeds &middot; costBasis(costPerUnit:) &middot; realizedProfitLoss</div>
+          <div class="derived-list">proceeds &middot; costBasis(costPerUnit:) &middot; realizedProfitLoss &middot; pricePerUnitInDollars</div>
         </div>
       </article>
 
@@ -1588,9 +1592,11 @@
           </div>
           <p class="n-desc">
             Catalogue, search and spot price for coins, asked for and answered in VND, so
-            no exchange rate enters the app. Keyed by CoinGecko's own identifier rather than
-            the ticker, because tickers collide. Unauthenticated and rate-limited; a refusal
-            is reported as such and the last known-good price stands.
+            no exchange rate enters the valuation path at all. Keyed by CoinGecko's own
+            identifier rather than the ticker, because tickers collide. It also answers with
+            the đồng price of the dollar, which fills the rate box on a coin editor as a
+            starting value. Unauthenticated and rate-limited; a refusal is reported as such
+            and the last known-good price stands.
           </p>
           <div class="n-meta">api.coingecko.com · module: market-valuation</div>
         </div>
@@ -1855,6 +1861,38 @@
       </p>
     </div>
     <div class="note">
+      <h3>Dollars are converted once, on the way in</h3>
+      <p>
+        Coins are bought in dollars and this app counts in đồng. The two meet exactly once,
+        in <code>FundDraft</code> and <code>FundSaleDraft</code>, on the way into the store.
+        <code>averageCostPerUnit</code> and <code>pricePerUnit</code> are đồng whichever
+        currency was typed, so no total, cost basis or profit figure has to ask which
+        currency it is in. What the rate fields record is only <em>how</em> the đồng figure
+        was arrived at.
+      </p>
+      <p>
+        The rate is the owner's, not a market's: coins are bought through an exchange or a
+        P2P desk whose rate is not the published one, and what has to end up in the store is
+        the đồng that actually left the account. A fetched rate is a starting value to
+        correct, never an answer.
+      </p>
+    </div>
+    <div class="note">
+      <h3>A stored rate never refreshes</h3>
+      <p>
+        <code>FundHolding.purchaseExchangeRate</code> and <code>FundSale.exchangeRate</code>
+        are read in three places, all of them data entry: the two draft initialisers that
+        reopen an editor in the currency it was typed in, and the backup document. Nothing in
+        valuation reads either. Refreshing them would move a settled cost basis &mdash; last
+        year's purchase would have cost a different amount this morning.
+      </p>
+      <p>
+        Nothing goes stale by leaving them alone, because market value never passes through a
+        rate: <code>FundInstrument.currentPricePerUnit</code> arrives from CoinGecko already
+        in đồng, and refreshes on its own fifteen-minute clock.
+      </p>
+    </div>
+    <div class="note">
       <h3>A coin's price goes stale by the clock</h3>
       <p>
         <code>TradingCalendar</code> decides staleness by session: an ETF against the last
@@ -1878,7 +1916,9 @@
       <p>
         Denormalised onto every money-bearing entity, always written from <code>VNDCurrency.code</code>.
         Nothing enforces that related records share a currency. The fund split removed one
-        copy: a holding no longer stores it and reads the instrument's instead.
+        copy: a holding no longer stores it and reads the instrument's instead. A dollar
+        entry does not change this &mdash; see the note below: the dollars are converted
+        before they reach a model, so every stored amount is still đồng.
       </p>
     </div>
     <div class="note">
