@@ -7,13 +7,14 @@
 #
 # Only main ships. The branch and clean-tree checks are here so an archive can be
 # traced back to a commit that is on main and pushed.
+#
+# Install with scripts/install-prod.sh <device-name>.
 
 set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$project_root"
 
-device_name="${1:-}"
 derived_data_path="${MONMON_PROD_DERIVED_DATA_PATH:-/tmp/MonMonProdDerivedData}"
 output_dir="${MONMON_PROD_OUTPUT_DIR:-$project_root/build/prod}"
 archive_path="$output_dir/MonMon.xcarchive"
@@ -60,19 +61,4 @@ xcodebuild \
 
 echo "archive: $archive_path"
 echo "ipa:     $output_dir/MonMon.ipa"
-
-if [[ -z "$device_name" ]]; then
-  exit 0
-fi
-
-app_path="$archive_path/Products/Applications/MonMon.app"
-bundle_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app_path/Info.plist")"
-
-xcrun devicectl device install app \
-  --device "$device_name" \
-  "$app_path"
-
-xcrun devicectl device process launch \
-  --terminate-existing \
-  --device "$device_name" \
-  "$bundle_id"
+echo "install: scripts/install-prod.sh <device-name>"

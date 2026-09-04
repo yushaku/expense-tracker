@@ -2,8 +2,6 @@
 
 MonMon is a private personal-finance app for iPhone and Mac, built with SwiftUI and SwiftData and themed with Catppuccin — Latte in light, Frappé in dark. It is single-owner and offline by default: every balance is derived from what was recorded, never from a hand-edited number, and the only network calls it ever makes are market-price lookups the owner asks for.
 
-Read the docs before the code:
-
 | Page                                                                                             | What it covers                                                                         |
 | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
 | `[docs/smart-note.html](docs/smart-note.html)`                                                   | Owner's guide — recording transactions, voice capture, statement import, reports       |
@@ -12,7 +10,7 @@ Read the docs before the code:
 | `[docs/savings.html](docs/savings.html)`                                                         | Term deposits — simple interest, the three states, withdrawals as records              |
 | `[docs/funds.html](docs/funds.html)`                                                             | Funds, ETFs and gold — immutable lots, sales, market pricing, catalogue import         |
 | `[docs/architecture.html](docs/architecture.html)`                                               | The sixteen SwiftData models, their foreign keys, system boundaries, import flow       |
-| `[docs/mcp.md](docs/mcp.md)`                                                                     | Read-only AI access, tool contract, privacy boundary, and client setup                  |
+| `[docs/mcp.md](docs/mcp.md)`                                                                     | Read-only AI access, tool contract, privacy boundary, and client setup                 |
 | `[docs/bank-transaction-auto-note-research.html](docs/bank-transaction-auto-note-research.html)` | Research behind automatic transaction notes                                            |
 
 ## Features
@@ -81,53 +79,29 @@ open MonMon.xcodeproj
 
 ### Build flavours
 
-The build configuration picks the flavour, and the flavour owns every identifier
-that decides where data lives. A dev install and a prod install on the same phone
-share nothing.
-
-|                    | Dev (`Debug`)                          | Prod (`Release`)                                                   |
-| ------------------ | -------------------------------------- | ------------------------------------------------------------------ |
-| Home screen name   | MonMon Dev                             | MonMon                                                             |
-| App icon           | `AppIconDev` (DEV band)                | `AppIcon`                                                          |
-| Bundle identifier  | `com.sonlv.monmon.local.yushaku`       | `com.sonlv.monmon.app`                                             |
-| App group          | `group.com.sonlv.monmon.local.yushaku` | `group.com.sonlv.monmon.app`                                       |
-| CloudKit container | `iCloud.monmon.dev`                    | `iCloud.monmon`                                                    |
-| Push environment   | `development`                          | `development` (see `APS_ENVIRONMENT` in `Config/Release.xcconfig`) |
-| MCP server name    | `monmon-dev`                           | `monmon`                                                            |
-
-The dev icon is derived art, not a hand-drawn second logo. Regenerate it from
-the real one with `swift scripts/make-dev-appicon.swift` whenever `AppIcon`
-changes.
-
-Those values are set in `Config/Debug.xcconfig` and `Config/Release.xcconfig`.
-Everything downstream reads them: `PRODUCT_BUNDLE_IDENTIFIER` in the project, the
-two `.entitlements` files, and the `Info.plist` keys `MonMonAppGroupIdentifier`
-and `MonMonCloudKitContainer` that `ShareViewController` and `CloudSync` read at
-runtime. Nothing hard-codes an identifier in Swift, so adding a flavour is an
-xcconfig change.
-
-A distinct bundle identifier gives each flavour its own container, which is what
-separates the SwiftData store and `UserDefaults`; the app group separates the
-share extension's statement inbox; the CloudKit container separates what syncs.
-The macOS app also embeds `Contents/Helpers/MonMonMCPServer`, signed only for the
-same App Group. MonMon writes its local MCP snapshot there; the helper never
-opens CloudKit. The two MCP server names keep dev and prod client entries
-independent.
-
 Build and install the dev flavour on the phone:
 
 ```sh
 scripts/run-iphone.sh Yushaku
 ```
 
-Build the prod flavour. The script refuses to run unless `HEAD` is a clean `main`
-matching `origin/main`, archives with the `Release` configuration, and exports an
-`.ipa` into `build/prod`. Pass a device name to also install and launch it:
+Prod (clean `main` only):
 
 ```sh
 scripts/build-prod.sh
-scripts/build-prod.sh Yushaku
+scripts/install-prod.sh Yushaku
 ```
+
+### Add a new phone (prod)
+
+Prod is development-signed, so the phone must be on the team before install works.
+
+1. Unlock the phone, plug in USB, tap **Trust**.
+2. Enable **Settings → Privacy & Security → Developer Mode**, then restart.
+3. Confirm the Mac sees it: `xcrun devicectl list devices`
+4. First install registers the UDID automatically (`-allowProvisioningDeviceRegistration`). Or add it by hand in [developer.apple.com](https://developer.apple.com/account/resources/devices/list) → Devices.
+5. `scripts/install-prod.sh "<Device Name>"`
+6. On the phone: **Settings → General → VPN & Device Management** → trust the developer certificate.
 
 Both flavours need their App ID, app group, and CloudKit container to exist in
 the developer account before signing succeeds. Xcode registers them when you add
@@ -164,34 +138,3 @@ Check Swift formatting:
 ```sh
 rtk swift format lint --strict --recursive MonMon MonMonTests MonMonShareExtension
 ```
-
-### Run on Mac
-
-1. Open `MonMon.xcodeproj`.
-2. Select the `MonMon` scheme.
-3. Select **My Mac** as the destination.
-4. Press **Command-R**.
-
-No signing team is required for the current local Mac build.
-
-### Run on iPhone Simulator
-
-1. In Xcode, open **Settings > Components** and install an iOS Simulator runtime
-   if no iPhone destination is available.
-2. Select the `MonMon` scheme and an installed iPhone Simulator.
-3. Press **Command-R**.
-
-The Simulator runtime is only needed to launch the app. The command-line SDK build
-above can compile the iOS target without it.
-
-### Run on a physical iPhone
-
-1. Sign in under **Xcode > Settings > Accounts**.
-2. Select the `MonMon` target, open **Signing & Capabilities**, and choose your
-   development team.
-3. Connect and trust the iPhone, enable Developer Mode when prompted, and select
-   the phone as the run destination.
-4. Press **Command-R**.
-
-Signing identities, provisioning profiles, and Xcode user state must remain local
-and are excluded by `.gitignore`.
