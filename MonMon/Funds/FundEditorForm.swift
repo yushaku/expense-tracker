@@ -9,7 +9,10 @@ struct FundEditorForm: View {
     /// The catalogue to pick from. A position is held in something that already
     /// exists, so the form selects rather than retypes.
     let instruments: [FundInstrument]
-    let isGold: Bool
+    /// The kinds this form is scoped to, as its editor was opened with. The
+    /// copy and the units follow from it: gold is weighed in chỉ, a coin is
+    /// counted to eight places, and a fund or ETF in whole-ish units.
+    let kinds: [FundInstrumentKind]
     let isEditing: Bool
     let validationError: FundFormError?
     let saveErrorMessage: LocalizedStringKey?
@@ -46,7 +49,7 @@ struct FundEditorForm: View {
 
     private var introduction: some View {
         HStack(spacing: 16) {
-            Image(systemName: isGold ? "seal.fill" : "chart.line.uptrend.xyaxis")
+            Image(systemName: introductionSymbol)
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(MonMonTheme.onAccent)
                 .frame(width: 46, height: 46)
@@ -54,16 +57,12 @@ struct FundEditorForm: View {
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(isGold ? "The gold you hold" : "What you hold, what it is worth")
+                Text(introductionTitle)
                     .font(.title3.weight(.semibold))
 
-                Text(
-                    isGold
-                        ? "Pick a gold product, then enter its weight in chỉ."
-                        : "Pick what you hold, then say how much of it you own."
-                )
-                .font(.subheadline)
-                .foregroundStyle(MonMonTheme.textSecondary)
+                Text(introductionDescription)
+                    .font(.subheadline)
+                    .foregroundStyle(MonMonTheme.textSecondary)
             }
         }
     }
@@ -330,9 +329,13 @@ struct FundEditorForm: View {
 
     private var instrumentErrorMessage: LocalizedStringKey? {
         guard validationError == .missingInstrument else { return nil }
-        return isGold
-            ? "Pick the gold product this position is held in."
-            : "Pick the fund or ETF this position is held in."
+        if isGold {
+            return "Pick the gold product this position is held in."
+        }
+        if isCrypto {
+            return "Pick the coin this position is held in."
+        }
+        return "Pick the fund or ETF this position is held in."
     }
 
     private var unitsErrorMessage: LocalizedStringKey? {
@@ -363,14 +366,57 @@ struct FundEditorForm: View {
     }
 
     private var emptyInstrumentText: String {
-        isGold
-            ? "No gold product in the catalogue yet. Add one from vang.today."
-            : "No fund or ETF in the catalogue yet. Add one to hold it."
+        if isGold {
+            return "No gold product in the catalogue yet. Add one from vang.today."
+        }
+        if isCrypto {
+            return "No coin in the catalogue yet. Add one from CoinGecko."
+        }
+        return "No fund or ETF in the catalogue yet. Add one to hold it."
     }
 
     private var addInstrumentTitle: String {
-        isGold ? "Add from vang.today" : "Add instrument"
+        if isGold {
+            return "Add from vang.today"
+        }
+        if isCrypto {
+            return "Add from CoinGecko"
+        }
+        return "Add instrument"
     }
+
+    private var introductionSymbol: String {
+        if isGold {
+            return "seal.fill"
+        }
+        if isCrypto {
+            return "bitcoinsign.circle.fill"
+        }
+        return "chart.line.uptrend.xyaxis"
+    }
+
+    private var introductionTitle: LocalizedStringKey {
+        if isGold {
+            return "The gold you hold"
+        }
+        if isCrypto {
+            return "The coins you hold"
+        }
+        return "What you hold, what it is worth"
+    }
+
+    private var introductionDescription: LocalizedStringKey {
+        if isGold {
+            return "Pick a gold product, then enter its weight in chỉ."
+        }
+        if isCrypto {
+            return "Pick a coin, then say how much of it you own."
+        }
+        return "Pick what you hold, then say how much of it you own."
+    }
+
+    private var isGold: Bool { kinds == [.gold] }
+    private var isCrypto: Bool { kinds == [.crypto] }
 }
 
 #if DEBUG
@@ -410,7 +456,7 @@ struct FundEditorForm: View {
                         ),
                     ],
                     instruments: instruments,
-                    isGold: false,
+                    kinds: [.fund, .etf],
                     isEditing: isEditing,
                     validationError: validationError,
                     saveErrorMessage: saveErrorMessage,

@@ -298,6 +298,7 @@
 		A00000000000000000000981 /* VangTodayQuoteProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000980 /* VangTodayQuoteProvider.swift */; };
 		A00000000000000000000983 /* VangTodayQuoteProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000982 /* VangTodayQuoteProviderTests.swift */; };
 		Z10000000000000000000202 /* CoinGeckoQuoteProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Z10000000000000000000102 /* CoinGeckoQuoteProviderTests.swift */; };
+		Z10000000000000000000203 /* FundInstrumentKindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Z10000000000000000000103 /* FundInstrumentKindTests.swift */; };
 		A00000000000000000000985 /* GoldWeight.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000984 /* GoldWeight.swift */; };
 		A00000000000000000000987 /* GoldWeightTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000986 /* GoldWeightTests.swift */; };
 		A00000000000000000000A02 /* AccountSeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000A01 /* AccountSeed.swift */; };
@@ -710,6 +711,7 @@
 		A00000000000000000000980 /* VangTodayQuoteProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VangTodayQuoteProvider.swift; sourceTree = "<group>"; };
 		A00000000000000000000982 /* VangTodayQuoteProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VangTodayQuoteProviderTests.swift; sourceTree = "<group>"; };
 		Z10000000000000000000102 /* CoinGeckoQuoteProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinGeckoQuoteProviderTests.swift; sourceTree = "<group>"; };
+		Z10000000000000000000103 /* FundInstrumentKindTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentKindTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000984 /* GoldWeight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoldWeight.swift; sourceTree = "<group>"; };
 		A00000000000000000000986 /* GoldWeightTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoldWeightTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000A01 /* AccountSeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSeed.swift; sourceTree = "<group>"; };
@@ -1255,6 +1257,7 @@
 				A00000000000000000000962 /* FundLogoCatalogueTests.swift */,
 				A00000000000000000000982 /* VangTodayQuoteProviderTests.swift */,
 				Z10000000000000000000102 /* CoinGeckoQuoteProviderTests.swift */,
+				Z10000000000000000000103 /* FundInstrumentKindTests.swift */,
 				A00000000000000000000986 /* GoldWeightTests.swift */,
 				A00000000000000000000158 /* FundSummaryTests.swift */,
 				A00000000000000000000F20 /* FundPositionGroupTests.swift */,
@@ -2065,6 +2068,7 @@
 				A00000000000000000000963 /* FundLogoCatalogueTests.swift in Sources */,
 				A00000000000000000000983 /* VangTodayQuoteProviderTests.swift in Sources */,
 				Z10000000000000000000202 /* CoinGeckoQuoteProviderTests.swift in Sources */,
+				Z10000000000000000000203 /* FundInstrumentKindTests.swift in Sources */,
 				A00000000000000000000987 /* GoldWeightTests.swift in Sources */,
 				A00000000000000000000247 /* FundSummaryTests.swift in Sources */,
 				A00000000000000000000F21 /* FundPositionGroupTests.swift in Sources */,

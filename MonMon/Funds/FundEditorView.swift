@@ -61,6 +61,7 @@ struct FundEditorView: View {
     private let mode: FundEditorMode
     private let kinds: [FundInstrumentKind]
     private let isGold: Bool
+    private let isCrypto: Bool
 
     @State private var draft: FundDraft
     @State private var validationError: FundFormError?
@@ -72,6 +73,7 @@ struct FundEditorView: View {
         self.mode = mode
         self.kinds = kinds
         isGold = kinds == [.gold]
+        isCrypto = kinds == [.crypto]
 
         switch mode {
         case .add:
@@ -100,7 +102,7 @@ struct FundEditorView: View {
                 draft: $draft,
                 accounts: accounts,
                 instruments: selectableInstruments,
-                isGold: isGold,
+                kinds: kinds,
                 isEditing: mode.editedHolding != nil,
                 validationError: validationError,
                 saveErrorMessage: saveErrorMessage,
@@ -125,13 +127,22 @@ struct FundEditorView: View {
                 }
             }
             .appSheet(isPresented: $isAddingInstrument) {
+                // Gold and coins each have one provider worth importing from,
+                // so the sheet goes straight to it. Funds and ETFs have two,
+                // and the choice belongs on the catalogue screen rather than
+                // half way through entering a position.
                 if isGold {
                     FundCatalogueImportView(
                         title: "Add Gold from vang.today",
                         importer: FundCatalogueImport(provider: VangTodayQuoteProvider())
                     )
+                } else if isCrypto {
+                    FundCatalogueImportView(
+                        title: "Add from CoinGecko",
+                        importer: FundCatalogueImport(provider: CoinGeckoQuoteProvider())
+                    )
                 } else {
-                    FundInstrumentEditorView(mode: .add)
+                    FundInstrumentEditorView(mode: .add, kinds: kinds)
                 }
             }
             .confirmationDialog(
@@ -232,6 +243,9 @@ struct FundEditorView: View {
     private var navigationTitle: String {
         if isGold {
             return mode.editedHolding == nil ? "Add gold" : "Edit gold"
+        }
+        if isCrypto {
+            return mode.editedHolding == nil ? "Add coin" : "Edit coin"
         }
         return mode.editedHolding == nil ? "Add holding" : "Edit holding"
     }
