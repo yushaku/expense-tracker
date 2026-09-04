@@ -206,6 +206,18 @@ struct FundHoldingCard: View {
 
         if hasSales {
             metrics.append(FundMetric(titleKey: soldTitle, value: soldValue))
+            if instrument?.kind == .gold {
+                metrics.append(
+                    FundMetric(
+                        titleKey: "FEE",
+                        value: VNDCurrency.format(
+                            FundSaleSummary.totalFees(
+                                of: FundSaleSummary.sales(for: holding, sales: sales)
+                            )
+                        )
+                    )
+                )
+            }
             metrics.append(
                 FundMetric(
                     titleKey: "PROCEEDS",

@@ -417,6 +417,7 @@ struct FundSaleEditorView: View {
                     soldAt: values.soldAt,
                     note: values.note,
                     currencyCode: VNDCurrency.code,
+                    exchangeRate: values.exchangeRate,
                     createdAt: .now
                 )
             )

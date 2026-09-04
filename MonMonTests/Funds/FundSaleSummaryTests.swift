@@ -33,6 +33,14 @@ struct FundSaleSummaryTests {
         #expect(allocations.reduce(0, +) == 3)
     }
 
+    @Test("Rounding never assigns a negative fee to the final lot")
+    func groupSaleFeeAllocationStaysNonnegative() {
+        let allocations = FundSaleSummary.allocateFee(2, weights: [1, 1, 1, 1])
+
+        #expect(allocations.allSatisfy { $0 >= 0 })
+        #expect(allocations.reduce(0, +) == 2)
+    }
+
     @Test("A lot nobody has sold out of is fully held")
     func untouchedLotIsFullyHeld() {
         let (_, holding) = FundTestFactory.pair(

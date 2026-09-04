@@ -386,6 +386,13 @@ private struct PayloadChecker {
             try uuid(record.proceedsAccountID)
             try date(record.soldAt)
             try currency(record.currencyCode)
+            if let encodedFee = record.fee {
+                let fee = try MonMonBackupScalar.parseDecimal(encodedFee)
+                let units = try MonMonBackupScalar.parseDecimal(record.units)
+                let price = try MonMonBackupScalar.parseDecimal(record.pricePerUnit)
+                try require(fee >= 0)
+                try require(fee < FundValuation.marketValue(units: units, pricePerUnit: price))
+            }
         }
         try validateUniqueRecords(payload.debtPayments) { record in
             try scalarIDAndDate(record.id, record.createdAt)

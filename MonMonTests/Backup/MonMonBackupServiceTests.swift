@@ -51,6 +51,7 @@ struct MonMonBackupServiceTests {
         #expect(validated.payload.fundInstruments.count == 1)
         #expect(validated.payload.fundHoldings.count == 1)
         #expect(validated.payload.fundSales.count == 1)
+        #expect(validated.payload.fundSales.single?.fee == "5")
         #expect(validated.payload.budgetJars.count == 3)
         #expect(validated.payload.goals.count == 1)
         #expect(validated.payload.tripWorkspaces.count == 1)
@@ -267,6 +268,10 @@ struct MonMonBackupServiceTests {
             destination.mainContext.fetch(FetchDescriptor<FundHolding>()).first
         )
         #expect(restoredHolding.purchaseExchangeRate == 26_058)
+        let restoredSale = try #require(
+            destination.mainContext.fetch(FetchDescriptor<FundSale>()).single
+        )
+        #expect(restoredSale.fee == 5)
         #expect(try destination.mainContext.fetchCount(FetchDescriptor<CashAccount>()) == 2)
         let restoredCredit = try #require(
             destination.mainContext.fetch(FetchDescriptor<CashAccount>()).first {
@@ -781,6 +786,7 @@ struct MonMonBackupServiceTests {
                 holdingID: holdingID,
                 units: 1,
                 pricePerUnit: 25,
+                fee: 5,
                 proceedsAccountID: bankID,
                 soldAt: instant,
                 note: "Partial",

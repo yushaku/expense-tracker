@@ -64,7 +64,8 @@ enum FundSaleSummary {
             return weights.map { _ in .zero }
         }
 
-        var allocated = Decimal.zero
+        var remainingFee = fee
+        var remainingWeight = totalWeight
         return weights.enumerated().map { index, weight in
             guard weight > 0 else {
                 return .zero
@@ -72,15 +73,16 @@ enum FundSaleSummary {
 
             let portion: Decimal
             if index == finalIndex {
-                portion = fee - allocated
+                portion = remainingFee
             } else {
-                var raw = fee * weight / totalWeight
+                var raw = remainingFee * weight / remainingWeight
                 var rounded = Decimal.zero
                 NSDecimalRound(&rounded, &raw, 0, .plain)
-                portion = rounded
+                portion = min(rounded, remainingFee)
             }
 
-            allocated += portion
+            remainingFee -= portion
+            remainingWeight -= weight
             return portion
         }
     }

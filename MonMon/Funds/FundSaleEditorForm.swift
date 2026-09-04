@@ -42,6 +42,9 @@ struct FundSaleEditorForm: View {
                     }
 
                     priceCard
+                    if isGold {
+                        feeCard
+                    }
                     outcomeCard
                     accountCard
                     detailsCard
@@ -346,6 +349,42 @@ struct FundSaleEditorForm: View {
             : "You paid \(VNDCurrency.formatUnitPrice(averageCostPerUnit)) per unit on average."
     }
 
+    private var feeCard: some View {
+        card {
+            VStack(alignment: .leading, spacing: 14) {
+                sectionHeader("Sale fee", systemImage: "minus.circle.fill")
+
+                HStack(spacing: 12) {
+                    Text("₫")
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(MonMonTheme.accent)
+                        .accessibilityHidden(true)
+
+                    VNDTextField(text: $draft.feeText, keyboard: .decimal)
+                        .textFieldStyle(.plain)
+                        .font(.system(.title2, design: .rounded, weight: .semibold))
+                        .monospacedDigit()
+                        .multilineTextAlignment(.trailing)
+                        .accessibilityLabel("Sale fee")
+                        .accessibilityIdentifier("fund-sale-fee")
+                }
+                .padding(16)
+                .background(
+                    MonMonTheme.field,
+                    in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                )
+
+                if let feeErrorMessage {
+                    validationMessage(feeErrorMessage, id: "fund-sale-fee-error")
+                }
+
+                Text("Fee or deduction charged by the shop when you sell.")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            }
+        }
+    }
+
     /// What the sale comes to, worked out live so the owner sees the profit
     /// before committing to it rather than after.
     private var outcomeCard: some View {
@@ -355,16 +394,7 @@ struct FundSaleEditorForm: View {
 
                 if let outcome {
                     FundMetricGrid(
-                        metrics: [
-                            FundMetric(
-                                titleKey: "PROCEEDS",
-                                value: VNDCurrency.format(outcome.proceeds)
-                            ),
-                            FundMetric(
-                                titleKey: "COST OF WHAT GOES",
-                                value: VNDCurrency.format(outcome.cost)
-                            ),
-                        ]
+                        metrics: outcomeMetrics(outcome)
                     )
 
                     FundProfitLossRow(
@@ -378,7 +408,7 @@ struct FundSaleEditorForm: View {
                         .foregroundStyle(MonMonTheme.textSecondary)
                 }
 
-                Text("Net worth does not move: the position turns into cash worth the same.")
+                Text("Your account receives net proceeds after the fee.")
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
@@ -386,6 +416,8 @@ struct FundSaleEditorForm: View {
     }
 
     private struct Outcome {
+        var grossProceeds: Decimal
+        var fee: Decimal
         var proceeds: Decimal
         var cost: Decimal
         var profitLoss: Decimal
@@ -395,8 +427,14 @@ struct FundSaleEditorForm: View {
     /// What the sale comes to. `nil` until both figures are there, so the card
     /// says what it needs rather than showing a confident zero.
     private var outcome: Outcome? {
-        guard let typed = UnitQuantity.parse(draft.unitsText), typed > 0,
-            let price = pricePerUnitInDong, price > 0
+        let typed: Decimal?
+        if isClosingGroup {
+            typed = remainingUnits
+        } else {
+            typed = UnitQuantity.parse(draft.unitsText)
+        }
+        guard let typed, typed > 0, let price = pricePerUnitInDong, price > 0,
+            let fee = parsedFee
         else {
             return nil
         }
@@ -406,15 +444,59 @@ struct FundSaleEditorForm: View {
         // come back to lượng before it meets the price.
         let units = isGold ? typed / GoldWeight.chiPerLuong : typed
 
-        let proceeds = FundValuation.marketValue(units: units, pricePerUnit: price)
+        let grossProceeds = FundValuation.marketValue(units: units, pricePerUnit: price)
+        guard fee < grossProceeds else {
+            return nil
+        }
+        let proceeds = grossProceeds - fee
         let cost = FundValuation.costBasis(units: units, averageCostPerUnit: averageCostPerUnit)
 
         return Outcome(
+            grossProceeds: grossProceeds,
+            fee: fee,
             proceeds: proceeds,
             cost: cost,
             profitLoss: proceeds - cost,
             returnPercent: cost > 0 ? (proceeds - cost) / cost * 100 : .zero
         )
+    }
+
+    private var parsedFee: Decimal? {
+        if draft.feeText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return .zero
+        }
+        guard let fee = VNDCurrency.parse(draft.feeText), fee >= 0 else {
+            return nil
+        }
+        return fee
+    }
+
+    private func outcomeMetrics(_ outcome: Outcome) -> [FundMetric] {
+        if isGold {
+            return [
+                FundMetric(
+                    titleKey: "GROSS PROCEEDS",
+                    value: VNDCurrency.format(outcome.grossProceeds)
+                ),
+                FundMetric(titleKey: "FEE", value: VNDCurrency.format(outcome.fee)),
+                FundMetric(
+                    titleKey: "NET PROCEEDS",
+                    value: VNDCurrency.format(outcome.proceeds)
+                ),
+                FundMetric(
+                    titleKey: "COST OF WHAT GOES",
+                    value: VNDCurrency.format(outcome.cost)
+                ),
+            ]
+        }
+
+        return [
+            FundMetric(titleKey: "PROCEEDS", value: VNDCurrency.format(outcome.proceeds)),
+            FundMetric(
+                titleKey: "COST OF WHAT GOES",
+                value: VNDCurrency.format(outcome.cost)
+            ),
+        ]
     }
 
     private var accountCard: some View {
@@ -605,6 +687,19 @@ struct FundSaleEditorForm: View {
             "Enter a valid price."
         case .nonPositivePrice:
             "Enter a price greater than zero."
+        default:
+            nil
+        }
+    }
+
+    private var feeErrorMessage: LocalizedStringKey? {
+        switch validationError {
+        case .invalidFee:
+            "Enter a valid sale fee."
+        case .negativeFee:
+            "Sale fee cannot be negative."
+        case .feeExceedsProceeds:
+            "Sale fee must be less than gross proceeds."
         default:
             nil
         }

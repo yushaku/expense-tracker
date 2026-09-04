@@ -119,7 +119,12 @@ struct FundSaleDraftTests {
             averageCostPerUnit: 20_000,
             pricePerUnit: 25_000
         )
-        let sale = FundTestFactory.sale(of: holding, units: 400, pricePerUnit: 26_000)
+        let sale = FundTestFactory.sale(
+            of: holding,
+            units: 400,
+            pricePerUnit: 26_000,
+            fee: 25_000
+        )
 
         // What the editor hands the draft: what is left, plus this sale's own
         // units, because they are about to be rewritten rather than added to.
@@ -130,7 +135,7 @@ struct FundSaleDraftTests {
 
         #expect(sale.units == 400)
         #expect(sale.pricePerUnit == 26_000)
-        #expect(sale.fee == 0)
+        #expect(sale.fee == 25_000)
     }
 
     @Test("Growing a sale past what is left is still refused while editing")

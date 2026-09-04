@@ -56,6 +56,12 @@ struct FundSaleCard: View {
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
+
+            if sale.fee > 0 {
+                Text("Sale fee: \(VNDCurrency.format(sale.fee))")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)

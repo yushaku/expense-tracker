@@ -103,6 +103,36 @@
     "swapped from": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "đổi từ" } } }
     },
+    "Enter a valid sale fee.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập phí bán hợp lệ." } } }
+    },
+    "FEE": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "PHÍ" } } }
+    },
+    "Fee or deduction charged by the shop when you sell.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phí hoặc khoản khấu trừ của tiệm khi bạn bán vàng." } } }
+    },
+    "GROSS PROCEEDS": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "TIỀN BÁN TRƯỚC PHÍ" } } }
+    },
+    "NET PROCEEDS": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "TIỀN THỰC NHẬN" } } }
+    },
+    "Sale fee": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phí bán" } } }
+    },
+    "Sale fee cannot be negative.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phí bán không được âm." } } }
+    },
+    "Sale fee must be less than gross proceeds.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phí bán phải nhỏ hơn tổng tiền bán." } } }
+    },
+    "Sale fee: %@": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phí bán: %@" } } }
+    },
+    "Your account receives net proceeds after the fee.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tài khoản nhận số tiền bán sau khi trừ phí." } } }
+    },
     "Rate at purchase, %@.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tỷ giá lúc mua, %@." } } }
     },
