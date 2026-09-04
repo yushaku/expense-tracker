@@ -1,6 +1,108 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Swap coins": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đổi coin" } } }
+    },
+    "Edit swap": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sửa lần đổi" } } }
+    },
+    "Delete this swap": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xoá lần đổi này" } } }
+    },
+    "Delete this swap?": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xoá lần đổi này?" } } }
+    },
+    "Both sides go: the coin you gave comes back into its lot, and the coin you got is removed.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Cả hai chiều đều mất: coin bạn đưa ra quay lại lô của nó, coin bạn nhận bị xoá." } } }
+    },
+    "One coin for another": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đổi coin này lấy coin khác" } } }
+    },
+    "No money leaves or arrives. What you gave settles its gain, and what you got starts at what it cost.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không có tiền ra hay vào. Coin bạn đưa ra chốt lãi/lỗ, coin bạn nhận bắt đầu từ đúng giá vốn đó." } } }
+    },
+    "You gave": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bạn đưa ra" } } }
+    },
+    "You got": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bạn nhận về" } } }
+    },
+    "Coin received": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Coin nhận về" } } }
+    },
+    "Quantity given": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số lượng đưa ra" } } }
+    },
+    "Quantity received": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số lượng nhận về" } } }
+    },
+    "%@ held in this lot.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lô này còn %@." } } }
+    },
+    "What the trade was worth": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Giá trị lần đổi" } } }
+    },
+    "Value currency": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đơn vị giá trị" } } }
+    },
+    "Value of this swap": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Giá trị lần đổi này" } } }
+    },
+    "One figure settles both sides, so a swap can neither create nor lose value.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Một con số cho cả hai chiều, nên đổi coin không thể sinh ra hay làm mất giá trị." } } }
+    },
+    "Swapped on": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đổi ngày" } } }
+    },
+    "What this settles": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lần đổi này chốt gì" } } }
+    },
+    "%@ leaves the lot at %@, and that is what the new position cost.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "%@ rời lô ở mức %@, và đó cũng là giá vốn của vị thế mới." } } }
+    },
+    "Rate at the swap, %@.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tỷ giá lúc đổi, %@." } } }
+    },
+    "Choose the coin you got.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn coin bạn nhận về." } } }
+    },
+    "Choose a different coin from the one you gave.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn một coin khác với coin bạn đưa ra." } } }
+    },
+    "Enter a valid quantity.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập số lượng hợp lệ." } } }
+    },
+    "Enter what the trade was worth, in đồng.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập giá trị lần đổi, tính bằng đồng." } } }
+    },
+    "Enter what the trade was worth, in dollars.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập giá trị lần đổi, tính bằng đô la." } } }
+    },
+    "The value must be greater than zero.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Giá trị phải lớn hơn không." } } }
+    },
+    "Enter the rate you used, in đồng per dollar.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập tỷ giá bạn đã dùng, tính bằng đồng mỗi đô la." } } }
+    },
+    "Couldn’t save this swap. Try again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không lưu được lần đổi này. Hãy thử lại." } } }
+    },
+    "Couldn’t delete this swap. Try again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không xoá được lần đổi này. Hãy thử lại." } } }
+    },
+    "This position is no longer here.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Vị thế này không còn ở đây nữa." } } }
+    },
+    "swapped": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "đã đổi" } } }
+    },
+    "for": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "lấy" } } }
+    },
+    "swapped from": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "đổi từ" } } }
+    },
     "Rate at purchase, %@.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tỷ giá lúc mua, %@." } } }
     },

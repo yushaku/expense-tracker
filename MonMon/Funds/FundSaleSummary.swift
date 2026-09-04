@@ -134,16 +134,26 @@ enum FundSaleSummary {
     ///
     /// Only ever positive. A sale is the one side of this app's cash flow that
     /// cannot reverse, because unwinding one means deleting it.
+    /// What selling paid into this account.
+    ///
+    /// A swap is skipped, because nothing was paid into anything: one coin
+    /// became another and the value never left the portfolio. Counting it here
+    /// would credit an account with đồng that does not exist, while the coin
+    /// bought still carries its value — net worth would double-count the trade.
     static func netFlow(for account: CashAccount, sales: [FundSale]) -> Decimal {
         sales.reduce(Decimal.zero) { total, sale in
-            sale.proceedsAccountID == account.id ? total + sale.proceeds : total
+            guard !sale.isSwap, sale.proceedsAccountID == account.id else {
+                return total
+            }
+            return total + sale.proceeds
         }
     }
 
     /// Every sale that paid into this account, which is what the account
-    /// deletion guard counts.
+    /// deletion guard counts. A swap paid into no account, so it never holds
+    /// one open.
     static func count(for account: CashAccount, sales: [FundSale]) -> Int {
-        sales.filter { $0.proceedsAccountID == account.id }.count
+        sales.filter { !$0.isSwap && $0.proceedsAccountID == account.id }.count
     }
 
     /// Every sale out of every lot held in one instrument, newest first. What

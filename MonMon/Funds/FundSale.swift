@@ -45,7 +45,26 @@ final class FundSale {
     /// Identifier of the cash account the proceeds landed in. Required, for the
     /// reason `DebtPayment.accountID` is: a sale that moves no money is not a
     /// sale, it is a smaller position, and that is an edit to the lot.
+    ///
+    /// Meaningless on a swap, where no cash account is involved at all. See
+    /// `swapHoldingID`, which is what every cash reader checks first.
     var proceedsAccountID: UUID = AccountSeed.unassignedID
+    /// The lot this sale bought, when it was a swap rather than a sale for cash.
+    ///
+    /// Most coin trading is not a sale into a bank account: one coin is
+    /// exchanged for another, usually a stablecoin, and no đồng moves anywhere.
+    /// Such a trade is still a disposal — the units leave the lot and the gain
+    /// on them is settled — so it is recorded as a sale. What it must not do is
+    /// pay into an account, because nothing arrived in one.
+    ///
+    /// This is the flag for that, and the link between the two legs at the same
+    /// time. `FundSaleSummary.netFlow` and `count(for:)` skip a sale carrying
+    /// one, so the swap's value stays entirely inside the portfolio: the units
+    /// sold stop being worth anything and the lot named here starts.
+    ///
+    /// `nil` for an ordinary sale, which is every sale written before swaps
+    /// existed.
+    var swapHoldingID: UUID?
     var soldAt: Date = Date(timeIntervalSince1970: 0)
     var note: String = ""
     var currencyCode: String = VNDCurrency.code
@@ -66,6 +85,7 @@ final class FundSale {
         note: String = "",
         currencyCode: String = VNDCurrency.code,
         exchangeRate: Decimal? = nil,
+        swapHoldingID: UUID? = nil,
         createdAt: Date
     ) {
         self.id = id
@@ -77,11 +97,18 @@ final class FundSale {
         self.note = note
         self.currencyCode = currencyCode
         self.exchangeRate = exchangeRate
+        self.swapHoldingID = swapHoldingID
         self.createdAt = createdAt
     }
 }
 
 extension FundSale {
+    /// Whether this disposal exchanged one coin for another rather than paying
+    /// into a cash account.
+    var isSwap: Bool {
+        swapHoldingID != nil
+    }
+
     /// The dollar price this sale was entered at, when it was entered in
     /// dollars. Derived, so it can never disagree with the đồng that reached
     /// the account.

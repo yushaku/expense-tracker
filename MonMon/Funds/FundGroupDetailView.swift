@@ -30,6 +30,7 @@ struct FundGroupDetailView: View {
 
     @State private var editorMode: FundEditorMode?
     @State private var saleEditorMode: FundSaleEditorMode?
+    @State private var swapEditorMode: CryptoSwapEditorMode?
     @State private var expandedSaleLots: Set<UUID> = []
 
     /// Passed in rather than read from the clock, so a preview and a test both
@@ -82,7 +83,34 @@ struct FundGroupDetailView: View {
         .appSheet(item: $saleEditorMode) { mode in
             FundSaleEditorView(mode: mode)
         }
+        .appSheet(item: $swapEditorMode) { mode in
+            CryptoSwapEditorView(mode: mode)
+        }
         .tint(MonMonTheme.accent)
+    }
+
+    /// The ticker a lot was swapped out of, when a swap bought it rather than
+    /// money. `nil` for an ordinary purchase.
+    private func swappedFromSymbol(for holding: FundHolding) -> String? {
+        guard let sale = CryptoSwapDraft.swapSale(forHoldingID: holding.id, in: sales),
+            let given = holdings.first(where: { $0.id == sale.holdingID })
+        else {
+            return nil
+        }
+        return instruments.matching(given)?.symbol
+    }
+
+    /// The ticker a swap bought, for the line under its card. `nil` when the
+    /// sale was an ordinary one, or when the lot it bought has been deleted.
+    private func swappedIntoSymbol(for sale: FundSale) -> String? {
+        guard let received = CryptoSwapDraft.receivedHolding(for: sale, in: holdings) else {
+            return nil
+        }
+        return instruments.matching(received)?.symbol
+    }
+
+    private var isCrypto: Bool {
+        group.instrument?.kind == .crypto
     }
 
     private var positions: [FundHolding] {
@@ -148,9 +176,11 @@ struct FundGroupDetailView: View {
                 instrument: instruments.matching(holding),
                 sales: salesFor(holding),
                 sourceAccountName: accountName(for: holding),
+                swappedFromSymbol: swappedFromSymbol(for: holding),
                 asOf: asOf,
                 onEdit: { editorMode = .edit(holding) },
                 onSell: { saleEditorMode = .sell(holding) },
+                onSwap: isCrypto ? { swapEditorMode = .swap(holding) } : nil,
                 onToggleSales: salesFor(holding).isEmpty
                     ? nil : { toggleSales(for: holding) },
                 isShowingSales: expandedSaleLots.contains(holding.id)
@@ -159,13 +189,21 @@ struct FundGroupDetailView: View {
             if expandedSaleLots.contains(holding.id) {
                 ForEach(salesFor(holding)) { sale in
                     Button {
-                        saleEditorMode = .edit(sale)
+                        // A swap is two records. Opening its sale leg in the
+                        // sale editor would edit half a trade and leave the
+                        // other half saying something else.
+                        if sale.isSwap {
+                            swapEditorMode = .edit(sale)
+                        } else {
+                            saleEditorMode = .edit(sale)
+                        }
                     } label: {
                         FundSaleCard(
                             sale: sale,
                             costPerUnit: holding.averageCostPerUnit,
                             isGold: instruments.matching(holding)?.kind == .gold,
-                            proceedsAccountName: accountName(forID: sale.proceedsAccountID)
+                            proceedsAccountName: accountName(forID: sale.proceedsAccountID),
+                            swappedIntoSymbol: swappedIntoSymbol(for: sale)
                         )
                     }
                     .buttonStyle(.plain)
