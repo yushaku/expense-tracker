@@ -677,6 +677,7 @@ private extension MonMonBackupService {
             note: record.note,
             currencyCode: record.currencyCode,
             exchangeRate: try record.exchangeRate.map(MonMonBackupScalar.parseDecimal),
+            swapHoldingID: try optionalUUID(record.swapHoldingID),
             createdAt: try MonMonBackupScalar.parseDate(record.createdAt)
         )
     }
@@ -694,6 +695,7 @@ private extension MonMonBackupService {
         model.note = record.note
         model.currencyCode = record.currencyCode
         model.exchangeRate = try record.exchangeRate.map(MonMonBackupScalar.parseDecimal)
+        model.swapHoldingID = try optionalUUID(record.swapHoldingID)
         model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
     }
 
@@ -1044,6 +1046,7 @@ struct MonMonBackupService {
             note: model.note,
             currencyCode: model.currencyCode,
             exchangeRate: model.exchangeRate.map(MonMonBackupScalar.decimal),
+            swapHoldingID: model.swapHoldingID.map(MonMonBackupScalar.uuid),
             createdAt: MonMonBackupScalar.date(model.createdAt)
         )
     }

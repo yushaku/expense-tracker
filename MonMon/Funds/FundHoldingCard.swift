@@ -16,6 +16,9 @@ struct FundHoldingCard: View {
     /// a card handed the holding alone would show a closed position as open.
     let sales: [FundSale]
     let sourceAccountName: String?
+    /// The coin this lot was swapped out of, when no money bought it. Says why
+    /// the line names no funding account.
+    var swappedFromSymbol: String?
     /// Passed in rather than read from the clock, so a preview and a test both
     /// get a stable answer for whether the price is stale.
     var asOf: Date = .now
@@ -27,6 +30,10 @@ struct FundHoldingCard: View {
     /// card loses its footer entirely rather than showing dead buttons.
     var onEdit: (() -> Void)?
     var onSell: (() -> Void)?
+    /// Offered only for coins. Most coin trading never reaches a bank account:
+    /// one coin is exchanged for another, so "Sell" alone would leave the
+    /// commonest thing the owner does with no way in.
+    var onSwap: (() -> Void)?
     /// Opens or folds away the sales beneath the card. `nil` when this lot has
     /// none, so the affordance never appears over an empty list.
     var onToggleSales: (() -> Void)?
@@ -87,7 +94,7 @@ struct FundHoldingCard: View {
     }
 
     private var hasActions: Bool {
-        onEdit != nil || onSell != nil || onToggleSales != nil
+        onEdit != nil || onSell != nil || onSwap != nil || onToggleSales != nil
     }
 
     private var actions: some View {
@@ -106,6 +113,14 @@ struct FundHoldingCard: View {
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(MonMonTheme.funds)
                     .accessibilityIdentifier("fund-sell-\(holding.id.uuidString)")
+            }
+
+            if let onSwap, !isClosed {
+                Button("Swap coins", systemImage: "arrow.left.arrow.right", action: onSwap)
+                    .buttonStyle(.plain)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.crypto)
+                    .accessibilityIdentifier("fund-swap-\(holding.id.uuidString)")
             }
 
             Spacer(minLength: 8)
@@ -288,6 +303,11 @@ struct FundHoldingCard: View {
         }
 
         let kind = instrument.kind.displayName(in: locale)
+
+        if let swappedFromSymbol {
+            let from = AppText.string("swapped from", in: locale)
+            return "\(kind) · \(bought) · \(from) \(swappedFromSymbol)"
+        }
 
         if let sourceAccountName {
             let from = AppText.string("from", in: locale)

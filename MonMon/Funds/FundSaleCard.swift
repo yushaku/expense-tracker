@@ -11,13 +11,16 @@ struct FundSaleCard: View {
     let costPerUnit: Decimal
     let isGold: Bool
     let proceedsAccountName: String?
+    /// The coin a swap bought, when this disposal was a swap. `nil` for a sale
+    /// that paid into an account.
+    var swappedIntoSymbol: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 12) {
-                Image(systemName: "arrow.up.right")
+                Image(systemName: sale.isSwap ? "arrow.left.arrow.right" : "arrow.up.right")
                     .font(.caption.weight(.bold))
-                    .foregroundStyle(MonMonTheme.funds)
+                    .foregroundStyle(sale.isSwap ? MonMonTheme.crypto : MonMonTheme.funds)
                     .frame(width: 32, height: 32)
                     .background(MonMonTheme.funds.opacity(0.16), in: Circle())
                     .accessibilityHidden(true)
@@ -91,6 +94,16 @@ struct FundSaleCard: View {
     private var subtitle: String {
         let day = TransactionPeriod.day(sale.soldAt, in: locale)
         let price = VNDCurrency.formatUnitPrice(sale.pricePerUnit)
+
+        // A swap says which coin it became rather than naming an account,
+        // because no account was involved.
+        if sale.isSwap {
+            guard let swappedIntoSymbol else {
+                return "\(day) · \(price) · \(AppText.string("swapped", in: locale))"
+            }
+            let forWord = AppText.string("for", in: locale)
+            return "\(day) · \(price) · \(forWord) \(swappedIntoSymbol)"
+        }
 
         guard let proceedsAccountName else {
             return "\(day) · \(price)"

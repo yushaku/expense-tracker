@@ -422,6 +422,10 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         /// Đồng per dollar, when the price was typed in dollars. Optional for
         /// the reason `FundHoldingRecord.purchaseExchangeRate` is.
         var exchangeRate: String?
+        /// The lot this disposal bought, when it was a swap rather than a sale
+        /// for cash. Absent on every ordinary sale, and on every backup written
+        /// before swaps existed.
+        var swapHoldingID: String?
         var createdAt: String
     }
 
