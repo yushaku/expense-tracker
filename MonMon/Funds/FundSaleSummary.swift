@@ -47,6 +47,46 @@ enum FundSaleSummary {
         }
     }
 
+    static func totalFees(of sales: [FundSale]) -> Decimal {
+        sales.reduce(Decimal.zero) { $0 + $1.fee }
+    }
+
+    /// Splits one transaction fee across several lot-level sale records. The
+    /// final positive-weight lot receives the rounding remainder so the stored
+    /// fees always add back to the single amount the owner entered.
+    static func allocateFee(_ fee: Decimal, weights: [Decimal]) -> [Decimal] {
+        let totalWeight = weights.reduce(Decimal.zero) { total, weight in
+            total + max(weight, .zero)
+        }
+        guard fee > 0, totalWeight > 0,
+            let finalIndex = weights.lastIndex(where: { $0 > 0 })
+        else {
+            return weights.map { _ in .zero }
+        }
+
+        var remainingFee = fee
+        var remainingWeight = totalWeight
+        return weights.enumerated().map { index, weight in
+            guard weight > 0 else {
+                return .zero
+            }
+
+            let portion: Decimal
+            if index == finalIndex {
+                portion = remainingFee
+            } else {
+                var raw = remainingFee * weight / remainingWeight
+                var rounded = Decimal.zero
+                NSDecimalRound(&rounded, &raw, 0, .plain)
+                portion = min(rounded, remainingFee)
+            }
+
+            remainingFee -= portion
+            remainingWeight -= weight
+            return portion
+        }
+    }
+
     static func realizedProfitLoss(for holding: FundHolding, sales: [FundSale]) -> Decimal {
         sales.reduce(Decimal.zero) { total, sale in
             guard sale.holdingID == holding.id else {

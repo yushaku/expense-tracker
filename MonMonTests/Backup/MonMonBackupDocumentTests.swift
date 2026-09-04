@@ -206,6 +206,32 @@ struct MonMonBackupDocumentTests {
         #expect(record.purchaseExchangeRate == "26058")
     }
 
+    @Test("A legacy fund sale without a fee still decodes")
+    func legacyFundSaleRecordDecodes() throws {
+        let data = Data(
+            #"""
+            {
+              "id": "00000000-0000-0000-0000-000000000005",
+              "holdingID": null,
+              "units": "1",
+              "pricePerUnit": "150000000",
+              "proceedsAccountID": "00000000-0000-0000-0000-000000000006",
+              "soldAt": "2026-09-04T09:31:10.000Z",
+              "note": "",
+              "currencyCode": "VND",
+              "createdAt": "2026-09-04T09:31:10.000Z"
+            }
+            """#.utf8
+        )
+
+        let record = try JSONDecoder().decode(
+            MonMonBackupPayload.FundSaleRecord.self,
+            from: data
+        )
+
+        #expect(record.fee == nil)
+    }
+
     @Test("A legacy transaction record without an income snapshot still decodes")
     func legacyTransactionRecordDecodes() throws {
         let data = Data(

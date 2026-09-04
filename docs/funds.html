@@ -619,6 +619,7 @@
       <p class="section-kicker">07 — Vàng</p>
       <h2>Người dùng nhập theo chỉ, hệ thống lưu theo lượng</h2>
       <p>Tiệm vàng yết giá theo lượng, nên lượng là đơn vị được lưu. Ô nhập nhận số chỉ, vì đó là cách người dùng quen diễn đạt. <code>GoldWeight</code> nằm đúng tại ranh giới này: form thực hiện quy đổi, store thì không. Lệnh bán vàng cũng được ghi theo lượng, không bao giờ theo chỉ.</p>
+      <p>PnL chưa thực hiện dùng giá mua vào hiện tại của tiệm, nên chênh lệch mua–bán xuất hiện ngay sau khi mua mà không cần giả định thêm một khoản phí mua. Nếu tiệm thực sự khấu trừ phí kiểm định, ép vỉ hoặc khoản tương tự lúc bán, người dùng ghi khoản đó trên lệnh bán. Tiền thực nhận và PnL đã thực hiện cùng giảm đúng bằng phí; khi đóng nhiều lot trong một thao tác, tổng phí chỉ được tính một lần rồi phân bổ theo khối lượng.</p>
 
       <figure>
         <span class="fig-label">Hình 8 — Quy đổi và giá hai chiều</span>

@@ -13,7 +13,7 @@ struct FundSaleEditorForm: View {
     /// What one unit cost the owner. What the live readout measures against.
     let averageCostPerUnit: Decimal
     let accounts: [CashAccount]
-    let isGold: Bool
+    let policy: FundInstrumentPolicy
     /// Whether this closes every open lot in the fund at once, rather than the
     /// single lot the card was opened from.
     let isClosingGroup: Bool
@@ -42,6 +42,9 @@ struct FundSaleEditorForm: View {
                     }
 
                     priceCard
+                    if policy.fee != nil {
+                        feeCard
+                    }
                     outcomeCard
                     accountCard
                     detailsCard
@@ -112,7 +115,7 @@ struct FundSaleEditorForm: View {
             VStack(alignment: .leading, spacing: 14) {
                 HStack {
                     sectionHeader(
-                        isGold ? "Weight to sell" : "Units to sell",
+                        policy.quantity.saleFieldTitle,
                         systemImage: "scalemass.fill"
                     )
 
@@ -133,9 +136,9 @@ struct FundSaleEditorForm: View {
                         .textFieldStyle(.plain)
                         .font(.system(.title2, design: .rounded, weight: .semibold))
                         .monospacedDigit()
-                        .accessibilityLabel(isGold ? "Weight" : "Units")
+                        .accessibilityLabel(policy.quantity.accessibilityLabel)
 
-                    Text(isGold ? "chỉ" : "units")
+                    Text(policy.quantity.entryUnitLabel)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(MonMonTheme.textSecondary)
                 }
@@ -286,8 +289,7 @@ struct FundSaleEditorForm: View {
         return "Rate at sale, \(TransactionPeriod.day(draft.soldAt, in: locale))."
     }
 
-    /// Coins are sold for dollars; Vietnamese funds, ETFs and gold are not.
-    private var offersDollarEntry: Bool { instrument?.kind == .crypto }
+    private var offersDollarEntry: Bool { policy.allowsDollarPriceEntry }
 
     /// The đồng the typed dollars come to, shown before anything is stored.
     private var convertedPrice: String? {
@@ -328,22 +330,55 @@ struct FundSaleEditorForm: View {
     }
 
     private var priceTitle: LocalizedStringKey {
-        if isGold {
-            return "Price per lượng"
-        }
-        if offersDollarEntry {
-            return "Price per coin"
-        }
-        return "Price per unit"
+        LocalizedStringKey(policy.salePriceTitleKey)
     }
 
     /// Gold is quoted from the shop's side, so the figure the app already holds
     /// is what the shop pays — which is exactly what the owner receives. Saying
     /// so stops the sell price being read as the number on the shop's window.
     private var priceCaption: LocalizedStringKey {
-        isGold
-            ? "Filled in from the shop's buy price — what the shop pays you, not what it charges."
-            : "You paid \(VNDCurrency.formatUnitPrice(averageCostPerUnit)) per unit on average."
+        switch policy.quoteStyle {
+        case .shopBuy:
+            "Filled in from the shop's buy price — what the shop pays you, not what it charges."
+        case .averageCost:
+            "You paid \(VNDCurrency.formatUnitPrice(averageCostPerUnit)) per unit on average."
+        }
+    }
+
+    private var feeCard: some View {
+        card {
+            VStack(alignment: .leading, spacing: 14) {
+                sectionHeader("Sale fee", systemImage: "minus.circle.fill")
+
+                HStack(spacing: 12) {
+                    Text("₫")
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(MonMonTheme.accent)
+                        .accessibilityHidden(true)
+
+                    VNDTextField(text: $draft.feeText, keyboard: .decimal)
+                        .textFieldStyle(.plain)
+                        .font(.system(.title2, design: .rounded, weight: .semibold))
+                        .monospacedDigit()
+                        .multilineTextAlignment(.trailing)
+                        .accessibilityLabel("Sale fee")
+                        .accessibilityIdentifier("fund-sale-fee")
+                }
+                .padding(16)
+                .background(
+                    MonMonTheme.field,
+                    in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                )
+
+                if let feeErrorMessage {
+                    validationMessage(feeErrorMessage, id: "fund-sale-fee-error")
+                }
+
+                Text("Fee or deduction charged by the shop when you sell.")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            }
+        }
     }
 
     /// What the sale comes to, worked out live so the owner sees the profit
@@ -355,16 +390,7 @@ struct FundSaleEditorForm: View {
 
                 if let outcome {
                     FundMetricGrid(
-                        metrics: [
-                            FundMetric(
-                                titleKey: "PROCEEDS",
-                                value: VNDCurrency.format(outcome.proceeds)
-                            ),
-                            FundMetric(
-                                titleKey: "COST OF WHAT GOES",
-                                value: VNDCurrency.format(outcome.cost)
-                            ),
-                        ]
+                        metrics: outcomeMetrics(outcome)
                     )
 
                     FundProfitLossRow(
@@ -378,14 +404,22 @@ struct FundSaleEditorForm: View {
                         .foregroundStyle(MonMonTheme.textSecondary)
                 }
 
-                Text("Net worth does not move: the position turns into cash worth the same.")
+                Text(outcomeCaption)
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
         }
     }
 
+    private var outcomeCaption: LocalizedStringKey {
+        policy.fee != nil
+            ? "Your account receives net proceeds after the fee."
+            : "Net worth does not move: the position turns into cash worth the same."
+    }
+
     private struct Outcome {
+        var grossProceeds: Decimal
+        var fee: Decimal
         var proceeds: Decimal
         var cost: Decimal
         var profitLoss: Decimal
@@ -395,26 +429,73 @@ struct FundSaleEditorForm: View {
     /// What the sale comes to. `nil` until both figures are there, so the card
     /// says what it needs rather than showing a confident zero.
     private var outcome: Outcome? {
-        guard let typed = UnitQuantity.parse(draft.unitsText), typed > 0,
-            let price = pricePerUnitInDong, price > 0
+        let typed: Decimal?
+        if isClosingGroup {
+            typed = remainingUnits
+        } else {
+            typed = UnitQuantity.parse(draft.unitsText)
+        }
+        guard let typed, typed > 0, let price = pricePerUnitInDong, price > 0,
+            let fee = parsedFee
         else {
             return nil
         }
 
-        // Gold is typed in chỉ but priced and stored per lượng — the same
-        // split `FundEditorForm` already lives with — so the quantity has to
-        // come back to lượng before it meets the price.
-        let units = isGold ? typed / GoldWeight.chiPerLuong : typed
+        let units = policy.quantity.storedUnits(fromDisplayed: typed)
 
-        let proceeds = FundValuation.marketValue(units: units, pricePerUnit: price)
+        let grossProceeds = FundValuation.marketValue(units: units, pricePerUnit: price)
+        guard fee < grossProceeds else {
+            return nil
+        }
+        let proceeds = grossProceeds - fee
         let cost = FundValuation.costBasis(units: units, averageCostPerUnit: averageCostPerUnit)
 
         return Outcome(
+            grossProceeds: grossProceeds,
+            fee: fee,
             proceeds: proceeds,
             cost: cost,
             profitLoss: proceeds - cost,
             returnPercent: cost > 0 ? (proceeds - cost) / cost * 100 : .zero
         )
+    }
+
+    private var parsedFee: Decimal? {
+        if draft.feeText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return .zero
+        }
+        guard let fee = VNDCurrency.parse(draft.feeText), fee >= 0 else {
+            return nil
+        }
+        return fee
+    }
+
+    private func outcomeMetrics(_ outcome: Outcome) -> [FundMetric] {
+        if policy.fee != nil {
+            return [
+                FundMetric(
+                    titleKey: "GROSS PROCEEDS",
+                    value: VNDCurrency.format(outcome.grossProceeds)
+                ),
+                FundMetric(titleKey: "FEE", value: VNDCurrency.format(outcome.fee)),
+                FundMetric(
+                    titleKey: "NET PROCEEDS",
+                    value: VNDCurrency.format(outcome.proceeds)
+                ),
+                FundMetric(
+                    titleKey: "COST OF WHAT GOES",
+                    value: VNDCurrency.format(outcome.cost)
+                ),
+            ]
+        }
+
+        return [
+            FundMetric(titleKey: "PROCEEDS", value: VNDCurrency.format(outcome.proceeds)),
+            FundMetric(
+                titleKey: "COST OF WHAT GOES",
+                value: VNDCurrency.format(outcome.cost)
+            ),
+        ]
     }
 
     private var accountCard: some View {
@@ -506,9 +587,7 @@ struct FundSaleEditorForm: View {
     }
 
     private func quantityDescription(_ quantity: Decimal) -> String {
-        isGold
-            ? "\(UnitQuantity.format(quantity)) \(AppText.string("chỉ", in: locale))"
-            : "\(UnitQuantity.format(quantity)) \(AppText.string("units", in: locale))"
+        policy.quantity.entryDescription(quantity, locale: locale)
     }
 
     @ViewBuilder
@@ -589,7 +668,7 @@ struct FundSaleEditorForm: View {
     private var quantityErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidUnits:
-            isGold ? "Enter a valid weight." : "Enter a valid number of units."
+            policy.quantity.invalidEntryMessage
         case .nonPositiveUnits:
             "Enter a quantity greater than zero."
         case .exceedsRemainingUnits:
@@ -605,6 +684,19 @@ struct FundSaleEditorForm: View {
             "Enter a valid price."
         case .nonPositivePrice:
             "Enter a price greater than zero."
+        default:
+            nil
+        }
+    }
+
+    private var feeErrorMessage: LocalizedStringKey? {
+        switch validationError {
+        case .invalidFee:
+            "Enter a valid sale fee."
+        case .negativeFee:
+            "Sale fee cannot be negative."
+        case .feeExceedsProceeds:
+            "Sale fee must be less than gross proceeds."
         default:
             nil
         }

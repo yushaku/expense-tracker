@@ -206,6 +206,18 @@ struct FundHoldingCard: View {
 
         if hasSales {
             metrics.append(FundMetric(titleKey: soldTitle, value: soldValue))
+            if instrumentPolicy.fee != nil {
+                metrics.append(
+                    FundMetric(
+                        titleKey: "FEE",
+                        value: VNDCurrency.format(
+                            FundSaleSummary.totalFees(
+                                of: FundSaleSummary.sales(for: holding, sales: sales)
+                            )
+                        )
+                    )
+                )
+            }
             metrics.append(
                 FundMetric(
                     titleKey: "PROCEEDS",
@@ -257,36 +269,31 @@ struct FundHoldingCard: View {
     }
 
     private var soldTitle: String {
-        instrument?.kind == .gold ? "SOLD WEIGHT" : "SOLD UNITS"
+        instrumentPolicy.quantity.soldMetricTitle
     }
 
     private var soldValue: String {
         let sold = FundSaleSummary.unitsSold(for: holding, sales: sales)
-        return instrument?.kind == .gold
-            ? GoldWeight.label(luong: sold) : UnitQuantity.format(sold)
+        return instrumentPolicy.quantity.summaryValue(storedUnits: sold)
     }
 
     private var priceTitle: String {
-        switch instrument?.kind {
-        case .etf:
-            "PRICE"
-        case .gold:
-            "BUY"
-        default:
-            "NAV"
-        }
+        instrumentPolicy.priceMetricTitle
     }
 
     private var quantityTitle: String {
-        instrument?.kind == .gold ? "WEIGHT" : "UNITS"
+        instrumentPolicy.quantity.metricTitle
     }
 
     /// What is still held, not what was bought. The bought figure is still
     /// reachable — it is this plus the sold column beside it — and showing it
     /// here would put a number on the card that no longer describes anything.
     private var quantityValue: String {
-        instrument?.kind == .gold
-            ? GoldWeight.label(luong: remainingUnits) : UnitQuantity.format(remainingUnits)
+        instrumentPolicy.quantity.summaryValue(storedUnits: remainingUnits)
+    }
+
+    private var instrumentPolicy: FundInstrumentPolicy {
+        instrument?.kind.policy ?? FundInstrumentKind.fund.policy
     }
 
     /// Built as a plain `String`, so every word in it has to be resolved here.

@@ -9,7 +9,7 @@ struct FundSaleCard: View {
     /// What the sold units cost. Comes from the lot rather than the sale, so the
     /// two can never disagree about it.
     let costPerUnit: Decimal
-    let isGold: Bool
+    let policy: FundInstrumentPolicy
     let proceedsAccountName: String?
     /// The coin a swap bought, when this disposal was a swap. `nil` for a sale
     /// that paid into an account.
@@ -56,6 +56,12 @@ struct FundSaleCard: View {
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
+
+            if sale.fee > 0 {
+                Text("Sale fee: \(VNDCurrency.format(sale.fee))")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
@@ -86,9 +92,7 @@ struct FundSaleCard: View {
     }
 
     private var quantityDescription: String {
-        isGold
-            ? GoldWeight.label(luong: sale.units)
-            : "\(UnitQuantity.format(sale.units)) \(AppText.string("units", in: locale))"
+        policy.quantity.saleDescription(storedUnits: sale.units, locale: locale)
     }
 
     private var subtitle: String {

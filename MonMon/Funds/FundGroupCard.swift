@@ -104,23 +104,19 @@ struct FundGroupCard: View {
     }
 
     private var priceTitle: String {
-        switch group.instrument?.kind {
-        case .etf:
-            "PRICE"
-        case .gold:
-            "BUY"
-        default:
-            "NAV"
-        }
+        instrumentPolicy.priceMetricTitle
     }
 
     private var quantityTitle: String {
-        group.instrument?.kind == .gold ? "WEIGHT" : "UNITS"
+        instrumentPolicy.quantity.metricTitle
     }
 
     private var quantityValue: String {
-        group.instrument?.kind == .gold
-            ? GoldWeight.label(luong: group.units) : UnitQuantity.format(group.units)
+        instrumentPolicy.quantity.summaryValue(storedUnits: group.units)
+    }
+
+    private var instrumentPolicy: FundInstrumentPolicy {
+        group.instrument?.kind.policy ?? FundInstrumentKind.fund.policy
     }
 
     /// How many purchases went into the position, and nothing else. The kind

@@ -672,6 +672,7 @@ private extension MonMonBackupService {
             holdingID: try optionalUUID(record.holdingID),
             units: try MonMonBackupScalar.parseDecimal(record.units),
             pricePerUnit: try MonMonBackupScalar.parseDecimal(record.pricePerUnit),
+            fee: try record.fee.map(MonMonBackupScalar.parseDecimal) ?? .zero,
             proceedsAccountID: try MonMonBackupScalar.parseUUID(record.proceedsAccountID),
             soldAt: try MonMonBackupScalar.parseDate(record.soldAt),
             note: record.note,
@@ -696,6 +697,7 @@ private extension MonMonBackupService {
         model.currencyCode = record.currencyCode
         model.exchangeRate = try record.exchangeRate.map(MonMonBackupScalar.parseDecimal)
         model.swapHoldingID = try optionalUUID(record.swapHoldingID)
+        model.fee = try record.fee.map(MonMonBackupScalar.parseDecimal) ?? .zero
         model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
     }
 
@@ -1047,6 +1049,7 @@ struct MonMonBackupService {
             currencyCode: model.currencyCode,
             exchangeRate: model.exchangeRate.map(MonMonBackupScalar.decimal),
             swapHoldingID: model.swapHoldingID.map(MonMonBackupScalar.uuid),
+            fee: MonMonBackupScalar.decimal(model.fee),
             createdAt: MonMonBackupScalar.date(model.createdAt)
         )
     }

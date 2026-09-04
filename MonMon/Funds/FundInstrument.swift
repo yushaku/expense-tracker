@@ -91,16 +91,7 @@ extension FundInstrument {
     /// How this instrument's price should be described in a sentence:
     /// "NAV 21 Aug 2026 · Fmarket", or "Entered by hand".
     var priceLabelKey: String {
-        switch kind {
-        case .fund:
-            "NAV"
-        case .etf:
-            "Close"
-        case .gold:
-            "Buy"
-        case .crypto:
-            "Price"
-        }
+        kind.policy.marketPriceLabelKey
     }
 
     func priceLabel(in locale: Locale) -> String {

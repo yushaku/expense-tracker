@@ -5,6 +5,42 @@ import Testing
 
 @Suite("Fund sale summary")
 struct FundSaleSummaryTests {
+    @Test("Sale fees reduce proceeds and realized PnL")
+    func saleFeesReduceProceedsAndPnL() {
+        let (_, holding) = FundTestFactory.pair(
+            units: 10,
+            averageCostPerUnit: 100,
+            pricePerUnit: 150
+        )
+        let sale = FundTestFactory.sale(
+            of: holding,
+            units: 4,
+            pricePerUnit: 150,
+            fee: 50
+        )
+
+        #expect(FundSaleSummary.totalFees(of: [sale]) == 50)
+        #expect(FundSaleSummary.totalProceeds(of: [sale]) == 550)
+        #expect(FundSaleSummary.realizedProfitLoss(for: holding, sales: [sale]) == 150)
+        #expect(holding.remainingCostBasis(sales: [sale]) == 600)
+    }
+
+    @Test("A group sale allocates one fee exactly across its lots")
+    func groupSaleFeeAllocationIsExact() {
+        let allocations = FundSaleSummary.allocateFee(3, weights: [1, 2])
+
+        #expect(allocations == [1, 2])
+        #expect(allocations.reduce(0, +) == 3)
+    }
+
+    @Test("Rounding never assigns a negative fee to the final lot")
+    func groupSaleFeeAllocationStaysNonnegative() {
+        let allocations = FundSaleSummary.allocateFee(2, weights: [1, 1, 1, 1])
+
+        #expect(allocations.allSatisfy { $0 >= 0 })
+        #expect(allocations.reduce(0, +) == 2)
+    }
+
     @Test("A lot nobody has sold out of is fully held")
     func untouchedLotIsFullyHeld() {
         let (_, holding) = FundTestFactory.pair(

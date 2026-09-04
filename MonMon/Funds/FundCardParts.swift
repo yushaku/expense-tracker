@@ -215,7 +215,7 @@ struct FundPriceStatusRow: View {
     }
 
     private var spreadDescription: String? {
-        guard let instrument, instrument.kind == .gold else {
+        guard let instrument, instrument.kind.policy.quoteStyle == .shopBuy else {
             return nil
         }
         let buy = VNDCurrency.formatUnitPrice(instrument.currentPricePerUnit)

@@ -10,12 +10,14 @@ struct FundSaleDraftTests {
     private func makeDraft(
         unitsText: String = "100",
         pricePerUnitText: String = "26.000",
+        feeText: String = "",
         proceedsAccountID: UUID? = UUID(),
         note: String = ""
     ) -> FundSaleDraft {
         FundSaleDraft(
             unitsText: unitsText,
             pricePerUnitText: pricePerUnitText,
+            feeText: feeText,
             soldAt: soldAt,
             proceedsAccountID: proceedsAccountID,
             note: note
@@ -30,10 +32,33 @@ struct FundSaleDraftTests {
 
         #expect(values.units == 100)
         #expect(values.pricePerUnit == 26_000)
+        #expect(values.fee == 0)
         #expect(values.proceedsAccountID == accountID)
         #expect(values.soldAt == soldAt)
         #expect(values.note == "took profit")
         #expect(values.proceeds == 2_600_000)
+    }
+
+    @Test("A sale fee is optional and reduces net proceeds")
+    func saleFeeReducesNetProceeds() throws {
+        let values = try makeDraft(feeText: "100.000").validate(remainingUnits: 500)
+
+        #expect(values.fee == 100_000)
+        #expect(values.grossProceeds == 2_600_000)
+        #expect(values.proceeds == 2_500_000)
+    }
+
+    @Test("An invalid, negative, or excessive sale fee is refused")
+    func badSaleFeeIsRefused() {
+        #expect(throws: FundSaleFormError.invalidFee) {
+            try makeDraft(feeText: "abc").validate(remainingUnits: 500)
+        }
+        #expect(throws: FundSaleFormError.negativeFee) {
+            try makeDraft(feeText: "-1").validate(remainingUnits: 500)
+        }
+        #expect(throws: FundSaleFormError.feeExceedsProceeds) {
+            try makeDraft(feeText: "2.600.000").validate(remainingUnits: 500)
+        }
     }
 
     @Test("Selling exactly what is left is allowed")
@@ -94,7 +119,12 @@ struct FundSaleDraftTests {
             averageCostPerUnit: 20_000,
             pricePerUnit: 25_000
         )
-        let sale = FundTestFactory.sale(of: holding, units: 400, pricePerUnit: 26_000)
+        let sale = FundTestFactory.sale(
+            of: holding,
+            units: 400,
+            pricePerUnit: 26_000,
+            fee: 25_000
+        )
 
         // What the editor hands the draft: what is left, plus this sale's own
         // units, because they are about to be rewritten rather than added to.
@@ -105,6 +135,7 @@ struct FundSaleDraftTests {
 
         #expect(sale.units == 400)
         #expect(sale.pricePerUnit == 26_000)
+        #expect(sale.fee == 25_000)
     }
 
     @Test("Growing a sale past what is left is still refused while editing")

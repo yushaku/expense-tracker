@@ -42,6 +42,8 @@ final class FundSale {
     /// What one unit fetched. The owner's own figure, so a later price refresh
     /// cannot move a sale that already happened.
     var pricePerUnit: Decimal = Decimal.zero
+    /// A fee or deduction charged when this sale was completed.
+    var fee: Decimal = Decimal.zero
     /// Identifier of the cash account the proceeds landed in. Required, for the
     /// reason `DebtPayment.accountID` is: a sale that moves no money is not a
     /// sale, it is a smaller position, and that is an edit to the lot.
@@ -80,6 +82,7 @@ final class FundSale {
         holdingID: UUID?,
         units: Decimal,
         pricePerUnit: Decimal,
+        fee: Decimal = .zero,
         proceedsAccountID: UUID,
         soldAt: Date,
         note: String = "",
@@ -92,6 +95,7 @@ final class FundSale {
         self.holdingID = holdingID
         self.units = units
         self.pricePerUnit = pricePerUnit
+        self.fee = fee
         self.proceedsAccountID = proceedsAccountID
         self.soldAt = soldAt
         self.note = note
@@ -119,10 +123,14 @@ extension FundSale {
         return USDPrice.inDollars(pricePerUnit, rate: exchangeRate)
     }
 
-    /// What the sale brought in, rounded to the đồng like every other amount
-    /// that reaches a cash balance.
-    var proceeds: Decimal {
+    /// Sale value before fees, rounded to the đồng.
+    var grossProceeds: Decimal {
         FundValuation.marketValue(units: units, pricePerUnit: pricePerUnit)
+    }
+
+    /// What actually reaches the cash account after the sale fee.
+    var proceeds: Decimal {
+        grossProceeds - fee
     }
 
     /// What the sold units cost, given the lot they came out of. The cost is
@@ -134,10 +142,6 @@ extension FundSale {
     }
 
     func realizedProfitLoss(costPerUnit: Decimal) -> Decimal {
-        FundValuation.realizedProfitLoss(
-            units: units,
-            costPerUnit: costPerUnit,
-            salePricePerUnit: pricePerUnit
-        )
+        proceeds - costBasis(costPerUnit: costPerUnit)
     }
 }

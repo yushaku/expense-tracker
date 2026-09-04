@@ -62,8 +62,7 @@ struct FundEditorView: View {
 
     private let mode: FundEditorMode
     private let kinds: [FundInstrumentKind]
-    private let isGold: Bool
-    private let isCrypto: Bool
+    private let instrumentPolicy: FundInstrumentPolicy
 
     @State private var draft: FundDraft
     @State private var validationError: FundFormError?
@@ -75,17 +74,17 @@ struct FundEditorView: View {
     init(mode: FundEditorMode, kinds: [FundInstrumentKind]) {
         self.mode = mode
         self.kinds = kinds
-        isGold = kinds == [.gold]
-        isCrypto = kinds == [.crypto]
+        let policy = (kinds.first ?? .fund).policy
+        instrumentPolicy = policy
 
         switch mode {
         case .add:
             _draft = State(initialValue: FundDraft())
         case .edit(let holding):
             var initial = FundDraft(holding: holding)
-            if kinds == [.gold] {
-                initial.unitsText = GoldWeight.formatChi(luong: holding.units)
-            }
+            initial.unitsText = UnitQuantity.format(
+                policy.quantity.displayedUnits(fromStored: holding.units)
+            )
             _draft = State(initialValue: initial)
         }
     }
@@ -142,17 +141,18 @@ struct FundEditorView: View {
                 // so the sheet goes straight to it. Funds and ETFs have two,
                 // and the choice belongs on the catalogue screen rather than
                 // half way through entering a position.
-                if isGold {
+                switch instrumentPolicy.editor.catalogueRoute {
+                case .goldCatalogue:
                     FundCatalogueImportView(
                         title: "Add Gold from vang.today",
                         importer: FundCatalogueImport(provider: VangTodayQuoteProvider())
                     )
-                } else if isCrypto {
+                case .cryptoCatalogue:
                     FundCatalogueImportView(
                         title: "Add from CoinGecko",
                         importer: FundCatalogueImport(provider: CoinGeckoQuoteProvider())
                     )
-                } else {
+                case .instrumentEditor:
                     FundInstrumentEditorView(mode: .add, kinds: kinds)
                 }
             }
@@ -296,21 +296,17 @@ struct FundEditorView: View {
     }
 
     private var navigationTitle: String {
-        if isGold {
-            return mode.editedHolding == nil ? "Add gold" : "Edit gold"
-        }
-        if isCrypto {
-            return mode.editedHolding == nil ? "Add coin" : "Edit coin"
-        }
-        return mode.editedHolding == nil ? "Add holding" : "Edit holding"
+        mode.editedHolding == nil
+            ? instrumentPolicy.editor.newTitleKey : instrumentPolicy.editor.editTitleKey
     }
 
     private var draftForSaving: FundDraft {
-        guard isGold, let luong = GoldWeight.parseChi(draft.unitsText) else {
+        guard let units = instrumentPolicy.quantity.storedUnits(fromEntryText: draft.unitsText)
+        else {
             return draft
         }
         var converted = draft
-        converted.unitsText = NSDecimalNumber(decimal: luong).stringValue
+        converted.unitsText = NSDecimalNumber(decimal: units).stringValue
         return converted
     }
 

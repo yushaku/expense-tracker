@@ -139,7 +139,7 @@ struct FundEditorForm: View {
                 sectionHeader("Position", systemImage: "chart.bar.fill")
 
                 VStack(alignment: .leading, spacing: 8) {
-                    fieldLabel(isGold ? "Weight (chỉ)" : "Units")
+                    fieldLabel(instrumentPolicy.quantity.holdingFieldTitle)
 
                     unitsTextField
                         .textFieldStyle(.plain)
@@ -155,8 +155,10 @@ struct FundEditorForm: View {
                         validationMessage(unitsErrorMessage, id: "fund-units-error")
                     }
 
-                    if isGold, let luong = GoldWeight.parseChi(draft.unitsText) {
-                        Text("Stored as \(UnitQuantity.format(luong)) lượng")
+                    if let storageCaption = instrumentPolicy.quantity.storageCaption(
+                        fromEntryText: draft.unitsText
+                    ) {
+                        Text(storageCaption)
                             .font(.caption)
                             .foregroundStyle(MonMonTheme.textSecondary)
                     }
@@ -389,16 +391,10 @@ struct FundEditorForm: View {
     /// Dollars are offered where things are actually bought in them. Vietnamese
     /// funds, ETFs and gold are bought in đồng, so a currency switch on those
     /// forms would be a box to ignore rather than a feature.
-    private var offersDollarEntry: Bool { isCrypto }
+    private var offersDollarEntry: Bool { instrumentPolicy.allowsDollarPriceEntry }
 
     private var averageCostLabel: LocalizedStringKey {
-        if isGold {
-            return "Average cost per lượng"
-        }
-        if isCrypto {
-            return "Average cost per coin"
-        }
-        return "Average cost per unit"
+        LocalizedStringKey(instrumentPolicy.editor.averageCostTitleKey)
     }
 
     private var exchangeRateErrorMessage: LocalizedStringKey? {
@@ -468,21 +464,15 @@ struct FundEditorForm: View {
 
     private var instrumentErrorMessage: LocalizedStringKey? {
         guard validationError == .missingInstrument else { return nil }
-        if isGold {
-            return "Pick the gold product this position is held in."
-        }
-        if isCrypto {
-            return "Pick the coin this position is held in."
-        }
-        return "Pick the fund or ETF this position is held in."
+        return LocalizedStringKey(instrumentPolicy.editor.missingInstrumentMessageKey)
     }
 
     private var unitsErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidUnits:
-            isGold ? "Enter a valid weight in chỉ." : "Enter a valid number of units."
+            instrumentPolicy.quantity.invalidHoldingMessage
         case .nonPositiveUnits:
-            isGold ? "Weight must be greater than zero." : "Units must be greater than zero."
+            instrumentPolicy.quantity.nonPositiveHoldingMessage
         default:
             nil
         }
@@ -507,57 +497,28 @@ struct FundEditorForm: View {
     }
 
     private var emptyInstrumentText: String {
-        if isGold {
-            return "No gold product in the catalogue yet. Add one from vang.today."
-        }
-        if isCrypto {
-            return "No coin in the catalogue yet. Add one from CoinGecko."
-        }
-        return "No fund or ETF in the catalogue yet. Add one to hold it."
+        instrumentPolicy.editor.emptyCatalogueMessageKey
     }
 
     private var addInstrumentTitle: String {
-        if isGold {
-            return "Add from vang.today"
-        }
-        if isCrypto {
-            return "Add from CoinGecko"
-        }
-        return "Add instrument"
+        instrumentPolicy.editor.addInstrumentTitleKey
     }
 
     private var introductionSymbol: String {
-        if isGold {
-            return "seal.fill"
-        }
-        if isCrypto {
-            return "bitcoinsign.circle.fill"
-        }
-        return "chart.line.uptrend.xyaxis"
+        instrumentPolicy.editor.introductionSymbol
     }
 
     private var introductionTitle: LocalizedStringKey {
-        if isGold {
-            return "The gold you hold"
-        }
-        if isCrypto {
-            return "The coins you hold"
-        }
-        return "What you hold, what it is worth"
+        LocalizedStringKey(instrumentPolicy.editor.introductionTitleKey)
     }
 
     private var introductionDescription: LocalizedStringKey {
-        if isGold {
-            return "Pick a gold product, then enter its weight in chỉ."
-        }
-        if isCrypto {
-            return "Pick a coin, then say how much of it you own."
-        }
-        return "Pick what you hold, then say how much of it you own."
+        LocalizedStringKey(instrumentPolicy.editor.introductionDescriptionKey)
     }
 
-    private var isGold: Bool { kinds == [.gold] }
-    private var isCrypto: Bool { kinds == [.crypto] }
+    private var instrumentPolicy: FundInstrumentPolicy {
+        (kinds.first ?? .fund).policy
+    }
 }
 
 #if DEBUG

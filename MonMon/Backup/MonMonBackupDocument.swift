@@ -426,6 +426,8 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         /// for cash. Absent on every ordinary sale, and on every backup written
         /// before swaps existed.
         var swapHoldingID: String?
+        /// Absent in backups written before sale fees were tracked.
+        var fee: String? = nil
         var createdAt: String
     }
 
