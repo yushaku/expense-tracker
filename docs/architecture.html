@@ -881,7 +881,7 @@
                style="--e: var(--e-fund); grid-column: 3; grid-row: 3; align-self: center;">
         <div class="e-head">
           <div class="e-name">FundSale</div>
-          <div class="e-role">Dated units sold from one lot, with proceeds returned to cash</div>
+          <div class="e-role">Dated units leaving one lot, for cash or for another coin</div>
           <div class="e-file">MonMon/Funds/FundSale.swift</div>
         </div>
         <ul class="fields">
@@ -893,20 +893,26 @@
           </li>
           <li class="field"><span class="fname">units</span><span class="ftype">Decimal</span></li>
           <li class="field"><span class="fname">pricePerUnit</span><span class="ftype">Decimal</span></li>
+          <li class="field"><span class="fname">fee</span><span class="ftype">Decimal</span>
+            <span class="badges"><span class="badge">0 unless the shop deducted one</span></span></li>
           <li class="field key" data-anchor="FundSale.proceedsAccountID">
             <span class="fname">proceedsAccountID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span><span class="badge null">ignored on a swap</span></span>
           </li>
           <li class="field"><span class="fname">soldAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">exchangeRate</span><span class="ftype">Decimal?</span>
             <span class="badges"><span class="badge null">₫ per $ when the price was typed in dollars</span></span></li>
+          <li class="field key" data-anchor="FundSale.swapHoldingID">
+            <span class="fname">swapHoldingID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">the lot a swap bought</span></span>
+          </li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
         </ul>
         <div class="derived">
           <div class="derived-label">Derived &mdash; computed, not stored</div>
-          <div class="derived-list">proceeds &middot; costBasis(costPerUnit:) &middot; realizedProfitLoss &middot; pricePerUnitInDollars</div>
+          <div class="derived-list">grossProceeds &middot; proceeds &middot; costBasis(costPerUnit:) &middot; realizedProfitLoss &middot; pricePerUnitInDollars &middot; isSwap</div>
         </div>
       </article>
 
@@ -1850,6 +1856,44 @@
       </p>
     </div>
     <div class="note">
+      <h3>A swap is a sale that pays into a coin</h3>
+      <p>
+        Most coin trading never reaches a bank: one coin is exchanged for another, usually a
+        stablecoin, and no đồng moves. It is still a disposal — the units leave the lot and
+        their gain is settled — so it is recorded as a <code>FundSale</code> plus a new
+        <code>FundHolding</code>, written in one save. A fourth kind of record would have
+        made every summary in the app learn a new shape.
+      </p>
+      <p>
+        <code>swapHoldingID</code> is both the flag and the link.
+        <code>FundSaleSummary.netFlow</code>, its <code>count(for:)</code> and
+        <code>AccountLinkedSourceSummary</code> all skip a sale carrying one, and the lot it
+        bought names no funding account, so <code>CashBalanceSummary.fundedAmount</code>
+        skips that too. Without those guards the trade would be counted twice: as đồng in an
+        account that received nothing, and again as the coin bought.
+      </p>
+      <p>
+        One value settles both legs by construction — the sale's gross proceeds
+        <em>are</em> the new lot's cost basis. Typed apart, a swap could create or destroy
+        value on a trade where nothing entered or left the portfolio.
+      </p>
+    </div>
+    <div class="note">
+      <h3>A sale fee leaves, a swap value does not</h3>
+      <p>
+        <code>fee</code> is what a shop deducted on the way out, so <code>proceeds</code> is
+        gross minus fee and realized profit follows it down. Over a round trip the funding
+        account moves by the realized profit alone, exactly as it did before fees existed;
+        the fee simply leaves net worth, because it left for the shop.
+      </p>
+      <p>
+        Closing several lots at once splits one typed fee across them by gross proceeds.
+        Shares are floored and the shortfall handed to lots with room, because a share that
+        reached its own lot's proceeds would be a sale the editor refuses to write and the
+        backup validator refuses to restore.
+      </p>
+    </div>
+    <div class="note">
       <h3>Why a coin carries a <code>providerID</code></h3>
       <p>
         Every other provider is keyed by the ticker the owner already sees. CoinGecko is not:
@@ -1959,7 +2003,7 @@
   </section>
 
   <footer>
-    11 entities built &middot; 17 app-enforced foreign-key edges &middot; 0 declared SwiftData relationships
+    11 entities built &middot; 18 app-enforced foreign-key edges &middot; 0 declared SwiftData relationships
     &nbsp;|&nbsp; private CloudKit mirroring &middot; 4 market providers &middot; 1 reviewed PDF import path
   </footer>
 </div>
@@ -2127,7 +2171,8 @@
       { from: 'FinancialGoal', fromAnchor: 'FinancialGoal.id', to: 'TripWorkspace', toAnchor: 'TripWorkspace.sourceGoalID', label: 'starts', dashed: true },
       { from: 'TripWorkspace', fromAnchor: 'TripWorkspace.id', to: 'MoneyTransaction', toAnchor: 'MoneyTransaction.tripWorkspaceID', label: 'tags', dashed: true },
       { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'PendingTransactionCapture', toAnchor: 'PendingTransactionCapture.accountID', label: 'suggested', dashed: true },
-      { from: 'TransactionCategory', fromAnchor: 'TransactionCategory.id', to: 'PendingTransactionCapture', toAnchor: 'PendingTransactionCapture.categoryID', label: 'suggested', dashed: true }
+      { from: 'TransactionCategory', fromAnchor: 'TransactionCategory.id', to: 'PendingTransactionCapture', toAnchor: 'PendingTransactionCapture.categoryID', label: 'suggested', dashed: true },
+      { from: 'FundSale', fromAnchor: 'FundSale.swapHoldingID', to: 'FundHolding', label: 'swap buys', dashed: true }
     ]);
 
     wire('sysStage', 'sysEdges', '.node', [

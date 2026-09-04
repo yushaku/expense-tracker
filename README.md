@@ -36,8 +36,10 @@ Read the docs before the code:
 
 - **Term deposits** (sổ tiết kiệm) — maturity dates, projected interest, an optional funding account, and withdrawals that leave the opening terms immutable.
 - **Funds, ETFs, and gold** — held in units or weight against a shared instrument catalogue, showing cost basis, market value, and unrealized profit or loss. Gold is valued at the shop-buy quote, while any fee or deduction actually charged on sale reduces the cash proceeds and realized PnL of that sale.
-- **Market valuation** — prices from Fmarket for open-ended funds, VNDIRECT for listed ETFs, and the shop-buy side of a vang.today quote for gold. A fetch happens when the owner asks, or when a screen opens onto a stale price — never on a timer, never in the background, and never with anything but a ticker or product code leaving the device.
-- **Instrument catalogue imports** — add open-ended funds from Fmarket, HOSE-listed ETFs from VNDIRECT, or gold products from vang.today. ETF rows are saved only after VNDIRECT returns a valid closing price; an unavailable ticker does not block the rest of the selection.
+- **Coins** — held against the same catalogue, priced by CoinGecko in đồng. A purchase or a sale may be typed in dollars at a rate the owner states, which is converted once on the way in: what is stored is đồng, and each record keeps the rate that got it there.
+- **Coin swaps** — one coin exchanged for another, which is how most coin trading happens and touches no bank account. Recorded as a disposal of what was given and a new lot in what was received, settled at one value so the trade can neither create nor lose value. The coin given up settles its gain; the coin received starts at what it cost.
+- **Market valuation** — prices from Fmarket for open-ended funds, VNDIRECT for listed ETFs, the shop-buy side of a vang.today quote for gold, and CoinGecko for coins. A fetch happens when the owner asks, or when a screen opens onto a stale price — never on a timer, never in the background, and never with anything but a ticker, a product code or a coin identifier leaving the device.
+- **Instrument catalogue imports** — add open-ended funds from Fmarket, HOSE-listed ETFs from VNDIRECT, gold products from vang.today, or coins from CoinGecko. ETF rows are saved only after VNDIRECT returns a valid closing price; an unavailable ticker does not block the rest of the selection.
 - **Total assets** — counts transferred money once and holds still through borrowing, lending, and repaying.
 
 ### Capture without typing
