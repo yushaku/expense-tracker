@@ -44,4 +44,44 @@ struct FundInstrumentKindTests {
             #expect(!kind.priceLabelKey.isEmpty)
         }
     }
+
+    @Test("Sale behavior is declared by asset policy")
+    func saleBehaviorComesFromPolicy() {
+        #expect(FundInstrumentKind.fund.policy.quantity == .units)
+        #expect(FundInstrumentKind.etf.policy.quantity == .units)
+        #expect(FundInstrumentKind.gold.policy.quantity == .goldWeight)
+        #expect(FundInstrumentKind.crypto.policy.quantity == .units)
+
+        #expect(FundInstrumentKind.gold.policy.fee == .shopDeduction)
+        #expect(FundInstrumentKind.fund.policy.fee == nil)
+        #expect(FundInstrumentKind.crypto.policy.allowsDollarPriceEntry)
+        #expect(!FundInstrumentKind.gold.policy.allowsDollarPriceEntry)
+        #expect(FundInstrumentKind.crypto.policy.supportsSwap)
+        #expect(!FundInstrumentKind.gold.policy.supportsSwap)
+    }
+
+    @Test("Quantity policy owns display and storage conversion")
+    func quantityPolicyConvertsAtTheBoundary() {
+        let gold = FundInstrumentKind.gold.policy.quantity
+        #expect(gold.displayedUnits(fromStored: 1) == 10)
+        #expect(gold.storedUnits(fromDisplayed: 10) == 1)
+        #expect(gold.storedUnits(fromEntryText: "5") == Decimal(string: "0.5"))
+
+        let units = FundInstrumentKind.fund.policy.quantity
+        #expect(units.displayedUnits(fromStored: 3) == 3)
+        #expect(units.storedUnits(fromDisplayed: 3) == 3)
+        #expect(units.storedUnits(fromEntryText: "3.5") == Decimal(string: "3.5"))
+    }
+
+    @Test("Holding editor behavior is declared by asset policy")
+    func holdingEditorBehaviorComesFromPolicy() {
+        #expect(FundInstrumentKind.fund.policy.editor.catalogueRoute == .instrumentEditor)
+        #expect(FundInstrumentKind.etf.policy.editor.catalogueRoute == .instrumentEditor)
+        #expect(FundInstrumentKind.gold.policy.editor.catalogueRoute == .goldCatalogue)
+        #expect(FundInstrumentKind.crypto.policy.editor.catalogueRoute == .cryptoCatalogue)
+
+        #expect(FundInstrumentKind.gold.policy.editor.newTitleKey == "Add gold")
+        #expect(FundInstrumentKind.crypto.policy.editor.newTitleKey == "Add coin")
+        #expect(FundInstrumentKind.fund.policy.editor.newTitleKey == "Add holding")
+    }
 }

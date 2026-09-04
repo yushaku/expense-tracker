@@ -103,7 +103,7 @@ struct FundSaleEditorView: View {
                 remainingUnits: displayedRemainingUnits,
                 averageCostPerUnit: averageCostPerUnit,
                 accounts: accounts,
-                isGold: isGold,
+                policy: instrumentPolicy,
                 isClosingGroup: mode.isClosingGroup,
                 isEditing: mode.editedSale != nil,
                 validationError: validationError,
@@ -197,8 +197,8 @@ struct FundSaleEditorView: View {
         }
     }
 
-    private var isGold: Bool {
-        instrument?.kind == .gold
+    private var instrumentPolicy: FundInstrumentPolicy {
+        instrument?.kind.policy ?? FundInstrumentKind.fund.policy
     }
 
     /// What is still held, in stored units.
@@ -220,7 +220,7 @@ struct FundSaleEditorView: View {
 
     /// The same figure in the unit the owner types: chỉ for gold.
     private var displayedRemainingUnits: Decimal {
-        isGold ? remainingUnits * GoldWeight.chiPerLuong : remainingUnits
+        instrumentPolicy.quantity.displayedUnits(fromStored: remainingUnits)
     }
 
     /// What the units on offer cost, weighted across the lots being sold. Zero
@@ -335,11 +335,12 @@ struct FundSaleEditorView: View {
             return converted
         }
 
-        guard isGold, let luong = GoldWeight.parseChi(draft.unitsText) else {
+        guard let units = instrumentPolicy.quantity.storedUnits(fromEntryText: draft.unitsText)
+        else {
             return converted
         }
 
-        converted.unitsText = NSDecimalNumber(decimal: luong).stringValue
+        converted.unitsText = NSDecimalNumber(decimal: units).stringValue
         return converted
     }
 

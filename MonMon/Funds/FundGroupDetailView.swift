@@ -109,8 +109,8 @@ struct FundGroupDetailView: View {
         return instruments.matching(received)?.symbol
     }
 
-    private var isCrypto: Bool {
-        group.instrument?.kind == .crypto
+    private var canSwap: Bool {
+        group.instrument?.kind.policy.supportsSwap == true
     }
 
     private var positions: [FundHolding] {
@@ -180,7 +180,7 @@ struct FundGroupDetailView: View {
                 asOf: asOf,
                 onEdit: { editorMode = .edit(holding) },
                 onSell: { saleEditorMode = .sell(holding) },
-                onSwap: isCrypto ? { swapEditorMode = .swap(holding) } : nil,
+                onSwap: canSwap ? { swapEditorMode = .swap(holding) } : nil,
                 onToggleSales: salesFor(holding).isEmpty
                     ? nil : { toggleSales(for: holding) },
                 isShowingSales: expandedSaleLots.contains(holding.id)
@@ -201,7 +201,8 @@ struct FundGroupDetailView: View {
                         FundSaleCard(
                             sale: sale,
                             costPerUnit: holding.averageCostPerUnit,
-                            isGold: instruments.matching(holding)?.kind == .gold,
+                            policy: instruments.matching(holding)?.kind.policy
+                                ?? FundInstrumentKind.fund.policy,
                             proceedsAccountName: accountName(forID: sale.proceedsAccountID),
                             swappedIntoSymbol: swappedIntoSymbol(for: sale)
                         )
