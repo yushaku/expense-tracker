@@ -27,10 +27,18 @@ enum CryptoSwapFormError: Error, Equatable {
 ///
 /// ## Why one value anchors both legs
 ///
-/// The sale's proceeds and the new lot's cost basis are the same number by
-/// construction, taken from a single field. Letting the two be typed apart
+/// The sale's gross proceeds and the new lot's cost basis are the same number
+/// by construction, taken from a single field. Letting the two be typed apart
 /// would let a swap create or destroy value: net worth would move on a trade
 /// where nothing entered or left the portfolio.
+///
+/// Gross, not net. `FundSale.proceeds` subtracts whatever fee the sale
+/// carried, and a fee is a cost of trading rather than a change in what the
+/// trade was booked at. Reading the net figure back would shrink the value on
+/// every reopen while the lot it bought kept the gross one, and the two legs
+/// would drift apart a fee at a time. Coins carry no fee today — the policy
+/// gives them none — so this is a guard on the shape rather than on today's
+/// behaviour.
 ///
 /// Nothing here writes to a cash account. `FundSale.swapHoldingID` marks the
 /// sale so `FundSaleSummary.netFlow` skips it, and the new lot names no funding
@@ -76,7 +84,7 @@ struct CryptoSwapDraft: Equatable {
     /// Takes both because neither carries the whole trade: the sale knows what
     /// was given and what it was worth, and only the lot knows what came back.
     init(sale: FundSale, received: FundHolding) {
-        let value = sale.proceeds
+        let value = sale.grossProceeds
 
         if let rate = sale.exchangeRate, let dollars = USDPrice.inDollars(value, rate: rate) {
             self.init(
