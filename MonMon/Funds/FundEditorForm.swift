@@ -200,6 +200,15 @@ struct FundEditorForm: View {
                             id: "fund-average-cost-error"
                         )
                     }
+
+                    if !isEditing {
+                        Text(
+                            "Filled in from today's buy price. Change it to what you actually paid."
+                        )
+                        .font(.caption)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                        .accessibilityIdentifier("fund-average-cost-hint")
+                    }
                 }
 
                 if draft.costCurrency == .usd {
