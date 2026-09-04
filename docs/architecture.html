@@ -828,7 +828,7 @@
                style="--e: var(--e-fund); grid-column: 3; grid-row: 2; align-self: center;">
         <div class="e-head">
           <div class="e-name">FundInstrument</div>
-          <div class="e-role">One catalogue row per fund, ETF or gold product, owning its current quote</div>
+          <div class="e-role">One catalogue row per fund, ETF, gold product or coin, owning its current quote</div>
           <div class="e-file">MonMon/Funds/FundInstrument.swift</div>
         </div>
         <ul class="fields">
@@ -843,7 +843,7 @@
           <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">kind</span><span class="ftype">FundInstrumentKind</span>
-            <span class="badges"><span class="badge enum">enum: fund | etf | gold</span></span>
+            <span class="badges"><span class="badge enum">enum: fund | etf | gold | crypto</span></span>
           </li>
           <li class="field"><span class="fname">currentPricePerUnit</span><span class="ftype">Decimal</span></li>
           <li class="field"><span class="fname">askPricePerUnit</span><span class="ftype">Decimal</span>
@@ -858,9 +858,17 @@
           </li>
           <li class="field">
             <span class="fname">priceSource</span><span class="ftype">String</span>
-            <span class="badges"><span class="badge enum">manual | fmarket | vndirect | vangToday</span></span>
+            <span class="badges"><span class="badge enum">manual | fmarket | vndirect | vangToday | coinGecko</span></span>
           </li>
           <li class="field"><span class="fname">autoQuoteEnabled</span><span class="ftype">Bool</span></li>
+          <li class="field">
+            <span class="fname">logoURL</span><span class="ftype">String?</span>
+            <span class="badges"><span class="badge null">cosmetic; manager or coin image</span></span>
+          </li>
+          <li class="field">
+            <span class="fname">providerID</span><span class="ftype">String?</span>
+            <span class="badges"><span class="badge null">provider's own key when it is not the ticker</span></span>
+          </li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
         </ul>
@@ -1573,6 +1581,20 @@
           <div class="n-meta">www.vang.today · module: market-valuation</div>
         </div>
 
+        <div class="node" id="sys-coingecko" tabindex="0">
+          <div class="n-top">
+            <span class="n-name">CoinGecko API</span>
+            <span class="chip built">Built</span>
+          </div>
+          <p class="n-desc">
+            Catalogue, search and spot price for coins, asked for and answered in VND, so
+            no exchange rate enters the app. Keyed by CoinGecko's own identifier rather than
+            the ticker, because tickers collide. Unauthenticated and rate-limited; a refusal
+            is reported as such and the last known-good price stands.
+          </p>
+          <div class="n-meta">api.coingecko.com · module: market-valuation</div>
+        </div>
+
         <div class="node unbuilt" id="sys-mcp" tabindex="0">
           <div class="n-top">
             <span class="n-name">Read-only MCP server</span>
@@ -1822,6 +1844,27 @@
       </p>
     </div>
     <div class="note">
+      <h3>Why a coin carries a <code>providerID</code></h3>
+      <p>
+        Every other provider is keyed by the ticker the owner already sees. CoinGecko is not:
+        it names coins itself &mdash; <code>bitcoin</code>, not <code>BTC</code> &mdash; and a
+        ticker is shared by many coins, so asking by ticker would price whichever one the
+        endpoint preferred. The identifier is captured at import and stored beside the price.
+        It is optional and defaults to <code>nil</code>, so nothing else in the catalogue
+        changed and a backup written before coins existed still decodes.
+      </p>
+    </div>
+    <div class="note">
+      <h3>A coin's price goes stale by the clock</h3>
+      <p>
+        <code>TradingCalendar</code> decides staleness by session: an ETF against the last
+        close, a fund with a day of T+1 grace, gold at midnight. Crypto has no session, so it
+        is compared to the minute instead &mdash; a price older than fifteen minutes is stale,
+        whatever the weekday. Rounding it to the start of a day would call a price taken at
+        one minute past midnight current until the next one.
+      </p>
+    </div>
+    <div class="note">
       <h3>Enums stored as String</h3>
       <p>
         <code>CashAccountKind</code>, <code>TransactionKind</code>, <code>FundInstrumentKind</code>,
@@ -1849,16 +1892,17 @@
     <div class="note">
       <h3>Market-quote privacy boundary</h3>
       <p>
-        Quote requests send a fund or ETF symbol, or a gold product type code, and nothing
-        else &mdash; no balance, unit count, cost basis, or account name. A provider can learn
-        which quote was requested, but not whether the owner holds it or how much.
+        Quote requests send a fund or ETF symbol, a gold product type code, or a coin
+        identifier, and nothing else &mdash; no balance, unit count, cost basis, or account
+        name. A provider can learn which quote was requested, but not whether the owner holds
+        it or how much.
       </p>
     </div>
     <div class="note">
       <h3>One dependency, on purpose</h3>
       <p>
         Everything else is Apple's. A single pinned SwiftUI calendar view is the entire
-        linked third-party package. Market access uses three small first-party
+        linked third-party package. Market access uses four small first-party
         <code>URLSession</code> providers behind one transport protocol; there is still no
         analytics or vendor SDK.
       </p>
@@ -1876,7 +1920,7 @@
 
   <footer>
     11 entities built &middot; 17 app-enforced foreign-key edges &middot; 0 declared SwiftData relationships
-    &nbsp;|&nbsp; private CloudKit mirroring &middot; 3 market providers &middot; 1 reviewed PDF import path
+    &nbsp;|&nbsp; private CloudKit mirroring &middot; 4 market providers &middot; 1 reviewed PDF import path
   </footer>
 </div>
 
@@ -2056,6 +2100,7 @@
       { from: 'sys-app', to: 'sys-fmarket', label: 'ticker only', dashed: false },
       { from: 'sys-app', to: 'sys-vndirect', label: 'ticker only', dashed: false },
       { from: 'sys-app', to: 'sys-vang-today', label: 'type code only', dashed: false },
+      { from: 'sys-app', to: 'sys-coingecko', label: 'coin id only', dashed: false },
       { from: 'sys-mcp', to: 'sys-store', label: 'read-only', dashed: true }
     ]);
   })();
