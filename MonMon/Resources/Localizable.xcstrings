@@ -1,6 +1,9 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Filled in from today's buy price. Change it to what you actually paid.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Điền sẵn theo giá mua hôm nay. Sửa lại thành số bạn thực trả." } } }
+    },
     "At today's prices that is about %@. Use it": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Theo giá hôm nay thì khoảng %@. Dùng số này" } } }
     },

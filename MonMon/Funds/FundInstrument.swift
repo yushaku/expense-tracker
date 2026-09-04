@@ -82,6 +82,27 @@ final class FundInstrument {
 }
 
 extension FundInstrument {
+    /// What one unit would cost to buy today.
+    ///
+    /// Not the same question as what it is worth. A fund, an ETF and a coin are
+    /// bought and valued at one published figure, so the two answers coincide.
+    /// Gold does not: a shop sells at one price and buys back at a lower one,
+    /// and `currentPricePerUnit` is the buy-back side — what the owner would
+    /// receive, never what they would pay. Prefilling a cost basis with it
+    /// would understate every purchase by the spread and hide the loss that
+    /// buying gold genuinely opens with.
+    ///
+    /// Falls back to the valuation price when no two-sided quote has been
+    /// fetched, which is the closest thing the app knows.
+    var purchasePricePerUnit: Decimal {
+        switch kind.policy.quoteStyle {
+        case .shopBuy:
+            return askPricePerUnit > 0 ? askPricePerUnit : currentPricePerUnit
+        case .averageCost:
+            return currentPricePerUnit
+        }
+    }
+
     /// The stored source, or `.manual` when the raw value is one this build does
     /// not know. An unreadable source must not stop a price from rendering.
     var source: FundQuoteSource {

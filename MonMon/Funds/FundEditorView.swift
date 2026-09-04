@@ -70,6 +70,10 @@ struct FundEditorView: View {
     @State private var isConfirmingDelete = false
     @State private var isAddingInstrument = false
     @State private var rateLoader = USDExchangeRateLoader()
+    /// The last average cost this view filled in. While the box still holds it
+    /// the figure is the app's and may be replaced; once it differs, it is the
+    /// owner's and is left alone.
+    @State private var autofilledAverageCostText = ""
 
     init(mode: FundEditorMode, kinds: [FundInstrumentKind]) {
         self.mode = mode
@@ -120,6 +124,10 @@ struct FundEditorView: View {
             .onChange(of: draft.costCurrency) { previous, current in
                 Task { await convertCost(from: previous, to: current) }
             }
+            // Choosing what you hold fills in what a unit of it costs today.
+            // Only on a new position: an existing one already records what was
+            // actually paid, and today's price is not that.
+            .onChange(of: draft.instrumentID) { _, _ in fillAverageCostFromCatalogue() }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -247,6 +255,50 @@ struct FundEditorView: View {
         }
     }
 
+    /// Offers today's buy price rather than making the owner look it up.
+    ///
+    /// The figure is what a unit would cost to buy now — the shop's asking
+    /// price for gold, the published price for anything else — because this
+    /// field is a cost basis, not a valuation. It is a starting value: a
+    /// purchase made last month went through at a different price, and the
+    /// owner types over it.
+    ///
+    /// Never touches an existing position, and never a figure the owner has
+    /// typed.
+    private func fillAverageCostFromCatalogue() {
+        guard mode.editedHolding == nil else {
+            return
+        }
+        guard
+            draft.averageCostText.isEmpty
+                || draft.averageCostText == autofilledAverageCostText
+        else {
+            return
+        }
+        guard let instrument = selectableInstruments.first(where: { $0.id == draft.instrumentID }),
+            instrument.purchasePricePerUnit > 0
+        else {
+            return
+        }
+
+        let price = instrument.purchasePricePerUnit
+        let text: String
+        switch draft.costCurrency {
+        case .vnd:
+            text = VNDCurrency.formatPlain(price)
+        case .usd:
+            guard let rate = VNDCurrency.parse(draft.exchangeRateText), rate > 0,
+                let dollars = USDPrice.inDollars(price, rate: rate)
+            else {
+                return
+            }
+            text = USDPrice.format(dollars)
+        }
+
+        draft.averageCostText = text
+        autofilledAverageCostText = text
+    }
+
     /// Keeps the amount the same when the currency under it changes.
     ///
     /// Switching to dollars turns 2.070.646.854 ₫ into $79463 rather than
@@ -288,6 +340,11 @@ struct FundEditorView: View {
                 return
             }
             draft.averageCostText = VNDCurrency.formatPlain(dong)
+        }
+
+        // The converted figure is still the app's if the app put it there.
+        if !autofilledAverageCostText.isEmpty {
+            autofilledAverageCostText = draft.averageCostText
         }
     }
 

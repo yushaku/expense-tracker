@@ -84,4 +84,46 @@ struct FundInstrumentKindTests {
         #expect(FundInstrumentKind.crypto.policy.editor.newTitleKey == "Add coin")
         #expect(FundInstrumentKind.fund.policy.editor.newTitleKey == "Add holding")
     }
+
+    // MARK: - What a unit costs to buy
+
+    /// A fund, an ETF and a coin are bought and valued at one published figure,
+    /// so today's price is both what it is worth and what it would cost.
+    @Test("A single-sided quote is its own buy price")
+    func singleSidedQuoteIsItsOwnBuyPrice() {
+        for kind in [FundInstrumentKind.fund, .etf, .crypto] {
+            let instrument = FundTestFactory.instrument(kind: kind, pricePerUnit: 25_000)
+
+            #expect(instrument.purchasePricePerUnit == 25_000)
+        }
+    }
+
+    /// Gold is the case this exists for. `currentPricePerUnit` is the shop's
+    /// buy-back side — what the owner would receive — so prefilling a cost
+    /// basis with it would understate every purchase by the spread and hide the
+    /// loss that buying gold genuinely opens with.
+    @Test("Gold is bought at the shop's asking price, not its buy-back price")
+    func goldIsBoughtAtTheAsk() {
+        let gold = FundTestFactory.instrument(
+            symbol: "SJL1L10",
+            kind: .gold,
+            pricePerUnit: 147_000_000
+        )
+        gold.askPricePerUnit = 150_000_000
+
+        #expect(gold.purchasePricePerUnit == 150_000_000)
+        #expect(gold.currentPricePerUnit == 147_000_000)
+    }
+
+    @Test("Gold without a two-sided quote falls back to the price it has")
+    func goldWithoutASpreadFallsBack() {
+        let gold = FundTestFactory.instrument(
+            symbol: "SJL1L10",
+            kind: .gold,
+            pricePerUnit: 147_000_000
+        )
+
+        #expect(gold.askPricePerUnit == .zero)
+        #expect(gold.purchasePricePerUnit == 147_000_000)
+    }
 }
