@@ -14,7 +14,7 @@ private struct QuoteBackedETFProvider: FundCatalogueProvider {
         candidates
     }
 
-    func latestQuote(symbol: String, asOf: Date) async throws -> FundQuote {
+    func latestQuote(symbol: String, providerID: String?, asOf: Date) async throws -> FundQuote {
         if failedSymbols.contains(symbol) {
             throw FundQuoteError.noQuoteAvailable
         }

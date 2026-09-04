@@ -19,7 +19,7 @@ struct FmarketQuoteProvider: FundCatalogueProvider {
         self.transport = transport
     }
 
-    func latestQuote(symbol: String, asOf: Date) async throws -> FundQuote {
+    func latestQuote(symbol: String, providerID: String?, asOf: Date) async throws -> FundQuote {
         let wanted = symbol.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         let productID = try await productID(for: wanted)
         let history = try await transport.json(navHistoryRequest(productID: productID, asOf: asOf))

@@ -38,6 +38,13 @@ final class FundInstrument {
     /// fund, and an instrument added by hand has none at all. Nothing reads it
     /// but the badge, which falls back to the ticker when it is missing.
     var logoURL: String?
+    /// How the provider names this instrument, when that is not the ticker.
+    ///
+    /// CoinGecko keys on an identifier of its own — `bitcoin`, not `BTC` — and
+    /// several coins share a ticker, so asking by symbol could price the wrong
+    /// one. `nil` for every provider that does key on the ticker, and for a
+    /// coin added by hand, which is then priced by whatever the owner types.
+    var providerID: String?
     var currencyCode: String = VNDCurrency.code
     var createdAt: Date = Date(timeIntervalSince1970: 0)
 
@@ -53,6 +60,7 @@ final class FundInstrument {
         priceFetchedAt: Date? = nil,
         autoQuoteEnabled: Bool = true,
         logoURL: String? = nil,
+        providerID: String? = nil,
         currencyCode: String,
         createdAt: Date
     ) {
@@ -67,6 +75,7 @@ final class FundInstrument {
         self.priceFetchedAt = priceFetchedAt
         self.autoQuoteEnabled = autoQuoteEnabled
         self.logoURL = logoURL
+        self.providerID = providerID
         self.currencyCode = currencyCode
         self.createdAt = createdAt
     }
@@ -89,6 +98,8 @@ extension FundInstrument {
             "Close"
         case .gold:
             "Buy"
+        case .crypto:
+            "Price"
         }
     }
 
