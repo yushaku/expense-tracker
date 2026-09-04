@@ -71,7 +71,10 @@ struct CryptoSwapEditorView: View {
                 initialValue: CryptoSwapDraft(
                     unitsGivenText: UnitQuantity.format(sale.units),
                     unitsReceivedText: "",
-                    valueText: VNDCurrency.formatPlain(sale.proceeds),
+                    // Gross, for the reason `CryptoSwapDraft` documents: a fee
+                    // is a cost of trading, not a change in what the trade was
+                    // booked at.
+                    valueText: VNDCurrency.formatPlain(sale.grossProceeds),
                     swappedAt: sale.soldAt,
                     note: sale.note
                 )

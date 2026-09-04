@@ -340,6 +340,36 @@ struct CryptoSwapDraftTests {
         )
     }
 
+    /// A fee is a cost of trading, not a change in what the trade was booked
+    /// at. Reopening must therefore show the gross figure, or the value would
+    /// shrink on every reopen while the lot it bought kept the gross one.
+    @Test("A fee on the sale leg does not shrink the value on reopening")
+    func feeDoesNotShrinkTheReopenedValue() throws {
+        let swap = try draft().makeSwap(
+            givenHolding: bitcoinLot(),
+            remainingUnits: 1,
+            createdAt: createdAt
+        )
+        swap.sale.fee = 1_000_000
+
+        let reopened = CryptoSwapDraft(sale: swap.sale, received: swap.received)
+
+        #expect(reopened.valueText == VNDCurrency.formatPlain(2_100_000_000))
+        #expect(swap.received.costBasis == swap.sale.grossProceeds)
+    }
+
+    @Test("A swap is written without a fee")
+    func swapCarriesNoFee() throws {
+        let swap = try draft().makeSwap(
+            givenHolding: bitcoinLot(),
+            remainingUnits: 1,
+            createdAt: createdAt
+        )
+
+        #expect(swap.sale.fee == .zero)
+        #expect(FundInstrumentKind.crypto.policy.fee == nil)
+    }
+
     @Test("An ordinary sale has no other leg to find")
     func ordinarySaleHasNoOtherLeg() {
         let sale = FundTestFactory.sale(
