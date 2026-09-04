@@ -260,6 +260,13 @@ struct MonMonBackupServiceTests {
             destination.mainContext.fetch(FetchDescriptor<FundInstrument>()).first
         )
         #expect(restoredInstrument.providerID == "synthetic-fund")
+        // The rate a cost was typed at is part of the record too: without it a
+        // restored position reopens in đồng and the dollars the owner entered
+        // are gone.
+        let restoredHolding = try #require(
+            destination.mainContext.fetch(FetchDescriptor<FundHolding>()).first
+        )
+        #expect(restoredHolding.purchaseExchangeRate == 26_058)
         #expect(try destination.mainContext.fetchCount(FetchDescriptor<CashAccount>()) == 2)
         let restoredCredit = try #require(
             destination.mainContext.fetch(FetchDescriptor<CashAccount>()).first {
@@ -691,7 +698,8 @@ struct MonMonBackupServiceTests {
                 averageCostPerUnit: 15,
                 createdAt: instant,
                 sourceAccountID: bankID,
-                purchasedAt: instant
+                purchasedAt: instant,
+                purchaseExchangeRate: 26_058
             )
         )
         context.insert(

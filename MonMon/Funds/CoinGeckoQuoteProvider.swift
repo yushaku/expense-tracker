@@ -135,6 +135,40 @@ struct CoinGeckoQuoteProvider: FundCatalogueProvider {
         }
     }
 
+    /// Đồng per dollar, read off the stablecoin coins are actually bought with.
+    ///
+    /// Tether rather than a published FX rate, and not because it is a better
+    /// dollar: it is the one a Vietnamese buyer hands over on an exchange, so
+    /// its đồng price is nearer what a purchase really cost than an interbank
+    /// mid would be. It is still only a starting value — the owner corrects it
+    /// to whatever their desk gave them, and that corrected figure is what gets
+    /// stored.
+    static let dollarProxyID = "tether"
+
+    func usdExchangeRate() async throws -> USDExchangeRate {
+        let payload = try JSONReader.object(
+            try await json(priceRequest(identifier: Self.dollarProxyID))
+        )
+
+        guard let entry = payload[Self.dollarProxyID] else {
+            throw FundQuoteError.noQuoteAvailable
+        }
+
+        let quote = try JSONReader.object(entry)
+        guard let raw = quote[Self.quoteCurrency] else {
+            throw FundQuoteError.noQuoteAvailable
+        }
+
+        let asOfStamp = (try? JSONReader.int(quote["last_updated_at"])).map {
+            Date(timeIntervalSince1970: TimeInterval($0))
+        }
+
+        return USDExchangeRate(
+            dongPerDollar: try JSONReader.price(raw),
+            asOf: asOfStamp ?? Date(timeIntervalSince1970: 0)
+        )
+    }
+
     /// A GET whose rate-limit refusal keeps its own name.
     ///
     /// `FundQuoteTransport.json(_:)` folds every non-2xx reply into

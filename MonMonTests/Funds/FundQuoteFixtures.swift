@@ -226,6 +226,12 @@ enum FundQuoteFixtures {
         {"coins":[],"exchanges":[],"categories":[]}
         """
 
+    /// `GET /api/v3/simple/price?ids=tether&vs_currencies=vnd&include_last_updated_at=true`,
+    /// captured 2026-09-04. The dollar, priced in đồng.
+    static let coinGeckoTetherRate = """
+        {"tether":{"vnd":26058,"last_updated_at":1788538300}}
+        """
+
     /// What the free tier answers with once it has had enough.
     static let coinGeckoThrottled = """
         {"status":{"error_code":429,"error_message":"You've exceeded the Rate Limit"}}

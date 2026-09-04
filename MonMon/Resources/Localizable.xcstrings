@@ -1,6 +1,63 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Rate at purchase, %@.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tỷ giá lúc mua, %@." } } }
+    },
+    "Rate at sale, %@.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tỷ giá lúc bán, %@." } } }
+    },
+    "Đồng": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đồng" } } }
+    },
+    "Dollar": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đô la" } } }
+    },
+    "Cost currency": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đơn vị giá vốn" } } }
+    },
+    "Price currency": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đơn vị giá bán" } } }
+    },
+    "Average cost per coin": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Giá vốn trung bình mỗi coin" } } }
+    },
+    "Price per coin": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Giá mỗi coin" } } }
+    },
+    "Rate used (₫ per $)": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tỷ giá đã dùng (₫ mỗi $)" } } }
+    },
+    "Rate used": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tỷ giá đã dùng" } } }
+    },
+    "Stored as %@ ₫": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lưu thành %@ ₫" } } }
+    },
+    "Enter the rate you paid, in đồng per dollar.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập tỷ giá bạn đã trả, tính bằng đồng mỗi đô la." } } }
+    },
+    "Enter the rate you were paid, in đồng per dollar.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập tỷ giá bạn đã nhận, tính bằng đồng mỗi đô la." } } }
+    },
+    "The rate must be greater than zero.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tỷ giá phải lớn hơn không." } } }
+    },
+    "Enter a valid average cost in dollars.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập giá vốn trung bình hợp lệ bằng đô la." } } }
+    },
+    "Fetching today's rate…": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang lấy tỷ giá hôm nay…" } } }
+    },
+    "CoinGecko rate. Change it to the rate you paid.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tỷ giá CoinGecko. Đổi lại thành tỷ giá bạn đã trả." } } }
+    },
+    "Checked a moment ago. Type the rate you paid.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Vừa kiểm tra xong. Hãy tự nhập tỷ giá bạn đã trả." } } }
+    },
+    "Couldn’t fetch a rate. Type the rate you paid.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không lấy được tỷ giá. Hãy tự nhập tỷ giá bạn đã trả." } } }
+    },
     "Add coin": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm coin" } } }
     },
