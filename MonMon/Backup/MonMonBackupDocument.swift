@@ -387,6 +387,11 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         /// Absent in backups written before instruments carried a logo, and in
         /// every instrument added by hand. Decodes as `nil` either way.
         var logoURL: String?
+        /// How the provider names this instrument, when that is not the ticker.
+        /// Absent in backups written before coins existed, and in everything a
+        /// ticker already identifies. Decodes as `nil` either way, which is why
+        /// this needs no version bump.
+        var providerID: String?
         var currencyCode: String
         var createdAt: String
     }

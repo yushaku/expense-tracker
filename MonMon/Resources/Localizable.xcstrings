@@ -1,6 +1,69 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "A coin is priced by a market that never closes, quoted straight in đồng.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đồng coin được định giá bởi một thị trường không bao giờ đóng cửa, báo thẳng bằng đồng." } } }
+    },
+    "Add a coin to see what it cost, what it is worth in đồng today, and the gap between them.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm một đồng coin để thấy giá vốn, giá trị quy ra đồng hôm nay, và khoảng cách giữa hai con số." } } }
+    },
+    "Add Coin": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm coin" } } }
+    },
+    "Add from CoinGecko": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm từ CoinGecko" } } }
+    },
+    "Asking %@…": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang hỏi %@…" } } }
+    },
+    "Checked a moment ago. Try again shortly.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Vừa kiểm tra xong. Thử lại sau một lát." } } }
+    },
+    "coin": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "đồng coin" } } }
+    },
+    "CoinGecko": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "CoinGecko" } } }
+    },
+    "Coins": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đồng coin" } } }
+    },
+    "coins": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "đồng coin" } } }
+    },
+    "Crypto": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền mã hoá" } } }
+    },
+    "Import coins from CoinGecko, or add one by hand.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập đồng coin từ CoinGecko, hoặc tự thêm bằng tay." } } }
+    },
+    "Market price per coin": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Giá thị trường mỗi coin" } } }
+    },
+    "No connection, so only the loaded list was searched.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không có kết nối, nên chỉ tìm trong danh sách đã tải." } } }
+    },
+    "Searching": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang tìm" } } }
+    },
+    "Ticker or coin name": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mã hoặc tên coin" } } }
+    },
+    "Track your coins": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Theo dõi đồng coin của bạn" } } }
+    },
+    "Type at least %lld characters.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập ít nhất %lld ký tự." } } }
+    },
+    "%@ could not answer that search.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "%@ không trả lời được tìm kiếm đó." } } }
+    },
+    "%@ has nothing under that name either.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "%@ cũng không có gì dưới tên đó." } } }
+    },
+    "%lld coins": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "%lld đồng coin" } } }
+    },
     "%@ is due today.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "%@ đến hạn hôm nay." } } }
     },
@@ -6491,12 +6554,12 @@
         }
       }
     },
-    "Savings books, funds, and gold will be split up here.": {
+    "Savings books, funds, gold, and coins will be split up here.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sổ tiết kiệm, quỹ và vàng sẽ được chia ra ở đây."
+            "value": "Sổ tiết kiệm, quỹ, vàng và đồng coin sẽ được chia ra ở đây."
           }
         }
       }
