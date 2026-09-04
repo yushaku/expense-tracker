@@ -51,40 +51,67 @@ enum FundSaleSummary {
         sales.reduce(Decimal.zero) { $0 + $1.fee }
     }
 
-    /// Splits one transaction fee across several lot-level sale records. The
-    /// final positive-weight lot receives the rounding remainder so the stored
-    /// fees always add back to the single amount the owner entered.
-    static func allocateFee(_ fee: Decimal, weights: [Decimal]) -> [Decimal] {
-        let totalWeight = weights.reduce(Decimal.zero) { total, weight in
-            total + max(weight, .zero)
-        }
-        guard fee > 0, totalWeight > 0,
-            let finalIndex = weights.lastIndex(where: { $0 > 0 })
-        else {
-            return weights.map { _ in .zero }
+    /// Splits one transaction fee across several lot-level sale records, in
+    /// proportion to what each lot brought in.
+    ///
+    /// Two things have to hold at once. The parts must add back to the single
+    /// amount the owner entered, or the app would quietly charge a different
+    /// fee than the one they typed. And no part may reach its own lot's
+    /// proceeds, because `FundSaleDraft` refuses such a sale and
+    /// `MonMonBackupValidator` refuses to restore one — a record that saves but
+    /// cannot be restored is worse than one that was never allowed.
+    ///
+    /// So each share is floored rather than rounded, which can only ever leave
+    /// a lot owing less than a đồng too little, and the shortfall is then
+    /// handed out where there is room for it. Dumping the whole remainder on
+    /// the last lot, as this used to, could hand a dust-sized lot more fee than
+    /// it made.
+    ///
+    /// - Parameter grossProceeds: what each lot sold for, before fees. Used as
+    ///   the weight and as the ceiling, which is why it is not a unit count:
+    ///   units alone cannot say how much room a lot has.
+    static func allocateFee(_ fee: Decimal, grossProceeds: [Decimal]) -> [Decimal] {
+        let total = grossProceeds.reduce(Decimal.zero) { running, gross in
+            running + max(gross, .zero)
         }
 
-        var remainingFee = fee
-        var remainingWeight = totalWeight
-        return weights.enumerated().map { index, weight in
-            guard weight > 0 else {
+        // A fee at or above the whole trade cannot be split so that every part
+        // stays under its lot. `FundSaleDraft` rejects it before this is
+        // reached; answering with nothing is the safe reading if it ever is.
+        guard fee > 0, total > 0, fee < total else {
+            return grossProceeds.map { _ in .zero }
+        }
+
+        var shares = grossProceeds.map { gross -> Decimal in
+            guard gross > 0 else {
                 return .zero
             }
 
-            let portion: Decimal
-            if index == finalIndex {
-                portion = remainingFee
-            } else {
-                var raw = remainingFee * weight / remainingWeight
-                var rounded = Decimal.zero
-                NSDecimalRound(&rounded, &raw, 0, .plain)
-                portion = min(rounded, remainingFee)
+            var raw = fee * gross / total
+            var floored = Decimal.zero
+            NSDecimalRound(&floored, &raw, 0, .down)
+            return floored
+        }
+
+        var remainder = fee - shares.reduce(Decimal.zero, +)
+        guard remainder > 0 else {
+            return shares
+        }
+
+        // Flooring loses under a đồng per lot, so one pass over the lots with
+        // room left is enough to place all of it.
+        for index in shares.indices where remainder > 0 {
+            let headroom = grossProceeds[index] - 1 - shares[index]
+            guard headroom > 0 else {
+                continue
             }
 
-            remainingFee -= portion
-            remainingWeight -= weight
-            return portion
+            let portion = min(remainder, headroom)
+            shares[index] += portion
+            remainder -= portion
         }
+
+        return shares
     }
 
     static func realizedProfitLoss(for holding: FundHolding, sales: [FundSale]) -> Decimal {
