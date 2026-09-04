@@ -35,6 +35,7 @@ struct FundSalePersistenceTests {
             holdingID: holding.id,
             units: 400,
             pricePerUnit: 26_000,
+            fee: 100_000,
             proceedsAccountID: accountID,
             soldAt: referenceDate,
             note: "took profit",
@@ -52,11 +53,13 @@ struct FundSalePersistenceTests {
         #expect(saved.holdingID == holding.id)
         #expect(saved.units == 400)
         #expect(saved.pricePerUnit == 26_000)
+        #expect(saved.fee == 100_000)
         #expect(saved.proceedsAccountID == accountID)
         #expect(saved.soldAt == referenceDate)
         #expect(saved.note == "took profit")
-        #expect(saved.proceeds == 10_400_000)
-        #expect(saved.realizedProfitLoss(costPerUnit: holding.averageCostPerUnit) == 2_400_000)
+        #expect(saved.grossProceeds == 10_400_000)
+        #expect(saved.proceeds == 10_300_000)
+        #expect(saved.realizedProfitLoss(costPerUnit: holding.averageCostPerUnit) == 2_300_000)
     }
 
     @Test("The lot behind a saved sale reports only what is left")

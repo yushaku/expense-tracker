@@ -8,6 +8,9 @@ enum FundSaleFormError: Error, Equatable {
     case nonPositivePrice
     case invalidExchangeRate
     case nonPositiveExchangeRate
+    case invalidFee
+    case negativeFee
+    case feeExceedsProceeds
     case missingAccount
 }
 
@@ -25,6 +28,7 @@ struct FundSaleDraft: Equatable {
     var priceCurrency: PriceEntryCurrency
     /// Đồng per dollar, as typed. Read only while `priceCurrency` is `.usd`.
     var exchangeRateText: String
+    var feeText: String
     var soldAt: Date
     var proceedsAccountID: UUID?
     var note: String
@@ -34,6 +38,7 @@ struct FundSaleDraft: Equatable {
         pricePerUnitText: String = "",
         priceCurrency: PriceEntryCurrency = .vnd,
         exchangeRateText: String = "",
+        feeText: String = "",
         soldAt: Date,
         proceedsAccountID: UUID? = nil,
         note: String = ""
@@ -42,6 +47,7 @@ struct FundSaleDraft: Equatable {
         self.pricePerUnitText = pricePerUnitText
         self.priceCurrency = priceCurrency
         self.exchangeRateText = exchangeRateText
+        self.feeText = feeText
         self.soldAt = soldAt
         self.proceedsAccountID = proceedsAccountID
         self.note = note
@@ -56,6 +62,7 @@ struct FundSaleDraft: Equatable {
                 pricePerUnitText: USDPrice.format(dollars),
                 priceCurrency: .usd,
                 exchangeRateText: VNDCurrency.formatPlain(rate),
+                feeText: sale.fee > 0 ? VNDCurrency.formatPlain(sale.fee) : "",
                 soldAt: sale.soldAt,
                 proceedsAccountID: sale.proceedsAccountID,
                 note: sale.note
@@ -66,6 +73,7 @@ struct FundSaleDraft: Equatable {
         self.init(
             unitsText: UnitQuantity.format(sale.units),
             pricePerUnitText: VNDCurrency.formatPlain(sale.pricePerUnit),
+            feeText: sale.fee > 0 ? VNDCurrency.formatPlain(sale.fee) : "",
             soldAt: sale.soldAt,
             proceedsAccountID: sale.proceedsAccountID,
             note: sale.note
@@ -82,12 +90,17 @@ struct FundSaleDraft: Equatable {
         /// The rate that produced `pricePerUnit`, or `nil` when it was typed in
         /// đồng directly.
         var exchangeRate: Decimal?
+        var fee: Decimal
         var soldAt: Date
         var proceedsAccountID: UUID
         var note: String
 
-        var proceeds: Decimal {
+        var grossProceeds: Decimal {
             FundValuation.marketValue(units: units, pricePerUnit: pricePerUnit)
+        }
+
+        var proceeds: Decimal {
+            grossProceeds - fee
         }
     }
 
@@ -145,6 +158,24 @@ struct FundSaleDraft: Equatable {
 
         let price = try validatedPrice()
 
+        let fee: Decimal
+        if feeText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            fee = .zero
+        } else {
+            guard let parsedFee = VNDCurrency.parse(feeText) else {
+                throw FundSaleFormError.invalidFee
+            }
+            guard parsedFee >= 0 else {
+                throw FundSaleFormError.negativeFee
+            }
+            fee = parsedFee
+        }
+
+        let grossProceeds = FundValuation.marketValue(units: units, pricePerUnit: price.perUnit)
+        guard fee < grossProceeds else {
+            throw FundSaleFormError.feeExceedsProceeds
+        }
+
         guard let proceedsAccountID else {
             throw FundSaleFormError.missingAccount
         }
@@ -153,6 +184,7 @@ struct FundSaleDraft: Equatable {
             units: units,
             pricePerUnit: price.perUnit,
             exchangeRate: price.exchangeRate,
+            fee: fee,
             soldAt: soldAt,
             proceedsAccountID: proceedsAccountID,
             note: note.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -172,6 +204,7 @@ struct FundSaleDraft: Equatable {
             holdingID: holdingID,
             units: values.units,
             pricePerUnit: values.pricePerUnit,
+            fee: values.fee,
             proceedsAccountID: values.proceedsAccountID,
             soldAt: values.soldAt,
             note: values.note,
@@ -189,6 +222,7 @@ struct FundSaleDraft: Equatable {
         // Cleared when the price is retyped in đồng, for the reason
         // `FundDraft.apply(to:availableSourceBalance:)` clears its own.
         sale.exchangeRate = values.exchangeRate
+        sale.fee = values.fee
         sale.soldAt = values.soldAt
         sale.proceedsAccountID = values.proceedsAccountID
         sale.note = values.note

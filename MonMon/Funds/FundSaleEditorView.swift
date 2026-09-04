@@ -397,7 +397,10 @@ struct FundSaleEditorView: View {
             throw FundSaleFormError.exceedsRemainingUnits
         }
 
-        for lot in lots {
+        let weights = lots.map { $0.remainingUnits(sales: sales) }
+        let allocatedFees = FundSaleSummary.allocateFee(values.fee, weights: weights)
+
+        for (index, lot) in lots.enumerated() {
             let units = lot.remainingUnits(sales: sales)
             guard units > 0 else {
                 continue
@@ -409,6 +412,7 @@ struct FundSaleEditorView: View {
                     holdingID: lot.id,
                     units: units,
                     pricePerUnit: values.pricePerUnit,
+                    fee: allocatedFees[index],
                     proceedsAccountID: values.proceedsAccountID,
                     soldAt: values.soldAt,
                     note: values.note,
