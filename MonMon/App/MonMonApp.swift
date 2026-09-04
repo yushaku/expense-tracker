@@ -9,6 +9,9 @@ struct MonMonApp: App {
     @State private var appLock: AppLock
     @State private var appRoute: AppRoute
     @State private var cloudSync = CloudSync()
+    #if os(macOS)
+        @State private var mcpAccessManager: MCPAccessManager
+    #endif
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -16,7 +19,6 @@ struct MonMonApp: App {
         let appRoute = AppRoute()
         _appLock = State(initialValue: appLock)
         _appRoute = State(initialValue: appRoute)
-
         let modelContainer: ModelContainer
         do {
             modelContainer = try ModelContainer(
@@ -65,6 +67,20 @@ struct MonMonApp: App {
             // loss than a launch that does not happen.
             assertionFailure("Recurring generation failed: \(error)")
         }
+
+        #if os(macOS)
+            do {
+                let configuration = try MCPRuntimeConfiguration.current()
+                _mcpAccessManager = State(
+                    initialValue: try MCPAccessManager(
+                        configuration: configuration,
+                        sourceContext: modelContainer.mainContext
+                    )
+                )
+            } catch {
+                fatalError("MCP configuration failed")
+            }
+        #endif
     }
 
     private static var modelConfiguration: ModelConfiguration {
@@ -88,6 +104,9 @@ struct MonMonApp: App {
                 .environment(appLock)
                 .environment(appRoute)
                 .environment(cloudSync)
+                #if os(macOS)
+                    .environment(mcpAccessManager)
+                #endif
                 .task { cloudSync.startObserving() }
                 // Duplicates arrive when synchronisation lands, which is after
                 // launch, so reconciling only in `init` would miss the case it
@@ -102,6 +121,9 @@ struct MonMonApp: App {
                     // since the app was opened — an app left running overnight
                     // would otherwise not record today until it was relaunched.
                     _ = try? RecurringGenerator.generate(in: container.mainContext)
+                    #if os(macOS)
+                        mcpAccessManager.refreshSnapshotIfAllowed()
+                    #endif
                 }
         }
         .modelContainer(container)

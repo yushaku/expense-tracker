@@ -7,6 +7,29 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		M40000000000000000000201 /* MCPTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000101 /* MCPTypes.swift */; platformFilters = (macos, ); };
+		M40000000000000000000202 /* MCPRecordSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000102 /* MCPRecordSerializer.swift */; platformFilters = (macos, ); };
+		M40000000000000000000203 /* MCPRecordSerializerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000103 /* MCPRecordSerializerTests.swift */; };
+		M40000000000000000000204 /* MCPQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000104 /* MCPQuery.swift */; platformFilters = (macos, ); };
+		M40000000000000000000205 /* MCPDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000105 /* MCPDataRepository.swift */; platformFilters = (macos, ); };
+		M40000000000000000000206 /* MCPQueryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000106 /* MCPQueryTests.swift */; };
+		M40000000000000000000207 /* MCPRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000107 /* MCPRuntime.swift */; platformFilters = (macos, ); };
+		M40000000000000000000208 /* MCPRuntimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000108 /* MCPRuntimeTests.swift */; };
+		M50000000000000000000201 /* MCPServerAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = M50000000000000000000101 /* MCPServerAdapter.swift */; };
+		M50000000000000000000202 /* MCPServerContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M50000000000000000000102 /* MCPServerContractTests.swift */; };
+		M50000000000000000000203 /* MCP in Frameworks */ = {isa = PBXBuildFile; productRef = M50000000000000000000702 /* MCP */; };
+		M40000000000000000000209 /* MCPClientInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000109 /* MCPClientInstaller.swift */; platformFilters = (macos, ); };
+		M40000000000000000000210 /* MCPClientInstallerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000110 /* MCPClientInstallerTests.swift */; };
+		M40000000000000000000211 /* MCPAccessManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000111 /* MCPAccessManager.swift */; platformFilters = (macos, ); };
+		M40000000000000000000212 /* MCPAccessManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000112 /* MCPAccessManagerTests.swift */; };
+		M40000000000000000000213 /* MCPSettingsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000113 /* MCPSettingsCard.swift */; platformFilters = (macos, ); };
+		M50000000000000000000204 /* MonMonMCPServer in Embed MCP Helper */ = {isa = PBXBuildFile; fileRef = M50000000000000000000105 /* MonMonMCPServer */; platformFilters = (macos, ); settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		M50000000000000000000205 /* MCP in Frameworks */ = {isa = PBXBuildFile; productRef = M50000000000000000000702 /* MCP */; };
+		M60000000000000000000201 /* MCPTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000101 /* MCPTypes.swift */; };
+		M60000000000000000000203 /* MCPQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000104 /* MCPQuery.swift */; };
+		M60000000000000000000205 /* MCPRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000107 /* MCPRuntime.swift */; };
+		M60000000000000000000206 /* MCPServerAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = M50000000000000000000101 /* MCPServerAdapter.swift */; };
+		M60000000000000000000207 /* MonMonMCPServerMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = M50000000000000000000103 /* MonMonMCPServerMain.swift */; };
 		Y10000000000000000000201 /* TripWorkspaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000101 /* TripWorkspaceTests.swift */; };
 		Y10000000000000000000202 /* TripWorkspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000102 /* TripWorkspace.swift */; };
 		Y10000000000000000000203 /* TripWorkspaceLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000103 /* TripWorkspaceLifecycle.swift */; };
@@ -383,6 +406,13 @@
 			remoteGlobalIDString = D10000000000000000000001;
 			remoteInfo = MonMonShareExtension;
 		};
+		M50000000000000000000602 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A00000000000000000000003 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = M50000000000000000000002;
+			remoteInfo = MonMonMCPServer;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -398,9 +428,38 @@
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		M50000000000000000000304 /* Embed MCP Helper */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Contents/Helpers;
+			dstSubfolderSpec = 1;
+			files = (
+				M50000000000000000000204 /* MonMonMCPServer in Embed MCP Helper */,
+			);
+			name = "Embed MCP Helper";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		M40000000000000000000101 /* MCPTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPTypes.swift; sourceTree = "<group>"; };
+		M40000000000000000000102 /* MCPRecordSerializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPRecordSerializer.swift; sourceTree = "<group>"; };
+		M40000000000000000000103 /* MCPRecordSerializerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPRecordSerializerTests.swift; sourceTree = "<group>"; };
+		M40000000000000000000104 /* MCPQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPQuery.swift; sourceTree = "<group>"; };
+		M40000000000000000000105 /* MCPDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPDataRepository.swift; sourceTree = "<group>"; };
+		M40000000000000000000106 /* MCPQueryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPQueryTests.swift; sourceTree = "<group>"; };
+		M40000000000000000000107 /* MCPRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPRuntime.swift; sourceTree = "<group>"; };
+		M40000000000000000000108 /* MCPRuntimeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPRuntimeTests.swift; sourceTree = "<group>"; };
+		M50000000000000000000101 /* MCPServerAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPServerAdapter.swift; sourceTree = "<group>"; };
+		M50000000000000000000102 /* MCPServerContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPServerContractTests.swift; sourceTree = "<group>"; };
+		M40000000000000000000109 /* MCPClientInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPClientInstaller.swift; sourceTree = "<group>"; };
+		M40000000000000000000110 /* MCPClientInstallerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPClientInstallerTests.swift; sourceTree = "<group>"; };
+		M40000000000000000000111 /* MCPAccessManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPAccessManager.swift; sourceTree = "<group>"; };
+		M40000000000000000000112 /* MCPAccessManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPAccessManagerTests.swift; sourceTree = "<group>"; };
+		M40000000000000000000113 /* MCPSettingsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPSettingsCard.swift; sourceTree = "<group>"; };
+		M50000000000000000000103 /* MonMonMCPServerMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonMonMCPServerMain.swift; sourceTree = "<group>"; };
+		M50000000000000000000104 /* MonMonMCPServer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MonMonMCPServer.entitlements; sourceTree = "<group>"; };
+		M50000000000000000000105 /* MonMonMCPServer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MonMonMCPServer; sourceTree = BUILT_PRODUCTS_DIR; };
 		Y10000000000000000000101 /* TripWorkspaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspaceTests.swift; sourceTree = "<group>"; };
 		Y10000000000000000000102 /* TripWorkspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspace.swift; sourceTree = "<group>"; };
 		Y10000000000000000000103 /* TripWorkspaceLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspaceLifecycle.swift; sourceTree = "<group>"; };
@@ -781,6 +840,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				M50000000000000000000203 /* MCP in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		M50000000000000000000302 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				M50000000000000000000205 /* MCP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -800,6 +868,7 @@
 				A00000000000000000000011 /* Config */,
 				A00000000000000000000012 /* MonMon */,
 				A00000000000000000000015 /* MonMonTests */,
+				M50000000000000000000001 /* MonMonMCPServer */,
 				D10000000000000000000010 /* MonMonShareExtension */,
 				J10000000000000000000010 /* MonMonQuickExpenseWidget */,
 				A00000000000000000000016 /* Products */,
@@ -819,6 +888,7 @@
 		A00000000000000000000012 /* MonMon */ = {
 			isa = PBXGroup;
 			children = (
+				M40000000000000000000001 /* MCP */,
 				Y10000000000000000000001 /* Trips */,
 				X10000000000000000000001 /* IncomeAllocation */,
 				V10000000000000000000001 /* Goals */,
@@ -924,6 +994,7 @@
 		A00000000000000000000015 /* MonMonTests */ = {
 			isa = PBXGroup;
 			children = (
+				M40000000000000000000002 /* MCP */,
 				Y10000000000000000000002 /* Trips */,
 				X10000000000000000000002 /* IncomeAllocation */,
 				V10000000000000000000002 /* Goals */,
@@ -943,6 +1014,44 @@
 				B10000000000000000000002 /* Imports */,
 			);
 			path = MonMonTests;
+			sourceTree = "<group>";
+		};
+		M40000000000000000000001 /* MCP */ = {
+			isa = PBXGroup;
+			children = (
+				M40000000000000000000101 /* MCPTypes.swift */,
+				M40000000000000000000102 /* MCPRecordSerializer.swift */,
+				M40000000000000000000104 /* MCPQuery.swift */,
+				M40000000000000000000105 /* MCPDataRepository.swift */,
+				M40000000000000000000107 /* MCPRuntime.swift */,
+				M40000000000000000000109 /* MCPClientInstaller.swift */,
+				M40000000000000000000111 /* MCPAccessManager.swift */,
+				M40000000000000000000113 /* MCPSettingsCard.swift */,
+			);
+			path = MCP;
+			sourceTree = "<group>";
+		};
+		M40000000000000000000002 /* MCP */ = {
+			isa = PBXGroup;
+			children = (
+				M40000000000000000000103 /* MCPRecordSerializerTests.swift */,
+				M40000000000000000000106 /* MCPQueryTests.swift */,
+				M40000000000000000000108 /* MCPRuntimeTests.swift */,
+				M50000000000000000000102 /* MCPServerContractTests.swift */,
+				M40000000000000000000110 /* MCPClientInstallerTests.swift */,
+				M40000000000000000000112 /* MCPAccessManagerTests.swift */,
+			);
+			path = MCP;
+			sourceTree = "<group>";
+		};
+		M50000000000000000000001 /* MonMonMCPServer */ = {
+			isa = PBXGroup;
+			children = (
+				M50000000000000000000101 /* MCPServerAdapter.swift */,
+				M50000000000000000000103 /* MonMonMCPServerMain.swift */,
+				M50000000000000000000104 /* MonMonMCPServer.entitlements */,
+			);
+			path = MonMonMCPServer;
 			sourceTree = "<group>";
 		};
 		X10000000000000000000002 /* IncomeAllocation */ = {
@@ -1015,6 +1124,7 @@
 				A00000000000000000000121 /* MonMonTests.xctest */,
 				D10000000000000000000101 /* MonMonShareExtension.appex */,
 				J10000000000000000000101 /* MonMonQuickExpenseWidget.appex */,
+				M50000000000000000000105 /* MonMonMCPServer */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1504,12 +1614,14 @@
 				A00000000000000000000302 /* Frameworks */,
 				A00000000000000000000303 /* Resources */,
 				D10000000000000000000304 /* Embed App Extensions */,
+				M50000000000000000000304 /* Embed MCP Helper */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				D10000000000000000000601 /* PBXTargetDependency */,
 				J10000000000000000000601 /* PBXTargetDependency */,
+				M50000000000000000000601 /* PBXTargetDependency */,
 			);
 			name = MonMon;
 			packageProductDependencies = (
@@ -1533,6 +1645,9 @@
 				A00000000000000000000601 /* PBXTargetDependency */,
 			);
 			name = MonMonTests;
+			packageProductDependencies = (
+				M50000000000000000000702 /* MCP */,
+			);
 			productName = MonMonTests;
 			productReference = A00000000000000000000121 /* MonMonTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -1571,6 +1686,25 @@
 			productReference = J10000000000000000000101 /* MonMonQuickExpenseWidget.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		M50000000000000000000002 /* MonMonMCPServer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = M50000000000000000000401 /* Build configuration list for PBXNativeTarget "MonMonMCPServer" */;
+			buildPhases = (
+				M50000000000000000000303 /* Sources */,
+				M50000000000000000000302 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MonMonMCPServer;
+			packageProductDependencies = (
+				M50000000000000000000702 /* MCP */,
+			);
+			productName = MonMonMCPServer;
+			productReference = M50000000000000000000105 /* MonMonMCPServer */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -1594,6 +1728,9 @@
 					J10000000000000000000001 = {
 						CreatedOnToolsVersion = 26.6;
 					};
+					M50000000000000000000002 = {
+						CreatedOnToolsVersion = 26.6;
+					};
 				};
 			};
 			buildConfigurationList = A00000000000000000000401 /* Build configuration list for PBXProject "MonMon" */;
@@ -1608,6 +1745,7 @@
 			mainGroup = A00000000000000000000010;
 			packageReferences = (
 				33A69BFD303AE3A900432AF4 /* XCRemoteSwiftPackageReference "CalendarView" */,
+				M50000000000000000000701 /* XCRemoteSwiftPackageReference "swift-sdk" */,
 			);
 			productRefGroup = A00000000000000000000016 /* Products */;
 			projectDirPath = "";
@@ -1617,6 +1755,7 @@
 				A00000000000000000000002 /* MonMonTests */,
 				D10000000000000000000001 /* MonMonShareExtension */,
 				J10000000000000000000001 /* MonMonQuickExpenseWidget */,
+				M50000000000000000000002 /* MonMonMCPServer */,
 			);
 		};
 /* End PBXProject section */
@@ -1672,6 +1811,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				M40000000000000000000201 /* MCPTypes.swift in Sources */,
+				M40000000000000000000202 /* MCPRecordSerializer.swift in Sources */,
+				M40000000000000000000204 /* MCPQuery.swift in Sources */,
+				M40000000000000000000205 /* MCPDataRepository.swift in Sources */,
+				M40000000000000000000207 /* MCPRuntime.swift in Sources */,
+				M40000000000000000000209 /* MCPClientInstaller.swift in Sources */,
+				M40000000000000000000211 /* MCPAccessManager.swift in Sources */,
+				M40000000000000000000213 /* MCPSettingsCard.swift in Sources */,
 				Y10000000000000000000202 /* TripWorkspace.swift in Sources */,
 				Y10000000000000000000203 /* TripWorkspaceLifecycle.swift in Sources */,
 				Y10000000000000000000205 /* TripSummary.swift in Sources */,
@@ -1909,6 +2056,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				M40000000000000000000203 /* MCPRecordSerializerTests.swift in Sources */,
+				M40000000000000000000206 /* MCPQueryTests.swift in Sources */,
+				M40000000000000000000208 /* MCPRuntimeTests.swift in Sources */,
+				M50000000000000000000201 /* MCPServerAdapter.swift in Sources */,
+				M50000000000000000000202 /* MCPServerContractTests.swift in Sources */,
+				M40000000000000000000210 /* MCPClientInstallerTests.swift in Sources */,
+				M40000000000000000000212 /* MCPAccessManagerTests.swift in Sources */,
 				Y10000000000000000000201 /* TripWorkspaceTests.swift in Sources */,
 				Y10000000000000000000204 /* TripSummaryTests.swift in Sources */,
 				X10000000000000000000201 /* IncomeAllocationSnapshotTests.swift in Sources */,
@@ -2020,6 +2174,18 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		M50000000000000000000303 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				M60000000000000000000201 /* MCPTypes.swift in Sources */,
+				M60000000000000000000203 /* MCPQuery.swift in Sources */,
+				M60000000000000000000205 /* MCPRuntime.swift in Sources */,
+				M60000000000000000000206 /* MCPServerAdapter.swift in Sources */,
+				M60000000000000000000207 /* MonMonMCPServerMain.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -2039,6 +2205,14 @@
 			platformFilter = ios;
 			target = D10000000000000000000001 /* MonMonShareExtension */;
 			targetProxy = D10000000000000000000602 /* PBXContainerItemProxy */;
+		};
+		M50000000000000000000601 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilters = (
+				macos,
+			);
+			target = M50000000000000000000002 /* MonMonMCPServer */;
+			targetProxy = M50000000000000000000602 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -2135,6 +2309,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) MCP_ADAPTER_TEST";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -2150,6 +2325,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) MCP_ADAPTER_TEST";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -2203,6 +2379,44 @@
 			};
 			name = Release;
 		};
+		M50000000000000000000503 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A00000000000000000000102 /* Debug.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = MonMonMCPServer/MonMonMCPServer.entitlements;
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/MCPHelper";
+				DEVELOPMENT_TEAM = VB5AW63GJ8;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_MODULE_NAME = MonMon;
+				PRODUCT_NAME = MonMonMCPServer;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_INCLUDE_PATHS = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) MONMON_MCP_HELPER";
+			};
+			name = Debug;
+		};
+		M50000000000000000000504 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A00000000000000000000103 /* Release.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = MonMonMCPServer/MonMonMCPServer.entitlements;
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/MCPHelper";
+				DEVELOPMENT_TEAM = VB5AW63GJ8;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_MODULE_NAME = MonMon;
+				PRODUCT_NAME = MonMonMCPServer;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_INCLUDE_PATHS = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) MONMON_MCP_HELPER";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -2251,9 +2465,26 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		M50000000000000000000401 /* Build configuration list for PBXNativeTarget "MonMonMCPServer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				M50000000000000000000503 /* Debug */,
+				M50000000000000000000504 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		M50000000000000000000701 /* XCRemoteSwiftPackageReference "swift-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/modelcontextprotocol/swift-sdk.git";
+			requirement = {
+				kind = exactVersion;
+				version = 0.12.1;
+			};
+		};
 		33A69BFD303AE3A900432AF4 /* XCRemoteSwiftPackageReference "CalendarView" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Mijick/CalendarView.git";
@@ -2265,6 +2496,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		M50000000000000000000702 /* MCP */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = M50000000000000000000701 /* XCRemoteSwiftPackageReference "swift-sdk" */;
+			productName = MCP;
+		};
 		33A69BFE303AE3A900432AF4 /* MijickCalendarView */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 33A69BFD303AE3A900432AF4 /* XCRemoteSwiftPackageReference "CalendarView" */;

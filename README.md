@@ -9,6 +9,7 @@ Read the docs before the code:
 | `[docs/smart-note.html](docs/smart-note.html)`                                                   | Owner's guide — recording transactions, voice capture, statement import, reports       |
 | `[docs/budget-and-goals.html](docs/budget-and-goals.html)`                                       | How jars split income, how goals earmark money inside them, what the app refuses to do |
 | `[docs/architecture.html](docs/architecture.html)`                                               | The sixteen SwiftData models, their foreign keys, system boundaries, import flow       |
+| `[docs/mcp.md](docs/mcp.md)`                                                                     | Read-only AI access, tool contract, privacy boundary, and client setup                  |
 | `[docs/bank-transaction-auto-note-research.html](docs/bank-transaction-auto-note-research.html)` | Research behind automatic transaction notes                                            |
 
 ## Features
@@ -52,6 +53,7 @@ Read the docs before the code:
 ### Data, sync, and privacy
 
 - **Optional iCloud sync** — a CloudKit mirror of the local store, off until the owner turns it on, applied after a relaunch.
+- **Optional read-only AI access on Mac** — an embedded local MCP helper exposes raw records from an App Group SQLite snapshot to Codex or Claude Desktop after explicit consent. The helper has no CloudKit entitlement or write tools.
 - **Backup and restore** — a validated document covering every model, including jars, goals, and trips, with a confirmation step before a restore replaces what is on the device.
 - **App lock** — Face ID or Touch ID with device-passcode fallback, re-locking after time in the background.
 - **Language** — Vietnamese, English, or whatever the system is set to.
@@ -85,6 +87,7 @@ share nothing.
 | App group          | `group.com.sonlv.monmon.local.yushaku` | `group.com.sonlv.monmon.app`                                       |
 | CloudKit container | `iCloud.monmon.dev`                    | `iCloud.monmon`                                                    |
 | Push environment   | `development`                          | `development` (see `APS_ENVIRONMENT` in `Config/Release.xcconfig`) |
+| MCP server name    | `monmon-dev`                           | `monmon`                                                            |
 
 The dev icon is derived art, not a hand-drawn second logo. Regenerate it from
 the real one with `swift scripts/make-dev-appicon.swift` whenever `AppIcon`
@@ -100,6 +103,10 @@ xcconfig change.
 A distinct bundle identifier gives each flavour its own container, which is what
 separates the SwiftData store and `UserDefaults`; the app group separates the
 share extension's statement inbox; the CloudKit container separates what syncs.
+The macOS app also embeds `Contents/Helpers/MonMonMCPServer`, signed only for the
+same App Group. MonMon writes its local MCP snapshot there; the helper never
+opens CloudKit. The two MCP server names keep dev and prod client entries
+independent.
 
 Build and install the dev flavour on the phone:
 

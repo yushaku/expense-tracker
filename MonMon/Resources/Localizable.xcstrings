@@ -8975,6 +8975,72 @@
     },
     "Move or delete this jar’s goals before deleting the jar.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chuyển hoặc xoá các mục tiêu dùng hũ này trước khi xoá hũ." } } }
+    },
+    "AI access": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Quyền truy cập AI" } } }
+    },
+    "Allow AI access": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Cho phép AI truy cập" } } }
+    },
+    "App Lock does not protect MCP access. An AI client may send your detailed financial records to its model provider.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khóa ứng dụng không bảo vệ quyền truy cập MCP. Ứng dụng AI có thể gửi các bản ghi tài chính chi tiết của bạn đến nhà cung cấp mô hình." } } }
+    },
+    "MCP reads a local snapshot. Open MonMon on this Mac to refresh data changed on another device.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "MCP đọc bản chụp dữ liệu cục bộ. Hãy mở MonMon trên máy Mac này để cập nhật dữ liệu đã thay đổi trên thiết bị khác." } } }
+    },
+    "Not installed": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa cài đặt" } } }
+    },
+    "Not configured": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa cấu hình" } } }
+    },
+    "Connected after restart": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Kết nối sau khi khởi động lại" } } }
+    },
+    "Repair needed": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Cần sửa cấu hình" } } }
+    },
+    "Needs confirmation": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Cần xác nhận" } } }
+    },
+    "Repair client setup": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sửa cấu hình ứng dụng" } } }
+    },
+    "Updating AI client setup…": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang cập nhật cấu hình ứng dụng AI…" } } }
+    },
+    "Replace the existing server entry?": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thay thế mục máy chủ hiện có?" } } }
+    },
+    "Replace configuration": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thay thế cấu hình" } } }
+    },
+    "A client already has a server with this name or an old MonMon helper path. Only that MonMon entry will be replaced.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Một ứng dụng đã có máy chủ cùng tên hoặc đường dẫn helper MonMon cũ. Chỉ mục MonMon đó sẽ được thay thế." } } }
+    },
+    "Claude Desktop's configuration could not be read safely.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể đọc cấu hình Claude Desktop một cách an toàn." } } }
+    },
+    "No client configuration was changed.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không có cấu hình ứng dụng nào bị thay đổi." } } }
+    },
+    "Client configuration repaired. Restart the AI client to reconnect.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã sửa cấu hình ứng dụng. Hãy khởi động lại ứng dụng AI để kết nối lại." } } }
+    },
+    "Client configuration could not be repaired.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể sửa cấu hình ứng dụng." } } }
+    },
+    "AI access is enabled. Restart Codex or Claude Desktop to connect.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã bật quyền truy cập AI. Hãy khởi động lại Codex hoặc Claude Desktop để kết nối." } } }
+    },
+    "AI access could not be enabled.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể bật quyền truy cập AI." } } }
+    },
+    "AI access is off, but local cleanup was incomplete. The helper will still refuse data.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Quyền truy cập AI đã tắt nhưng chưa thể hoàn tất dọn dẹp cục bộ. Helper vẫn sẽ từ chối cung cấp dữ liệu." } } }
+    },
+    "AI access is off. Restart the AI client to remove the disconnected server.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Quyền truy cập AI đã tắt. Hãy khởi động lại ứng dụng AI để xóa máy chủ đã ngắt kết nối." } } }
     }
   },
   "version": "1.0"
