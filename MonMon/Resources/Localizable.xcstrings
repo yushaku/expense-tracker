@@ -1,6 +1,12 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Rate at purchase, %@.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tỷ giá lúc mua, %@." } } }
+    },
+    "Rate at sale, %@.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tỷ giá lúc bán, %@." } } }
+    },
     "Đồng": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đồng" } } }
     },

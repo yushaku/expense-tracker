@@ -261,6 +261,11 @@ struct FundSaleEditorForm: View {
                 Text(rateStatusMessage)
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
+            } else if let storedRateCaption {
+                Text(storedRateCaption)
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .accessibilityIdentifier("fund-sale-stored-rate-caption")
             }
 
             if let convertedPrice {
@@ -270,6 +275,15 @@ struct FundSaleEditorForm: View {
                     .accessibilityIdentifier("fund-sale-converted-price")
             }
         }
+    }
+
+    /// Says the rate in the box is the one this sale went through at. Mirrors
+    /// `FundEditorForm.storedRateCaption`, and for the same reason.
+    private var storedRateCaption: LocalizedStringKey? {
+        guard isEditing, draft.priceCurrency == .usd else {
+            return nil
+        }
+        return "Rate at sale, \(TransactionPeriod.day(draft.soldAt, in: locale))."
     }
 
     /// Coins are sold for dollars; Vietnamese funds, ETFs and gold are not.

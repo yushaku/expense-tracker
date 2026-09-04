@@ -331,6 +331,11 @@ struct FundEditorForm: View {
                 Text(rateStatusMessage)
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
+            } else if let storedRateCaption {
+                Text(storedRateCaption)
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .accessibilityIdentifier("fund-stored-rate-caption")
             }
 
             if let convertedCost {
@@ -366,6 +371,19 @@ struct FundEditorForm: View {
             return nil
         }
         return VNDCurrency.formatUnitPrice(dong)
+    }
+
+    /// Says the rate in the box is the one this position was bought at, not a
+    /// rate the app forgot to refresh.
+    ///
+    /// Only while editing, and only when nothing was fetched this time round —
+    /// a fetched rate has `rateStatusMessage` to explain itself, and saying
+    /// both would be two answers to one question.
+    private var storedRateCaption: LocalizedStringKey? {
+        guard isEditing, draft.costCurrency == .usd else {
+            return nil
+        }
+        return "Rate at purchase, \(TransactionPeriod.day(draft.purchasedAt, in: locale))."
     }
 
     /// Dollars are offered where things are actually bought in them. Vietnamese
