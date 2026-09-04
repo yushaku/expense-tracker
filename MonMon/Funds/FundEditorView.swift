@@ -37,6 +37,8 @@ struct FundEditorView: View {
     @Query(sort: \SavingsWithdrawal.withdrawnAt, order: .reverse)
     private var withdrawals: [SavingsWithdrawal]
 
+    @Environment(\.locale) private var locale
+
     @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
     private var transactions: [MoneyTransaction]
 
@@ -68,6 +70,7 @@ struct FundEditorView: View {
     @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
     @State private var isAddingInstrument = false
+    @State private var rateLoader = USDExchangeRateLoader()
 
     init(mode: FundEditorMode, kinds: [FundInstrumentKind]) {
         self.mode = mode
@@ -106,10 +109,18 @@ struct FundEditorView: View {
                 isEditing: mode.editedHolding != nil,
                 validationError: validationError,
                 saveErrorMessage: saveErrorMessage,
+                rateStatusMessage: rateLoader.phase.message(in: locale),
                 onAddInstrument: { isAddingInstrument = true },
                 onDelete: { isConfirmingDelete = true }
             )
             .navigationTitle(navigationTitle)
+            // `onChange` rather than `task(id:)`: this must run when the owner
+            // switches currency, and never on opening. A saved position opens
+            // in the currency it was written in, and converting it there would
+            // rewrite figures nobody touched.
+            .onChange(of: draft.costCurrency) { previous, current in
+                Task { await convertCost(from: previous, to: current) }
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -233,6 +244,50 @@ struct FundEditorView: View {
         } catch {
             modelContext.rollback()
             saveErrorMessage = "Couldn’t save this holding. Try again."
+        }
+    }
+
+    /// Keeps the amount the same when the currency under it changes.
+    ///
+    /// Switching to dollars turns 2.070.646.854 ₫ into $79463 rather than
+    /// leaving a đồng figure to be read as dollars, which would overstate a
+    /// purchase by four orders of magnitude. The rate is fetched first when the
+    /// box is empty — that is the one moment this app has a reason to ask.
+    private func convertCost(
+        from previous: PriceEntryCurrency,
+        to current: PriceEntryCurrency
+    ) async {
+        guard previous != current else {
+            return
+        }
+
+        if current == .usd,
+            draft.exchangeRateText.trimmingCharacters(in: .whitespaces).isEmpty,
+            let fetched = await rateLoader.load()
+        {
+            draft.exchangeRateText = VNDCurrency.formatPlain(fetched.dongPerDollar)
+        }
+
+        guard let rate = VNDCurrency.parse(draft.exchangeRateText), rate > 0 else {
+            return
+        }
+
+        switch current {
+        case .usd:
+            guard let dong = VNDCurrency.parse(draft.averageCostText),
+                let dollars = USDPrice.inDollars(dong, rate: rate)
+            else {
+                return
+            }
+            draft.averageCostText = USDPrice.format(dollars)
+
+        case .vnd:
+            guard let dollars = USDPrice.parse(draft.averageCostText),
+                let dong = USDPrice.inDong(dollars, rate: rate)
+            else {
+                return
+            }
+            draft.averageCostText = VNDCurrency.formatPlain(dong)
         }
     }
 

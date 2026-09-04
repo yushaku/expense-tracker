@@ -20,6 +20,8 @@ struct FundSaleEditorForm: View {
     let isEditing: Bool
     let validationError: FundSaleFormError?
     let saveErrorMessage: LocalizedStringKey?
+    /// What the rate lookup has to say, when it has anything.
+    var rateStatusMessage: String?
     let onSellEverything: () -> Void
     let onDelete: () -> Void
 
@@ -181,8 +183,18 @@ struct FundSaleEditorForm: View {
             VStack(alignment: .leading, spacing: 14) {
                 sectionHeader(priceTitle, systemImage: "tag.fill")
 
+                if offersDollarEntry {
+                    SegmentedTabs(
+                        label: "Price currency",
+                        selection: $draft.priceCurrency,
+                        options: PriceEntryCurrency.allCases,
+                        title: \.displayName
+                    )
+                    .accessibilityIdentifier("fund-sale-price-currency")
+                }
+
                 HStack(spacing: 12) {
-                    Text("₫")
+                    Text(draft.priceCurrency.symbol)
                         .font(.title2.weight(.bold))
                         .foregroundStyle(MonMonTheme.accent)
                         .accessibilityHidden(true)
@@ -204,6 +216,10 @@ struct FundSaleEditorForm: View {
                     validationMessage(priceErrorMessage, id: "fund-sale-price-error")
                 }
 
+                if draft.priceCurrency == .usd {
+                    exchangeRateField
+                }
+
                 Text(priceCaption)
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
@@ -211,8 +227,100 @@ struct FundSaleEditorForm: View {
         }
     }
 
+    /// The rate box, shown only while the price is being typed in dollars.
+    /// Mirrors `FundEditorForm.exchangeRateField`, and for the same reasons.
+    private var exchangeRateField: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Rate used (₫ per $)")
+                .font(.subheadline.weight(.medium))
+
+            HStack(spacing: 12) {
+                Text("₫")
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(MonMonTheme.accent)
+                    .accessibilityHidden(true)
+
+                VNDTextField(text: $draft.exchangeRateText, keyboard: .decimal)
+                    .textFieldStyle(.plain)
+                    .monospacedDigit()
+                    .multilineTextAlignment(.trailing)
+                    .accessibilityLabel("Rate used")
+                    .accessibilityIdentifier("fund-sale-exchange-rate")
+            }
+            .padding(14)
+            .background(
+                MonMonTheme.field,
+                in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+            )
+
+            if let exchangeRateErrorMessage {
+                validationMessage(exchangeRateErrorMessage, id: "fund-sale-exchange-rate-error")
+            }
+
+            if let rateStatusMessage {
+                Text(rateStatusMessage)
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            }
+
+            if let convertedPrice {
+                Text("Stored as \(convertedPrice) ₫")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .accessibilityIdentifier("fund-sale-converted-price")
+            }
+        }
+    }
+
+    /// Coins are sold for dollars; Vietnamese funds, ETFs and gold are not.
+    private var offersDollarEntry: Bool { instrument?.kind == .crypto }
+
+    /// The đồng the typed dollars come to, shown before anything is stored.
+    private var convertedPrice: String? {
+        guard let dong = pricePerUnitInDong, draft.priceCurrency == .usd else {
+            return nil
+        }
+        return VNDCurrency.formatUnitPrice(dong)
+    }
+
+    /// The sale price in đồng, whichever currency it was typed in. `nil` until
+    /// the boxes hold something usable.
+    private var pricePerUnitInDong: Decimal? {
+        switch draft.priceCurrency {
+        case .vnd:
+            guard let price = VNDCurrency.parse(draft.pricePerUnitText), price > 0 else {
+                return nil
+            }
+            return price
+        case .usd:
+            guard let dollars = USDPrice.parse(draft.pricePerUnitText),
+                let rate = VNDCurrency.parse(draft.exchangeRateText)
+            else {
+                return nil
+            }
+            return USDPrice.inDong(dollars, rate: rate)
+        }
+    }
+
+    private var exchangeRateErrorMessage: LocalizedStringKey? {
+        switch validationError {
+        case .invalidExchangeRate:
+            "Enter the rate you were paid, in đồng per dollar."
+        case .nonPositiveExchangeRate:
+            "The rate must be greater than zero."
+        default:
+            nil
+        }
+    }
+
     private var priceTitle: LocalizedStringKey {
-        isGold ? "Price per lượng" : "Price per unit"
+        if isGold {
+            return "Price per lượng"
+        }
+        if offersDollarEntry {
+            return "Price per coin"
+        }
+        return "Price per unit"
     }
 
     /// Gold is quoted from the shop's side, so the figure the app already holds
@@ -274,7 +382,7 @@ struct FundSaleEditorForm: View {
     /// says what it needs rather than showing a confident zero.
     private var outcome: Outcome? {
         guard let typed = UnitQuantity.parse(draft.unitsText), typed > 0,
-            let price = VNDCurrency.parse(draft.pricePerUnitText), price > 0
+            let price = pricePerUnitInDong, price > 0
         else {
             return nil
         }
@@ -403,8 +511,19 @@ struct FundSaleEditorForm: View {
 
     @ViewBuilder
     private var priceTextField: some View {
-        VNDTextField(text: $draft.pricePerUnitText)
-            .accessibilityIdentifier("fund-sale-price")
+        if draft.priceCurrency == .usd {
+            #if os(iOS)
+                TextField("0", text: $draft.pricePerUnitText)
+                    .keyboardType(.decimalPad)
+                    .accessibilityIdentifier("fund-sale-price")
+            #else
+                TextField("0", text: $draft.pricePerUnitText)
+                    .accessibilityIdentifier("fund-sale-price")
+            #endif
+        } else {
+            VNDTextField(text: $draft.pricePerUnitText)
+                .accessibilityIdentifier("fund-sale-price")
+        }
     }
 
     private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {

@@ -16,6 +16,9 @@ struct FundEditorForm: View {
     let isEditing: Bool
     let validationError: FundFormError?
     let saveErrorMessage: LocalizedStringKey?
+    /// What the rate lookup has to say, when it has anything. The form neither
+    /// fetches nor decides — it only shows what the editor found out.
+    var rateStatusMessage: String?
     let onAddInstrument: () -> Void
     let onDelete: () -> Void
 
@@ -160,10 +163,20 @@ struct FundEditorForm: View {
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
-                    fieldLabel(isGold ? "Average cost per lượng" : "Average cost per unit")
+                    fieldLabel(averageCostLabel)
+
+                    if offersDollarEntry {
+                        SegmentedTabs(
+                            label: "Cost currency",
+                            selection: $draft.costCurrency,
+                            options: PriceEntryCurrency.allCases,
+                            title: \.displayName
+                        )
+                        .accessibilityIdentifier("fund-cost-currency")
+                    }
 
                     HStack(spacing: 12) {
-                        Text("₫")
+                        Text(draft.costCurrency.symbol)
                             .font(.title3.weight(.bold))
                             .foregroundStyle(MonMonTheme.funds)
 
@@ -171,9 +184,7 @@ struct FundEditorForm: View {
                             .textFieldStyle(.plain)
                             .monospacedDigit()
                             .multilineTextAlignment(.trailing)
-                            .accessibilityLabel(
-                                isGold ? "Average cost per lượng" : "Average cost per unit"
-                            )
+                            .accessibilityLabel(averageCostLabel)
                     }
                     .padding(14)
                     .background(
@@ -187,6 +198,10 @@ struct FundEditorForm: View {
                             id: "fund-average-cost-error"
                         )
                     }
+                }
+
+                if draft.costCurrency == .usd {
+                    exchangeRateField
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -269,8 +284,114 @@ struct FundEditorForm: View {
 
     @ViewBuilder
     private var averageCostTextField: some View {
-        VNDTextField(text: $draft.averageCostText, keyboard: .decimal)
-            .accessibilityIdentifier("fund-average-cost")
+        // Đồng gets the grouping field the rest of the app types money into.
+        // Dollars get a plain decimal box: đồng grouping would put a separator
+        // where a dollar's decimal point belongs.
+        if draft.costCurrency == .usd {
+            plainDecimalField(text: $draft.averageCostText, identifier: "fund-average-cost")
+        } else {
+            VNDTextField(text: $draft.averageCostText, keyboard: .decimal)
+                .accessibilityIdentifier("fund-average-cost")
+        }
+    }
+
+    /// The rate box, shown only while the cost is being typed in dollars.
+    ///
+    /// It carries a fetched starting value and stays editable, because the rate
+    /// that matters is the one the owner's exchange gave them, not a published
+    /// mid. What lands in the store is the đồng underneath, and it is spelled
+    /// out here so nothing is converted out of sight.
+    private var exchangeRateField: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            fieldLabel("Rate used (₫ per $)")
+
+            HStack(spacing: 12) {
+                Text("₫")
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(MonMonTheme.funds)
+
+                VNDTextField(text: $draft.exchangeRateText, keyboard: .decimal)
+                    .textFieldStyle(.plain)
+                    .monospacedDigit()
+                    .multilineTextAlignment(.trailing)
+                    .accessibilityLabel("Rate used")
+                    .accessibilityIdentifier("fund-exchange-rate")
+            }
+            .padding(14)
+            .background(
+                MonMonTheme.field,
+                in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+            )
+
+            if let exchangeRateErrorMessage {
+                validationMessage(exchangeRateErrorMessage, id: "fund-exchange-rate-error")
+            }
+
+            if let rateStatusMessage {
+                Text(rateStatusMessage)
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            }
+
+            if let convertedCost {
+                Text("Stored as \(convertedCost) ₫")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .accessibilityIdentifier("fund-converted-cost")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func plainDecimalField(text: Binding<String>, identifier: String) -> some View {
+        #if os(iOS)
+            TextField("0", text: text)
+                .keyboardType(.decimalPad)
+                .accessibilityIdentifier(identifier)
+        #else
+            TextField("0", text: text)
+                .accessibilityIdentifier(identifier)
+        #endif
+    }
+
+    /// The đồng the typed dollars come to, so the owner sees the number that
+    /// will actually be stored before storing it. Absent until both boxes hold
+    /// something usable.
+    private var convertedCost: String? {
+        guard draft.costCurrency == .usd,
+            let dollars = USDPrice.parse(draft.averageCostText),
+            let rate = VNDCurrency.parse(draft.exchangeRateText),
+            let dong = USDPrice.inDong(dollars, rate: rate)
+        else {
+            return nil
+        }
+        return VNDCurrency.formatUnitPrice(dong)
+    }
+
+    /// Dollars are offered where things are actually bought in them. Vietnamese
+    /// funds, ETFs and gold are bought in đồng, so a currency switch on those
+    /// forms would be a box to ignore rather than a feature.
+    private var offersDollarEntry: Bool { isCrypto }
+
+    private var averageCostLabel: LocalizedStringKey {
+        if isGold {
+            return "Average cost per lượng"
+        }
+        if isCrypto {
+            return "Average cost per coin"
+        }
+        return "Average cost per unit"
+    }
+
+    private var exchangeRateErrorMessage: LocalizedStringKey? {
+        switch validationError {
+        case .invalidExchangeRate:
+            "Enter the rate you paid, in đồng per dollar."
+        case .nonPositiveExchangeRate:
+            "The rate must be greater than zero."
+        default:
+            nil
+        }
     }
 
     private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {
@@ -352,7 +473,9 @@ struct FundEditorForm: View {
     private var averageCostErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidAverageCost:
-            "Enter a valid average cost per unit."
+            draft.costCurrency == .usd
+                ? "Enter a valid average cost in dollars."
+                : "Enter a valid average cost per unit."
         case .nonPositiveAverageCost:
             "Average cost must be greater than zero."
         default:

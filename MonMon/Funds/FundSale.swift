@@ -49,6 +49,11 @@ final class FundSale {
     var soldAt: Date = Date(timeIntervalSince1970: 0)
     var note: String = ""
     var currencyCode: String = VNDCurrency.code
+    /// Đồng per dollar, when the price was typed in dollars. `pricePerUnit` is
+    /// đồng either way; this only records how that figure was arrived at, so
+    /// reopening the editor shows what was typed. `nil` for a price typed in
+    /// đồng. See `FundHolding.purchaseExchangeRate`.
+    var exchangeRate: Decimal?
     var createdAt: Date = Date(timeIntervalSince1970: 0)
 
     init(
@@ -60,6 +65,7 @@ final class FundSale {
         soldAt: Date,
         note: String = "",
         currencyCode: String = VNDCurrency.code,
+        exchangeRate: Decimal? = nil,
         createdAt: Date
     ) {
         self.id = id
@@ -70,11 +76,22 @@ final class FundSale {
         self.soldAt = soldAt
         self.note = note
         self.currencyCode = currencyCode
+        self.exchangeRate = exchangeRate
         self.createdAt = createdAt
     }
 }
 
 extension FundSale {
+    /// The dollar price this sale was entered at, when it was entered in
+    /// dollars. Derived, so it can never disagree with the đồng that reached
+    /// the account.
+    var pricePerUnitInDollars: Decimal? {
+        guard let exchangeRate else {
+            return nil
+        }
+        return USDPrice.inDollars(pricePerUnit, rate: exchangeRate)
+    }
+
     /// What the sale brought in, rounded to the đồng like every other amount
     /// that reaches a cash balance.
     var proceeds: Decimal {

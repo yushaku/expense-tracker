@@ -67,10 +67,13 @@ struct FundSaleEditorView: View {
 
     private let mode: FundSaleEditorMode
 
+    @Environment(\.locale) private var locale
+
     @State private var draft: FundSaleDraft
     @State private var validationError: FundSaleFormError?
     @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
+    @State private var rateLoader = USDExchangeRateLoader()
 
     init(mode: FundSaleEditorMode, defaultDate: Date = .now) {
         self.mode = mode
@@ -105,12 +108,18 @@ struct FundSaleEditorView: View {
                 isEditing: mode.editedSale != nil,
                 validationError: validationError,
                 saveErrorMessage: saveErrorMessage,
+                rateStatusMessage: rateLoader.phase.message(in: locale),
                 onSellEverything: {
                     draft.unitsText = UnitQuantity.format(displayedRemainingUnits)
                 },
                 onDelete: { isConfirmingDelete = true }
             )
             .navigationTitle(navigationTitle)
+            // See `FundEditorView.convertCost(from:to:)` for why this is an
+            // `onChange` and not a `task(id:)`.
+            .onChange(of: draft.priceCurrency) { previous, current in
+                Task { await convertPrice(from: previous, to: current) }
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -239,6 +248,47 @@ struct FundSaleEditorView: View {
         }
 
         return mode.isClosingGroup ? "Close position" : "Sell"
+    }
+
+    /// Keeps the amount the same when the currency under it changes, so the
+    /// catalogue price filled in below can be read in dollars without becoming
+    /// a different number. Mirrors `FundEditorView.convertCost(from:to:)`.
+    private func convertPrice(
+        from previous: PriceEntryCurrency,
+        to current: PriceEntryCurrency
+    ) async {
+        guard previous != current else {
+            return
+        }
+
+        if current == .usd,
+            draft.exchangeRateText.trimmingCharacters(in: .whitespaces).isEmpty,
+            let fetched = await rateLoader.load()
+        {
+            draft.exchangeRateText = VNDCurrency.formatPlain(fetched.dongPerDollar)
+        }
+
+        guard let rate = VNDCurrency.parse(draft.exchangeRateText), rate > 0 else {
+            return
+        }
+
+        switch current {
+        case .usd:
+            guard let dong = VNDCurrency.parse(draft.pricePerUnitText),
+                let dollars = USDPrice.inDollars(dong, rate: rate)
+            else {
+                return
+            }
+            draft.pricePerUnitText = USDPrice.format(dollars)
+
+        case .vnd:
+            guard let dollars = USDPrice.parse(draft.pricePerUnitText),
+                let dong = USDPrice.inDong(dollars, rate: rate)
+            else {
+                return
+            }
+            draft.pricePerUnitText = VNDCurrency.formatPlain(dong)
+        }
     }
 
     /// Offers today's price rather than making the owner retype it. Only ever

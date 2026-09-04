@@ -6,6 +6,8 @@ enum FundFormError: Error, Equatable {
     case nonPositiveUnits
     case invalidAverageCost
     case nonPositiveAverageCost
+    case invalidExchangeRate
+    case nonPositiveExchangeRate
     case insufficientSourceBalance
 }
 
@@ -17,7 +19,14 @@ enum FundFormError: Error, Equatable {
 struct FundDraft: Equatable {
     var instrumentID: UUID?
     var unitsText: String
+    /// The average cost, as typed, in whichever currency `costCurrency` names.
     var averageCostText: String
+    /// Which currency `averageCostText` is in. Đồng unless the owner switched,
+    /// which is what every position written before this existed reads as.
+    var costCurrency: PriceEntryCurrency
+    /// Đồng per dollar, as typed. Read only while `costCurrency` is `.usd`,
+    /// so switching back to đồng cannot leave a stale rate behind.
+    var exchangeRateText: String
     var sourceAccountID: UUID?
     /// The day the units were bought. Defaults to whatever the caller passes —
     /// today, for a new position — and can be moved back, because a stack of
@@ -28,17 +37,42 @@ struct FundDraft: Equatable {
         instrumentID: UUID? = nil,
         unitsText: String = "",
         averageCostText: String = "",
+        costCurrency: PriceEntryCurrency = .vnd,
+        exchangeRateText: String = "",
         sourceAccountID: UUID? = nil,
         purchasedAt: Date = .now
     ) {
         self.instrumentID = instrumentID
         self.unitsText = unitsText
         self.averageCostText = averageCostText
+        self.costCurrency = costCurrency
+        self.exchangeRateText = exchangeRateText
         self.sourceAccountID = sourceAccountID
         self.purchasedAt = purchasedAt
     }
 
+    /// Reopens a position in the currency it was entered in.
+    ///
+    /// A position bought in dollars comes back in dollars, at the rate it was
+    /// written with. Showing the converted đồng instead would put a number in
+    /// front of the owner that they never typed, and re-saving it would quietly
+    /// re-anchor the cost to whatever rate happened to be in the box.
     init(holding: FundHolding) {
+        if let rate = holding.purchaseExchangeRate,
+            let dollars = holding.averageCostPerUnitInDollars
+        {
+            self.init(
+                instrumentID: holding.instrumentID,
+                unitsText: UnitQuantity.format(holding.units),
+                averageCostText: USDPrice.format(dollars),
+                costCurrency: .usd,
+                exchangeRateText: VNDCurrency.formatPlain(rate),
+                sourceAccountID: holding.sourceAccountID,
+                purchasedAt: holding.boughtOn
+            )
+            return
+        }
+
         self.init(
             instrumentID: holding.instrumentID,
             unitsText: UnitQuantity.format(holding.units),
@@ -52,10 +86,50 @@ struct FundDraft: Equatable {
     struct ValidatedValues: Equatable {
         var instrumentID: UUID
         var units: Decimal
+        /// Always đồng, whichever currency was typed.
         var averageCostPerUnit: Decimal
+        /// The rate that produced `averageCostPerUnit`, or `nil` when it was
+        /// typed in đồng directly.
+        var exchangeRate: Decimal?
 
         var costBasis: Decimal {
             FundValuation.costBasis(units: units, averageCostPerUnit: averageCostPerUnit)
+        }
+    }
+
+    /// The average cost in đồng, and the rate that got it there.
+    ///
+    /// The conversion happens once, here, on the way into the store. Nothing
+    /// downstream knows a dollar was involved, which is what keeps every total
+    /// in the app a single-currency figure.
+    private func validatedCost() throws -> (perUnit: Decimal, exchangeRate: Decimal?) {
+        switch costCurrency {
+        case .vnd:
+            guard let perUnit = VNDCurrency.parse(averageCostText) else {
+                throw FundFormError.invalidAverageCost
+            }
+            guard perUnit > 0 else {
+                throw FundFormError.nonPositiveAverageCost
+            }
+            return (perUnit, nil)
+
+        case .usd:
+            guard let dollars = USDPrice.parse(averageCostText) else {
+                throw FundFormError.invalidAverageCost
+            }
+            guard dollars > 0 else {
+                throw FundFormError.nonPositiveAverageCost
+            }
+            guard let rate = VNDCurrency.parse(exchangeRateText) else {
+                throw FundFormError.invalidExchangeRate
+            }
+            guard rate > 0 else {
+                throw FundFormError.nonPositiveExchangeRate
+            }
+            guard let perUnit = USDPrice.inDong(dollars, rate: rate) else {
+                throw FundFormError.invalidAverageCost
+            }
+            return (perUnit, rate)
         }
     }
 
@@ -76,18 +150,13 @@ struct FundDraft: Equatable {
             throw FundFormError.nonPositiveUnits
         }
 
-        guard let averageCostPerUnit = VNDCurrency.parse(averageCostText) else {
-            throw FundFormError.invalidAverageCost
-        }
-
-        guard averageCostPerUnit > 0 else {
-            throw FundFormError.nonPositiveAverageCost
-        }
+        let cost = try validatedCost()
 
         let values = ValidatedValues(
             instrumentID: instrumentID,
             units: units,
-            averageCostPerUnit: averageCostPerUnit
+            averageCostPerUnit: cost.perUnit,
+            exchangeRate: cost.exchangeRate
         )
 
         if let availableSourceBalance, values.costBasis > availableSourceBalance {
@@ -111,7 +180,8 @@ struct FundDraft: Equatable {
             averageCostPerUnit: values.averageCostPerUnit,
             createdAt: createdAt,
             sourceAccountID: sourceAccountID,
-            purchasedAt: purchasedAt
+            purchasedAt: purchasedAt,
+            purchaseExchangeRate: values.exchangeRate
         )
     }
 
@@ -126,5 +196,8 @@ struct FundDraft: Equatable {
         holding.averageCostPerUnit = values.averageCostPerUnit
         holding.sourceAccountID = sourceAccountID
         holding.purchasedAt = purchasedAt
+        // Cleared when the cost is retyped in đồng, so a position never keeps a
+        // rate that no longer explains its cost.
+        holding.purchaseExchangeRate = values.exchangeRate
     }
 }

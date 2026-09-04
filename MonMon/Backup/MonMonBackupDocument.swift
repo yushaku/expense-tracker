@@ -404,6 +404,10 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         var sourceAccountID: String?
         var createdAt: String
         var purchasedAt: String?
+        /// Đồng per dollar, when the cost was typed in dollars. Absent in
+        /// backups written before coins could be, and in every cost typed in
+        /// đồng. Decodes as `nil` either way, so the format version stands.
+        var purchaseExchangeRate: String?
     }
 
     struct FundSaleRecord: Codable, Equatable, Sendable, MonMonBackupRecord {
@@ -415,6 +419,9 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         var soldAt: String
         var note: String
         var currencyCode: String
+        /// Đồng per dollar, when the price was typed in dollars. Optional for
+        /// the reason `FundHoldingRecord.purchaseExchangeRate` is.
+        var exchangeRate: String?
         var createdAt: String
     }
 
