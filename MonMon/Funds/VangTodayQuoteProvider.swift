@@ -17,7 +17,7 @@ struct VangTodayQuoteProvider: FundCatalogueProvider {
         self.transport = transport
     }
 
-    func latestQuote(symbol: String, asOf: Date) async throws -> FundQuote {
+    func latestQuote(symbol: String, providerID: String?, asOf: Date) async throws -> FundQuote {
         let wanted = symbol.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         let url = Self.pricesURL.appending(queryItems: [
             URLQueryItem(name: "type", value: wanted)

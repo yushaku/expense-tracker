@@ -14,7 +14,7 @@ private struct QuoteBackedETFProvider: FundCatalogueProvider {
         candidates
     }
 
-    func latestQuote(symbol: String, asOf: Date) async throws -> FundQuote {
+    func latestQuote(symbol: String, providerID: String?, asOf: Date) async throws -> FundQuote {
         if failedSymbols.contains(symbol) {
             throw FundQuoteError.noQuoteAvailable
         }
@@ -44,6 +44,23 @@ struct FundCatalogueImportTests {
             "products/filter": .init(body, statusCode: statusCode)
         ])
         return FundCatalogueImport(provider: FmarketQuoteProvider(transport: transport))
+    }
+
+    private func cryptoImporter(
+        markets: String = FundQuoteFixtures.coinGeckoMarkets,
+        search: String = FundQuoteFixtures.coinGeckoSearchPepe,
+        price: String = FundQuoteFixtures.coinGeckoPriceBitcoin,
+        searchStatusCode: Int = 200
+    ) -> (FundCatalogueImport, FixtureTransport) {
+        let transport = FixtureTransport([
+            "coins/markets": .init(markets),
+            "api/v3/search": .init(search, statusCode: searchStatusCode),
+            "simple/price": .init(price),
+        ])
+        return (
+            FundCatalogueImport(provider: CoinGeckoQuoteProvider(transport: transport)),
+            transport
+        )
     }
 
     private func goldImporter() -> FundCatalogueImport {
@@ -301,6 +318,134 @@ struct FundCatalogueImportTests {
         #expect(saved.allSatisfy { $0.currentPricePerUnit > 0 })
         #expect(saved.allSatisfy { $0.priceAsOf == quoteDay })
         #expect(saved.allSatisfy { $0.priceFetchedAt == stamped })
+    }
+
+    // MARK: - Coins
+
+    @Test("A coin catalogue arrives priced and identified")
+    func coinCatalogueIsPricedAndIdentified() async throws {
+        let (importer, _) = cryptoImporter()
+
+        await importer.load(existing: [])
+
+        let bitcoin = try #require(importer.importable.first { $0.symbol == "BTC" })
+        #expect(bitcoin.kind == .crypto)
+        #expect(bitcoin.providerID == "bitcoin")
+        #expect(bitcoin.pricePerUnit == 2_110_321_939)
+    }
+
+    @Test("The identifier is written onto the instrument, so a later refresh asks for it")
+    func importedCoinKeepsItsIdentifier() async throws {
+        let container = try makeContainer()
+        let (importer, _) = cryptoImporter()
+
+        await importer.load(existing: [])
+        let bitcoin = try #require(importer.importable.first { $0.symbol == "BTC" })
+        _ = try await importer.importing(
+            [bitcoin],
+            into: container.mainContext,
+            existing: [],
+            createdAt: FundTestFactory.referenceDate
+        )
+
+        let stored = try container.mainContext.fetch(FetchDescriptor<FundInstrument>())
+        let saved = try #require(stored.first { $0.symbol == "BTC" })
+        #expect(saved.providerID == "bitcoin")
+        #expect(saved.kind == .crypto)
+        #expect(saved.source == .coinGecko)
+        #expect(saved.currentPricePerUnit == 2_110_321_939)
+    }
+
+    /// The catalogue page carries the largest coins; anything else has to be
+    /// asked for, and what comes back joins the list rather than replacing it.
+    @Test("A search the loaded page cannot answer is asked of the provider")
+    func remoteSearchFindsCoinsBeyondThePage() async throws {
+        let (importer, transport) = cryptoImporter()
+
+        await importer.load(existing: [])
+        #expect(importer.matching("pepe").isEmpty)
+
+        await importer.searchRemotely("pepe")
+
+        #expect(importer.matching("pepe").count == 2)
+        // The page is still there afterwards.
+        #expect(importer.importable.contains { $0.symbol == "BTC" })
+        #expect(transport.allSentText().contains("query=pepe"))
+    }
+
+    @Test("A search the loaded page answers costs no request")
+    func localMatchAsksForNothing() async throws {
+        let (importer, transport) = cryptoImporter()
+
+        await importer.load(existing: [])
+        let afterLoad = transport.requestCount
+
+        await importer.searchRemotely("bitcoin")
+
+        #expect(transport.requestCount == afterLoad)
+    }
+
+    @Test("One character is too little to ask about")
+    func aSingleCharacterAsksForNothing() async throws {
+        let (importer, transport) = cryptoImporter()
+
+        await importer.load(existing: [])
+        let afterLoad = transport.requestCount
+
+        await importer.searchRemotely("p")
+
+        #expect(transport.requestCount == afterLoad)
+    }
+
+    @Test("A complete catalogue is never asked to search again")
+    func completeCataloguesDoNotSearchRemotely() async throws {
+        let fmarket = importer(FundQuoteFixtures.fmarketCatalogue)
+        #expect(!fmarket.offersRemoteSearch)
+        #expect(goldImporter().offersRemoteSearch == false)
+    }
+
+    @Test("A throttled search is reported rather than read as an empty result")
+    func throttledSearchIsReported() async throws {
+        let (importer, _) = cryptoImporter(
+            search: FundQuoteFixtures.coinGeckoThrottled,
+            searchStatusCode: 429
+        )
+
+        await importer.load(existing: [])
+        await importer.searchRemotely("pepe")
+
+        #expect(importer.remoteSearchFailure == .rateLimited)
+        #expect(importer.matching("pepe").isEmpty)
+    }
+
+    /// A coin found by search carries no price, so it is quoted before it is
+    /// written — the rule the ETF import already follows.
+    @Test("A coin found by search is priced before it is saved")
+    func searchedCoinIsQuotedBeforeSaving() async throws {
+        let container = try makeContainer()
+        let (importer, _) = cryptoImporter(
+            price: """
+                {"pepe":{"vnd":250,"last_updated_at":1788514270}}
+                """
+        )
+
+        await importer.load(existing: [])
+        await importer.searchRemotely("pepe")
+        let pepe = try #require(importer.importable.first { $0.symbol == "PEPE" })
+        #expect(pepe.pricePerUnit == nil)
+
+        let result = try await importer.importing(
+            [pepe],
+            into: container.mainContext,
+            existing: [],
+            createdAt: FundTestFactory.referenceDate
+        )
+
+        #expect(result.addedSymbols == ["PEPE"])
+        let stored = try container.mainContext.fetch(FetchDescriptor<FundInstrument>())
+        let saved = try #require(stored.first { $0.symbol == "PEPE" })
+        #expect(saved.currentPricePerUnit == 250)
+        #expect(saved.providerID == "pepe")
     }
 }
 

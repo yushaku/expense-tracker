@@ -207,7 +207,12 @@ final class FundPriceRefresher {
     ///
     /// - Returns: whether anything was written.
     private func syncLogos(instruments: [FundInstrument], asOf: Date) async -> Bool {
-        let missing = instruments.filter { $0.logoURL == nil && $0.kind != .gold }
+        // Gold has no listing to read a logo from, and a coin's image arrives
+        // with its own catalogue row, so neither has anything to backfill from
+        // Fmarket's fund managers.
+        let missing = instruments.filter {
+            $0.logoURL == nil && $0.kind != .gold && $0.kind != .crypto
+        }
         guard !missing.isEmpty else {
             return false
         }
@@ -275,6 +280,7 @@ final class FundPriceRefresher {
         do {
             let quote = try await router.latestQuote(
                 symbol: ticker,
+                providerID: instrument.providerID,
                 kind: instrument.kind,
                 asOf: asOf
             )

@@ -173,6 +173,63 @@ enum FundQuoteFixtures {
            "type":"CỔ PHIẾU"}
         ]
         """
+
+    /// `GET /api/v3/simple/price?ids=bitcoin&vs_currencies=vnd&include_last_updated_at=true`,
+    /// captured 2026-09-04.
+    static let coinGeckoPriceBitcoin = """
+        {"bitcoin":{"vnd":2110324943,"last_updated_at":1788514270}}
+        """
+
+    /// What an identifier CoinGecko does not know is answered with. Not an
+    /// error, and not a malformed body — an empty object.
+    static let coinGeckoPriceUnknown = """
+        {}
+        """
+
+    /// A coin CoinGecko knows, quoted in a currency that was not asked for.
+    static let coinGeckoPriceWrongCurrency = """
+        {"bitcoin":{"usd":80123.45,"last_updated_at":1788514270}}
+        """
+
+    /// `GET /api/v3/coins/markets?vs_currency=vnd`, trimmed to the fields the
+    /// provider reads, plus one row with no usable price.
+    static let coinGeckoMarkets = """
+        [{"id":"bitcoin","symbol":"btc","name":"Bitcoin",
+          "image":"https://coin-images.coingecko.com/coins/images/1/large/bitcoin.png",
+          "current_price":2110321939,"market_cap_rank":1,
+          "last_updated":"2026-09-04T09:30:30.000Z"},
+         {"id":"ethereum","symbol":"eth","name":"Ethereum",
+          "image":"https://coin-images.coingecko.com/coins/images/279/large/ethereum.png",
+          "current_price":76543210,"market_cap_rank":2,
+          "last_updated":"2026-09-04T09:30:31.000Z"},
+         {"id":"unpriced-coin","symbol":"nop","name":"Unpriced Coin",
+          "image":"https://coin-images.coingecko.com/coins/images/3/large/nope.png",
+          "current_price":null,"market_cap_rank":null,
+          "last_updated":"2026-09-04T09:30:32.000Z"}]
+        """
+
+    /// `GET /api/v3/search?query=pepe`, captured 2026-09-04.
+    static let coinGeckoSearchPepe = """
+        {"coins":[
+          {"id":"pepe","name":"Pepe","api_symbol":"pepe","symbol":"PEPE",
+           "market_cap_rank":54,
+           "thumb":"https://coin-images.coingecko.com/coins/images/29850/thumb/pepe-token.jpeg",
+           "large":"https://coin-images.coingecko.com/coins/images/29850/large/pepe-token.jpeg"},
+          {"id":"ape-and-pepe","name":"Ape and Pepe","api_symbol":"ape-and-pepe",
+           "symbol":"APEPE","market_cap_rank":163,
+           "thumb":"https://coin-images.coingecko.com/coins/images/39614/thumb/APEPE_200.png",
+           "large":"https://coin-images.coingecko.com/coins/images/39614/large/APEPE_200.png"}
+        ],"exchanges":[],"categories":[]}
+        """
+
+    static let coinGeckoSearchEmpty = """
+        {"coins":[],"exchanges":[],"categories":[]}
+        """
+
+    /// What the free tier answers with once it has had enough.
+    static let coinGeckoThrottled = """
+        {"status":{"error_code":429,"error_message":"You've exceeded the Rate Limit"}}
+        """
 }
 
 /// Serves recorded replies, and records what was asked for so a test can assert

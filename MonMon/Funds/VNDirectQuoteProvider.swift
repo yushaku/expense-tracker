@@ -24,7 +24,7 @@ struct VNDirectQuoteProvider: FundCatalogueProvider {
         self.transport = transport
     }
 
-    func latestQuote(symbol: String, asOf: Date) async throws -> FundQuote {
+    func latestQuote(symbol: String, providerID: String?, asOf: Date) async throws -> FundQuote {
         let wanted = symbol.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         let value = try await transport.json(historyRequest(symbol: wanted, asOf: asOf))
         let payload = try JSONReader.object(value)

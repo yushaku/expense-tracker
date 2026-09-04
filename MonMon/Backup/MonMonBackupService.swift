@@ -373,6 +373,7 @@ private extension MonMonBackupService {
             priceFetchedAt: try optionalDate(record.priceFetchedAt),
             autoQuoteEnabled: record.autoQuoteEnabled,
             logoURL: record.logoURL,
+            providerID: record.providerID,
             currencyCode: record.currencyCode,
             createdAt: try MonMonBackupScalar.parseDate(record.createdAt)
         )
@@ -393,6 +394,7 @@ private extension MonMonBackupService {
         model.priceFetchedAt = try optionalDate(record.priceFetchedAt)
         model.autoQuoteEnabled = record.autoQuoteEnabled
         model.logoURL = record.logoURL
+        model.providerID = record.providerID
         model.currencyCode = record.currencyCode
         model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
     }
@@ -1003,6 +1005,7 @@ struct MonMonBackupService {
             priceFetchedAt: model.priceFetchedAt.map(MonMonBackupScalar.date),
             autoQuoteEnabled: model.autoQuoteEnabled,
             logoURL: model.logoURL,
+            providerID: model.providerID,
             currencyCode: model.currencyCode,
             createdAt: MonMonBackupScalar.date(model.createdAt)
         )

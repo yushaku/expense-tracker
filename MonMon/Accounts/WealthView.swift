@@ -230,7 +230,7 @@ struct WealthView: View {
         )
     }
 
-    /// The three places parked money sits, each worth what it is worth today and
+    /// The four places parked money sits, each worth what it is worth today and
     /// each a door into the list behind it. The figures repeat slices the
     /// allocation ring already draws, so the rows are doors rather than new
     /// claims.
@@ -264,6 +264,15 @@ struct WealthView: View {
                 amount: goldTotal,
                 count: goldHoldings.count
             )
+
+            investmentRow(
+                .crypto,
+                title: "Crypto",
+                systemImage: "bitcoinsign.circle.fill",
+                tint: MonMonTheme.crypto,
+                amount: cryptoTotal,
+                count: cryptoHoldings.count
+            )
         }
     }
 
@@ -288,7 +297,7 @@ struct WealthView: View {
     }
 
     /// What a row counts is what its list holds, so the word follows the
-    /// segment rather than one plural covering three different things.
+    /// segment rather than one plural covering four different things.
     private func countLabel(_ count: Int, for segment: InvestmentSegment) -> LocalizedStringKey {
         switch segment {
         case .savings:
@@ -297,6 +306,8 @@ struct WealthView: View {
             "\(count) holdings"
         case .gold:
             "\(count) products"
+        case .crypto:
+            "\(count) coins"
         }
     }
 
@@ -312,12 +323,20 @@ struct WealthView: View {
         FundSummary.holdings(holdings, in: instruments, matching: [.gold])
     }
 
+    private var cryptoHoldings: [FundHolding] {
+        FundSummary.holdings(holdings, in: instruments, matching: [.crypto])
+    }
+
     private var fundsTotal: Decimal {
         FundSummary.totalMarketValue(of: fundHoldings, instruments: instruments, sales: sales)
     }
 
     private var goldTotal: Decimal {
         FundSummary.totalMarketValue(of: goldHoldings, instruments: instruments, sales: sales)
+    }
+
+    private var cryptoTotal: Decimal {
+        FundSummary.totalMarketValue(of: cryptoHoldings, instruments: instruments, sales: sales)
     }
 
     private var debtsSection: some View {

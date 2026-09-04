@@ -253,6 +253,13 @@ struct MonMonBackupServiceTests {
         let report = try restoreService.restore(validated)
 
         #expect(report.restoredRecordCount == 19)
+        // The identifier a coin's price is fetched by is part of the record,
+        // not decoration: a restore that dropped it would leave every coin
+        // priced by ticker, which is the wrong coin often enough to matter.
+        let restoredInstrument = try #require(
+            destination.mainContext.fetch(FetchDescriptor<FundInstrument>()).first
+        )
+        #expect(restoredInstrument.providerID == "synthetic-fund")
         #expect(try destination.mainContext.fetchCount(FetchDescriptor<CashAccount>()) == 2)
         let restoredCredit = try #require(
             destination.mainContext.fetch(FetchDescriptor<CashAccount>()).first {
@@ -658,6 +665,7 @@ struct MonMonBackupServiceTests {
                 priceSource: FundQuoteSource.manual.rawValue,
                 priceFetchedAt: nil,
                 autoQuoteEnabled: false,
+                providerID: "synthetic-fund",
                 currencyCode: VNDCurrency.code,
                 createdAt: instant
             )

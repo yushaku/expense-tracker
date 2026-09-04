@@ -40,15 +40,29 @@ struct UnitQuantityTests {
         #expect(UnitQuantity.parse("-1") == -1)
     }
 
-    @Test("Formatting drops trailing zeros and keeps four fraction digits")
+    @Test("Formatting drops trailing zeros and keeps the fraction digits typed")
     func formattingIsCompact() {
         #expect(UnitQuantity.format(2_000) == "2000")
         #expect(UnitQuantity.format(Decimal(string: "1234.5678") ?? 0) == "1234,5678")
     }
 
+    /// A coin is divisible to eight places, so a satoshi-scale holding has to
+    /// survive being formatted and read back.
+    @Test("Eight fraction digits survive formatting")
+    func eightFractionDigitsAreKept() {
+        #expect(UnitQuantity.format(Decimal(string: "0.12345678") ?? 0) == "0,12345678")
+    }
+
     @Test("A formatted quantity parses back to the same value")
     func formatAndParseRoundTrip() throws {
         let units = try #require(Decimal(string: "1234.5678"))
+
+        #expect(UnitQuantity.parse(UnitQuantity.format(units)) == units)
+    }
+
+    @Test("A satoshi-scale quantity round-trips intact")
+    func satoshiRoundTrip() throws {
+        let units = try #require(Decimal(string: "0.00000001"))
 
         #expect(UnitQuantity.parse(UnitQuantity.format(units)) == units)
     }

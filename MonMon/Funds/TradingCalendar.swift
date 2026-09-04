@@ -14,6 +14,15 @@ enum TradingCalendar {
     /// HOSE trades 09:00–15:00 on weekdays.
     static let sessionCloseHour = 15
 
+    /// How old a coin price may be before it counts as stale.
+    ///
+    /// Crypto has no session to close, so its freshness is a clock question
+    /// rather than a calendar one. Fifteen minutes matches
+    /// `FundPriceRefresher.requestFloor`, so a screen opened twice inside the
+    /// floor finds nothing stale and asks for nothing — the two limits would
+    /// otherwise disagree about whether a fetch was worth making.
+    static let cryptoStaleWindow: TimeInterval = 15 * 60
+
     static var calendar: Calendar {
         TransactionPeriod.calendar
     }
@@ -55,13 +64,27 @@ enum TradingCalendar {
     /// An open-ended fund gets one extra trading day of grace: Fmarket publishes
     /// NAV at T+1, so a fund priced at the day before last is as fresh as it can
     /// be, not stale.
+    ///
+    /// Crypto is compared to the minute instead. Rounding it down to the start
+    /// of a day would call a price taken at one minute past midnight current
+    /// until the next midnight, which for a market that never closes is a whole
+    /// day of saying something false.
     static func isStale(priceAsOf: Date, kind: FundInstrumentKind, asOf: Date) -> Bool {
-        priceAsOf < calendar.startOfDay(for: freshestExpected(kind: kind, asOf: asOf))
+        let freshest = freshestExpected(kind: kind, asOf: asOf)
+
+        guard kind != .crypto else {
+            return priceAsOf < freshest
+        }
+
+        return priceAsOf < calendar.startOfDay(for: freshest)
     }
 
-    /// The oldest day a current price is allowed to carry.
+    /// The oldest moment a current price is allowed to carry. Every kind but
+    /// crypto answers with a day, which `isStale` then rounds down.
     static func freshestExpected(kind: FundInstrumentKind, asOf: Date) -> Date {
         switch kind {
+        case .crypto:
+            return asOf.addingTimeInterval(-cryptoStaleWindow)
         case .gold:
             return calendar.startOfDay(for: asOf)
         case .etf:

@@ -276,6 +276,8 @@ struct FundInstrumentEditorForm: View {
             "A listed ETF is priced by its close, which sits above or below its NAV."
         case .gold:
             "Gold is valued at the shop's buy price per lượng."
+        case .crypto:
+            "A coin is priced by a market that never closes, quoted straight in đồng."
         }
     }
 
