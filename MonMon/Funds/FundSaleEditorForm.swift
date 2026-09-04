@@ -113,6 +113,16 @@ struct FundSaleEditorForm: View {
     private var quantityCard: some View {
         card {
             VStack(alignment: .leading, spacing: 14) {
+                if offersGoldUnitChoice {
+                    SegmentedTabs(
+                        label: "Unit",
+                        selection: $draft.goldUnit,
+                        options: GoldUnit.allCases,
+                        title: \.displayName
+                    )
+                    .accessibilityIdentifier("fund-sale-gold-unit")
+                }
+
                 HStack {
                     sectionHeader(
                         policy.quantity.saleFieldTitle,
@@ -138,7 +148,7 @@ struct FundSaleEditorForm: View {
                         .monospacedDigit()
                         .accessibilityLabel(policy.quantity.accessibilityLabel)
 
-                    Text(policy.quantity.entryUnitLabel)
+                    Text(entryUnitName)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(MonMonTheme.textSecondary)
                 }
@@ -209,7 +219,7 @@ struct FundSaleEditorForm: View {
                         .multilineTextAlignment(.trailing)
                         .accessibilityLabel("Sale price per unit")
 
-                    Text("/ \(AppText.string(key: policy.priceUnitLabelKey, in: locale))")
+                    Text("/ \(priceUnitName)")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(MonMonTheme.textSecondary)
                         .accessibilityHidden(true)
@@ -335,7 +345,25 @@ struct FundSaleEditorForm: View {
     }
 
     private var priceTitle: LocalizedStringKey {
-        LocalizedStringKey(policy.salePriceTitleKey)
+        // The unit sits beside the figure, so repeating it in the heading would
+        // only be a second place for the two to disagree.
+        offersGoldUnitChoice ? "Sale price" : LocalizedStringKey(policy.salePriceTitleKey)
+    }
+
+    /// Only gold has two units to choose between.
+    private var offersGoldUnitChoice: Bool { policy.quantity.usesGoldSummary }
+
+    /// The unit both boxes are in, named in the language on show.
+    private var entryUnitName: String {
+        offersGoldUnitChoice
+            ? AppText.string(key: draft.goldUnit.displayNameKey, in: locale)
+            : AppText.string(key: policy.quantity.entryUnitLabelKey, in: locale)
+    }
+
+    /// Always the same unit as the quantity. That is the point of the choice.
+    private var priceUnitName: String {
+        offersGoldUnitChoice
+            ? entryUnitName : AppText.string(key: policy.priceUnitLabelKey, in: locale)
     }
 
     /// Gold is quoted from the shop's side, so the figure the app already holds
@@ -446,7 +474,9 @@ struct FundSaleEditorForm: View {
             return nil
         }
 
-        let units = policy.quantity.storedUnits(fromDisplayed: typed)
+        // Everything here is in the unit on screen: the price beside it and the
+        // average cost handed in are both per that unit.
+        let units = typed
 
         let grossProceeds = FundValuation.marketValue(units: units, pricePerUnit: price)
         guard fee < grossProceeds else {
@@ -592,7 +622,7 @@ struct FundSaleEditorForm: View {
     }
 
     private func quantityDescription(_ quantity: Decimal) -> String {
-        policy.quantity.entryDescription(quantity, locale: locale)
+        "\(UnitQuantity.format(quantity)) \(entryUnitName)"
     }
 
     @ViewBuilder

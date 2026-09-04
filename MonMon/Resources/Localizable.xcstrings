@@ -1,6 +1,15 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Unit": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đơn vị" } } }
+    },
+    "Average cost": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Giá vốn trung bình" } } }
+    },
+    "Sale price": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Giá bán" } } }
+    },
     "unit": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "đơn vị" } } }
     },

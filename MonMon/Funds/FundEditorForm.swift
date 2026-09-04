@@ -138,8 +138,18 @@ struct FundEditorForm: View {
             VStack(alignment: .leading, spacing: 18) {
                 sectionHeader("Position", systemImage: "chart.bar.fill")
 
+                if offersGoldUnitChoice {
+                    SegmentedTabs(
+                        label: "Unit",
+                        selection: $draft.goldUnit,
+                        options: GoldUnit.allCases,
+                        title: \.displayName
+                    )
+                    .accessibilityIdentifier("fund-gold-unit")
+                }
+
                 VStack(alignment: .leading, spacing: 8) {
-                    fieldLabel(instrumentPolicy.quantity.holdingFieldTitle)
+                    fieldLabel(quantityLabel)
 
                     HStack(spacing: 12) {
                         unitsTextField
@@ -147,7 +157,7 @@ struct FundEditorForm: View {
                             .font(.system(.title2, design: .rounded, weight: .semibold))
                             .monospacedDigit()
 
-                        Text(instrumentPolicy.quantity.entryUnitLabel)
+                        Text(entryUnitName)
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(MonMonTheme.textSecondary)
                             .accessibilityHidden(true)
@@ -417,8 +427,30 @@ struct FundEditorForm: View {
     /// Dollars are offered where things are actually bought in them. Vietnamese
     /// funds, ETFs and gold are bought in đồng, so a currency switch on those
     /// forms would be a box to ignore rather than a feature.
+    /// Only gold has two units to choose between.
+    private var offersGoldUnitChoice: Bool { instrumentPolicy.quantity.usesGoldSummary }
+
+    /// The unit both boxes are in, named in the language on show.
+    private var entryUnitName: String {
+        offersGoldUnitChoice
+            ? AppText.string(key: draft.goldUnit.displayNameKey, in: locale)
+            : AppText.string(key: instrumentPolicy.quantity.entryUnitLabelKey, in: locale)
+    }
+
+    private var quantityLabel: LocalizedStringKey {
+        offersGoldUnitChoice ? "Weight" : instrumentPolicy.quantity.holdingFieldTitle
+    }
+
     private var perPriceUnitLabel: String {
-        "/ \(AppText.string(key: instrumentPolicy.priceUnitLabelKey, in: locale))"
+        "/ \(priceUnitName)"
+    }
+
+    /// What the price is quoted against. The same unit as the quantity, always:
+    /// that is the whole point of letting gold choose one.
+    private var priceUnitName: String {
+        offersGoldUnitChoice
+            ? entryUnitName
+            : AppText.string(key: instrumentPolicy.priceUnitLabelKey, in: locale)
     }
 
     /// The purchase spelled out: how much, at what, for how much altogether.
@@ -433,19 +465,18 @@ struct FundEditorForm: View {
     /// `nil` until both boxes hold something usable, so it never shows a
     /// confident zero.
     private var costWorkingText: String? {
-        guard
-            let storedUnits = instrumentPolicy.quantity.storedUnits(
-                fromEntryText: draft.unitsText
-            ), storedUnits > 0, let perUnit = averageCostPerUnitInDong, perUnit > 0
+        guard let quantity = UnitQuantity.parse(draft.unitsText), quantity > 0,
+            let perUnit = averageCostPerUnitInDong, perUnit > 0
         else {
             return nil
         }
 
-        let quantity = instrumentPolicy.quantity.summaryValue(storedUnits: storedUnits)
-        let priceUnit = AppText.string(key: instrumentPolicy.priceUnitLabelKey, in: locale)
-        let total = FundValuation.costBasis(units: storedUnits, averageCostPerUnit: perUnit)
+        // Both figures are in the same unit, so the total is simply their
+        // product — no factor hides between this line and the boxes above it.
+        let total = FundValuation.costBasis(units: quantity, averageCostPerUnit: perUnit)
 
-        return "\(quantity) × \(VNDCurrency.formatUnitPrice(perUnit)) ₫/\(priceUnit)"
+        return "\(UnitQuantity.format(quantity)) \(entryUnitName)"
+            + " × \(VNDCurrency.formatUnitPrice(perUnit)) ₫/\(entryUnitName)"
             + " = \(VNDCurrency.formatPlain(total)) ₫"
     }
 
@@ -467,7 +498,8 @@ struct FundEditorForm: View {
     private var offersDollarEntry: Bool { instrumentPolicy.allowsDollarPriceEntry }
 
     private var averageCostLabel: LocalizedStringKey {
-        LocalizedStringKey(instrumentPolicy.editor.averageCostTitleKey)
+        offersGoldUnitChoice
+            ? "Average cost" : LocalizedStringKey(instrumentPolicy.editor.averageCostTitleKey)
     }
 
     private var exchangeRateErrorMessage: LocalizedStringKey? {

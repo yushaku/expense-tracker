@@ -86,9 +86,19 @@ struct FundEditorView: View {
             _draft = State(initialValue: FundDraft())
         case .edit(let holding):
             var initial = FundDraft(holding: holding)
-            initial.unitsText = UnitQuantity.format(
-                policy.quantity.displayedUnits(fromStored: holding.units)
-            )
+            if policy.quantity.usesGoldSummary {
+                // Weight and price move together into the unit the form opens
+                // in, or the two would describe purchases a factor of ten apart.
+                let perLuong = initial.goldUnit.perLuong
+                initial.unitsText = UnitQuantity.format(holding.units * perLuong)
+                initial.averageCostText = VNDCurrency.formatPlain(
+                    holding.averageCostPerUnit / perLuong
+                )
+            } else {
+                initial.unitsText = UnitQuantity.format(
+                    policy.quantity.displayedUnits(fromStored: holding.units)
+                )
+            }
             _draft = State(initialValue: initial)
         }
     }
@@ -128,6 +138,9 @@ struct FundEditorView: View {
             // Only on a new position: an existing one already records what was
             // actually paid, and today's price is not that.
             .onChange(of: draft.instrumentID) { _, _ in fillAverageCostFromCatalogue() }
+            .onChange(of: draft.goldUnit) { previous, current in
+                convertGoldUnit(from: previous, to: current)
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -281,7 +294,7 @@ struct FundEditorView: View {
             return
         }
 
-        let price = instrument.purchasePricePerUnit
+        let price = instrument.purchasePricePerUnit / entryUnitsPerStoredUnit
         let text: String
         switch draft.costCurrency {
         case .vnd:
@@ -297,6 +310,30 @@ struct FundEditorView: View {
 
         draft.averageCostText = text
         autofilledAverageCostText = text
+    }
+
+    /// Keeps the purchase the same when the unit under it changes.
+    ///
+    /// Ten chỉ at fifteen million is one lượng at a hundred and fifty million.
+    /// Moving only the label would leave the weight and the price describing
+    /// two different purchases.
+    private func convertGoldUnit(from previous: GoldUnit, to current: GoldUnit) {
+        guard previous != current else {
+            return
+        }
+
+        let factor = current.perLuong / previous.perLuong
+
+        if let typed = UnitQuantity.parse(draft.unitsText) {
+            draft.unitsText = UnitQuantity.format(typed * factor)
+        }
+
+        if let perUnit = VNDCurrency.parse(draft.averageCostText) {
+            draft.averageCostText = VNDCurrency.formatPlain(perUnit / factor)
+            if !autofilledAverageCostText.isEmpty {
+                autofilledAverageCostText = draft.averageCostText
+            }
+        }
     }
 
     /// Keeps the amount the same when the currency under it changes.
@@ -357,14 +394,37 @@ struct FundEditorView: View {
             ? instrumentPolicy.editor.newTitleKey : instrumentPolicy.editor.editTitleKey
     }
 
+    /// The draft in stored units: lượng for gold, the typed figure otherwise.
+    ///
+    /// The price is converted alongside the weight, by the same factor in the
+    /// other direction, so a purchase typed in chỉ and one typed in lượng save
+    /// as exactly the same position.
     private var draftForSaving: FundDraft {
-        guard let units = instrumentPolicy.quantity.storedUnits(fromEntryText: draft.unitsText)
-        else {
+        guard let typed = UnitQuantity.parse(draft.unitsText) else {
             return draft
         }
+
         var converted = draft
-        converted.unitsText = NSDecimalNumber(decimal: units).stringValue
+        let perStoredUnit = entryUnitsPerStoredUnit
+        converted.unitsText = NSDecimalNumber(decimal: typed / perStoredUnit).stringValue
+
+        if perStoredUnit != 1, let perUnit = VNDCurrency.parse(draft.averageCostText) {
+            converted.averageCostText =
+                NSDecimalNumber(
+                    decimal: perUnit * perStoredUnit
+                ).stringValue
+        }
+
         return converted
+    }
+
+    /// How many typed units make one stored unit. Gold answers with its chosen
+    /// unit; nothing else has a choice to make.
+    private var entryUnitsPerStoredUnit: Decimal {
+        guard instrumentPolicy.quantity.usesGoldSummary else {
+            return 1
+        }
+        return draft.goldUnit.perLuong
     }
 
     /// Says what else goes. A lot that has been sold out of takes its sales

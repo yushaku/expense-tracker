@@ -26,6 +26,9 @@ struct FundSaleDraft: Equatable {
     var pricePerUnitText: String
     /// Which currency `pricePerUnitText` is in. See `FundDraft.costCurrency`.
     var priceCurrency: PriceEntryCurrency
+    /// Which unit gold is being typed in. Ignored by every other kind,
+    /// which has only one unit to offer.
+    var goldUnit: GoldUnit
     /// Đồng per dollar, as typed. Read only while `priceCurrency` is `.usd`.
     var exchangeRateText: String
     var feeText: String
@@ -37,6 +40,7 @@ struct FundSaleDraft: Equatable {
         unitsText: String = "",
         pricePerUnitText: String = "",
         priceCurrency: PriceEntryCurrency = .vnd,
+        goldUnit: GoldUnit = .chi,
         exchangeRateText: String = "",
         feeText: String = "",
         soldAt: Date,
@@ -46,6 +50,7 @@ struct FundSaleDraft: Equatable {
         self.unitsText = unitsText
         self.pricePerUnitText = pricePerUnitText
         self.priceCurrency = priceCurrency
+        self.goldUnit = goldUnit
         self.exchangeRateText = exchangeRateText
         self.feeText = feeText
         self.soldAt = soldAt

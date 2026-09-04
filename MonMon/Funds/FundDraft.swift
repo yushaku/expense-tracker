@@ -24,6 +24,9 @@ struct FundDraft: Equatable {
     /// Which currency `averageCostText` is in. Đồng unless the owner switched,
     /// which is what every position written before this existed reads as.
     var costCurrency: PriceEntryCurrency
+    /// Which unit gold is being typed in. Ignored by every other kind,
+    /// which has only one unit to offer.
+    var goldUnit: GoldUnit
     /// Đồng per dollar, as typed. Read only while `costCurrency` is `.usd`,
     /// so switching back to đồng cannot leave a stale rate behind.
     var exchangeRateText: String
@@ -38,6 +41,7 @@ struct FundDraft: Equatable {
         unitsText: String = "",
         averageCostText: String = "",
         costCurrency: PriceEntryCurrency = .vnd,
+        goldUnit: GoldUnit = .chi,
         exchangeRateText: String = "",
         sourceAccountID: UUID? = nil,
         purchasedAt: Date = .now
@@ -46,6 +50,7 @@ struct FundDraft: Equatable {
         self.unitsText = unitsText
         self.averageCostText = averageCostText
         self.costCurrency = costCurrency
+        self.goldUnit = goldUnit
         self.exchangeRateText = exchangeRateText
         self.sourceAccountID = sourceAccountID
         self.purchasedAt = purchasedAt

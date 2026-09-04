@@ -101,7 +101,7 @@ struct FundSaleEditorView: View {
                 draft: $draft,
                 instrument: instrument,
                 remainingUnits: displayedRemainingUnits,
-                averageCostPerUnit: averageCostPerUnit,
+                averageCostPerUnit: displayedAverageCostPerUnit,
                 accounts: accounts,
                 policy: instrumentPolicy,
                 isClosingGroup: mode.isClosingGroup,
@@ -119,6 +119,9 @@ struct FundSaleEditorView: View {
             // `onChange` and not a `task(id:)`.
             .onChange(of: draft.priceCurrency) { previous, current in
                 Task { await convertPrice(from: previous, to: current) }
+            }
+            .onChange(of: draft.goldUnit) { previous, current in
+                convertGoldUnit(from: previous, to: current)
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -151,6 +154,7 @@ struct FundSaleEditorView: View {
                 Text("The units return to the position and the proceeds leave the account.")
             }
             .task {
+                showRecordedSaleInEntryUnit()
                 fillPriceFromCatalogue()
                 fillProceedsAccount()
             }
@@ -218,9 +222,15 @@ struct FundSaleEditorView: View {
         return remaining
     }
 
-    /// The same figure in the unit the owner types: chỉ for gold.
+    /// The same figure in the unit the owner is typing in.
     private var displayedRemainingUnits: Decimal {
-        instrumentPolicy.quantity.displayedUnits(fromStored: remainingUnits)
+        remainingUnits * entryUnitsPerStoredUnit
+    }
+
+    /// What a unit cost, in the unit the owner is typing in, so the form's
+    /// comparison sits beside a price in the same terms.
+    private var displayedAverageCostPerUnit: Decimal {
+        averageCostPerUnit / entryUnitsPerStoredUnit
     }
 
     /// What the units on offer cost, weighted across the lots being sold. Zero
@@ -295,6 +305,22 @@ struct FundSaleEditorView: View {
     /// fills an empty field, so it cannot overwrite what the owner typed, and it
     /// never touches a sale being edited — that one already has the price it was
     /// sold at.
+    /// Rewrites a recorded sale into the unit the form is typing in.
+    ///
+    /// `FundSaleDraft(sale:)` reads the stored figures, which for gold are per
+    /// lượng, and the form opens in chỉ. The instrument is only known once the
+    /// store is to hand, which is why this waits for the appear pass rather
+    /// than happening in `init`.
+    private func showRecordedSaleInEntryUnit() {
+        guard let sale = mode.editedSale, entryUnitsPerStoredUnit != 1 else {
+            return
+        }
+
+        let perStoredUnit = entryUnitsPerStoredUnit
+        draft.unitsText = UnitQuantity.format(sale.units * perStoredUnit)
+        draft.pricePerUnitText = VNDCurrency.formatPlain(sale.pricePerUnit / perStoredUnit)
+    }
+
     private func fillPriceFromCatalogue() {
         guard mode.editedSale == nil,
             draft.pricePerUnitText.isEmpty,
@@ -304,7 +330,9 @@ struct FundSaleEditorView: View {
             return
         }
 
-        draft.pricePerUnitText = VNDCurrency.formatPlain(instrument.currentPricePerUnit)
+        draft.pricePerUnitText = VNDCurrency.formatPlain(
+            instrument.currentPricePerUnit / entryUnitsPerStoredUnit
+        )
     }
 
     /// Offers the default account rather than opening on "Choose". Only ever
@@ -326,6 +354,16 @@ struct FundSaleEditorView: View {
     /// `FundEditorView.draftForSaving` does it.
     private var draftForSaving: FundSaleDraft {
         var converted = draft
+        let perStoredUnit = entryUnitsPerStoredUnit
+
+        // The price follows the weight, by the same factor the other way, so a
+        // sale typed in chỉ and one typed in lượng save as the same sale.
+        if perStoredUnit != 1, let price = VNDCurrency.parse(draft.pricePerUnitText) {
+            converted.pricePerUnitText =
+                NSDecimalNumber(
+                    decimal: price * perStoredUnit
+                ).stringValue
+        }
 
         if mode.isClosingGroup {
             // There is no quantity field to read: closing sells everything on
@@ -335,13 +373,38 @@ struct FundSaleEditorView: View {
             return converted
         }
 
-        guard let units = instrumentPolicy.quantity.storedUnits(fromEntryText: draft.unitsText)
-        else {
+        guard let typed = UnitQuantity.parse(draft.unitsText) else {
             return converted
         }
 
-        converted.unitsText = NSDecimalNumber(decimal: units).stringValue
+        converted.unitsText = NSDecimalNumber(decimal: typed / perStoredUnit).stringValue
         return converted
+    }
+
+    /// How many typed units make one stored unit. Gold answers with its chosen
+    /// unit; nothing else has a choice to make.
+    private var entryUnitsPerStoredUnit: Decimal {
+        guard instrumentPolicy.quantity.usesGoldSummary else {
+            return 1
+        }
+        return draft.goldUnit.perLuong
+    }
+
+    /// Keeps the sale the same when the unit under it changes.
+    private func convertGoldUnit(from previous: GoldUnit, to current: GoldUnit) {
+        guard previous != current else {
+            return
+        }
+
+        let factor = current.perLuong / previous.perLuong
+
+        if let typed = UnitQuantity.parse(draft.unitsText) {
+            draft.unitsText = UnitQuantity.format(typed * factor)
+        }
+
+        if let price = VNDCurrency.parse(draft.pricePerUnitText) {
+            draft.pricePerUnitText = VNDCurrency.formatPlain(price / factor)
+        }
     }
 
     private func save() {
