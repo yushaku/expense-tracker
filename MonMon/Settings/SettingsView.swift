@@ -251,6 +251,17 @@ struct SettingsView: View {
                     tint: MonMonTheme.Hue.peach,
                     scope: .gold
                 )
+
+                Divider()
+                    .overlay(MonMonTheme.border)
+
+                instrumentButton(
+                    title: "Crypto",
+                    subtitle: "Manage coins and CoinGecko imports",
+                    systemImage: "bitcoinsign.circle.fill",
+                    tint: MonMonTheme.crypto,
+                    scope: .crypto
+                )
             }
         }
     }

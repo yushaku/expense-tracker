@@ -1,6 +1,9 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Manage coins and CoinGecko imports": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Quản lý đồng coin và nhập từ CoinGecko" } } }
+    },
     "A coin is priced by a market that never closes, quoted straight in đồng.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đồng coin được định giá bởi một thị trường không bao giờ đóng cửa, báo thẳng bằng đồng." } } }
     },
