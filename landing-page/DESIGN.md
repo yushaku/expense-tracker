@@ -1,10 +1,11 @@
-# MonMon — lavender product showcase
+# MonMon — asset-first product showcase
 
 The user selected a Nexora landing-page screenshot as the style reference.
 Adapt its visual language to MonMon: a white/lavender background, bold sans-serif
 headline with violet-to-pink emphasis, two rounded calls to action, a large tilted
 dashboard, soft shadows, and floating feature cards. Keep the established short
-Vietnamese copy and interactive finance diagrams.
+Vietnamese copy and interactive finance diagrams. The user clarified that asset
+management is the main feature; jars are a supporting planning tool.
 
 ## Design choices
 
@@ -13,9 +14,26 @@ Vietnamese copy and interactive finance diagrams.
 - Desktop hero uses a 46/54 split; on mobile copy precedes the product image.
 - Existing capture, jar, asset and privacy diagrams retain their meaning with
   coordinated lavender accents.
-- Primary action scrolls to the working allocation slider. Secondary action opens
+- Primary action scrolls to asset management. Secondary action opens
   an accessible image dialog; Escape and the close button dismiss it and restore focus.
 - No fictional customers, ratings, release claims or App Store destination.
+
+## Feature hierarchy
+
+1. Asset management: hero, navigation, first feature section and closing CTA.
+   Show accounts, term deposits, funds/ETFs, gold and coins, with cost basis,
+   investment profit/loss and historical asset changes.
+2. Income/expenses: categories, accounts, transfers, recurring transactions,
+   search/filtering and quick capture.
+3. Daily/monthly reports: switch the illustrative report period to update the
+   income, expenses, net difference and expense distribution together.
+4. Debts: separate borrowed/lent examples with principal, payments and remaining.
+5. Budget jars and goals: smaller section after the four core capabilities.
+
+Report figures are fictional; expenses are summed from the visible bars. The day
+example spends 485,000 VND with no income; the month spends 8,500,000 VND against
+20,000,000 VND of income. Debt examples use principal minus recorded payments.
+No example is persisted or connected to real financial data.
 
 ## Assets and content
 

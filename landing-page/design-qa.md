@@ -51,3 +51,23 @@ final result: passed
 
 A genuine MonMon screenshot can replace the explicitly labeled concept image when
 native capture becomes available. This does not block the requested style adaptation.
+
+
+## Asset-first content revision
+
+User priority: highlight asset management and add income/expense management,
+daily/monthly reports and debt management. Preserve the chosen lavender style.
+Latest desktop and mobile full-page captures at the paths above were inspected.
+
+- Hero, top feature link, main CTA, first feature section and closing CTA all lead
+  with asset management. Budget jars appear after the four requested core sections.
+- New report and debt sections remain readable without horizontal overflow at
+  1440, 390 and 320 px. No broken images, anchor targets or console errors.
+- Day report: 485,000 VND expenses and −485,000 VND net. Month report: 8,500,000 VND
+  expenses and 11,500,000 VND net. Chart rows and selected button update together.
+- Verified month selection by keyboard Enter, day selection by click and DOM order
+  `tai-san, cach-dung, bao-cao, khoan-no, chia-hu, rieng-tu, kham-pha`.
+- Existing image-dialog controls, focus restoration and income slider still pass.
+- All financial examples are labeled and consistent; no real-user records are used.
+- No new actionable visual findings. The content hierarchy changes intentionally
+  supersede the earlier jar-led story.

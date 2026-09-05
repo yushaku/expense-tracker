@@ -1,6 +1,6 @@
 # MonMon landing page
 
-Vietnamese landing page: **Hiểu tiền của bạn. Sống nhẹ hơn.**
+Vietnamese landing page: **Quản lý tài sản. Làm chủ dòng tiền.**
 
 Lavender styling and a floating dashboard composition follow the user-selected visual reference.
 
@@ -15,6 +15,10 @@ python3 -m http.server 8080 --directory landing-page
 ```
 
 Then visit `http://localhost:8080`.
+
+The main story is asset management, followed by income/expenses, daily/monthly
+reports and borrowed/lent money. Budget jars are a secondary planning feature.
+The report period buttons switch between fictional day and month examples.
 
 The interactive income slider demonstrates the app's default jar allocation:
 55% necessities, 10% investment, 10% education, 10% savings, 10% play, 5% giving.
