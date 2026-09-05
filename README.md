@@ -79,13 +79,25 @@ open MonMon.xcodeproj
 
 ### Build flavours
 
-Build and install the dev flavour on the phone:
+Build, install, and launch either flavour on this Mac. The script installs into
+`~/Applications`, so it does not need administrator privileges:
+
+```sh
+scripts/install-mac.sh dev
+scripts/install-mac.sh prod # clean main matching origin/main only
+```
+
+The installed apps are `~/Applications/MonMon Dev.app` and
+`~/Applications/MonMon.app`. Override the destination with
+`MONMON_MAC_INSTALL_DIR` when needed.
+
+Build and install the dev flavour on an iPhone:
 
 ```sh
 scripts/run-iphone.sh Yushaku
 ```
 
-Prod (clean `main` only):
+Build and install Prod on an iPhone (clean `main` only):
 
 ```sh
 scripts/build-prod.sh

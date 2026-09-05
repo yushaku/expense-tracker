@@ -36,10 +36,14 @@ of `README.md` for the identifiers.
 
 - Dev is the `Debug` configuration. Build, install, and launch it with
   `scripts/run-iphone.sh Yushaku` from the `dev` branch, following the physical
-  iPhone workflow above. This is the flavour to use for every ordinary change.
-- Prod is the `Release` configuration, built only by `scripts/build-prod.sh`,
-  which refuses to run unless `HEAD` is a clean `main` matching `origin/main`.
-  Build it only when the user asks, and only from a `main` the user promoted.
+  iPhone workflow above, or install the local Mac app with
+  `scripts/install-mac.sh dev`. This is the flavour to use for every ordinary
+  change.
+- Prod is the `Release` configuration. Build iPhone archives only with
+  `scripts/build-prod.sh`; install the local Mac app with
+  `scripts/install-mac.sh prod`. Both Prod build paths refuse to run unless
+  `HEAD` is a clean `main` matching `origin/main`. Build it only when the user
+  asks, and only from a `main` the user promoted.
   Install and launch with `scripts/install-prod.sh <device-name>` after a build.
   Never bypass that guard by calling `xcodebuild archive` by hand to work around
   a dirty tree or an unmerged branch; report the blocker instead.
