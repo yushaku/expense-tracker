@@ -240,6 +240,18 @@ struct QuickExpensePresetStore {
         defaults.set(try encoder.encode(normalized), forKey: Self.storageKey)
     }
 
+    /// Read the latest configuration so editing one slot does not overwrite
+    /// changes to other slots or to the visible count made in another window.
+    func savePreset(_ preset: QuickExpensePreset) throws {
+        let current = load()
+        let presets = current.presets.map { $0.slot == preset.slot ? preset : $0 }
+        try save(QuickExpenseConfiguration(visibleCount: current.visibleCount, presets: presets))
+    }
+
+    func setVisibleCount(_ count: QuickExpensePresetCount) throws {
+        try save(QuickExpenseConfiguration(visibleCount: count, presets: load().presets))
+    }
+
     func preset(for slot: QuickExpenseSlot) -> QuickExpensePreset {
         load().presets.first { $0.slot == slot }
             ?? QuickExpensePreset.defaultPreset(for: slot)

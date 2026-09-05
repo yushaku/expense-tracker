@@ -112,6 +112,40 @@ struct QuickExpensePresetStoreTests {
         #expect(loaded.presets == presets)
     }
 
+    @Test("Saving one preset preserves newer settings and hidden presets")
+    func savingOnePresetPreservesOtherSettings() throws {
+        let fixture = try makeFixture()
+        let presets = try customizedPresets()
+        try fixture.store.save(QuickExpenseConfiguration(visibleCount: .nine, presets: presets))
+        var draft = QuickExpensePresetDraft(preset: presets[0])
+        draft.symbol = "Coffee"
+        draft.categoryID = UUID()
+
+        try fixture.store.setVisibleCount(.three)
+        try fixture.store.savePreset(draft.makePreset())
+
+        let loaded = fixture.store.load()
+        #expect(loaded.visibleCount == .three)
+        #expect(loaded.presets[0] == (try draft.makePreset()))
+        #expect(Array(loaded.presets.dropFirst()) == Array(presets.dropFirst()))
+        try fixture.store.setVisibleCount(.nine)
+        #expect(fixture.store.load().presets == loaded.presets)
+    }
+
+    @Test("Editing a local draft leaves storage unchanged until save")
+    func draftDoesNotWriteUntilSaved() throws {
+        let fixture = try makeFixture()
+        let original = fixture.store.load()
+        var draft = QuickExpensePresetDraft(preset: original.presets[0])
+        draft.amountText = "0"
+        draft.symbol = "Changed"
+
+        #expect(throws: QuickExpensePresetError.invalidAmount) {
+            try fixture.store.savePreset(draft.makePreset())
+        }
+        #expect(fixture.store.load() == original)
+    }
+
     @Test("A preset requires a short nonempty name")
     func nameValidation() throws {
         #expect(throws: QuickExpensePresetError.invalidName) {
