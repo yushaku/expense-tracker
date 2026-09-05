@@ -71,7 +71,7 @@ struct MonMonApp: App {
     }
 
     private static var modelConfiguration: ModelConfiguration {
-        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
+        if MonMonProcess.isRunningUnitTests {
             return ModelConfiguration(isStoredInMemoryOnly: true)
         }
 
@@ -115,5 +115,18 @@ struct MonMonApp: App {
                 }
         }
         .modelContainer(container)
+    }
+}
+
+/// Process-wide facts that are not about money, only about how this launch
+/// was started.
+enum MonMonProcess {
+    /// `xcodebuild test` injects this when MonMon.app is the Mac test host.
+    /// Under that path the binary is usually unsigned (`CODE_SIGNING_ALLOWED=NO`),
+    /// so opening an App Group container trips Sequoia's "access data from
+    /// other apps" prompt on every run. Skip those calls for the host launch;
+    /// tests that need a group inject their own suite or URL.
+    static var isRunningUnitTests: Bool {
+        ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
     }
 }

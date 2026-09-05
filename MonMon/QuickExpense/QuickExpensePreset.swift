@@ -129,6 +129,11 @@ enum QuickExpenseWidgetConfiguration {
     }
 
     static func makeDefaults(bundle: Bundle = .main) -> UserDefaults {
+        // The Mac test host must not open the real App Group suite: see
+        // `MonMonProcess.isRunningUnitTests`.
+        guard !MonMonProcess.isRunningUnitTests else {
+            return .standard
+        }
         guard
             let identifier = appGroupIdentifier(in: bundle.infoDictionary ?? [:]),
             let defaults = UserDefaults(suiteName: identifier)

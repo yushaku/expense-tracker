@@ -17,15 +17,15 @@ tests on the phone; `main` is what a prod build is cut from.
 
 - Never commit to `dev` or `main` directly. Branch first, from up-to-date `dev`.
 - Name the branch for the kind of change: `feat/<topic>`, `fix/<topic>`,
-`docs/<topic>`, `refactor/<topic>`. Use kebab-case for `<topic>`.
+  `docs/<topic>`, `refactor/<topic>`. Use kebab-case for `<topic>`.
 - Commit to that branch, then stop and report. Reviewing and merging is the
-user's call.
+  user's call.
 - Merge into `dev` only when the user asks for it in that turn. Passing quality
-gates is not permission to merge, and permission given for one branch does not
-carry to the next. Once merged, put the result on the phone with
-`scripts/run-iphone.sh Yushaku` so the user can test it.
+  gates is not permission to merge, and permission given for one branch does not
+  carry to the next. Once merged, put the result on the phone with
+  `scripts/run-iphone.sh Yushaku` so the user can test it.
 - Never merge into `main`. The user promotes `dev` to `main` themselves, when
-what they tested is what they want a prod build cut from.
+  what they tested is what they want a prod build cut from.
 - Do not push to `origin` unless the user asks.
 
 ## Building the app
@@ -35,19 +35,18 @@ identifiers, app groups, and CloudKit containers. See the build flavours section
 of `README.md` for the identifiers.
 
 - Dev is the `Debug` configuration. Build, install, and launch it with
-`scripts/run-iphone.sh Yushaku` from the `dev` branch, following the physical
-iPhone workflow above. This is the flavour to use for every ordinary change.
+  `scripts/run-iphone.sh Yushaku` from the `dev` branch, following the physical
+  iPhone workflow above. This is the flavour to use for every ordinary change.
 - Prod is the `Release` configuration, built only by `scripts/build-prod.sh`,
-which refuses to run unless `HEAD` is a clean `main` matching `origin/main`.
-Build it only when the user asks, and only from a `main` the user promoted.
-Never bypass that guard by calling `xcodebuild archive` by hand to work around
-a dirty tree or an unmerged branch; report the blocker instead.
+  which refuses to run unless `HEAD` is a clean `main` matching `origin/main`.
+  Build it only when the user asks, and only from a `main` the user promoted.
+  Never bypass that guard by calling `xcodebuild archive` by hand to work around
+  a dirty tree or an unmerged branch; report the blocker instead.
 - Never install a prod build over the user's dev install, or the reverse,
-without saying which flavour is going onto the phone.
+  without saying which flavour is going onto the phone.
 - The dev app icon is generated art. After changing `AppIcon`, regenerate the
-dev variant with `swift scripts/make-dev-appicon.swift` rather than editing
-`AppIconDev.appiconset` by hand.
-
+  dev variant with `swift scripts/make-dev-appicon.swift` rather than editing
+  `AppIconDev.appiconset` by hand.
 
 ## Quality gates
 
@@ -57,27 +56,26 @@ Three gates, cheapest first. All of them use the fixed
 Measured on this project, the whole loop is about five seconds warm.
 
 - **Format** — `xcrun swift-format lint -r MonMon MonMonTests`. A second or
-so, and it is the gate most often forgotten.
+  so, and it is the gate most often forgotten.
 - **Tests** — run them on `platform=macOS,arch=arm64`, not on an iPhone
-Simulator. The suite is unit tests and in-memory SwiftData, so a Mac runs all of
-it in seconds, while a Simulator destination clones and boots a device first and
-costs minutes. Narrow with `-only-testing:` while iterating; run the whole suite
-before committing.
+  Simulator. The suite is unit tests and in-memory SwiftData, so a Mac runs all of
+  it in seconds, while a Simulator destination clones and boots a device first and
+  costs minutes. Narrow with `-only-testing:` while iterating; run the whole suite
+  before committing.
 - **Compile for iOS** — the `-sdk iphonesimulator` build with
-`CODE_SIGNING_ALLOWED=NO`. It catches the iOS-only code a Mac test run cannot:
-the widget, the share extension, App Intents. A signed device build
-(`-destination 'generic/platform=iOS'`) is slower and belongs before a merge or
-an install, not in the edit loop.
+  `CODE_SIGNING_ALLOWED=NO`. It catches the iOS-only code a Mac test run cannot:
+  the widget, the share extension, App Intents. A signed device build
+  (`-destination 'generic/platform=iOS'`) is slower and belongs before a merge or
+  an install, not in the edit loop.
 
 Two things that cost real time when ignored:
 
 - Run one `xcodebuild` per shell command. Two in a single line pay the build and
-startup cost twice.
+  startup cost twice.
 - A failure on one destination and not another is a fact about the destination.
-`LanguageResolutionTests` and the timing-sensitive `CloudSyncTests` both fail
-under a Simulator and pass on a Mac. Re-run the other way before reporting a
-failure as a bug.
-
+  `LanguageResolutionTests` and the timing-sensitive `CloudSyncTests` both fail
+  under a Simulator and pass on a Mac. Re-run the other way before reporting a
+  failure as a bug.
 
 ## SwiftUI
 
@@ -85,12 +83,12 @@ The app's UI is SwiftUI. The `swiftui-expert-skill` in `.claude/skills/` carries
 the reference material for it.
 
 - Use `swiftui-expert-skill` whenever you write, review, or refactor SwiftUI
-code in this repository. Its `references/latest-apis.md` is the check against
-reaching for a deprecated API.
+  code in this repository. Its `references/latest-apis.md` is the check against
+  reaching for a deprecated API.
 - Follow its correctness checklist before you call SwiftUI work done. Those are
-bugs, not preferences.
+  bugs, not preferences.
 - Adopt Liquid Glass only when the user asks for it, and gate iOS 26+ APIs with
-`#available` and a fallback.
+  `#available` and a fallback.
 
 <!-- CODEGRAPH_START -->
 
@@ -104,4 +102,3 @@ In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the re
 If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
 
 <!-- CODEGRAPH_END -->
-
