@@ -71,3 +71,27 @@ Latest desktop and mobile full-page captures at the paths above were inspected.
 - All financial examples are labeled and consistent; no real-user records are used.
 - No new actionable visual findings. The content hierarchy changes intentionally
   supersede the earlier jar-led story.
+
+
+## Asset portfolio UI enhancement
+
+The asset section was deliberately redesigned from the simple relationship map
+into a usable portfolio demonstration while retaining the lavender visual direction.
+
+- Evidence: `/tmp/monmon-landing-tools/assets-desktop.png` at 1440 px viewport,
+  and `assets-mobile.png` at 390 px. Full-page checks also cover 320 px.
+- Portfolio header emphasizes the 125 million VND total; the allocation ring maps
+  exactly to 20/40/24/12/4 percent and the five visible values sum to that total.
+- Each asset button updates its pressed state, ring-center percentage and detail
+  panel. All five groups tested; only one is selected at a time.
+- Funds and gold show positive illustrative PnL; coins show a negative amount with
+  a minus sign as well as color. Cash and term deposits have distinct detail labels.
+- Selection works by keyboard. Updated details use a polite live region.
+- Initial mobile capture exposed the old offscreen skip-link clipping behavior;
+  switched to an explicitly clipped, focus-revealed skip link and recaptured.
+- Increased muted text contrast in the portfolio. Final mobile capture is clear,
+  has no overflow, and preserves visible keyboard focus on the selected group.
+- Report controls, income allocation, preview-dialog focus behavior and anchor
+  navigation still pass. No console errors or broken images.
+
+Final result remains passed.

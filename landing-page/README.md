@@ -16,6 +16,10 @@ python3 -m http.server 8080 --directory landing-page
 
 Then visit `http://localhost:8080`.
 
+The interactive asset portfolio lets visitors select accounts, term deposits,
+funds/ETFs, gold or coins and see the corresponding value, allocation and details.
+All figures are explicitly illustrative.
+
 The main story is asset management, followed by income/expenses, daily/monthly
 reports and borrowed/lent money. Budget jars are a secondary planning feature.
 The report period buttons switch between fictional day and month examples.

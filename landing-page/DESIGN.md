@@ -22,7 +22,10 @@ management is the main feature; jars are a supporting planning tool.
 
 1. Asset management: hero, navigation, first feature section and closing CTA.
    Show accounts, term deposits, funds/ETFs, gold and coins, with cost basis,
-   investment profit/loss and historical asset changes.
+   investment profit/loss and historical asset changes. The featured portfolio
+   uses a proportionate allocation ring, five selectable asset groups and a detail
+   panel tailored to each group. Sample holdings total 125 million VND; allocation
+   is 20/40/24/12/4 percent. Cash and deposits do not imply unrealized market PnL.
 2. Income/expenses: categories, accounts, transfers, recurring transactions,
    search/filtering and quick capture.
 3. Daily/monthly reports: switch the illustrative report period to update the

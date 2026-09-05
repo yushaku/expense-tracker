@@ -231,6 +231,54 @@
     @media(max-width:1050px) { nav { gap:20px; } .debts { grid-template-columns:1fr; gap:30px; } .debt-cards { max-width:700px; } }
     @media(max-width:700px) { .asset-spotlight { padding-top:50px; padding-bottom:50px; } .asset-points { gap:16px; } .transaction-types { margin:0 0 30px; gap:8px; } .transaction-types span { font-size:11px; padding:9px 12px; } .reports { padding-bottom:60px; } .report-demo { padding:20px 15px; border-radius:20px; } .report-toolbar strong { font-size:14px; } .period-switch button { padding:10px 14px; font-size:12px; } .report-totals { grid-template-columns:1fr; gap:10px; margin:24px 0; } .report-totals>div { display:flex; align-items:center; justify-content:space-between; padding:17px 14px; gap:10px; } .report-totals span { margin:0; font-size:10px; } .report-totals strong { font-size:21px; } .bar-row { grid-template-columns:43px 1fr 78px; gap:8px; font-size:11px; } .bar-track { height:23px; } .debts { padding-bottom:65px; } .debt-cards { gap:13px; } .debt-card { padding:20px 14px; } .debt-top { display:block; } .debt-top h3 { font-size:14px; margin-bottom:6px; } .debt-amount strong { font-size:19px; } .debt-meta { font-size:9px; } .jars h2 { font-size:32px; } .jars { margin-bottom:60px; } }
     @media(max-width:360px) { .debt-cards { grid-template-columns:1fr; } .debt-card.lending { margin-top:0; } .debt-amount strong { font-size:25px; } }
+
+    .asset-spotlight { grid-template-columns:.7fr 1.3fr; gap:58px; align-items:center; padding-top:95px; padding-bottom:100px; }
+    .asset-intro h2 { font-size:clamp(38px,4vw,58px); }
+    .asset-intro>p { max-width:330px; font-size:16px; }
+    .asset-promises { display:grid; gap:15px; margin-top:30px; color:#766781; font-size:13px; }
+    .asset-promises span { display:flex; align-items:center; gap:10px; }
+    .asset-promises span::before { content:''; width:5px; height:5px; border-radius:50%; background:#a288cf; }
+    .portfolio { border:1px solid #e7def4; border-radius:30px; padding:30px; background:linear-gradient(135deg,#fff 40%,#faf7ff); box-shadow:0 24px 75px #6d43ab10,0 4px 10px #5d3b8010; min-width:0; }
+    .portfolio-header { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding-bottom:25px; border-bottom:1px solid #eee8f5; }
+    .portfolio-label { display:block; font-size:12px; color:#81718e; letter-spacing:.2px; }
+    .portfolio-total { display:block; font-size:clamp(30px,3.5vw,46px); font-weight:650; line-height:1.25; letter-spacing:-1.5px; margin-top:10px; font-variant-numeric:tabular-nums; }
+    .portfolio-total>span { font-size:25px; color:#9c8aae; font-weight:450; }
+    .demo-label { font-size:10px; color:#84639f; padding:8px 10px; background:#f2ecfa; border:1px solid #e9dff4; border-radius:20px; white-space:nowrap; }
+    .portfolio-main { display:grid; grid-template-columns:.85fr 1.15fr; gap:25px; align-items:center; padding:25px 0; }
+    .allocation-visual { min-width:0; text-align:center; }
+    .allocation-ring { aspect-ratio:1; width:100%; max-width:218px; margin:auto; border-radius:50%; padding:22px; background:conic-gradient(#c5b7ed 0% 20%,#a68bde 20% 60%,#7451cb 60% 84%,#dfb977 84% 96%,#d695c8 96% 100%); transform:rotate(-.01deg); }
+    .allocation-hole { width:100%; height:100%; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#fff; box-shadow:inset 0 0 0 6px #fbf9fe; }
+    .allocation-hole>span { font-size:10px; color:#8e7d9e; }
+    .allocation-hole>span:first-child { color:#655077; font-size:12px; }
+    .allocation-hole>strong { font-size:40px; font-weight:600; letter-spacing:-2px; line-height:1.35; color:#6d4cad; }
+    .allocation-hole>strong span { font-size:19px; letter-spacing:0; }
+    .allocation-visual>p { font-size:10px; color:#8b7d98; margin:16px auto 0; line-height:1.5; }
+    .asset-list { display:grid; gap:5px; min-width:0; }
+    .asset-choice { border:1px solid transparent; background:transparent; display:flex; align-items:center; gap:10px; border-radius:12px; padding:11px 10px; width:100%; text-align:left; color:#362543; cursor:pointer; }
+    .asset-choice:hover { background:#f9f5fe; }
+    .asset-choice[aria-pressed="true"] { border-color:#decef0; background:#f3ecfc; box-shadow:0 4px 12px #6e45920a; }
+    .asset-swatch { width:9px; height:9px; background:var(--asset-color); flex-shrink:0; border-radius:3px; }
+    .asset-choice-name { font-size:12px; font-weight:600; }
+    .asset-choice small { display:block; color:#8b7b97; font-size:9px; margin-top:5px; font-weight:400; }
+    .asset-choice-value { font-size:12px; margin-left:auto; text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
+    .asset-detail { background:#f7f3fc; border:1px solid #ece3f6; border-radius:18px; padding:22px; }
+    .asset-detail-heading { display:flex; justify-content:space-between; gap:15px; align-items:center; }
+    .asset-detail-heading h3 { font-size:18px; margin:5px 0 0; font-weight:600; }
+    .asset-detail-heading .portfolio-label { font-size:10px; }
+    .detail-badge { color:#7a6490; font-size:10px; padding:7px 9px; border-radius:8px; background:#ebe1f6; }
+    .asset-detail-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:22px 0 16px; }
+    .asset-detail-stats>div>span { font-size:10px; color:#8b7b97; display:block; margin-bottom:8px; }
+    .asset-detail-stats strong { display:block; font-size:clamp(14px,1.3vw,19px); font-weight:600; white-space:nowrap; letter-spacing:-.3px; font-variant-numeric:tabular-nums; }
+    .asset-detail-stats strong.gain { color:#287956; }
+    .asset-detail-stats strong.loss { color:#b1446b; }
+    .asset-detail p { margin:0; font-size:11px; line-height:1.6; color:#85718f; max-width:none; }
+    .portfolio-footer { display:flex; justify-content:space-between; gap:15px; margin-top:18px; font-size:9px; color:#9c8ea6; }
+    @media(max-width:1100px) { .asset-spotlight { grid-template-columns:1fr; gap:35px; } .asset-intro { display:grid; grid-template-columns:1fr 1fr; gap:0 40px; align-items:start; } .asset-intro .chapter { grid-column:1/-1; } .asset-intro h2 { grid-row:2/4; } .asset-intro>p { margin-top:30px; } .asset-promises { margin-top:0; } .portfolio { max-width:850px; width:100%; margin:auto; } .allocation-ring { max-width:240px; } .asset-choice-name,.asset-choice-value { font-size:14px; } .asset-choice small { font-size:11px; } .asset-detail-stats strong { font-size:21px; } }
+    @media(max-width:600px) { .asset-spotlight { padding-top:55px; padding-bottom:60px; gap:30px; } .asset-intro { display:block; } .asset-intro>p { margin-top:20px; } .asset-promises { gap:10px; margin-top:22px; font-size:12px; } .portfolio { padding:19px 15px; border-radius:23px; } .portfolio-header { display:block; padding-bottom:20px; } .portfolio-total { font-size:36px; } .demo-label { display:inline-block; margin-top:13px; } .portfolio-main { grid-template-columns:1fr; gap:22px; padding:25px 0; } .allocation-ring { width:195px; padding:21px; } .allocation-visual>p { margin-top:12px; font-size:11px; } .asset-list { gap:4px; } .asset-choice { padding:12px; min-height:62px; } .asset-choice-name,.asset-choice-value { font-size:13px; } .asset-choice small { font-size:10px; } .asset-detail { padding:17px 13px; } .asset-detail-heading { gap:8px; } .detail-badge { font-size:9px; max-width:115px; text-align:center; line-height:1.4; } .asset-detail-stats { grid-template-columns:1fr; gap:14px; } .asset-detail-stats>div { display:flex; justify-content:space-between; align-items:center; gap:10px; } .asset-detail-stats>div>span { margin:0; font-size:11px; } .asset-detail-stats strong { font-size:16px; } .portfolio-footer { flex-direction:column; gap:6px; font-size:10px; } }
+
+    .portfolio .portfolio-label,.portfolio small,.allocation-hole>span,.allocation-visual>p,.portfolio-footer,.asset-detail-stats>div>span,.asset-detail p { color:#756481; }
+    .skip { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+    .skip:focus { position:fixed; top:12px; width:auto; height:auto; padding:14px; overflow:visible; clip-path:none; }
   </style>
 </head>
 <body>
@@ -256,17 +304,24 @@
     </section>
     <div class="hero-bottom wrap"><span>Mọi phần tài chính. Một nơi để hiểu.</span><div class="feature-words"><a href="#tai-san">Tài sản</a><a href="#cach-dung">Thu chi</a><a href="#bao-cao">Báo cáo</a><a href="#khoan-no">Khoản nợ</a><a href="#chia-hu">Ngân sách</a></div></div>
     <section class="wealth wrap asset-spotlight" id="tai-san" aria-labelledby="wealth-title">
-      <div><div class="chapter"><span class="number">01</span> Quản lý tài sản</div><h2 id="wealth-title">Mọi tài sản.<br><em>Một bức tranh.</em></h2><p>Từ tiền trong ví đến danh mục đầu tư. Biết mình đang có gì, ở đâu và thay đổi thế nào.</p><ul class="asset-points"><li><strong>Tổng quan tài sản</strong><span>Tài khoản, sổ tiết kiệm, quỹ, ETF, vàng và coin.</span></li><li><strong>Giá vốn & lãi lỗ</strong><span>Theo dõi giá trị và lãi lỗ của khoản đầu tư.</span></li><li><strong>Lịch sử biến động</strong><span>Nhìn lại tài sản qua từng tháng.</span></li></ul></div>
-      <svg class="asset-map" viewBox="0 0 580 440" role="img" aria-labelledby="map-title map-desc"><title id="map-title">Bản đồ tài sản trong MonMon</title><desc id="map-desc">Tài khoản, tiết kiệm, quỹ và ETF, vàng, coin kết nối vào một tổng quan tài sản.</desc>
-        <g fill="none" stroke="#9da890" stroke-width="1.5"><path d="M290 220Q100 220 105 88M290 220Q360 75 460 75M290 220Q440 170 485 240M290 220Q350 340 360 370M290 220Q120 220 115 340"/></g>
-        <circle cx="290" cy="220" r="90" fill="#c9d9b5"/><circle cx="290" cy="220" r="76" fill="none" stroke="#263b31" stroke-dasharray="3 5"/><text x="290" y="215" text-anchor="middle" font-size="23">Tài sản</text><text x="290" y="244" text-anchor="middle" font-size="23">của bạn</text>
-        <g transform="translate(30 35) rotate(-7 75 50)"><rect width="155" height="95" rx="10" fill="#d8cfee"/><text x="77" y="43" text-anchor="middle" font-size="28">▤</text><text x="77" y="74" text-anchor="middle" font-size="16">Tài khoản</text></g>
-        <g transform="translate(381 26) rotate(6 77 50)"><rect width="160" height="98" rx="49" fill="#edcf7c"/><text x="80" y="44" text-anchor="middle" font-size="26">⌛</text><text x="80" y="73" text-anchor="middle" font-size="16">Tiết kiệm</text></g>
-        <g transform="translate(417 192) rotate(-4 70 45)"><rect width="150" height="94" rx="8" fill="#edb798"/><text x="75" y="40" text-anchor="middle" font-size="28">↗</text><text x="75" y="70" text-anchor="middle" font-size="16">Quỹ & ETF</text></g>
-        <g transform="translate(295 323)"><circle cx="65" cy="48" r="53" fill="#e8b7c9"/><text x="65" y="46" text-anchor="middle" font-size="27">◎</text><text x="65" y="72" text-anchor="middle" font-size="16">Coin</text></g>
-        <g transform="translate(42 294) rotate(7 75 50)"><path d="M25 0H125L150 95H0Z" fill="#edcf7c"/><text x="75" y="46" text-anchor="middle" font-size="26">◇</text><text x="75" y="75" text-anchor="middle" font-size="16">Vàng</text></g>
-      </svg>
+      <div class="asset-intro"><div class="chapter"><span class="number">01</span> Quản lý tài sản</div><h2 id="wealth-title">Mọi tài sản.<br><em>Một bức tranh.</em></h2><p>Từ tiền trong ví đến danh mục đầu tư. Nhìn rõ giá trị, tỷ trọng và lãi lỗ.</p><div class="asset-promises"><span>Tổng quan danh mục</span><span>Giá vốn & lãi lỗ</span><span>Lịch sử biến động</span></div></div>
+      <div class="portfolio" aria-label="Danh mục tài sản tương tác với dữ liệu minh họa">
+        <div class="portfolio-header"><div><span class="portfolio-label">Tổng tài sản</span><strong class="portfolio-total">125.000.000 <span>₫</span></strong></div><span class="demo-label">Danh mục minh họa</span></div>
+        <div class="portfolio-main">
+          <div class="allocation-visual"><div class="allocation-ring" role="img" aria-label="Tỷ trọng: tài khoản 20%, tiết kiệm 40%, quỹ và ETF 24%, vàng 12%, coin 4%"><div class="allocation-hole"><span id="allocation-name">Quỹ & ETF</span><strong id="allocation-share">24<span>%</span></strong><span>trong danh mục</span></div></div><p>Chọn một nhóm để khám phá</p></div>
+          <div class="asset-list" role="group" aria-label="Chọn nhóm tài sản minh họa">
+            <button type="button" class="asset-choice" data-asset="cash" aria-pressed="false" style="--asset-color:#c5b7ed"><span class="asset-swatch"></span><span class="asset-choice-name">Tài khoản<small>Tiền mặt & ngân hàng</small></span><span class="asset-choice-value">25 triệu<small>20%</small></span></button>
+            <button type="button" class="asset-choice" data-asset="savings" aria-pressed="false" style="--asset-color:#a68bde"><span class="asset-swatch"></span><span class="asset-choice-name">Tiết kiệm<small>Các khoản gửi có kỳ hạn</small></span><span class="asset-choice-value">50 triệu<small>40%</small></span></button>
+            <button type="button" class="asset-choice" data-asset="funds" aria-pressed="true" style="--asset-color:#7451cb"><span class="asset-swatch"></span><span class="asset-choice-name">Quỹ & ETF<small>Danh mục đầu tư</small></span><span class="asset-choice-value">30 triệu<small>24%</small></span></button>
+            <button type="button" class="asset-choice" data-asset="gold" aria-pressed="false" style="--asset-color:#dfb977"><span class="asset-swatch"></span><span class="asset-choice-name">Vàng<small>Giá trị theo giá mua vào</small></span><span class="asset-choice-value">15 triệu<small>12%</small></span></button>
+            <button type="button" class="asset-choice" data-asset="coins" aria-pressed="false" style="--asset-color:#d695c8"><span class="asset-swatch"></span><span class="asset-choice-name">Coin<small>Theo dõi theo đồng</small></span><span class="asset-choice-value">5 triệu<small>4%</small></span></button>
+          </div>
+        </div>
+        <div class="asset-detail" aria-live="polite" aria-atomic="true"><div class="asset-detail-heading"><div><span class="portfolio-label">Nhìn sâu hơn</span><h3 id="asset-detail-title">Quỹ & ETF</h3></div><span class="detail-badge" id="asset-detail-badge">Lãi chưa thực hiện</span></div><div class="asset-detail-stats"><div><span id="asset-value-label">Giá trị thị trường</span><strong id="asset-value">30.000.000 ₫</strong></div><div><span id="asset-basis-label">Giá vốn</span><strong id="asset-basis">25.000.000 ₫</strong></div><div><span id="asset-change-label">Lãi / lỗ</span><strong id="asset-change" class="gain">+5.000.000 ₫</strong></div></div><p id="asset-detail-note">Đặt giá trị hiện tại cạnh số tiền đã đầu tư. Biết rõ phần chênh lệch chưa thực hiện.</p></div>
+        <div class="portfolio-footer"><span>5 nhóm tài sản. Một góc nhìn chung.</span><span>Số liệu ví dụ, không phải dữ liệu thật.</span></div>
+      </div>
     </section>
+
     <section class="capture wrap" id="cach-dung" aria-labelledby="capture-title">
       <div class="chapter"><span class="number">02</span> Quản lý thu chi</div>
       <div class="section-head"><h2 id="capture-title">Thu vào. Chi ra.<br><em>Rõ từng giao dịch.</em></h2><p>Ghi nhận theo tài khoản và danh mục. Tìm kiếm, lọc và xem lại từng khoản.</p></div>
@@ -364,6 +419,26 @@
     }
     document.querySelectorAll('[data-period]').forEach(button => button.addEventListener('click', () => setReportPeriod(button.dataset.period)));
     setReportPeriod('month');
+
+    const assetExamples = {
+      cash: { name:'Tài khoản', share:20, value:25000000, valueLabel:'Số dư', basisLabel:'Tài khoản', basis:'2 tài khoản', changeLabel:'Ghi nhận', change:'Thu & chi', badge:'Tiền khả dụng', note:'Tiền mặt và ngân hàng cùng một chỗ. Số dư được tính từ các giao dịch đã ghi.' },
+      savings: { name:'Tiết kiệm', share:40, value:50000000, valueLabel:'Tiền gốc', basisLabel:'Sổ tiết kiệm', basis:'2 sổ', changeLabel:'Theo dõi', change:'Ngày đáo hạn', badge:'Khoản gửi có kỳ hạn', note:'Theo dõi tiền gốc, kỳ hạn và lãi dự kiến. Lãi dự kiến chưa được cộng vào tài sản.' },
+      funds: { name:'Quỹ & ETF', share:24, value:30000000, valueLabel:'Giá trị thị trường', basisLabel:'Giá vốn', basis:'25.000.000 ₫', changeLabel:'Lãi / lỗ', change:'+5.000.000 ₫', state:'gain', badge:'Lãi chưa thực hiện', note:'Đặt giá trị hiện tại cạnh số tiền đã đầu tư. Biết rõ phần chênh lệch chưa thực hiện.' },
+      gold: { name:'Vàng', share:12, value:15000000, valueLabel:'Giá trị hiện tại', basisLabel:'Giá vốn', basis:'14.000.000 ₫', changeLabel:'Lãi / lỗ', change:'+1.000.000 ₫', state:'gain', badge:'Theo giá mua vào', note:'Định giá theo giá cửa hàng mua vào. Nhìn rõ giá vốn và chênh lệch của lượng vàng đang giữ.' },
+      coins: { name:'Coin', share:4, value:5000000, valueLabel:'Giá trị hiện tại', basisLabel:'Giá vốn', basis:'6.000.000 ₫', changeLabel:'Lãi / lỗ', change:'−1.000.000 ₫', state:'loss', badge:'Lỗ chưa thực hiện', note:'Xem giá trị và lãi lỗ quy về đồng. Số liệu ở đây chỉ dùng để minh họa cách theo dõi.' }
+    };
+    function selectAsset(key) {
+      const asset = assetExamples[key];
+      document.querySelectorAll('[data-asset]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.asset === key)));
+      document.getElementById('allocation-name').textContent = asset.name;
+      document.getElementById('allocation-share').replaceChildren(document.createTextNode(asset.share), Object.assign(document.createElement('span'), { textContent:'%' }));
+      const text = { 'asset-detail-title':asset.name, 'asset-detail-badge':asset.badge, 'asset-value-label':asset.valueLabel, 'asset-value':money.format(asset.value), 'asset-basis-label':asset.basisLabel, 'asset-basis':asset.basis, 'asset-change-label':asset.changeLabel, 'asset-change':asset.change, 'asset-detail-note':asset.note };
+      Object.entries(text).forEach(([id,value]) => { document.getElementById(id).textContent = value; });
+      document.getElementById('asset-change').className = asset.state || '';
+    }
+    document.querySelectorAll('[data-asset]').forEach(button => button.addEventListener('click', () => selectAsset(button.dataset.asset)));
+    selectAsset('funds');
+
 
   </script>
 </body>
