@@ -663,7 +663,9 @@
     <h1>Architecture map</h1>
     <p class="lede">
       Sixteen <code>@Model</code> types backed by SwiftData, the set registered by
-      <code>MonMonSchema.models</code>. Relationships are <strong>not</strong>
+      <code>MonMonSchema.models</code>. Two more exist in the source and are deliberately
+      absent from it: the MCP snapshot records live in their own App Group store, so nothing
+      the server reads can reach the financial container. Relationships are <strong>not</strong>
       declared with <code>@Relationship</code> &mdash; every association is a hand-stored
       <code>UUID</code> foreign key, resolved in Swift at read time
       (<code>accounts.first { $0.id == someID }</code>). Money-moving records sit around the
@@ -874,6 +876,10 @@
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
         </ul>
+        <div class="derived">
+          <div class="derived-label">Derived &mdash; computed, not stored</div>
+          <div class="derived-list">source &middot; priceLabelKey &middot; purchasePricePerUnit</div>
+        </div>
       </article>
 
       <!-- ============ FundSale ============ -->
@@ -1892,6 +1898,53 @@
         Shares are floored and the shortfall handed to lots with room, because a share that
         reached its own lot's proceeds would be a sale the editor refuses to write and the
         backup validator refuses to restore.
+      </p>
+    </div>
+    <div class="note">
+      <h3>One mapping per asset kind</h3>
+      <p>
+        The shared forms and cards used to branch on <code>.gold</code>, then on
+        <code>.crypto</code>, in a dozen places each. They now read a
+        <code>FundInstrumentPolicy</code> off <code>FundInstrumentKind</code>: the quantity
+        it is counted in, whether it may be priced in dollars, whether it can be swapped,
+        which fee it can carry, and the copy its editor uses.
+      </p>
+      <p>
+        Adding an asset kind therefore has exactly one required place to fill in, and the
+        compiler asks for it. The bug that prompted this was a screen deciding its catalogue
+        with <code>kind == .gold ? … : …</code>, which quietly offered funds to a coin
+        position and made it unsaveable.
+      </p>
+    </div>
+    <div class="note">
+      <h3>Two prices, and which one a form wants</h3>
+      <p>
+        A fund, an ETF and a coin are bought and valued at one published figure.
+        Gold is not: a shop sells at one price and buys back at a lower one, and
+        <code>currentPricePerUnit</code> holds the buy-back side, because that is what
+        valuation needs &mdash; what the owner would receive.
+      </p>
+      <p>
+        A cost basis wants the other side. <code>purchasePricePerUnit</code> answers with the
+        asking price for gold and the published price for everything else, and it is what
+        prefills the cost box when a position is added. Prefilling with the valuation price
+        would understate every gold purchase by the spread and hide the loss that buying gold
+        genuinely opens with &mdash; a loss the app is otherwise careful to show.
+      </p>
+    </div>
+    <div class="note">
+      <h3>Gold's entry unit never reaches the store</h3>
+      <p>
+        Gold is stored in lượng and bought in chỉ. Which of the two the owner types in is a
+        property of the form, not of the record: <code>GoldUnit</code> lives on the draft,
+        defaults to chỉ, and is converted away at the view boundary &mdash; the weight
+        divided by the factor and the price multiplied by it, so either unit saves the same
+        position.
+      </p>
+      <p>
+        It governs both boxes together on purpose. A weight in chỉ beside a price per lượng
+        is two numbers a factor of ten apart with nothing on screen saying so, which reads as
+        a purchase ten times the size of the one being recorded.
       </p>
     </div>
     <div class="note">

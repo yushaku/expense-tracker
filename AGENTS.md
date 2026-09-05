@@ -40,6 +40,7 @@ of `README.md` for the identifiers.
 - Prod is the `Release` configuration, built only by `scripts/build-prod.sh`,
   which refuses to run unless `HEAD` is a clean `main` matching `origin/main`.
   Build it only when the user asks, and only from a `main` the user promoted.
+  Install and launch with `scripts/install-prod.sh <device-name>` after a build.
   Never bypass that guard by calling `xcodebuild archive` by hand to work around
   a dirty tree or an unmerged branch; report the blocker instead.
 - Never install a prod build over the user's dev install, or the reverse,
