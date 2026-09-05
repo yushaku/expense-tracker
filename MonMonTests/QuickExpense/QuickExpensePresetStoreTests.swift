@@ -13,7 +13,7 @@ struct QuickExpensePresetStoreTests {
         let configuration = fixture.store.load()
 
         #expect(configuration == .defaults)
-        #expect(configuration.visibleCount == .three)
+        #expect(configuration.visibleCount == 3)
         #expect(configuration.presets.count == 9)
         #expect(configuration.activePresets.map(\.slot) == [.coffee, .lunch, .fuel])
         #expect(configuration.activePresets.map(\.symbol) == ["☕", "🍜", "⛽"])
@@ -32,12 +32,12 @@ struct QuickExpensePresetStoreTests {
         let presets = try customizedPresets().reversed()
 
         try fixture.store.save(
-            QuickExpenseConfiguration(visibleCount: .nine, presets: Array(presets))
+            QuickExpenseConfiguration(visibleCount: 9, presets: Array(presets))
         )
 
         let loaded = fixture.store.load()
         let expectedPresets = try customizedPresets()
-        #expect(loaded.visibleCount == .nine)
+        #expect(loaded.visibleCount == 9)
         #expect(loaded.presets.map(\.slot) == QuickExpenseSlot.allCases)
         #expect(loaded.presets.map(\.symbol) == expectedPresets.map(\.symbol))
         #expect(loaded.activePresets.count == 9)
@@ -56,7 +56,7 @@ struct QuickExpensePresetStoreTests {
         )
 
         try fixture.store.save(
-            QuickExpenseConfiguration(visibleCount: .three, presets: presets)
+            QuickExpenseConfiguration(visibleCount: 3, presets: presets)
         )
 
         #expect(fixture.store.load().presets[0].categoryID == categoryID)
@@ -78,7 +78,7 @@ struct QuickExpensePresetStoreTests {
 
         let migrated = fixture.store.load()
 
-        #expect(migrated.visibleCount == .three)
+        #expect(migrated.visibleCount == 3)
         #expect(migrated.presets.count == 9)
         #expect(migrated.activePresets.map(\.symbol) == ["🧋", "🥗", "🚕"])
         #expect(migrated.activePresets.map(\.amount) == [42_000, 65_000, 120_000])
@@ -89,10 +89,10 @@ struct QuickExpensePresetStoreTests {
 
     @Test("The supported counts expose active prefixes of three, six, and nine")
     func supportedCountsExposeActivePrefixes() {
-        #expect(QuickExpensePresetCount.allCases.map(\.rawValue) == [3, 6, 9])
+        #expect(QuickExpenseConfiguration.countRange == 1...9)
         #expect(
             QuickExpenseConfiguration(
-                visibleCount: .six,
+                visibleCount: 6,
                 presets: QuickExpensePreset.defaults
             ).activePresets.count == 6
         )
@@ -102,12 +102,12 @@ struct QuickExpensePresetStoreTests {
     func hiddenPresetsAreRetained() throws {
         let fixture = try makeFixture()
         let presets = try customizedPresets()
-        try fixture.store.save(QuickExpenseConfiguration(visibleCount: .nine, presets: presets))
-        try fixture.store.save(QuickExpenseConfiguration(visibleCount: .three, presets: presets))
+        try fixture.store.save(QuickExpenseConfiguration(visibleCount: 9, presets: presets))
+        try fixture.store.save(QuickExpenseConfiguration(visibleCount: 3, presets: presets))
 
         let loaded = fixture.store.load()
 
-        #expect(loaded.visibleCount == .three)
+        #expect(loaded.visibleCount == 3)
         #expect(loaded.activePresets.count == 3)
         #expect(loaded.presets == presets)
     }
@@ -116,19 +116,19 @@ struct QuickExpensePresetStoreTests {
     func savingOnePresetPreservesOtherSettings() throws {
         let fixture = try makeFixture()
         let presets = try customizedPresets()
-        try fixture.store.save(QuickExpenseConfiguration(visibleCount: .nine, presets: presets))
+        try fixture.store.save(QuickExpenseConfiguration(visibleCount: 9, presets: presets))
         var draft = QuickExpensePresetDraft(preset: presets[0])
         draft.symbol = "Coffee"
         draft.categoryID = UUID()
 
-        try fixture.store.setVisibleCount(.three)
+        try fixture.store.setVisibleCount(3)
         try fixture.store.savePreset(draft.makePreset())
 
         let loaded = fixture.store.load()
-        #expect(loaded.visibleCount == .three)
+        #expect(loaded.visibleCount == 3)
         #expect(loaded.presets[0] == (try draft.makePreset()))
         #expect(Array(loaded.presets.dropFirst()) == Array(presets.dropFirst()))
-        try fixture.store.setVisibleCount(.nine)
+        try fixture.store.setVisibleCount(9)
         #expect(fixture.store.load().presets == loaded.presets)
     }
 
@@ -195,7 +195,7 @@ struct QuickExpensePresetStoreTests {
 
         #expect(throws: QuickExpensePresetError.incompleteSet) {
             try fixture.store.save(
-                QuickExpenseConfiguration(visibleCount: .three, presets: [coffee])
+                QuickExpenseConfiguration(visibleCount: 3, presets: [coffee])
             )
         }
     }

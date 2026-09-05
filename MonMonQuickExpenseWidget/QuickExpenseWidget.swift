@@ -88,23 +88,28 @@ struct QuickExpenseWidgetView: View {
     }
 
     private var columns: [GridItem] {
-        Array(repeating: GridItem(.flexible(), spacing: 8), count: 3)
+        Array(
+            repeating: GridItem(.flexible(), spacing: 8),
+            count: QuickExpenseWidgetLayout.columns(visible: visiblePresets.count, size: size)
+        )
     }
 
+    /// As many of the owner's presets as this size holds. They choose how many
+    /// to keep; the size only says how many fit.
     private var visiblePresets: [QuickExpensePreset] {
-        Array(entry.presets.prefix(maximumPresetCount))
+        Array(entry.presets.prefix(QuickExpenseWidgetLayout.capacity(size)))
     }
 
-    private var maximumPresetCount: Int {
+    /// The one place WidgetKit's families meet the layout, so the maths stays
+    /// testable without a widget host.
+    private var size: QuickExpenseWidgetLayout.Size {
         switch family {
-        case .systemSmall:
-            3
         case .systemMedium:
-            6
+            .medium
         case .systemLarge:
-            9
+            .large
         default:
-            3
+            .small
         }
     }
 }
