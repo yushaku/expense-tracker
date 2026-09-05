@@ -423,7 +423,7 @@ struct StatementImportPreviewView: View {
         _ row: ReconciledImportRow, index: Int, review: StatementImportReview
     ) -> some View {
         let candidate = row.candidate
-        let status = rowStatus(row)
+        let status = rowStatus(row, review: review)
         return HStack(alignment: .top, spacing: 0) {
             Button {
                 review.setSelected(!row.isSelected, forCandidateID: row.id)
@@ -435,7 +435,7 @@ struct StatementImportPreviewView: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .disabled(row.disposition.isExact)
+            .disabled(row.disposition.isExact || review.validationIssue(for: row) != nil)
             .accessibilityLabel("Import transaction: \(candidate.note)")
             .accessibilityValue(row.isSelected ? Text("Selected") : Text("Not selected"))
             .accessibilityAddTraits(row.isSelected ? [.isSelected] : [])
@@ -547,7 +547,19 @@ struct StatementImportPreviewView: View {
         }
     }
 
-    private func rowStatus(_ row: ReconciledImportRow) -> RowStatus {
+    private func rowStatus(_ row: ReconciledImportRow, review: StatementImportReview) -> RowStatus {
+        if let issue = review.validationIssue(for: row) {
+            let title: LocalizedStringKey
+            switch issue {
+            case .account: title = "Not selected: choose a VND account"
+            case .source: title = "Not selected: invalid statement reference"
+            case .amount: title = "Not selected: amount must be greater than zero"
+            case .category: title = "Not selected: choose a valid category"
+            }
+            return RowStatus(
+                title: title, systemImage: "exclamationmark.circle.fill",
+                tint: MonMonTheme.danger)
+        }
         if row.disposition.isExact {
             return RowStatus(
                 title: "Already imported",

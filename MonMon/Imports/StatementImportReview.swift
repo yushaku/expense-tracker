@@ -47,6 +47,13 @@ struct StatementImportCommitConfirmation: Equatable, Sendable {
     let removesReviewedStatement: Bool
 }
 
+enum StatementImportRowIssue {
+    case account
+    case source
+    case amount
+    case category
+}
+
 @MainActor
 @Observable
 final class StatementImportReview {
@@ -94,7 +101,24 @@ final class StatementImportReview {
         StatementImportSummary(rows: rows)
     }
 
-    var visibleRows: [ReconciledImportRow] { rows }
+    var visibleRows: [ReconciledImportRow] {
+        rows.filter { validationIssue(for: $0) != nil }
+            + rows.filter { validationIssue(for: $0) == nil }
+    }
+
+    func validationIssue(for row: ReconciledImportRow) -> StatementImportRowIssue? {
+        guard !row.disposition.isExact else { return nil }
+        guard let statementAccountID,
+            statement.currencyCode == VNDCurrency.code,
+            snapshot.accounts.contains(where: {
+                $0.id == statementAccountID && $0.currencyCode == VNDCurrency.code
+            })
+        else { return .account }
+        guard ImportSourceID(rawValue: row.id) != nil else { return .source }
+        guard row.candidate.amount > 0 else { return .amount }
+        guard resolutionIsValid(row.resolution, for: row) else { return .category }
+        return nil
+    }
 
     var selectedCount: Int {
         rows.filter { $0.isSelected && !$0.disposition.isExact }.count
@@ -141,7 +165,7 @@ final class StatementImportReview {
         guard selectedCount > 0 || rows.allSatisfy(\.disposition.isExact) else { return false }
         return rows.allSatisfy {
             !$0.isSelected
-                || resolutionIsValid($0.resolution, for: $0, statementAccountID: statementAccountID)
+                || validationIssue(for: $0) == nil
         }
     }
 
@@ -166,6 +190,9 @@ final class StatementImportReview {
             return
         }
         rows[index].resolution = resolution
+        if validationIssue(for: rows[index]) != nil {
+            rows[index].isSelected = false
+        }
         phase = .reviewing
         generation = UUID()
     }
@@ -175,7 +202,7 @@ final class StatementImportReview {
             let index = rows.firstIndex(where: { $0.id == candidateID }),
             !rows[index].disposition.isExact
         else { return }
-        rows[index].isSelected = isSelected
+        rows[index].isSelected = isSelected && validationIssue(for: rows[index]) == nil
         phase = .reviewing
         generation = UUID()
     }
@@ -275,7 +302,7 @@ final class StatementImportReview {
                     candidate: $0,
                     disposition: .newTransaction,
                     resolution: choices[$0.id]?.resolution ?? .unresolved,
-                    isSelected: choices[$0.id]?.isSelected
+                    isSelected: false
                 )
             }
             return
@@ -293,13 +320,15 @@ final class StatementImportReview {
             calendar: StatementImportReconciler.vietnamCalendar
         )
         rows = reconciliation.rows.map { row in
-            guard !row.disposition.isExact, let previous = choices[row.id] else { return row }
             var preserved = row
-            preserved.isSelected = previous.isSelected
-            if resolutionIsValid(
-                previous.resolution, for: row, statementAccountID: statementAccountID)
+            if !row.disposition.isExact, let previous = choices[row.id],
+                resolutionIsValid(previous.resolution, for: row)
             {
                 preserved.resolution = previous.resolution
+                preserved.isSelected = previous.isSelected
+            }
+            if validationIssue(for: preserved) != nil {
+                preserved.isSelected = false
             }
             return preserved
         }
@@ -307,8 +336,7 @@ final class StatementImportReview {
 
     private func resolutionIsValid(
         _ resolution: ImportRowResolution,
-        for row: ReconciledImportRow,
-        statementAccountID: UUID
+        for row: ReconciledImportRow
     ) -> Bool {
         if row.disposition.isExact {
             return resolution == .alreadyImported
