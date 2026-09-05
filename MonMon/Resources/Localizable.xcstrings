@@ -1,6 +1,21 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Day / Month / Year": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngày / Tháng / Năm" } } }
+    },
+    "Month / Day / Year": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tháng / Ngày / Năm" } } }
+    },
+    "Year / Month / Day": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Năm / Tháng / Ngày" } } }
+    },
+    "Choose how dates appear throughout the app. Changes apply immediately.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn cách hiển thị ngày trong ứng dụng. Thay đổi được áp dụng ngay." } } }
+    },
+    "Example: December 24, 2026": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ví dụ: ngày 24 tháng 12 năm 2026" } } }
+    },
     "Date format": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Định dạng ngày" } } }
     },

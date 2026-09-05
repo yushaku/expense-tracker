@@ -11,6 +11,14 @@ enum AppDateFormat: String, CaseIterable, Identifiable {
     static let storageKey = "appDateFormat"
     var id: String { rawValue }
 
+    var displayName: LocalizedStringKey {
+        switch self {
+        case .dayMonthYear: "Day / Month / Year"
+        case .monthDayYear: "Month / Day / Year"
+        case .yearMonthDay: "Year / Month / Day"
+        }
+    }
+
     var style: Date.VerbatimFormatStyle {
         let pattern: Date.FormatString
         switch self {

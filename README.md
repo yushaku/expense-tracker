@@ -153,8 +153,9 @@ rtk swift format lint --strict --recursive MonMon MonMonTests MonMonShareExtensi
 
 ### Date display
 
-In Settings → Appearance → Date format, choose `dd/MM/yyyy` (default),
+In Settings → Date format, choose `dd/MM/yyyy` (default),
 `MM/dd/yyyy`, or `yyyy-MM-dd`. The choice is saved on this device and applies
-immediately, independently of the interface language. Date-time labels retain
+immediately, independently of the interface language. Each option shows a sample
+date, and the selected option has a checkmark. Date-time labels retain
 the localized time, and month/year headings retain their existing labels.
 Backup files, bank imports, and API date encodings keep their existing formats.
