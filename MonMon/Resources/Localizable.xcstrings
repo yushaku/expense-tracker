@@ -1,6 +1,84 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Preview": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xem trước" } } }
+    },
+    "Expense category": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Danh mục chi" } } }
+    },
+    "Tap a preset to edit its name, amount, and category.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chạm vào một mẫu để sửa tên, số tiền và danh mục." } } }
+    },
+    "Widget limits: small 3 · medium 6 · large 9. Hidden presets are kept.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Widget nhỏ: tối đa 3 mẫu · vừa: 6 · lớn: 9. Các mẫu ẩn vẫn được giữ lại." } } }
+    },
+    "Edit this preset. No expense will be recorded.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sửa mẫu này. Thao tác này không ghi khoản chi." } } }
+    },
+    "Couldn’t save presets. Try again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể lưu mẫu chi nhanh. Vui lòng thử lại." } } }
+    },
+    "Choose a category": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn danh mục" } } }
+    },
+    "Uses transaction default": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dùng danh mục mặc định" } } }
+    },
+    "Records to account": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi vào tài khoản" } } }
+    },
+    "Choose a default account": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn tài khoản mặc định" } } }
+    },
+    "Choose an account in Defaults before using the widget.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn tài khoản trong phần Mặc định trước khi dùng widget." } } }
+    },
+    "Preview only. No expense will be recorded.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chỉ xem trước, không ghi khoản chi." } } }
+    },
+    "Edit quick expense": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sửa mẫu chi nhanh" } } }
+    },
+    "Discard changes?": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bỏ các thay đổi?" } } }
+    },
+    "Discard changes": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bỏ thay đổi" } } }
+    },
+    "Keep editing": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiếp tục sửa" } } }
+    },
+    "Name or emoji": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên hoặc emoji" } } }
+    },
+    "Enter a name or emoji with 1–16 characters.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập tên hoặc emoji từ 1–16 ký tự." } } }
+    },
+    "Up to 16 characters. This appears on the widget.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tối đa 16 ký tự. Nội dung này sẽ hiển thị trên widget." } } }
+    },
+    "Amount (VND)": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền (VND)" } } }
+    },
+    "Enter a positive whole amount in VND.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập số tiền nguyên lớn hơn 0, đơn vị VND." } } }
+    },
+    "Category unavailable": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Danh mục không còn tồn tại" } } }
+    },
+    "Default: %@": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mặc định: %@" } } }
+    },
+    "Default category unavailable": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa có danh mục mặc định hợp lệ" } } }
+    },
+    "Choose an expense category. Add one in Categories if the list is empty.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn danh mục chi. Nếu danh sách trống, hãy thêm trong phần Danh mục." } } }
+    },
+    "Follows your default expense category when it changes.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tự dùng danh mục chi mặc định mới khi bạn thay đổi." } } }
+    },
     "Unit": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đơn vị" } } }
     },
