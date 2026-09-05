@@ -1,6 +1,21 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Widget sizes hold:": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Các cỡ widget chứa được:" } } }
+    },
+    "A size shows as many as it fits. Hidden presets are kept.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mỗi cỡ hiện tối đa số nó chứa được. Preset bị ẩn vẫn được giữ." } } }
+    },
+    "small": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "nhỏ" } } }
+    },
+    "medium": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "vừa" } } }
+    },
+    "large": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "lớn" } } }
+    },
     "Preview": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xem trước" } } }
     },
@@ -9,9 +24,6 @@
     },
     "Tap a preset to edit its name, amount, and category.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chạm vào một mẫu để sửa tên, số tiền và danh mục." } } }
-    },
-    "Widget limits: small 3 · medium 6 · large 9. Hidden presets are kept.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Widget nhỏ: tối đa 3 mẫu · vừa: 6 · lớn: 9. Các mẫu ẩn vẫn được giữ lại." } } }
     },
     "Edit this preset. No expense will be recorded.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sửa mẫu này. Thao tác này không ghi khoản chi." } } }

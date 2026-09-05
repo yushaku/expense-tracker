@@ -3,6 +3,8 @@ import SwiftUI
 import WidgetKit
 
 struct QuickExpensePresetsCard: View {
+    @Environment(\.locale) private var locale
+
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Query(sort: \TransactionCategory.createdAt, order: .forward)
     private var categories: [TransactionCategory]
@@ -34,14 +36,18 @@ struct QuickExpensePresetsCard: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Presets shown")
                     .font(.subheadline.weight(.medium))
-                Picker("Presets shown", selection: countSelection) {
-                    ForEach(QuickExpensePresetCount.allCases) { count in
-                        Text(count.rawValue, format: .number).tag(count)
-                    }
+                Stepper(
+                    value: countSelection,
+                    in: QuickExpenseConfiguration.countRange
+                ) {
+                    Text(configuration.visibleCount, format: .number)
+                        .font(.title3.weight(.semibold))
+                        .monospacedDigit()
                 }
-                .pickerStyle(.segmented)
                 .accessibilityIdentifier("quick-expense-visible-count")
-                Text("Widget limits: small 3 · medium 6 · large 9. Hidden presets are kept.")
+                .accessibilityLabel("Presets shown")
+
+                Text(widgetCapacityCaption)
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
@@ -97,8 +103,25 @@ struct QuickExpensePresetsCard: View {
             : [GridItem(.adaptive(minimum: 140), spacing: 12)]
     }
 
-    private var countSelection: Binding<QuickExpensePresetCount> {
+    private var countSelection: Binding<Int> {
         Binding(get: { configuration.visibleCount }, set: { saveCount($0) })
+    }
+
+    /// What each widget size can hold, read off the layout rather than typed
+    /// out, so the sentence cannot drift from what the widget draws.
+    private var widgetCapacityCaption: String {
+        let sizes = QuickExpenseWidgetLayout.Size.allCases.map { size in
+            let name = AppText.string(key: size.displayNameKey, in: locale)
+            return "\(name) \(QuickExpenseWidgetLayout.capacity(size))"
+        }
+        .joined(separator: " · ")
+
+        let limits = AppText.string("Widget sizes hold:", in: locale)
+        let kept = AppText.string(
+            "A size shows as many as it fits. Hidden presets are kept.",
+            in: locale
+        )
+        return "\(limits) \(sizes). \(kept)"
     }
 
     private func resolvedCategory(for preset: QuickExpensePreset) -> TransactionCategory? {
@@ -113,7 +136,7 @@ struct QuickExpensePresetsCard: View {
         configuration = store.load()
     }
 
-    private func saveCount(_ count: QuickExpensePresetCount) {
+    private func saveCount(_ count: Int) {
         do {
             try store.setVisibleCount(count)
             reload()
