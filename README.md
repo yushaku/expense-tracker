@@ -150,3 +150,11 @@ Check Swift formatting:
 ```sh
 rtk swift format lint --strict --recursive MonMon MonMonTests MonMonShareExtension
 ```
+
+### Date display
+
+In Settings → Appearance → Date format, choose `dd/MM/yyyy` (default),
+`MM/dd/yyyy`, or `yyyy-MM-dd`. The choice is saved on this device and applies
+immediately, independently of the interface language. Date-time labels retain
+the localized time, and month/year headings retain their existing labels.
+Backup files, bank imports, and API date encodings keep their existing formats.

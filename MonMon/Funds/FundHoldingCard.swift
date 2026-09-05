@@ -4,6 +4,8 @@ import SwiftUI
 /// single lot stands today. The list groups these by instrument, so this card is
 /// what a group opens into rather than what the list shows.
 struct FundHoldingCard: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     let holding: FundHolding
@@ -303,7 +305,7 @@ struct FundHoldingCard: View {
     /// description, brackets and all. The kind therefore goes through
     /// `displayName(in:)`, and the two words around it through `AppText`.
     private var subtitle: String {
-        let bought = TransactionPeriod.day(holding.boughtOn, in: locale)
+        let bought = TransactionPeriod.day(holding.boughtOn, in: locale, dateFormat: dateFormat)
 
         guard let instrument else {
             return "\(AppText.string("Unknown instrument", in: locale)) · \(bought)"

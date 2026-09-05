@@ -10,18 +10,18 @@ import SwiftUI
 /// would take in every form, and draws it with MijickCalendarView, which is
 /// plain SwiftUI on both platforms.
 struct DateField: View {
-    @Environment(\.locale) private var locale
+    @Environment(\.appDateFormat) private var dateFormat
 
     @Binding var selection: Date
 
     let accessibilityIdentifier: String
+    /// Bounded goal dates keep the native calendar enforcing their date limits.
+    var allowedRange: ClosedRange<Date>? = nil
 
     @State private var isPickingDate = false
 
-    private static let displayTemplate = Date.FormatStyle().day().month(.abbreviated).year()
-
     private var formattedDate: String {
-        TransactionPeriod.format(Self.displayTemplate, in: locale).format(selection)
+        dateFormat.format(selection)
     }
 
     var body: some View {
@@ -57,7 +57,24 @@ struct DateField: View {
         }
     }
 
+    @ViewBuilder
     private var calendar: some View {
+        if let allowedRange {
+            DatePicker("Date", selection: $selection, in: allowedRange, displayedComponents: .date)
+                .datePickerStyle(.graphical)
+                .labelsHidden()
+                .padding(16)
+                .frame(minWidth: 320)
+                .tint(MonMonTheme.accent)
+                .accessibilityIdentifier("\(accessibilityIdentifier)-calendar")
+                .presentationCompactAdaptation(.popover)
+                .onChange(of: selection) { isPickingDate = false }
+        } else {
+            themedCalendar
+        }
+    }
+
+    private var themedCalendar: some View {
         MCalendarView(selectedDate: pickedDate, selectedRange: nil) {
             $0
                 .startMonth(CalendarTheme.startMonth())

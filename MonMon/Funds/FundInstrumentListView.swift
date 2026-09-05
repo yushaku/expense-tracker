@@ -109,6 +109,8 @@ enum FundInstrumentListScope: String, Identifiable {
 /// reaches Categories — a list of the records other records point at, kept off
 /// the main screen because it is edited rarely.
 struct FundInstrumentListView: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     @Environment(\.dismiss) private var dismiss
@@ -464,7 +466,7 @@ struct FundInstrumentListView: View {
     /// States the price's age, its source, and how many positions depend on it,
     /// so the row explains both what it is and why it matters.
     private func statusDescription(_ instrument: FundInstrument) -> String {
-        let day = TransactionPeriod.day(instrument.priceAsOf, in: locale)
+        let day = TransactionPeriod.day(instrument.priceAsOf, in: locale, dateFormat: dateFormat)
         let held = FundSummary.holdings(for: instrument, holdings: holdings).count
         let position = AppText.string("\(held) positions", in: locale)
         var text =

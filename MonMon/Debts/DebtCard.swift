@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct DebtCard: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     let debt: Debt
@@ -208,7 +210,7 @@ struct DebtCard: View {
             return AppText.string("No due date", in: locale)
         }
 
-        return TransactionPeriod.day(dueDate, in: locale)
+        return TransactionPeriod.day(dueDate, in: locale, dateFormat: dateFormat)
     }
 
     private var progressFraction: CGFloat {

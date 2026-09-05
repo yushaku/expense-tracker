@@ -9,6 +9,8 @@ import SwiftUI
 /// whether a month went in one afternoon or a little at a time, and where the
 /// income landed against it.
 struct SpendingTrendCard: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     let unit: SpendingTrendUnit
     let points: [SpendingTrendPoint]
 
@@ -196,11 +198,19 @@ struct SpendingTrendCard: View {
         // the app's own colours.
         .chartLegend(.hidden)
         .chartXAxis {
-            AxisMarks(values: .automatic(desiredCount: 4)) { _ in
+            AxisMarks(values: .automatic(desiredCount: 3)) { value in
                 AxisGridLine()
                     .foregroundStyle(MonMonTheme.border)
-                AxisValueLabel(format: axisDateFormat)
-                    .foregroundStyle(MonMonTheme.textMuted)
+                AxisValueLabel {
+                    if let date = value.as(Date.self) {
+                        if unit == .day {
+                            Text(dateFormat.format(date))
+                        } else {
+                            Text(date, format: .dateTime.month(.abbreviated))
+                        }
+                    }
+                }
+                .foregroundStyle(MonMonTheme.textMuted)
             }
         }
         .chartYAxis {
@@ -245,15 +255,6 @@ struct SpendingTrendCard: View {
         .padding(.vertical, 6)
         .background(MonMonTheme.field, in: Capsule())
         .shadow(color: .black.opacity(0.12), radius: 4, y: 2)
-    }
-
-    private var axisDateFormat: Date.FormatStyle {
-        switch unit {
-        case .day:
-            .dateTime.day().month(.abbreviated)
-        case .month:
-            .dateTime.month(.abbreviated)
-        }
     }
 
     private var average: some View {

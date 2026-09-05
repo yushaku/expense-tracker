@@ -4,6 +4,8 @@ import SwiftUI
 /// fetches a rate nor writes a record, the way every other editor form here
 /// leaves both to its view.
 struct CryptoSwapEditorForm: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     @Binding var draft: CryptoSwapDraft
@@ -250,9 +252,11 @@ struct CryptoSwapEditorForm: View {
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
             } else if isEditing {
-                Text("Rate at the swap, \(TransactionPeriod.day(draft.swappedAt, in: locale)).")
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
+                Text(
+                    "Rate at the swap, \(TransactionPeriod.day(draft.swappedAt, in: locale, dateFormat: dateFormat))."
+                )
+                .font(.caption)
+                .foregroundStyle(MonMonTheme.textSecondary)
             }
 
             if let convertedValue {

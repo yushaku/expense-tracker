@@ -56,11 +56,10 @@ struct TransactionRange: Hashable {
         TransactionPeriod.calendar
     }
 
-    private static let dayTemplate = Date.FormatStyle().day().month(.abbreviated).year()
     private static let yearTemplate = Date.FormatStyle().year()
 
-    private static func day(_ date: Date, in locale: Locale) -> String {
-        TransactionPeriod.format(dayTemplate, in: locale).format(date)
+    private static func day(_ date: Date, dateFormat: AppDateFormat) -> String {
+        dateFormat.format(date)
     }
 
     // MARK: - Building
@@ -147,18 +146,18 @@ struct TransactionRange: Hashable {
         }
     }
 
-    func title(in locale: Locale) -> String {
+    func title(in locale: Locale, dateFormat: AppDateFormat = .dayMonthYear) -> String {
         switch scope {
         case .day:
-            Self.day(start, in: locale)
+            Self.day(start, dateFormat: dateFormat)
         case .month:
             TransactionPeriod.title(for: start, in: locale)
         case .year:
             TransactionPeriod.format(Self.yearTemplate, in: locale).format(start)
         case .custom:
             start == lastDay
-                ? Self.day(start, in: locale)
-                : "\(Self.day(start, in: locale)) – \(Self.day(lastDay, in: locale))"
+                ? Self.day(start, dateFormat: dateFormat)
+                : "\(Self.day(start, dateFormat: dateFormat)) – \(Self.day(lastDay, dateFormat: dateFormat))"
         }
     }
 
@@ -166,15 +165,15 @@ struct TransactionRange: Hashable {
     /// whether it names a point or a span.
     /// Whole phrases rather than a preposition glued to a title: a language
     /// puts the two together its own way, and some put nothing between them.
-    func phrase(in locale: Locale) -> String {
+    func phrase(in locale: Locale, dateFormat: AppDateFormat = .dayMonthYear) -> String {
         switch scope {
         case .day:
-            AppText.string("on \(title(in: locale))", in: locale)
+            AppText.string("on \(title(in: locale, dateFormat: dateFormat))", in: locale)
         case .month, .year:
-            AppText.string("in \(title(in: locale))", in: locale)
+            AppText.string("in \(title(in: locale, dateFormat: dateFormat))", in: locale)
         case .custom:
             AppText.string(
-                "between \(Self.day(start, in: locale)) and \(Self.day(lastDay, in: locale))",
+                "between \(Self.day(start, dateFormat: dateFormat)) and \(Self.day(lastDay, dateFormat: dateFormat))",
                 in: locale
             )
         }

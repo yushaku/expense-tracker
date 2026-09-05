@@ -8,6 +8,8 @@ import SwiftUI
 /// and delete gestures. The enclosing screen owns the shared transaction
 /// actions so sheets and the Undo banner stay anchored to its viewport.
 struct TransactionListSection<Accessory: View>: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     @Query(sort: \TripWorkspace.startedAt, order: .reverse)
@@ -106,7 +108,7 @@ struct TransactionListSection<Accessory: View>: View {
     private func dayHeader(for group: TransactionDayGroup) -> some View {
         HStack(spacing: 12) {
             Text(
-                TransactionPeriod.format(Self.dayTemplate, in: locale).format(group.day)
+                dateFormat.format(group.day)
                     .uppercased()
             )
             .font(.caption.weight(.semibold))
@@ -145,9 +147,6 @@ struct TransactionListSection<Accessory: View>: View {
         accounts.first { $0.id == transaction.accountID }
     }
 
-    private static var dayTemplate: Date.FormatStyle {
-        Date.FormatStyle().weekday(.abbreviated).day().month(.abbreviated)
-    }
 }
 
 extension TransactionListSection where Accessory == EmptyView {

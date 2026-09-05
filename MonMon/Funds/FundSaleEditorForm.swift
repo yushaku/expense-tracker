@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct FundSaleEditorForm: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     @Binding var draft: FundSaleDraft
@@ -301,7 +303,8 @@ struct FundSaleEditorForm: View {
         guard isEditing, draft.priceCurrency == .usd else {
             return nil
         }
-        return "Rate at sale, \(TransactionPeriod.day(draft.soldAt, in: locale))."
+        return
+            "Rate at sale, \(TransactionPeriod.day(draft.soldAt, in: locale, dateFormat: dateFormat))."
     }
 
     private var offersDollarEntry: Bool { policy.allowsDollarPriceEntry }

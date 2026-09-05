@@ -210,13 +210,15 @@ private struct IncomeAllocationTimelineNotice: View {
 }
 
 private struct IncomeAllocationEventCard: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     let event: IncomeAllocationTimeline.Event
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .firstTextBaseline, spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(event.occurredAt, format: .dateTime.day().month().year())
+                    Text(dateFormat.format(event.occurredAt))
                         .font(.caption)
                         .foregroundStyle(MonMonTheme.textSecondary)
 

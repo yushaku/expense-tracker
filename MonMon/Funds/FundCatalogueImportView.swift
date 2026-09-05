@@ -3,6 +3,8 @@ import SwiftUI
 
 /// Picks instruments out of a provider's catalogue instead of typing them one at a time.
 struct FundCatalogueImportView: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     @Environment(\.dismiss) private var dismiss
@@ -448,7 +450,7 @@ struct FundCatalogueImportView: View {
                 in: locale
             )
         }
-        return TransactionPeriod.day(day, in: locale)
+        return TransactionPeriod.day(day, in: locale, dateFormat: dateFormat)
     }
 
     private func toggle(_ symbol: String) {

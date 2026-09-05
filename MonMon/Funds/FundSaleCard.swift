@@ -3,6 +3,8 @@ import SwiftUI
 /// One sale, under the position it came out of: how much went, at what price,
 /// where the money landed, and what it made.
 struct FundSaleCard: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     let sale: FundSale
@@ -96,7 +98,7 @@ struct FundSaleCard: View {
     }
 
     private var subtitle: String {
-        let day = TransactionPeriod.day(sale.soldAt, in: locale)
+        let day = TransactionPeriod.day(sale.soldAt, in: locale, dateFormat: dateFormat)
         let price = VNDCurrency.formatUnitPrice(sale.pricePerUnit)
 
         // A swap says which coin it became rather than naming an account,

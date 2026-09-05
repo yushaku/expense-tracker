@@ -18,6 +18,8 @@ private enum AccountDetailTab: CaseIterable, Hashable {
 }
 
 struct AccountDetailView: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     @Query(sort: \CashAccount.createdAt, order: .forward)
@@ -203,7 +205,7 @@ struct AccountDetailView: View {
 
     private var transactionFilter: some View {
         HStack(spacing: 8) {
-            Text(transactionRange.title(in: locale).uppercased())
+            Text(transactionRange.title(in: locale, dateFormat: dateFormat).uppercased())
                 .font(.caption.weight(.semibold))
                 .tracking(0.6)
                 .foregroundStyle(MonMonTheme.textSecondary)
@@ -219,7 +221,7 @@ struct AccountDetailView: View {
     }
 
     private var emptyTransactionNotice: LocalizedStringKey {
-        "No transactions recorded \(transactionRange.phrase(in: locale))."
+        "No transactions recorded \(transactionRange.phrase(in: locale, dateFormat: dateFormat))."
     }
 
     private func accountTransfers(for account: CashAccount) -> [AccountTransfer] {

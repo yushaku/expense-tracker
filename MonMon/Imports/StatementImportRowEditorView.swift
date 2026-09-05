@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct StatementImportRowEditorView: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
 
@@ -97,7 +99,7 @@ struct StatementImportRowEditorView: View {
                     .monospacedDigit()
             }
             LabeledContent("Date") {
-                Text(row.candidate.occurredAt.formatted(dateFormat))
+                Text(dateFormat.dateTime(row.candidate.occurredAt, in: locale))
             }
             LabeledContent("Description") {
                 Text(
@@ -247,10 +249,6 @@ struct StatementImportRowEditorView: View {
         }
     }
 
-    private var dateFormat: Date.FormatStyle {
-        Date.FormatStyle(date: .abbreviated, time: .shortened).locale(locale)
-    }
-
     private func choiceButton(
         _ value: Choice,
         title: LocalizedStringKey,
@@ -290,7 +288,7 @@ struct StatementImportRowEditorView: View {
 
     private func existingTransactionDetail(_ transaction: MoneyTransaction) -> String {
         transaction.note.isEmpty
-            ? transaction.occurredAt.formatted(dateFormat)
+            ? dateFormat.dateTime(transaction.occurredAt, in: locale)
             : transaction.note
     }
 

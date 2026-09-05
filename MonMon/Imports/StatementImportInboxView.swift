@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct StatementImportInboxView: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
 
@@ -176,9 +178,7 @@ struct StatementImportInboxView: View {
     }
 
     private func receivedDate(_ statement: StagedBankStatement) -> String {
-        statement.createdAt.formatted(
-            Date.FormatStyle(date: .abbreviated, time: .shortened).locale(locale)
-        )
+        dateFormat.dateTime(statement.createdAt, in: locale)
     }
 
     private func fileSize(_ statement: StagedBankStatement) -> String {

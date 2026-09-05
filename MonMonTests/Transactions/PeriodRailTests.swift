@@ -108,7 +108,7 @@ struct PeriodRailTests {
 
         #expect(PeriodRailUnit.year.label(for: august, in: english, today: today) == "2026")
         #expect(PeriodRailUnit.month.label(for: august, in: english, today: today) == "August")
-        #expect(PeriodRailUnit.day.label(for: august, in: english, today: today) == "Aug 15")
+        #expect(PeriodRailUnit.day.label(for: august, in: english, today: today) == "15/08/2026")
 
         #expect(PeriodRailUnit.year.identifier(for: august) == "2026")
         #expect(PeriodRailUnit.month.identifier(for: august) == "2026-08")
@@ -121,7 +121,7 @@ struct PeriodRailTests {
         let older = date(2019, 3, 4)
 
         #expect(PeriodRailUnit.month.label(for: older, in: english, today: today) == "Mar 2019")
-        #expect(PeriodRailUnit.day.label(for: older, in: english, today: today) == "Mar 4, 2019")
+        #expect(PeriodRailUnit.day.label(for: older, in: english, today: today) == "04/03/2019")
     }
 
     @Test("Period grids identify the current month and year independently of selection")
