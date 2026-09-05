@@ -15,8 +15,6 @@ enum PeriodRailUnit: Equatable {
     /// a tap that throws the span away.
     case custom(TransactionRange)
 
-    private static let dayTemplate = Date.FormatStyle().day().month(.abbreviated)
-    private static let dayYearTemplate = Date.FormatStyle().day().month(.abbreviated).year()
     private static let monthTemplate = Date.FormatStyle().month(.wide)
 
     /// Months outside this year carry it, so scrolling back never leaves the
@@ -93,10 +91,13 @@ enum PeriodRailUnit: Equatable {
         }
     }
 
-    /// What the entry says. Days and months outside this year carry it; a year
+    /// What the entry says. Full days always carry the year; older months carry it; a year
     /// is already unambiguous; a hand-picked span names both its ends, since
     /// neither one alone says what is being added up.
-    func label(for period: Date, in locale: Locale, today: Date = .now) -> String {
+    func label(
+        for period: Date, in locale: Locale, today: Date = .now,
+        dateFormat: AppDateFormat = .dayMonthYear
+    ) -> String {
         let calendar = TransactionPeriod.calendar
         let isThisYear =
             calendar.component(.year, from: period) == calendar.component(.year, from: today)
@@ -105,13 +106,13 @@ enum PeriodRailUnit: Equatable {
 
         switch self {
         case .day:
-            template = isThisYear ? Self.dayTemplate : Self.dayYearTemplate
+            return dateFormat.format(period)
         case .month:
             template = isThisYear ? Self.monthTemplate : Self.monthYearTemplate
         case .year:
             template = Self.yearTemplate
         case .custom(let range):
-            return range.title(in: locale)
+            return range.title(in: locale, dateFormat: dateFormat)
         }
 
         return TransactionPeriod.format(template, in: locale).format(period)
@@ -119,16 +120,18 @@ enum PeriodRailUnit: Equatable {
 
     /// Spoken in full, since an abbreviation a sighted owner reads in context is
     /// a riddle on its own.
-    func accessibilityLabel(for period: Date, in locale: Locale) -> String {
+    func accessibilityLabel(
+        for period: Date, in locale: Locale, dateFormat: AppDateFormat = .dayMonthYear
+    ) -> String {
         switch self {
         case .day:
-            TransactionPeriod.day(period, in: locale)
+            dateFormat.format(period)
         case .month:
             TransactionPeriod.title(for: period, in: locale)
         case .year:
             TransactionPeriod.format(Self.yearTemplate, in: locale).format(period)
         case .custom(let range):
-            range.title(in: locale)
+            range.title(in: locale, dateFormat: dateFormat)
         }
     }
 
@@ -238,6 +241,8 @@ struct PeriodRailPeriods: Equatable {
 /// days, so the rail can never describe a wider slice of time than the figures
 /// under it.
 struct PeriodRail: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     /// The unit each entry stands for. A hand-picked range has no unit of its
@@ -285,7 +290,7 @@ struct PeriodRail: View {
             onSelect(period)
         } label: {
             VStack(spacing: 5) {
-                Text(unit.label(for: period, in: locale))
+                Text(unit.label(for: period, in: locale, dateFormat: dateFormat))
                     .font(
                         .subheadline.weight(
                             isSelected ? .bold : (isCurrent ? .semibold : .medium)
@@ -317,7 +322,9 @@ struct PeriodRail: View {
         .buttonStyle(.plain)
         .id(period)
         .animation(.snappy(duration: 0.22), value: isSelected)
-        .accessibilityLabel(unit.accessibilityLabel(for: period, in: locale))
+        .accessibilityLabel(
+            unit.accessibilityLabel(for: period, in: locale, dateFormat: dateFormat)
+        )
         .accessibilityValue(isCurrent ? Text(unit.currentPeriodNotice) : Text(""))
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
         .accessibilityIdentifier("period-rail-\(unit.identifier(for: period))")

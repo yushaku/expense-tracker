@@ -217,6 +217,8 @@ private struct GoalActionStatusBanner: View {
 }
 
 struct GoalDetailView: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
@@ -361,7 +363,7 @@ struct GoalDetailView: View {
                 .overlay(MonMonTheme.border)
 
             detailRow("Target date") {
-                Text(goal.targetDate, format: .dateTime.day().month().year())
+                Text(dateFormat.format(goal.targetDate))
             }
         }
         .padding(18)
@@ -545,6 +547,8 @@ private struct GoalArchiveMenu: View {
 }
 
 private struct GoalContributionCard: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     let goal: FinancialGoal
     let onMarkContribution: () -> Void
 
@@ -576,7 +580,7 @@ private struct GoalContributionCard: View {
             } else {
                 ForEach(entries) { entry in
                     HStack(alignment: .firstTextBaseline, spacing: 12) {
-                        Text(entry.occurredAt, format: .dateTime.day().month().year())
+                        Text(dateFormat.format(entry.occurredAt))
                             .font(.subheadline)
                             .foregroundStyle(MonMonTheme.textSecondary)
 
@@ -629,13 +633,11 @@ private struct GoalContributionEditor: View {
                         .accessibilityLabel("Contribution amount")
                         .accessibilityIdentifier("goal-contribution-amount")
 
-                    DatePicker(
-                        "Date",
+                    DateField(
                         selection: $occurredAt,
-                        in: ...Date.now,
-                        displayedComponents: .date
+                        accessibilityIdentifier: "goal-contribution-date",
+                        allowedRange: Date.distantPast...Date.now
                     )
-                    .accessibilityIdentifier("goal-contribution-date")
 
                     Text("Remaining: \(VNDCurrency.format(remaining))")
                         .font(.caption)

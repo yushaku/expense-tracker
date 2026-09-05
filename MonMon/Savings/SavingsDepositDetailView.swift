@@ -20,6 +20,8 @@ private enum SavingsDepositDetailEditor: Identifiable {
 }
 
 struct SavingsDepositDetailView: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     let route: SavingsDepositRoute
@@ -160,8 +162,12 @@ struct SavingsDepositDetailView: View {
             detail("Original principal", VNDCurrency.format(deposit.principal))
             detail("Annual rate", PercentInput.formatWithSymbol(deposit.annualInterestRate))
             detail("Term", AppText.string("\(deposit.termMonths) months", in: locale))
-            detail("Opened on", TransactionPeriod.day(deposit.openedAt, in: locale))
-            detail("Maturity date", TransactionPeriod.day(deposit.maturityDate, in: locale))
+            detail(
+                "Opened on",
+                TransactionPeriod.day(deposit.openedAt, in: locale, dateFormat: dateFormat))
+            detail(
+                "Maturity date",
+                TransactionPeriod.day(deposit.maturityDate, in: locale, dateFormat: dateFormat))
 
             if let accountName = accountName(forID: deposit.sourceAccountID) {
                 detail("Funded from", accountName)

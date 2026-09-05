@@ -13,6 +13,8 @@ import SwiftUI
 /// the Spending screen and the Accounts screen without either learning about the
 /// other.
 struct DateRangeFilter: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Binding var range: TransactionRange
 
     @Environment(\.locale) private var locale
@@ -85,7 +87,7 @@ struct DateRangeFilter: View {
                 endLabel("To", date: range.lastDay)
             }
         } else {
-            Text(range.title(in: locale).uppercased())
+            Text(range.title(in: locale, dateFormat: dateFormat).uppercased())
                 .font(.caption.weight(.semibold))
                 .tracking(0.8)
                 .lineLimit(1)
@@ -102,7 +104,7 @@ struct DateRangeFilter: View {
                 .tracking(0.6)
                 .foregroundStyle(MonMonTheme.textSecondary)
 
-            Text(TransactionPeriod.format(Self.dayTemplate, in: locale).format(date))
+            Text(dateFormat.format(date))
                 .font(.subheadline.weight(.semibold))
                 .monospacedDigit()
                 .lineLimit(1)
@@ -239,7 +241,6 @@ struct DateRangeFilter: View {
         identifierPrefix.isEmpty ? name : "\(identifierPrefix)-\(name)"
     }
 
-    private static let dayTemplate = Date.FormatStyle().day().month(.abbreviated).year()
 }
 
 /// The small button a section title carries to change what slice of time it is
@@ -250,6 +251,8 @@ struct DateRangeFilter: View {
 /// rather than a summary. Behind a button they cost one glyph, and the range
 /// they picked stays legible because the screen writes its name beside them.
 struct DateRangeFilterButton: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Binding var range: TransactionRange
 
     @Environment(\.locale) private var locale
@@ -278,7 +281,7 @@ struct DateRangeFilterButton: View {
         .buttonStyle(.plain)
         .headerIconStyle()
         .accessibilityLabel("Filter by date")
-        .accessibilityValue(range.title(in: locale))
+        .accessibilityValue(range.title(in: locale, dateFormat: dateFormat))
         .accessibilityIdentifier(identifier("period-filter"))
         .appSheet(isPresented: $isFiltering) {
             sheet
@@ -330,6 +333,8 @@ struct DateRangeFilterButton: View {
 
 #if DEBUG
     private struct DateRangeFilterPreview: View {
+        @Environment(\.appDateFormat) private var dateFormat
+
         @Environment(\.locale) private var locale
 
         @State private var range = TransactionRange.month(containing: .now)
@@ -337,7 +342,7 @@ struct DateRangeFilterButton: View {
         var body: some View {
             VStack(spacing: 24) {
                 HStack(spacing: 12) {
-                    Text(range.title(in: locale).uppercased())
+                    Text(range.title(in: locale, dateFormat: dateFormat).uppercased())
                         .font(.caption.weight(.semibold))
                         .tracking(0.8)
                         .foregroundStyle(MonMonTheme.textSecondary)

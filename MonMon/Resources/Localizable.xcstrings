@@ -1,6 +1,9 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Date format": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Định dạng ngày" } } }
+    },
     "Widget sizes hold:": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Các cỡ widget chứa được:" } } }
     },

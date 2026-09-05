@@ -8,6 +8,8 @@ import SwiftUI
 /// Home keeps the short version — a few cards and a total — so this screen is
 /// where the detail lives rather than a second copy of the same summary.
 struct AccountsScreen: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     @Query(sort: \CashAccount.createdAt, order: .forward)
@@ -209,7 +211,7 @@ struct AccountsScreen: View {
     /// What the transfer list is showing. Changing it is the header's filter
     /// button, so this only has to say what is on screen.
     private var transferPeriodHeader: some View {
-        Text(transferRange.title(in: locale).uppercased())
+        Text(transferRange.title(in: locale, dateFormat: dateFormat).uppercased())
             .font(.caption.weight(.semibold))
             .tracking(0.8)
             .lineLimit(1)
@@ -238,7 +240,7 @@ struct AccountsScreen: View {
     private var noTransfersState: some View {
         placeholder(
             symbol: "arrow.left.arrow.right",
-            title: "Nothing moved \(transferRange.phrase(in: locale))",
+            title: "Nothing moved \(transferRange.phrase(in: locale, dateFormat: dateFormat))",
             message: accounts.count < 2
                 ? "A transfer needs somewhere to leave and somewhere to land, so add a second account first."
                 : "Record money you shifted between your own accounts. Your total assets stay the same."

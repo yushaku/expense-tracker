@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct FundEditorForm: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     @Binding var draft: FundDraft
@@ -122,7 +124,7 @@ struct FundEditorForm: View {
     /// one ticker used to end up disagreeing.
     private func instrumentExplanation(_ instrument: FundInstrument) -> String {
         let price = VNDCurrency.formatUnitPrice(instrument.currentPricePerUnit)
-        let day = TransactionPeriod.day(instrument.priceAsOf, in: locale)
+        let day = TransactionPeriod.day(instrument.priceAsOf, in: locale, dateFormat: dateFormat)
         return AppText.string(
             """
             \(instrument.kind.displayName(in: locale)) · \
@@ -421,7 +423,8 @@ struct FundEditorForm: View {
         guard isEditing, draft.costCurrency == .usd else {
             return nil
         }
-        return "Rate at purchase, \(TransactionPeriod.day(draft.purchasedAt, in: locale))."
+        return
+            "Rate at purchase, \(TransactionPeriod.day(draft.purchasedAt, in: locale, dateFormat: dateFormat))."
     }
 
     /// Dollars are offered where things are actually bought in them. Vietnamese

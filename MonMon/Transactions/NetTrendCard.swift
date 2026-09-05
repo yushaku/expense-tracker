@@ -8,6 +8,8 @@ import SwiftUI
 /// because it was quiet, or because a large expense landed on top of a large
 /// income halfway through it.
 struct NetTrendCard: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     let points: [TransactionNetPoint]
 
     @State private var selectedDay: Date?
@@ -136,11 +138,15 @@ struct NetTrendCard: View {
         .chartYScale(domain: .automatic(includesZero: true))
         .chartLegend(.hidden)
         .chartXAxis {
-            AxisMarks(values: .automatic(desiredCount: 4)) { _ in
+            AxisMarks(values: .automatic(desiredCount: 3)) { value in
                 AxisGridLine()
                     .foregroundStyle(MonMonTheme.border)
-                AxisValueLabel(format: .dateTime.day().month(.abbreviated))
-                    .foregroundStyle(MonMonTheme.textMuted)
+                AxisValueLabel {
+                    if let date = value.as(Date.self) {
+                        Text(dateFormat.format(date))
+                    }
+                }
+                .foregroundStyle(MonMonTheme.textMuted)
             }
         }
         .chartYAxis {

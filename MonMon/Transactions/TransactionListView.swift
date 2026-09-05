@@ -7,6 +7,8 @@ private enum SpendingDestination: Hashable {
 }
 
 struct TransactionListView: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(AppRoute.self) private var appRoute
     @Environment(\.locale) private var locale
     @Environment(\.scenePhase) private var scenePhase
@@ -587,7 +589,7 @@ struct TransactionListView: View {
     private var emptyFilterNotice: LocalizedStringKey {
         query.isNarrowed
             ? "Nothing matches what you are looking for."
-            : "Nothing recorded \(query.range.phrase(in: locale))."
+            : "Nothing recorded \(query.range.phrase(in: locale, dateFormat: dateFormat))."
     }
 
     private var noAccountState: some View {

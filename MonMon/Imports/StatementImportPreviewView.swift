@@ -2,6 +2,8 @@ import SwiftData
 import SwiftUI
 
 struct StatementImportPreviewView: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
     @Environment(\.modelContext) private var modelContext
@@ -472,7 +474,7 @@ struct StatementImportPreviewView: View {
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(status.tint)
 
-                    Text(candidate.occurredAt.formatted(candidateDateFormat))
+                    Text(dateFormat.dateTime(candidate.occurredAt, in: locale))
                         .font(.caption)
                         .foregroundStyle(MonMonTheme.textSecondary)
 
@@ -880,10 +882,6 @@ struct StatementImportPreviewView: View {
         )
     }
 
-    private var candidateDateFormat: Date.FormatStyle {
-        Date.FormatStyle(date: .abbreviated, time: .shortened).locale(locale)
-    }
-
     private func issueMessage(_ issue: BankStatementIssue) -> LocalizedStringKey {
         switch issue {
         case .ambiguousAmount(let page, let row):
@@ -903,7 +901,7 @@ struct StatementImportPreviewView: View {
     }
 
     private func period(_ range: ClosedRange<Date>) -> String {
-        let format = Date.FormatStyle(date: .abbreviated, time: .omitted).locale(locale)
+        let format = dateFormat.style
         return "\(range.lowerBound.formatted(format)) – \(range.upperBound.formatted(format))"
     }
 

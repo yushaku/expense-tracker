@@ -9,6 +9,8 @@ import SwiftUI
 /// already in the rows below, and tapping a wedge names it in the middle of the
 /// ring, so a third copy only cost the chart its width.
 struct CategoryBreakdownCard: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     @Binding var kind: TransactionKind
@@ -315,7 +317,7 @@ struct CategoryBreakdownCard: View {
                 Text(emptyStateMessage)
             } else if let range {
                 Text(
-                    "No \(kind.displayName(in: locale).lowercased()) recorded \(range.phrase(in: locale))."
+                    "No \(kind.displayName(in: locale).lowercased()) recorded \(range.phrase(in: locale, dateFormat: dateFormat))."
                 )
             } else {
                 Text("No \(kind.displayName(in: locale).lowercased()) recorded.")

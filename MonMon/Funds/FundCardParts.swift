@@ -150,6 +150,8 @@ struct FundClosedBadge: View {
 /// Where the price came from and when it is from. A stale price says so in
 /// words and carries a symbol; colour only reinforces it.
 struct FundPriceStatusRow: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     let instrument: FundInstrument?
@@ -207,7 +209,7 @@ struct FundPriceStatusRow: View {
             return AppText.string("Instrument missing — value cannot be worked out", in: locale)
         }
 
-        let day = TransactionPeriod.day(instrument.priceAsOf, in: locale)
+        let day = TransactionPeriod.day(instrument.priceAsOf, in: locale, dateFormat: dateFormat)
         let base =
             "\(instrument.priceLabel(in: locale)) \(day) · "
             + "\(instrument.source.displayName(in: locale))"

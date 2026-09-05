@@ -13,6 +13,7 @@ struct SettingsView: View {
     @AppStorage(AppTheme.storageKey) private var theme = AppTheme.system
     @AppStorage(AppLanguage.storageKey) private var language = AppLanguage.system
     @AppStorage(AppLock.enabledKey) private var isLockEnabled = false
+    @AppStorage(AppDateFormat.storageKey) private var dateFormat = AppDateFormat.dayMonthYear
     @State private var instrumentScope: FundInstrumentListScope?
 
     var body: some View {
@@ -57,9 +58,6 @@ struct SettingsView: View {
         }
     }
 
-    private static let syncedTemplate = Date.FormatStyle().day().month(.abbreviated).year()
-        .hour().minute()
-
     private var appearanceCard: some View {
         card {
             VStack(alignment: .leading, spacing: 14) {
@@ -95,6 +93,22 @@ struct SettingsView: View {
                 .pickerStyle(.segmented)
                 .labelsHidden()
                 .accessibilityIdentifier("language-picker")
+
+                Divider()
+                    .overlay(MonMonTheme.border)
+
+                Picker("Date format", selection: $dateFormat) {
+                    ForEach(AppDateFormat.allCases) { option in
+                        Text(option.rawValue).tag(option)
+                    }
+                }
+                .pickerStyle(.menu)
+                .accessibilityIdentifier("date-format-picker")
+
+                Text(dateFormat.format(.now))
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .accessibilityIdentifier("date-format-preview")
             }
         }
     }
@@ -427,7 +441,7 @@ struct SettingsView: View {
             return "No sync recorded yet on this device."
         }
 
-        let day = TransactionPeriod.format(Self.syncedTemplate, in: locale).format(lastSyncedAt)
+        let day = dateFormat.dateTime(lastSyncedAt, in: locale)
 
         return AppText.string("Last synced \(day).", in: locale)
     }
