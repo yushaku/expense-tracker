@@ -1,6 +1,42 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Cannot import income: fix budget jar allocations and reopen this report": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể nhập khoản thu: hãy sửa tỷ lệ phân bổ hũ và mở lại sao kê này" } } }
+    },
+    "These transactions will not be imported. Open a row to review its reason.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Các giao dịch này sẽ không được nhập. Mở từng dòng để xem lý do." } } }
+    },
+    "Needs attention: %lld": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Cần xử lý: %lld" } } }
+    },
+    "Import stopped — nothing saved": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã dừng nhập — chưa lưu giao dịch nào" } } }
+    },
+    "No transactions from this attempt were saved. Your selections are still available below.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa lưu giao dịch nào trong lần nhập này. Các lựa chọn của bạn vẫn còn ở bên dưới." } } }
+    },
+    "%lld transactions could not be imported and were unchecked. See Needs attention below. You can import the remaining selected transactions.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể nhập %lld giao dịch nên đã bỏ chọn. Xem mục Cần xử lý bên dưới. Bạn có thể nhập các giao dịch còn đang được chọn." } } }
+    },
+    "The selected account is no longer available. Choose a VND account and select the transactions to import.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tài khoản đã chọn không còn khả dụng. Hãy chọn tài khoản VND và các giao dịch cần nhập." } } }
+    },
+    "This report could not be validated. Close it and reopen it from the import inbox.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể xác thực sao kê này. Hãy đóng rồi mở lại từ hộp thư nhập sao kê." } } }
+    },
+    "Your records changed while saving. Close this report and reopen it to refresh the imported transactions.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dữ liệu đã thay đổi khi lưu. Hãy đóng và mở lại sao kê để cập nhật các giao dịch đã nhập." } } }
+    },
+    "MonMon could not write to its data store. This does not mean a transaction is invalid. Try importing again.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "MonMon không thể ghi vào kho dữ liệu. Điều này không có nghĩa giao dịch không hợp lệ. Hãy thử nhập lại." } } }
+    },
+    "MonMon could not finish this import. Try again, or close this report and reopen it.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "MonMon không thể hoàn tất lần nhập này. Hãy thử lại hoặc đóng rồi mở lại sao kê." } } }
+    },
+    "Will be imported": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sẽ được nhập" } } }
+    },
     "Not selected: choose a valid category": {
       "localizations": {
         "vi": {

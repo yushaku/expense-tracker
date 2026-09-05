@@ -442,6 +442,83 @@ struct StatementImportReviewTests {
         #expect(review.commitConfirmation?.recordCount == 1)
     }
 
+    @Test("Save failures identify and uncheck only affected rows, allowing retry")
+    func saveFailuresIdentifyRows() async throws {
+        let fixture = try makeFixture()
+        defer { fixture.removeDefaults() }
+        let failedID = importB
+        let review = StatementImportReview(
+            preview: preview(stagedID: "row-failure"),
+            snapshot: fixture.snapshot,
+            accountMapping: fixture.mapping,
+            complete: { request, _ in
+                if request.rows.contains(where: { $0.id == failedID && $0.isSelected }) {
+                    throw StatementImportRowsError(failures: [
+                        StatementImportRowFailure(candidateID: failedID, issue: .category)
+                    ])
+                }
+                return .completed(StatementImportCommitReport(createdTransactionCount: 1))
+            },
+            retryCleanup: { _ in true }
+        )
+        review.selectStatementAccount(fixture.firstAccountID)
+        await review.commit()
+        #expect(review.phase == .failed(.invalidRows(1)))
+        #expect(review.invalidRows.map(\.id) == [importB])
+        #expect(review.validRows.map(\.id) == [importA])
+        #expect(review.visibleRows.map(\.id) == [importB, importA])
+        #expect(review.selectedCount == 1)
+        #expect(review.commitConfirmation?.recordCount == 1)
+        review.setSelected(true, forCandidateID: importB)
+        #expect(review.selectedCount == 1)
+        review.selectStatementAccount(fixture.secondAccountID)
+        #expect(review.invalidRows.map(\.id) == [importB])
+        review.setResolution(
+            .transaction(categoryID: fixture.expenseCategoryID, note: "Repaired"),
+            forCandidateID: importB
+        )
+        #expect(review.invalidRows.isEmpty)
+        #expect(review.selectedCount == 1)
+        await review.commit()
+        #expect(review.phase == .saved(StatementImportCommitReport(createdTransactionCount: 1)))
+    }
+
+    @Test("Store failures do not label valid transactions invalid or discard selections")
+    func storeFailureKeepsValidSelections() async throws {
+        let fixture = try makeFixture()
+        defer { fixture.removeDefaults() }
+        let review = StatementImportReview(
+            preview: preview(stagedID: "store-failure"),
+            snapshot: fixture.snapshot, accountMapping: fixture.mapping,
+            complete: { _, _ in throw StatementImportCommitError.storeFailure },
+            retryCleanup: { _ in true }
+        )
+        review.selectStatementAccount(fixture.firstAccountID)
+        await review.commit()
+        #expect(review.phase == .failed(.storeFailure))
+        #expect(review.invalidRows.isEmpty)
+        #expect(review.selectedCount == 2)
+        #expect(review.commitConfirmation?.recordCount == 2)
+    }
+
+    @Test("An account removed during review prompts account selection instead of blaming rows")
+    func missingAccountAfterConfirmation() async throws {
+        let fixture = try makeFixture()
+        defer { fixture.removeDefaults() }
+        let review = StatementImportReview(
+            preview: preview(stagedID: "removed-account"),
+            snapshot: fixture.snapshot, accountMapping: fixture.mapping,
+            complete: { _, _ in throw StatementImportCommitError.accountUnavailable },
+            retryCleanup: { _ in true }
+        )
+        review.selectStatementAccount(fixture.firstAccountID)
+        await review.commit()
+        #expect(review.phase == .failed(.accountUnavailable))
+        #expect(review.statementAccountID == nil)
+        #expect(review.selectedCount == 0)
+        #expect(review.commitConfirmation == nil)
+    }
+
     private func makeReview(fixture: Fixture) -> StatementImportReview {
         StatementImportReview(
             preview: preview(stagedID: "review"),

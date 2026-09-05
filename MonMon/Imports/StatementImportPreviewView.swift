@@ -171,43 +171,78 @@ struct StatementImportPreviewView: View {
     }
 
     private func reviewContent(_ review: StatementImportReview) -> some View {
-        List {
-            summaryCard(review.statement)
-                .importReviewListRow(top: 16, bottom: 0)
+        ScrollViewReader { proxy in
+            List {
+                summaryCard(review.statement)
+                    .importReviewListRow(top: 16, bottom: 0)
 
-            statementAccountCard(review)
-                .importReviewListRow(top: 12, bottom: 0)
-
-            if !review.statement.issues.isEmpty {
-                issuesCard(review.statement.issues)
+                statementAccountCard(review)
                     .importReviewListRow(top: 12, bottom: 0)
-            }
 
-            commitStatusCard(review)
+                if !review.statement.issues.isEmpty {
+                    issuesCard(review.statement.issues)
+                        .importReviewListRow(top: 12, bottom: 0)
+                }
 
-            Section {
-                ForEach(Array(review.visibleRows.enumerated()), id: \.element.id) { index, row in
-                    candidateRow(row, index: index, review: review)
+                commitStatusCard(review)
+                    .id("import-review-status")
+
+                if !review.invalidRows.isEmpty {
+                    Section {
+                        Text(
+                            "These transactions will not be imported. Open a row to review its reason."
+                        )
+                        .font(.subheadline)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                        .importReviewListRow(top: 0, bottom: 12)
+                        ForEach(review.invalidRows) { row in
+                            candidateRow(
+                                row, index: review.rows.firstIndex { $0.id == row.id } ?? 0,
+                                review: review
+                            )
+                            .disabled(!review.isEditingAllowed)
+                            .importReviewListRow(top: 0, bottom: 12)
+                        }
+                    } header: {
+                        Text("Needs attention: \(review.invalidRows.count)")
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(MonMonTheme.danger)
+                            .textCase(nil)
+                    }
+                }
+
+                Section {
+                    ForEach(review.validRows) { row in
+                        candidateRow(
+                            row, index: review.rows.firstIndex { $0.id == row.id } ?? 0,
+                            review: review
+                        )
                         .disabled(!review.isEditingAllowed)
                         .importReviewListRow(top: 0, bottom: 12)
+                    }
+                } header: {
+                    HStack {
+                        Text("Transactions")
+                            .font(.title3.weight(.semibold))
+                        Spacer()
+                        Text("Selected: \(review.selectedCount)")
+                            .font(.subheadline)
+                    }
+                    .foregroundStyle(MonMonTheme.textPrimary)
+                    .textCase(nil)
                 }
-            } header: {
-                HStack {
-                    Text("Transactions")
-                        .font(.title3.weight(.semibold))
-                    Spacer()
-                    Text("Selected: \(review.selectedCount)")
-                        .font(.subheadline)
-                }
-                .foregroundStyle(MonMonTheme.textPrimary)
-                .textCase(nil)
             }
-        }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
-        .background(MonMonTheme.canvas)
-        .safeAreaInset(edge: .bottom) {
-            commitFooter(review)
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .background(MonMonTheme.canvas)
+            .safeAreaInset(edge: .bottom) {
+                commitFooter(review)
+            }
+            .onChange(of: review.phase) { _, phase in
+                if case .failed = phase {
+                    proxy.scrollTo("import-review-status", anchor: .top)
+                }
+            }
         }
     }
 
@@ -401,7 +436,7 @@ struct StatementImportPreviewView: View {
         case .failed(let failure):
             card {
                 VStack(alignment: .leading, spacing: 8) {
-                    Label("Couldn’t save this review", systemImage: "xmark.circle.fill")
+                    Label("Import stopped — nothing saved", systemImage: "xmark.circle.fill")
                         .font(.headline)
                         .foregroundStyle(MonMonTheme.danger)
 
@@ -409,9 +444,11 @@ struct StatementImportPreviewView: View {
                         .font(.subheadline)
                         .foregroundStyle(MonMonTheme.textSecondary)
 
-                    Text("Your choices are still here. Review them and try again.")
-                        .font(.caption)
-                        .foregroundStyle(MonMonTheme.textSecondary)
+                    Text(
+                        "No transactions from this attempt were saved. Your selections are still available below."
+                    )
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
                 }
             }
             .accessibilityIdentifier("statement-import-save-failed")
@@ -555,6 +592,8 @@ struct StatementImportPreviewView: View {
             case .source: title = "Not selected: invalid statement reference"
             case .amount: title = "Not selected: amount must be greater than zero"
             case .category: title = "Not selected: choose a valid category"
+            case .allocation:
+                title = "Cannot import income: fix budget jar allocations and reopen this report"
             }
             return RowStatus(
                 title: title, systemImage: "exclamationmark.circle.fill",
@@ -574,7 +613,7 @@ struct StatementImportPreviewView: View {
         switch row.resolution {
         case .transaction:
             return RowStatus(
-                title: "New transaction",
+                title: "Will be imported",
                 systemImage: "plus.circle.fill",
                 tint: MonMonTheme.bank
             )
@@ -699,14 +738,18 @@ struct StatementImportPreviewView: View {
         _ failure: StatementImportReviewFailure
     ) -> LocalizedStringKey {
         switch failure {
+        case .invalidRows(let count):
+            "\(count) transactions could not be imported and were unchecked. See Needs attention below. You can import the remaining selected transactions."
+        case .accountUnavailable:
+            "The selected account is no longer available. Choose a VND account and select the transactions to import."
         case .invalidReview:
-            "One or more choices are no longer valid. Review them before retrying."
+            "This report could not be validated. Close it and reopen it from the import inbox."
         case .staleReview:
-            "Your records changed while saving. Review the matches before retrying."
+            "Your records changed while saving. Close this report and reopen it to refresh the imported transactions."
         case .storeFailure:
-            "MonMon could not save the reviewed records. No partial import was kept."
+            "MonMon could not write to its data store. This does not mean a transaction is invalid. Try importing again."
         case .unknown:
-            "MonMon could not finish this import. No partial import was kept."
+            "MonMon could not finish this import. Try again, or close this report and reopen it."
         }
     }
 
