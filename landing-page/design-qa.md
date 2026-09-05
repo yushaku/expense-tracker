@@ -95,3 +95,19 @@ into a usable portfolio demonstration while retaining the lavender visual direct
   navigation still pass. No console errors or broken images.
 
 Final result remains passed.
+
+
+## Logo-green revision
+
+User requested green primary color. The earlier lavender palette is superseded.
+Primary #087f63, logo-inspired mint #32d6a0, white/pale-mint surfaces.
+Recolored the illustrative dashboard through ImageGen without changing data or
+layout. Source photo icon remains unchanged.
+
+Inspected updated reference-viewport and mobile asset captures. Softened the first
+mint background after visual review, then recaptured. No remaining visual issue.
+Desktop/mobile checks, all five asset groups, negative PnL, report periods, budget
+slider, dialog Escape/focus return and links pass with zero console errors or
+overflow at 1440/390/320 px. Swift lint, macOS unit tests and iOS compile passed.
+
+Final result remains passed.

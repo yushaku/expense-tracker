@@ -2,7 +2,8 @@
 
 Vietnamese landing page: **Quản lý tài sản. Làm chủ dòng tiền.**
 
-Lavender styling and a floating dashboard composition follow the user-selected visual reference.
+Emerald/mint colors match the MonMon logo. The floating dashboard composition
+follows the user-selected visual reference.
 
 Open `index.html` directly in a browser. The HTML embeds its image, CSS and
 JavaScript, works offline, and requires no build or package installation.
