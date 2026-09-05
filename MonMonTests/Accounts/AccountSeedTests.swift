@@ -106,8 +106,10 @@ struct AccountSeedTests {
         let container = try makeContainer()
         let context = container.mainContext
 
-        let account = AccountSeed.ensureUnassignedExists(in: context, createdAt: referenceDate)
+        let account = AccountSeed.ensureUnassignedExists(
+            in: context, createdAt: referenceDate, locale: Locale(identifier: "vi"))
 
+        #expect(account.name == "Cash")
         #expect(account.id == AccountSeed.unassignedID)
         #expect(try context.fetchCount(FetchDescriptor<CashAccount>()) == 1)
     }

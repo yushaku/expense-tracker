@@ -79,6 +79,9 @@
     "Follows your default expense category when it changes.": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tự dùng danh mục chi mặc định mới khi bạn thay đổi." } } }
     },
+    "Other": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khác" } } }
+    },
     "Unit": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đơn vị" } } }
     },

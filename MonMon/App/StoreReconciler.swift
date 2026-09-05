@@ -13,8 +13,8 @@ import SwiftData
 /// A draft can only check what the device can already see. Two devices that
 /// have not met yet both pass their own check, and the duplicate appears at the
 /// moment they meet. The clearest case needs no race at all: a second device
-/// installs, finds an empty store, seeds nine starter categories and the anchor
-/// account, and then synchronisation delivers the nine and the anchor the first
+/// installs, finds an empty store, seeds ten starter categories and the anchor
+/// account, and then synchronisation delivers the ten and the anchor the first
 /// device already had.
 ///
 /// So the rule is enforced twice: by the draft before a write, and by this
