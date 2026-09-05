@@ -1607,14 +1607,15 @@
           <div class="n-meta">api.coingecko.com · module: market-valuation</div>
         </div>
 
-        <div class="node unbuilt" id="sys-mcp" tabindex="0">
+        <div class="node" id="sys-mcp" tabindex="0">
           <div class="n-top">
             <span class="n-name">Read-only MCP server</span>
-            <span class="chip roadmap">Roadmap</span>
+            <span class="chip built">Built</span>
           </div>
           <p class="n-desc">
-            A macOS server exposing synchronized records to AI clients. Read operations
-            only &mdash; it can neither mutate a record nor execute a trade.
+            An embedded macOS stdio server exposing raw records from an App Group SQLite
+            snapshot after explicit consent. It has no CloudKit entitlement and can neither
+            mutate a business record nor execute a trade.
           </p>
           <div class="n-meta">module: mcp-readonly</div>
         </div>
@@ -2186,7 +2187,7 @@
       { from: 'sys-app', to: 'sys-vndirect', label: 'ticker only', dashed: false },
       { from: 'sys-app', to: 'sys-vang-today', label: 'type code only', dashed: false },
       { from: 'sys-app', to: 'sys-coingecko', label: 'coin id only', dashed: false },
-      { from: 'sys-mcp', to: 'sys-store', label: 'read-only', dashed: true }
+      { from: 'sys-app', to: 'sys-mcp', label: 'local SQLite snapshot', dashed: false }
     ]);
   })();
 </script>

@@ -10,6 +10,9 @@ struct MonMonApp: App {
     @State private var appRoute: AppRoute
     @State private var cloudSync = CloudSync()
     @State private var notificationCoordinator: NotificationCoordinator
+    #if os(macOS)
+        @State private var mcpAccessManager: MCPAccessManager
+    #endif
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -19,7 +22,6 @@ struct MonMonApp: App {
         _appLock = State(initialValue: appLock)
         _appRoute = State(initialValue: appRoute)
         _notificationCoordinator = State(initialValue: notificationCoordinator)
-
         let modelContainer: ModelContainer
         do {
             modelContainer = try ModelContainer(
@@ -68,6 +70,20 @@ struct MonMonApp: App {
             // loss than a launch that does not happen.
             assertionFailure("Recurring generation failed: \(error)")
         }
+
+        #if os(macOS)
+            do {
+                let configuration = try MCPRuntimeConfiguration.current()
+                _mcpAccessManager = State(
+                    initialValue: try MCPAccessManager(
+                        configuration: configuration,
+                        sourceContext: modelContainer.mainContext
+                    )
+                )
+            } catch {
+                fatalError("MCP configuration failed")
+            }
+        #endif
     }
 
     private static var modelConfiguration: ModelConfiguration {
@@ -96,6 +112,9 @@ struct MonMonApp: App {
                     cloudSync.startObserving()
                     await notificationCoordinator.reconcile(in: container.mainContext)
                 }
+                #if os(macOS)
+                    .environment(mcpAccessManager)
+                #endif
                 // Duplicates arrive when synchronisation lands, which is after
                 // launch, so reconciling only in `init` would miss the case it
                 // exists for. Coming back to the app is the next moment the
@@ -112,21 +131,11 @@ struct MonMonApp: App {
                     Task {
                         await notificationCoordinator.reconcile(in: container.mainContext)
                     }
+                    #if os(macOS)
+                        mcpAccessManager.refreshSnapshotIfAllowed()
+                    #endif
                 }
         }
         .modelContainer(container)
-    }
-}
-
-/// Process-wide facts that are not about money, only about how this launch
-/// was started.
-enum MonMonProcess {
-    /// `xcodebuild test` injects this when MonMon.app is the Mac test host.
-    /// Under that path the binary is usually unsigned (`CODE_SIGNING_ALLOWED=NO`),
-    /// so opening an App Group container trips Sequoia's "access data from
-    /// other apps" prompt on every run. Skip those calls for the host launch;
-    /// tests that need a group inject their own suite or URL.
-    static var isRunningUnitTests: Bool {
-        ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
     }
 }

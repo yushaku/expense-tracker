@@ -29,6 +29,9 @@ struct SettingsView: View {
                         instrumentsCard
                         securityCard
                         backupCard
+                        #if os(macOS)
+                            MCPSettingsCard()
+                        #endif
                         aboutCard
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
