@@ -264,7 +264,7 @@ struct TPBankPDFStatementParserTests {
         let statement = try parser.parse(data)
 
         #expect(statement.issues.contains(.ambiguousAmount(page: 1, row: 2)))
-        #expect(statement.issues.contains(.totalsMismatch))
+        #expect(!statement.issues.contains(.totalsMismatch))
         #expect(!statement.isComplete)
     }
 
@@ -296,7 +296,7 @@ struct TPBankPDFStatementParserTests {
         #expect(!statement.isComplete)
     }
 
-    @Test("Declared totals that exceed parsed rows create a totals mismatch")
+    @Test("Declared totals do not prevent importing valid transaction rows")
     func reportsTotalsMismatch() throws {
         let data = TPBankPDFTestFixture.statement(
             rows: [
@@ -313,8 +313,8 @@ struct TPBankPDFStatementParserTests {
 
         let statement = try parser.parse(data)
 
-        #expect(statement.issues.contains(.totalsMismatch))
-        #expect(!statement.isComplete)
+        #expect(!statement.issues.contains(.totalsMismatch))
+        #expect(statement.isComplete)
     }
 
     @Test("A note containing Total does not shadow the footer")

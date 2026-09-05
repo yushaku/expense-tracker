@@ -66,10 +66,13 @@ struct StatementImportReviewTests {
         #expect(confirmation.recordCount == 0)
         #expect(confirmation.summary.alreadyImportedCount == 2)
         #expect(confirmation.removesReviewedStatement)
+        #expect(review.selectedCount == 0)
+        review.setSelected(true, forCandidateID: importA)
+        #expect(review.selectedCount == 0)
     }
 
-    @Test("Skipped rows leave the active list and return when restored")
-    func skippedRowsAreHiddenUntilRestored() throws {
+    @Test("Unchecked rows stay visible and can be restored")
+    func skippedRowsRemainVisible() throws {
         let fixture = try makeFixture()
         defer { fixture.removeDefaults() }
         let review = makeReview(fixture: fixture)
@@ -78,13 +81,14 @@ struct StatementImportReviewTests {
             review.rows.first { $0.id == importA }?.resolution
         )
 
-        review.setResolution(.skip, forCandidateID: importA)
+        review.setSelected(false, forCandidateID: importA)
 
-        #expect(review.visibleRows.map(\.id) == [importB])
+        #expect(review.visibleRows.map(\.id) == [importA, importB])
         #expect(review.rows.count == 2)
         #expect(review.summary.skippedCount == 1)
 
-        review.setResolution(originalResolution, forCandidateID: importA)
+        #expect(review.rows.first { $0.id == importA }?.resolution == originalResolution)
+        review.setSelected(true, forCandidateID: importA)
 
         #expect(review.visibleRows.map(\.id) == [importA, importB])
         #expect(review.summary.skippedCount == 0)
@@ -251,7 +255,7 @@ struct StatementImportReviewTests {
 
         let savedRows = review.rows
         let savedAccountID = review.statementAccountID
-        review.setResolution(.skip, forCandidateID: importA)
+        review.setSelected(false, forCandidateID: importA)
         review.selectStatementAccount(fixture.secondAccountID)
 
         #expect(review.rows == savedRows)
@@ -336,6 +340,47 @@ struct StatementImportReviewTests {
 
         #expect(review.phase == .failed(.staleReview))
         #expect(review.rows == choices)
+    }
+
+    @Test("Checkboxes default on and preserve edits and visibility across account changes")
+    func checkboxSelectionPreservesEdits() throws {
+        let fixture = try makeFixture()
+        defer { fixture.removeDefaults() }
+        let review = makeReview(fixture: fixture)
+        #expect(review.rows.allSatisfy { $0.isSelected })
+        review.selectStatementAccount(fixture.firstAccountID)
+        let edited = ImportRowResolution.transaction(
+            categoryID: fixture.expenseCategoryID, note: "Edited note")
+        review.setResolution(edited, forCandidateID: importA)
+        review.setSelected(false, forCandidateID: importA)
+        review.selectStatementAccount(fixture.secondAccountID)
+        #expect(review.visibleRows.count == 2)
+        #expect(review.selectedCount == 1)
+        #expect(review.commitConfirmation?.recordCount == 1)
+        #expect(review.rows.first { $0.id == importA }?.resolution == edited)
+        review.setSelected(true, forCandidateID: importA)
+        #expect(review.selectedCount == 2)
+        #expect(review.rows.first { $0.id == importA }?.resolution == edited)
+        review.setSelected(false, forCandidateID: importA)
+        review.setSelected(false, forCandidateID: importB)
+        #expect(review.commitConfirmation == nil)
+        #expect(review.visibleRows.count == 2)
+    }
+
+    @Test("Unchecked unresolved rows do not block selected transactions")
+    func unselectedRowsDoNotRequireResolution() throws {
+        let fixture = try makeFixture()
+        defer { fixture.removeDefaults() }
+        let review = makeReview(fixture: fixture)
+        review.selectStatementAccount(fixture.firstAccountID)
+        review.setResolution(.unresolved, forCandidateID: importA)
+        #expect(!review.isCommitReady)
+        review.setSelected(false, forCandidateID: importA)
+        #expect(review.isCommitReady)
+        #expect(review.summary.unresolvedCount == 0)
+        #expect(review.summary.skippedCount == 1)
+        review.setSelected(true, forCandidateID: importA)
+        #expect(!review.isCommitReady)
     }
 
     private func makeReview(fixture: Fixture) -> StatementImportReview {
@@ -424,7 +469,7 @@ struct StatementImportReviewTests {
                 candidates: candidates,
                 declaredTotals: isComplete ? totals : nil,
                 parsedTotals: totals,
-                issues: []
+                issues: isComplete ? [] : [.invalidRow(page: 1, row: 1)]
             )
         )
     }

@@ -117,21 +117,19 @@ struct StatementImportCommitService {
             calendar: StatementImportReconciler.vietnamCalendar
         )
 
-        let transactionByID = Dictionary(uniqueKeysWithValues: transactions.map { ($0.id, $0) })
-        let transferByID = Dictionary(uniqueKeysWithValues: transfers.map { ($0.id, $0) })
         let categoryByID = Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0) })
         var newTransactions: [MoneyTransaction] = []
-        var newTransfers: [AccountTransfer] = []
-        var linkedTransactions: [(MoneyTransaction, ImportSourceID)] = []
-        var linkedTransfers: [(AccountTransfer, TransactionKind, ImportSourceID)] = []
-        var linkedTransactionIDs: Set<UUID> = []
-        var linkedTransferIDs: Set<UUID> = []
         var report = StatementImportCommitReport()
         let createdAt = Date()
 
         for (requestedRow, currentRow) in zip(request.rows, current.rows) {
             if currentRow.disposition.isExact {
                 report.alreadyImportedCount += 1
+                continue
+            }
+
+            guard requestedRow.isSelected else {
+                report.skippedCount += 1
                 continue
             }
 
@@ -167,79 +165,9 @@ struct StatementImportCommitService {
                 newTransactions.append(transaction)
                 report.createdTransactionCount += 1
 
-            case let .linkTransaction(transactionID):
-                guard case let .possibleMatches(transactionIDs, _) = currentRow.disposition,
-                    transactionIDs.contains(transactionID),
-                    linkedTransactionIDs.insert(transactionID).inserted,
-                    let transaction = transactionByID[transactionID],
-                    transaction.sourceImportID == nil
-                else {
-                    throw StatementImportCommitError.staleReview
-                }
-                linkedTransactions.append((transaction, sourceID))
-                report.linkedCount += 1
-
-            case let .newTransfer(otherAccountID, note):
-                guard otherAccountID != request.statementAccountID,
-                    accounts.contains(where: {
-                        $0.id == otherAccountID && $0.currencyCode == VNDCurrency.code
-                    })
-                else {
-                    throw StatementImportCommitError.invalidRequest
-                }
-                let endpoints: (source: UUID, destination: UUID)
-                switch requestedRow.candidate.kind {
-                case .expense:
-                    endpoints = (request.statementAccountID, otherAccountID)
-                case .income:
-                    endpoints = (otherAccountID, request.statementAccountID)
-                }
-                let draft = TransferDraft(
-                    amountText: VNDCurrency.formatPlain(requestedRow.candidate.amount),
-                    occurredAt: requestedRow.candidate.occurredAt,
-                    note: note,
-                    sourceAccountID: endpoints.source,
-                    destinationAccountID: endpoints.destination
-                )
-                let transfer: AccountTransfer
-                do {
-                    transfer = try draft.makeTransfer(
-                        id: UUID(),
-                        createdAt: createdAt,
-                        availableSourceBalance: nil
-                    )
-                } catch {
-                    throw StatementImportCommitError.invalidRequest
-                }
-                switch requestedRow.candidate.kind {
-                case .expense:
-                    transfer.sourceAccountImportID = sourceID.rawValue
-                case .income:
-                    transfer.destinationAccountImportID = sourceID.rawValue
-                }
-                newTransfers.append(transfer)
-                report.createdTransferCount += 1
-
-            case let .linkTransfer(transferID):
-                guard case let .possibleMatches(_, transferIDs) = currentRow.disposition,
-                    transferIDs.contains(transferID),
-                    linkedTransferIDs.insert(transferID).inserted,
-                    let transfer = transferByID[transferID]
-                else {
-                    throw StatementImportCommitError.staleReview
-                }
-                switch requestedRow.candidate.kind {
-                case .expense:
-                    guard transfer.sourceAccountImportID == nil else {
-                        throw StatementImportCommitError.staleReview
-                    }
-                case .income:
-                    guard transfer.destinationAccountImportID == nil else {
-                        throw StatementImportCommitError.staleReview
-                    }
-                }
-                linkedTransfers.append((transfer, requestedRow.candidate.kind, sourceID))
-                report.linkedCount += 1
+            case .newTransfer, .linkTransaction, .linkTransfer:
+                // Only transaction creation is supported, including for stale review requests.
+                throw StatementImportCommitError.invalidRequest
 
             case .skip:
                 report.skippedCount += 1
@@ -255,23 +183,7 @@ struct StatementImportCommitService {
         for transaction in newTransactions {
             context.insert(transaction)
         }
-        for transfer in newTransfers {
-            context.insert(transfer)
-        }
-        for (transaction, sourceID) in linkedTransactions {
-            transaction.sourceImportID = sourceID.rawValue
-        }
-        for (transfer, kind, sourceID) in linkedTransfers {
-            switch kind {
-            case .expense:
-                transfer.sourceAccountImportID = sourceID.rawValue
-            case .income:
-                transfer.destinationAccountImportID = sourceID.rawValue
-            }
-        }
-        if !newTransactions.isEmpty || !newTransfers.isEmpty || !linkedTransactions.isEmpty
-            || !linkedTransfers.isEmpty
-        {
+        if !newTransactions.isEmpty {
             try save(context)
         }
 

@@ -40,7 +40,8 @@ struct ParsedBankStatement: Sendable, Equatable {
     let issues: [BankStatementIssue]
 
     var isComplete: Bool {
-        issues.isEmpty && declaredTotals == parsedTotals
+        // Import the report's rows, without reconciling bank totals or account balances.
+        issues.allSatisfy { $0 == .totalsMismatch }
     }
 }
 

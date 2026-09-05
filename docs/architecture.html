@@ -1665,17 +1665,17 @@
       </li>
       <li class="import-step">
         <h3>Reconcile current data</h3>
-        <p>Stable candidate fingerprints find exact imports first; amount, day, account and kind then surface possible transaction or transfer matches.</p>
+        <p>Stable candidate fingerprints identify previously imported transactions and legacy transfers. Possible amount/day matches remain new transactions; the owner can uncheck them.</p>
         <div class="n-meta">StatementImportReconciler · no writes</div>
       </li>
       <li class="import-step">
         <h3>Owner resolves rows</h3>
-        <p>Each row becomes a new transaction, a new transfer, a link to an existing record, a skip, or already imported. Unresolved rows block commit.</p>
+        <p>New rows are selected by default and create income/expense transactions. Checkboxes exclude rows without hiding them or losing category/note edits. Only selected unresolved rows block commit; balances and aggregate statement totals are not reconciled.</p>
         <div class="n-meta">StatementImportReview · account + category checks</div>
       </li>
       <li class="import-step">
         <h3>Recheck, save, clean up</h3>
-        <p>A fresh context repeats reconciliation to reject stale reviews, saves all financial changes once, remembers the bank-account mapping, then removes the staged PDF.</p>
+        <p>A fresh context rechecks provenance and validates the selected transactions, saves them once, remembers the bank-account mapping, then removes the staged PDF. No transfer or link action is accepted.</p>
         <div class="n-meta">CommitService → SwiftData → UserDefaults → inbox cleanup</div>
       </li>
     </ol>

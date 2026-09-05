@@ -31,7 +31,6 @@ struct StatementImportPreviewView: View {
     @State private var isRemoving = false
     @State private var review: StatementImportReview?
     @State private var editorSelection: RowEditorSelection?
-    @State private var lastSkipped: SkippedUndo?
     @State private var commitConfirmation: StatementImportCommitConfirmation?
 
     var body: some View {
@@ -104,16 +103,12 @@ struct StatementImportPreviewView: View {
                 StatementImportRowEditorView(
                     review: review,
                     rowIndex: rowIndex,
-                    accounts: accounts,
-                    categories: categories,
-                    transactions: transactions,
-                    transfers: transfers
+                    categories: categories
                 )
             }
         }
         .onDisappear {
             editorSelection = nil
-            lastSkipped = nil
             commitConfirmation = nil
             review = nil
             inbox.clearPreview()
@@ -191,49 +186,28 @@ struct StatementImportPreviewView: View {
             commitStatusCard(review)
 
             Section {
-                if review.visibleRows.isEmpty {
-                    Text("All transactions are skipped.")
-                        .font(.subheadline)
-                        .foregroundStyle(MonMonTheme.textSecondary)
-                        .frame(maxWidth: .infinity, minHeight: 68, alignment: .center)
-                        .importReviewListRow(top: 0, bottom: 16)
-                } else {
-                    ForEach(Array(review.visibleRows.enumerated()), id: \.element.id) {
-                        index,
-                        row in
-                        candidateRow(row, index: index)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                if !row.disposition.isExact && review.isEditingAllowed {
-                                    Button {
-                                        skip(row, in: review)
-                                    } label: {
-                                        Label("Skip", systemImage: "forward.end.fill")
-                                    }
-                                    .tint(MonMonTheme.danger)
-                                    .accessibilityIdentifier("skip-import-candidate-\(index)")
-                                }
-                            }
-                            .disabled(!review.isEditingAllowed)
-                            .importReviewListRow(top: 0, bottom: 12)
-                    }
+                ForEach(Array(review.visibleRows.enumerated()), id: \.element.id) { index, row in
+                    candidateRow(row, index: index, review: review)
+                        .disabled(!review.isEditingAllowed)
+                        .importReviewListRow(top: 0, bottom: 12)
                 }
             } header: {
-                Text("Transactions")
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(MonMonTheme.textPrimary)
-                    .textCase(nil)
+                HStack {
+                    Text("Transactions")
+                        .font(.title3.weight(.semibold))
+                    Spacer()
+                    Text("Selected: \(review.selectedCount)")
+                        .font(.subheadline)
+                }
+                .foregroundStyle(MonMonTheme.textPrimary)
+                .textCase(nil)
             }
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .background(MonMonTheme.canvas)
         .safeAreaInset(edge: .bottom) {
-            VStack(spacing: 0) {
-                if let skipped = validUndo(in: review), review.isEditingAllowed {
-                    undoBanner(skipped, in: review)
-                }
-                commitFooter(review)
-            }
+            commitFooter(review)
         }
     }
 
@@ -262,7 +236,7 @@ struct StatementImportPreviewView: View {
 
                 if review.statementAccountID == nil {
                     Label(
-                        "Choose an account to reconcile this statement.",
+                        "Choose an account for the imported transactions.",
                         systemImage: "exclamationmark.circle.fill"
                     )
                     .font(.caption)
@@ -445,120 +419,72 @@ struct StatementImportPreviewView: View {
         }
     }
 
-    private func candidateRow(_ row: ReconciledImportRow, index: Int) -> some View {
+    private func candidateRow(
+        _ row: ReconciledImportRow, index: Int, review: StatementImportReview
+    ) -> some View {
         let candidate = row.candidate
         let status = rowStatus(row)
-        return Button {
-            editorSelection = RowEditorSelection(id: row.id)
-        } label: {
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: candidate.kind.symbolName)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(
-                        candidate.kind == .income ? MonMonTheme.gain : MonMonTheme.danger
-                    )
-                    .frame(width: 36, height: 36)
-                    .background(
-                        (candidate.kind == .income ? MonMonTheme.gain : MonMonTheme.danger)
-                            .opacity(0.16),
-                        in: RoundedRectangle(cornerRadius: 10)
-                    )
-                    .accessibilityHidden(true)
+        return HStack(alignment: .top, spacing: 0) {
+            Button {
+                review.setSelected(!row.isSelected, forCandidateID: row.id)
+            } label: {
+                Image(systemName: row.isSelected ? "checkmark.square.fill" : "square")
+                    .font(.title2)
+                    .foregroundStyle(row.isSelected ? MonMonTheme.bank : MonMonTheme.textSecondary)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(row.disposition.isExact)
+            .accessibilityLabel("Import transaction: \(candidate.note)")
+            .accessibilityValue(row.isSelected ? Text("Selected") : Text("Not selected"))
+            .accessibilityAddTraits(row.isSelected ? [.isSelected] : [])
+            .accessibilityIdentifier("select-import-candidate-\(index)")
 
-                VStack(alignment: .leading, spacing: 5) {
+            Button {
+                editorSelection = RowEditorSelection(id: row.id)
+            } label: {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text("\(candidate.kind.signLabel)\(VNDCurrency.format(candidate.amount))")
+                            .font(.subheadline.weight(.semibold))
+                            .monospacedDigit()
+                            .foregroundStyle(
+                                candidate.kind == .income ? MonMonTheme.gain : MonMonTheme.danger
+                            )
+                        Spacer(minLength: 0)
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(MonMonTheme.textMuted)
+                            .accessibilityHidden(true)
+                    }
                     Text(candidate.note.isEmpty ? "No description" : candidate.note)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(MonMonTheme.textPrimary)
-
                     Label(status.title, systemImage: status.systemImage)
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(status.tint)
-
                     Text(dateFormat.dateTime(candidate.occurredAt, in: locale))
                         .font(.caption)
                         .foregroundStyle(MonMonTheme.textSecondary)
-
                     Text("Reference \(candidate.sourceReference) · Page \(candidate.sourcePage)")
                         .font(.caption2)
                         .foregroundStyle(MonMonTheme.textMuted)
-                        .textSelection(.enabled)
                 }
-
-                Spacer(minLength: 8)
-
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("\(candidate.kind.signLabel)\(VNDCurrency.format(candidate.amount))")
-                        .font(.subheadline.weight(.semibold))
-                        .monospacedDigit()
-                        .foregroundStyle(
-                            candidate.kind == .income ? MonMonTheme.gain : MonMonTheme.danger
-                        )
-
-                    Image(systemName: "chevron.right")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(MonMonTheme.textMuted)
-                        .accessibilityHidden(true)
-                }
+                .frame(maxWidth: .infinity, minHeight: 68, alignment: .leading)
+                .contentShape(Rectangle())
             }
-            .padding(14)
-            .frame(minHeight: 68)
-            .contentShape(Rectangle())
+            .buttonStyle(.plain)
+            .accessibilityElement(children: .combine)
+            .accessibilityHint("Edit category and note")
+            .accessibilityIdentifier("import-candidate-\(index)")
         }
-        .buttonStyle(.plain)
+        .padding(14)
         .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 16))
         .overlay {
             RoundedRectangle(cornerRadius: 16)
                 .stroke(MonMonTheme.border, lineWidth: 1)
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityHint("Opens resolution options")
-        .accessibilityIdentifier("import-candidate-\(index)")
-    }
-
-    private func skip(_ row: ReconciledImportRow, in review: StatementImportReview) {
-        guard !row.disposition.isExact else { return }
-        lastSkipped = SkippedUndo(candidateID: row.id, previousResolution: row.resolution)
-        withAnimation {
-            review.setResolution(.skip, forCandidateID: row.id)
-        }
-    }
-
-    private func validUndo(in review: StatementImportReview) -> SkippedUndo? {
-        guard let lastSkipped,
-            let row = review.rows.first(where: { $0.id == lastSkipped.candidateID }),
-            case .skip = row.resolution
-        else {
-            return nil
-        }
-        return lastSkipped
-    }
-
-    private func undoBanner(
-        _ skipped: SkippedUndo,
-        in review: StatementImportReview
-    ) -> some View {
-        HStack(spacing: 12) {
-            Label("Transaction skipped", systemImage: "forward.end.circle.fill")
-                .font(.subheadline)
-
-            Spacer(minLength: 8)
-
-            Button("Undo") {
-                withAnimation {
-                    review.setResolution(
-                        skipped.previousResolution,
-                        forCandidateID: skipped.candidateID
-                    )
-                    lastSkipped = nil
-                }
-            }
-            .font(.subheadline.weight(.semibold))
-            .frame(minHeight: 44)
-            .accessibilityIdentifier("undo-skip-import-candidate")
-        }
-        .padding(.horizontal, 20)
-        .background(.ultraThinMaterial)
-        .accessibilityIdentifier("import-skip-undo-banner")
     }
 
     private func commitFooter(_ review: StatementImportReview) -> some View {
@@ -629,6 +555,10 @@ struct StatementImportPreviewView: View {
                 tint: MonMonTheme.gain
             )
         }
+        if !row.isSelected {
+            return RowStatus(
+                title: "Not selected", systemImage: "minus.circle", tint: MonMonTheme.textSecondary)
+        }
         switch row.resolution {
         case .transaction:
             return RowStatus(
@@ -636,18 +566,10 @@ struct StatementImportPreviewView: View {
                 systemImage: "plus.circle.fill",
                 tint: MonMonTheme.bank
             )
-        case .newTransfer:
+        case .newTransfer, .linkTransaction, .linkTransfer:
             return RowStatus(
-                title: "Transfer",
-                systemImage: "arrow.left.arrow.right.circle.fill",
-                tint: MonMonTheme.bank
-            )
-        case .linkTransaction, .linkTransfer:
-            return RowStatus(
-                title: "Link existing record",
-                systemImage: "link.circle.fill",
-                tint: MonMonTheme.bank
-            )
+                title: "Needs attention", systemImage: "exclamationmark.circle.fill",
+                tint: MonMonTheme.danger)
         case .skip:
             return RowStatus(
                 title: "Skipped",
@@ -661,17 +583,9 @@ struct StatementImportPreviewView: View {
                 tint: MonMonTheme.gain
             )
         case .unresolved:
-            let hasPossibleMatches: Bool
-            if case .possibleMatches = row.disposition {
-                hasPossibleMatches = true
-            } else {
-                hasPossibleMatches = false
-            }
             return RowStatus(
-                title: hasPossibleMatches ? "Possible duplicate" : "Needs attention",
-                systemImage: "exclamationmark.circle.fill",
-                tint: MonMonTheme.danger
-            )
+                title: "Choose category", systemImage: "exclamationmark.circle.fill",
+                tint: MonMonTheme.danger)
         }
     }
 
@@ -701,14 +615,14 @@ struct StatementImportPreviewView: View {
     private func primaryCommitTitle(
         _ confirmation: StatementImportCommitConfirmation?
     ) -> LocalizedStringKey {
-        guard let confirmation else { return "Import reviewed records" }
+        guard let confirmation else { return "Import selected transactions" }
         if confirmation.removesReviewedStatement {
             return "Remove reviewed statement"
         }
         if confirmation.recordCount == 0 {
             return "Finish review"
         }
-        return "Import \(confirmation.recordCount) records"
+        return "Import \(confirmation.recordCount) transactions"
     }
 
     private func commitActionTitle(
@@ -716,7 +630,7 @@ struct StatementImportPreviewView: View {
     ) -> LocalizedStringKey {
         confirmation.recordCount == 0
             ? "Finish review"
-            : "Import \(confirmation.recordCount) records"
+            : "Import \(confirmation.recordCount) transactions"
     }
 
     private func primaryCommitSystemImage(
@@ -734,8 +648,6 @@ struct StatementImportPreviewView: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("New transactions: \(confirmation.summary.newTransactionCount)")
-            Text("New transfers: \(confirmation.summary.newTransferCount)")
-            Text("Linked records: \(confirmation.summary.linkedCount)")
             Text("Skipped: \(confirmation.summary.skippedCount)")
             if confirmation.summary.alreadyImportedCount > 0 {
                 Text("Already imported: \(confirmation.summary.alreadyImportedCount)")
@@ -755,6 +667,9 @@ struct StatementImportPreviewView: View {
         }
         if review.statementAccountID == nil {
             return "Choose the statement account to continue."
+        }
+        if review.selectedCount == 0 && !review.rows.allSatisfy(\.disposition.isExact) {
+            return "Select at least one transaction to import."
         }
         if review.summary.unresolvedCount == 1 {
             return "1 transaction needs attention."
@@ -860,7 +775,6 @@ struct StatementImportPreviewView: View {
         let mapping = StatementAccountMapping(defaults: .standard)
         let inboxService = try? StatementImportInboxService.live()
         let commitService = StatementImportCommitService(container: modelContext.container)
-        lastSkipped = nil
         review = StatementImportReview(
             preview: preview,
             snapshot: snapshot,
@@ -929,11 +843,6 @@ struct StatementImportPreviewView: View {
 
     private struct RowEditorSelection: Identifiable {
         let id: String
-    }
-
-    private struct SkippedUndo {
-        let candidateID: String
-        let previousResolution: ImportRowResolution
     }
 
     private struct RowStatus {

@@ -18,8 +18,8 @@ struct BankStatementParsingTests {
         #expect(income.signedAmount == 500_000)
     }
 
-    @Test("A parsed statement is complete only when issues are absent and totals match")
-    func completenessRequiresExactReconciliation() {
+    @Test("Only row parsing issues block import; aggregate totals are informational")
+    func completenessIgnoresAggregateTotals() {
         let totals = BankStatementTotals(debit: 125_000, credit: 500_000)
         let period = occurredAt...occurredAt.addingTimeInterval(86_400)
 
@@ -43,7 +43,7 @@ struct BankStatementParsingTests {
             parsedTotals: BankStatementTotals(debit: 124_000, credit: 500_000),
             issues: []
         )
-        let uncertain = ParsedBankStatement(
+        let legacyTotalsIssue = ParsedBankStatement(
             bank: .tpBank,
             accountLastFour: "9012",
             currencyCode: "VND",
@@ -54,9 +54,15 @@ struct BankStatementParsingTests {
             issues: [.totalsMismatch]
         )
 
+        let malformed = ParsedBankStatement(
+            bank: .tpBank, accountLastFour: "9012", currencyCode: "VND", period: period,
+            candidates: [], declaredTotals: nil, parsedTotals: totals,
+            issues: [.invalidRow(page: 1, row: 1)]
+        )
+        #expect(!malformed.isComplete)
         #expect(complete.isComplete)
-        #expect(!mismatched.isComplete)
-        #expect(!uncertain.isComplete)
+        #expect(mismatched.isComplete)
+        #expect(legacyTotalsIssue.isComplete)
     }
 
     @Test("Candidate identity is deterministic and does not expose source identifiers")
