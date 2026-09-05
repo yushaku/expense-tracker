@@ -411,11 +411,11 @@ struct TransactionListView: View {
     }
 
     private var categoryNames: [UUID: String] {
-        Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0.name) })
+        Dictionary(firstWins: categories.map { ($0.id, $0.name) })
     }
 
     private var accountNames: [UUID: String] {
-        Dictionary(uniqueKeysWithValues: accounts.map { ($0.id, $0.name) })
+        Dictionary(firstWins: accounts.map { ($0.id, $0.name) })
     }
 
     private var featuredTrip: TripWorkspace? {

@@ -25,7 +25,7 @@ enum GoalCommitment {
         capacityByJar: [UUID: Decimal]
     ) -> [UUID: GoalCommitmentSnapshot] {
         Dictionary(
-            uniqueKeysWithValues: jarIDs.map { jarID in
+            firstWins: jarIDs.map { jarID in
                 (
                     jarID,
                     snapshot(

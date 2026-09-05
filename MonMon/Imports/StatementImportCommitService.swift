@@ -129,7 +129,7 @@ struct StatementImportCommitService {
             calendar: StatementImportReconciler.vietnamCalendar
         )
 
-        let categoryByID = Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0) })
+        let categoryByID = Dictionary(firstWins: categories.map { ($0.id, $0) })
         var newTransactions: [MoneyTransaction] = []
         var failures: [StatementImportRowFailure] = []
         var report = StatementImportCommitReport()

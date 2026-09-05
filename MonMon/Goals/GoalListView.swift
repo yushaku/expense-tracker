@@ -275,7 +275,7 @@ private struct TripWorkspaceSection: View {
         self.title = title
         self.workspaces = workspaces
         snapshots = Dictionary(
-            uniqueKeysWithValues: workspaces.map { workspace in
+            firstWins: workspaces.map { workspace in
                 (
                     workspace.id,
                     TripSummary.snapshot(
@@ -351,7 +351,7 @@ private struct GoalCollection: View {
     ) {
         self.title = title
         self.goals = goals
-        jarNames = Dictionary(uniqueKeysWithValues: jars.map { ($0.id, $0.name) })
+        jarNames = Dictionary(firstWins: jars.map { ($0.id, $0.name) })
         self.asOf = asOf
         self.onSelect = onSelect
     }

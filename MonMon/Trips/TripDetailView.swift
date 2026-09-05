@@ -162,8 +162,8 @@ private struct TripDetailContent: View {
             workspaceID: workspace.id,
             in: transactions
         )
-        categoriesByID = Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0) })
-        accountsByID = Dictionary(uniqueKeysWithValues: accounts.map { ($0.id, $0) })
+        categoriesByID = Dictionary(firstWins: categories.map { ($0.id, $0) })
+        accountsByID = Dictionary(firstWins: accounts.map { ($0.id, $0) })
         self.onAddExpense = onAddExpense
         self.onEditTransaction = onEditTransaction
         self.onComplete = onComplete
