@@ -45,7 +45,7 @@ MonMon is a private personal-finance app for iPhone and Mac, built with SwiftUI 
 
 - **Quick capture** — an App Intent and Siri phrase that parses a spoken or typed line into a transaction. A clean parse is saved outright; an incomplete one is staged for review rather than guessed at.
 - **Quick-expense widget** — configurable one-tap presets on the Home Screen.
-- **Bank-statement import** — a PDF shared from the bank app lands in the extension's inbox, is parsed off the main thread, reconciled against existing data, reviewed row by row, and committed in a single atomic save. Every imported row keeps a fingerprint, so re-importing the same statement cannot duplicate it.
+- **Bank-statement import** — a PDF shared from the bank app lands in the extension's inbox and is parsed off the main thread. New rows are checked by default; uncheck any row to leave it out, or tap its details to edit category and note. Import creates income/expense transactions only, without reconciling account balances or statement totals. The selected rows are committed in one atomic save. Existing import fingerprints prevent duplicates when the same report is imported again.
 
 ### Reports and review
 

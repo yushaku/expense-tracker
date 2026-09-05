@@ -36,9 +36,6 @@ struct TPBankPDFStatementParser: BankStatementParsing {
             credit: candidates.filter { $0.kind == .income }.reduce(0) { $0 + $1.amount }
         )
         let declaredTotals = declaredTotals(in: document)
-        if let declaredTotals, declaredTotals != totals {
-            issues.append(.totalsMismatch)
-        }
         return ParsedBankStatement(
             bank: metadata.bank,
             accountLastFour: metadata.accountLastFour,

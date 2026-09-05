@@ -101,6 +101,19 @@ struct ReconciledImportRow: Identifiable, Equatable, Sendable {
     let candidate: BankTransactionCandidate
     let disposition: ImportCandidateDisposition
     var resolution: ImportRowResolution
+    var isSelected: Bool
+
+    init(
+        candidate: BankTransactionCandidate,
+        disposition: ImportCandidateDisposition,
+        resolution: ImportRowResolution,
+        isSelected: Bool? = nil
+    ) {
+        self.candidate = candidate
+        self.disposition = disposition
+        self.resolution = resolution
+        self.isSelected = isSelected ?? (!disposition.isExact && resolution != .skip)
+    }
 }
 
 struct StatementImportSummary: Equatable, Sendable {
@@ -115,6 +128,11 @@ struct StatementImportSummary: Equatable, Sendable {
         for row in rows {
             if row.disposition.isExact {
                 alreadyImportedCount += 1
+                continue
+            }
+
+            guard row.isSelected else {
+                skippedCount += 1
                 continue
             }
 
@@ -233,6 +251,14 @@ enum StatementImportReconciler {
             )
         }
 
+        let categoryID = defaults.categoryID(for: candidate.kind).flatMap { defaultID in
+            categories.first { $0.id == defaultID && $0.kind == candidate.kind }?.id
+        }
+        let defaultResolution: ImportRowResolution =
+            categoryID.map {
+                .transaction(categoryID: $0, note: candidate.note)
+            } ?? .unresolved
+
         let transactionIDs = possibleTransactionIDs(
             for: candidate,
             statementAccountID: statementAccountID,
@@ -254,19 +280,14 @@ enum StatementImportReconciler {
                     transactionIDs: transactionIDs,
                     transferIDs: transferIDs
                 ),
-                resolution: .unresolved
+                resolution: defaultResolution
             )
         }
 
-        let categoryID = defaults.categoryID(for: candidate.kind).flatMap { defaultID in
-            categories.first { $0.id == defaultID && $0.kind == candidate.kind }?.id
-        }
         return ReconciledImportRow(
             candidate: candidate,
             disposition: .newTransaction,
-            resolution: categoryID.map {
-                .transaction(categoryID: $0, note: candidate.note)
-            } ?? .unresolved
+            resolution: defaultResolution
         )
     }
 

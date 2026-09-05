@@ -94,13 +94,10 @@ final class StatementImportReview {
         StatementImportSummary(rows: rows)
     }
 
-    var visibleRows: [ReconciledImportRow] {
-        rows.filter {
-            if case .skip = $0.resolution {
-                return false
-            }
-            return true
-        }
+    var visibleRows: [ReconciledImportRow] { rows }
+
+    var selectedCount: Int {
+        rows.filter { $0.isSelected && !$0.disposition.isExact }.count
     }
 
     var commitConfirmation: StatementImportCommitConfirmation? {
@@ -108,9 +105,7 @@ final class StatementImportReview {
         let summary = summary
         return StatementImportCommitConfirmation(
             summary: summary,
-            recordCount: summary.newTransactionCount
-                + summary.newTransferCount
-                + summary.linkedCount,
+            recordCount: summary.newTransactionCount,
             removesReviewedStatement: rows.allSatisfy(\.disposition.isExact)
         )
     }
@@ -143,14 +138,16 @@ final class StatementImportReview {
             return false
         }
 
+        guard selectedCount > 0 || rows.allSatisfy(\.disposition.isExact) else { return false }
         return rows.allSatisfy {
-            resolutionIsValid($0.resolution, for: $0, statementAccountID: statementAccountID)
+            !$0.isSelected
+                || resolutionIsValid($0.resolution, for: $0, statementAccountID: statementAccountID)
         }
     }
 
     func selectStatementAccount(_ accountID: UUID?) {
         guard isEditingAllowed else { return }
-        let choices = Dictionary(uniqueKeysWithValues: rows.map { ($0.id, $0.resolution) })
+        let choices = Dictionary(uniqueKeysWithValues: rows.map { ($0.id, $0) })
         statementAccountID = accountID
         phase = .reviewing
         generation = UUID()
@@ -164,7 +161,21 @@ final class StatementImportReview {
         else {
             return
         }
+        if resolution == .skip {
+            setSelected(false, forCandidateID: candidateID)
+            return
+        }
         rows[index].resolution = resolution
+        phase = .reviewing
+        generation = UUID()
+    }
+
+    func setSelected(_ isSelected: Bool, forCandidateID candidateID: String) {
+        guard isEditingAllowed,
+            let index = rows.firstIndex(where: { $0.id == candidateID }),
+            !rows[index].disposition.isExact
+        else { return }
+        rows[index].isSelected = isSelected
         phase = .reviewing
         generation = UUID()
     }
@@ -257,13 +268,14 @@ final class StatementImportReview {
         }?.id
     }
 
-    private func rebuildRows(preserving choices: [String: ImportRowResolution]) {
+    private func rebuildRows(preserving choices: [String: ReconciledImportRow]) {
         guard let statementAccountID else {
             rows = statement.candidates.map {
                 ReconciledImportRow(
                     candidate: $0,
                     disposition: .newTransaction,
-                    resolution: .unresolved
+                    resolution: choices[$0.id]?.resolution ?? .unresolved,
+                    isSelected: choices[$0.id]?.isSelected
                 )
             }
             return
@@ -281,14 +293,14 @@ final class StatementImportReview {
             calendar: StatementImportReconciler.vietnamCalendar
         )
         rows = reconciliation.rows.map { row in
-            guard !row.disposition.isExact,
-                let choice = choices[row.id],
-                resolutionIsValid(choice, for: row, statementAccountID: statementAccountID)
-            else {
-                return row
-            }
+            guard !row.disposition.isExact, let previous = choices[row.id] else { return row }
             var preserved = row
-            preserved.resolution = choice
+            preserved.isSelected = previous.isSelected
+            if resolutionIsValid(
+                previous.resolution, for: row, statementAccountID: statementAccountID)
+            {
+                preserved.resolution = previous.resolution
+            }
             return preserved
         }
     }
@@ -307,24 +319,9 @@ final class StatementImportReview {
             return snapshot.categories.contains {
                 $0.id == categoryID && $0.kind == row.candidate.kind
             }
-        case let .newTransfer(otherAccountID, _):
-            return otherAccountID != statementAccountID
-                && snapshot.accounts.contains {
-                    $0.id == otherAccountID && $0.currencyCode == VNDCurrency.code
-                }
-        case let .linkTransaction(transactionID):
-            guard case let .possibleMatches(transactionIDs, _) = row.disposition else {
-                return false
-            }
-            return transactionIDs.contains(transactionID)
-        case let .linkTransfer(transferID):
-            guard case let .possibleMatches(_, transferIDs) = row.disposition else {
-                return false
-            }
-            return transferIDs.contains(transferID)
-        case .skip:
-            return true
-        case .alreadyImported, .unresolved:
+        case .newTransfer, .linkTransaction, .linkTransfer:
+            return false
+        case .skip, .alreadyImported, .unresolved:
             return false
         }
     }

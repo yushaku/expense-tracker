@@ -37,8 +37,6 @@ struct StatementImportInboxView: View {
         } message: { report in
             VStack(alignment: .leading, spacing: 4) {
                 Text("Created transactions: \(report.createdTransactionCount)")
-                Text("Created transfers: \(report.createdTransferCount)")
-                Text("Linked records: \(report.linkedCount)")
                 if report.skippedCount > 0 {
                     Text("Skipped: \(report.skippedCount)")
                 }

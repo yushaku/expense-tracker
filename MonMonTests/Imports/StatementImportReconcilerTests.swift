@@ -87,7 +87,8 @@ struct StatementImportReconcilerTests {
             row.disposition
                 == .possibleMatches(transactionIDs: [matchingID], transferIDs: [])
         )
-        #expect(row.resolution == .unresolved)
+        #expect(
+            row.resolution == .transaction(categoryID: expenseCategoryID, note: row.candidate.note))
     }
 
     @Test("Local-day matching uses Asia Ho Chi Minh rather than the UTC day")
@@ -145,10 +146,13 @@ struct StatementImportReconcilerTests {
                 .possibleMatches(transactionIDs: [], transferIDs: [incomingID]),
             ]
         )
-        #expect(result.rows.allSatisfy { $0.resolution == .unresolved })
+        #expect(
+            result.rows[0].resolution
+                == .transaction(categoryID: expenseCategoryID, note: result.rows[0].candidate.note))
+        #expect(result.rows[1].resolution == .unresolved)
     }
 
-    @Test("Multiple possible matches stay unresolved and sort ids deterministically")
+    @Test("Possible matches default to transaction creation and sort ids deterministically")
     func ambiguousMatchesStayUnresolved() throws {
         let lowID = try #require(UUID(uuidString: "00000000-0000-0000-0000-000000000001"))
         let highID = try #require(UUID(uuidString: "FFFFFFFF-0000-0000-0000-000000000002"))
@@ -162,8 +166,9 @@ struct StatementImportReconcilerTests {
             row.disposition
                 == .possibleMatches(transactionIDs: [lowID, highID], transferIDs: [])
         )
-        #expect(row.resolution == .unresolved)
-        #expect(result.summary.unresolvedCount == 1)
+        #expect(
+            row.resolution == .transaction(categoryID: expenseCategoryID, note: row.candidate.note))
+        #expect(result.summary.newTransactionCount == 1)
     }
 
     @Test("New rows use only a current same-direction category default")

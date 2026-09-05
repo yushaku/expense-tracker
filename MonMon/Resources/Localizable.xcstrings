@@ -1,6 +1,36 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Review transaction": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xem lại giao dịch" } } }
+    },
+    "Choose an account for the imported transactions.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn tài khoản cho các giao dịch được nhập." } } }
+    },
+    "Selected: %lld": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã chọn: %lld" } } }
+    },
+    "Import transaction: %@": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập giao dịch: %@" } } }
+    },
+    "Not selected": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa chọn" } } }
+    },
+    "Edit category and note": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sửa danh mục và ghi chú" } } }
+    },
+    "Choose category": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn danh mục" } } }
+    },
+    "Select at least one transaction to import.": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn ít nhất một giao dịch để nhập." } } }
+    },
+    "Import selected transactions": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập giao dịch đã chọn" } } }
+    },
+    "Import %lld transactions": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập %lld giao dịch" } } }
+    },
     "Day / Month / Year": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngày / Tháng / Năm" } } }
     },
