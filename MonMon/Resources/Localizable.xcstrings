@@ -1,6 +1,9 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Other": {
+      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khác" } } }
+    },
     "Unit": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đơn vị" } } }
     },
