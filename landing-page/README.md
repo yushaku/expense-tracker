@@ -1,0 +1,27 @@
+# MonMon landing page
+
+Vietnamese editorial landing page: **Tiền gọn. Đời nhẹ.**
+
+Open `index.html` directly in a browser. The HTML embeds its image, CSS and
+JavaScript, works offline, and requires no build or package installation.
+`assets/` retains the source images for future editing.
+
+To preview over HTTP from this repository:
+
+```sh
+python3 -m http.server 8080 --directory landing-page
+```
+
+Then visit `http://localhost:8080`.
+
+The interactive income slider demonstrates the app's default jar allocation:
+55% necessities, 10% investment, 10% education, 10% savings, 10% play, 5% giving.
+It is an illustration, stores no data, and makes no network requests.
+
+The still life is AI-generated. The icon comes from the app's existing assets.
+The transaction illustration is labeled as example data; it is not a screenshot.
+Native screenshots remain unavailable because the computer-use provider rejects
+window access with a permissions error. There is no invented download link or
+public release claim. All calls to action lead to working sections of this page.
+
+Design rationale: `DESIGN.md`. No Cloudflare project has been created or deployed.
