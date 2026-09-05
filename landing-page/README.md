@@ -1,6 +1,8 @@
 # MonMon landing page
 
-Vietnamese editorial landing page: **Tiền gọn. Đời nhẹ.**
+Vietnamese landing page: **Hiểu tiền của bạn. Sống nhẹ hơn.**
+
+Lavender styling and a floating dashboard composition follow the user-selected visual reference.
 
 Open `index.html` directly in a browser. The HTML embeds its image, CSS and
 JavaScript, works offline, and requires no build or package installation.
@@ -18,7 +20,9 @@ The interactive income slider demonstrates the app's default jar allocation:
 55% necessities, 10% investment, 10% education, 10% savings, 10% play, 5% giving.
 It is an illustration, stores no data, and makes no network requests.
 
-The still life is AI-generated. The icon comes from the app's existing assets.
+The dashboard concept is AI-generated and can be enlarged with “Xem giao diện”.
+It is labeled as an illustration, not an actual app screenshot. The icon comes
+from the app's existing assets. The earlier still-life image is retained as a source asset.
 The transaction illustration is labeled as example data; it is not a screenshot.
 Native screenshots remain unavailable because the computer-use provider rejects
 window access with a permissions error. There is no invented download link or

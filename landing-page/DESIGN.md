@@ -1,43 +1,36 @@
-# MonMon — Tiền gọn. Đời nhẹ.
+# MonMon — lavender product showcase
 
-## Creative direction
+The user selected a Nexora landing-page screenshot as the style reference.
+Adapt its visual language to MonMon: a white/lavender background, bold sans-serif
+headline with violet-to-pink emphasis, two rounded calls to action, a large tilted
+dashboard, soft shadows, and floating feature cards. Keep the established short
+Vietnamese copy and interactive finance diagrams.
 
-A Vietnamese, image-led landing page for the personal-finance app in this repository.
-Treat money as a small collection of things with a purpose: capture a transaction,
-divide income between jars, then see the whole picture. Editorial and tactile,
-not a banking dashboard. Short copy, oversized headings, asymmetric compositions,
-pastel diagrams and a still life of savings jars.
+## Design choices
 
-- Background: warm paper `#f5f2e9`; ink: deep olive `#263b31`.
-- Accents: sage `#c9d9b5`, lilac `#d8cfee`, peach `#edb798`, yellow `#edcf7c`.
-- Typography: system sans for readable Vietnamese, Georgia italic for emphasis.
-- Layout: split hero → capture flow → interactive jar allocation → asset map → privacy.
-- Interaction: change illustrative monthly income to see the six seeded allocations.
-- Product claims: grounded in the repository README and BudgetJarSeed.swift.
-- No invented App Store link, user counts, performance claims or testimonials.
+- Paper `#ffffff`, ink `#17162d`, muted text `#6b687d`, primary violet `#7357db`.
+- System sans-serif supports Vietnamese; display weight 760 with tight spacing.
+- Desktop hero uses a 46/54 split; on mobile copy precedes the product image.
+- Existing capture, jar, asset and privacy diagrams retain their meaning with
+  coordinated lavender accents.
+- Primary action scrolls to the working allocation slider. Secondary action opens
+  an accessible image dialog; Escape and the close button dismiss it and restore focus.
+- No fictional customers, ratings, release claims or App Store destination.
 
-## Images
+## Assets and content
 
-- Use MonMon's existing production icon.
-- Generated still life: original at
-  `/Users/sonlv/.codex/generated_images/01a07112-ef84-7883-8eed-29eafae0fbbd/exec-0562152a-e770-4fce-b164-8a1cb79c36d5.png`.
-- CUA can enumerate MonMon Dev, but opening its window still reports
-  `Computer Use permissions are not granted`, including after the user's restart
-  and a fresh attempt. Actual app screenshots could not be captured.
-- Do not substitute fabricated screens for actual product screenshots. Any demo
-  figures are explicitly marked as illustrative.
+`assets/icon.png` is the existing MonMon icon.
+`assets/dashboard-concept.png` is a generated marketing concept with fictional
+figures. Both the image caption and dialog explicitly identify it as an illustration,
+not a real screenshot of the current application. Native screenshots remain blocked
+by the computer-use provider's permissions error after the user's restart.
+`assets/savings-still-life.png` retains the earlier direction for reference but is
+not used by the current page. The HTML embeds all essential assets for offline use.
 
-## Working state
+## Delivery
 
-Branch: `feat/monmon-landing-page`, based on fetched dev (32 commits ahead, none behind).
-Work continued in an isolated worktree because the shared checkout switched to
-another task's branch. Existing deletions in docs and scripts are untouched.
-
-Browser checks passed at 1440, 390 and 320 px: no horizontal overflow, no broken
-images, no missing anchor targets and no JavaScript console errors. Keyboard Home
-and End adjust income to 5 and 50 million VND with correct allocations. Reduced
-motion disables smooth scrolling. Desktop and mobile screenshots were inspected;
-the hero image's aspect ratio and percentage-label contrast were corrected.
-Swift format lint and all macOS unit tests passed in the landing-page worktree.
-The iOS SDK compile check also passed after retrying a shared build database lock.
-Do not merge, push or deploy without a user request.
+Branch: `feat/monmon-landing-page`. Implementation is in an isolated worktree;
+the shared checkout's other task and existing deletions are untouched.
+Browser verification: 1440, 390 and 320 px; reference comparison: 1920 × 1301 px.
+See `design-qa.md` for visual and interaction verification.
+No merge, push or deployment is part of this change.
