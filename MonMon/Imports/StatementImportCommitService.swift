@@ -17,8 +17,18 @@ struct StatementImportCommitReport: Equatable, Sendable {
 
 enum StatementImportCommitError: Error, Equatable, Sendable {
     case invalidRequest
+    case accountUnavailable
     case staleReview
     case storeFailure
+}
+
+struct StatementImportRowFailure: Equatable, Sendable {
+    let candidateID: String
+    let issue: StatementImportRowIssue
+}
+
+struct StatementImportRowsError: Error, Equatable, Sendable {
+    let failures: [StatementImportRowFailure]
 }
 
 @MainActor
@@ -40,6 +50,9 @@ struct StatementImportCommitService {
 
         do {
             return try commit(request, in: context)
+        } catch let error as StatementImportRowsError {
+            context.rollback()
+            throw error
         } catch let error as StatementImportCommitError {
             context.rollback()
             throw error
@@ -57,8 +70,7 @@ struct StatementImportCommitService {
         guard request.statement.isComplete,
             request.statement.currencyCode == VNDCurrency.code,
             request.rows.map(\.candidate) == candidates,
-            Set(candidates.map(\.id)).count == candidates.count,
-            candidates.allSatisfy({ ImportSourceID(rawValue: $0.id) != nil })
+            Set(candidates.map(\.id)).count == candidates.count
         else {
             throw StatementImportCommitError.invalidRequest
         }
@@ -72,7 +84,7 @@ struct StatementImportCommitService {
             $0.id == request.statementAccountID && $0.currencyCode == VNDCurrency.code
         }
         guard statementAccountIsValid else {
-            throw StatementImportCommitError.invalidRequest
+            throw StatementImportCommitError.accountUnavailable
         }
 
         let current = StatementImportReconciler.reconcile(
@@ -119,6 +131,7 @@ struct StatementImportCommitService {
 
         let categoryByID = Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0) })
         var newTransactions: [MoneyTransaction] = []
+        var failures: [StatementImportRowFailure] = []
         var report = StatementImportCommitReport()
         let createdAt = Date()
 
@@ -133,13 +146,19 @@ struct StatementImportCommitService {
                 continue
             }
 
-            let sourceID = try validatedSourceID(for: requestedRow.candidate)
+            guard let sourceID = ImportSourceID(rawValue: requestedRow.id) else {
+                failures.append(
+                    StatementImportRowFailure(candidateID: requestedRow.id, issue: .source))
+                continue
+            }
             switch requestedRow.resolution {
             case let .transaction(categoryID, note):
                 guard let category = categoryByID[categoryID],
                     category.kind == requestedRow.candidate.kind
                 else {
-                    throw StatementImportCommitError.invalidRequest
+                    failures.append(
+                        StatementImportRowFailure(candidateID: requestedRow.id, issue: .category))
+                    continue
                 }
 
                 let draft = TransactionDraft(
@@ -154,14 +173,20 @@ struct StatementImportCommitService {
                 do {
                     transaction = try draft.makeTransaction(id: UUID(), createdAt: createdAt)
                 } catch {
-                    throw StatementImportCommitError.invalidRequest
+                    failures.append(
+                        StatementImportRowFailure(candidateID: requestedRow.id, issue: .amount))
+                    continue
                 }
                 transaction.sourceImportID = sourceID.rawValue
-                try IncomeAllocationLifecycle.captureNew(
-                    on: transaction,
-                    jars: jars,
-                    capturedAt: createdAt
-                )
+                do {
+                    try IncomeAllocationLifecycle.captureNew(
+                        on: transaction, jars: jars, capturedAt: createdAt
+                    )
+                } catch {
+                    failures.append(
+                        StatementImportRowFailure(candidateID: requestedRow.id, issue: .allocation))
+                    continue
+                }
                 newTransactions.append(transaction)
                 report.createdTransactionCount += 1
 
@@ -176,8 +201,13 @@ struct StatementImportCommitService {
                 throw StatementImportCommitError.staleReview
 
             case .unresolved:
-                throw StatementImportCommitError.invalidRequest
+                failures.append(
+                    StatementImportRowFailure(candidateID: requestedRow.id, issue: .category))
             }
+        }
+
+        guard failures.isEmpty else {
+            throw StatementImportRowsError(failures: failures)
         }
 
         for transaction in newTransactions {
@@ -188,14 +218,5 @@ struct StatementImportCommitService {
         }
 
         return report
-    }
-
-    private func validatedSourceID(
-        for candidate: BankTransactionCandidate
-    ) throws -> ImportSourceID {
-        guard let sourceID = ImportSourceID(rawValue: candidate.id) else {
-            throw StatementImportCommitError.invalidRequest
-        }
-        return sourceID
     }
 }

@@ -28,6 +28,8 @@ struct StatementImportReviewSnapshot: Equatable, Sendable {
 
 enum StatementImportReviewFailure: Equatable, Sendable {
     case invalidReview
+    case invalidRows(Int)
+    case accountUnavailable
     case staleReview
     case storeFailure
     case unknown
@@ -47,11 +49,12 @@ struct StatementImportCommitConfirmation: Equatable, Sendable {
     let removesReviewedStatement: Bool
 }
 
-enum StatementImportRowIssue {
+enum StatementImportRowIssue: Equatable, Sendable {
     case account
     case source
     case amount
     case category
+    case allocation
 }
 
 @MainActor
@@ -61,6 +64,7 @@ final class StatementImportReview {
     private(set) var statement: ParsedBankStatement
     private(set) var statementAccountID: UUID?
     private(set) var rows: [ReconciledImportRow] = []
+    private var saveFailures: [String: StatementImportRowIssue] = [:]
     private(set) var phase: StatementImportReviewPhase = .reviewing
 
     @ObservationIgnored private var snapshot: StatementImportReviewSnapshot
@@ -101,13 +105,19 @@ final class StatementImportReview {
         StatementImportSummary(rows: rows)
     }
 
-    var visibleRows: [ReconciledImportRow] {
+    var invalidRows: [ReconciledImportRow] {
         rows.filter { validationIssue(for: $0) != nil }
-            + rows.filter { validationIssue(for: $0) == nil }
     }
+
+    var validRows: [ReconciledImportRow] {
+        rows.filter { validationIssue(for: $0) == nil }
+    }
+
+    var visibleRows: [ReconciledImportRow] { invalidRows + validRows }
 
     func validationIssue(for row: ReconciledImportRow) -> StatementImportRowIssue? {
         guard !row.disposition.isExact else { return nil }
+        if let failure = saveFailures[row.id] { return failure }
         guard let statementAccountID,
             statement.currencyCode == VNDCurrency.code,
             snapshot.accounts.contains(where: {
@@ -189,6 +199,9 @@ final class StatementImportReview {
             setSelected(false, forCandidateID: candidateID)
             return
         }
+        if saveFailures[candidateID] == .category {
+            saveFailures[candidateID] = nil
+        }
         rows[index].resolution = resolution
         if validationIssue(for: rows[index]) != nil {
             rows[index].isSelected = false
@@ -216,6 +229,7 @@ final class StatementImportReview {
         staged = preview.staged
         statement = preview.statement
         self.snapshot = snapshot
+        saveFailures = [:]
         statementAccountID = Self.initialStatementAccountID(
             for: preview.statement,
             snapshot: snapshot,
@@ -260,7 +274,22 @@ final class StatementImportReview {
             guard generation == expectedGeneration, staged.id == expectedStagedID else {
                 return
             }
-            phase = .failed(reviewFailure(for: error))
+            if let rowError = error as? StatementImportRowsError {
+                for failure in rowError.failures {
+                    saveFailures[failure.candidateID] = failure.issue
+                    if let index = rows.firstIndex(where: { $0.id == failure.candidateID }) {
+                        rows[index].isSelected = false
+                    }
+                }
+                phase = .failed(.invalidRows(rowError.failures.count))
+            } else {
+                if error as? StatementImportCommitError == .accountUnavailable {
+                    self.statementAccountID = nil
+                    rebuildRows(
+                        preserving: Dictionary(uniqueKeysWithValues: rows.map { ($0.id, $0) }))
+                }
+                phase = .failed(reviewFailure(for: error))
+            }
         }
     }
 
@@ -361,6 +390,8 @@ final class StatementImportReview {
         switch commitError {
         case .invalidRequest:
             return .invalidReview
+        case .accountUnavailable:
+            return .accountUnavailable
         case .staleReview:
             return .staleReview
         case .storeFailure:
