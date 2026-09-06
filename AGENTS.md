@@ -31,8 +31,8 @@ tests on the phone; `main` is what a prod build is cut from.
 ## Building the app
 
 Two flavours, picked by build configuration. They share no data: separate bundle
-identifiers, app groups, and CloudKit containers. See the build flavours section
-of `README.md` for the identifiers.
+identifiers and app groups. See the build flavours section of `README.md` for
+the identifiers.
 
 - Dev is the `Debug` configuration. Build, install, and launch it with
   `scripts/run-iphone.sh Yushaku` from the `dev` branch, following the physical

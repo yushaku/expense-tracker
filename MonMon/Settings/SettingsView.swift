@@ -4,7 +4,6 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(AppLock.self) private var appLock
-    @Environment(CloudSync.self) private var cloudSync
     @Environment(NotificationCoordinator.self) private var notificationCoordinator
     @Environment(\.modelContext) private var modelContext
 
@@ -405,101 +404,11 @@ struct SettingsView: View {
     private var backupCard: some View {
         card {
             VStack(alignment: .leading, spacing: 14) {
-                sectionHeader("Backup", systemImage: "icloud.fill")
-
-                Toggle(isOn: syncBinding) {
-                    Text("Sync to iCloud")
-                        .font(.subheadline.weight(.medium))
-                }
-                .toggleStyle(.switch)
-                .tint(MonMonTheme.accent)
-                .accessibilityIdentifier("icloud-sync")
-
-                Text(
-                    """
-                    Keeps every record in your own private iCloud database, so your iPhone and\
-                     Mac show the same books. Nobody else can read it, MonMon included.
-                    """
-                )
-                .font(.caption)
-                .foregroundStyle(MonMonTheme.textSecondary)
-
-                if cloudSync.needsRelaunch {
-                    Label(
-                        "Quit MonMon and open it again to apply this.",
-                        systemImage: "arrow.clockwise.circle.fill"
-                    )
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-                    .accessibilityIdentifier("icloud-sync-relaunch")
-                }
-
-                if cloudSync.isEnabled {
-                    syncControls
-                }
+                sectionHeader("Backup", systemImage: "externaldrive.fill")
 
                 BackupRestoreView()
             }
         }
-    }
-
-    @ViewBuilder
-    private var syncControls: some View {
-        Divider()
-            .overlay(MonMonTheme.border)
-
-        HStack(spacing: 12) {
-            Button {
-                Task { await cloudSync.syncNow(context: modelContext) }
-            } label: {
-                Label("Sync now", systemImage: "arrow.triangle.2.circlepath")
-            }
-            .buttonStyle(.prominentAction)
-            .disabled(cloudSync.isSyncing || cloudSync.needsRelaunch)
-            .accessibilityIdentifier("icloud-sync-now")
-
-            if cloudSync.isSyncing {
-                ProgressView()
-                    .controlSize(.small)
-            }
-
-            Spacer(minLength: 0)
-        }
-
-        Text(lastSyncedText)
-            .font(.caption)
-            .foregroundStyle(MonMonTheme.textSecondary)
-            .accessibilityIdentifier("icloud-last-synced")
-
-        if let message = cloudSync.message {
-            Label(
-                message.text,
-                systemImage: message.isFailure
-                    ? "exclamationmark.circle.fill" : "checkmark.circle.fill"
-            )
-            .font(.caption)
-            .foregroundStyle(message.isFailure ? MonMonTheme.danger : MonMonTheme.textSecondary)
-            .accessibilityIdentifier("icloud-sync-message")
-        }
-    }
-
-    /// Turning synchronisation on or off only rewrites the preference. The store
-    /// this launch opened keeps mirroring, or not, until the app is relaunched.
-    private var syncBinding: Binding<Bool> {
-        Binding(
-            get: { cloudSync.isEnabled },
-            set: { cloudSync.setEnabled($0) }
-        )
-    }
-
-    private var lastSyncedText: String {
-        guard let lastSyncedAt = cloudSync.lastSyncedAt else {
-            return "No sync recorded yet on this device."
-        }
-
-        let day = dateFormat.dateTime(lastSyncedAt, in: locale)
-
-        return AppText.string("Last synced \(day).", in: locale)
     }
 
     private var aboutCard: some View {
@@ -515,12 +424,7 @@ struct SettingsView: View {
     }
 
     private var storageExplanation: LocalizedStringKey {
-        cloudSync.isEnabled
-            ? """
-            MonMon keeps everything on this device and in your own iCloud account. No MonMon \
-            account, no server of ours.
-            """
-            : "MonMon keeps everything on this device. No account, no network."
+        "MonMon keeps everything on this device. No account, no network."
     }
 
     private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {
@@ -548,7 +452,6 @@ struct SettingsView: View {
     #Preview("Settings") {
         SettingsView()
             .environment(AppLock(isLocked: false))
-            .environment(CloudSync())
             .environment(NotificationCoordinator())
             .modelContainer(PreviewData.populated)
             .tint(MonMonTheme.accent)

@@ -56,8 +56,8 @@ MonMon is a private personal-finance app for iPhone and Mac, built with SwiftUI 
 
 ### Data, sync, and privacy
 
-- **Optional iCloud sync** — a CloudKit mirror of the local store, off until the owner turns it on, applied after a relaunch.
-- **Optional read-only AI access on Mac** — an embedded local MCP helper exposes raw records from an App Group SQLite snapshot to Codex or Claude Desktop after explicit consent. The helper has no CloudKit entitlement or write tools.
+- **On-device only** — the store never leaves the device. No account, no server, no sync.
+- **Optional read-only AI access on Mac** — an embedded local MCP helper exposes raw records from an App Group SQLite snapshot to Codex or Claude Desktop after explicit consent. The helper has no write tools.
 - **Backup and restore** — a validated document covering every model, including jars, goals, and trips, with a confirmation step before a restore replaces what is on the device.
 - **App lock** — Face ID or Touch ID with device-passcode fallback, re-locking after time in the background.
 - **Language** — Vietnamese, English, or whatever the system is set to.
@@ -115,10 +115,9 @@ Prod is development-signed, so the phone must be on the team before install work
 5. `scripts/install-prod.sh "<Device Name>"`
 6. On the phone: **Settings → General → VPN & Device Management** → trust the developer certificate.
 
-Both flavours need their App ID, app group, and CloudKit container to exist in
-the developer account before signing succeeds. Xcode registers them when you add
-the capability under **Signing & Capabilities** with that configuration selected;
-`xcodebuild` will not create a CloudKit container on its own.
+Both flavours need their App ID and app group to exist in the developer account
+before signing succeeds. Xcode registers them when you add the capability under
+**Signing & Capabilities** with that configuration selected.
 
 ### Build
 

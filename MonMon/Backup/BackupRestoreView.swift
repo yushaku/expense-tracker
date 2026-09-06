@@ -76,7 +76,6 @@ struct MonMonBackupFileDocument: FileDocument {
 
 struct BackupRestoreView: View {
     @Environment(AppLock.self) private var appLock
-    @Environment(CloudSync.self) private var cloudSync
     @Environment(\.modelContext) private var modelContext
     @Environment(\.locale) private var locale
 
@@ -206,7 +205,6 @@ struct BackupRestoreView: View {
                 selection: selection,
                 isWorking: isWorking,
                 errorMessage: operationError,
-                isCloudSyncEnabled: cloudSync.isEnabled,
                 onCancel: { self.selection = nil },
                 onRestore: performRestore
             )
@@ -327,11 +325,7 @@ struct BackupRestoreView: View {
                 hasRecovery = true
                 self.selection = nil
                 notice = BackupRestoreNotice(
-                    message: localized(
-                        cloudSync.isEnabled
-                            ? "Local restore complete. iCloud will sync this state separately."
-                            : "Local restore complete."
-                    ),
+                    message: localized("Local restore complete."),
                     isFailure: false
                 )
             } catch {
@@ -383,7 +377,6 @@ private struct BackupRestorePreviewSheet: View {
     let selection: BackupRestoreSelection
     let isWorking: Bool
     let errorMessage: String?
-    let isCloudSyncEnabled: Bool
     let onCancel: () -> Void
     let onRestore: () -> Void
     @State private var isConfirmingRestore = false
@@ -399,15 +392,6 @@ private struct BackupRestorePreviewSheet: View {
                         Label(
                             "Some optional links or saved defaults are stale. MonMon will clear only those defaults and preserve supported records.",
                             systemImage: "exclamationmark.triangle.fill"
-                        )
-                        .font(.caption)
-                        .foregroundStyle(MonMonTheme.textSecondary)
-                    }
-
-                    if isCloudSyncEnabled {
-                        Label(
-                            "Close MonMon on other devices. Restore here, let this device sync, then reopen the others.",
-                            systemImage: "icloud.and.arrow.up"
                         )
                         .font(.caption)
                         .foregroundStyle(MonMonTheme.textSecondary)
