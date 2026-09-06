@@ -7,6 +7,9 @@ struct SavingsSection: View {
     let deposits: [SavingsDeposit]
     let withdrawals: [SavingsWithdrawal]
     let accounts: [CashAccount]
+    /// Which order the books are listed in. Owned by the screen, so switching
+    /// segments and coming back finds the same order.
+    let sort: InvestmentSort
     let onAdd: () -> Void
 
     var body: some View {
@@ -147,7 +150,7 @@ struct SavingsSection: View {
         SavingsWithdrawalSummary.sortedDeposits(
             deposits,
             withdrawals: withdrawals,
-            asOf: .now
+            by: sort
         )
     }
 }

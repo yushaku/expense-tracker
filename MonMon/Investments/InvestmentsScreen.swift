@@ -54,6 +54,10 @@ struct InvestmentsScreen: View {
     @Environment(\.modelContext) private var modelContext
 
     @State private var segment: InvestmentSegment
+    /// One order per segment rather than one for the screen: what a savings
+    /// book is worth and what a coin is worth are different questions, and an
+    /// owner who sorts gold by name rarely wants their funds resorted too.
+    @State private var sorts: [InvestmentSegment: InvestmentSort] = [:]
     @State private var editor: InvestmentEditorMode?
     @State private var refresher = FundPriceRefresher()
 
@@ -74,6 +78,10 @@ struct InvestmentsScreen: View {
                     summaryCard
 
                     segmentPicker
+
+                    if !isSelectedSectionEmpty {
+                        sortMenu
+                    }
 
                     selectedSection
                 }
@@ -286,11 +294,49 @@ struct InvestmentsScreen: View {
         .accessibilityIdentifier("investment-segment")
     }
 
+    /// Newest purchase first until the owner says otherwise, which is the order
+    /// a list of holdings is usually read in.
+    private var sort: InvestmentSort {
+        sorts[segment] ?? .date
+    }
+
+    /// A menu rather than another row of tabs: the segment picker directly above
+    /// already spends the width, and the order is picked far less often than the
+    /// segment is.
+    private var sortMenu: some View {
+        Menu {
+            Picker("Sort", selection: sortBinding) {
+                ForEach(InvestmentSort.allCases) { option in
+                    Label(option.title, systemImage: option.systemImage)
+                        .tag(option)
+                }
+            }
+        } label: {
+            Label(sort.title, systemImage: "arrow.up.arrow.down")
+                .font(.subheadline.weight(.semibold))
+        }
+        .frame(maxWidth: .infinity, alignment: .trailing)
+        .accessibilityLabel("Sort")
+        .accessibilityIdentifier("investment-sort")
+    }
+
+    private var sortBinding: Binding<InvestmentSort> {
+        Binding(
+            get: { sort },
+            set: { sorts[segment] = $0 }
+        )
+    }
+
     @ViewBuilder
     private var selectedSection: some View {
         switch segment {
         case .savings:
-            SavingsSection(deposits: deposits, withdrawals: withdrawals, accounts: accounts) {
+            SavingsSection(
+                deposits: deposits,
+                withdrawals: withdrawals,
+                accounts: accounts,
+                sort: sort
+            ) {
                 add()
             }
         case .funds:
@@ -299,6 +345,7 @@ struct InvestmentsScreen: View {
                 instruments: instruments,
                 sales: sales,
                 kinds: [.fund, .etf],
+                sort: sort,
                 sectionTitle: "Funds",
                 itemNameKey: "fund",
                 emptyTitle: "Track your funds and ETFs",
@@ -323,6 +370,7 @@ struct InvestmentsScreen: View {
                 instruments: instruments,
                 sales: sales,
                 kinds: [.gold],
+                sort: sort,
                 sectionTitle: "Gold",
                 itemNameKey: "gold product",
                 emptyTitle: "Track your physical gold",
@@ -346,6 +394,7 @@ struct InvestmentsScreen: View {
                 instruments: instruments,
                 sales: sales,
                 kinds: [.crypto],
+                sort: sort,
                 sectionTitle: "Crypto",
                 itemNameKey: "coin",
                 emptyTitle: "Track your coins",

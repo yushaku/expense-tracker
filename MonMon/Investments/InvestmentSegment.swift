@@ -73,3 +73,39 @@ enum InvestmentSegment: String, CaseIterable, Identifiable, Hashable {
         }
     }
 }
+
+/// How the list under the picker is ordered. Every kind answers the same three
+/// questions — when it was bought, what it is worth, what it is called — even
+/// though each reads them off its own fields, so one set of options covers all
+/// four segments and each segment remembers its own choice.
+enum InvestmentSort: String, CaseIterable, Identifiable {
+    case date
+    case value
+    case name
+
+    var id: String {
+        rawValue
+    }
+
+    var title: LocalizedStringKey {
+        switch self {
+        case .date:
+            "Purchase date"
+        case .value:
+            "Value"
+        case .name:
+            "Name"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .date:
+            "calendar"
+        case .value:
+            "banknote.fill"
+        case .name:
+            "textformat"
+        }
+    }
+}

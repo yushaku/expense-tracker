@@ -59,6 +59,12 @@ struct FundPositionGroup: Identifiable {
         return costBasis / units
     }
 
+    /// The most recent purchase in the stack, which is the date a DCA position
+    /// is read by. `holdings` is newest first, so it leads.
+    var boughtOn: Date {
+        holdings.first?.boughtOn ?? .distantPast
+    }
+
     var pricePerUnit: Decimal {
         instrument?.currentPricePerUnit ?? .zero
     }
@@ -127,16 +133,19 @@ struct FundPositionGroup: Identifiable {
 }
 
 extension FundSummary {
-    /// One group per instrument, largest holding first, with the unmatched
-    /// positions last — they are worth nothing the app can prove, so they never
-    /// lead the list.
+    /// One group per instrument, in the order asked for — largest first by
+    /// default, which puts the unmatched positions last, since they are worth
+    /// nothing the app can prove. A fully closed group sorts to zero market
+    /// value and falls to the bottom with them, which is where a position
+    /// nobody holds anymore belongs.
     ///
-    /// A fully closed group sorts to zero market value and so falls to the
-    /// bottom, which is where a position nobody holds anymore belongs.
+    /// Ties break on the symbol, so a list sorted on a key several groups share
+    /// still holds still between redraws.
     static func groups(
         holdings: [FundHolding],
         instruments: [FundInstrument],
-        sales: [FundSale]
+        sales: [FundSale],
+        by sort: InvestmentSort = .value
     ) -> [FundPositionGroup] {
         let grouped = Dictionary(grouping: holdings) { $0.instrumentID }
 
@@ -153,8 +162,20 @@ extension FundSummary {
                 )
             }
             .sorted { first, second in
-                if first.marketValue != second.marketValue {
-                    return first.marketValue > second.marketValue
+                switch sort {
+                case .date:
+                    if first.boughtOn != second.boughtOn {
+                        return first.boughtOn > second.boughtOn
+                    }
+                case .value:
+                    if first.marketValue != second.marketValue {
+                        return first.marketValue > second.marketValue
+                    }
+                case .name:
+                    let order = first.symbol.localizedStandardCompare(second.symbol)
+                    if order != .orderedSame {
+                        return order == .orderedAscending
+                    }
                 }
 
                 return first.symbol < second.symbol
