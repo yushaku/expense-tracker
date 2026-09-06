@@ -232,4 +232,40 @@ struct FundPositionGroupTests {
         #expect(diamondGroup?.sales.count == 1)
         #expect(diamondGroup?.units == 50)
     }
+
+    @Test("Groups sort by the latest purchase, the value held, or the symbol")
+    func groupsSortOnTheChosenKey() {
+        let vesaf = FundTestFactory.instrument(symbol: "VESAF", pricePerUnit: 30_000)
+        let dcds = FundTestFactory.instrument(symbol: "DCDS", pricePerUnit: 90_000)
+        let holdings = [
+            // Bought first, worth 3,000,000.
+            FundTestFactory.holding(
+                in: vesaf,
+                units: 100,
+                averageCostPerUnit: 20_000,
+                createdAt: FundTestFactory.referenceDate
+            ),
+            // Bought later, worth 900,000.
+            FundTestFactory.holding(
+                in: dcds,
+                units: 10,
+                averageCostPerUnit: 80_000,
+                createdAt: FundTestFactory.referenceDate.addingTimeInterval(86_400)
+            ),
+        ]
+
+        func symbols(_ sort: InvestmentSort) -> [String] {
+            FundSummary.groups(
+                holdings: holdings,
+                instruments: [vesaf, dcds],
+                sales: [],
+                by: sort
+            )
+            .map(\.symbol)
+        }
+
+        #expect(symbols(.date) == ["DCDS", "VESAF"])
+        #expect(symbols(.value) == ["VESAF", "DCDS"])
+        #expect(symbols(.name) == ["DCDS", "VESAF"])
+    }
 }
