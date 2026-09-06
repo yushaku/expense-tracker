@@ -5,10 +5,18 @@ struct AccountEditorForm: View {
 
     let isEditing: Bool
     let canDelete: Bool
-    let deleteBlockedReason: String?
+    let deleteBlockedReason: LocalizedStringKey?
+    /// Whether this account has records or a balance to hand over before it can
+    /// go. Decided by the screen, which is the side that can see the store.
+    let requiresDestination: Bool
+    let moveDestinations: [CashAccount]
+    @Binding var moveDestinationID: UUID?
+    let linkedRecordCount: Int
     let validationError: AccountFormError?
     let saveErrorMessage: LocalizedStringKey?
     let onDelete: () -> Void
+
+    private let colorColumns = [GridItem(.adaptive(minimum: 44), spacing: 10)]
 
     var body: some View {
         ZStack {
@@ -19,6 +27,7 @@ struct AccountEditorForm: View {
                 VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                     introduction
                     accountDetailsCard
+                    colorCard
                     openingBalanceCard
 
                     if draft.kind == .credit {
@@ -47,7 +56,10 @@ struct AccountEditorForm: View {
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(MonMonTheme.onAccent)
                 .frame(width: 46, height: 46)
-                .background(MonMonTheme.accent, in: RoundedRectangle(cornerRadius: 14))
+                .background(
+                    CategoryPalette.color(named: draft.effectiveColorName),
+                    in: RoundedRectangle(cornerRadius: 14)
+                )
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
@@ -67,6 +79,10 @@ struct AccountEditorForm: View {
 
     private var deleteSection: some View {
         VStack(alignment: .leading, spacing: 8) {
+            if requiresDestination, !moveDestinations.isEmpty {
+                moveCard
+            }
+
             deleteButton
 
             if let deleteBlockedReason {
@@ -78,12 +94,47 @@ struct AccountEditorForm: View {
         }
     }
 
+    /// Records do not go with the account. They move to another one, so the
+    /// history of what was spent survives the wallet it was spent from.
+    private var moveCard: some View {
+        card {
+            VStack(alignment: .leading, spacing: 14) {
+                sectionHeader("Move records to", systemImage: "arrow.left.arrow.right")
+
+                Text(
+                    """
+                    \(linkedRecordCount) records and this account's balance move to the \
+                    account you pick. Nothing is deleted but the account itself.
+                    """
+                )
+                .font(.subheadline)
+                .foregroundStyle(MonMonTheme.textSecondary)
+
+                Picker("Move records to", selection: $moveDestinationID) {
+                    Text("Choose an account")
+                        .tag(UUID?.none)
+
+                    ForEach(moveDestinations) { account in
+                        Text(account.name)
+                            .tag(UUID?.some(account.id))
+                    }
+                }
+                .labelsHidden()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityIdentifier("move-records-destination")
+            }
+        }
+    }
+
     private var deleteButton: some View {
         Button(role: .destructive, action: onDelete) {
-            Label("Delete account", systemImage: "trash.fill")
-                .font(.subheadline.weight(.semibold))
-                .frame(maxWidth: .infinity)
-                .padding(14)
+            Label(
+                requiresDestination ? "Delete and move records" : "Delete account",
+                systemImage: "trash.fill"
+            )
+            .font(.subheadline.weight(.semibold))
+            .frame(maxWidth: .infinity)
+            .padding(14)
         }
         .buttonStyle(.plain)
         .disabled(!canDelete)
@@ -141,6 +192,49 @@ struct AccountEditorForm: View {
                 }
             }
         }
+    }
+
+    /// The colour this account is drawn in — its card, its wedge in the cash
+    /// ring, its row in a spending report. Ten swatches rather than a colour
+    /// well, so an account can only ever take a colour the rest of the app
+    /// already draws in.
+    private var colorCard: some View {
+        card {
+            VStack(alignment: .leading, spacing: 14) {
+                sectionHeader("Colour", systemImage: "paintpalette.fill")
+
+                LazyVGrid(columns: colorColumns, spacing: 10) {
+                    ForEach(CategoryPalette.colorNames, id: \.self) { colorName in
+                        colorButton(colorName)
+                    }
+                }
+                .accessibilityIdentifier("account-color")
+            }
+        }
+    }
+
+    private func colorButton(_ colorName: String) -> some View {
+        let isSelected = draft.effectiveColorName == colorName
+
+        return Button {
+            draft.colorName = colorName
+        } label: {
+            Circle()
+                .fill(CategoryPalette.color(named: colorName))
+                .frame(width: 34, height: 34)
+                .overlay {
+                    // The tick, not the ring alone, says which colour is chosen.
+                    if isSelected {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(MonMonTheme.onAccent)
+                    }
+                }
+                .frame(width: 44, height: 44)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(colorName)
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 
     private var openingBalanceCard: some View {
@@ -305,7 +399,11 @@ struct AccountEditorForm: View {
         @State var draft: AccountDraft
         var isEditing = false
         var canDelete = false
-        var deleteBlockedReason: String?
+        var deleteBlockedReason: LocalizedStringKey?
+        var requiresDestination = false
+        var moveDestinations: [CashAccount] = []
+        @State var moveDestinationID: UUID?
+        var linkedRecordCount = 0
         var validationError: AccountFormError?
         var saveErrorMessage: LocalizedStringKey?
 
@@ -316,6 +414,10 @@ struct AccountEditorForm: View {
                     isEditing: isEditing,
                     canDelete: canDelete,
                     deleteBlockedReason: deleteBlockedReason,
+                    requiresDestination: requiresDestination,
+                    moveDestinations: moveDestinations,
+                    moveDestinationID: $moveDestinationID,
+                    linkedRecordCount: linkedRecordCount,
                     validationError: validationError,
                     saveErrorMessage: saveErrorMessage,
                     onDelete: {}
@@ -359,7 +461,12 @@ struct AccountEditorForm: View {
                 creditLimitText: "20.000.000"
             ),
             isEditing: true,
-            deleteBlockedReason: "Set the balance to 0 before deleting this account."
+            deleteBlockedReason: "Pick where this account's records should go.",
+            requiresDestination: true,
+            moveDestinations: [
+                CashAccount.preview(name: "Techcombank", kind: .normal, openingBalance: 4_000_000)
+            ],
+            linkedRecordCount: 128
         )
     }
 

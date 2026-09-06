@@ -55,7 +55,7 @@ struct AccountBalanceCard: View {
                 angularInset: 1.5
             )
             .cornerRadius(4)
-            .foregroundStyle(AccountPalette.tint(at: index))
+            .foregroundStyle(AccountPalette.tint(at: index, colorName: slice.colorName))
         }
         .chartLegend(.hidden)
         .frame(width: 168, height: 168)
@@ -82,7 +82,7 @@ struct AccountBalanceCard: View {
     private var legend: some View {
         VStack(alignment: .leading, spacing: 12) {
             ForEach(Array(slices.enumerated()), id: \.element.id) { index, slice in
-                legendRow(slice, tint: AccountPalette.tint(at: index))
+                legendRow(slice, tint: AccountPalette.tint(at: index, colorName: slice.colorName))
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -183,6 +183,13 @@ enum AccountPalette {
     static func tint(at index: Int) -> Color {
         tints[index % tints.count]
     }
+
+    /// The colour an account is drawn in here: its own once its owner picks
+    /// one, and a position in the palette above until then — which is what
+    /// keeps two uncoloured accounts from sharing a wedge.
+    static func tint(at index: Int, colorName: String) -> Color {
+        colorName.isEmpty ? tint(at: index) : CategoryPalette.color(named: colorName)
+    }
 }
 
 private extension CashAccountKind {
@@ -214,12 +221,14 @@ private extension Decimal {
                         accountID: UUID(),
                         name: "Techcombank",
                         kind: .normal,
+                        colorName: "blue",
                         amount: 42_000_000
                     ),
                     AccountBalanceSlice(
                         accountID: UUID(),
                         name: "Wallet",
                         kind: .normal,
+                        colorName: "",
                         amount: 3_500_000
                     ),
                 ],

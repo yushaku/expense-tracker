@@ -13676,6 +13676,86 @@
           }
         }
       }
+    },
+    "Move records to": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyển bản ghi sang"
+          }
+        }
+      }
+    },
+    "Choose an account": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn tài khoản"
+          }
+        }
+      }
+    },
+    "Delete and move records": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xoá và chuyển bản ghi"
+          }
+        }
+      }
+    },
+    "%lld records and this account's balance move to the account you pick. Nothing is deleted but the account itself.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld bản ghi và số dư của tài khoản này sẽ chuyển sang tài khoản bạn chọn. Không có gì bị xoá ngoài chính tài khoản này."
+          }
+        }
+      }
+    },
+    "%lld records and this account's balance move to %@. This cannot be undone.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld bản ghi và số dư của tài khoản này sẽ chuyển sang %@. Không thể hoàn tác."
+          }
+        }
+      }
+    },
+    "This is where records with no account of their own land, so it stays.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đây là nơi các bản ghi không có tài khoản riêng được ghi nhận, nên không thể xoá."
+          }
+        }
+      }
+    },
+    "Add another account first, so this one has somewhere to move its records.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hãy thêm một tài khoản khác trước, để tài khoản này có nơi chuyển bản ghi sang."
+          }
+        }
+      }
+    },
+    "Pick where this account's records should go.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn nơi các bản ghi của tài khoản này sẽ chuyển đến."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

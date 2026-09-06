@@ -9,6 +9,9 @@ struct AccountBalanceSlice: Identifiable, Equatable {
     let accountID: UUID
     let name: String
     let kind: CashAccountKind
+    /// The account's own colour, empty while nobody has picked one. Carried
+    /// here so the ring and the account's card cannot disagree about it.
+    let colorName: String
     let amount: Decimal
 
     var id: UUID { accountID }
@@ -38,6 +41,7 @@ enum AccountBalanceAllocation {
                     accountID: account.id,
                     name: account.name,
                     kind: account.kind,
+                    colorName: account.colorName,
                     amount: CashBalanceSummary.available(
                         for: account,
                         deposits: deposits,
