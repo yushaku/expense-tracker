@@ -10647,6 +10647,16 @@
         }
       }
     },
+    "Where the money came from": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiền đến từ đâu"
+          }
+        }
+      }
+    },
     "Where the money went": {
       "localizations": {
         "vi": {
