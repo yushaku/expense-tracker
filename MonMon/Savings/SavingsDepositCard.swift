@@ -20,6 +20,8 @@ enum SavingsDepositCardPresentation: Equatable {
 }
 
 struct SavingsDepositCard: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     let deposit: SavingsDeposit
@@ -164,7 +166,7 @@ struct SavingsDepositCard: View {
     }
 
     private var maturityDescription: String {
-        TransactionPeriod.day(deposit.maturityDate, in: locale)
+        TransactionPeriod.day(deposit.maturityDate, in: locale, dateFormat: dateFormat)
     }
 
     private var status: SavingsDepositStatus {

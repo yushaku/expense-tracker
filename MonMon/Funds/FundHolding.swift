@@ -42,6 +42,21 @@ final class FundHolding {
     /// `createdAt` for those, which is the closest thing that build knew.
     var purchasedAt: Date?
 
+    /// Đồng per dollar, when the cost was typed in dollars.
+    ///
+    /// `averageCostPerUnit` is đồng either way — this app counts in đồng and a
+    /// second currency in the store would make every total ask which. What this
+    /// keeps is how the đồng figure was arrived at, so reopening the editor can
+    /// show the dollars that were typed instead of a converted number nobody
+    /// entered.
+    ///
+    /// It is the owner's rate, not a market's: coins are bought through an
+    /// exchange or a P2P desk whose rate is not the published one, and what has
+    /// to end up in the store is the đồng that actually left the account.
+    /// `nil` for a cost typed in đồng, which is every position written before
+    /// this existed.
+    var purchaseExchangeRate: Decimal?
+
     init(
         id: UUID,
         instrumentID: UUID?,
@@ -49,7 +64,8 @@ final class FundHolding {
         averageCostPerUnit: Decimal,
         createdAt: Date,
         sourceAccountID: UUID? = nil,
-        purchasedAt: Date? = nil
+        purchasedAt: Date? = nil,
+        purchaseExchangeRate: Decimal? = nil
     ) {
         self.id = id
         self.instrumentID = instrumentID
@@ -58,10 +74,21 @@ final class FundHolding {
         self.createdAt = createdAt
         self.sourceAccountID = sourceAccountID
         self.purchasedAt = purchasedAt
+        self.purchaseExchangeRate = purchaseExchangeRate
     }
 }
 
 extension FundHolding {
+    /// The dollar price this position was entered at, when it was entered in
+    /// dollars. Derived rather than stored, so it can never disagree with the
+    /// đồng cost the rest of the app settles against.
+    var averageCostPerUnitInDollars: Decimal? {
+        guard let purchaseExchangeRate else {
+            return nil
+        }
+        return USDPrice.inDollars(averageCostPerUnit, rate: purchaseExchangeRate)
+    }
+
     /// The day this position was bought. Records written before the app asked
     /// for one report the day they were entered instead, which is what those
     /// builds meant by it.

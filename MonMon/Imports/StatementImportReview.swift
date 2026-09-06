@@ -28,6 +28,8 @@ struct StatementImportReviewSnapshot: Equatable, Sendable {
 
 enum StatementImportReviewFailure: Equatable, Sendable {
     case invalidReview
+    case invalidRows(Int)
+    case accountUnavailable
     case staleReview
     case storeFailure
     case unknown
@@ -47,6 +49,14 @@ struct StatementImportCommitConfirmation: Equatable, Sendable {
     let removesReviewedStatement: Bool
 }
 
+enum StatementImportRowIssue: Equatable, Sendable {
+    case account
+    case source
+    case amount
+    case category
+    case allocation
+}
+
 @MainActor
 @Observable
 final class StatementImportReview {
@@ -54,6 +64,7 @@ final class StatementImportReview {
     private(set) var statement: ParsedBankStatement
     private(set) var statementAccountID: UUID?
     private(set) var rows: [ReconciledImportRow] = []
+    private var saveFailures: [String: StatementImportRowIssue] = [:]
     private(set) var phase: StatementImportReviewPhase = .reviewing
 
     @ObservationIgnored private var snapshot: StatementImportReviewSnapshot
@@ -94,13 +105,33 @@ final class StatementImportReview {
         StatementImportSummary(rows: rows)
     }
 
-    var visibleRows: [ReconciledImportRow] {
-        rows.filter {
-            if case .skip = $0.resolution {
-                return false
-            }
-            return true
-        }
+    var invalidRows: [ReconciledImportRow] {
+        rows.filter { validationIssue(for: $0) != nil }
+    }
+
+    var validRows: [ReconciledImportRow] {
+        rows.filter { validationIssue(for: $0) == nil }
+    }
+
+    var visibleRows: [ReconciledImportRow] { invalidRows + validRows }
+
+    func validationIssue(for row: ReconciledImportRow) -> StatementImportRowIssue? {
+        guard !row.disposition.isExact else { return nil }
+        if let failure = saveFailures[row.id] { return failure }
+        guard let statementAccountID,
+            statement.currencyCode == VNDCurrency.code,
+            snapshot.accounts.contains(where: {
+                $0.id == statementAccountID && $0.currencyCode == VNDCurrency.code
+            })
+        else { return .account }
+        guard ImportSourceID(rawValue: row.id) != nil else { return .source }
+        guard row.candidate.amount > 0 else { return .amount }
+        guard resolutionIsValid(row.resolution, for: row) else { return .category }
+        return nil
+    }
+
+    var selectedCount: Int {
+        rows.filter { $0.isSelected && !$0.disposition.isExact }.count
     }
 
     var commitConfirmation: StatementImportCommitConfirmation? {
@@ -108,9 +139,7 @@ final class StatementImportReview {
         let summary = summary
         return StatementImportCommitConfirmation(
             summary: summary,
-            recordCount: summary.newTransactionCount
-                + summary.newTransferCount
-                + summary.linkedCount,
+            recordCount: summary.newTransactionCount,
             removesReviewedStatement: rows.allSatisfy(\.disposition.isExact)
         )
     }
@@ -143,14 +172,16 @@ final class StatementImportReview {
             return false
         }
 
+        guard selectedCount > 0 || rows.allSatisfy(\.disposition.isExact) else { return false }
         return rows.allSatisfy {
-            resolutionIsValid($0.resolution, for: $0, statementAccountID: statementAccountID)
+            !$0.isSelected
+                || validationIssue(for: $0) == nil
         }
     }
 
     func selectStatementAccount(_ accountID: UUID?) {
         guard isEditingAllowed else { return }
-        let choices = Dictionary(uniqueKeysWithValues: rows.map { ($0.id, $0.resolution) })
+        let choices = Dictionary(uniqueKeysWithValues: rows.map { ($0.id, $0) })
         statementAccountID = accountID
         phase = .reviewing
         generation = UUID()
@@ -164,7 +195,27 @@ final class StatementImportReview {
         else {
             return
         }
+        if resolution == .skip {
+            setSelected(false, forCandidateID: candidateID)
+            return
+        }
+        if saveFailures[candidateID] == .category {
+            saveFailures[candidateID] = nil
+        }
         rows[index].resolution = resolution
+        if validationIssue(for: rows[index]) != nil {
+            rows[index].isSelected = false
+        }
+        phase = .reviewing
+        generation = UUID()
+    }
+
+    func setSelected(_ isSelected: Bool, forCandidateID candidateID: String) {
+        guard isEditingAllowed,
+            let index = rows.firstIndex(where: { $0.id == candidateID }),
+            !rows[index].disposition.isExact
+        else { return }
+        rows[index].isSelected = isSelected && validationIssue(for: rows[index]) == nil
         phase = .reviewing
         generation = UUID()
     }
@@ -178,6 +229,7 @@ final class StatementImportReview {
         staged = preview.staged
         statement = preview.statement
         self.snapshot = snapshot
+        saveFailures = [:]
         statementAccountID = Self.initialStatementAccountID(
             for: preview.statement,
             snapshot: snapshot,
@@ -222,7 +274,22 @@ final class StatementImportReview {
             guard generation == expectedGeneration, staged.id == expectedStagedID else {
                 return
             }
-            phase = .failed(reviewFailure(for: error))
+            if let rowError = error as? StatementImportRowsError {
+                for failure in rowError.failures {
+                    saveFailures[failure.candidateID] = failure.issue
+                    if let index = rows.firstIndex(where: { $0.id == failure.candidateID }) {
+                        rows[index].isSelected = false
+                    }
+                }
+                phase = .failed(.invalidRows(rowError.failures.count))
+            } else {
+                if error as? StatementImportCommitError == .accountUnavailable {
+                    self.statementAccountID = nil
+                    rebuildRows(
+                        preserving: Dictionary(uniqueKeysWithValues: rows.map { ($0.id, $0) }))
+                }
+                phase = .failed(reviewFailure(for: error))
+            }
         }
     }
 
@@ -257,13 +324,14 @@ final class StatementImportReview {
         }?.id
     }
 
-    private func rebuildRows(preserving choices: [String: ImportRowResolution]) {
+    private func rebuildRows(preserving choices: [String: ReconciledImportRow]) {
         guard let statementAccountID else {
             rows = statement.candidates.map {
                 ReconciledImportRow(
                     candidate: $0,
                     disposition: .newTransaction,
-                    resolution: .unresolved
+                    resolution: choices[$0.id]?.resolution ?? .unresolved,
+                    isSelected: false
                 )
             }
             return
@@ -281,22 +349,23 @@ final class StatementImportReview {
             calendar: StatementImportReconciler.vietnamCalendar
         )
         rows = reconciliation.rows.map { row in
-            guard !row.disposition.isExact,
-                let choice = choices[row.id],
-                resolutionIsValid(choice, for: row, statementAccountID: statementAccountID)
-            else {
-                return row
-            }
             var preserved = row
-            preserved.resolution = choice
+            if !row.disposition.isExact, let previous = choices[row.id],
+                resolutionIsValid(previous.resolution, for: row)
+            {
+                preserved.resolution = previous.resolution
+                preserved.isSelected = previous.isSelected
+            }
+            if validationIssue(for: preserved) != nil {
+                preserved.isSelected = false
+            }
             return preserved
         }
     }
 
     private func resolutionIsValid(
         _ resolution: ImportRowResolution,
-        for row: ReconciledImportRow,
-        statementAccountID: UUID
+        for row: ReconciledImportRow
     ) -> Bool {
         if row.disposition.isExact {
             return resolution == .alreadyImported
@@ -307,24 +376,9 @@ final class StatementImportReview {
             return snapshot.categories.contains {
                 $0.id == categoryID && $0.kind == row.candidate.kind
             }
-        case let .newTransfer(otherAccountID, _):
-            return otherAccountID != statementAccountID
-                && snapshot.accounts.contains {
-                    $0.id == otherAccountID && $0.currencyCode == VNDCurrency.code
-                }
-        case let .linkTransaction(transactionID):
-            guard case let .possibleMatches(transactionIDs, _) = row.disposition else {
-                return false
-            }
-            return transactionIDs.contains(transactionID)
-        case let .linkTransfer(transferID):
-            guard case let .possibleMatches(_, transferIDs) = row.disposition else {
-                return false
-            }
-            return transferIDs.contains(transferID)
-        case .skip:
-            return true
-        case .alreadyImported, .unresolved:
+        case .newTransfer, .linkTransaction, .linkTransfer:
+            return false
+        case .skip, .alreadyImported, .unresolved:
             return false
         }
     }
@@ -336,6 +390,8 @@ final class StatementImportReview {
         switch commitError {
         case .invalidRequest:
             return .invalidReview
+        case .accountUnavailable:
+            return .accountUnavailable
         case .staleReview:
             return .staleReview
         case .storeFailure:

@@ -52,6 +52,11 @@ struct FundInstrumentCandidate: Sendable, Equatable, Identifiable {
     /// per management company, so every fund of one manager shares an image.
     /// `nil` for a listing that gives none, and nothing depends on it.
     let logoURL: String?
+    /// How the provider names this entry, when that is not the ticker. Carried
+    /// from the listing to `FundInstrument.providerID` so a later refresh asks
+    /// for the same thing that was imported. `nil` everywhere the ticker is the
+    /// identifier.
+    let providerID: String?
 
     var id: String { symbol }
 
@@ -63,7 +68,8 @@ struct FundInstrumentCandidate: Sendable, Equatable, Identifiable {
         askPricePerUnit: Decimal? = nil,
         priceAsOf: Date? = nil,
         owner: String = "",
-        logoURL: String? = nil
+        logoURL: String? = nil,
+        providerID: String? = nil
     ) {
         self.symbol = symbol
         self.name = name
@@ -73,6 +79,7 @@ struct FundInstrumentCandidate: Sendable, Equatable, Identifiable {
         self.priceAsOf = priceAsOf
         self.owner = owner
         self.logoURL = logoURL
+        self.providerID = providerID
     }
 }
 
@@ -125,8 +132,18 @@ enum FundQuoteError: Error, Equatable, Sendable {
 
 protocol FundQuoteProvider: Sendable {
     var source: FundQuoteSource { get }
-    func latestQuote(symbol: String, asOf: Date) async throws -> FundQuote
+    /// - Parameter providerID: How this provider names the instrument, when
+    ///   that is not the ticker. Only CoinGecko needs it; every other provider
+    ///   is keyed by symbol and ignores it.
+    func latestQuote(symbol: String, providerID: String?, asOf: Date) async throws -> FundQuote
     func search(_ query: String) async throws -> [FundInstrumentCandidate]
+}
+
+extension FundQuoteProvider {
+    /// The quote for an instrument the provider keys by ticker.
+    func latestQuote(symbol: String, asOf: Date) async throws -> FundQuote {
+        try await latestQuote(symbol: symbol, providerID: nil, asOf: asOf)
+    }
 }
 
 /// A quote provider that can offer its complete importable catalogue in one request.
@@ -143,15 +160,18 @@ struct FundQuoteRouter: Sendable {
     private let fmarket: any FundQuoteProvider
     private let vndirect: any FundQuoteProvider
     private let vangToday: any FundQuoteProvider
+    private let coinGecko: any FundQuoteProvider
 
     init(
         fmarket: any FundQuoteProvider = FmarketQuoteProvider(),
         vndirect: any FundQuoteProvider = VNDirectQuoteProvider(),
-        vangToday: any FundQuoteProvider = VangTodayQuoteProvider()
+        vangToday: any FundQuoteProvider = VangTodayQuoteProvider(),
+        coinGecko: any FundQuoteProvider = CoinGeckoQuoteProvider()
     ) {
         self.fmarket = fmarket
         self.vndirect = vndirect
         self.vangToday = vangToday
+        self.coinGecko = coinGecko
     }
 
     func provider(for kind: FundInstrumentKind) -> any FundQuoteProvider {
@@ -162,15 +182,19 @@ struct FundQuoteRouter: Sendable {
             vndirect
         case .gold:
             vangToday
+        case .crypto:
+            coinGecko
         }
     }
 
     func latestQuote(
         symbol: String,
+        providerID: String? = nil,
         kind: FundInstrumentKind,
         asOf: Date
     ) async throws -> FundQuote {
-        try await provider(for: kind).latestQuote(symbol: symbol, asOf: asOf)
+        try await provider(for: kind)
+            .latestQuote(symbol: symbol, providerID: providerID, asOf: asOf)
     }
 
     func search(

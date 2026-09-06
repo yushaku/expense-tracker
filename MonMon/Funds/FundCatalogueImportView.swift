@@ -3,6 +3,8 @@ import SwiftUI
 
 /// Picks instruments out of a provider's catalogue instead of typing them one at a time.
 struct FundCatalogueImportView: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     @Environment(\.dismiss) private var dismiss
@@ -67,6 +69,22 @@ struct FundCatalogueImportView: View {
         .tint(MonMonTheme.accent)
         .interactiveDismissDisabled(isSaving)
         .task { await importer.load(existing: instruments) }
+        // Debounced rather than sent per keystroke: the provider is a free
+        // public endpoint, and typing "bitcoin" would otherwise be seven
+        // requests for one answer. A newer keystroke replaces this task, so
+        // only the text somebody stopped on is ever asked about.
+        .task(id: searchText) {
+            guard importer.offersRemoteSearch else {
+                return
+            }
+
+            try? await Task.sleep(for: .milliseconds(400))
+            guard !Task.isCancelled else {
+                return
+            }
+
+            await importer.searchRemotely(searchText)
+        }
     }
 
     @ViewBuilder
@@ -148,7 +166,7 @@ struct FundCatalogueImportView: View {
 
     @ViewBuilder
     private var candidateContent: some View {
-        if isETF {
+        if isETF || isCrypto {
             ForEach(shown) { candidate in
                 row(candidate)
             }
@@ -297,6 +315,12 @@ struct FundCatalogueImportView: View {
                 .textFieldStyle(.plain)
                 .accessibilityIdentifier("import-search")
 
+            if importer.isSearchingRemotely {
+                ProgressView()
+                    .controlSize(.small)
+                    .accessibilityLabel("Searching")
+            }
+
             if !searchText.isEmpty {
                 Button {
                     searchText = ""
@@ -317,12 +341,19 @@ struct FundCatalogueImportView: View {
     }
 
     private var noMatches: some View {
-        Text("No \(itemNoun) matches “\(searchText)”.")
-            .font(.subheadline)
-            .foregroundStyle(MonMonTheme.textSecondary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, 24)
-            .accessibilityIdentifier("import-no-matches")
+        VStack(alignment: .leading, spacing: 6) {
+            Text("No \(itemNoun) matches “\(searchText)”.")
+
+            if let remoteMessage {
+                Text(remoteMessage)
+            }
+        }
+        .font(.subheadline)
+        .foregroundStyle(MonMonTheme.textSecondary)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 24)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("import-no-matches")
     }
 
     private func row(_ candidate: FundInstrumentCandidate) -> some View {
@@ -419,7 +450,7 @@ struct FundCatalogueImportView: View {
                 in: locale
             )
         }
-        return TransactionPeriod.day(day, in: locale)
+        return TransactionPeriod.day(day, in: locale, dateFormat: dateFormat)
     }
 
     private func toggle(_ symbol: String) {
@@ -477,6 +508,35 @@ struct FundCatalogueImportView: View {
 
     private var isGold: Bool { importer.source == .vangToday }
     private var isETF: Bool { importer.source == .vndirect }
+    private var isCrypto: Bool { importer.source == .coinGecko }
+
+    /// What to say under a search the loaded list did not answer.
+    ///
+    /// Only where a remote lookup is possible at all: telling somebody a
+    /// complete catalogue is still being searched would be untrue.
+    private var remoteMessage: LocalizedStringKey? {
+        guard importer.offersRemoteSearch else {
+            return nil
+        }
+
+        if importer.isSearchingRemotely {
+            return "Asking \(providerName)…"
+        }
+
+        switch importer.remoteSearchFailure {
+        case .none:
+            return searchText.trimmingCharacters(in: .whitespacesAndNewlines).count
+                < FundCatalogueImport.remoteSearchMinimumLength
+                ? "Type at least \(FundCatalogueImport.remoteSearchMinimumLength) characters."
+                : "\(providerName) has nothing under that name either."
+        case .rateLimited:
+            return "Checked a moment ago. Try again shortly."
+        case .transport:
+            return "No connection, so only the loaded list was searched."
+        default:
+            return "\(providerName) could not answer that search."
+        }
+    }
     private var providerName: String { importer.source.displayName(in: locale) }
     /// The nouns this screen builds its sentences from, in the language on
     /// show. Vietnamese does not change a noun for number, so one word answers
@@ -484,6 +544,9 @@ struct FundCatalogueImportView: View {
     private var itemNoun: String {
         if isGold {
             return AppText.string(key: "gold products", in: locale)
+        }
+        if isCrypto {
+            return AppText.string(key: "coins", in: locale)
         }
         return AppText.string(key: isETF ? "ETFs" : "funds", in: locale)
     }
@@ -494,6 +557,9 @@ struct FundCatalogueImportView: View {
     private var searchPlaceholder: String {
         if isGold {
             return AppText.string("Code, name or brand", in: locale)
+        }
+        if isCrypto {
+            return AppText.string("Ticker or coin name", in: locale)
         }
         return AppText.string(
             key: isETF ? "Ticker or name" : "Ticker, name or manager",

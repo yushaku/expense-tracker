@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct FundEditorForm: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     @Binding var draft: FundDraft
@@ -9,10 +11,16 @@ struct FundEditorForm: View {
     /// The catalogue to pick from. A position is held in something that already
     /// exists, so the form selects rather than retypes.
     let instruments: [FundInstrument]
-    let isGold: Bool
+    /// The kinds this form is scoped to, as its editor was opened with. The
+    /// copy and the units follow from it: gold is weighed in chỉ, a coin is
+    /// counted to eight places, and a fund or ETF in whole-ish units.
+    let kinds: [FundInstrumentKind]
     let isEditing: Bool
     let validationError: FundFormError?
     let saveErrorMessage: LocalizedStringKey?
+    /// What the rate lookup has to say, when it has anything. The form neither
+    /// fetches nor decides — it only shows what the editor found out.
+    var rateStatusMessage: String?
     let onAddInstrument: () -> Void
     let onDelete: () -> Void
 
@@ -46,7 +54,7 @@ struct FundEditorForm: View {
 
     private var introduction: some View {
         HStack(spacing: 16) {
-            Image(systemName: isGold ? "seal.fill" : "chart.line.uptrend.xyaxis")
+            Image(systemName: introductionSymbol)
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(MonMonTheme.onAccent)
                 .frame(width: 46, height: 46)
@@ -54,16 +62,12 @@ struct FundEditorForm: View {
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(isGold ? "The gold you hold" : "What you hold, what it is worth")
+                Text(introductionTitle)
                     .font(.title3.weight(.semibold))
 
-                Text(
-                    isGold
-                        ? "Pick a gold product, then enter its weight in chỉ."
-                        : "Pick what you hold, then say how much of it you own."
-                )
-                .font(.subheadline)
-                .foregroundStyle(MonMonTheme.textSecondary)
+                Text(introductionDescription)
+                    .font(.subheadline)
+                    .foregroundStyle(MonMonTheme.textSecondary)
             }
         }
     }
@@ -120,7 +124,7 @@ struct FundEditorForm: View {
     /// one ticker used to end up disagreeing.
     private func instrumentExplanation(_ instrument: FundInstrument) -> String {
         let price = VNDCurrency.formatUnitPrice(instrument.currentPricePerUnit)
-        let day = TransactionPeriod.day(instrument.priceAsOf, in: locale)
+        let day = TransactionPeriod.day(instrument.priceAsOf, in: locale, dateFormat: dateFormat)
         return AppText.string(
             """
             \(instrument.kind.displayName(in: locale)) · \
@@ -136,35 +140,56 @@ struct FundEditorForm: View {
             VStack(alignment: .leading, spacing: 18) {
                 sectionHeader("Position", systemImage: "chart.bar.fill")
 
-                VStack(alignment: .leading, spacing: 8) {
-                    fieldLabel(isGold ? "Weight (chỉ)" : "Units")
+                if offersGoldUnitChoice {
+                    SegmentedTabs(
+                        label: "Unit",
+                        selection: $draft.goldUnit,
+                        options: GoldUnit.allCases,
+                        title: \.displayName
+                    )
+                    .accessibilityIdentifier("fund-gold-unit")
+                }
 
-                    unitsTextField
-                        .textFieldStyle(.plain)
-                        .font(.system(.title2, design: .rounded, weight: .semibold))
-                        .monospacedDigit()
-                        .padding(16)
-                        .background(
-                            MonMonTheme.field,
-                            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        )
+                VStack(alignment: .leading, spacing: 8) {
+                    fieldLabel(quantityLabel)
+
+                    HStack(spacing: 12) {
+                        unitsTextField
+                            .textFieldStyle(.plain)
+                            .font(.system(.title2, design: .rounded, weight: .semibold))
+                            .monospacedDigit()
+
+                        Text(entryUnitName)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(MonMonTheme.textSecondary)
+                            .accessibilityHidden(true)
+                    }
+                    .padding(16)
+                    .background(
+                        MonMonTheme.field,
+                        in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    )
 
                     if let unitsErrorMessage {
                         validationMessage(unitsErrorMessage, id: "fund-units-error")
                     }
-
-                    if isGold, let luong = GoldWeight.parseChi(draft.unitsText) {
-                        Text("Stored as \(UnitQuantity.format(luong)) lượng")
-                            .font(.caption)
-                            .foregroundStyle(MonMonTheme.textSecondary)
-                    }
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
-                    fieldLabel(isGold ? "Average cost per lượng" : "Average cost per unit")
+                    fieldLabel(averageCostLabel)
+
+                    if offersDollarEntry {
+                        SegmentedTabs(
+                            label: "Cost currency",
+                            selection: $draft.costCurrency,
+                            options: PriceEntryCurrency.allCases,
+                            title: \.displayName
+                        )
+                        .accessibilityIdentifier("fund-cost-currency")
+                    }
 
                     HStack(spacing: 12) {
-                        Text("₫")
+                        Text(draft.costCurrency.symbol)
                             .font(.title3.weight(.bold))
                             .foregroundStyle(MonMonTheme.funds)
 
@@ -172,9 +197,12 @@ struct FundEditorForm: View {
                             .textFieldStyle(.plain)
                             .monospacedDigit()
                             .multilineTextAlignment(.trailing)
-                            .accessibilityLabel(
-                                isGold ? "Average cost per lượng" : "Average cost per unit"
-                            )
+                            .accessibilityLabel(averageCostLabel)
+
+                        Text(perPriceUnitLabel)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(MonMonTheme.textSecondary)
+                            .accessibilityHidden(true)
                     }
                     .padding(14)
                     .background(
@@ -188,6 +216,32 @@ struct FundEditorForm: View {
                             id: "fund-average-cost-error"
                         )
                     }
+
+                    if !isEditing {
+                        Text(
+                            "Filled in from today's buy price. Change it to what you actually paid."
+                        )
+                        .font(.caption)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                        .accessibilityIdentifier("fund-average-cost-hint")
+                    }
+                }
+
+                if let costWorkingText {
+                    Text(costWorkingText)
+                        .font(.footnote)
+                        .foregroundStyle(MonMonTheme.textPrimary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(14)
+                        .background(
+                            MonMonTheme.field,
+                            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        )
+                        .accessibilityIdentifier("fund-cost-working")
+                }
+
+                if draft.costCurrency == .usd {
+                    exchangeRateField
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -270,8 +324,196 @@ struct FundEditorForm: View {
 
     @ViewBuilder
     private var averageCostTextField: some View {
-        VNDTextField(text: $draft.averageCostText, keyboard: .decimal)
-            .accessibilityIdentifier("fund-average-cost")
+        // Đồng gets the grouping field the rest of the app types money into.
+        // Dollars get a plain decimal box: đồng grouping would put a separator
+        // where a dollar's decimal point belongs.
+        if draft.costCurrency == .usd {
+            plainDecimalField(text: $draft.averageCostText, identifier: "fund-average-cost")
+        } else {
+            VNDTextField(text: $draft.averageCostText, keyboard: .decimal)
+                .accessibilityIdentifier("fund-average-cost")
+        }
+    }
+
+    /// The rate box, shown only while the cost is being typed in dollars.
+    ///
+    /// It carries a fetched starting value and stays editable, because the rate
+    /// that matters is the one the owner's exchange gave them, not a published
+    /// mid. What lands in the store is the đồng underneath, and it is spelled
+    /// out here so nothing is converted out of sight.
+    private var exchangeRateField: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            fieldLabel("Rate used (₫ per $)")
+
+            HStack(spacing: 12) {
+                Text("₫")
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(MonMonTheme.funds)
+
+                VNDTextField(text: $draft.exchangeRateText, keyboard: .decimal)
+                    .textFieldStyle(.plain)
+                    .monospacedDigit()
+                    .multilineTextAlignment(.trailing)
+                    .accessibilityLabel("Rate used")
+                    .accessibilityIdentifier("fund-exchange-rate")
+            }
+            .padding(14)
+            .background(
+                MonMonTheme.field,
+                in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+            )
+
+            if let exchangeRateErrorMessage {
+                validationMessage(exchangeRateErrorMessage, id: "fund-exchange-rate-error")
+            }
+
+            if let rateStatusMessage {
+                Text(rateStatusMessage)
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            } else if let storedRateCaption {
+                Text(storedRateCaption)
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .accessibilityIdentifier("fund-stored-rate-caption")
+            }
+
+            if let convertedCost {
+                Text("Stored as \(convertedCost) ₫")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .accessibilityIdentifier("fund-converted-cost")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func plainDecimalField(text: Binding<String>, identifier: String) -> some View {
+        #if os(iOS)
+            TextField("0", text: text)
+                .keyboardType(.decimalPad)
+                .accessibilityIdentifier(identifier)
+        #else
+            TextField("0", text: text)
+                .accessibilityIdentifier(identifier)
+        #endif
+    }
+
+    /// The đồng the typed dollars come to, so the owner sees the number that
+    /// will actually be stored before storing it. Absent until both boxes hold
+    /// something usable.
+    private var convertedCost: String? {
+        guard draft.costCurrency == .usd,
+            let dollars = USDPrice.parse(draft.averageCostText),
+            let rate = VNDCurrency.parse(draft.exchangeRateText),
+            let dong = USDPrice.inDong(dollars, rate: rate)
+        else {
+            return nil
+        }
+        return VNDCurrency.formatUnitPrice(dong)
+    }
+
+    /// Says the rate in the box is the one this position was bought at, not a
+    /// rate the app forgot to refresh.
+    ///
+    /// Only while editing, and only when nothing was fetched this time round —
+    /// a fetched rate has `rateStatusMessage` to explain itself, and saying
+    /// both would be two answers to one question.
+    private var storedRateCaption: LocalizedStringKey? {
+        guard isEditing, draft.costCurrency == .usd else {
+            return nil
+        }
+        return
+            "Rate at purchase, \(TransactionPeriod.day(draft.purchasedAt, in: locale, dateFormat: dateFormat))."
+    }
+
+    /// Dollars are offered where things are actually bought in them. Vietnamese
+    /// funds, ETFs and gold are bought in đồng, so a currency switch on those
+    /// forms would be a box to ignore rather than a feature.
+    /// Only gold has two units to choose between.
+    private var offersGoldUnitChoice: Bool { instrumentPolicy.quantity.usesGoldSummary }
+
+    /// The unit both boxes are in, named in the language on show.
+    private var entryUnitName: String {
+        offersGoldUnitChoice
+            ? AppText.string(key: draft.goldUnit.displayNameKey, in: locale)
+            : AppText.string(key: instrumentPolicy.quantity.entryUnitLabelKey, in: locale)
+    }
+
+    private var quantityLabel: LocalizedStringKey {
+        offersGoldUnitChoice ? "Weight" : instrumentPolicy.quantity.holdingFieldTitle
+    }
+
+    private var perPriceUnitLabel: String {
+        "/ \(priceUnitName)"
+    }
+
+    /// What the price is quoted against. The same unit as the quantity, always:
+    /// that is the whole point of letting gold choose one.
+    private var priceUnitName: String {
+        offersGoldUnitChoice
+            ? entryUnitName
+            : AppText.string(key: instrumentPolicy.priceUnitLabelKey, in: locale)
+    }
+
+    /// The purchase spelled out: how much, at what, for how much altogether.
+    ///
+    /// Gold is the reason this exists. It is bought in chỉ and quoted per
+    /// lượng, so two adjacent boxes hold numbers in different units and nothing
+    /// on screen related them — "2" and "150.000.000" reads as a purchase ten
+    /// times the size of the one being recorded. This line does the conversion
+    /// where it can be seen, and ends on the figure that actually leaves the
+    /// funding account.
+    ///
+    /// `nil` until both boxes hold something usable, so it never shows a
+    /// confident zero.
+    private var costWorkingText: String? {
+        guard let quantity = UnitQuantity.parse(draft.unitsText), quantity > 0,
+            let perUnit = averageCostPerUnitInDong, perUnit > 0
+        else {
+            return nil
+        }
+
+        // Both figures are in the same unit, so the total is simply their
+        // product — no factor hides between this line and the boxes above it.
+        let total = FundValuation.costBasis(units: quantity, averageCostPerUnit: perUnit)
+
+        return "\(UnitQuantity.format(quantity)) \(entryUnitName)"
+            + " × \(VNDCurrency.formatUnitPrice(perUnit)) ₫/\(entryUnitName)"
+            + " = \(VNDCurrency.formatPlain(total)) ₫"
+    }
+
+    /// The typed cost in đồng, whichever currency it was typed in.
+    private var averageCostPerUnitInDong: Decimal? {
+        switch draft.costCurrency {
+        case .vnd:
+            return VNDCurrency.parse(draft.averageCostText)
+        case .usd:
+            guard let dollars = USDPrice.parse(draft.averageCostText),
+                let rate = VNDCurrency.parse(draft.exchangeRateText)
+            else {
+                return nil
+            }
+            return USDPrice.inDong(dollars, rate: rate)
+        }
+    }
+
+    private var offersDollarEntry: Bool { instrumentPolicy.allowsDollarPriceEntry }
+
+    private var averageCostLabel: LocalizedStringKey {
+        offersGoldUnitChoice
+            ? "Average cost" : LocalizedStringKey(instrumentPolicy.editor.averageCostTitleKey)
+    }
+
+    private var exchangeRateErrorMessage: LocalizedStringKey? {
+        switch validationError {
+        case .invalidExchangeRate:
+            "Enter the rate you paid, in đồng per dollar."
+        case .nonPositiveExchangeRate:
+            "The rate must be greater than zero."
+        default:
+            nil
+        }
     }
 
     private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {
@@ -330,17 +572,15 @@ struct FundEditorForm: View {
 
     private var instrumentErrorMessage: LocalizedStringKey? {
         guard validationError == .missingInstrument else { return nil }
-        return isGold
-            ? "Pick the gold product this position is held in."
-            : "Pick the fund or ETF this position is held in."
+        return LocalizedStringKey(instrumentPolicy.editor.missingInstrumentMessageKey)
     }
 
     private var unitsErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidUnits:
-            isGold ? "Enter a valid weight in chỉ." : "Enter a valid number of units."
+            instrumentPolicy.quantity.invalidHoldingMessage
         case .nonPositiveUnits:
-            isGold ? "Weight must be greater than zero." : "Units must be greater than zero."
+            instrumentPolicy.quantity.nonPositiveHoldingMessage
         default:
             nil
         }
@@ -349,7 +589,9 @@ struct FundEditorForm: View {
     private var averageCostErrorMessage: LocalizedStringKey? {
         switch validationError {
         case .invalidAverageCost:
-            "Enter a valid average cost per unit."
+            draft.costCurrency == .usd
+                ? "Enter a valid average cost in dollars."
+                : "Enter a valid average cost per unit."
         case .nonPositiveAverageCost:
             "Average cost must be greater than zero."
         default:
@@ -363,13 +605,27 @@ struct FundEditorForm: View {
     }
 
     private var emptyInstrumentText: String {
-        isGold
-            ? "No gold product in the catalogue yet. Add one from vang.today."
-            : "No fund or ETF in the catalogue yet. Add one to hold it."
+        instrumentPolicy.editor.emptyCatalogueMessageKey
     }
 
     private var addInstrumentTitle: String {
-        isGold ? "Add from vang.today" : "Add instrument"
+        instrumentPolicy.editor.addInstrumentTitleKey
+    }
+
+    private var introductionSymbol: String {
+        instrumentPolicy.editor.introductionSymbol
+    }
+
+    private var introductionTitle: LocalizedStringKey {
+        LocalizedStringKey(instrumentPolicy.editor.introductionTitleKey)
+    }
+
+    private var introductionDescription: LocalizedStringKey {
+        LocalizedStringKey(instrumentPolicy.editor.introductionDescriptionKey)
+    }
+
+    private var instrumentPolicy: FundInstrumentPolicy {
+        (kinds.first ?? .fund).policy
     }
 }
 
@@ -410,7 +666,7 @@ struct FundEditorForm: View {
                         ),
                     ],
                     instruments: instruments,
-                    isGold: false,
+                    kinds: [.fund, .etf],
                     isEditing: isEditing,
                     validationError: validationError,
                     saveErrorMessage: saveErrorMessage,

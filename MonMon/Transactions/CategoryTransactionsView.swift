@@ -12,6 +12,8 @@ struct CategoryPeriod: Hashable {
 
 /// The transactions behind one wedge of the spending doughnut.
 struct CategoryTransactionsView: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
@@ -96,7 +98,7 @@ struct CategoryTransactionsView: View {
     private var summaryCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             Label(
-                period.range.title(in: locale).uppercased(),
+                period.range.title(in: locale, dateFormat: dateFormat).uppercased(),
                 systemImage: period.kind.symbolName
             )
             .font(.caption.weight(.semibold))
@@ -134,7 +136,7 @@ struct CategoryTransactionsView: View {
     }
 
     private var emptyNotice: LocalizedStringKey {
-        "Nothing left under this category \(period.range.phrase(in: locale))."
+        "Nothing left under this category \(period.range.phrase(in: locale, dateFormat: dateFormat))."
     }
 
     private func category(for transaction: MoneyTransaction) -> TransactionCategory? {

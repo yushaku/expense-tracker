@@ -663,7 +663,9 @@
     <h1>Architecture map</h1>
     <p class="lede">
       Sixteen <code>@Model</code> types backed by SwiftData, the set registered by
-      <code>MonMonSchema.models</code>. Relationships are <strong>not</strong>
+      <code>MonMonSchema.models</code>. Two more exist in the source and are deliberately
+      absent from it: the MCP snapshot records live in their own App Group store, so nothing
+      the server reads can reach the financial container. Relationships are <strong>not</strong>
       declared with <code>@Relationship</code> &mdash; every association is a hand-stored
       <code>UUID</code> foreign key, resolved in Swift at read time
       (<code>accounts.first { $0.id == someID }</code>). Money-moving records sit around the
@@ -808,6 +810,8 @@
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">purchasedAt</span><span class="ftype">Date?</span>
             <span class="badges"><span class="badge null">? &mdash; falls back to createdAt</span></span></li>
+          <li class="field"><span class="fname">purchaseExchangeRate</span><span class="ftype">Decimal?</span>
+            <span class="badges"><span class="badge null">₫ per $ when the cost was typed in dollars</span></span></li>
           <li class="field key" data-anchor="FundHolding.instrumentID">
             <span class="fname">instrumentID</span><span class="ftype">UUID?</span>
             <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span></span>
@@ -819,7 +823,7 @@
         </ul>
         <div class="derived">
           <div class="derived-label">Derived &mdash; computed, not stored</div>
-          <div class="derived-list">boughtOn &middot; remainingUnits &middot; costBasis &middot; realized / unrealized P&amp;L &middot; marketValue</div>
+          <div class="derived-list">boughtOn &middot; remainingUnits &middot; costBasis &middot; realized / unrealized P&amp;L &middot; marketValue &middot; averageCostPerUnitInDollars</div>
         </div>
       </article>
 
@@ -828,7 +832,7 @@
                style="--e: var(--e-fund); grid-column: 3; grid-row: 2; align-self: center;">
         <div class="e-head">
           <div class="e-name">FundInstrument</div>
-          <div class="e-role">One catalogue row per fund, ETF or gold product, owning its current quote</div>
+          <div class="e-role">One catalogue row per fund, ETF, gold product or coin, owning its current quote</div>
           <div class="e-file">MonMon/Funds/FundInstrument.swift</div>
         </div>
         <ul class="fields">
@@ -843,7 +847,7 @@
           <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">kind</span><span class="ftype">FundInstrumentKind</span>
-            <span class="badges"><span class="badge enum">enum: fund | etf | gold</span></span>
+            <span class="badges"><span class="badge enum">enum: fund | etf | gold | crypto</span></span>
           </li>
           <li class="field"><span class="fname">currentPricePerUnit</span><span class="ftype">Decimal</span></li>
           <li class="field"><span class="fname">askPricePerUnit</span><span class="ftype">Decimal</span>
@@ -858,12 +862,24 @@
           </li>
           <li class="field">
             <span class="fname">priceSource</span><span class="ftype">String</span>
-            <span class="badges"><span class="badge enum">manual | fmarket | vndirect | vangToday</span></span>
+            <span class="badges"><span class="badge enum">manual | fmarket | vndirect | vangToday | coinGecko</span></span>
           </li>
           <li class="field"><span class="fname">autoQuoteEnabled</span><span class="ftype">Bool</span></li>
+          <li class="field">
+            <span class="fname">logoURL</span><span class="ftype">String?</span>
+            <span class="badges"><span class="badge null">cosmetic; manager or coin image</span></span>
+          </li>
+          <li class="field">
+            <span class="fname">providerID</span><span class="ftype">String?</span>
+            <span class="badges"><span class="badge null">provider's own key when it is not the ticker</span></span>
+          </li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
         </ul>
+        <div class="derived">
+          <div class="derived-label">Derived &mdash; computed, not stored</div>
+          <div class="derived-list">source &middot; priceLabelKey &middot; purchasePricePerUnit</div>
+        </div>
       </article>
 
       <!-- ============ FundSale ============ -->
@@ -871,7 +887,7 @@
                style="--e: var(--e-fund); grid-column: 3; grid-row: 3; align-self: center;">
         <div class="e-head">
           <div class="e-name">FundSale</div>
-          <div class="e-role">Dated units sold from one lot, with proceeds returned to cash</div>
+          <div class="e-role">Dated units leaving one lot, for cash or for another coin</div>
           <div class="e-file">MonMon/Funds/FundSale.swift</div>
         </div>
         <ul class="fields">
@@ -883,18 +899,26 @@
           </li>
           <li class="field"><span class="fname">units</span><span class="ftype">Decimal</span></li>
           <li class="field"><span class="fname">pricePerUnit</span><span class="ftype">Decimal</span></li>
+          <li class="field"><span class="fname">fee</span><span class="ftype">Decimal</span>
+            <span class="badges"><span class="badge">0 unless the shop deducted one</span></span></li>
           <li class="field key" data-anchor="FundSale.proceedsAccountID">
             <span class="fname">proceedsAccountID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span><span class="badge null">ignored on a swap</span></span>
           </li>
           <li class="field"><span class="fname">soldAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
+          <li class="field"><span class="fname">exchangeRate</span><span class="ftype">Decimal?</span>
+            <span class="badges"><span class="badge null">₫ per $ when the price was typed in dollars</span></span></li>
+          <li class="field key" data-anchor="FundSale.swapHoldingID">
+            <span class="fname">swapHoldingID</span><span class="ftype">UUID?</span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">the lot a swap bought</span></span>
+          </li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
         </ul>
         <div class="derived">
           <div class="derived-label">Derived &mdash; computed, not stored</div>
-          <div class="derived-list">proceeds &middot; costBasis(costPerUnit:) &middot; realizedProfitLoss</div>
+          <div class="derived-list">grossProceeds &middot; proceeds &middot; costBasis(costPerUnit:) &middot; realizedProfitLoss &middot; pricePerUnitInDollars &middot; isSwap</div>
         </div>
       </article>
 
@@ -1573,14 +1597,31 @@
           <div class="n-meta">www.vang.today · module: market-valuation</div>
         </div>
 
-        <div class="node unbuilt" id="sys-mcp" tabindex="0">
+        <div class="node" id="sys-coingecko" tabindex="0">
           <div class="n-top">
-            <span class="n-name">Read-only MCP server</span>
-            <span class="chip roadmap">Roadmap</span>
+            <span class="n-name">CoinGecko API</span>
+            <span class="chip built">Built</span>
           </div>
           <p class="n-desc">
-            A macOS server exposing synchronized records to AI clients. Read operations
-            only &mdash; it can neither mutate a record nor execute a trade.
+            Catalogue, search and spot price for coins, asked for and answered in VND, so
+            no exchange rate enters the valuation path at all. Keyed by CoinGecko's own
+            identifier rather than the ticker, because tickers collide. It also answers with
+            the đồng price of the dollar, which fills the rate box on a coin editor as a
+            starting value. Unauthenticated and rate-limited; a refusal is reported as such
+            and the last known-good price stands.
+          </p>
+          <div class="n-meta">api.coingecko.com · module: market-valuation</div>
+        </div>
+
+        <div class="node" id="sys-mcp" tabindex="0">
+          <div class="n-top">
+            <span class="n-name">Read-only MCP server</span>
+            <span class="chip built">Built</span>
+          </div>
+          <p class="n-desc">
+            An embedded macOS stdio server exposing raw records from an App Group SQLite
+            snapshot after explicit consent. It has no CloudKit entitlement and can neither
+            mutate a business record nor execute a trade.
           </p>
           <div class="n-meta">module: mcp-readonly</div>
         </div>
@@ -1624,17 +1665,17 @@
       </li>
       <li class="import-step">
         <h3>Reconcile current data</h3>
-        <p>Stable candidate fingerprints find exact imports first; amount, day, account and kind then surface possible transaction or transfer matches.</p>
+        <p>Stable candidate fingerprints identify previously imported transactions and legacy transfers. Possible amount/day matches remain new transactions; the owner can uncheck them.</p>
         <div class="n-meta">StatementImportReconciler · no writes</div>
       </li>
       <li class="import-step">
         <h3>Owner resolves rows</h3>
-        <p>Each row becomes a new transaction, a new transfer, a link to an existing record, a skip, or already imported. Unresolved rows block commit.</p>
+        <p>New rows are selected by default and create income/expense transactions. Checkboxes exclude rows without hiding them or losing category/note edits. Only selected unresolved rows block commit; balances and aggregate statement totals are not reconciled.</p>
         <div class="n-meta">StatementImportReview · account + category checks</div>
       </li>
       <li class="import-step">
         <h3>Recheck, save, clean up</h3>
-        <p>A fresh context repeats reconciliation to reject stale reviews, saves all financial changes once, remembers the bank-account mapping, then removes the staged PDF.</p>
+        <p>A fresh context rechecks provenance and validates the selected transactions, saves them once, remembers the bank-account mapping, then removes the staged PDF. No transfer or link action is accepted.</p>
         <div class="n-meta">CommitService → SwiftData → UserDefaults → inbox cleanup</div>
       </li>
     </ol>
@@ -1822,6 +1863,144 @@
       </p>
     </div>
     <div class="note">
+      <h3>A swap is a sale that pays into a coin</h3>
+      <p>
+        Most coin trading never reaches a bank: one coin is exchanged for another, usually a
+        stablecoin, and no đồng moves. It is still a disposal — the units leave the lot and
+        their gain is settled — so it is recorded as a <code>FundSale</code> plus a new
+        <code>FundHolding</code>, written in one save. A fourth kind of record would have
+        made every summary in the app learn a new shape.
+      </p>
+      <p>
+        <code>swapHoldingID</code> is both the flag and the link.
+        <code>FundSaleSummary.netFlow</code>, its <code>count(for:)</code> and
+        <code>AccountLinkedSourceSummary</code> all skip a sale carrying one, and the lot it
+        bought names no funding account, so <code>CashBalanceSummary.fundedAmount</code>
+        skips that too. Without those guards the trade would be counted twice: as đồng in an
+        account that received nothing, and again as the coin bought.
+      </p>
+      <p>
+        One value settles both legs by construction — the sale's gross proceeds
+        <em>are</em> the new lot's cost basis. Typed apart, a swap could create or destroy
+        value on a trade where nothing entered or left the portfolio.
+      </p>
+    </div>
+    <div class="note">
+      <h3>A sale fee leaves, a swap value does not</h3>
+      <p>
+        <code>fee</code> is what a shop deducted on the way out, so <code>proceeds</code> is
+        gross minus fee and realized profit follows it down. Over a round trip the funding
+        account moves by the realized profit alone, exactly as it did before fees existed;
+        the fee simply leaves net worth, because it left for the shop.
+      </p>
+      <p>
+        Closing several lots at once splits one typed fee across them by gross proceeds.
+        Shares are floored and the shortfall handed to lots with room, because a share that
+        reached its own lot's proceeds would be a sale the editor refuses to write and the
+        backup validator refuses to restore.
+      </p>
+    </div>
+    <div class="note">
+      <h3>One mapping per asset kind</h3>
+      <p>
+        The shared forms and cards used to branch on <code>.gold</code>, then on
+        <code>.crypto</code>, in a dozen places each. They now read a
+        <code>FundInstrumentPolicy</code> off <code>FundInstrumentKind</code>: the quantity
+        it is counted in, whether it may be priced in dollars, whether it can be swapped,
+        which fee it can carry, and the copy its editor uses.
+      </p>
+      <p>
+        Adding an asset kind therefore has exactly one required place to fill in, and the
+        compiler asks for it. The bug that prompted this was a screen deciding its catalogue
+        with <code>kind == .gold ? … : …</code>, which quietly offered funds to a coin
+        position and made it unsaveable.
+      </p>
+    </div>
+    <div class="note">
+      <h3>Two prices, and which one a form wants</h3>
+      <p>
+        A fund, an ETF and a coin are bought and valued at one published figure.
+        Gold is not: a shop sells at one price and buys back at a lower one, and
+        <code>currentPricePerUnit</code> holds the buy-back side, because that is what
+        valuation needs &mdash; what the owner would receive.
+      </p>
+      <p>
+        A cost basis wants the other side. <code>purchasePricePerUnit</code> answers with the
+        asking price for gold and the published price for everything else, and it is what
+        prefills the cost box when a position is added. Prefilling with the valuation price
+        would understate every gold purchase by the spread and hide the loss that buying gold
+        genuinely opens with &mdash; a loss the app is otherwise careful to show.
+      </p>
+    </div>
+    <div class="note">
+      <h3>Gold's entry unit never reaches the store</h3>
+      <p>
+        Gold is stored in lượng and bought in chỉ. Which of the two the owner types in is a
+        property of the form, not of the record: <code>GoldUnit</code> lives on the draft,
+        defaults to chỉ, and is converted away at the view boundary &mdash; the weight
+        divided by the factor and the price multiplied by it, so either unit saves the same
+        position.
+      </p>
+      <p>
+        It governs both boxes together on purpose. A weight in chỉ beside a price per lượng
+        is two numbers a factor of ten apart with nothing on screen saying so, which reads as
+        a purchase ten times the size of the one being recorded.
+      </p>
+    </div>
+    <div class="note">
+      <h3>Why a coin carries a <code>providerID</code></h3>
+      <p>
+        Every other provider is keyed by the ticker the owner already sees. CoinGecko is not:
+        it names coins itself &mdash; <code>bitcoin</code>, not <code>BTC</code> &mdash; and a
+        ticker is shared by many coins, so asking by ticker would price whichever one the
+        endpoint preferred. The identifier is captured at import and stored beside the price.
+        It is optional and defaults to <code>nil</code>, so nothing else in the catalogue
+        changed and a backup written before coins existed still decodes.
+      </p>
+    </div>
+    <div class="note">
+      <h3>Dollars are converted once, on the way in</h3>
+      <p>
+        Coins are bought in dollars and this app counts in đồng. The two meet exactly once,
+        in <code>FundDraft</code> and <code>FundSaleDraft</code>, on the way into the store.
+        <code>averageCostPerUnit</code> and <code>pricePerUnit</code> are đồng whichever
+        currency was typed, so no total, cost basis or profit figure has to ask which
+        currency it is in. What the rate fields record is only <em>how</em> the đồng figure
+        was arrived at.
+      </p>
+      <p>
+        The rate is the owner's, not a market's: coins are bought through an exchange or a
+        P2P desk whose rate is not the published one, and what has to end up in the store is
+        the đồng that actually left the account. A fetched rate is a starting value to
+        correct, never an answer.
+      </p>
+    </div>
+    <div class="note">
+      <h3>A stored rate never refreshes</h3>
+      <p>
+        <code>FundHolding.purchaseExchangeRate</code> and <code>FundSale.exchangeRate</code>
+        are read in three places, all of them data entry: the two draft initialisers that
+        reopen an editor in the currency it was typed in, and the backup document. Nothing in
+        valuation reads either. Refreshing them would move a settled cost basis &mdash; last
+        year's purchase would have cost a different amount this morning.
+      </p>
+      <p>
+        Nothing goes stale by leaving them alone, because market value never passes through a
+        rate: <code>FundInstrument.currentPricePerUnit</code> arrives from CoinGecko already
+        in đồng, and refreshes on its own fifteen-minute clock.
+      </p>
+    </div>
+    <div class="note">
+      <h3>A coin's price goes stale by the clock</h3>
+      <p>
+        <code>TradingCalendar</code> decides staleness by session: an ETF against the last
+        close, a fund with a day of T+1 grace, gold at midnight. Crypto has no session, so it
+        is compared to the minute instead &mdash; a price older than fifteen minutes is stale,
+        whatever the weekday. Rounding it to the start of a day would call a price taken at
+        one minute past midnight current until the next one.
+      </p>
+    </div>
+    <div class="note">
       <h3>Enums stored as String</h3>
       <p>
         <code>CashAccountKind</code>, <code>TransactionKind</code>, <code>FundInstrumentKind</code>,
@@ -1835,7 +2014,9 @@
       <p>
         Denormalised onto every money-bearing entity, always written from <code>VNDCurrency.code</code>.
         Nothing enforces that related records share a currency. The fund split removed one
-        copy: a holding no longer stores it and reads the instrument's instead.
+        copy: a holding no longer stores it and reads the instrument's instead. A dollar
+        entry does not change this &mdash; see the note below: the dollars are converted
+        before they reach a model, so every stored amount is still đồng.
       </p>
     </div>
     <div class="note">
@@ -1849,16 +2030,17 @@
     <div class="note">
       <h3>Market-quote privacy boundary</h3>
       <p>
-        Quote requests send a fund or ETF symbol, or a gold product type code, and nothing
-        else &mdash; no balance, unit count, cost basis, or account name. A provider can learn
-        which quote was requested, but not whether the owner holds it or how much.
+        Quote requests send a fund or ETF symbol, a gold product type code, or a coin
+        identifier, and nothing else &mdash; no balance, unit count, cost basis, or account
+        name. A provider can learn which quote was requested, but not whether the owner holds
+        it or how much.
       </p>
     </div>
     <div class="note">
       <h3>One dependency, on purpose</h3>
       <p>
         Everything else is Apple's. A single pinned SwiftUI calendar view is the entire
-        linked third-party package. Market access uses three small first-party
+        linked third-party package. Market access uses four small first-party
         <code>URLSession</code> providers behind one transport protocol; there is still no
         analytics or vendor SDK.
       </p>
@@ -1875,8 +2057,8 @@
   </section>
 
   <footer>
-    11 entities built &middot; 17 app-enforced foreign-key edges &middot; 0 declared SwiftData relationships
-    &nbsp;|&nbsp; private CloudKit mirroring &middot; 3 market providers &middot; 1 reviewed PDF import path
+    11 entities built &middot; 18 app-enforced foreign-key edges &middot; 0 declared SwiftData relationships
+    &nbsp;|&nbsp; private CloudKit mirroring &middot; 4 market providers &middot; 1 reviewed PDF import path
   </footer>
 </div>
 
@@ -2043,7 +2225,8 @@
       { from: 'FinancialGoal', fromAnchor: 'FinancialGoal.id', to: 'TripWorkspace', toAnchor: 'TripWorkspace.sourceGoalID', label: 'starts', dashed: true },
       { from: 'TripWorkspace', fromAnchor: 'TripWorkspace.id', to: 'MoneyTransaction', toAnchor: 'MoneyTransaction.tripWorkspaceID', label: 'tags', dashed: true },
       { from: 'CashAccount', fromAnchor: 'CashAccount.id', to: 'PendingTransactionCapture', toAnchor: 'PendingTransactionCapture.accountID', label: 'suggested', dashed: true },
-      { from: 'TransactionCategory', fromAnchor: 'TransactionCategory.id', to: 'PendingTransactionCapture', toAnchor: 'PendingTransactionCapture.categoryID', label: 'suggested', dashed: true }
+      { from: 'TransactionCategory', fromAnchor: 'TransactionCategory.id', to: 'PendingTransactionCapture', toAnchor: 'PendingTransactionCapture.categoryID', label: 'suggested', dashed: true },
+      { from: 'FundSale', fromAnchor: 'FundSale.swapHoldingID', to: 'FundHolding', label: 'swap buys', dashed: true }
     ]);
 
     wire('sysStage', 'sysEdges', '.node', [
@@ -2056,7 +2239,8 @@
       { from: 'sys-app', to: 'sys-fmarket', label: 'ticker only', dashed: false },
       { from: 'sys-app', to: 'sys-vndirect', label: 'ticker only', dashed: false },
       { from: 'sys-app', to: 'sys-vang-today', label: 'type code only', dashed: false },
-      { from: 'sys-mcp', to: 'sys-store', label: 'read-only', dashed: true }
+      { from: 'sys-app', to: 'sys-coingecko', label: 'coin id only', dashed: false },
+      { from: 'sys-app', to: 'sys-mcp', label: 'local SQLite snapshot', dashed: false }
     ]);
   })();
 </script>

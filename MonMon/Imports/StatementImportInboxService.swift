@@ -28,6 +28,12 @@ struct StatementImportInboxService: Sendable {
 
     static func live(
         containerURL: @escaping @Sendable () -> URL? = {
+            // The Mac test host must not resolve the App Group container: see
+            // `MonMonProcess.isRunningUnitTests`. Spending still launches, and
+            // `StatementImportInbox.live()` swallows this as unavailable.
+            guard !MonMonProcess.isRunningUnitTests else {
+                return nil
+            }
             guard let appGroupIdentifier = StatementInboxConfiguration.appGroupIdentifier else {
                 return nil
             }

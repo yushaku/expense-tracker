@@ -1,13 +1,14 @@
 import Foundation
 import SwiftUI
 
-/// Which half of the Investments screen is showing. Savings books and fund
-/// holdings are the same idea — money parked rather than spent — so they share
-/// one tab and take turns behind this picker.
+/// Which part of the Investments screen is showing. Savings books, fund
+/// holdings, gold and coins are the same idea — money parked rather than spent
+/// — so they share one tab and take turns behind this picker.
 enum InvestmentSegment: String, CaseIterable, Identifiable, Hashable {
     case savings
     case funds
     case gold
+    case crypto
 
     var id: String {
         rawValue
@@ -21,6 +22,8 @@ enum InvestmentSegment: String, CaseIterable, Identifiable, Hashable {
             "Funds"
         case .gold:
             "Gold"
+        case .crypto:
+            "Crypto"
         }
     }
 
@@ -34,6 +37,8 @@ enum InvestmentSegment: String, CaseIterable, Identifiable, Hashable {
             "Add Holding"
         case .gold:
             "Add Gold"
+        case .crypto:
+            "Add Coin"
         }
     }
 
@@ -47,6 +52,8 @@ enum InvestmentSegment: String, CaseIterable, Identifiable, Hashable {
             "add-fund"
         case .gold:
             "add-gold"
+        case .crypto:
+            "add-crypto"
         }
     }
 
@@ -61,6 +68,8 @@ enum InvestmentSegment: String, CaseIterable, Identifiable, Hashable {
             [.fund, .etf]
         case .gold:
             [.gold]
+        case .crypto:
+            [.crypto]
         }
     }
 }

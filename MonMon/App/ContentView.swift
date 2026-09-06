@@ -8,6 +8,8 @@ struct ContentView: View {
     @AppStorage(AppTheme.storageKey) private var theme = AppTheme.system
     @AppStorage(AppLanguage.storageKey) private var language = AppLanguage.system
 
+    @AppStorage(AppDateFormat.storageKey) private var dateFormat = AppDateFormat.dayMonthYear
+
     var body: some View {
         RootTabView()
             .tint(MonMonTheme.accent)
@@ -19,6 +21,7 @@ struct ContentView: View {
             // Every localized string and date format resolves against this,
             // so picking a language repaints the whole tree at once.
             .environment(\.locale, language.locale)
+            .environment(\.appDateFormat, dateFormat)
             .overlay {
                 if appLock.isLocked {
                     LockScreenView(

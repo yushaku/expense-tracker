@@ -59,7 +59,7 @@ struct StatementImportCommitServiceTests {
         #expect(stored.first { $0.sourceImportID == importA }?.incomeAllocationSnapshot == nil)
     }
 
-    @Test("An eligible link attaches provenance without creating a transaction")
+    @Test("Link actions are rejected without modifying existing transactions")
     func linksExistingTransaction() throws {
         let fixture = try makeFixture()
         let targetID = UUID()
@@ -78,14 +78,13 @@ struct StatementImportCommitServiceTests {
             accountID: fixture.accountID
         )
 
-        let report = try fixture.service.commit(request)
+        #expect(throws: StatementImportCommitError.invalidRequest) {
+            try fixture.service.commit(request)
+        }
         let stored = try fetchTransactions(from: fixture.container)
-
-        #expect(report.createdTransactionCount == 0)
-        #expect(report.linkedCount == 1)
         #expect(stored.count == 1)
         #expect(stored.first?.id == targetID)
-        #expect(stored.first?.sourceImportID == importA)
+        #expect(stored.first?.sourceImportID == nil)
     }
 
     @Test("Exact and skipped rows make no financial write")
@@ -151,7 +150,7 @@ struct StatementImportCommitServiceTests {
             accountID: fixture.accountID
         )
 
-        #expect(throws: StatementImportCommitError.staleReview) {
+        #expect(throws: StatementImportCommitError.invalidRequest) {
             try fixture.service.commit(request)
         }
         let stored = try fetchTransactions(from: fixture.container)
@@ -223,9 +222,23 @@ struct StatementImportCommitServiceTests {
             ),
         ]
 
-        for invalidRequest in requests {
-            #expect(throws: StatementImportCommitError.invalidRequest) {
-                try fixture.service.commit(invalidRequest)
+        let expectedRowIssues: [StatementImportRowIssue] = [
+            .category, .source, .category, .category,
+        ]
+        for (index, invalidRequest) in requests.enumerated() {
+            if index < expectedRowIssues.count {
+                #expect(
+                    throws: StatementImportRowsError(failures: [
+                        StatementImportRowFailure(
+                            candidateID: invalidRequest.rows[0].id, issue: expectedRowIssues[index])
+                    ])
+                ) {
+                    try fixture.service.commit(invalidRequest)
+                }
+            } else {
+                #expect(throws: StatementImportCommitError.invalidRequest) {
+                    try fixture.service.commit(invalidRequest)
+                }
             }
         }
         #expect(try fetchTransactions(from: fixture.container).isEmpty)
@@ -257,7 +270,7 @@ struct StatementImportCommitServiceTests {
         #expect(try fetchTransactions(from: fixture.container).count == 1)
     }
 
-    @Test("Transfer resolutions create direction-correct neutral records")
+    @Test("Transfer creation is rejected without any financial writes")
     func createsDirectionCorrectTransfers() throws {
         let fixture = try makeFixture()
         let outgoing = candidate(id: importA, kind: .expense, amount: 9_000_000)
@@ -283,41 +296,14 @@ struct StatementImportCommitServiceTests {
             accountID: fixture.accountID
         )
 
-        let report = try fixture.service.commit(request)
-        let transfers = try fetchTransfers(from: fixture.container)
-        let transactions = try fetchTransactions(from: fixture.container)
-        let accounts = try ModelContext(fixture.container).fetch(FetchDescriptor<CashAccount>())
-
-        #expect(report.createdTransferCount == 2)
-        #expect(transfers.count == 2)
-        #expect(transactions.isEmpty)
-        #expect(
-            transfers.contains {
-                $0.sourceAccountID == fixture.accountID
-                    && $0.destinationAccountID == fixture.otherAccountID
-                    && $0.sourceAccountImportID == importA
-                    && $0.destinationAccountImportID == nil
-                    && $0.note == "Historical outgoing"
-            }
-        )
-        #expect(
-            transfers.contains {
-                $0.sourceAccountID == fixture.otherAccountID
-                    && $0.destinationAccountID == fixture.accountID
-                    && $0.sourceAccountImportID == nil
-                    && $0.destinationAccountImportID == importB
-            }
-        )
-        #expect(TransactionSummary.totalExpense(of: transactions) == 0)
-        #expect(TransactionSummary.totalIncome(of: transactions) == 0)
-        #expect(
-            accounts.reduce(Decimal.zero) {
-                $0 + TransferSummary.netFlow(for: $1, transfers: transfers)
-            } == 0
-        )
+        #expect(throws: StatementImportCommitError.invalidRequest) {
+            try fixture.service.commit(request)
+        }
+        #expect(try fetchTransfers(from: fixture.container).isEmpty)
+        #expect(try fetchTransactions(from: fixture.container).isEmpty)
     }
 
-    @Test("Transfer links fill only the eligible statement side")
+    @Test("Transfer links are rejected without changing provenance")
     func linksDirectionCorrectTransferSides() throws {
         let fixture = try makeFixture()
         let outgoingID = UUID()
@@ -351,25 +337,14 @@ struct StatementImportCommitServiceTests {
             accountID: fixture.accountID
         )
 
-        let report = try fixture.service.commit(request)
+        #expect(throws: StatementImportCommitError.invalidRequest) {
+            try fixture.service.commit(request)
+        }
         let transfers = try fetchTransfers(from: fixture.container)
-
-        #expect(report.linkedCount == 2)
+        #expect(transfers.count == 2)
+        #expect(transfers.first { $0.id == outgoingID }?.sourceAccountImportID == nil)
+        #expect(transfers.first { $0.id == incomingID }?.destinationAccountImportID == nil)
         #expect(try fetchTransactions(from: fixture.container).isEmpty)
-        #expect(
-            transfers.first { $0.id == outgoingID }?.sourceAccountImportID == importA
-        )
-        #expect(
-            transfers.first { $0.id == outgoingID }?.destinationAccountImportID
-                == String(repeating: "c", count: 64)
-        )
-        #expect(
-            transfers.first { $0.id == incomingID }?.destinationAccountImportID == importB
-        )
-        #expect(
-            transfers.first { $0.id == incomingID }?.sourceAccountImportID
-                == String(repeating: "d", count: 64)
-        )
     }
 
     @Test("Invalid transfer endpoints roll back every row")
@@ -403,6 +378,137 @@ struct StatementImportCommitServiceTests {
         }
         #expect(try fetchTransactions(from: fixture.container).isEmpty)
         #expect(try fetchTransfers(from: fixture.container).isEmpty)
+    }
+
+    @Test("Selected report rows import without account balance or aggregate total checks")
+    func importsHistoricalExpenseWithoutBalanceChecks() throws {
+        let fixture = try makeFixture()
+        let source = candidate(id: importA, amount: 9_000_000)
+        let base = request(
+            candidates: [source],
+            rows: [
+                row(
+                    source,
+                    resolution: .transaction(
+                        categoryID: fixture.expenseCategoryID, note: source.note))
+            ],
+            accountID: fixture.accountID
+        )
+        for totals in [nil, BankStatementTotals(debit: 1, credit: 1)] as [BankStatementTotals?] {
+            let statement = ParsedBankStatement(
+                bank: base.statement.bank, accountLastFour: base.statement.accountLastFour,
+                currencyCode: base.statement.currencyCode, period: base.statement.period,
+                candidates: base.statement.candidates, declaredTotals: totals,
+                parsedTotals: base.statement.parsedTotals, issues: []
+            )
+            _ = try fixture.service.commit(
+                StatementImportCommitRequest(
+                    statement: statement, statementAccountID: fixture.accountID, rows: base.rows
+                ))
+        }
+        let stored = try fetchTransactions(from: fixture.container)
+        #expect(stored.count == 1)
+        #expect(stored.first?.amount == 9_000_000)
+        #expect(stored.first?.accountID == fixture.accountID)
+        #expect(stored.first?.kind == .expense)
+        #expect(try fetchTransfers(from: fixture.container).isEmpty)
+    }
+
+    @Test("Unchecked rows write nothing even if their category is unresolved")
+    func importsOnlyCheckedRows() throws {
+        let fixture = try makeFixture()
+        let selected = candidate(id: importA)
+        let omitted = candidate(id: importB)
+        var unchecked = row(omitted, resolution: .unresolved)
+        unchecked.isSelected = false
+        let report = try fixture.service.commit(
+            request(
+                candidates: [selected, omitted],
+                rows: [
+                    row(
+                        selected,
+                        resolution: .transaction(
+                            categoryID: fixture.expenseCategoryID, note: "Selected")), unchecked,
+                ],
+                accountID: fixture.accountID
+            ))
+        #expect(report.createdTransactionCount == 1)
+        #expect(report.skippedCount == 1)
+        #expect(try fetchTransactions(from: fixture.container).map(\.sourceImportID) == [importA])
+        #expect(try fetchTransfers(from: fixture.container).isEmpty)
+    }
+
+    @Test("Commit reports every invalid category instead of a generic failure")
+    func reportsAllInvalidRows() throws {
+        let fixture = try makeFixture()
+        let candidates = [candidate(id: importA), candidate(id: importB)]
+        let request = request(
+            candidates: candidates,
+            rows: candidates.map {
+                row($0, resolution: .transaction(categoryID: UUID(), note: "Stale category"))
+            }, accountID: fixture.accountID
+        )
+        #expect(
+            throws: StatementImportRowsError(failures: [
+                StatementImportRowFailure(candidateID: importA, issue: .category),
+                StatementImportRowFailure(candidateID: importB, issue: .category),
+            ])
+        ) {
+            try fixture.service.commit(request)
+        }
+        #expect(try fetchTransactions(from: fixture.container).isEmpty)
+    }
+
+    @Test("An unchecked invalid reference does not block valid transactions")
+    func uncheckedInvalidSourceDoesNotBlockImport() throws {
+        let fixture = try makeFixture()
+        let valid = candidate(id: importA)
+        let invalid = candidate(id: "bad-reference")
+        let request = request(
+            candidates: [valid, invalid],
+            rows: [
+                row(
+                    valid,
+                    resolution: .transaction(
+                        categoryID: fixture.expenseCategoryID, note: "Valid")),
+                row(invalid, resolution: .skip),
+            ], accountID: fixture.accountID
+        )
+        let report = try fixture.service.commit(request)
+        #expect(report.createdTransactionCount == 1)
+        #expect(report.skippedCount == 1)
+    }
+
+    @Test("Invalid income allocation identifies income rows and keeps the import atomic")
+    func allocationFailureIdentifiesIncome() throws {
+        let fixture = try makeFixture()
+        let context = ModelContext(fixture.container)
+        let jar = try #require(context.fetch(FetchDescriptor<BudgetJar>()).first)
+        jar.allocationPercent = 110
+        try context.save()
+        let expense = candidate(id: importA)
+        let income = candidate(id: importB, kind: .income)
+        let rows = [
+            row(expense, resolution: .transaction(categoryID: fixture.expenseCategoryID, note: "")),
+            row(income, resolution: .transaction(categoryID: fixture.incomeCategoryID, note: "")),
+        ]
+        #expect(
+            throws: StatementImportRowsError(failures: [
+                StatementImportRowFailure(candidateID: importB, issue: .allocation)
+            ])
+        ) {
+            try fixture.service.commit(
+                request(
+                    candidates: [expense, income], rows: rows, accountID: fixture.accountID))
+        }
+        #expect(try fetchTransactions(from: fixture.container).isEmpty)
+        var retryRows = rows
+        retryRows[1].isSelected = false
+        let report = try fixture.service.commit(
+            request(
+                candidates: [expense, income], rows: retryRows, accountID: fixture.accountID))
+        #expect(report.createdTransactionCount == 1)
+        #expect(try fetchTransactions(from: fixture.container).count == 1)
     }
 
     private func makeFixture() throws -> Fixture {
@@ -480,7 +586,7 @@ struct StatementImportCommitServiceTests {
             candidates: candidates,
             declaredTotals: isComplete ? totals : nil,
             parsedTotals: totals,
-            issues: []
+            issues: isComplete ? [] : [.invalidRow(page: 1, row: 1)]
         )
         return StatementImportCommitRequest(
             statement: statement,

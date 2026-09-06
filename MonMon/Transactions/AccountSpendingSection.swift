@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct AccountSpendingSection: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     let range: TransactionRange
@@ -15,7 +17,7 @@ struct AccountSpendingSection: View {
                 emptyState
             } else {
                 AllocationDoughnut(
-                    context: range.title(in: locale),
+                    context: range.title(in: locale, dateFormat: dateFormat),
                     items: doughnutItems,
                     totalLabel: TransactionKind.expense.displayName(in: locale),
                     showsLegend: false
@@ -49,7 +51,7 @@ struct AccountSpendingSection: View {
 
             Spacer(minLength: 8)
 
-            Text(range.title(in: locale).uppercased())
+            Text(range.title(in: locale, dateFormat: dateFormat).uppercased())
                 .font(.caption.weight(.semibold))
                 .tracking(0.8)
                 .foregroundStyle(MonMonTheme.textSecondary)
@@ -60,7 +62,7 @@ struct AccountSpendingSection: View {
 
     private var emptyState: some View {
         Text(
-            "No \(TransactionKind.expense.displayName(in: locale).lowercased()) recorded \(range.phrase(in: locale))."
+            "No \(TransactionKind.expense.displayName(in: locale).lowercased()) recorded \(range.phrase(in: locale, dateFormat: dateFormat))."
         )
         .font(.subheadline)
         .foregroundStyle(MonMonTheme.textSecondary)

@@ -10,12 +10,14 @@ struct FundSaleDraftTests {
     private func makeDraft(
         unitsText: String = "100",
         pricePerUnitText: String = "26.000",
+        feeText: String = "",
         proceedsAccountID: UUID? = UUID(),
         note: String = ""
     ) -> FundSaleDraft {
         FundSaleDraft(
             unitsText: unitsText,
             pricePerUnitText: pricePerUnitText,
+            feeText: feeText,
             soldAt: soldAt,
             proceedsAccountID: proceedsAccountID,
             note: note
@@ -30,10 +32,33 @@ struct FundSaleDraftTests {
 
         #expect(values.units == 100)
         #expect(values.pricePerUnit == 26_000)
+        #expect(values.fee == 0)
         #expect(values.proceedsAccountID == accountID)
         #expect(values.soldAt == soldAt)
         #expect(values.note == "took profit")
         #expect(values.proceeds == 2_600_000)
+    }
+
+    @Test("A sale fee is optional and reduces net proceeds")
+    func saleFeeReducesNetProceeds() throws {
+        let values = try makeDraft(feeText: "100.000").validate(remainingUnits: 500)
+
+        #expect(values.fee == 100_000)
+        #expect(values.grossProceeds == 2_600_000)
+        #expect(values.proceeds == 2_500_000)
+    }
+
+    @Test("An invalid, negative, or excessive sale fee is refused")
+    func badSaleFeeIsRefused() {
+        #expect(throws: FundSaleFormError.invalidFee) {
+            try makeDraft(feeText: "abc").validate(remainingUnits: 500)
+        }
+        #expect(throws: FundSaleFormError.negativeFee) {
+            try makeDraft(feeText: "-1").validate(remainingUnits: 500)
+        }
+        #expect(throws: FundSaleFormError.feeExceedsProceeds) {
+            try makeDraft(feeText: "2.600.000").validate(remainingUnits: 500)
+        }
     }
 
     @Test("Selling exactly what is left is allowed")
@@ -94,7 +119,12 @@ struct FundSaleDraftTests {
             averageCostPerUnit: 20_000,
             pricePerUnit: 25_000
         )
-        let sale = FundTestFactory.sale(of: holding, units: 400, pricePerUnit: 26_000)
+        let sale = FundTestFactory.sale(
+            of: holding,
+            units: 400,
+            pricePerUnit: 26_000,
+            fee: 25_000
+        )
 
         // What the editor hands the draft: what is left, plus this sale's own
         // units, because they are about to be rewritten rather than added to.
@@ -105,6 +135,7 @@ struct FundSaleDraftTests {
 
         #expect(sale.units == 400)
         #expect(sale.pricePerUnit == 26_000)
+        #expect(sale.fee == 25_000)
     }
 
     @Test("Growing a sale past what is left is still refused while editing")
@@ -178,5 +209,103 @@ struct FundSaleDraftTests {
         #expect(sale.soldAt == soldAt)
         #expect(sale.createdAt == createdAt)
         #expect(sale.currencyCode == VNDCurrency.code)
+    }
+
+    // MARK: - Dollars
+
+    private func usdSaleDraft(
+        pricePerUnitText: String = "82000",
+        exchangeRateText: String = "26.058"
+    ) -> FundSaleDraft {
+        FundSaleDraft(
+            unitsText: "1",
+            pricePerUnitText: pricePerUnitText,
+            priceCurrency: .usd,
+            exchangeRateText: exchangeRateText,
+            soldAt: FundTestFactory.referenceDate,
+            proceedsAccountID: AccountSeed.unassignedID
+        )
+    }
+
+    @Test("A dollar sale price is converted once, on the way in")
+    func dollarPriceIsConverted() throws {
+        let values = try usdSaleDraft().validate(remainingUnits: 2)
+
+        #expect(values.pricePerUnit == 2_136_756_000)
+        #expect(values.exchangeRate == 26_058)
+        #expect(values.proceeds == 2_136_756_000)
+    }
+
+    @Test("The rate reaches the sale and the proceeds stay in đồng")
+    func rateReachesTheSale() throws {
+        let sale = try usdSaleDraft().makeSale(
+            id: UUID(),
+            holdingID: UUID(),
+            createdAt: FundTestFactory.referenceDate,
+            remainingUnits: 2
+        )
+
+        #expect(sale.pricePerUnit == 2_136_756_000)
+        #expect(sale.exchangeRate == 26_058)
+        #expect(sale.currencyCode == VNDCurrency.code)
+    }
+
+    @Test("A dollar sale reopens in dollars, at the rate it was written with")
+    func dollarSaleReopensInDollars() throws {
+        let sale = try usdSaleDraft().makeSale(
+            id: UUID(),
+            holdingID: UUID(),
+            createdAt: FundTestFactory.referenceDate,
+            remainingUnits: 2
+        )
+
+        let reopened = FundSaleDraft(sale: sale)
+
+        #expect(reopened.priceCurrency == .usd)
+        #expect(reopened.pricePerUnitText == "82000")
+        #expect(reopened.exchangeRateText == VNDCurrency.formatPlain(26_058))
+    }
+
+    @Test("A đồng sale carries no rate and reopens in đồng")
+    func dongSaleCarriesNoRate() throws {
+        let sale = try FundSaleDraft(
+            unitsText: "1",
+            pricePerUnitText: "30.000",
+            soldAt: FundTestFactory.referenceDate,
+            proceedsAccountID: AccountSeed.unassignedID
+        )
+        .makeSale(
+            id: UUID(),
+            holdingID: UUID(),
+            createdAt: FundTestFactory.referenceDate,
+            remainingUnits: 2
+        )
+
+        #expect(sale.exchangeRate == nil)
+        #expect(FundSaleDraft(sale: sale).priceCurrency == .vnd)
+        #expect(sale.pricePerUnitInDollars == nil)
+    }
+
+    @Test("A missing or nonsensical rate is rejected, and names itself")
+    func badSaleRateIsRejected() {
+        #expect(saleError(from: usdSaleDraft(exchangeRateText: "")) == .invalidExchangeRate)
+        #expect(saleError(from: usdSaleDraft(exchangeRateText: "0")) == .nonPositiveExchangeRate)
+    }
+
+    @Test("A zero dollar price is rejected before the rate is even read")
+    func zeroDollarPriceIsRejected() {
+        #expect(saleError(from: usdSaleDraft(pricePerUnitText: "0")) == .nonPositivePrice)
+        #expect(saleError(from: usdSaleDraft(pricePerUnitText: "")) == .invalidPrice)
+    }
+
+    private func saleError(from draft: FundSaleDraft) -> FundSaleFormError? {
+        do {
+            _ = try draft.validate(remainingUnits: 2)
+            return nil
+        } catch let error as FundSaleFormError {
+            return error
+        } catch {
+            return nil
+        }
     }
 }

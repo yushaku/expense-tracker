@@ -2,20 +2,14 @@ import SwiftUI
 
 /// One rule as a row: what it records, how often, and when it next falls due.
 struct RecurringCard: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     let rule: RecurringRule
     let category: TransactionCategory?
     let account: CashAccount?
     let asOf: Date
-
-    private static let dateFormat: Date.FormatStyle = {
-        var style = Date.FormatStyle().day().month(.abbreviated)
-        style.calendar = TransactionPeriod.calendar
-        style.timeZone = TransactionPeriod.calendar.timeZone
-        style.locale = Locale(identifier: "en_US")
-        return style
-    }()
 
     var body: some View {
         HStack(spacing: 14) {
@@ -102,7 +96,7 @@ struct RecurringCard: View {
             return "Finished"
         }
 
-        return "Next \(Self.dateFormat.format(next))"
+        return "Next \(dateFormat.format(next))"
     }
 
     private var dueSymbolName: String {

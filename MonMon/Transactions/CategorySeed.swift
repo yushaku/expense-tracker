@@ -26,7 +26,7 @@ enum CategorySeed {
         /// its own: two devices seeding the same starter set must produce the
         /// same rows. It also decouples a category's identity from its name,
         /// which is now written in whichever language the owner picked — two
-        /// devices set to different languages would otherwise seed nine
+        /// devices set to different languages would otherwise seed ten
         /// categories each and agree on none of them.
         let id: UUID
         /// The key the catalogue answers. Resolved once, at seeding, and stored
@@ -88,6 +88,13 @@ enum CategorySeed {
             kind: .expense,
             symbolName: "gamecontroller.fill",
             colorName: "lavender"
+        ),
+        Template(
+            id: seedID(10),
+            nameKey: "Other",
+            kind: .expense,
+            symbolName: "tag.fill",
+            colorName: "sky"
         ),
         Template(
             id: seedID(7),

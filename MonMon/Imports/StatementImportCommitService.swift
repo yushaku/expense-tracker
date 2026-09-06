@@ -17,8 +17,18 @@ struct StatementImportCommitReport: Equatable, Sendable {
 
 enum StatementImportCommitError: Error, Equatable, Sendable {
     case invalidRequest
+    case accountUnavailable
     case staleReview
     case storeFailure
+}
+
+struct StatementImportRowFailure: Equatable, Sendable {
+    let candidateID: String
+    let issue: StatementImportRowIssue
+}
+
+struct StatementImportRowsError: Error, Equatable, Sendable {
+    let failures: [StatementImportRowFailure]
 }
 
 @MainActor
@@ -40,6 +50,9 @@ struct StatementImportCommitService {
 
         do {
             return try commit(request, in: context)
+        } catch let error as StatementImportRowsError {
+            context.rollback()
+            throw error
         } catch let error as StatementImportCommitError {
             context.rollback()
             throw error
@@ -57,8 +70,7 @@ struct StatementImportCommitService {
         guard request.statement.isComplete,
             request.statement.currencyCode == VNDCurrency.code,
             request.rows.map(\.candidate) == candidates,
-            Set(candidates.map(\.id)).count == candidates.count,
-            candidates.allSatisfy({ ImportSourceID(rawValue: $0.id) != nil })
+            Set(candidates.map(\.id)).count == candidates.count
         else {
             throw StatementImportCommitError.invalidRequest
         }
@@ -72,7 +84,7 @@ struct StatementImportCommitService {
             $0.id == request.statementAccountID && $0.currencyCode == VNDCurrency.code
         }
         guard statementAccountIsValid else {
-            throw StatementImportCommitError.invalidRequest
+            throw StatementImportCommitError.accountUnavailable
         }
 
         let current = StatementImportReconciler.reconcile(
@@ -117,15 +129,9 @@ struct StatementImportCommitService {
             calendar: StatementImportReconciler.vietnamCalendar
         )
 
-        let transactionByID = Dictionary(uniqueKeysWithValues: transactions.map { ($0.id, $0) })
-        let transferByID = Dictionary(uniqueKeysWithValues: transfers.map { ($0.id, $0) })
-        let categoryByID = Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0) })
+        let categoryByID = Dictionary(firstWins: categories.map { ($0.id, $0) })
         var newTransactions: [MoneyTransaction] = []
-        var newTransfers: [AccountTransfer] = []
-        var linkedTransactions: [(MoneyTransaction, ImportSourceID)] = []
-        var linkedTransfers: [(AccountTransfer, TransactionKind, ImportSourceID)] = []
-        var linkedTransactionIDs: Set<UUID> = []
-        var linkedTransferIDs: Set<UUID> = []
+        var failures: [StatementImportRowFailure] = []
         var report = StatementImportCommitReport()
         let createdAt = Date()
 
@@ -135,13 +141,24 @@ struct StatementImportCommitService {
                 continue
             }
 
-            let sourceID = try validatedSourceID(for: requestedRow.candidate)
+            guard requestedRow.isSelected else {
+                report.skippedCount += 1
+                continue
+            }
+
+            guard let sourceID = ImportSourceID(rawValue: requestedRow.id) else {
+                failures.append(
+                    StatementImportRowFailure(candidateID: requestedRow.id, issue: .source))
+                continue
+            }
             switch requestedRow.resolution {
             case let .transaction(categoryID, note):
                 guard let category = categoryByID[categoryID],
                     category.kind == requestedRow.candidate.kind
                 else {
-                    throw StatementImportCommitError.invalidRequest
+                    failures.append(
+                        StatementImportRowFailure(candidateID: requestedRow.id, issue: .category))
+                    continue
                 }
 
                 let draft = TransactionDraft(
@@ -156,90 +173,26 @@ struct StatementImportCommitService {
                 do {
                     transaction = try draft.makeTransaction(id: UUID(), createdAt: createdAt)
                 } catch {
-                    throw StatementImportCommitError.invalidRequest
+                    failures.append(
+                        StatementImportRowFailure(candidateID: requestedRow.id, issue: .amount))
+                    continue
                 }
                 transaction.sourceImportID = sourceID.rawValue
-                try IncomeAllocationLifecycle.captureNew(
-                    on: transaction,
-                    jars: jars,
-                    capturedAt: createdAt
-                )
+                do {
+                    try IncomeAllocationLifecycle.captureNew(
+                        on: transaction, jars: jars, capturedAt: createdAt
+                    )
+                } catch {
+                    failures.append(
+                        StatementImportRowFailure(candidateID: requestedRow.id, issue: .allocation))
+                    continue
+                }
                 newTransactions.append(transaction)
                 report.createdTransactionCount += 1
 
-            case let .linkTransaction(transactionID):
-                guard case let .possibleMatches(transactionIDs, _) = currentRow.disposition,
-                    transactionIDs.contains(transactionID),
-                    linkedTransactionIDs.insert(transactionID).inserted,
-                    let transaction = transactionByID[transactionID],
-                    transaction.sourceImportID == nil
-                else {
-                    throw StatementImportCommitError.staleReview
-                }
-                linkedTransactions.append((transaction, sourceID))
-                report.linkedCount += 1
-
-            case let .newTransfer(otherAccountID, note):
-                guard otherAccountID != request.statementAccountID,
-                    accounts.contains(where: {
-                        $0.id == otherAccountID && $0.currencyCode == VNDCurrency.code
-                    })
-                else {
-                    throw StatementImportCommitError.invalidRequest
-                }
-                let endpoints: (source: UUID, destination: UUID)
-                switch requestedRow.candidate.kind {
-                case .expense:
-                    endpoints = (request.statementAccountID, otherAccountID)
-                case .income:
-                    endpoints = (otherAccountID, request.statementAccountID)
-                }
-                let draft = TransferDraft(
-                    amountText: VNDCurrency.formatPlain(requestedRow.candidate.amount),
-                    occurredAt: requestedRow.candidate.occurredAt,
-                    note: note,
-                    sourceAccountID: endpoints.source,
-                    destinationAccountID: endpoints.destination
-                )
-                let transfer: AccountTransfer
-                do {
-                    transfer = try draft.makeTransfer(
-                        id: UUID(),
-                        createdAt: createdAt,
-                        availableSourceBalance: nil
-                    )
-                } catch {
-                    throw StatementImportCommitError.invalidRequest
-                }
-                switch requestedRow.candidate.kind {
-                case .expense:
-                    transfer.sourceAccountImportID = sourceID.rawValue
-                case .income:
-                    transfer.destinationAccountImportID = sourceID.rawValue
-                }
-                newTransfers.append(transfer)
-                report.createdTransferCount += 1
-
-            case let .linkTransfer(transferID):
-                guard case let .possibleMatches(_, transferIDs) = currentRow.disposition,
-                    transferIDs.contains(transferID),
-                    linkedTransferIDs.insert(transferID).inserted,
-                    let transfer = transferByID[transferID]
-                else {
-                    throw StatementImportCommitError.staleReview
-                }
-                switch requestedRow.candidate.kind {
-                case .expense:
-                    guard transfer.sourceAccountImportID == nil else {
-                        throw StatementImportCommitError.staleReview
-                    }
-                case .income:
-                    guard transfer.destinationAccountImportID == nil else {
-                        throw StatementImportCommitError.staleReview
-                    }
-                }
-                linkedTransfers.append((transfer, requestedRow.candidate.kind, sourceID))
-                report.linkedCount += 1
+            case .newTransfer, .linkTransaction, .linkTransfer:
+                // Only transaction creation is supported, including for stale review requests.
+                throw StatementImportCommitError.invalidRequest
 
             case .skip:
                 report.skippedCount += 1
@@ -248,42 +201,22 @@ struct StatementImportCommitService {
                 throw StatementImportCommitError.staleReview
 
             case .unresolved:
-                throw StatementImportCommitError.invalidRequest
+                failures.append(
+                    StatementImportRowFailure(candidateID: requestedRow.id, issue: .category))
             }
+        }
+
+        guard failures.isEmpty else {
+            throw StatementImportRowsError(failures: failures)
         }
 
         for transaction in newTransactions {
             context.insert(transaction)
         }
-        for transfer in newTransfers {
-            context.insert(transfer)
-        }
-        for (transaction, sourceID) in linkedTransactions {
-            transaction.sourceImportID = sourceID.rawValue
-        }
-        for (transfer, kind, sourceID) in linkedTransfers {
-            switch kind {
-            case .expense:
-                transfer.sourceAccountImportID = sourceID.rawValue
-            case .income:
-                transfer.destinationAccountImportID = sourceID.rawValue
-            }
-        }
-        if !newTransactions.isEmpty || !newTransfers.isEmpty || !linkedTransactions.isEmpty
-            || !linkedTransfers.isEmpty
-        {
+        if !newTransactions.isEmpty {
             try save(context)
         }
 
         return report
-    }
-
-    private func validatedSourceID(
-        for candidate: BankTransactionCandidate
-    ) throws -> ImportSourceID {
-        guard let sourceID = ImportSourceID(rawValue: candidate.id) else {
-            throw StatementImportCommitError.invalidRequest
-        }
-        return sourceID
     }
 }

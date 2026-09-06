@@ -28,13 +28,11 @@ enum TransactionPeriod {
 
     private static let titleTemplate = Date.FormatStyle().year().month(.wide)
 
-    /// How a date is written when a screen has no format of its own: short
-    /// enough for a card, and always carrying the year, since a debt or a
-    /// deposit can be older than the year on show.
-    static let dayTemplate = Date.FormatStyle().day().month(.abbreviated).year()
-
-    static func day(_ date: Date, in locale: Locale) -> String {
-        format(dayTemplate, in: locale).format(date)
+    /// Full dates follow the display preference and the app's calendar/time zone.
+    static func day(
+        _ date: Date, in locale: Locale, dateFormat: AppDateFormat = .dayMonthYear
+    ) -> String {
+        dateFormat.format(date)
     }
 
     static func startOfMonth(for date: Date) -> Date {

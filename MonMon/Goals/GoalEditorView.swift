@@ -314,15 +314,12 @@ private struct GoalEditorForm: View {
                     Text("Target date")
                         .font(.subheadline.weight(.medium))
 
-                    DatePicker(
-                        "Target date",
+                    DateField(
                         selection: $draft.targetDate,
-                        in: minimumTargetDate...,
-                        displayedComponents: .date
+                        accessibilityIdentifier: "goal-target-date",
+                        allowedRange: minimumTargetDate...Date.distantFuture
                     )
-                    .labelsHidden()
                     .accessibilityLabel("Target date")
-                    .accessibilityIdentifier("goal-target-date")
 
                     if let dateError {
                         validationMessage(dateError)

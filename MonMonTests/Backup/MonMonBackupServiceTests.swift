@@ -51,6 +51,7 @@ struct MonMonBackupServiceTests {
         #expect(validated.payload.fundInstruments.count == 1)
         #expect(validated.payload.fundHoldings.count == 1)
         #expect(validated.payload.fundSales.count == 1)
+        #expect(validated.payload.fundSales.single?.fee == "5")
         #expect(validated.payload.budgetJars.count == 3)
         #expect(validated.payload.goals.count == 1)
         #expect(validated.payload.tripWorkspaces.count == 1)
@@ -253,6 +254,24 @@ struct MonMonBackupServiceTests {
         let report = try restoreService.restore(validated)
 
         #expect(report.restoredRecordCount == 19)
+        // The identifier a coin's price is fetched by is part of the record,
+        // not decoration: a restore that dropped it would leave every coin
+        // priced by ticker, which is the wrong coin often enough to matter.
+        let restoredInstrument = try #require(
+            destination.mainContext.fetch(FetchDescriptor<FundInstrument>()).first
+        )
+        #expect(restoredInstrument.providerID == "synthetic-fund")
+        // The rate a cost was typed at is part of the record too: without it a
+        // restored position reopens in đồng and the dollars the owner entered
+        // are gone.
+        let restoredHolding = try #require(
+            destination.mainContext.fetch(FetchDescriptor<FundHolding>()).first
+        )
+        #expect(restoredHolding.purchaseExchangeRate == 26_058)
+        let restoredSale = try #require(
+            destination.mainContext.fetch(FetchDescriptor<FundSale>()).single
+        )
+        #expect(restoredSale.fee == 5)
         #expect(try destination.mainContext.fetchCount(FetchDescriptor<CashAccount>()) == 2)
         let restoredCredit = try #require(
             destination.mainContext.fetch(FetchDescriptor<CashAccount>()).first {
@@ -658,6 +677,7 @@ struct MonMonBackupServiceTests {
                 priceSource: FundQuoteSource.manual.rawValue,
                 priceFetchedAt: nil,
                 autoQuoteEnabled: false,
+                providerID: "synthetic-fund",
                 currencyCode: VNDCurrency.code,
                 createdAt: instant
             )
@@ -683,7 +703,8 @@ struct MonMonBackupServiceTests {
                 averageCostPerUnit: 15,
                 createdAt: instant,
                 sourceAccountID: bankID,
-                purchasedAt: instant
+                purchasedAt: instant,
+                purchaseExchangeRate: 26_058
             )
         )
         context.insert(
@@ -765,6 +786,7 @@ struct MonMonBackupServiceTests {
                 holdingID: holdingID,
                 units: 1,
                 pricePerUnit: 25,
+                fee: 5,
                 proceedsAccountID: bankID,
                 soldAt: instant,
                 note: "Partial",

@@ -7,28 +7,9 @@ import Testing
 @MainActor
 @Suite("App route coordination")
 struct AppRouteTests {
-    @Test("Quick capture intent launches MonMon in the foreground")
-    func quickCaptureIntentLaunchesInForeground() {
-        #expect(OpenQuickCaptureIntent.openAppWhenRun)
-
-        if #available(iOS 26.0, macOS 26.0, *) {
-            #expect(OpenQuickCaptureIntent.supportedModes == .foreground)
-        }
-    }
-
-    @Test("Quick capture intent waits behind the app lock")
-    func quickCaptureIntentWaitsForUnlock() async {
-        let route = AppRoute()
-        let appLock = AppLock(isLocked: true)
-        let dependency = QuickCaptureIntentDependency(appRoute: route, appLock: appLock)
-
-        await dependency.request()
-
-        #expect(route.quickCaptureRequestID == nil)
-
-        route.releaseQueuedQuickCapture(isLocked: false)
-
-        #expect(route.quickCaptureRequestID != nil)
+    @Test("Record Transaction is the only advertised app shortcut")
+    func onlyRecordTransactionShortcutRemains() {
+        #expect(MonMonAppShortcuts.appShortcuts.count == 1)
     }
 
     @Test("Quick capture waits behind the app lock")

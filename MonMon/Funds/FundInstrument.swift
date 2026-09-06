@@ -38,6 +38,13 @@ final class FundInstrument {
     /// fund, and an instrument added by hand has none at all. Nothing reads it
     /// but the badge, which falls back to the ticker when it is missing.
     var logoURL: String?
+    /// How the provider names this instrument, when that is not the ticker.
+    ///
+    /// CoinGecko keys on an identifier of its own — `bitcoin`, not `BTC` — and
+    /// several coins share a ticker, so asking by symbol could price the wrong
+    /// one. `nil` for every provider that does key on the ticker, and for a
+    /// coin added by hand, which is then priced by whatever the owner types.
+    var providerID: String?
     var currencyCode: String = VNDCurrency.code
     var createdAt: Date = Date(timeIntervalSince1970: 0)
 
@@ -53,6 +60,7 @@ final class FundInstrument {
         priceFetchedAt: Date? = nil,
         autoQuoteEnabled: Bool = true,
         logoURL: String? = nil,
+        providerID: String? = nil,
         currencyCode: String,
         createdAt: Date
     ) {
@@ -67,12 +75,34 @@ final class FundInstrument {
         self.priceFetchedAt = priceFetchedAt
         self.autoQuoteEnabled = autoQuoteEnabled
         self.logoURL = logoURL
+        self.providerID = providerID
         self.currencyCode = currencyCode
         self.createdAt = createdAt
     }
 }
 
 extension FundInstrument {
+    /// What one unit would cost to buy today.
+    ///
+    /// Not the same question as what it is worth. A fund, an ETF and a coin are
+    /// bought and valued at one published figure, so the two answers coincide.
+    /// Gold does not: a shop sells at one price and buys back at a lower one,
+    /// and `currentPricePerUnit` is the buy-back side — what the owner would
+    /// receive, never what they would pay. Prefilling a cost basis with it
+    /// would understate every purchase by the spread and hide the loss that
+    /// buying gold genuinely opens with.
+    ///
+    /// Falls back to the valuation price when no two-sided quote has been
+    /// fetched, which is the closest thing the app knows.
+    var purchasePricePerUnit: Decimal {
+        switch kind.policy.quoteStyle {
+        case .shopBuy:
+            return askPricePerUnit > 0 ? askPricePerUnit : currentPricePerUnit
+        case .averageCost:
+            return currentPricePerUnit
+        }
+    }
+
     /// The stored source, or `.manual` when the raw value is one this build does
     /// not know. An unreadable source must not stop a price from rendering.
     var source: FundQuoteSource {
@@ -82,14 +112,7 @@ extension FundInstrument {
     /// How this instrument's price should be described in a sentence:
     /// "NAV 21 Aug 2026 · Fmarket", or "Entered by hand".
     var priceLabelKey: String {
-        switch kind {
-        case .fund:
-            "NAV"
-        case .etf:
-            "Close"
-        case .gold:
-            "Buy"
-        }
+        kind.policy.marketPriceLabelKey
     }
 
     func priceLabel(in locale: Locale) -> String {

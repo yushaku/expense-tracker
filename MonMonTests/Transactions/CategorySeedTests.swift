@@ -28,12 +28,14 @@ struct CategorySeedTests {
         #expect(categories.count == CategorySeed.templates.count)
         #expect(names.contains("Ăn uống"))
         #expect(names.contains("Lương"))
+        #expect(categories.filter { $0.kind == .expense }.count == 7)
+        #expect(categories.contains { $0.name == "Khác" && $0.kind == .expense })
         #expect(!names.contains("Food"))
     }
 
     /// Identity is what two devices agree on. If it followed the name, a phone
-    /// seeded in Vietnamese and a Mac seeded in English would sync to eighteen
-    /// categories rather than nine.
+    /// seeded in Vietnamese and a Mac seeded in English would sync to twenty
+    /// categories rather than ten.
     @Test("The same starter category has the same id whichever language seeded it")
     func identityIsIndependentOfLanguage() throws {
         let english = try makeContext()

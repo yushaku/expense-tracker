@@ -37,6 +37,8 @@ struct FundEditorView: View {
     @Query(sort: \SavingsWithdrawal.withdrawnAt, order: .reverse)
     private var withdrawals: [SavingsWithdrawal]
 
+    @Environment(\.locale) private var locale
+
     @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
     private var transactions: [MoneyTransaction]
 
@@ -60,26 +62,42 @@ struct FundEditorView: View {
 
     private let mode: FundEditorMode
     private let kinds: [FundInstrumentKind]
-    private let isGold: Bool
+    private let instrumentPolicy: FundInstrumentPolicy
 
     @State private var draft: FundDraft
     @State private var validationError: FundFormError?
     @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
     @State private var isAddingInstrument = false
+    @State private var rateLoader = USDExchangeRateLoader()
+    /// The last average cost this view filled in. While the box still holds it
+    /// the figure is the app's and may be replaced; once it differs, it is the
+    /// owner's and is left alone.
+    @State private var autofilledAverageCostText = ""
 
     init(mode: FundEditorMode, kinds: [FundInstrumentKind]) {
         self.mode = mode
         self.kinds = kinds
-        isGold = kinds == [.gold]
+        let policy = (kinds.first ?? .fund).policy
+        instrumentPolicy = policy
 
         switch mode {
         case .add:
             _draft = State(initialValue: FundDraft())
         case .edit(let holding):
             var initial = FundDraft(holding: holding)
-            if kinds == [.gold] {
-                initial.unitsText = GoldWeight.formatChi(luong: holding.units)
+            if policy.quantity.usesGoldSummary {
+                // Weight and price move together into the unit the form opens
+                // in, or the two would describe purchases a factor of ten apart.
+                let perLuong = initial.goldUnit.perLuong
+                initial.unitsText = UnitQuantity.format(holding.units * perLuong)
+                initial.averageCostText = VNDCurrency.formatPlain(
+                    holding.averageCostPerUnit / perLuong
+                )
+            } else {
+                initial.unitsText = UnitQuantity.format(
+                    policy.quantity.displayedUnits(fromStored: holding.units)
+                )
             }
             _draft = State(initialValue: initial)
         }
@@ -100,14 +118,29 @@ struct FundEditorView: View {
                 draft: $draft,
                 accounts: accounts,
                 instruments: selectableInstruments,
-                isGold: isGold,
+                kinds: kinds,
                 isEditing: mode.editedHolding != nil,
                 validationError: validationError,
                 saveErrorMessage: saveErrorMessage,
+                rateStatusMessage: rateLoader.phase.message(in: locale),
                 onAddInstrument: { isAddingInstrument = true },
                 onDelete: { isConfirmingDelete = true }
             )
             .navigationTitle(navigationTitle)
+            // `onChange` rather than `task(id:)`: this must run when the owner
+            // switches currency, and never on opening. A saved position opens
+            // in the currency it was written in, and converting it there would
+            // rewrite figures nobody touched.
+            .onChange(of: draft.costCurrency) { previous, current in
+                Task { await convertCost(from: previous, to: current) }
+            }
+            // Choosing what you hold fills in what a unit of it costs today.
+            // Only on a new position: an existing one already records what was
+            // actually paid, and today's price is not that.
+            .onChange(of: draft.instrumentID) { _, _ in fillAverageCostFromCatalogue() }
+            .onChange(of: draft.goldUnit) { previous, current in
+                convertGoldUnit(from: previous, to: current)
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -125,13 +158,23 @@ struct FundEditorView: View {
                 }
             }
             .appSheet(isPresented: $isAddingInstrument) {
-                if isGold {
+                // Gold and coins each have one provider worth importing from,
+                // so the sheet goes straight to it. Funds and ETFs have two,
+                // and the choice belongs on the catalogue screen rather than
+                // half way through entering a position.
+                switch instrumentPolicy.editor.catalogueRoute {
+                case .goldCatalogue:
                     FundCatalogueImportView(
                         title: "Add Gold from vang.today",
                         importer: FundCatalogueImport(provider: VangTodayQuoteProvider())
                     )
-                } else {
-                    FundInstrumentEditorView(mode: .add)
+                case .cryptoCatalogue:
+                    FundCatalogueImportView(
+                        title: "Add from CoinGecko",
+                        importer: FundCatalogueImport(provider: CoinGeckoQuoteProvider())
+                    )
+                case .instrumentEditor:
+                    FundInstrumentEditorView(mode: .add, kinds: kinds)
                 }
             }
             .confirmationDialog(
@@ -225,24 +268,163 @@ struct FundEditorView: View {
         }
     }
 
+    /// Offers today's buy price rather than making the owner look it up.
+    ///
+    /// The figure is what a unit would cost to buy now — the shop's asking
+    /// price for gold, the published price for anything else — because this
+    /// field is a cost basis, not a valuation. It is a starting value: a
+    /// purchase made last month went through at a different price, and the
+    /// owner types over it.
+    ///
+    /// Never touches an existing position, and never a figure the owner has
+    /// typed.
+    private func fillAverageCostFromCatalogue() {
+        guard mode.editedHolding == nil else {
+            return
+        }
+        guard
+            draft.averageCostText.isEmpty
+                || draft.averageCostText == autofilledAverageCostText
+        else {
+            return
+        }
+        guard let instrument = selectableInstruments.first(where: { $0.id == draft.instrumentID }),
+            instrument.purchasePricePerUnit > 0
+        else {
+            return
+        }
+
+        let price = instrument.purchasePricePerUnit / entryUnitsPerStoredUnit
+        let text: String
+        switch draft.costCurrency {
+        case .vnd:
+            text = VNDCurrency.formatPlain(price)
+        case .usd:
+            guard let rate = VNDCurrency.parse(draft.exchangeRateText), rate > 0,
+                let dollars = USDPrice.inDollars(price, rate: rate)
+            else {
+                return
+            }
+            text = USDPrice.format(dollars)
+        }
+
+        draft.averageCostText = text
+        autofilledAverageCostText = text
+    }
+
+    /// Keeps the purchase the same when the unit under it changes.
+    ///
+    /// Ten chỉ at fifteen million is one lượng at a hundred and fifty million.
+    /// Moving only the label would leave the weight and the price describing
+    /// two different purchases.
+    private func convertGoldUnit(from previous: GoldUnit, to current: GoldUnit) {
+        guard previous != current else {
+            return
+        }
+
+        let factor = current.perLuong / previous.perLuong
+
+        if let typed = UnitQuantity.parse(draft.unitsText) {
+            draft.unitsText = UnitQuantity.format(typed * factor)
+        }
+
+        if let perUnit = VNDCurrency.parse(draft.averageCostText) {
+            draft.averageCostText = VNDCurrency.formatPlain(perUnit / factor)
+            if !autofilledAverageCostText.isEmpty {
+                autofilledAverageCostText = draft.averageCostText
+            }
+        }
+    }
+
+    /// Keeps the amount the same when the currency under it changes.
+    ///
+    /// Switching to dollars turns 2.070.646.854 ₫ into $79463 rather than
+    /// leaving a đồng figure to be read as dollars, which would overstate a
+    /// purchase by four orders of magnitude. The rate is fetched first when the
+    /// box is empty — that is the one moment this app has a reason to ask.
+    private func convertCost(
+        from previous: PriceEntryCurrency,
+        to current: PriceEntryCurrency
+    ) async {
+        guard previous != current else {
+            return
+        }
+
+        if current == .usd,
+            draft.exchangeRateText.trimmingCharacters(in: .whitespaces).isEmpty,
+            let fetched = await rateLoader.load()
+        {
+            draft.exchangeRateText = VNDCurrency.formatPlain(fetched.dongPerDollar)
+        }
+
+        guard let rate = VNDCurrency.parse(draft.exchangeRateText), rate > 0 else {
+            return
+        }
+
+        switch current {
+        case .usd:
+            guard let dong = VNDCurrency.parse(draft.averageCostText),
+                let dollars = USDPrice.inDollars(dong, rate: rate)
+            else {
+                return
+            }
+            draft.averageCostText = USDPrice.format(dollars)
+
+        case .vnd:
+            guard let dollars = USDPrice.parse(draft.averageCostText),
+                let dong = USDPrice.inDong(dollars, rate: rate)
+            else {
+                return
+            }
+            draft.averageCostText = VNDCurrency.formatPlain(dong)
+        }
+
+        // The converted figure is still the app's if the app put it there.
+        if !autofilledAverageCostText.isEmpty {
+            autofilledAverageCostText = draft.averageCostText
+        }
+    }
+
     private var selectableInstruments: [FundInstrument] {
         instruments.filter { kinds.contains($0.kind) }
     }
 
     private var navigationTitle: String {
-        if isGold {
-            return mode.editedHolding == nil ? "Add gold" : "Edit gold"
-        }
-        return mode.editedHolding == nil ? "Add holding" : "Edit holding"
+        mode.editedHolding == nil
+            ? instrumentPolicy.editor.newTitleKey : instrumentPolicy.editor.editTitleKey
     }
 
+    /// The draft in stored units: lượng for gold, the typed figure otherwise.
+    ///
+    /// The price is converted alongside the weight, by the same factor in the
+    /// other direction, so a purchase typed in chỉ and one typed in lượng save
+    /// as exactly the same position.
     private var draftForSaving: FundDraft {
-        guard isGold, let luong = GoldWeight.parseChi(draft.unitsText) else {
+        guard let typed = UnitQuantity.parse(draft.unitsText) else {
             return draft
         }
+
         var converted = draft
-        converted.unitsText = NSDecimalNumber(decimal: luong).stringValue
+        let perStoredUnit = entryUnitsPerStoredUnit
+        converted.unitsText = NSDecimalNumber(decimal: typed / perStoredUnit).stringValue
+
+        if perStoredUnit != 1, let perUnit = VNDCurrency.parse(draft.averageCostText) {
+            converted.averageCostText =
+                NSDecimalNumber(
+                    decimal: perUnit * perStoredUnit
+                ).stringValue
+        }
+
         return converted
+    }
+
+    /// How many typed units make one stored unit. Gold answers with its chosen
+    /// unit; nothing else has a choice to make.
+    private var entryUnitsPerStoredUnit: Decimal {
+        guard instrumentPolicy.quantity.usesGoldSummary else {
+            return 1
+        }
+        return draft.goldUnit.perLuong
     }
 
     /// Says what else goes. A lot that has been sold out of takes its sales

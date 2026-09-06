@@ -154,4 +154,46 @@ struct TradingCalendarTests {
             )
         )
     }
+
+    /// Crypto trades without a session, so its freshness is a clock question,
+    /// not a calendar one. A price minutes old is current; the same price an
+    /// hour later is not, whatever day of the week it is.
+    @Test("A crypto price inside the stale window is current")
+    func cryptoInsideWindowIsCurrent() {
+        let asOf = date(2026, 8, 23, 9)
+
+        #expect(
+            !TradingCalendar.isStale(
+                priceAsOf: asOf.addingTimeInterval(-5 * 60),
+                kind: .crypto,
+                asOf: asOf
+            )
+        )
+    }
+
+    @Test("A crypto price older than the stale window is stale, even on a Sunday")
+    func cryptoOutsideWindowIsStale() {
+        // 2026-08-23 is a Sunday, when no other kind expects a new price.
+        let sundayMorning = date(2026, 8, 23, 9)
+
+        #expect(
+            TradingCalendar.isStale(
+                priceAsOf: sundayMorning.addingTimeInterval(-20 * 60),
+                kind: .crypto,
+                asOf: sundayMorning
+            )
+        )
+    }
+
+    @Test("Crypto staleness ignores the start of the day")
+    func cryptoDoesNotResetAtMidnight() {
+        // Priced at 00:05 and read at 23:00: the same calendar day, and stale.
+        #expect(
+            TradingCalendar.isStale(
+                priceAsOf: date(2026, 8, 24).addingTimeInterval(5 * 60),
+                kind: .crypto,
+                asOf: date(2026, 8, 24, 23)
+            )
+        )
+    }
 }

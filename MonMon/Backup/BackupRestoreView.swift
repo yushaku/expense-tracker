@@ -376,6 +376,9 @@ private struct BackupRestoreNotice: Identifiable {
 }
 
 private struct BackupRestorePreviewSheet: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
+    @Environment(\.locale) private var locale
     @Environment(\.dismiss) private var dismiss
     let selection: BackupRestoreSelection
     let isWorking: Bool
@@ -465,7 +468,9 @@ private struct BackupRestorePreviewSheet: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Backup details")
                 .font(.headline)
-            detailRow("Created", value: selection.validated.preview.exportedAt.formatted())
+            detailRow(
+                "Created",
+                value: dateFormat.dateTime(selection.validated.preview.exportedAt, in: locale))
             detailRow("App version", value: selection.validated.preview.appVersion)
             detailRow("Build", value: selection.validated.preview.flavour.rawValue.uppercased())
             detailRow(

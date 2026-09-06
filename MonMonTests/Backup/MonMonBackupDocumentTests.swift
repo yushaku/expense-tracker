@@ -102,6 +102,136 @@ struct MonMonBackupDocumentTests {
         #expect(record.creditLimit == nil)
     }
 
+    @Test("A legacy fund instrument record without a provider identifier still decodes")
+    func legacyFundInstrumentRecordDecodes() throws {
+        let data = Data(
+            #"""
+            {
+              "id": "00000000-0000-0000-0000-000000000001",
+              "symbol": "VESAF",
+              "name": "VinaCapital VESAF",
+              "kind": "fund",
+              "currentPricePerUnit": "31581.76",
+              "askPricePerUnit": "0",
+              "priceAsOf": "2023-11-14T22:13:20.125Z",
+              "priceSource": "manual",
+              "autoQuoteEnabled": true,
+              "currencyCode": "VND",
+              "createdAt": "2023-11-14T22:13:20.125Z"
+            }
+            """#.utf8
+        )
+
+        let record = try JSONDecoder().decode(
+            MonMonBackupPayload.FundInstrumentRecord.self,
+            from: data
+        )
+
+        #expect(record.symbol == "VESAF")
+        #expect(record.providerID == nil)
+        #expect(record.logoURL == nil)
+    }
+
+    @Test("A coin record carries the identifier its price is fetched by")
+    func coinRecordCarriesItsIdentifier() throws {
+        let data = Data(
+            #"""
+            {
+              "id": "00000000-0000-0000-0000-000000000002",
+              "symbol": "BTC",
+              "name": "Bitcoin",
+              "kind": "crypto",
+              "currentPricePerUnit": "2110324943",
+              "askPricePerUnit": "0",
+              "priceAsOf": "2026-09-04T09:31:10.000Z",
+              "priceSource": "coinGecko",
+              "autoQuoteEnabled": true,
+              "providerID": "bitcoin",
+              "currencyCode": "VND",
+              "createdAt": "2026-09-04T09:31:10.000Z"
+            }
+            """#.utf8
+        )
+
+        let record = try JSONDecoder().decode(
+            MonMonBackupPayload.FundInstrumentRecord.self,
+            from: data
+        )
+
+        #expect(record.kind == "crypto")
+        #expect(record.providerID == "bitcoin")
+    }
+
+    @Test("A legacy fund holding record without an exchange rate still decodes")
+    func legacyFundHoldingRecordDecodes() throws {
+        let data = Data(
+            #"""
+            {
+              "id": "00000000-0000-0000-0000-000000000003",
+              "units": "10",
+              "averageCostPerUnit": "15",
+              "createdAt": "2023-11-14T22:13:20.125Z"
+            }
+            """#.utf8
+        )
+
+        let record = try JSONDecoder().decode(
+            MonMonBackupPayload.FundHoldingRecord.self,
+            from: data
+        )
+
+        #expect(record.units == "10")
+        #expect(record.purchaseExchangeRate == nil)
+    }
+
+    @Test("A dollar-entered position keeps the rate it was written with")
+    func dollarPositionRecordCarriesItsRate() throws {
+        let data = Data(
+            #"""
+            {
+              "id": "00000000-0000-0000-0000-000000000004",
+              "units": "2",
+              "averageCostPerUnit": "2070646854",
+              "purchaseExchangeRate": "26058",
+              "createdAt": "2026-09-04T09:31:10.000Z"
+            }
+            """#.utf8
+        )
+
+        let record = try JSONDecoder().decode(
+            MonMonBackupPayload.FundHoldingRecord.self,
+            from: data
+        )
+
+        #expect(record.purchaseExchangeRate == "26058")
+    }
+
+    @Test("A legacy fund sale without a fee still decodes")
+    func legacyFundSaleRecordDecodes() throws {
+        let data = Data(
+            #"""
+            {
+              "id": "00000000-0000-0000-0000-000000000005",
+              "holdingID": null,
+              "units": "1",
+              "pricePerUnit": "150000000",
+              "proceedsAccountID": "00000000-0000-0000-0000-000000000006",
+              "soldAt": "2026-09-04T09:31:10.000Z",
+              "note": "",
+              "currencyCode": "VND",
+              "createdAt": "2026-09-04T09:31:10.000Z"
+            }
+            """#.utf8
+        )
+
+        let record = try JSONDecoder().decode(
+            MonMonBackupPayload.FundSaleRecord.self,
+            from: data
+        )
+
+        #expect(record.fee == nil)
+    }
+
     @Test("A legacy transaction record without an income snapshot still decodes")
     func legacyTransactionRecordDecodes() throws {
         let data = Data(

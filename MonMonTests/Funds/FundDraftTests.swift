@@ -238,4 +238,137 @@ struct FundDraftTests {
         #expect(holding.marketValue(in: [cheap, dear], sales: []) == 4_000_000)
         #expect(holding.costBasis == 1_000_000)
     }
+
+    // MARK: - Dollars
+
+    private func usdDraft(
+        averageCostText: String = "79463",
+        exchangeRateText: String = "26.058"
+    ) -> FundDraft {
+        FundDraft(
+            instrumentID: instrument.id,
+            unitsText: "2",
+            averageCostText: averageCostText,
+            costCurrency: .usd,
+            exchangeRateText: exchangeRateText
+        )
+    }
+
+    @Test("A dollar cost is converted once, on the way in")
+    func dollarCostIsConverted() throws {
+        let values = try usdDraft().validate(availableSourceBalance: nil)
+
+        #expect(values.averageCostPerUnit == 2_070_646_854)
+        #expect(values.exchangeRate == 26_058)
+    }
+
+    /// The rate is kept so the editor can reopen in dollars, but what every
+    /// total settles against is still the đồng figure.
+    @Test("The rate reaches the holding and the cost stays in đồng")
+    func rateReachesTheHolding() throws {
+        let holding = try usdDraft().makeHolding(
+            id: UUID(),
+            createdAt: createdAt,
+            availableSourceBalance: nil
+        )
+
+        #expect(holding.averageCostPerUnit == 2_070_646_854)
+        #expect(holding.purchaseExchangeRate == 26_058)
+        #expect(holding.costBasis == 4_141_293_708)
+    }
+
+    @Test("A đồng cost carries no rate at all")
+    func dongCostCarriesNoRate() throws {
+        let holding = try makeDraft(instrumentID: instrument.id).makeHolding(
+            id: UUID(),
+            createdAt: createdAt,
+            availableSourceBalance: nil
+        )
+
+        #expect(holding.purchaseExchangeRate == nil)
+        #expect(holding.averageCostPerUnitInDollars == nil)
+    }
+
+    @Test("A dollar position reopens in dollars, at the rate it was written with")
+    func dollarPositionReopensInDollars() throws {
+        let holding = try usdDraft().makeHolding(
+            id: UUID(),
+            createdAt: createdAt,
+            availableSourceBalance: nil
+        )
+
+        let reopened = FundDraft(holding: holding)
+
+        #expect(reopened.costCurrency == .usd)
+        #expect(reopened.averageCostText == "79463")
+        #expect(reopened.exchangeRateText == VNDCurrency.formatPlain(26_058))
+    }
+
+    @Test("A đồng position reopens in đồng")
+    func dongPositionReopensInDong() throws {
+        let holding = try makeDraft(instrumentID: instrument.id).makeHolding(
+            id: UUID(),
+            createdAt: createdAt,
+            availableSourceBalance: nil
+        )
+
+        #expect(FundDraft(holding: holding).costCurrency == .vnd)
+    }
+
+    /// Retyping the cost in đồng has to drop the rate, or the position would
+    /// keep a number that no longer explains what it cost.
+    @Test("Switching back to đồng clears the stored rate")
+    func switchingBackClearsTheRate() throws {
+        let holding = try usdDraft().makeHolding(
+            id: UUID(),
+            createdAt: createdAt,
+            availableSourceBalance: nil
+        )
+
+        try makeDraft(instrumentID: instrument.id)
+            .apply(to: holding, availableSourceBalance: nil)
+
+        #expect(holding.purchaseExchangeRate == nil)
+        #expect(holding.averageCostPerUnit == 20_000)
+    }
+
+    @Test("A missing or nonsensical rate is rejected, and names itself")
+    func badRateIsRejected() {
+        #expect(
+            error(from: usdDraft(exchangeRateText: "")) == .invalidExchangeRate
+        )
+        #expect(
+            error(from: usdDraft(exchangeRateText: "twenty")) == .invalidExchangeRate
+        )
+        #expect(
+            error(from: usdDraft(exchangeRateText: "0")) == .nonPositiveExchangeRate
+        )
+    }
+
+    @Test("A zero dollar cost is rejected before the rate is even read")
+    func zeroDollarCostIsRejected() {
+        #expect(error(from: usdDraft(averageCostText: "0")) == .nonPositiveAverageCost)
+        #expect(error(from: usdDraft(averageCostText: "")) == .invalidAverageCost)
+    }
+
+    /// A coin worth a fraction of a đồng still has a cost. Rounding the
+    /// converted figure would store zero and fail validation.
+    @Test("A sub-đồng dollar price survives conversion")
+    func subDongDollarPriceSurvives() throws {
+        let values = try usdDraft(averageCostText: "0,000001")
+            .validate(availableSourceBalance: nil)
+
+        #expect(values.averageCostPerUnit > 0)
+    }
+
+    private func error(from draft: FundDraft) -> FundFormError? {
+        do {
+            _ = try draft.validate(availableSourceBalance: nil)
+            return nil
+        } catch let error as FundFormError {
+            return error
+        } catch {
+            return nil
+        }
+    }
 }

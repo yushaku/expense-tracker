@@ -309,7 +309,8 @@ struct FundQuoteRouterTests {
             var asked = false
         }
 
-        func latestQuote(symbol: String, asOf: Date) async throws -> FundQuote {
+        func latestQuote(symbol: String, providerID: String?, asOf: Date) async throws -> FundQuote
+        {
             box.asked = true
             return FundQuote(symbol: symbol, pricePerUnit: 1, asOf: asOf, source: source)
         }

@@ -62,3 +62,22 @@ enum DuplicateReconciler {
         }
     }
 }
+
+extension Dictionary {
+    /// A lookup that survives a store holding two rows under one id.
+    ///
+    /// `Dictionary(uniqueKeysWithValues:)` traps on a repeated key, and a
+    /// repeated key is something this app's store can genuinely hold: the
+    /// identities seeded with a fixed id exist on every device, so
+    /// synchronisation can deliver a second row carrying an id the first one
+    /// already used. `StoreReconciler` folds those — but it runs at launch and
+    /// when the app comes back, and a view rendering in between must not be the
+    /// thing that takes the app down.
+    ///
+    /// Which of the two wins is arbitrary and deliberately so. A view showing
+    /// one of two names for a moment is a blemish; the fold decides the real
+    /// survivor, and it decides it the same way on every device.
+    init<S: Sequence>(firstWins pairs: S) where S.Element == (Key, Value) {
+        self.init(pairs, uniquingKeysWith: { first, _ in first })
+    }
+}

@@ -100,6 +100,8 @@ struct ReportData {
 }
 
 struct ReportView: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
@@ -195,7 +197,7 @@ struct ReportView: View {
                 }
 
                 SpendingOverviewCard(
-                    title: query.range.title(in: locale),
+                    title: query.range.title(in: locale, dateFormat: dateFormat),
                     income: report.income,
                     expense: report.expense,
                     count: report.count
@@ -279,11 +281,11 @@ struct ReportView: View {
     }
 
     private var categoryNames: [UUID: String] {
-        Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0.name) })
+        Dictionary(firstWins: categories.map { ($0.id, $0.name) })
     }
 
     private var accountNames: [UUID: String] {
-        Dictionary(uniqueKeysWithValues: accounts.map { ($0.id, $0.name) })
+        Dictionary(firstWins: accounts.map { ($0.id, $0.name) })
     }
 
     private func categoryBreakdownKindBinding(for report: ReportData) -> Binding<TransactionKind> {
@@ -353,7 +355,7 @@ struct ReportView: View {
     private var emptyNotice: LocalizedStringKey {
         query.isNarrowed
             ? "Nothing matches what you are looking for."
-            : "Nothing recorded \(query.range.phrase(in: locale))."
+            : "Nothing recorded \(query.range.phrase(in: locale, dateFormat: dateFormat))."
     }
 
     private func resultsSection(_ results: [MoneyTransaction]) -> some View {

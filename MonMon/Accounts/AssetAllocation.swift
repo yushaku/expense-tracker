@@ -8,7 +8,8 @@ struct AssetAllocationSlice: Identifiable, Equatable {
         case savings
         case funds
         case gold
-        /// Declared last because the first four are money the owner holds,
+        case crypto
+        /// Declared last because the ones before it are money the owner holds,
         /// while this is a claim on money someone else holds.
         case lent
 
@@ -22,6 +23,8 @@ struct AssetAllocationSlice: Identifiable, Equatable {
                 "Funds"
             case .gold:
                 "Gold"
+            case .crypto:
+                "Crypto"
             case .lent:
                 "Lent out"
             }
@@ -166,6 +169,13 @@ enum AssetAllocation {
                 instruments: instruments,
                 sales: sales,
                 kinds: [.gold]
+            )
+        case .crypto:
+            FundSummary.totalMarketValue(
+                of: holdings,
+                instruments: instruments,
+                sales: sales,
+                kinds: [.crypto]
             )
         case .lent:
             DebtSummary.totalOutstanding(of: debts, payments: payments, direction: .lent)

@@ -135,6 +135,34 @@ struct FundSaleNetWorthTests {
         )
     }
 
+    @Test("A sale fee lowers cash and net worth by exactly that fee")
+    func saleFeeLowersNetWorth() {
+        let account = makeAccount(openingBalance: 50_000_000)
+        let instrument = FundTestFactory.instrument(pricePerUnit: 25_000)
+        let holding = FundTestFactory.holding(
+            in: instrument,
+            units: 1_000,
+            averageCostPerUnit: 20_000,
+            sourceAccountID: account.id
+        )
+        let sale = FundTestFactory.sale(
+            of: holding,
+            units: 1_000,
+            pricePerUnit: 25_000,
+            fee: 100_000,
+            proceedsAccountID: account.id
+        )
+
+        #expect(
+            netWorth(
+                account: account,
+                holdings: [holding],
+                instruments: [instrument],
+                sales: [sale]
+            ) == 54_900_000
+        )
+    }
+
     @Test("The proceeds land in the account the sale names, not the one that funded it")
     func proceedsLandWhereTheSaleSays() {
         let funding = makeAccount(openingBalance: 50_000_000)

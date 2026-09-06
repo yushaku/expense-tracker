@@ -13,6 +13,7 @@ struct SettingsView: View {
     @AppStorage(AppTheme.storageKey) private var theme = AppTheme.system
     @AppStorage(AppLanguage.storageKey) private var language = AppLanguage.system
     @AppStorage(AppLock.enabledKey) private var isLockEnabled = false
+    @AppStorage(AppDateFormat.storageKey) private var dateFormat = AppDateFormat.dayMonthYear
     @State private var instrumentScope: FundInstrumentListScope?
 
     var body: some View {
@@ -24,11 +25,15 @@ struct SettingsView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                         appearanceCard
+                        dateFormatCard
                         notificationCard
                         voiceCaptureCard
                         instrumentsCard
                         securityCard
                         backupCard
+                        #if os(macOS)
+                            MCPSettingsCard()
+                        #endif
                         aboutCard
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -53,9 +58,6 @@ struct SettingsView: View {
             }
         }
     }
-
-    private static let syncedTemplate = Date.FormatStyle().day().month(.abbreviated).year()
-        .hour().minute()
 
     private var appearanceCard: some View {
         card {
@@ -92,8 +94,85 @@ struct SettingsView: View {
                 .pickerStyle(.segmented)
                 .labelsHidden()
                 .accessibilityIdentifier("language-picker")
+
             }
         }
+    }
+
+    private static let dateFormatExample =
+        TransactionPeriod.calendar.date(
+            from: DateComponents(year: 2026, month: 12, day: 24)
+        ) ?? .distantPast
+
+    private var dateFormatCard: some View {
+        card {
+            VStack(alignment: .leading, spacing: 14) {
+                sectionHeader("Date format", systemImage: "calendar")
+
+                Text("Choose how dates appear throughout the app. Changes apply immediately.")
+                    .font(.subheadline)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text("Example: December 24, 2026")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+
+                VStack(spacing: 8) {
+                    ForEach(AppDateFormat.allCases) { option in
+                        dateFormatOption(option)
+                    }
+                }
+                .accessibilityIdentifier("date-format-picker")
+            }
+        }
+    }
+
+    private func dateFormatOption(_ option: AppDateFormat) -> some View {
+        let isSelected = dateFormat == option
+
+        return Button {
+            dateFormat = option
+        } label: {
+            HStack(spacing: 14) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(option.displayName)
+                        .font(.subheadline)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+
+                    Text(option.format(Self.dateFormatExample))
+                        .font(.headline)
+                        .monospacedDigit()
+                        .foregroundStyle(MonMonTheme.textPrimary)
+                }
+                .fixedSize(horizontal: false, vertical: true)
+
+                Spacer(minLength: 0)
+
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.title3)
+                    .foregroundStyle(isSelected ? MonMonTheme.accent : MonMonTheme.textSecondary)
+                    .accessibilityHidden(true)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading)
+            .background(
+                isSelected ? MonMonTheme.accent.opacity(0.10) : MonMonTheme.field,
+                in: RoundedRectangle(cornerRadius: 12)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(
+                        isSelected ? MonMonTheme.accent : MonMonTheme.border,
+                        lineWidth: isSelected ? 1.5 : 1
+                    )
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+        .accessibilityIdentifier("date-format-option-\(option.id)")
     }
 
     private var securityCard: some View {
@@ -134,11 +213,11 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 sectionHeader("Siri & Shortcuts", systemImage: "waveform.badge.mic")
 
-                Label("Two shortcuts are ready", systemImage: "checkmark.circle.fill")
+                Label("Record Transaction is ready", systemImage: "checkmark.circle.fill")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(MonMonTheme.accent)
 
-                Text("They are installed automatically with MonMon—nothing else to download.")
+                Text("This shortcut is installed automatically with MonMon.")
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
 
@@ -148,12 +227,6 @@ struct SettingsView: View {
                 shortcutRow(
                     title: "Record Transaction",
                     detail: "Say “Siri, record a transaction in MonMon”, then answer “cafe 50k”.",
-                    systemImage: "square.and.pencil"
-                )
-
-                shortcutRow(
-                    title: "Quick Capture",
-                    detail: "Opens the focused entry form when voice is not convenient.",
                     systemImage: "square.and.pencil"
                 )
 
@@ -250,6 +323,17 @@ struct SettingsView: View {
                     systemImage: "seal.fill",
                     tint: MonMonTheme.Hue.peach,
                     scope: .gold
+                )
+
+                Divider()
+                    .overlay(MonMonTheme.border)
+
+                instrumentButton(
+                    title: "Crypto",
+                    subtitle: "Manage coins and CoinGecko imports",
+                    systemImage: "bitcoinsign.circle.fill",
+                    tint: MonMonTheme.crypto,
+                    scope: .crypto
                 )
             }
         }
@@ -413,7 +497,7 @@ struct SettingsView: View {
             return "No sync recorded yet on this device."
         }
 
-        let day = TransactionPeriod.format(Self.syncedTemplate, in: locale).format(lastSyncedAt)
+        let day = dateFormat.dateTime(lastSyncedAt, in: locale)
 
         return AppText.string("Last synced \(day).", in: locale)
     }

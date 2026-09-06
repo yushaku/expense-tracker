@@ -2,8 +2,6 @@
 
 MonMon is a private personal-finance app for iPhone and Mac, built with SwiftUI and SwiftData and themed with Catppuccin — Latte in light, Frappé in dark. It is single-owner and offline by default: every balance is derived from what was recorded, never from a hand-edited number, and the only network calls it ever makes are market-price lookups the owner asks for.
 
-Read the docs before the code:
-
 | Page                                                                                             | What it covers                                                                         |
 | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
 | `[docs/smart-note.html](docs/smart-note.html)`                                                   | Owner's guide — recording transactions, voice capture, statement import, reports       |
@@ -12,6 +10,7 @@ Read the docs before the code:
 | `[docs/savings.html](docs/savings.html)`                                                         | Term deposits — simple interest, the three states, withdrawals as records              |
 | `[docs/funds.html](docs/funds.html)`                                                             | Funds, ETFs and gold — immutable lots, sales, market pricing, catalogue import         |
 | `[docs/architecture.html](docs/architecture.html)`                                               | The sixteen SwiftData models, their foreign keys, system boundaries, import flow       |
+| `[docs/mcp.md](docs/mcp.md)`                                                                     | Read-only AI access, tool contract, privacy boundary, and client setup                 |
 | `[docs/bank-transaction-auto-note-research.html](docs/bank-transaction-auto-note-research.html)` | Research behind automatic transaction notes                                            |
 
 ## Features
@@ -35,16 +34,18 @@ Read the docs before the code:
 ### Wealth
 
 - **Term deposits** (sổ tiết kiệm) — maturity dates, projected interest, an optional funding account, and withdrawals that leave the opening terms immutable.
-- **Funds, ETFs, and gold** — held in units or weight against a shared instrument catalogue, showing cost basis, market value, and unrealized profit or loss.
-- **Market valuation** — prices from Fmarket for open-ended funds, VNDIRECT for listed ETFs, and the shop-buy side of a vang.today quote for gold. A fetch happens when the owner asks, or when a screen opens onto a stale price — never on a timer, never in the background, and never with anything but a ticker or product code leaving the device.
-- **Instrument catalogue imports** — add open-ended funds from Fmarket, HOSE-listed ETFs from VNDIRECT, or gold products from vang.today. ETF rows are saved only after VNDIRECT returns a valid closing price; an unavailable ticker does not block the rest of the selection.
+- **Funds, ETFs, and gold** — held in units or weight against a shared instrument catalogue, showing cost basis, market value, and unrealized profit or loss. Gold is valued at the shop-buy quote, while any fee or deduction actually charged on sale reduces the cash proceeds and realized PnL of that sale.
+- **Coins** — held against the same catalogue, priced by CoinGecko in đồng. A purchase or a sale may be typed in dollars at a rate the owner states, which is converted once on the way in: what is stored is đồng, and each record keeps the rate that got it there.
+- **Coin swaps** — one coin exchanged for another, which is how most coin trading happens and touches no bank account. Recorded as a disposal of what was given and a new lot in what was received, settled at one value so the trade can neither create nor lose value. The coin given up settles its gain; the coin received starts at what it cost.
+- **Market valuation** — prices from Fmarket for open-ended funds, VNDIRECT for listed ETFs, the shop-buy side of a vang.today quote for gold, and CoinGecko for coins. A fetch happens when the owner asks, or when a screen opens onto a stale price — never on a timer, never in the background, and never with anything but a ticker, a product code or a coin identifier leaving the device.
+- **Instrument catalogue imports** — add open-ended funds from Fmarket, HOSE-listed ETFs from VNDIRECT, gold products from vang.today, or coins from CoinGecko. ETF rows are saved only after VNDIRECT returns a valid closing price; an unavailable ticker does not block the rest of the selection.
 - **Total assets** — counts transferred money once and holds still through borrowing, lending, and repaying.
 
 ### Capture without typing
 
-- **Quick capture** — an App Intent and Siri phrase that parses a spoken or typed line into a transaction. A clean parse is saved outright; an incomplete one is staged for review rather than guessed at.
+- **Natural-language entry** — type a sentence in Add Transaction to fill the form before saving. The Record Transaction Siri shortcut saves a clean parse directly and stages incomplete entries for review.
 - **Quick-expense widget** — configurable one-tap presets on the Home Screen.
-- **Bank-statement import** — a PDF shared from the bank app lands in the extension's inbox, is parsed off the main thread, reconciled against existing data, reviewed row by row, and committed in a single atomic save. Every imported row keeps a fingerprint, so re-importing the same statement cannot duplicate it.
+- **Bank-statement import** — a PDF shared from the bank app lands in the extension's inbox and is parsed off the main thread. Valid new rows are checked by default. Invalid rows appear first, unchecked, with a reason; uncheck any row to leave it out, or tap its details to edit category and note. Import creates income/expense transactions only, without reconciling account balances or statement totals. The selected rows are committed in one atomic save. If validation fails at save time, affected rows move to Needs attention with a reason and are unchecked; the remaining valid selections can be retried. A storage failure keeps selections and explicitly reports that nothing was saved. Existing import fingerprints prevent duplicates when the same report is imported again.
 
 ### Reports and review
 
@@ -56,6 +57,7 @@ Read the docs before the code:
 ### Data, sync, and privacy
 
 - **Optional iCloud sync** — a CloudKit mirror of the local store, off until the owner turns it on, applied after a relaunch.
+- **Optional read-only AI access on Mac** — an embedded local MCP helper exposes raw records from an App Group SQLite snapshot to Codex or Claude Desktop after explicit consent. The helper has no CloudKit entitlement or write tools.
 - **Backup and restore** — a validated document covering every model, including jars, goals, and trips, with a confirmation step before a restore replaces what is on the device.
 - **App lock** — Face ID or Touch ID with device-passcode fallback, re-locking after time in the background.
 - **Language** — Vietnamese, English, or whatever the system is set to.
@@ -77,48 +79,41 @@ open MonMon.xcodeproj
 
 ### Build flavours
 
-The build configuration picks the flavour, and the flavour owns every identifier
-that decides where data lives. A dev install and a prod install on the same phone
-share nothing.
+Build, install, and launch either flavour on this Mac. The script installs into
+`~/Applications`, so it does not need administrator privileges:
 
-|                    | Dev (`Debug`)                          | Prod (`Release`)                                                   |
-| ------------------ | -------------------------------------- | ------------------------------------------------------------------ |
-| Home screen name   | MonMon Dev                             | MonMon                                                             |
-| App icon           | `AppIconDev` (DEV band)                | `AppIcon`                                                          |
-| Bundle identifier  | `com.sonlv.monmon.local.yushaku`       | `com.sonlv.monmon.app`                                             |
-| App group          | `group.com.sonlv.monmon.local.yushaku` | `group.com.sonlv.monmon.app`                                       |
-| CloudKit container | `iCloud.monmon.dev`                    | `iCloud.monmon`                                                    |
-| Push environment   | `development`                          | `development` (see `APS_ENVIRONMENT` in `Config/Release.xcconfig`) |
+```sh
+scripts/install-mac.sh dev
+scripts/install-mac.sh prod # clean main matching origin/main only
+```
 
-The dev icon is derived art, not a hand-drawn second logo. Regenerate it from
-the real one with `swift scripts/make-dev-appicon.swift` whenever `AppIcon`
-changes.
+The installed apps are `~/Applications/MonMon Dev.app` and
+`~/Applications/MonMon.app`. Override the destination with
+`MONMON_MAC_INSTALL_DIR` when needed.
 
-Those values are set in `Config/Debug.xcconfig` and `Config/Release.xcconfig`.
-Everything downstream reads them: `PRODUCT_BUNDLE_IDENTIFIER` in the project, the
-two `.entitlements` files, and the `Info.plist` keys `MonMonAppGroupIdentifier`
-and `MonMonCloudKitContainer` that `ShareViewController` and `CloudSync` read at
-runtime. Nothing hard-codes an identifier in Swift, so adding a flavour is an
-xcconfig change.
-
-A distinct bundle identifier gives each flavour its own container, which is what
-separates the SwiftData store and `UserDefaults`; the app group separates the
-share extension's statement inbox; the CloudKit container separates what syncs.
-
-Build and install the dev flavour on the phone:
+Build and install the dev flavour on an iPhone:
 
 ```sh
 scripts/run-iphone.sh Yushaku
 ```
 
-Build the prod flavour. The script refuses to run unless `HEAD` is a clean `main`
-matching `origin/main`, archives with the `Release` configuration, and exports an
-`.ipa` into `build/prod`. Pass a device name to also install and launch it:
+Build and install Prod on an iPhone (clean `main` only):
 
 ```sh
 scripts/build-prod.sh
-scripts/build-prod.sh Yushaku
+scripts/install-prod.sh Yushaku
 ```
+
+### Add a new phone (prod)
+
+Prod is development-signed, so the phone must be on the team before install works.
+
+1. Unlock the phone, plug in USB, tap **Trust**.
+2. Enable **Settings → Privacy & Security → Developer Mode**, then restart.
+3. Confirm the Mac sees it: `xcrun devicectl list devices`
+4. First install registers the UDID automatically (`-allowProvisioningDeviceRegistration`). Or add it by hand in [developer.apple.com](https://developer.apple.com/account/resources/devices/list) → Devices.
+5. `scripts/install-prod.sh "<Device Name>"`
+6. On the phone: **Settings → General → VPN & Device Management** → trust the developer certificate.
 
 Both flavours need their App ID, app group, and CloudKit container to exist in
 the developer account before signing succeeds. Xcode registers them when you add
@@ -156,33 +151,32 @@ Check Swift formatting:
 rtk swift format lint --strict --recursive MonMon MonMonTests MonMonShareExtension
 ```
 
-### Run on Mac
+### Adding transactions
 
-1. Open `MonMon.xcodeproj`.
-2. Select the `MonMon` scheme.
-3. Select **My Mac** as the destination.
-4. Press **Command-R**.
+Add Transaction has Expense, Income, and Quick Add tabs. In **Quick Add**, type a
+sentence such as `50k lunch cash yesterday`, then choose **Fill transaction details**.
+The editor switches to the matching Expense or Income tab to review or complete
+the fields before tapping **Save**. Quick Add text is retained when switching tabs. Swipe left or right across the
+form to move between Income, Expense, and Quick Add; vertical drags still scroll
+the form. Swipes stop at the first and last tab. A directional 3D page-turn animation
+accompanies each swipe, with a short crossfade when Reduce Motion is enabled.
+Filling the form does not write transactions or pending captures. Expense entries retain the selected trip and
+funding jar; income entries clear that expense-only routing.
 
-No signing team is required for the current local Mac build.
+**Record Transaction** is the only Siri app shortcut. The former Quick Capture
+shortcut has been removed; existing quick-capture URLs open Add Transaction.
 
-### Run on iPhone Simulator
+### Gold unit labels
 
-1. In Xcode, open **Settings > Components** and install an iOS Simulator runtime
-   if no iPhone destination is available.
-2. Select the `MonMon` scheme and an installed iPhone Simulator.
-3. Press **Command-R**.
+Gold forms, quotes, and holding summaries use **mace / tael** in English and
+**chỉ / lượng** in Vietnamese, following the selected app language. This changes
+labels only: stored weights and the ten-to-one conversion are unchanged.
 
-The Simulator runtime is only needed to launch the app. The command-line SDK build
-above can compile the iOS target without it.
+### Date display
 
-### Run on a physical iPhone
-
-1. Sign in under **Xcode > Settings > Accounts**.
-2. Select the `MonMon` target, open **Signing & Capabilities**, and choose your
-   development team.
-3. Connect and trust the iPhone, enable Developer Mode when prompted, and select
-   the phone as the run destination.
-4. Press **Command-R**.
-
-Signing identities, provisioning profiles, and Xcode user state must remain local
-and are excluded by `.gitignore`.
+In Settings → Date format, choose `dd/MM/yyyy` (default),
+`MM/dd/yyyy`, or `yyyy-MM-dd`. The choice is saved on this device and applies
+immediately, independently of the interface language. Each option shows a sample
+date, and the selected option has a checkmark. Date-time labels retain
+the localized time, and month/year headings retain their existing labels.
+Backup files, bank imports, and API date encodings keep their existing formats.

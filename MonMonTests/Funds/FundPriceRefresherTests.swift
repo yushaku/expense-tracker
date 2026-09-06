@@ -52,7 +52,9 @@ struct FundPriceRefresherTests {
             }
         }
 
-        func latestQuote(symbol: String, asOf requested: Date) async throws -> FundQuote {
+        func latestQuote(symbol: String, providerID: String?, asOf requested: Date) async throws
+            -> FundQuote
+        {
             calls.record(symbol)
             if let error {
                 throw error
@@ -88,7 +90,8 @@ struct FundPriceRefresherTests {
             return listed
         }
 
-        func latestQuote(symbol: String, asOf: Date) async throws -> FundQuote {
+        func latestQuote(symbol: String, providerID: String?, asOf: Date) async throws -> FundQuote
+        {
             throw FundQuoteError.noQuoteAvailable
         }
 
@@ -483,7 +486,9 @@ struct FundPriceRefresherTests {
             let quoteDay: Date
             let calls: StubProvider.Calls
 
-            func latestQuote(symbol: String, asOf: Date) async throws -> FundQuote {
+            func latestQuote(symbol: String, providerID: String?, asOf: Date) async throws
+                -> FundQuote
+            {
                 calls.record(symbol)
                 if symbol == "MISSING" {
                     throw FundQuoteError.symbolNotFound

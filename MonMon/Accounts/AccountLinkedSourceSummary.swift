@@ -30,8 +30,10 @@ enum AccountLinkedSourceSummary {
         let counts: [AccountLinkedSourceKind: Int] = [
             .savings: deposits.count { $0.sourceAccountID == account.id }
                 + withdrawals.count { $0.destinationAccountID == account.id },
+            // A swap paid into no account, so it is not a reason this one
+            // cannot be deleted. See `FundSale.swapHoldingID`.
             .funds: holdings.count { $0.sourceAccountID == account.id }
-                + sales.count { $0.proceedsAccountID == account.id },
+                + sales.count { !$0.isSwap && $0.proceedsAccountID == account.id },
             .debts: debts.count { $0.accountID == account.id }
                 + payments.count { $0.accountID == account.id },
             .recurring: recurringRules.count { $0.accountID == account.id },

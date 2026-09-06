@@ -1,5 +1,18 @@
 import Foundation
 
+/// Process-wide facts that are not about money, only about how this launch
+/// was started. This file is shared by the app and widget targets.
+enum MonMonProcess {
+    /// `xcodebuild test` injects this when MonMon.app is the Mac test host.
+    /// Under that path the binary is usually unsigned (`CODE_SIGNING_ALLOWED=NO`),
+    /// so opening an App Group container trips Sequoia's "access data from
+    /// other apps" prompt on every run. Skip those calls for the host launch;
+    /// tests that need a group inject their own suite or URL.
+    static var isRunningUnitTests: Bool {
+        ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+    }
+}
+
 enum QuickExpenseSlot: String, CaseIterable, Codable, Sendable {
     case coffee
     case lunch
@@ -10,14 +23,6 @@ enum QuickExpenseSlot: String, CaseIterable, Codable, Sendable {
     case medicine
     case entertainment
     case bills
-}
-
-enum QuickExpensePresetCount: Int, CaseIterable, Codable, Identifiable, Sendable {
-    case three = 3
-    case six = 6
-    case nine = 9
-
-    var id: Int { rawValue }
 }
 
 enum QuickExpensePresetError: Error, Equatable, Sendable {
@@ -101,15 +106,41 @@ struct QuickExpensePreset: Codable, Equatable, Identifiable, Sendable {
 }
 
 struct QuickExpenseConfiguration: Codable, Equatable, Sendable {
-    let visibleCount: QuickExpensePresetCount
+    /// Any number of presets from one up to the slots there are, rather than a
+    /// choice of three fixed sizes. The widget sizes have their own capacities
+    /// and no longer decide this for the owner; see `QuickExpenseWidgetLayout`.
+    static let countRange = 1...QuickExpenseSlot.allCases.count
+
+    let visibleCount: Int
     let presets: [QuickExpensePreset]
 
     var activePresets: [QuickExpensePreset] {
-        Array(presets.prefix(visibleCount.rawValue))
+        Array(presets.prefix(visibleCount))
+    }
+
+    init(visibleCount: Int, presets: [QuickExpensePreset]) {
+        self.visibleCount = Self.clamped(visibleCount)
+        self.presets = presets
+    }
+
+    /// Clamps rather than refuses. A stored count outside the range means a
+    /// build that knew a different number of slots, or a file somebody edited;
+    /// either way the presets themselves are still readable, and showing as
+    /// many as there are beats refusing to show any.
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            visibleCount: try container.decode(Int.self, forKey: .visibleCount),
+            presets: try container.decode([QuickExpensePreset].self, forKey: .presets)
+        )
+    }
+
+    static func clamped(_ count: Int) -> Int {
+        min(max(count, countRange.lowerBound), countRange.upperBound)
     }
 
     static let defaults = QuickExpenseConfiguration(
-        visibleCount: .three,
+        visibleCount: 3,
         presets: QuickExpensePreset.defaults
     )
 }
@@ -129,6 +160,11 @@ enum QuickExpenseWidgetConfiguration {
     }
 
     static func makeDefaults(bundle: Bundle = .main) -> UserDefaults {
+        // The Mac test host must not open the real App Group suite: see
+        // `MonMonProcess.isRunningUnitTests`.
+        guard !MonMonProcess.isRunningUnitTests else {
+            return .standard
+        }
         guard
             let identifier = appGroupIdentifier(in: bundle.infoDictionary ?? [:]),
             let defaults = UserDefaults(suiteName: identifier)
@@ -222,6 +258,18 @@ struct QuickExpensePresetStore {
         defaults.set(try encoder.encode(normalized), forKey: Self.storageKey)
     }
 
+    /// Read the latest configuration so editing one slot does not overwrite
+    /// changes to other slots or to the visible count made in another window.
+    func savePreset(_ preset: QuickExpensePreset) throws {
+        let current = load()
+        let presets = current.presets.map { $0.slot == preset.slot ? preset : $0 }
+        try save(QuickExpenseConfiguration(visibleCount: current.visibleCount, presets: presets))
+    }
+
+    func setVisibleCount(_ count: Int) throws {
+        try save(QuickExpenseConfiguration(visibleCount: count, presets: load().presets))
+    }
+
     func preset(for slot: QuickExpenseSlot) -> QuickExpensePreset {
         load().presets.first { $0.slot == slot }
             ?? QuickExpensePreset.defaultPreset(for: slot)
@@ -277,7 +325,10 @@ struct QuickExpensePresetStore {
             )
         }
 
-        return QuickExpenseConfiguration(visibleCount: .three, presets: migratedPresets)
+        return QuickExpenseConfiguration(
+            visibleCount: QuickExpenseConfiguration.defaults.visibleCount,
+            presets: migratedPresets
+        )
     }
 
     private func requiredIndex(for slot: QuickExpenseSlot) throws -> Int {

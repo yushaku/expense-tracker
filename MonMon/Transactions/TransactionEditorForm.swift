@@ -1,9 +1,46 @@
 import SwiftUI
 
+enum TransactionEntryTab: Int, CaseIterable {
+    case income
+    case expense
+    case quickAdd
+
+    init(kind: TransactionKind) {
+        self = kind == .income ? .income : .expense
+    }
+
+    var kind: TransactionKind? {
+        switch self {
+        case .income: .income
+        case .expense: .expense
+        case .quickAdd: nil
+        }
+    }
+
+    func swiped(
+        horizontal: CGFloat, vertical: CGFloat, allowsQuickAdd: Bool = true
+    ) -> Self {
+        // Require an intentional horizontal swipe, leaving vertical scrolling
+        // and short drags within form controls alone.
+        guard abs(horizontal) >= 60, abs(horizontal) > abs(vertical) * 1.5 else {
+            return self
+        }
+        let last = allowsQuickAdd ? Self.quickAdd.rawValue : Self.expense.rawValue
+        let next = min(max(rawValue + (horizontal < 0 ? 1 : -1), 0), last)
+        return Self(rawValue: next) ?? self
+    }
+}
+
 struct TransactionEditorForm: View {
     @Environment(\.locale) private var locale
+    @Environment(\.layoutDirection) private var layoutDirection
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    @State private var pageTurnDirection = -1.0
 
     @Binding var draft: TransactionDraft
+    @Binding var isQuickAdding: Bool
+    @Binding var rawEntry: String
 
     let accounts: [CashAccount]
     let categories: [TransactionCategory]
@@ -13,6 +50,7 @@ struct TransactionEditorForm: View {
     let validationError: TransactionFormError?
     let saveErrorMessage: LocalizedStringKey?
     let onDelete: () -> Void
+    let onCapture: (String) -> Void
 
     var body: some View {
         ZStack {
@@ -21,20 +59,15 @@ struct TransactionEditorForm: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                    introduction
-                    amountCard
-                    detailsCard
+                    entryTabs
 
-                    if showsTripRouting {
-                        tripRoutingCard
-                    }
-
-                    if let saveErrorMessage {
-                        errorBanner(saveErrorMessage)
-                    }
-
-                    if isEditing {
-                        deleteButton
+                    ZStack(alignment: .top) {
+                        entryPage
+                            .id(entrySelection.wrappedValue)
+                            .transition(
+                                TransactionPageTurn(
+                                    direction: pageTurnDirection, reduceMotion: reduceMotion)
+                            )
                     }
                 }
                 .frame(maxWidth: 560)
@@ -47,7 +80,79 @@ struct TransactionEditorForm: View {
             // pulls where it should take one. Content that already fits has
             // nothing to scroll and so has no reason to bounce.
             .scrollBounceBehavior(.basedOnSize)
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 30)
+                    .onEnded { value in
+                        let horizontal =
+                            layoutDirection == .rightToLeft
+                            ? -value.translation.width : value.translation.width
+                        let current = entrySelection.wrappedValue
+                        let next = current.swiped(
+                            horizontal: horizontal,
+                            vertical: value.translation.height,
+                            allowsQuickAdd: !isEditing
+                        )
+                        guard next != current else { return }
+                        pageTurnDirection = value.translation.width < 0 ? -1 : 1
+                        withAnimation(.easeInOut(duration: reduceMotion ? 0.15 : 0.35)) {
+                            entrySelection.wrappedValue = next
+                        }
+                    }
+            )
         }
+    }
+
+    private var entryPage: some View {
+        VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+            if isQuickAdding {
+                TransactionCaptureEntry(rawEntry: $rawEntry, onApply: onCapture)
+            } else {
+                introduction
+                amountCard
+                detailsCard
+
+                if showsTripRouting {
+                    tripRoutingCard
+                }
+            }
+
+            if let saveErrorMessage {
+                errorBanner(saveErrorMessage)
+            }
+
+            if isEditing {
+                deleteButton
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var entryTabs: some View {
+        Picker("Entry method", selection: entrySelection) {
+            ForEach(TransactionKind.allCases, id: \.rawValue) { kind in
+                Text(kind.displayName)
+                    .tag(TransactionEntryTab(kind: kind))
+            }
+            if !isEditing {
+                Text("Quick Add")
+                    .tag(TransactionEntryTab.quickAdd)
+            }
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .accessibilityIdentifier("transaction-kind")
+    }
+
+    private var entrySelection: Binding<TransactionEntryTab> {
+        Binding(
+            get: { isQuickAdding ? .quickAdd : TransactionEntryTab(kind: draft.kind) },
+            set: { tab in
+                isQuickAdding = tab == .quickAdd
+                if let kind = tab.kind {
+                    draft.kind = kind
+                }
+            }
+        )
     }
 
     private var introduction: some View {
@@ -60,7 +165,7 @@ struct TransactionEditorForm: View {
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(isEditing ? "Fix what you recorded" : "Where the money went")
+                Text(introductionTitle)
                     .font(.title3.weight(.semibold))
 
                 Text("The account you pick moves by exactly this amount.")
@@ -70,6 +175,13 @@ struct TransactionEditorForm: View {
         }
     }
 
+    private var introductionTitle: LocalizedStringKey {
+        if isEditing {
+            return "Fix what you recorded"
+        }
+        return draft.kind == .income ? "Where the money came from" : "Where the money went"
+    }
+
     private var directionTint: Color {
         draft.kind == .income ? MonMonTheme.gain : MonMonTheme.danger
     }
@@ -77,16 +189,6 @@ struct TransactionEditorForm: View {
     private var amountCard: some View {
         card {
             VStack(alignment: .leading, spacing: 14) {
-                Picker("Direction", selection: $draft.kind) {
-                    ForEach(TransactionKind.allCases, id: \.rawValue) {
-                        Text($0.displayName)
-                            .tag($0)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .accessibilityIdentifier("transaction-kind")
-
                 HStack(spacing: 12) {
                     Text(draft.kind.signLabel)
                         .font(.title2.weight(.bold))
@@ -408,5 +510,22 @@ struct TransactionEditorForm: View {
         default:
             nil
         }
+    }
+}
+
+/// Rotate incoming and outgoing pages in opposite directions. The tab bar stays
+/// stationary; Reduce Motion replaces the depth effect with a brief crossfade.
+private struct TransactionPageTurn: Transition {
+    let direction: Double
+    let reduceMotion: Bool
+
+    func body(content: Content, phase: TransitionPhase) -> some View {
+        content
+            .rotation3DEffect(
+                .degrees(reduceMotion ? 0 : phase.value * direction * 85),
+                axis: (x: 0, y: 1, z: 0),
+                perspective: 0.3
+            )
+            .opacity(phase.isIdentity ? 1 : 0)
     }
 }

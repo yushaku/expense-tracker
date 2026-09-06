@@ -160,6 +160,133 @@ struct StoreReconcilerTests {
         #expect(try context.fetchCount(FetchDescriptor<TransactionCategory>()) == seeded)
     }
 
+    /// The crash this fold exists to prevent, reproduced from the store it
+    /// actually happened in: a Mac seeded its starter categories in Vietnamese,
+    /// an iPhone seeded the same fixed ids in English, and synchronisation put
+    /// both sets in one store. Matching on the name pairs none of them, so nine
+    /// ids each named two rows and every `[UUID: …]` lookup in the app trapped
+    /// on the first one it built.
+    @Test("Two seeded sets in different languages fold on the id")
+    func seededSetsInDifferentLanguagesFold() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        for template in CategorySeed.makeCategories(
+            createdAt: day0,
+            locale: AppLanguage.vietnamese.locale
+        ) {
+            context.insert(template)
+        }
+        for template in CategorySeed.makeCategories(
+            createdAt: day1,
+            locale: AppLanguage.english.locale
+        ) {
+            context.insert(template)
+        }
+        try context.save()
+
+        let seeded = CategorySeed.templates.count
+        let report = try StoreReconciler.reconcile(in: context)
+
+        #expect(report.categories == seeded)
+
+        let survivors = try context.fetch(FetchDescriptor<TransactionCategory>())
+        #expect(survivors.count == seeded)
+        // The point of the fold: one row per id, which is what every lookup in
+        // the app assumes and what `Dictionary(uniqueKeysWithValues:)` traps on.
+        #expect(Set(survivors.map(\.id)).count == survivors.count)
+        // Oldest-wins, so the set that was in the store first keeps its names.
+        #expect(
+            survivors.map(\.name).sorted()
+                == CategorySeed.makeCategories(
+                    createdAt: day0,
+                    locale: AppLanguage.vietnamese.locale
+                ).map(\.name).sorted()
+        )
+    }
+
+    /// A device that seeds while the peer's set is already present must not
+    /// leave the store worse than it found it, whichever set arrived first.
+    @Test("The id fold is the same answer in either arrival order")
+    func idFoldIsOrderIndependent() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        for template in CategorySeed.makeCategories(
+            createdAt: day1,
+            locale: AppLanguage.english.locale
+        ) {
+            context.insert(template)
+        }
+        for template in CategorySeed.makeCategories(
+            createdAt: day0,
+            locale: AppLanguage.vietnamese.locale
+        ) {
+            context.insert(template)
+        }
+        try context.save()
+
+        _ = try StoreReconciler.reconcile(in: context)
+
+        let survivors = try context.fetch(FetchDescriptor<TransactionCategory>())
+        #expect(Set(survivors.map(\.id)).count == survivors.count)
+        #expect(
+            survivors.map(\.name).sorted()
+                == CategorySeed.makeCategories(
+                    createdAt: day0,
+                    locale: AppLanguage.vietnamese.locale
+                ).map(\.name).sorted()
+        )
+    }
+
+    /// A transaction filed under the newer of two rows sharing one id is
+    /// already filed under the survivor, because the id is what they share.
+    /// Folding must leave it pointing there and delete only the row.
+    @Test("A transaction keeps its category id when a same-id row is folded")
+    func transactionSurvivesSameIDFold() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let sharedID = CategorySeed.defaultID(for: .expense)
+        let older = TransactionCategory(
+            id: sharedID,
+            name: "Ăn uống",
+            kind: .expense,
+            symbolName: CategoryPalette.defaultSymbolName,
+            colorName: CategoryPalette.defaultColorName,
+            createdAt: day0
+        )
+        let newer = TransactionCategory(
+            id: sharedID,
+            name: "Food",
+            kind: .expense,
+            symbolName: CategoryPalette.defaultSymbolName,
+            colorName: CategoryPalette.defaultColorName,
+            createdAt: day1
+        )
+        context.insert(older)
+        context.insert(newer)
+        let transaction = MoneyTransaction(
+            id: UUID(),
+            kind: .expense,
+            amount: 100,
+            occurredAt: day1,
+            note: "Lunch",
+            accountID: AccountSeed.unassignedID,
+            categoryID: sharedID,
+            sourceRuleID: nil,
+            currencyCode: VNDCurrency.code,
+            createdAt: day1
+        )
+        context.insert(transaction)
+        try context.save()
+
+        let report = try StoreReconciler.reconcile(in: context)
+
+        #expect(report.categories == 1)
+        #expect(transaction.categoryID == sharedID)
+        let survivors = try context.fetch(FetchDescriptor<TransactionCategory>())
+        #expect(survivors.count == 1)
+        #expect(survivors.first?.name == "Ăn uống")
+    }
+
     @Test("Case and surrounding space do not make a second category")
     func caseAndSpaceStillMatch() throws {
         let container = try makeContainer()

@@ -1,500 +1,3338 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@ mace (%@ tael)": {
+      "comment": "Gold weight in mace and Vietnamese tael; one tael is ten mace. Values are already formatted.",
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ chỉ (%@ lượng)"
+          }
+        }
+      }
+    },
+    "Entry method": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cách nhập"
+          }
+        }
+      }
+    },
+    "Quick Add": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm nhanh"
+          }
+        }
+      }
+    },
+    "Fill the details, then review them in Income or Expense before saving.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fill the details, then review them in Income or Expense before saving."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Điền thông tin, rồi kiểm tra trong tab Thu hoặc Chi trước khi lưu."
+          }
+        }
+      }
+    },
+    "Fill transaction details": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fill transaction details"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Điền thông tin giao dịch"
+          }
+        }
+      }
+    },
+    "Cannot import income: fix budget jar allocations and reopen this report": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể nhập khoản thu: hãy sửa tỷ lệ phân bổ hũ và mở lại sao kê này"
+          }
+        }
+      }
+    },
+    "These transactions will not be imported. Open a row to review its reason.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Các giao dịch này sẽ không được nhập. Mở từng dòng để xem lý do."
+          }
+        }
+      }
+    },
+    "Needs attention: %lld": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cần xử lý: %lld"
+          }
+        }
+      }
+    },
+    "Import stopped — nothing saved": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã dừng nhập — chưa lưu giao dịch nào"
+          }
+        }
+      }
+    },
+    "No transactions from this attempt were saved. Your selections are still available below.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa lưu giao dịch nào trong lần nhập này. Các lựa chọn của bạn vẫn còn ở bên dưới."
+          }
+        }
+      }
+    },
+    "%lld transactions could not be imported and were unchecked. See Needs attention below. You can import the remaining selected transactions.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể nhập %lld giao dịch nên đã bỏ chọn. Xem mục Cần xử lý bên dưới. Bạn có thể nhập các giao dịch còn đang được chọn."
+          }
+        }
+      }
+    },
+    "The selected account is no longer available. Choose a VND account and select the transactions to import.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tài khoản đã chọn không còn khả dụng. Hãy chọn tài khoản VND và các giao dịch cần nhập."
+          }
+        }
+      }
+    },
+    "This report could not be validated. Close it and reopen it from the import inbox.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể xác thực sao kê này. Hãy đóng rồi mở lại từ hộp thư nhập sao kê."
+          }
+        }
+      }
+    },
+    "Your records changed while saving. Close this report and reopen it to refresh the imported transactions.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dữ liệu đã thay đổi khi lưu. Hãy đóng và mở lại sao kê để cập nhật các giao dịch đã nhập."
+          }
+        }
+      }
+    },
+    "MonMon could not write to its data store. This does not mean a transaction is invalid. Try importing again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không thể ghi vào kho dữ liệu. Điều này không có nghĩa giao dịch không hợp lệ. Hãy thử nhập lại."
+          }
+        }
+      }
+    },
+    "MonMon could not finish this import. Try again, or close this report and reopen it.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không thể hoàn tất lần nhập này. Hãy thử lại hoặc đóng rồi mở lại sao kê."
+          }
+        }
+      }
+    },
+    "Will be imported": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sẽ được nhập"
+          }
+        }
+      }
+    },
+    "Not selected: choose a valid category": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa chọn: hãy chọn danh mục hợp lệ"
+          }
+        }
+      }
+    },
+    "Not selected: amount must be greater than zero": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa chọn: số tiền phải lớn hơn 0"
+          }
+        }
+      }
+    },
+    "Not selected: invalid statement reference": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa chọn: mã tham chiếu sao kê không hợp lệ"
+          }
+        }
+      }
+    },
+    "Not selected: choose a VND account": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa chọn: hãy chọn tài khoản VND"
+          }
+        }
+      }
+    },
+    "Review transaction": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xem lại giao dịch"
+          }
+        }
+      }
+    },
+    "Choose an account for the imported transactions.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn tài khoản cho các giao dịch được nhập."
+          }
+        }
+      }
+    },
+    "Selected: %lld": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã chọn: %lld"
+          }
+        }
+      }
+    },
+    "Import transaction: %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập giao dịch: %@"
+          }
+        }
+      }
+    },
+    "Not selected": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa chọn"
+          }
+        }
+      }
+    },
+    "Edit category and note": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sửa danh mục và ghi chú"
+          }
+        }
+      }
+    },
+    "Choose category": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn danh mục"
+          }
+        }
+      }
+    },
+    "Select at least one transaction to import.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn ít nhất một giao dịch để nhập."
+          }
+        }
+      }
+    },
+    "Import selected transactions": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập giao dịch đã chọn"
+          }
+        }
+      }
+    },
+    "Import %lld transactions": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập %lld giao dịch"
+          }
+        }
+      }
+    },
+    "Day / Month / Year": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngày / Tháng / Năm"
+          }
+        }
+      }
+    },
+    "Month / Day / Year": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tháng / Ngày / Năm"
+          }
+        }
+      }
+    },
+    "Year / Month / Day": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Năm / Tháng / Ngày"
+          }
+        }
+      }
+    },
+    "Choose how dates appear throughout the app. Changes apply immediately.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn cách hiển thị ngày trong ứng dụng. Thay đổi được áp dụng ngay."
+          }
+        }
+      }
+    },
+    "Example: December 24, 2026": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ví dụ: ngày 24 tháng 12 năm 2026"
+          }
+        }
+      }
+    },
+    "Date format": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Định dạng ngày"
+          }
+        }
+      }
+    },
+    "Widget sizes hold:": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Các cỡ widget chứa được:"
+          }
+        }
+      }
+    },
+    "A size shows as many as it fits. Hidden presets are kept.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mỗi cỡ hiện tối đa số nó chứa được. Preset bị ẩn vẫn được giữ."
+          }
+        }
+      }
+    },
+    "small": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "nhỏ"
+          }
+        }
+      }
+    },
+    "medium": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vừa"
+          }
+        }
+      }
+    },
+    "large": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lớn"
+          }
+        }
+      }
+    },
+    "Preview": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xem trước"
+          }
+        }
+      }
+    },
+    "Expense category": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Danh mục chi"
+          }
+        }
+      }
+    },
+    "Tap a preset to edit its name, amount, and category.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chạm vào một mẫu để sửa tên, số tiền và danh mục."
+          }
+        }
+      }
+    },
+    "Edit this preset. No expense will be recorded.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sửa mẫu này. Thao tác này không ghi khoản chi."
+          }
+        }
+      }
+    },
+    "Couldn’t save presets. Try again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể lưu mẫu chi nhanh. Vui lòng thử lại."
+          }
+        }
+      }
+    },
+    "Choose a category": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn danh mục"
+          }
+        }
+      }
+    },
+    "Uses transaction default": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dùng danh mục mặc định"
+          }
+        }
+      }
+    },
+    "Records to account": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi vào tài khoản"
+          }
+        }
+      }
+    },
+    "Choose a default account": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn tài khoản mặc định"
+          }
+        }
+      }
+    },
+    "Choose an account in Defaults before using the widget.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn tài khoản trong phần Mặc định trước khi dùng widget."
+          }
+        }
+      }
+    },
+    "Preview only. No expense will be recorded.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chỉ xem trước, không ghi khoản chi."
+          }
+        }
+      }
+    },
+    "Edit quick expense": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sửa mẫu chi nhanh"
+          }
+        }
+      }
+    },
+    "Discard changes?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bỏ các thay đổi?"
+          }
+        }
+      }
+    },
+    "Discard changes": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bỏ thay đổi"
+          }
+        }
+      }
+    },
+    "Keep editing": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiếp tục sửa"
+          }
+        }
+      }
+    },
+    "Name or emoji": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tên hoặc emoji"
+          }
+        }
+      }
+    },
+    "Enter a name or emoji with 1–16 characters.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập tên hoặc emoji từ 1–16 ký tự."
+          }
+        }
+      }
+    },
+    "Up to 16 characters. This appears on the widget.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tối đa 16 ký tự. Nội dung này sẽ hiển thị trên widget."
+          }
+        }
+      }
+    },
+    "Amount (VND)": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền (VND)"
+          }
+        }
+      }
+    },
+    "Enter a positive whole amount in VND.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập số tiền nguyên lớn hơn 0, đơn vị VND."
+          }
+        }
+      }
+    },
+    "Category unavailable": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Danh mục không còn tồn tại"
+          }
+        }
+      }
+    },
+    "Default: %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mặc định: %@"
+          }
+        }
+      }
+    },
+    "Default category unavailable": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có danh mục mặc định hợp lệ"
+          }
+        }
+      }
+    },
+    "Choose an expense category. Add one in Categories if the list is empty.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn danh mục chi. Nếu danh sách trống, hãy thêm trong phần Danh mục."
+          }
+        }
+      }
+    },
+    "Follows your default expense category when it changes.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tự dùng danh mục chi mặc định mới khi bạn thay đổi."
+          }
+        }
+      }
+    },
+    "Other": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khác"
+          }
+        }
+      }
+    },
+    "Unit": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đơn vị"
+          }
+        }
+      }
+    },
+    "Average cost": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giá vốn trung bình"
+          }
+        }
+      }
+    },
+    "Sale price": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giá bán"
+          }
+        }
+      }
+    },
+    "unit": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "đơn vị"
+          }
+        }
+      }
+    },
+    "tael": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lượng"
+          }
+        }
+      }
+    },
+    "Filled in from today's buy price. Change it to what you actually paid.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Điền sẵn theo giá mua hôm nay. Sửa lại thành số bạn thực trả."
+          }
+        }
+      }
+    },
+    "At today's prices that is about %@. Use it": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theo giá hôm nay thì khoảng %@. Dùng số này"
+          }
+        }
+      }
+    },
+    "This is what both sides are booked at: the gain the coin you gave settles, and what the coin you got cost.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đây là mức ghi sổ cho cả hai chiều: lãi/lỗ mà coin bạn đưa ra chốt lại, và giá vốn của coin bạn nhận về."
+          }
+        }
+      }
+    },
+    "Filled in from today's %@ price. It is what both sides are booked at — the gain %@ settles, and what the coin you got cost. Change it if the trade went through at a different price.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Điền sẵn theo giá %@ hôm nay. Đây là mức ghi sổ cho cả hai chiều — lãi/lỗ mà %@ chốt lại, và giá vốn của coin bạn nhận về. Sửa lại nếu lệnh khớp ở giá khác."
+          }
+        }
+      }
+    },
+    "Swap coins": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đổi coin"
+          }
+        }
+      }
+    },
+    "Edit swap": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sửa lần đổi"
+          }
+        }
+      }
+    },
+    "Delete this swap": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xoá lần đổi này"
+          }
+        }
+      }
+    },
+    "Delete this swap?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xoá lần đổi này?"
+          }
+        }
+      }
+    },
+    "Both sides go: the coin you gave comes back into its lot, and the coin you got is removed.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cả hai chiều đều mất: coin bạn đưa ra quay lại lô của nó, coin bạn nhận bị xoá."
+          }
+        }
+      }
+    },
+    "One coin for another": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đổi coin này lấy coin khác"
+          }
+        }
+      }
+    },
+    "No money leaves or arrives. What you gave settles its gain, and what you got starts at what it cost.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không có tiền ra hay vào. Coin bạn đưa ra chốt lãi/lỗ, coin bạn nhận bắt đầu từ đúng giá vốn đó."
+          }
+        }
+      }
+    },
+    "You gave": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bạn đưa ra"
+          }
+        }
+      }
+    },
+    "You got": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bạn nhận về"
+          }
+        }
+      }
+    },
+    "Coin received": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coin nhận về"
+          }
+        }
+      }
+    },
+    "Quantity given": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số lượng đưa ra"
+          }
+        }
+      }
+    },
+    "Quantity received": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số lượng nhận về"
+          }
+        }
+      }
+    },
+    "%@ held in this lot.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lô này còn %@."
+          }
+        }
+      }
+    },
+    "What the trade was worth": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giá trị lần đổi"
+          }
+        }
+      }
+    },
+    "Value currency": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đơn vị giá trị"
+          }
+        }
+      }
+    },
+    "Value of this swap": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giá trị lần đổi này"
+          }
+        }
+      }
+    },
+    "Swapped on": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đổi ngày"
+          }
+        }
+      }
+    },
+    "What this settles": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lần đổi này chốt gì"
+          }
+        }
+      }
+    },
+    "%@ leaves the lot at %@, and that is what the new position cost.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ rời lô ở mức %@, và đó cũng là giá vốn của vị thế mới."
+          }
+        }
+      }
+    },
+    "Rate at the swap, %@.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tỷ giá lúc đổi, %@."
+          }
+        }
+      }
+    },
+    "Choose the coin you got.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn coin bạn nhận về."
+          }
+        }
+      }
+    },
+    "Choose a different coin from the one you gave.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn một coin khác với coin bạn đưa ra."
+          }
+        }
+      }
+    },
+    "Enter a valid quantity.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập số lượng hợp lệ."
+          }
+        }
+      }
+    },
+    "Enter what the trade was worth, in đồng.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập giá trị lần đổi, tính bằng đồng."
+          }
+        }
+      }
+    },
+    "Enter what the trade was worth, in dollars.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập giá trị lần đổi, tính bằng đô la."
+          }
+        }
+      }
+    },
+    "The value must be greater than zero.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giá trị phải lớn hơn không."
+          }
+        }
+      }
+    },
+    "Enter the rate you used, in đồng per dollar.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập tỷ giá bạn đã dùng, tính bằng đồng mỗi đô la."
+          }
+        }
+      }
+    },
+    "Couldn’t save this swap. Try again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không lưu được lần đổi này. Hãy thử lại."
+          }
+        }
+      }
+    },
+    "Couldn’t delete this swap. Try again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không xoá được lần đổi này. Hãy thử lại."
+          }
+        }
+      }
+    },
+    "This position is no longer here.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vị thế này không còn ở đây nữa."
+          }
+        }
+      }
+    },
+    "swapped": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "đã đổi"
+          }
+        }
+      }
+    },
+    "for": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lấy"
+          }
+        }
+      }
+    },
+    "swapped from": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "đổi từ"
+          }
+        }
+      }
+    },
+    "Enter a valid sale fee.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập phí bán hợp lệ."
+          }
+        }
+      }
+    },
+    "FEE": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PHÍ"
+          }
+        }
+      }
+    },
+    "Fee or deduction charged by the shop when you sell.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phí hoặc khoản khấu trừ của tiệm khi bạn bán vàng."
+          }
+        }
+      }
+    },
+    "GROSS PROCEEDS": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TIỀN BÁN TRƯỚC PHÍ"
+          }
+        }
+      }
+    },
+    "NET PROCEEDS": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TIỀN THỰC NHẬN"
+          }
+        }
+      }
+    },
+    "Sale fee": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phí bán"
+          }
+        }
+      }
+    },
+    "Sale fee cannot be negative.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phí bán không được âm."
+          }
+        }
+      }
+    },
+    "Sale fee must be less than gross proceeds.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phí bán phải nhỏ hơn tổng tiền bán."
+          }
+        }
+      }
+    },
+    "Sale fee: %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phí bán: %@"
+          }
+        }
+      }
+    },
+    "Your account receives net proceeds after the fee.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tài khoản nhận số tiền bán sau khi trừ phí."
+          }
+        }
+      }
+    },
+    "Rate at purchase, %@.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tỷ giá lúc mua, %@."
+          }
+        }
+      }
+    },
+    "Rate at sale, %@.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tỷ giá lúc bán, %@."
+          }
+        }
+      }
+    },
+    "Đồng": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đồng"
+          }
+        }
+      }
+    },
+    "Dollar": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đô la"
+          }
+        }
+      }
+    },
+    "Cost currency": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đơn vị giá vốn"
+          }
+        }
+      }
+    },
+    "Price currency": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đơn vị giá bán"
+          }
+        }
+      }
+    },
+    "Average cost per coin": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giá vốn trung bình mỗi coin"
+          }
+        }
+      }
+    },
+    "Price per coin": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giá mỗi coin"
+          }
+        }
+      }
+    },
+    "Rate used (₫ per $)": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tỷ giá đã dùng (₫ mỗi $)"
+          }
+        }
+      }
+    },
+    "Rate used": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tỷ giá đã dùng"
+          }
+        }
+      }
+    },
+    "Stored as %@ ₫": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lưu thành %@ ₫"
+          }
+        }
+      }
+    },
+    "Enter the rate you paid, in đồng per dollar.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập tỷ giá bạn đã trả, tính bằng đồng mỗi đô la."
+          }
+        }
+      }
+    },
+    "Enter the rate you were paid, in đồng per dollar.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập tỷ giá bạn đã nhận, tính bằng đồng mỗi đô la."
+          }
+        }
+      }
+    },
+    "The rate must be greater than zero.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tỷ giá phải lớn hơn không."
+          }
+        }
+      }
+    },
+    "Enter a valid average cost in dollars.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập giá vốn trung bình hợp lệ bằng đô la."
+          }
+        }
+      }
+    },
+    "Fetching today's rate…": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang lấy tỷ giá hôm nay…"
+          }
+        }
+      }
+    },
+    "CoinGecko rate. Change it to the rate you paid.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tỷ giá CoinGecko. Đổi lại thành tỷ giá bạn đã trả."
+          }
+        }
+      }
+    },
+    "Checked a moment ago. Type the rate you paid.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vừa kiểm tra xong. Hãy tự nhập tỷ giá bạn đã trả."
+          }
+        }
+      }
+    },
+    "Couldn’t fetch a rate. Type the rate you paid.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không lấy được tỷ giá. Hãy tự nhập tỷ giá bạn đã trả."
+          }
+        }
+      }
+    },
+    "Add coin": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm coin"
+          }
+        }
+      }
+    },
+    "Edit coin": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sửa coin"
+          }
+        }
+      }
+    },
+    "The coins you hold": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đồng coin bạn đang giữ"
+          }
+        }
+      }
+    },
+    "Pick a coin, then say how much of it you own.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn một đồng coin, rồi cho biết bạn giữ bao nhiêu."
+          }
+        }
+      }
+    },
+    "Pick the coin this position is held in.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn đồng coin mà vị thế này đang nắm giữ."
+          }
+        }
+      }
+    },
+    "No coin in the catalogue yet. Add one from CoinGecko.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Danh mục chưa có đồng coin nào. Thêm một cái từ CoinGecko."
+          }
+        }
+      }
+    },
+    "Manage coins and CoinGecko imports": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quản lý đồng coin và nhập từ CoinGecko"
+          }
+        }
+      }
+    },
+    "A coin is priced by a market that never closes, quoted straight in đồng.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đồng coin được định giá bởi một thị trường không bao giờ đóng cửa, báo thẳng bằng đồng."
+          }
+        }
+      }
+    },
+    "Add a coin to see what it cost, what it is worth in đồng today, and the gap between them.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm một đồng coin để thấy giá vốn, giá trị quy ra đồng hôm nay, và khoảng cách giữa hai con số."
+          }
+        }
+      }
+    },
+    "Add Coin": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm coin"
+          }
+        }
+      }
+    },
+    "Add from CoinGecko": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm từ CoinGecko"
+          }
+        }
+      }
+    },
+    "Asking %@…": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang hỏi %@…"
+          }
+        }
+      }
+    },
+    "Checked a moment ago. Try again shortly.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vừa kiểm tra xong. Thử lại sau một lát."
+          }
+        }
+      }
+    },
+    "coin": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "đồng coin"
+          }
+        }
+      }
+    },
+    "CoinGecko": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CoinGecko"
+          }
+        }
+      }
+    },
+    "Coins": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đồng coin"
+          }
+        }
+      }
+    },
+    "coins": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "đồng coin"
+          }
+        }
+      }
+    },
+    "Crypto": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiền mã hoá"
+          }
+        }
+      }
+    },
+    "Import coins from CoinGecko, or add one by hand.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập đồng coin từ CoinGecko, hoặc tự thêm bằng tay."
+          }
+        }
+      }
+    },
+    "Market price per coin": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giá thị trường mỗi coin"
+          }
+        }
+      }
+    },
+    "No connection, so only the loaded list was searched.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không có kết nối, nên chỉ tìm trong danh sách đã tải."
+          }
+        }
+      }
+    },
+    "Searching": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang tìm"
+          }
+        }
+      }
+    },
+    "Ticker or coin name": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mã hoặc tên coin"
+          }
+        }
+      }
+    },
+    "Track your coins": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theo dõi đồng coin của bạn"
+          }
+        }
+      }
+    },
+    "Type at least %lld characters.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập ít nhất %lld ký tự."
+          }
+        }
+      }
+    },
+    "%@ could not answer that search.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ không trả lời được tìm kiếm đó."
+          }
+        }
+      }
+    },
+    "%@ has nothing under that name either.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ cũng không có gì dưới tên đó."
+          }
+        }
+      }
+    },
+    "%lld coins": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld đồng coin"
+          }
+        }
+      }
+    },
     "%@ is due today.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "%@ đến hạn hôm nay." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ đến hạn hôm nay."
+          }
+        }
+      }
     },
     "A recurring item is due today.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Một khoản định kỳ đến hạn hôm nay." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Một khoản định kỳ đến hạn hôm nay."
+          }
+        }
+      }
     },
     "Couldn’t update notification reminders. Try again.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể cập nhật lời nhắc. Hãy thử lại." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể cập nhật lời nhắc. Hãy thử lại."
+          }
+        }
+      }
     },
     "Daily expense reminder": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhắc nhập chi tiêu hằng ngày" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhắc nhập chi tiêu hằng ngày"
+          }
+        }
+      }
     },
     "Daily spending reminder": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhắc nhập chi tiêu hằng ngày" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhắc nhập chi tiêu hằng ngày"
+          }
+        }
+      }
     },
     "Notifications": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thông báo" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thông báo"
+          }
+        }
+      }
     },
     "Notifications are turned off in iPhone Settings.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thông báo đang bị tắt trong Cài đặt iPhone." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thông báo đang bị tắt trong Cài đặt iPhone."
+          }
+        }
+      }
     },
     "Notifies you for each active recurring item due that day.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thông báo từng khoản định kỳ đang hoạt động đến hạn trong ngày." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thông báo từng khoản định kỳ đang hoạt động đến hạn trong ngày."
+          }
+        }
+      }
     },
     "Open iPhone Settings": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mở Cài đặt iPhone" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở Cài đặt iPhone"
+          }
+        }
+      }
     },
     "Recurring due reminders": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhắc khoản định kỳ đến hạn" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhắc khoản định kỳ đến hạn"
+          }
+        }
+      }
     },
     "Recurring item due": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khoản định kỳ đến hạn" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khoản định kỳ đến hạn"
+          }
+        }
+      }
     },
     "Reminder time": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Giờ nhắc" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giờ nhắc"
+          }
+        }
+      }
     },
     "Reminds you every day even if you already recorded spending.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhắc bạn mỗi ngày dù đã ghi chi tiêu." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhắc bạn mỗi ngày dù đã ghi chi tiêu."
+          }
+        }
+      }
     },
     "Take a moment to record today's spending.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dành một chút thời gian để ghi chi tiêu hôm nay." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dành một chút thời gian để ghi chi tiêu hôm nay."
+          }
+        }
+      }
     },
     "%lld HOSE-listed ETFs. Pick the ones you hold — their closing prices are fetched before they are added.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "%lld ETF niêm yết trên HOSE. Chọn các quỹ bạn đang nắm giữ — giá đóng cửa sẽ được lấy trước khi thêm." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ETF niêm yết trên HOSE. Chọn các quỹ bạn đang nắm giữ — giá đóng cửa sẽ được lấy trước khi thêm."
+          }
+        }
+      }
     },
     "Add from Fmarket": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm từ Fmarket" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm từ Fmarket"
+          }
+        }
+      }
     },
     "Add from VNDIRECT": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm từ VNDIRECT" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm từ VNDIRECT"
+          }
+        }
+      }
     },
     "Add Gold from vang.today": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm vàng từ vang.today" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm vàng từ vang.today"
+          }
+        }
+      }
     },
     "Choose an import source": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn nguồn nhập" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn nguồn nhập"
+          }
+        }
+      }
     },
     "Close fetched when added": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Giá đóng cửa sẽ được lấy khi thêm" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giá đóng cửa sẽ được lấy khi thêm"
+          }
+        }
+      }
     },
     "Couldn’t fetch a closing price for %@. Try Add again.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể lấy giá đóng cửa cho %@. Hãy thử Thêm lại." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể lấy giá đóng cửa cho %@. Hãy thử Thêm lại."
+          }
+        }
+      }
     },
     "ETFs": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "ETF" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ETF"
+          }
+        }
+      }
     },
     "Fetching closing prices": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang lấy giá đóng cửa" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang lấy giá đóng cửa"
+          }
+        }
+      }
     },
     "Fmarket — Open-ended funds": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Fmarket — Quỹ mở" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fmarket — Quỹ mở"
+          }
+        }
+      }
     },
     "Import": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập"
+          }
+        }
+      }
     },
     "Import open-ended funds from Fmarket or listed ETFs from VNDIRECT, or add one by hand.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập quỹ mở từ Fmarket hoặc ETF niêm yết từ VNDIRECT, hoặc thêm thủ công." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập quỹ mở từ Fmarket hoặc ETF niêm yết từ VNDIRECT, hoặc thêm thủ công."
+          }
+        }
+      }
     },
     "Manage catalogue prices and Fmarket or VNDIRECT imports": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Quản lý giá danh mục và nhập từ Fmarket hoặc VNDIRECT" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quản lý giá danh mục và nhập từ Fmarket hoặc VNDIRECT"
+          }
+        }
+      }
     },
     "Open-ended funds use Fmarket NAV; listed ETFs use VNDIRECT closing prices.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Quỹ mở dùng NAV từ Fmarket; ETF niêm yết dùng giá đóng cửa từ VNDIRECT." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quỹ mở dùng NAV từ Fmarket; ETF niêm yết dùng giá đóng cửa từ VNDIRECT."
+          }
+        }
+      }
     },
     "Ticker or name": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mã hoặc tên" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mã hoặc tên"
+          }
+        }
+      }
     },
     "VNDIRECT — ETFs": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "VNDIRECT — ETF" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VNDIRECT — ETF"
+          }
+        }
+      }
     },
     "vang.today — Gold products": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "vang.today — Sản phẩm vàng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vang.today — Sản phẩm vàng"
+          }
+        }
+      }
     },
     "Trip: %@": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chuyến đi: %@" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyến đi: %@"
+          }
+        }
+      }
     },
     "Trip spending": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chi tiêu chuyến đi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chi tiêu chuyến đi"
+          }
+        }
+      }
     },
     "No trip": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thuộc chuyến đi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thuộc chuyến đi"
+          }
+        }
+      }
     },
     "Budget jar": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ ngân sách" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hũ ngân sách"
+          }
+        }
+      }
     },
     "Account: %@": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tài khoản: %@" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tài khoản: %@"
+          }
+        }
+      }
     },
     "Use category jar": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dùng hũ của danh mục" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dùng hũ của danh mục"
+          }
+        }
+      }
     },
     "The expense keeps its category. This choice only changes which jar pays for it.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khoản chi vẫn giữ nguyên danh mục. Lựa chọn này chỉ thay đổi hũ dùng để chi trả." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khoản chi vẫn giữ nguyên danh mục. Lựa chọn này chỉ thay đổi hũ dùng để chi trả."
+          }
+        }
+      }
     },
     "Only expenses can be added to a trip.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chỉ khoản chi mới có thể gắn vào chuyến đi." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chỉ khoản chi mới có thể gắn vào chuyến đi."
+          }
+        }
+      }
     },
     "Choose a trip before overriding its budget jar.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn chuyến đi trước khi đổi hũ ngân sách." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn chuyến đi trước khi đổi hũ ngân sách."
+          }
+        }
+      }
     },
     "Couldn’t start this trip": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể bắt đầu chuyến đi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể bắt đầu chuyến đi"
+          }
+        }
+      }
     },
     "Use this amount": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sử dụng khoản này" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sử dụng khoản này"
+          }
+        }
+      }
     },
     "Start a trip": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bắt đầu chuyến đi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bắt đầu chuyến đi"
+          }
+        }
+      }
     },
     "Open trip": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mở chuyến đi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở chuyến đi"
+          }
+        }
+      }
     },
     "The accumulated amount will become this trip's budget.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền đã tích lũy sẽ trở thành ngân sách của chuyến đi này." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền đã tích lũy sẽ trở thành ngân sách của chuyến đi này."
+          }
+        }
+      }
     },
     "Turn the money accumulated so far into a separate spending workspace.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chuyển số tiền đã tích lũy thành một không gian chi tiêu riêng." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyển số tiền đã tích lũy thành một không gian chi tiêu riêng."
+          }
+        }
+      }
     },
     "Add money to this goal before using it.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hãy tích lũy tiền cho mục tiêu trước khi sử dụng." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hãy tích lũy tiền cho mục tiêu trước khi sử dụng."
+          }
+        }
+      }
     },
     "Choose a funding jar before using this goal.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hãy chọn hũ nguồn trước khi sử dụng mục tiêu này." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hãy chọn hũ nguồn trước khi sử dụng mục tiêu này."
+          }
+        }
+      }
     },
     "Couldn’t save your changes. Please try again.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể lưu thay đổi. Vui lòng thử lại." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể lưu thay đổi. Vui lòng thử lại."
+          }
+        }
+      }
     },
     "This goal already has a trip workspace.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục tiêu này đã có không gian chi tiêu chuyến đi." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mục tiêu này đã có không gian chi tiêu chuyến đi."
+          }
+        }
+      }
     },
     "Check that this Trip goal is fully funded and has a funding jar.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Kiểm tra mục tiêu Du lịch đã đủ tiền và có hũ tài trợ." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiểm tra mục tiêu Du lịch đã đủ tiền và có hũ tài trợ."
+          }
+        }
+      }
     },
     "Ready to spend": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sẵn sàng chi tiêu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sẵn sàng chi tiêu"
+          }
+        }
+      }
     },
     "Ready to use": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sẵn sàng sử dụng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sẵn sàng sử dụng"
+          }
+        }
+      }
     },
     "Active trips": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chuyến đi đang diễn ra" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyến đi đang diễn ra"
+          }
+        }
+      }
     },
     "Trip history": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lịch sử chuyến đi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lịch sử chuyến đi"
+          }
+        }
+      }
     },
     "Opens this trip workspace": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mở không gian chi tiêu của chuyến đi này" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở không gian chi tiêu của chuyến đi này"
+          }
+        }
+      }
     },
     "Trip unavailable": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không tìm thấy chuyến đi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không tìm thấy chuyến đi"
+          }
+        }
+      }
     },
     "This trip is no longer in the current store.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chuyến đi này không còn trong dữ liệu hiện tại." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyến đi này không còn trong dữ liệu hiện tại."
+          }
+        }
+      }
     },
     "Trip budget": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngân sách chuyến đi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngân sách chuyến đi"
+          }
+        }
+      }
     },
     "Start spending": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bắt đầu chi tiêu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bắt đầu chi tiêu"
+          }
+        }
+      }
     },
     "Active trip": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chuyến đi đang diễn ra" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyến đi đang diễn ra"
+          }
+        }
+      }
     },
     "Completed trip": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chuyến đi đã hoàn tất" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyến đi đã hoàn tất"
+          }
+        }
+      }
     },
     "Active": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang diễn ra" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang diễn ra"
+          }
+        }
+      }
     },
     "Trip budget used": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngân sách chuyến đi đã sử dụng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngân sách chuyến đi đã sử dụng"
+          }
+        }
+      }
     },
     "Spent": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã chi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã chi"
+          }
+        }
+      }
     },
     "Over budget": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Vượt ngân sách" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vượt ngân sách"
+          }
+        }
+      }
     },
     "Left to spend": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Còn có thể chi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Còn có thể chi"
+          }
+        }
+      }
     },
     "Complete this trip?": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hoàn tất chuyến đi này?" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoàn tất chuyến đi này?"
+          }
+        }
+      }
     },
     "Cancel this trip workspace?": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Huỷ không gian chi tiêu chuyến đi này?" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Huỷ không gian chi tiêu chuyến đi này?"
+          }
+        }
+      }
     },
     "Complete trip": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hoàn tất chuyến đi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoàn tất chuyến đi"
+          }
+        }
+      }
     },
     "Keep active": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiếp tục chuyến đi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiếp tục chuyến đi"
+          }
+        }
+      }
     },
     "Cancel trip workspace": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Huỷ không gian chuyến đi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Huỷ không gian chuyến đi"
+          }
+        }
+      }
     },
     "Keep trip": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Giữ chuyến đi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giữ chuyến đi"
+          }
+        }
+      }
     },
     "The trip moves to history. No account balance or transaction changes.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chuyến đi sẽ chuyển vào lịch sử. Số dư tài khoản và giao dịch không thay đổi." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyến đi sẽ chuyển vào lịch sử. Số dư tài khoản và giao dịch không thay đổi."
+          }
+        }
+      }
     },
     "This removes the empty workspace only. The funded goal remains ready to spend.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thao tác này chỉ xoá không gian trống. Mục tiêu đã đủ tiền vẫn sẵn sàng để chi tiêu." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thao tác này chỉ xoá không gian trống. Mục tiêu đã đủ tiền vẫn sẵn sàng để chi tiêu."
+          }
+        }
+      }
     },
     "Couldn’t update this trip. Try again.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể cập nhật chuyến đi này. Hãy thử lại." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể cập nhật chuyến đi này. Hãy thử lại."
+          }
+        }
+      }
     },
     "A trip with expenses cannot be cancelled.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể huỷ chuyến đi đã có khoản chi." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể huỷ chuyến đi đã có khoản chi."
+          }
+        }
+      }
     },
     "Couldn’t cancel this trip. Try again.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể huỷ chuyến đi này. Hãy thử lại." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể huỷ chuyến đi này. Hãy thử lại."
+          }
+        }
+      }
     },
     "Only linked expenses reduce this budget.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chỉ các khoản chi được gắn vào chuyến đi mới làm giảm ngân sách này." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chỉ các khoản chi được gắn vào chuyến đi mới làm giảm ngân sách này."
+          }
+        }
+      }
     },
     "Spending by category": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chi tiêu theo danh mục" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chi tiêu theo danh mục"
+          }
+        }
+      }
     },
     "Food, accommodation, transport, and other spending will appear here.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền ăn, chỗ ở, đi lại và các khoản chi khác sẽ xuất hiện tại đây." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiền ăn, chỗ ở, đi lại và các khoản chi khác sẽ xuất hiện tại đây."
+          }
+        }
+      }
     },
     "Expenses: %lld": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số khoản chi: %lld" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số khoản chi: %lld"
+          }
+        }
+      }
     },
     "Trip expenses": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khoản chi chuyến đi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khoản chi chuyến đi"
+          }
+        }
+      }
     },
     "Add expense": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm khoản chi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm khoản chi"
+          }
+        }
+      }
     },
     "No trip expenses": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa có khoản chi chuyến đi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có khoản chi chuyến đi"
+          }
+        }
+      }
     },
     "Record an expense and keep its normal category.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi một khoản chi và giữ nguyên danh mục thông thường của nó." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi một khoản chi và giữ nguyên danh mục thông thường của nó."
+          }
+        }
+      }
     },
     "Opens this trip expense for editing": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mở khoản chi chuyến đi này để chỉnh sửa" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở khoản chi chuyến đi này để chỉnh sửa"
+          }
+        }
+      }
     },
     "The unused %@ is available to plan again. No refund or transfer was created.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "%@ chưa dùng có thể được phân bổ lại. Không có khoản hoàn tiền hay chuyển khoản nào được tạo." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ chưa dùng có thể được phân bổ lại. Không có khoản hoàn tiền hay chuyển khoản nào được tạo."
+          }
+        }
+      }
     },
     "Reopen trip": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mở lại chuyến đi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở lại chuyến đi"
+          }
+        }
+      }
     },
     "This jar is part of Trip history and cannot be deleted.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ này thuộc lịch sử chuyến đi nên không thể xoá." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hũ này thuộc lịch sử chuyến đi nên không thể xoá."
+          }
+        }
+      }
     },
     "Couldn’t update older income allocations. Try again.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể cập nhật phân bổ cho các khoản thu cũ. Hãy thử lại." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể cập nhật phân bổ cho các khoản thu cũ. Hãy thử lại."
+          }
+        }
+      }
     },
     "Estimated from current setup": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ước tính theo thiết lập hiện tại" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ước tính theo thiết lập hiện tại"
+          }
+        }
+      }
     },
     "Historical allocations stay frozen and may differ from your current Budget setup.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phân bổ lịch sử được giữ nguyên và có thể khác với thiết lập Ngân sách hiện tại." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phân bổ lịch sử được giữ nguyên và có thể khác với thiết lập Ngân sách hiện tại."
+          }
+        }
+      }
     },
     "Imported": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập từ sao kê" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập từ sao kê"
+          }
+        }
+      }
     },
     "Income allocation": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phân bổ thu nhập" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phân bổ thu nhập"
+          }
+        }
+      }
     },
     "Income allocation history": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lịch sử phân bổ thu nhập" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lịch sử phân bổ thu nhập"
+          }
+        }
+      }
     },
     "Income history": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lịch sử thu nhập" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lịch sử thu nhập"
+          }
+        }
+      }
     },
     "No income recorded": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa ghi nhận thu nhập" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa ghi nhận thu nhập"
+          }
+        }
+      }
     },
     "One-off": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Một lần" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Một lần"
+          }
+        }
+      }
     },
     "Recorded income for this month will appear here.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Các khoản thu đã ghi nhận trong tháng này sẽ xuất hiện ở đây." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Các khoản thu đã ghi nhận trong tháng này sẽ xuất hiện ở đây."
+          }
+        }
+      }
     },
     "Some allocations are unreadable. Original records are unchanged.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể đọc một số phân bổ thu nhập. Dữ liệu gốc vẫn được giữ nguyên." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể đọc một số phân bổ thu nhập. Dữ liệu gốc vẫn được giữ nguyên."
+          }
+        }
+      }
     },
     "Total received": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tổng đã nhận" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tổng đã nhận"
+          }
+        }
+      }
     },
     "Unallocated": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa phân bổ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa phân bổ"
+          }
+        }
+      }
     },
     "Current month": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tháng hiện tại" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tháng hiện tại"
+          }
+        }
+      }
     },
     "Current year": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Năm hiện tại" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Năm hiện tại"
+          }
+        }
+      }
     },
     "Today": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hôm nay" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hôm nay"
+          }
+        }
+      }
     },
     "Add an expense category to configure this preset.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm danh mục chi tiêu để cấu hình mục đặt sẵn này." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm danh mục chi tiêu để cấu hình mục đặt sẵn này."
+          }
+        }
+      }
     },
     "Bills name": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản hóa đơn" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tên khoản hóa đơn"
+          }
+        }
+      }
     },
     "Coffee name": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản cà phê" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tên khoản cà phê"
+          }
+        }
+      }
     },
     "Entertainment name": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản giải trí" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tên khoản giải trí"
+          }
+        }
+      }
     },
     "Fuel name": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản xăng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tên khoản xăng"
+          }
+        }
+      }
     },
     "Groceries name": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản đi chợ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tên khoản đi chợ"
+          }
+        }
+      }
     },
     "Lunch name": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản bữa trưa" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tên khoản bữa trưa"
+          }
+        }
+      }
     },
     "Medicine name": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản thuốc" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tên khoản thuốc"
+          }
+        }
+      }
     },
     "No category": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa có danh mục" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có danh mục"
+          }
+        }
+      }
     },
     "Parking name": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản đỗ xe" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tên khoản đỗ xe"
+          }
+        }
+      }
     },
     "Saved": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã lưu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã lưu"
+          }
+        }
+      }
     },
     "Saved %@ expense to MonMon": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã lưu khoản chi %@ vào MonMon" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã lưu khoản chi %@ vào MonMon"
+          }
+        }
+      }
     },
     "Transit name": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên khoản đi lại" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tên khoản đi lại"
+          }
+        }
+      }
     },
     "Use a short name, a positive whole amount, and a current expense category for every preset.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dùng tên ngắn, số tiền nguyên dương và danh mục chi tiêu hiện có cho mỗi mục đặt sẵn." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dùng tên ngắn, số tiền nguyên dương và danh mục chi tiêu hiện có cho mỗi mục đặt sẵn."
+          }
+        }
+      }
     },
     "Bills": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hóa đơn" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hóa đơn"
+          }
+        }
+      }
     },
     "Bills amount": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền hóa đơn" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền hóa đơn"
+          }
+        }
+      }
     },
     "Bills emoji": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji hóa đơn" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji hóa đơn"
+          }
+        }
+      }
     },
     "Choose 3, 6, or 9 expenses for the Home Screen widget.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn 3, 6 hoặc 9 khoản chi cho tiện ích Màn hình chính." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn 3, 6 hoặc 9 khoản chi cho tiện ích Màn hình chính."
+          }
+        }
+      }
     },
     "Coffee": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Cà phê" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cà phê"
+          }
+        }
+      }
     },
     "Coffee amount": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền cà phê" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền cà phê"
+          }
+        }
+      }
     },
     "Coffee emoji": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji cà phê" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji cà phê"
+          }
+        }
+      }
     },
     "Emoji": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji"
+          }
+        }
+      }
     },
     "Entertainment": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Giải trí" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giải trí"
+          }
+        }
+      }
     },
     "Entertainment amount": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền giải trí" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền giải trí"
+          }
+        }
+      }
     },
     "Entertainment emoji": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji giải trí" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji giải trí"
+          }
+        }
+      }
     },
     "Fuel": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xăng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xăng"
+          }
+        }
+      }
     },
     "Fuel amount": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền xăng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền xăng"
+          }
+        }
+      }
     },
     "Fuel emoji": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji xăng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji xăng"
+          }
+        }
+      }
     },
     "Groceries": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đi chợ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đi chợ"
+          }
+        }
+      }
     },
     "Groceries amount": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền đi chợ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền đi chợ"
+          }
+        }
+      }
     },
     "Groceries emoji": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji đi chợ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji đi chợ"
+          }
+        }
+      }
     },
     "Lunch": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bữa trưa" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bữa trưa"
+          }
+        }
+      }
     },
     "Lunch amount": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền bữa trưa" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền bữa trưa"
+          }
+        }
+      }
     },
     "Lunch emoji": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji bữa trưa" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji bữa trưa"
+          }
+        }
+      }
     },
     "Medicine": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thuốc" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thuốc"
+          }
+        }
+      }
     },
     "Medicine amount": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền thuốc" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền thuốc"
+          }
+        }
+      }
     },
     "Medicine emoji": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji thuốc" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji thuốc"
+          }
+        }
+      }
     },
     "Parking": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đỗ xe" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đỗ xe"
+          }
+        }
+      }
     },
     "Parking amount": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phí đỗ xe" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phí đỗ xe"
+          }
+        }
+      }
     },
     "Parking emoji": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji đỗ xe" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji đỗ xe"
+          }
+        }
+      }
     },
     "Preset": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục đặt sẵn" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mục đặt sẵn"
+          }
+        }
+      }
     },
     "Presets shown": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số mục hiển thị" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số mục hiển thị"
+          }
+        }
+      }
     },
     "Quick Expense": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chi tiêu nhanh" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chi tiêu nhanh"
+          }
+        }
+      }
     },
     "Quick Expense Preset": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục chi tiêu nhanh" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mục chi tiêu nhanh"
+          }
+        }
+      }
     },
     "Quick expenses": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chi tiêu nhanh" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chi tiêu nhanh"
+          }
+        }
+      }
     },
     "Transaction default": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mặc định giao dịch" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mặc định giao dịch"
+          }
+        }
+      }
     },
     "Record %@ expense for %@ đồng": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi khoản chi %@ với số tiền %@ đồng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi khoản chi %@ với số tiền %@ đồng"
+          }
+        }
+      }
     },
     "Record Quick Expense": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi chi tiêu nhanh" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi chi tiêu nhanh"
+          }
+        }
+      }
     },
     "Record one configured expense preset.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi một khoản chi đã đặt sẵn." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi một khoản chi đã đặt sẵn."
+          }
+        }
+      }
     },
     "Record one of your configured preset expenses with one tap.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi một khoản chi đã đặt sẵn chỉ bằng một lần chạm." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi một khoản chi đã đặt sẵn chỉ bằng một lần chạm."
+          }
+        }
+      }
     },
     "Record one of your three preset expenses with one tap.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi một trong ba khoản chi đặt sẵn chỉ bằng một lần chạm." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi một trong ba khoản chi đặt sẵn chỉ bằng một lần chạm."
+          }
+        }
+      }
     },
     "Save presets": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lưu mục đặt sẵn" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lưu mục đặt sẵn"
+          }
+        }
+      }
     },
     "Saved. The widget is up to date.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã lưu. Tiện ích đã được cập nhật." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã lưu. Tiện ích đã được cập nhật."
+          }
+        }
+      }
     },
     "Set the three expenses shown on the Home Screen widget.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đặt ba khoản chi hiển thị trên tiện ích Màn hình chính." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đặt ba khoản chi hiển thị trên tiện ích Màn hình chính."
+          }
+        }
+      }
     },
     "Transit": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đi lại" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đi lại"
+          }
+        }
+      }
     },
     "Transit amount": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền đi lại" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền đi lại"
+          }
+        }
+      }
     },
     "Transit emoji": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Emoji đi lại" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji đi lại"
+          }
+        }
+      }
     },
     "Use one emoji, a positive whole amount, and a current expense category for every preset.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dùng một emoji, số tiền nguyên dương và danh mục chi tiêu hiện có cho mỗi mục đặt sẵn." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dùng một emoji, số tiền nguyên dương và danh mục chi tiêu hiện có cho mỗi mục đặt sẵn."
+          }
+        }
+      }
     },
     "Use one emoji and a positive whole amount for every preset.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dùng một emoji và số tiền nguyên dương cho mỗi mục đặt sẵn." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dùng một emoji và số tiền nguyên dương cho mỗi mục đặt sẵn."
+          }
+        }
+      }
     },
     "AVAILABLE CREDIT": {
       "localizations": {
@@ -1056,22 +3894,22 @@
         }
       }
     },
-    "They are installed automatically with MonMon—nothing else to download.": {
+    "This shortcut is installed automatically with MonMon.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hai phím tắt được cài tự động cùng MonMon—không cần tải thêm."
+            "value": "Phím tắt này được cài tự động cùng MonMon."
           }
         }
       }
     },
-    "Two shortcuts are ready": {
+    "Record Transaction is ready": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hai phím tắt đã sẵn sàng"
+            "value": "Phím tắt Ghi giao dịch đã sẵn sàng"
           }
         }
       }
@@ -1097,148 +3935,484 @@
       }
     },
     "ACTIVE": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "ĐANG HOẠT ĐỘNG" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ĐANG HOẠT ĐỘNG"
+          }
+        }
+      }
     },
     "A withdrawal needs an account to receive the money. Add one on the Home tab first.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mỗi lần rút cần một tài khoản nhận tiền. Hãy thêm tài khoản ở tab Trang chủ trước." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mỗi lần rút cần một tài khoản nhận tiền. Hãy thêm tài khoản ở tab Trang chủ trước."
+          }
+        }
+      }
     },
     "Amount received": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền thực nhận" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền thực nhận"
+          }
+        }
+      }
     },
     "Amount received cannot be negative.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền thực nhận không được âm." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền thực nhận không được âm."
+          }
+        }
+      }
     },
     "Choose the account that received the money.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn tài khoản đã nhận tiền." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn tài khoản đã nhận tiền."
+          }
+        }
+      }
     },
     "Couldn’t delete this withdrawal. Try again.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể xóa lần rút này. Hãy thử lại." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể xóa lần rút này. Hãy thử lại."
+          }
+        }
+      }
     },
     "Couldn’t save this withdrawal. Try again.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể lưu lần rút này. Hãy thử lại." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể lưu lần rút này. Hãy thử lại."
+          }
+        }
+      }
     },
     "Delete this withdrawal?": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xóa lần rút này?" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xóa lần rút này?"
+          }
+        }
+      }
     },
     "Delete withdrawal": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xóa lần rút" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xóa lần rút"
+          }
+        }
+      }
     },
     "Edit withdrawal": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sửa lần rút" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sửa lần rút"
+          }
+        }
+      }
     },
     "Enter a valid principal amount.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập số tiền gốc hợp lệ." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập số tiền gốc hợp lệ."
+          }
+        }
+      }
     },
     "Enter the amount the bank actually paid.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập số tiền ngân hàng thực tế đã trả." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập số tiền ngân hàng thực tế đã trả."
+          }
+        }
+      }
     },
     "Financial terms are locked because this book has withdrawal history.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Điều khoản tài chính đã khóa vì sổ này đã có lịch sử rút." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Điều khoản tài chính đã khóa vì sổ này đã có lịch sử rút."
+          }
+        }
+      }
     },
     "Interest received": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền lãi thực nhận" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiền lãi thực nhận"
+          }
+        }
+      }
     },
     "Loss on withdrawal": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khoản hụt khi rút" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khoản hụt khi rút"
+          }
+        }
+      }
     },
     "MATURED": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "ĐÃ ĐÁO HẠN" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ĐÃ ĐÁO HẠN"
+          }
+        }
+      }
     },
     "MATURED — READY TO SETTLE": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "ĐÃ ĐÁO HẠN — SẴN SÀNG TẤT TOÁN" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ĐÃ ĐÁO HẠN — SẴN SÀNG TẤT TOÁN"
+          }
+        }
+      }
     },
     "Maturity estimate for the remaining book: %@.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ước tính đáo hạn cho phần sổ còn lại: %@." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ước tính đáo hạn cho phần sổ còn lại: %@."
+          }
+        }
+      }
     },
     "No money has been withdrawn from this book yet.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sổ này chưa có lần rút tiền nào." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sổ này chưa có lần rút tiền nào."
+          }
+        }
+      }
     },
     "Only the name can be changed after a withdrawal has been recorded.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sau khi đã ghi nhận một lần rút, chỉ có thể đổi tên sổ." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sau khi đã ghi nhận một lần rút, chỉ có thể đổi tên sổ."
+          }
+        }
+      }
     },
     "Original principal": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền gốc ban đầu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiền gốc ban đầu"
+          }
+        }
+      }
     },
     "Principal withdrawn": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền gốc rút ra" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiền gốc rút ra"
+          }
+        }
+      }
     },
     "Principal withdrawn must be greater than zero.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền gốc rút ra phải lớn hơn 0." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiền gốc rút ra phải lớn hơn 0."
+          }
+        }
+      }
     },
     "PROJECTED INTEREST": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "LÃI DỰ KIẾN" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LÃI DỰ KIẾN"
+          }
+        }
+      }
     },
     "Projected interest assumes the book stays until maturity.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lãi dự kiến giả định sổ được giữ đến ngày đáo hạn." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lãi dự kiến giả định sổ được giữ đến ngày đáo hạn."
+          }
+        }
+      }
     },
     "REALIZED INTEREST": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "LÃI ĐÃ THỰC NHẬN" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LÃI ĐÃ THỰC NHẬN"
+          }
+        }
+      }
     },
     "Record what the bank actually paid into your account.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi lại số tiền ngân hàng thực tế đã trả vào tài khoản." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi lại số tiền ngân hàng thực tế đã trả vào tài khoản."
+          }
+        }
+      }
     },
     "REMAINING": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "CÒN LẠI" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CÒN LẠI"
+          }
+        }
+      }
     },
     "Remaining principal": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền gốc còn lại" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiền gốc còn lại"
+          }
+        }
+      }
     },
     "Settle": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tất toán" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tất toán"
+          }
+        }
+      }
     },
     "Settle savings book": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tất toán sổ tiết kiệm" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tất toán sổ tiết kiệm"
+          }
+        }
+      }
     },
     "Savings book unavailable": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không tìm thấy sổ tiết kiệm" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không tìm thấy sổ tiết kiệm"
+          }
+        }
+      }
     },
     "SETTLED": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "ĐÃ TẤT TOÁN" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ĐÃ TẤT TOÁN"
+          }
+        }
+      }
     },
     "That is more than the principal still deposited.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số này lớn hơn tiền gốc còn lại trong sổ." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số này lớn hơn tiền gốc còn lại trong sổ."
+          }
+        }
+      }
     },
     "The principal returns to the savings book and the received amount leaves the account.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền gốc sẽ trở lại sổ và số tiền thực nhận sẽ bị trừ khỏi tài khoản." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiền gốc sẽ trở lại sổ và số tiền thực nhận sẽ bị trừ khỏi tài khoản."
+          }
+        }
+      }
     },
     "The savings book and all of its withdrawal history will be deleted.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sổ tiết kiệm và toàn bộ lịch sử rút của sổ sẽ bị xóa." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sổ tiết kiệm và toàn bộ lịch sử rút của sổ sẽ bị xóa."
+          }
+        }
+      }
     },
     "This savings book may have been deleted.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sổ tiết kiệm này có thể đã bị xóa." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sổ tiết kiệm này có thể đã bị xóa."
+          }
+        }
+      }
     },
     "This withdrawal no longer has a savings book.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lần rút này không còn liên kết với sổ tiết kiệm." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lần rút này không còn liên kết với sổ tiết kiệm."
+          }
+        }
+      }
     },
     "The selected account rises by the amount actually received.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tài khoản đã chọn sẽ tăng đúng bằng số tiền thực nhận." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tài khoản đã chọn sẽ tăng đúng bằng số tiền thực nhận."
+          }
+        }
+      }
     },
     "Use maturity estimate": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dùng số ước tính đáo hạn" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dùng số ước tính đáo hạn"
+          }
+        }
+      }
     },
     "Up to %@ remains available to withdraw.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Có thể rút tối đa %@." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Có thể rút tối đa %@."
+          }
+        }
+      }
     },
     "Withdraw": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Rút tiền" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rút tiền"
+          }
+        }
+      }
     },
     "Withdraw all": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Rút toàn bộ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rút toàn bộ"
+          }
+        }
+      }
     },
     "Withdraw savings": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Rút tiền tiết kiệm" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rút tiền tiết kiệm"
+          }
+        }
+      }
     },
     "Withdrawal date": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngày rút" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngày rút"
+          }
+        }
+      }
     },
     "Withdrawal date cannot be before the book was opened.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngày rút không thể trước ngày mở sổ." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngày rút không thể trước ngày mở sổ."
+          }
+        }
+      }
     },
     "Withdrawal date cannot be in the future.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngày rút không thể ở tương lai." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngày rút không thể ở tương lai."
+          }
+        }
+      }
     },
     "Withdrawal history": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lịch sử rút tiền" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lịch sử rút tiền"
+          }
+        }
+      }
     },
     "All transactions are skipped.": {
       "localizations": {
@@ -2770,7 +5944,7 @@
         }
       }
     },
-    "Average cost per lượng": {
+    "Average cost per tael": {
       "localizations": {
         "vi": {
           "stringUnit": {
@@ -4070,7 +7244,7 @@
         }
       }
     },
-    "Enter a valid weight in chỉ.": {
+    "Enter a valid weight in mace.": {
       "localizations": {
         "vi": {
           "stringUnit": {
@@ -4136,16 +7310,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nhập bằng tay"
-          }
-        }
-      }
-    },
-    "Entertainment": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Giải trí"
           }
         }
       }
@@ -4481,7 +7645,7 @@
         }
       }
     },
-    "Gold is valued at the shop's buy price per lượng.": {
+    "Gold is valued at the shop's buy price per tael.": {
       "localizations": {
         "vi": {
           "stringUnit": {
@@ -5931,7 +9095,7 @@
         }
       }
     },
-    "Pick a gold product, then enter its weight in chỉ.": {
+    "Pick a gold product, then enter its weight in mace.": {
       "localizations": {
         "vi": {
           "stringUnit": {
@@ -6131,7 +9295,7 @@
         }
       }
     },
-    "Price per lượng": {
+    "Price per tael": {
       "localizations": {
         "vi": {
           "stringUnit": {
@@ -6491,12 +9655,12 @@
         }
       }
     },
-    "Savings books, funds, and gold will be split up here.": {
+    "Savings books, funds, gold, and coins will be split up here.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sổ tiết kiệm, quỹ và vàng sẽ được chia ra ở đây."
+            "value": "Sổ tiết kiệm, quỹ, vàng và đồng coin sẽ được chia ra ở đây."
           }
         }
       }
@@ -6591,7 +9755,7 @@
         }
       }
     },
-    "Shop buy price per lượng": {
+    "Shop buy price per tael": {
       "localizations": {
         "vi": {
           "stringUnit": {
@@ -6601,7 +9765,7 @@
         }
       }
     },
-    "Shop buys %@ · sells %@ per lượng": {
+    "Shop buys %@ · sells %@ per tael": {
       "localizations": {
         "vi": {
           "stringUnit": {
@@ -6677,16 +9841,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bắt đầu"
-          }
-        }
-      }
-    },
-    "Stored as %@ lượng": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lưu dưới dạng %@ lượng"
           }
         }
       }
@@ -7403,7 +10557,7 @@
         }
       }
     },
-    "Weight (chỉ)": {
+    "Weight (mace)": {
       "localizations": {
         "vi": {
           "stringUnit": {
@@ -7489,6 +10643,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tiền về đâu"
+          }
+        }
+      }
+    },
+    "Where the money came from": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiền đến từ đâu"
           }
         }
       }
@@ -7613,7 +10777,7 @@
         }
       }
     },
-    "chỉ": {
+    "mace": {
       "localizations": {
         "vi": {
           "stringUnit": {
@@ -8554,520 +11718,1934 @@
       }
     },
     "Full backup": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sao lưu toàn bộ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sao lưu toàn bộ"
+          }
+        }
+      }
     },
     "Export or replace every account, transaction, category, recurring rule, saving, investment, transfer, and debt on this device.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xuất hoặc thay thế toàn bộ tài khoản, giao dịch, danh mục, định kỳ, tiết kiệm, đầu tư, chuyển khoản và khoản nợ trên thiết bị này." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xuất hoặc thay thế toàn bộ tài khoản, giao dịch, danh mục, định kỳ, tiết kiệm, đầu tư, chuyển khoản và khoản nợ trên thiết bị này."
+          }
+        }
+      }
     },
     "Exported JSON is readable financial data. Keep it somewhere private.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tệp JSON xuất ra chứa dữ liệu tài chính có thể đọc được. Hãy lưu ở nơi riêng tư." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tệp JSON xuất ra chứa dữ liệu tài chính có thể đọc được. Hãy lưu ở nơi riêng tư."
+          }
+        }
+      }
     },
     "Export Backup": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xuất bản sao lưu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xuất bản sao lưu"
+          }
+        }
+      }
     },
     "Restore Backup": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khôi phục bản sao lưu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khôi phục bản sao lưu"
+          }
+        }
+      }
     },
     "Restore Previous Data": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khôi phục dữ liệu trước đó" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khôi phục dữ liệu trước đó"
+          }
+        }
+      }
     },
     "Working…": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang xử lý…" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang xử lý…"
+          }
+        }
+      }
     },
     "Export readable JSON?": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xuất tệp JSON có thể đọc được?" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xuất tệp JSON có thể đọc được?"
+          }
+        }
+      }
     },
     "Anyone who can open the file can read the financial data inside it.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bất kỳ ai mở được tệp đều có thể đọc dữ liệu tài chính bên trong." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bất kỳ ai mở được tệp đều có thể đọc dữ liệu tài chính bên trong."
+          }
+        }
+      }
     },
     "Backup exported.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã xuất bản sao lưu." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã xuất bản sao lưu."
+          }
+        }
+      }
     },
     "Backup failed": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sao lưu thất bại" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sao lưu thất bại"
+          }
+        }
+      }
     },
     "Restore Preview": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xem trước khôi phục" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xem trước khôi phục"
+          }
+        }
+      }
     },
     "Restore and Replace": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khôi phục và thay thế" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khôi phục và thay thế"
+          }
+        }
+      }
     },
     "Replace all local data?": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thay thế toàn bộ dữ liệu cục bộ?" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thay thế toàn bộ dữ liệu cục bộ?"
+          }
+        }
+      }
     },
     "The selected snapshot becomes the complete local dataset. MonMon will create a private safety copy first.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản sao đã chọn sẽ trở thành toàn bộ dữ liệu cục bộ. MonMon sẽ tạo một bản an toàn riêng tư trước." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bản sao đã chọn sẽ trở thành toàn bộ dữ liệu cục bộ. MonMon sẽ tạo một bản an toàn riêng tư trước."
+          }
+        }
+      }
     },
     "Restoring…": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang khôi phục…" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang khôi phục…"
+          }
+        }
+      }
     },
     "Backup details": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chi tiết bản sao lưu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chi tiết bản sao lưu"
+          }
+        }
+      }
     },
     "App version": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phiên bản ứng dụng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phiên bản ứng dụng"
+          }
+        }
+      }
     },
     "File size": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Kích thước tệp" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kích thước tệp"
+          }
+        }
+      }
     },
     "Current total": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tổng hiện tại" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tổng hiện tại"
+          }
+        }
+      }
     },
     "Incoming total": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tổng sắp khôi phục" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tổng sắp khôi phục"
+          }
+        }
+      }
     },
     "Recurring rules": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Quy tắc định kỳ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quy tắc định kỳ"
+          }
+        }
+      }
     },
     "Pending captures": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ghi nhanh đang chờ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi nhanh đang chờ"
+          }
+        }
+      }
     },
     "Savings deposits": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sổ tiết kiệm" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sổ tiết kiệm"
+          }
+        }
+      }
     },
     "Savings withdrawals": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Rút tiết kiệm" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rút tiết kiệm"
+          }
+        }
+      }
     },
     "Fund & gold instruments": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sản phẩm quỹ và vàng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sản phẩm quỹ và vàng"
+          }
+        }
+      }
     },
     "Fund & gold holdings": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khoản nắm giữ quỹ và vàng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khoản nắm giữ quỹ và vàng"
+          }
+        }
+      }
     },
     "Fund & gold sales": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Lần bán quỹ và vàng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lần bán quỹ và vàng"
+          }
+        }
+      }
     },
     "Debt payments": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thanh toán nợ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thanh toán nợ"
+          }
+        }
+      }
     },
     "Some optional links or saved defaults are stale. MonMon will clear only those defaults and preserve supported records.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Một số liên kết tùy chọn hoặc mặc định đã cũ. MonMon chỉ xóa các mặc định đó và giữ lại các bản ghi được hỗ trợ." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Một số liên kết tùy chọn hoặc mặc định đã cũ. MonMon chỉ xóa các mặc định đó và giữ lại các bản ghi được hỗ trợ."
+          }
+        }
+      }
     },
     "Close MonMon on other devices. Restore here, let this device sync, then reopen the others.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đóng MonMon trên các thiết bị khác. Khôi phục tại đây, chờ thiết bị này đồng bộ rồi mở lại các thiết bị kia." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đóng MonMon trên các thiết bị khác. Khôi phục tại đây, chờ thiết bị này đồng bộ rồi mở lại các thiết bị kia."
+          }
+        }
+      }
     },
     "The selected backup is larger than 100 MB.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản sao lưu đã chọn lớn hơn 100 MB." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bản sao lưu đã chọn lớn hơn 100 MB."
+          }
+        }
+      }
     },
     "This isn’t a readable MonMon backup.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đây không phải bản sao lưu MonMon có thể đọc được." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đây không phải bản sao lưu MonMon có thể đọc được."
+          }
+        }
+      }
     },
     "This JSON file is not a MonMon backup.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tệp JSON này không phải bản sao lưu MonMon." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tệp JSON này không phải bản sao lưu MonMon."
+          }
+        }
+      }
     },
     "This backup needs a newer version of MonMon.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản sao lưu này cần phiên bản MonMon mới hơn." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bản sao lưu này cần phiên bản MonMon mới hơn."
+          }
+        }
+      }
     },
     "This backup belongs to a different MonMon build.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản sao lưu này thuộc một bản dựng MonMon khác." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bản sao lưu này thuộc một bản dựng MonMon khác."
+          }
+        }
+      }
     },
     "The backup is damaged or was edited.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản sao lưu bị hỏng hoặc đã được chỉnh sửa." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bản sao lưu bị hỏng hoặc đã được chỉnh sửa."
+          }
+        }
+      }
     },
     "The backup contains invalid or inconsistent data.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản sao lưu chứa dữ liệu không hợp lệ hoặc không nhất quán." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bản sao lưu chứa dữ liệu không hợp lệ hoặc không nhất quán."
+          }
+        }
+      }
     },
     "MonMon couldn’t create the safety copy, so no data was changed.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "MonMon không thể tạo bản an toàn nên không có dữ liệu nào bị thay đổi." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không thể tạo bản an toàn nên không có dữ liệu nào bị thay đổi."
+          }
+        }
+      }
     },
     "MonMon couldn’t replace the local data. Your previous data is still available.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "MonMon không thể thay thế dữ liệu cục bộ. Dữ liệu trước đó của bạn vẫn còn." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không thể thay thế dữ liệu cục bộ. Dữ liệu trước đó của bạn vẫn còn."
+          }
+        }
+      }
     },
     "Local restore complete.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã khôi phục dữ liệu cục bộ." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã khôi phục dữ liệu cục bộ."
+          }
+        }
+      }
     },
     "Local restore complete. iCloud will sync this state separately.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã khôi phục dữ liệu cục bộ. iCloud sẽ đồng bộ trạng thái này riêng." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã khôi phục dữ liệu cục bộ. iCloud sẽ đồng bộ trạng thái này riêng."
+          }
+        }
+      }
     },
     "Created": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thời điểm tạo" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thời điểm tạo"
+          }
+        }
+      }
     },
     "Build": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản dựng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bản dựng"
+          }
+        }
+      }
     },
     "Records": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản ghi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bản ghi"
+          }
+        }
+      }
     },
     "Continue": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiếp tục" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiếp tục"
+          }
+        }
+      }
     },
     "Authentication is required.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Cần xác thực để tiếp tục." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cần xác thực để tiếp tục."
+          }
+        }
+      }
     },
     "The backup is larger than 100 MB and wasn’t exported.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản sao lưu lớn hơn 100 MB nên chưa được xuất." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bản sao lưu lớn hơn 100 MB nên chưa được xuất."
+          }
+        }
+      }
     },
     "The selected backup is no longer valid. Choose the file again.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Bản sao lưu đã chọn không còn hợp lệ. Hãy chọn lại tệp." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bản sao lưu đã chọn không còn hợp lệ. Hãy chọn lại tệp."
+          }
+        }
+      }
     },
     "MonMon couldn’t complete the backup operation. Try again.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "MonMon không thể hoàn tất thao tác sao lưu. Hãy thử lại." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MonMon không thể hoàn tất thao tác sao lưu. Hãy thử lại."
+          }
+        }
+      }
     },
     "Budget": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngân sách" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngân sách"
+          }
+        }
+      }
     },
     "Goal unavailable": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục tiêu không khả dụng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mục tiêu không khả dụng"
+          }
+        }
+      }
     },
     "This goal is no longer in the current store.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục tiêu này không còn trong dữ liệu hiện tại." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mục tiêu này không còn trong dữ liệu hiện tại."
+          }
+        }
+      }
     },
     "Necessities": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thiết yếu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thiết yếu"
+          }
+        }
+      }
     },
     "Investment": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đầu tư" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đầu tư"
+          }
+        }
+      }
     },
     "Education": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phát triển bản thân" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phát triển bản thân"
+          }
+        }
+      }
     },
     "Play": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hưởng thụ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hưởng thụ"
+          }
+        }
+      }
     },
     "Giving": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Cho đi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cho đi"
+          }
+        }
+      }
     },
     "Available to plan": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Có thể phân bổ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Có thể phân bổ"
+          }
+        }
+      }
     },
     "Planned": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dự kiến" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dự kiến"
+          }
+        }
+      }
     },
     "Planned %@ plus received %@": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dự kiến %@ cộng đã nhận %@" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dự kiến %@ cộng đã nhận %@"
+          }
+        }
+      }
     },
     "Received": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã nhận" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã nhận"
+          }
+        }
+      }
     },
     "%@%% is not allocated yet": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "%@%% chưa được phân bổ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@%% chưa được phân bổ"
+          }
+        }
+      }
     },
     "%@%% allocation": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phân bổ %@%%" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phân bổ %@%%"
+          }
+        }
+      }
     },
     "System jar": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ hệ thống" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hũ hệ thống"
+          }
+        }
+      }
     },
     "Protected jar": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ được bảo vệ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hũ được bảo vệ"
+          }
+        }
+      }
     },
     "Left this month": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Còn lại tháng này" } } }
-    },
-    "Over budget": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Vượt ngân sách" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Còn lại tháng này"
+          }
+        }
+      }
     },
     "Budget used": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngân sách đã dùng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngân sách đã dùng"
+          }
+        }
+      }
     },
     "Plan": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Kế hoạch" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kế hoạch"
+          }
+        }
+      }
     },
     "Available": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khả dụng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khả dụng"
+          }
+        }
+      }
     },
     "Allocated": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phân bổ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phân bổ"
+          }
+        }
+      }
     },
     "Actual": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thực tế" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thực tế"
+          }
+        }
+      }
     },
     "Used": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã dùng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã dùng"
+          }
+        }
+      }
     },
     "Left": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Còn lại" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Còn lại"
+          }
+        }
+      }
     },
     "Setup": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thiết lập" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thiết lập"
+          }
+        }
+      }
     },
     "No monthly income planned": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa có thu nhập hàng tháng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có thu nhập hàng tháng"
+          }
+        }
+      }
     },
     "Add salary or another recurring income so Budget can plan the month ahead.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm lương hoặc khoản thu định kỳ để lập ngân sách cho tháng tới." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm lương hoặc khoản thu định kỳ để lập ngân sách cho tháng tới."
+          }
+        }
+      }
     },
     "Add recurring income": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm thu nhập định kỳ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm thu nhập định kỳ"
+          }
+        }
+      }
     },
     "Budget setup": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thiết lập ngân sách" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thiết lập ngân sách"
+          }
+        }
+      }
     },
     "Add Jar": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm hũ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm hũ"
+          }
+        }
+      }
     },
     "Monthly allocation": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Phân bổ hàng tháng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phân bổ hàng tháng"
+          }
+        }
+      }
     },
     "%@%% assigned": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã phân bổ %@%%" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã phân bổ %@%%"
+          }
+        }
+      }
     },
     "%@%% free": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Còn trống %@%%" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Còn trống %@%%"
+          }
+        }
+      }
     },
     "Your jar percentages can total less than 100%. The rest stays unallocated.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tổng tỷ lệ các hũ có thể dưới 100%. Phần còn lại sẽ chưa được phân bổ." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tổng tỷ lệ các hũ có thể dưới 100%. Phần còn lại sẽ chưa được phân bổ."
+          }
+        }
+      }
     },
     "Jars": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Các hũ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Các hũ"
+          }
+        }
+      }
     },
     "System routing": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Điều hướng hệ thống" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Điều hướng hệ thống"
+          }
+        }
+      }
     },
     "Custom routing": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Điều hướng tuỳ chỉnh" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Điều hướng tuỳ chỉnh"
+          }
+        }
+      }
     },
     "Category mapping": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Gán danh mục vào hũ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gán danh mục vào hũ"
+          }
+        }
+      }
     },
     "Each expense keeps its category. This mapping decides which jar pays for it.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mỗi khoản chi vẫn giữ danh mục; thiết lập này quyết định khoản đó trừ vào hũ nào." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mỗi khoản chi vẫn giữ danh mục; thiết lập này quyết định khoản đó trừ vào hũ nào."
+          }
+        }
+      }
     },
     "Default jar": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ mặc định" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hũ mặc định"
+          }
+        }
+      }
     },
     "Jar": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hũ"
+          }
+        }
+      }
     },
     "Couldn’t save this mapping. Try again.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể lưu thiết lập này. Hãy thử lại." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể lưu thiết lập này. Hãy thử lại."
+          }
+        }
+      }
     },
     "Add jar": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm hũ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm hũ"
+          }
+        }
+      }
     },
     "Edit jar": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sửa hũ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sửa hũ"
+          }
+        }
+      }
     },
     "Create a money jar": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tạo một hũ tài chính" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tạo một hũ tài chính"
+          }
+        }
+      }
     },
     "Shape this money jar": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Điều chỉnh hũ tài chính này" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Điều chỉnh hũ tài chính này"
+          }
+        }
+      }
     },
     "The percentage sets its monthly plan from recurring income.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tỷ lệ này xác định ngân sách tháng từ thu nhập định kỳ." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tỷ lệ này xác định ngân sách tháng từ thu nhập định kỳ."
+          }
+        }
+      }
     },
     "Jar details": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thông tin hũ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thông tin hũ"
+          }
+        }
+      }
     },
     "Savings and Investment are system jars. You can rename or resize them, but not delete them.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiết kiệm và Đầu tư là hũ hệ thống. Bạn có thể đổi tên hoặc tỷ lệ nhưng không thể xoá." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiết kiệm và Đầu tư là hũ hệ thống. Bạn có thể đổi tên hoặc tỷ lệ nhưng không thể xoá."
+          }
+        }
+      }
     },
     "Delete jar": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xoá hũ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xoá hũ"
+          }
+        }
+      }
     },
     "Delete this jar?": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xoá hũ này?" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xoá hũ này?"
+          }
+        }
+      }
     },
     "Categories mapped here will move to the Necessities jar.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Các danh mục đang gán vào đây sẽ chuyển sang hũ Thiết yếu." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Các danh mục đang gán vào đây sẽ chuyển sang hũ Thiết yếu."
+          }
+        }
+      }
     },
     "Enter a jar name.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập tên hũ." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập tên hũ."
+          }
+        }
+      }
     },
     "Another jar already has this name.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Một hũ khác đã dùng tên này." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Một hũ khác đã dùng tên này."
+          }
+        }
+      }
     },
     "Enter a valid percentage.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập tỷ lệ hợp lệ." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập tỷ lệ hợp lệ."
+          }
+        }
+      }
     },
     "The percentage cannot be negative.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tỷ lệ không thể là số âm." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tỷ lệ không thể là số âm."
+          }
+        }
+      }
     },
     "All jar percentages together cannot exceed 100%.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tổng tỷ lệ các hũ không thể vượt quá 100%." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tổng tỷ lệ các hũ không thể vượt quá 100%."
+          }
+        }
+      }
     },
     "Couldn’t save this jar. Try again.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể lưu hũ này. Hãy thử lại." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể lưu hũ này. Hãy thử lại."
+          }
+        }
+      }
     },
     "Couldn’t delete this jar. Try again.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể xoá hũ này. Hãy thử lại." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể xoá hũ này. Hãy thử lại."
+          }
+        }
+      }
     },
     "Budget jars": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ ngân sách" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hũ ngân sách"
+          }
+        }
+      }
     },
     "Financial goals": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục tiêu tài chính" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mục tiêu tài chính"
+          }
+        }
+      }
     },
     "Trip workspaces": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không gian chi tiêu chuyến đi" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không gian chi tiêu chuyến đi"
+          }
+        }
+      }
     },
     "Unmapped expenses use %@.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khoản chi chưa gán sẽ dùng hũ %@." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khoản chi chưa gán sẽ dùng hũ %@."
+          }
+        }
+      }
     },
     "No jar": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa có hũ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có hũ"
+          }
+        }
+      }
     },
     "Categories mapped here will move to another available jar.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Các danh mục đang gán vào đây sẽ chuyển sang một hũ còn lại." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Các danh mục đang gán vào đây sẽ chuyển sang một hũ còn lại."
+          }
+        }
+      }
     },
     "Export or replace every account, transaction, category, budget jar, financial goal, trip workspace, recurring rule, saving, investment, transfer, and debt on this device.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xuất hoặc thay thế toàn bộ tài khoản, giao dịch, danh mục, hũ ngân sách, mục tiêu tài chính, không gian chi tiêu chuyến đi, khoản định kỳ, tiết kiệm, đầu tư, chuyển khoản và khoản nợ trên thiết bị này." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xuất hoặc thay thế toàn bộ tài khoản, giao dịch, danh mục, hũ ngân sách, mục tiêu tài chính, không gian chi tiêu chuyến đi, khoản định kỳ, tiết kiệm, đầu tư, chuyển khoản và khoản nợ trên thiết bị này."
+          }
+        }
+      }
     },
     "Goals": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục tiêu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mục tiêu"
+          }
+        }
+      }
     },
     "Goal name": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tên mục tiêu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tên mục tiêu"
+          }
+        }
+      }
     },
     "Add goal": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thêm mục tiêu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm mục tiêu"
+          }
+        }
+      }
     },
     "Custom": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tuỳ chỉnh" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tuỳ chỉnh"
+          }
+        }
+      }
     },
     "Home": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhà ở" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhà ở"
+          }
+        }
+      }
     },
     "Trip": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Du lịch" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du lịch"
+          }
+        }
+      }
     },
     "Vehicle": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xe cộ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xe cộ"
+          }
+        }
+      }
     },
     "Goal progress": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiến độ mục tiêu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiến độ mục tiêu"
+          }
+        }
+      }
     },
     "Earmarked": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã dành riêng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã dành riêng"
+          }
+        }
+      }
     },
     "Remaining": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Còn thiếu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Còn thiếu"
+          }
+        }
+      }
     },
     "Target": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục tiêu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mục tiêu"
+          }
+        }
+      }
     },
     "Required monthly": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Cần mỗi tháng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cần mỗi tháng"
+          }
+        }
+      }
     },
     "Forecast": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Dự kiến hoàn thành" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dự kiến hoàn thành"
+          }
+        }
+      }
     },
     "No monthly plan": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa có kế hoạch tháng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có kế hoạch tháng"
+          }
+        }
+      }
     },
     "In progress": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang thực hiện" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang thực hiện"
+          }
+        }
+      }
     },
     "Accumulating": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đang tích luỹ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang tích luỹ"
+          }
+        }
+      }
     },
     "Completed": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã hoàn thành" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã hoàn thành"
+          }
+        }
+      }
     },
     "Opens this goal for editing": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mở mục tiêu này để chỉnh sửa" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở mục tiêu này để chỉnh sửa"
+          }
+        }
+      }
     },
     "%@ is overcommitted by %@ per month.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "%@ đang cam kết vượt %@ mỗi tháng." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ đang cam kết vượt %@ mỗi tháng."
+          }
+        }
+      }
     },
     "No goals yet": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chưa có mục tiêu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có mục tiêu"
+          }
+        }
+      }
     },
     "Create a home, vehicle, trip, or custom target and fund it from a jar.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tạo mục tiêu mua nhà, mua xe, du lịch hoặc tuỳ chỉnh và tài trợ từ một hũ." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tạo mục tiêu mua nhà, mua xe, du lịch hoặc tuỳ chỉnh và tài trợ từ một hũ."
+          }
+        }
+      }
     },
     "Create a goal": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tạo mục tiêu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tạo mục tiêu"
+          }
+        }
+      }
     },
     "Edit goal": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Sửa mục tiêu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sửa mục tiêu"
+          }
+        }
+      }
     },
     "Delete this goal?": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xoá mục tiêu này?" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xoá mục tiêu này?"
+          }
+        }
+      }
     },
     "This removes the earmark only. It does not move or delete financial records.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Thao tác này chỉ xoá phần tiền đánh dấu, không di chuyển hoặc xoá dữ liệu tài chính." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thao tác này chỉ xoá phần tiền đánh dấu, không di chuyển hoặc xoá dữ liệu tài chính."
+          }
+        }
+      }
     },
     "Shape this goal": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Điều chỉnh mục tiêu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Điều chỉnh mục tiêu"
+          }
+        }
+      }
     },
     "Create a financial target": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tạo mục tiêu tài chính" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tạo mục tiêu tài chính"
+          }
+        }
+      }
     },
     "Goal money stays inside its jar and is never counted as a second asset.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Tiền mục tiêu vẫn nằm trong hũ và không bao giờ được tính thành tài sản thứ hai." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiền mục tiêu vẫn nằm trong hũ và không bao giờ được tính thành tài sản thứ hai."
+          }
+        }
+      }
     },
     "Purpose": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Mục đích" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mục đích"
+          }
+        }
+      }
     },
     "Goal type": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Loại mục tiêu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loại mục tiêu"
+          }
+        }
+      }
     },
     "First home": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngôi nhà đầu tiên" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngôi nhà đầu tiên"
+          }
+        }
+      }
     },
     "Funding jar": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ tài trợ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hũ tài trợ"
+          }
+        }
+      }
     },
     "Choose a jar": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn một hũ" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn một hũ"
+          }
+        }
+      }
     },
     "Money": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền"
+          }
+        }
+      }
     },
     "Target amount": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền mục tiêu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền mục tiêu"
+          }
+        }
+      }
     },
     "Already earmarked": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Đã dành riêng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã dành riêng"
+          }
+        }
+      }
     },
     "Monthly plan": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Kế hoạch hàng tháng" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kế hoạch hàng tháng"
+          }
+        }
+      }
     },
     "Target date": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Ngày mục tiêu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngày mục tiêu"
+          }
+        }
+      }
     },
     "Planned contribution": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khoản dự kiến đóng góp" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khoản dự kiến đóng góp"
+          }
+        }
+      }
     },
     "Jar plan this month: %@": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Kế hoạch của hũ tháng này: %@" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kế hoạch của hũ tháng này: %@"
+          }
+        }
+      }
     },
     "This jar does not have enough uncommitted monthly plan for the goal.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Hũ này không còn đủ kế hoạch tháng chưa cam kết cho mục tiêu." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hũ này không còn đủ kế hoạch tháng chưa cam kết cho mục tiêu."
+          }
+        }
+      }
     },
     "Delete goal": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Xoá mục tiêu" } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xoá mục tiêu"
+          }
+        }
+      }
     },
     "Enter a goal name.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập tên mục tiêu." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập tên mục tiêu."
+          }
+        }
+      }
     },
     "Enter a valid target amount.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập số tiền mục tiêu hợp lệ." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập số tiền mục tiêu hợp lệ."
+          }
+        }
+      }
     },
     "The target must be greater than zero.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền mục tiêu phải lớn hơn 0." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền mục tiêu phải lớn hơn 0."
+          }
+        }
+      }
     },
     "Enter a valid earmarked amount.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập số tiền dành riêng hợp lệ." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập số tiền dành riêng hợp lệ."
+          }
+        }
+      }
     },
     "The earmarked amount cannot be negative.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền dành riêng không thể là số âm." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền dành riêng không thể là số âm."
+          }
+        }
+      }
     },
     "The earmarked amount cannot exceed the target.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Số tiền dành riêng không thể vượt mục tiêu." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền dành riêng không thể vượt mục tiêu."
+          }
+        }
+      }
     },
     "Enter a valid monthly contribution.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Nhập khoản đóng góp hàng tháng hợp lệ." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập khoản đóng góp hàng tháng hợp lệ."
+          }
+        }
+      }
     },
     "The monthly contribution cannot be negative.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Khoản đóng góp hàng tháng không thể là số âm." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khoản đóng góp hàng tháng không thể là số âm."
+          }
+        }
+      }
     },
     "Choose today or a future date.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn hôm nay hoặc một ngày trong tương lai." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn hôm nay hoặc một ngày trong tương lai."
+          }
+        }
+      }
     },
     "Choose a funding jar.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chọn hũ tài trợ." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn hũ tài trợ."
+          }
+        }
+      }
     },
     "Couldn’t save this goal. Try again.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể lưu mục tiêu này. Hãy thử lại." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể lưu mục tiêu này. Hãy thử lại."
+          }
+        }
+      }
     },
     "Couldn’t delete this goal. Try again.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể xoá mục tiêu này. Hãy thử lại." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể xoá mục tiêu này. Hãy thử lại."
+          }
+        }
+      }
     },
     "Move or delete this jar’s goals before deleting the jar.": {
-      "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Chuyển hoặc xoá các mục tiêu dùng hũ này trước khi xoá hũ." } } }
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyển hoặc xoá các mục tiêu dùng hũ này trước khi xoá hũ."
+          }
+        }
+      }
+    },
+    "AI access": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quyền truy cập AI"
+          }
+        }
+      }
+    },
+    "Allow AI access": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cho phép AI truy cập"
+          }
+        }
+      }
+    },
+    "App Lock does not protect MCP access. An AI client may send your detailed financial records to its model provider.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khóa ứng dụng không bảo vệ quyền truy cập MCP. Ứng dụng AI có thể gửi các bản ghi tài chính chi tiết của bạn đến nhà cung cấp mô hình."
+          }
+        }
+      }
+    },
+    "MCP reads a local snapshot. Open MonMon on this Mac to refresh data changed on another device.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MCP đọc bản chụp dữ liệu cục bộ. Hãy mở MonMon trên máy Mac này để cập nhật dữ liệu đã thay đổi trên thiết bị khác."
+          }
+        }
+      }
+    },
+    "Not installed": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa cài đặt"
+          }
+        }
+      }
+    },
+    "Not configured": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa cấu hình"
+          }
+        }
+      }
+    },
+    "Connected after restart": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kết nối sau khi khởi động lại"
+          }
+        }
+      }
+    },
+    "Repair needed": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cần sửa cấu hình"
+          }
+        }
+      }
+    },
+    "Needs confirmation": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cần xác nhận"
+          }
+        }
+      }
+    },
+    "Repair client setup": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sửa cấu hình ứng dụng"
+          }
+        }
+      }
+    },
+    "Updating AI client setup…": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang cập nhật cấu hình ứng dụng AI…"
+          }
+        }
+      }
+    },
+    "Replace the existing server entry?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thay thế mục máy chủ hiện có?"
+          }
+        }
+      }
+    },
+    "Replace configuration": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thay thế cấu hình"
+          }
+        }
+      }
+    },
+    "A client already has a server with this name or an old MonMon helper path. Only that MonMon entry will be replaced.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Một ứng dụng đã có máy chủ cùng tên hoặc đường dẫn helper MonMon cũ. Chỉ mục MonMon đó sẽ được thay thế."
+          }
+        }
+      }
+    },
+    "Claude Desktop's configuration could not be read safely.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể đọc cấu hình Claude Desktop một cách an toàn."
+          }
+        }
+      }
+    },
+    "No client configuration was changed.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không có cấu hình ứng dụng nào bị thay đổi."
+          }
+        }
+      }
+    },
+    "Client configuration repaired. Restart the AI client to reconnect.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã sửa cấu hình ứng dụng. Hãy khởi động lại ứng dụng AI để kết nối lại."
+          }
+        }
+      }
+    },
+    "Client configuration could not be repaired.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể sửa cấu hình ứng dụng."
+          }
+        }
+      }
+    },
+    "AI access is enabled. Restart Codex or Claude Desktop to connect.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã bật quyền truy cập AI. Hãy khởi động lại Codex hoặc Claude Desktop để kết nối."
+          }
+        }
+      }
+    },
+    "AI access could not be enabled.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể bật quyền truy cập AI."
+          }
+        }
+      }
+    },
+    "AI access is off, but local cleanup was incomplete. The helper will still refuse data.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quyền truy cập AI đã tắt nhưng chưa thể hoàn tất dọn dẹp cục bộ. Helper vẫn sẽ từ chối cung cấp dữ liệu."
+          }
+        }
+      }
+    },
+    "AI access is off. Restart the AI client to remove the disconnected server.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quyền truy cập AI đã tắt. Hãy khởi động lại ứng dụng AI để xóa máy chủ đã ngắt kết nối."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

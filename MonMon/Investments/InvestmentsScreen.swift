@@ -8,6 +8,7 @@ enum InvestmentEditorMode: Identifiable {
     case savings(SavingsEditorMode)
     case fund(FundEditorMode)
     case gold(FundEditorMode)
+    case crypto(FundEditorMode)
 
     var id: String {
         switch self {
@@ -17,6 +18,8 @@ enum InvestmentEditorMode: Identifiable {
             "fund-\(mode.id)"
         case .gold(let mode):
             "gold-\(mode.id)"
+        case .crypto(let mode):
+            "crypto-\(mode.id)"
         }
     }
 }
@@ -115,6 +118,8 @@ struct InvestmentsScreen: View {
                 FundEditorView(mode: fundMode, kinds: [.fund, .etf])
             case .gold(let goldMode):
                 FundEditorView(mode: goldMode, kinds: [.gold])
+            case .crypto(let cryptoMode):
+                FundEditorView(mode: cryptoMode, kinds: [.crypto])
             }
         }
         .tint(MonMonTheme.accent)
@@ -159,7 +164,7 @@ struct InvestmentsScreen: View {
                 .minimumScaleFactor(0.58)
                 .foregroundStyle(MonMonTheme.textPrimary)
 
-            Text("Savings books, funds, and gold will be split up here.")
+            Text("Savings books, funds, gold, and coins will be split up here.")
                 .font(.subheadline)
                 .foregroundStyle(MonMonTheme.textSecondary)
         }
@@ -191,6 +196,15 @@ struct InvestmentsScreen: View {
                     instruments: instruments,
                     sales: sales,
                     kinds: [.gold]
+                )
+            ),
+            AssetAllocationSlice(
+                kind: .crypto,
+                amount: FundSummary.totalMarketValue(
+                    of: holdings,
+                    instruments: instruments,
+                    sales: sales,
+                    kinds: [.crypto]
                 )
             ),
         ]
@@ -326,6 +340,30 @@ struct InvestmentsScreen: View {
             ) {
                 add()
             }
+        case .crypto:
+            FundSection(
+                holdings: holdings,
+                instruments: instruments,
+                sales: sales,
+                kinds: [.crypto],
+                sectionTitle: "Crypto",
+                itemNameKey: "coin",
+                emptyTitle: "Track your coins",
+                emptyDescription: """
+                    Add a coin to see what it cost, what it is worth in đồng today, and the gap \
+                    between them.
+                    """,
+                emptySystemImage: "bitcoinsign.circle.fill",
+                addTitle: InvestmentSegment.crypto.addTitle,
+                addIdentifier: InvestmentSegment.crypto.addIdentifier,
+                onRefresh: { refresh() },
+                isRefreshing: refresher.isRunning,
+                canRefresh: canRefresh,
+                refreshMessage: refreshSummary,
+                hasFailure: hasRefreshFailure
+            ) {
+                add()
+            }
         }
     }
 
@@ -337,6 +375,8 @@ struct InvestmentsScreen: View {
             FundSummary.holdings(holdings, in: instruments, matching: [.fund, .etf]).isEmpty
         case .gold:
             FundSummary.holdings(holdings, in: instruments, matching: [.gold]).isEmpty
+        case .crypto:
+            FundSummary.holdings(holdings, in: instruments, matching: [.crypto]).isEmpty
         }
     }
 
@@ -348,6 +388,8 @@ struct InvestmentsScreen: View {
             editor = .fund(.add)
         case .gold:
             editor = .gold(.add)
+        case .crypto:
+            editor = .crypto(.add)
         }
     }
 }

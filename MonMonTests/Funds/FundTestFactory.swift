@@ -58,6 +58,7 @@ enum FundTestFactory {
         of holding: FundHolding,
         units: Decimal,
         pricePerUnit: Decimal,
+        fee: Decimal = .zero,
         proceedsAccountID: UUID = AccountSeed.unassignedID,
         soldAt: Date = referenceDate,
         id: UUID = UUID()
@@ -67,6 +68,7 @@ enum FundTestFactory {
             holdingID: holding.id,
             units: units,
             pricePerUnit: pricePerUnit,
+            fee: fee,
             proceedsAccountID: proceedsAccountID,
             soldAt: soldAt,
             currencyCode: VNDCurrency.code,

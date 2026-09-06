@@ -1,19 +1,13 @@
 import SwiftUI
 
 struct TransferCard: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     let transfer: AccountTransfer
     let sourceAccount: CashAccount?
     let destinationAccount: CashAccount?
-
-    private static let dateFormat: Date.FormatStyle = {
-        var style = Date.FormatStyle().day().month(.abbreviated)
-        style.calendar = TransactionPeriod.calendar
-        style.timeZone = TransactionPeriod.calendar.timeZone
-        style.locale = Locale(identifier: "en_US")
-        return style
-    }()
 
     var body: some View {
         HStack(spacing: 14) {
@@ -67,7 +61,7 @@ struct TransferCard: View {
                 .foregroundStyle(MonMonTheme.textPrimary)
 
             Label(
-                Self.dateFormat.format(transfer.occurredAt),
+                dateFormat.format(transfer.occurredAt),
                 systemImage: "calendar"
             )
             .font(.caption2.weight(.semibold))

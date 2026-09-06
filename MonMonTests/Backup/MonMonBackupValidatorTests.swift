@@ -125,6 +125,35 @@ struct MonMonBackupValidatorTests {
         }
     }
 
+    @Test("A negative sale fee is rejected")
+    func negativeSaleFeeIsRejected() throws {
+        var payload = MonMonBackupPayload.empty
+        payload.fundSales = [
+            MonMonBackupPayload.FundSaleRecord(
+                id: MonMonBackupScalar.uuid(accountID),
+                holdingID: nil,
+                units: "1",
+                pricePerUnit: "100",
+                proceedsAccountID: MonMonBackupScalar.uuid(otherID),
+                soldAt: MonMonBackupScalar.date(instant),
+                note: "",
+                currencyCode: VNDCurrency.code,
+                exchangeRate: nil,
+                fee: "-1",
+                createdAt: MonMonBackupScalar.date(instant)
+            )
+        ]
+
+        #expect(throws: MonMonBackupValidationError.invalidPayload) {
+            try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
+        }
+
+        payload.fundSales[0].fee = "100"
+        #expect(throws: MonMonBackupValidationError.invalidPayload) {
+            try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
+        }
+    }
+
     @Test("Budget jar roles, allocation, and category references are validated")
     func invalidBudgetJarDataIsRejected() throws {
         var payload = MonMonBackupPayload.empty

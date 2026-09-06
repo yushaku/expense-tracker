@@ -41,6 +41,8 @@ private enum TransactionDetailDestination: Hashable {
 /// A quick read of one transaction list item. Editing remains in the full
 /// editor; this sheet is read-only so a tap never changes money by accident.
 struct TransactionDetailSheet: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
 
@@ -56,14 +58,6 @@ struct TransactionDetailSheet: View {
     @State private var isConfirmingDelete = false
     @State private var isShowingDeleteError = false
     @State private var selectedDetent = PresentationDetent.medium
-
-    private static let dateTemplate = Date.FormatStyle()
-        .weekday(.wide)
-        .day()
-        .month(.wide)
-        .year()
-        .hour()
-        .minute()
 
     var body: some View {
         NavigationStack {
@@ -223,7 +217,7 @@ struct TransactionDetailSheet: View {
     }
 
     private var formattedDate: String {
-        TransactionPeriod.format(Self.dateTemplate, in: locale).format(transaction.occurredAt)
+        dateFormat.dateTime(transaction.occurredAt, in: locale)
     }
 
     private var links: TransactionDetailLinks {

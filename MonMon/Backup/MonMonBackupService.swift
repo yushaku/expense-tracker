@@ -373,6 +373,7 @@ private extension MonMonBackupService {
             priceFetchedAt: try optionalDate(record.priceFetchedAt),
             autoQuoteEnabled: record.autoQuoteEnabled,
             logoURL: record.logoURL,
+            providerID: record.providerID,
             currencyCode: record.currencyCode,
             createdAt: try MonMonBackupScalar.parseDate(record.createdAt)
         )
@@ -393,6 +394,7 @@ private extension MonMonBackupService {
         model.priceFetchedAt = try optionalDate(record.priceFetchedAt)
         model.autoQuoteEnabled = record.autoQuoteEnabled
         model.logoURL = record.logoURL
+        model.providerID = record.providerID
         model.currencyCode = record.currencyCode
         model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
     }
@@ -436,7 +438,9 @@ private extension MonMonBackupService {
             averageCostPerUnit: try MonMonBackupScalar.parseDecimal(record.averageCostPerUnit),
             createdAt: try MonMonBackupScalar.parseDate(record.createdAt),
             sourceAccountID: try optionalUUID(record.sourceAccountID),
-            purchasedAt: try optionalDate(record.purchasedAt)
+            purchasedAt: try optionalDate(record.purchasedAt),
+            purchaseExchangeRate: try record.purchaseExchangeRate
+                .map(MonMonBackupScalar.parseDecimal)
         )
     }
 
@@ -451,6 +455,8 @@ private extension MonMonBackupService {
         model.sourceAccountID = try optionalUUID(record.sourceAccountID)
         model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
         model.purchasedAt = try optionalDate(record.purchasedAt)
+        model.purchaseExchangeRate = try record.purchaseExchangeRate
+            .map(MonMonBackupScalar.parseDecimal)
     }
 
     func makeDebt(_ record: MonMonBackupPayload.DebtRecord) throws -> Debt {
@@ -666,10 +672,13 @@ private extension MonMonBackupService {
             holdingID: try optionalUUID(record.holdingID),
             units: try MonMonBackupScalar.parseDecimal(record.units),
             pricePerUnit: try MonMonBackupScalar.parseDecimal(record.pricePerUnit),
+            fee: try record.fee.map(MonMonBackupScalar.parseDecimal) ?? .zero,
             proceedsAccountID: try MonMonBackupScalar.parseUUID(record.proceedsAccountID),
             soldAt: try MonMonBackupScalar.parseDate(record.soldAt),
             note: record.note,
             currencyCode: record.currencyCode,
+            exchangeRate: try record.exchangeRate.map(MonMonBackupScalar.parseDecimal),
+            swapHoldingID: try optionalUUID(record.swapHoldingID),
             createdAt: try MonMonBackupScalar.parseDate(record.createdAt)
         )
     }
@@ -686,6 +695,9 @@ private extension MonMonBackupService {
         model.soldAt = try MonMonBackupScalar.parseDate(record.soldAt)
         model.note = record.note
         model.currencyCode = record.currencyCode
+        model.exchangeRate = try record.exchangeRate.map(MonMonBackupScalar.parseDecimal)
+        model.swapHoldingID = try optionalUUID(record.swapHoldingID)
+        model.fee = try record.fee.map(MonMonBackupScalar.parseDecimal) ?? .zero
         model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
     }
 
@@ -1003,6 +1015,7 @@ struct MonMonBackupService {
             priceFetchedAt: model.priceFetchedAt.map(MonMonBackupScalar.date),
             autoQuoteEnabled: model.autoQuoteEnabled,
             logoURL: model.logoURL,
+            providerID: model.providerID,
             currencyCode: model.currencyCode,
             createdAt: MonMonBackupScalar.date(model.createdAt)
         )
@@ -1018,7 +1031,9 @@ struct MonMonBackupService {
             averageCostPerUnit: MonMonBackupScalar.decimal(model.averageCostPerUnit),
             sourceAccountID: model.sourceAccountID.map(MonMonBackupScalar.uuid),
             createdAt: MonMonBackupScalar.date(model.createdAt),
-            purchasedAt: model.purchasedAt.map(MonMonBackupScalar.date)
+            purchasedAt: model.purchasedAt.map(MonMonBackupScalar.date),
+            purchaseExchangeRate: model.purchaseExchangeRate
+                .map(MonMonBackupScalar.decimal)
         )
     }
 
@@ -1032,6 +1047,9 @@ struct MonMonBackupService {
             soldAt: MonMonBackupScalar.date(model.soldAt),
             note: model.note,
             currencyCode: model.currencyCode,
+            exchangeRate: model.exchangeRate.map(MonMonBackupScalar.decimal),
+            swapHoldingID: model.swapHoldingID.map(MonMonBackupScalar.uuid),
+            fee: MonMonBackupScalar.decimal(model.fee),
             createdAt: MonMonBackupScalar.date(model.createdAt)
         )
     }

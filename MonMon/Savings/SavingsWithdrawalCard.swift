@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct SavingsWithdrawalCard: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     let withdrawal: SavingsWithdrawal
@@ -62,7 +64,7 @@ struct SavingsWithdrawalCard: View {
     }
 
     private var subtitle: String {
-        let day = TransactionPeriod.day(withdrawal.withdrawnAt, in: locale)
+        let day = TransactionPeriod.day(withdrawal.withdrawnAt, in: locale, dateFormat: dateFormat)
         guard let destinationAccountName else { return day }
         let into = AppText.string("into", in: locale)
         return "\(day) · \(into) \(destinationAccountName)"

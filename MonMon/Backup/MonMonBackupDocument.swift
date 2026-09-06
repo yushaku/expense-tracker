@@ -387,6 +387,11 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         /// Absent in backups written before instruments carried a logo, and in
         /// every instrument added by hand. Decodes as `nil` either way.
         var logoURL: String?
+        /// How the provider names this instrument, when that is not the ticker.
+        /// Absent in backups written before coins existed, and in everything a
+        /// ticker already identifies. Decodes as `nil` either way, which is why
+        /// this needs no version bump.
+        var providerID: String?
         var currencyCode: String
         var createdAt: String
     }
@@ -399,6 +404,10 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         var sourceAccountID: String?
         var createdAt: String
         var purchasedAt: String?
+        /// Đồng per dollar, when the cost was typed in dollars. Absent in
+        /// backups written before coins could be, and in every cost typed in
+        /// đồng. Decodes as `nil` either way, so the format version stands.
+        var purchaseExchangeRate: String?
     }
 
     struct FundSaleRecord: Codable, Equatable, Sendable, MonMonBackupRecord {
@@ -410,6 +419,15 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         var soldAt: String
         var note: String
         var currencyCode: String
+        /// Đồng per dollar, when the price was typed in dollars. Optional for
+        /// the reason `FundHoldingRecord.purchaseExchangeRate` is.
+        var exchangeRate: String?
+        /// The lot this disposal bought, when it was a swap rather than a sale
+        /// for cash. Absent on every ordinary sale, and on every backup written
+        /// before swaps existed.
+        var swapHoldingID: String?
+        /// Absent in backups written before sale fees were tracked.
+        var fee: String? = nil
         var createdAt: String
     }
 

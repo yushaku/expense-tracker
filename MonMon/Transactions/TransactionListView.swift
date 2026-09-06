@@ -7,6 +7,8 @@ private enum SpendingDestination: Hashable {
 }
 
 struct TransactionListView: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(AppRoute.self) private var appRoute
     @Environment(\.locale) private var locale
     @Environment(\.scenePhase) private var scenePhase
@@ -38,7 +40,6 @@ struct TransactionListView: View {
     @State private var navigationPath = NavigationPath()
 
     @State private var isShowingCaptureInbox = false
-    @State private var isShowingQuickCapture = false
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -173,9 +174,6 @@ struct TransactionListView: View {
             .appSheet(isPresented: $isShowingCaptureInbox) {
                 PendingTransactionCaptureListView()
             }
-            .appSheet(isPresented: $isShowingQuickCapture) {
-                QuickTransactionCaptureView()
-            }
             .transactionActions(
                 transactionActions,
                 undoBottomInset: FloatingAddButton.contentInset,
@@ -196,15 +194,20 @@ struct TransactionListView: View {
             .onAppear {
                 presentQuickCaptureIfNeeded(appRoute.quickCaptureRequestID)
             }
+            .onChange(of: editorMode?.id) { _, modeID in
+                if modeID == nil {
+                    presentQuickCaptureIfNeeded(appRoute.quickCaptureRequestID)
+                }
+            }
             .tint(MonMonTheme.accent)
         }
     }
 
     private func presentQuickCaptureIfNeeded(_ requestID: UUID?) {
-        guard requestID != nil, !isShowingQuickCapture else {
+        guard requestID != nil, editorMode == nil else {
             return
         }
-        isShowingQuickCapture = true
+        editorMode = .add
         appRoute.consumeQuickCapture()
     }
 
@@ -409,11 +412,11 @@ struct TransactionListView: View {
     }
 
     private var categoryNames: [UUID: String] {
-        Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0.name) })
+        Dictionary(firstWins: categories.map { ($0.id, $0.name) })
     }
 
     private var accountNames: [UUID: String] {
-        Dictionary(uniqueKeysWithValues: accounts.map { ($0.id, $0.name) })
+        Dictionary(firstWins: accounts.map { ($0.id, $0.name) })
     }
 
     private var featuredTrip: TripWorkspace? {
@@ -587,7 +590,7 @@ struct TransactionListView: View {
     private var emptyFilterNotice: LocalizedStringKey {
         query.isNarrowed
             ? "Nothing matches what you are looking for."
-            : "Nothing recorded \(query.range.phrase(in: locale))."
+            : "Nothing recorded \(query.range.phrase(in: locale, dateFormat: dateFormat))."
     }
 
     private var noAccountState: some View {

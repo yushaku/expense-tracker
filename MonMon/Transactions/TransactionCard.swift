@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct TransactionCard: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     let transaction: MoneyTransaction
@@ -10,8 +12,6 @@ struct TransactionCard: View {
     /// The shared transaction list puts one date over each day of cards, so
     /// the card drops its own copy there and keeps it everywhere else.
     var showsDate = true
-
-    private static let dateTemplate = Date.FormatStyle().day().month(.abbreviated)
 
     var body: some View {
         HStack(spacing: 14) {
@@ -99,8 +99,7 @@ struct TransactionCard: View {
 
             Label(
                 showsDate
-                    ? TransactionPeriod.format(Self.dateTemplate, in: locale)
-                        .format(transaction.occurredAt)
+                    ? dateFormat.format(transaction.occurredAt)
                     : transaction.kind.displayName(in: locale),
                 systemImage: transaction.kind.symbolName
             )

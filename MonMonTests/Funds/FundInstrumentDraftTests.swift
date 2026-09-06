@@ -139,7 +139,7 @@ struct FundInstrumentDraftTests {
     @Test("Gold is offered as an instrument kind with its shop-buy price label")
     func goldKindIsDescribed() {
         #expect(FundInstrumentKind.gold.displayName == "Gold")
-        #expect(FundInstrumentKind.gold.priceLabel == "Shop buy price per lượng")
+        #expect(FundInstrumentKind.gold.priceLabel == "Shop buy price per tael")
         #expect(FundQuoteSource.vangToday.displayName == "vang.today")
     }
 

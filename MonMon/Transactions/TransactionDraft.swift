@@ -135,6 +135,21 @@ struct TransactionDraft: Equatable {
         )
     }
 
+    /// Fill the editor without persisting anything. Unresolved fields stay empty
+    /// for the owner to complete, rather than retaining values from an old entry.
+    mutating func apply(capture: ParsedTransactionCapture) {
+        kind = capture.kind
+        amountText = capture.amount.map { VNDCurrency.formatPlain($0) } ?? ""
+        occurredAt = capture.occurredAt
+        note = capture.note
+        accountID = capture.accountID
+        categoryID = capture.categoryID
+        if kind == .income {
+            tripWorkspaceID = nil
+            budgetJarOverrideID = nil
+        }
+    }
+
     /// Validated values ready to write to a model.
     struct ValidatedValues: Equatable {
         var kind: TransactionKind

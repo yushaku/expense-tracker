@@ -13,8 +13,8 @@ import SwiftData
 /// A draft can only check what the device can already see. Two devices that
 /// have not met yet both pass their own check, and the duplicate appears at the
 /// moment they meet. The clearest case needs no race at all: a second device
-/// installs, finds an empty store, seeds nine starter categories and the anchor
-/// account, and then synchronisation delivers the nine and the anchor the first
+/// installs, finds an empty store, seeds ten starter categories and the anchor
+/// account, and then synchronisation delivers the ten and the anchor the first
 /// device already had.
 ///
 /// So the rule is enforced twice: by the draft before a write, and by this
@@ -67,13 +67,45 @@ enum StoreReconciler {
         return report
     }
 
-    /// Matched on kind and name, case-insensitively — the same rule
-    /// `CategoryDraft` rejects a duplicate by.
+    /// Folded twice, because a category has two ways of being the same thing.
+    ///
+    /// The starter categories carry a **fixed id** on every device, the way the
+    /// anchor account and the seeded jars do, so the id is the identity to fold
+    /// on. Their names are not: `CategorySeed` resolves each name through
+    /// `AppText` at seeding, so a device seeding in Vietnamese and a device
+    /// seeding in English produce one id under two names. Matching on the name
+    /// alone can never pair those, and the pair that survives is a store
+    /// holding two rows under one id — which is what every `[UUID: …]` lookup
+    /// in the app is built on the assumption it will never see.
+    ///
+    /// The name pass still has to run after it, for the duplicate the id pass
+    /// cannot see: a category the owner created on two devices before they met
+    /// carries a fresh id on each, and only the name says they are one.
     private static func foldCategories(in context: ModelContext) throws -> Int {
-        let categories = try context.fetch(FetchDescriptor<TransactionCategory>())
+        var categories = try context.fetch(FetchDescriptor<TransactionCategory>())
+        var folded = 0
+
+        folded += try foldCategories(&categories, by: { $0.id.uuidString }, in: context)
+        folded += try foldCategories(
+            &categories,
+            by: { "\($0.kind.rawValue)|\($0.name.trimmed().lowercased())" },
+            in: context
+        )
+
+        return folded
+    }
+
+    /// One pass. Takes the working set `inout` so the pass after it sees what
+    /// this one deleted, rather than re-fetching a context that still holds the
+    /// deletions as pending changes.
+    private static func foldCategories(
+        _ categories: inout [TransactionCategory],
+        by key: (TransactionCategory) -> String,
+        in context: ModelContext
+    ) throws -> Int {
         let merges = DuplicateReconciler.merges(
             in: categories,
-            key: { "\($0.kind.rawValue)|\($0.name.trimmed().lowercased())" },
+            key: key,
             createdAt: \.createdAt,
             id: \.id
         )
@@ -84,9 +116,13 @@ enum StoreReconciler {
         let transactions = try context.fetch(FetchDescriptor<MoneyTransaction>())
         let rules = try context.fetch(FetchDescriptor<RecurringRule>())
         var folded = 0
+        var deleted: Set<ObjectIdentifier> = []
 
         for merge in merges {
-            let doomed = Set(merge.duplicates.map(\.id))
+            // Empty when the pass matched on the id itself: those duplicates
+            // already carry the survivor's id, so every foreign key naming one
+            // names the survivor, and repointing would only dirty rows.
+            let doomed = Set(merge.duplicates.map(\.id)).subtracting([merge.survivor.id])
             for transaction in transactions
             where transaction.categoryID.map(doomed.contains) == true {
                 transaction.categoryID = merge.survivor.id
@@ -97,10 +133,13 @@ enum StoreReconciler {
                 rule.categoryID = merge.survivor.id
             }
             for duplicate in merge.duplicates {
+                deleted.insert(ObjectIdentifier(duplicate))
                 context.delete(duplicate)
                 folded += 1
             }
         }
+
+        categories.removeAll { deleted.contains(ObjectIdentifier($0)) }
 
         return folded
     }

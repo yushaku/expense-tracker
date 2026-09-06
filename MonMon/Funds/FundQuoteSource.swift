@@ -15,6 +15,8 @@ enum FundQuoteSource: String, Codable, CaseIterable, Identifiable, Sendable {
     case vndirect
     /// Shop buy and sell prices for physical gold.
     case vangToday
+    /// Coin prices, quoted directly in VND so nothing here converts a currency.
+    case coinGecko
 
     var id: String { rawValue }
 
@@ -28,6 +30,8 @@ enum FundQuoteSource: String, Codable, CaseIterable, Identifiable, Sendable {
             "VNDIRECT"
         case .vangToday:
             "vang.today"
+        case .coinGecko:
+            "CoinGecko"
         }
     }
 

@@ -14,6 +14,8 @@ struct FundInstrumentImportOption: Identifiable {
             "Add from VNDIRECT"
         case .vangToday:
             "Add Gold from vang.today"
+        case .coinGecko:
+            "Add from CoinGecko"
         case .manual:
             "Add instrument"
         }
@@ -24,6 +26,7 @@ enum FundInstrumentListScope: String, Identifiable {
     case all
     case funds
     case gold
+    case crypto
 
     var id: String { rawValue }
 
@@ -35,6 +38,8 @@ enum FundInstrumentListScope: String, Identifiable {
             [.fund, .etf]
         case .gold:
             [.gold]
+        case .crypto:
+            [.crypto]
         }
     }
 
@@ -43,11 +48,16 @@ enum FundInstrumentListScope: String, Identifiable {
     var importOptions: [FundInstrumentImportOption] {
         switch self {
         case .all:
-            [.init(source: .fmarket), .init(source: .vndirect), .init(source: .vangToday)]
+            [
+                .init(source: .fmarket), .init(source: .vndirect),
+                .init(source: .vangToday), .init(source: .coinGecko),
+            ]
         case .funds:
             [.init(source: .fmarket), .init(source: .vndirect)]
         case .gold:
             [.init(source: .vangToday)]
+        case .crypto:
+            [.init(source: .coinGecko)]
         }
     }
 
@@ -59,6 +69,8 @@ enum FundInstrumentListScope: String, Identifiable {
             "Fund instruments"
         case .gold:
             "Gold instruments"
+        case .crypto:
+            "Coins"
         }
     }
 
@@ -68,6 +80,8 @@ enum FundInstrumentListScope: String, Identifiable {
             "Import open-ended funds from Fmarket or listed ETFs from VNDIRECT, or add one by hand."
         case .gold:
             "Add from vang.today to import gold products with shop prices, or add one by hand."
+        case .crypto:
+            "Import coins from CoinGecko, or add one by hand."
         }
     }
 
@@ -80,6 +94,8 @@ enum FundInstrumentListScope: String, Identifiable {
             FundCatalogueImport(provider: VNDirectQuoteProvider())
         case .vangToday:
             FundCatalogueImport(provider: VangTodayQuoteProvider())
+        case .coinGecko:
+            FundCatalogueImport(provider: CoinGeckoQuoteProvider())
         case .manual:
             FundCatalogueImport()
         }
@@ -93,6 +109,8 @@ enum FundInstrumentListScope: String, Identifiable {
 /// reaches Categories — a list of the records other records point at, kept off
 /// the main screen because it is edited rarely.
 struct FundInstrumentListView: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     @Environment(\.dismiss) private var dismiss
@@ -448,7 +466,7 @@ struct FundInstrumentListView: View {
     /// States the price's age, its source, and how many positions depend on it,
     /// so the row explains both what it is and why it matters.
     private func statusDescription(_ instrument: FundInstrument) -> String {
-        let day = TransactionPeriod.day(instrument.priceAsOf, in: locale)
+        let day = TransactionPeriod.day(instrument.priceAsOf, in: locale, dateFormat: dateFormat)
         let held = FundSummary.holdings(for: instrument, holdings: holdings).count
         let position = AppText.string("\(held) positions", in: locale)
         var text =

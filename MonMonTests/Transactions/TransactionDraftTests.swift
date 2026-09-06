@@ -3,11 +3,93 @@ import Testing
 
 @testable import MonMon
 
+@Suite("Transaction entry tab swipes")
+struct TransactionEntryTabSwipeTests {
+    @Test("Left and right swipes follow the visible tab order")
+    func swipeOrder() {
+        #expect(TransactionEntryTab.income.swiped(horizontal: -80, vertical: 5) == .expense)
+        #expect(TransactionEntryTab.expense.swiped(horizontal: -80, vertical: 5) == .quickAdd)
+        #expect(TransactionEntryTab.quickAdd.swiped(horizontal: 80, vertical: 5) == .expense)
+        #expect(TransactionEntryTab.expense.swiped(horizontal: 80, vertical: 5) == .income)
+    }
+
+    @Test("Short, vertical, and diagonal drags do not change tabs")
+    func scrollingDoesNotSwitchTabs() {
+        #expect(TransactionEntryTab.expense.swiped(horizontal: -25, vertical: 0) == .expense)
+        #expect(TransactionEntryTab.expense.swiped(horizontal: -60, vertical: 100) == .expense)
+        #expect(TransactionEntryTab.expense.swiped(horizontal: -60, vertical: 55) == .expense)
+    }
+
+    @Test("Swipes stop at either end and never reveal Quick Add while editing")
+    func boundaries() {
+        #expect(TransactionEntryTab.income.swiped(horizontal: 80, vertical: 0) == .income)
+        #expect(TransactionEntryTab.quickAdd.swiped(horizontal: -80, vertical: 0) == .quickAdd)
+        #expect(
+            TransactionEntryTab.expense.swiped(
+                horizontal: -80, vertical: 0, allowsQuickAdd: false) == .expense)
+    }
+}
+
 @Suite("Transaction draft validation")
 struct TransactionDraftTests {
     private let occurredAt = Date(timeIntervalSince1970: 1_700_000_000)
     private let accountID = UUID()
     private let categoryID = UUID()
+
+    @Test("Natural-language expense fills the form and preserves trip funding")
+    func captureFillsDraft() throws {
+        let tripID = UUID()
+        let jarID = UUID()
+        var draft = TransactionDraft(
+            occurredAt: occurredAt, tripWorkspaceID: tripID, budgetJarOverrideID: jarID)
+        let capture = ParsedTransactionCapture(
+            rawText: "50k lunch", kind: .expense, amount: 50_000,
+            occurredAt: occurredAt, note: "lunch", accountID: accountID,
+            categoryID: categoryID, issues: [])
+
+        draft.apply(capture: capture)
+
+        let values = try draft.validate()
+        #expect(values.amount == 50_000)
+        #expect(values.note == "lunch")
+        #expect(values.accountID == accountID)
+        #expect(values.categoryID == categoryID)
+        #expect(values.occurredAt == occurredAt)
+        #expect(values.tripWorkspaceID == tripID)
+        #expect(values.budgetJarOverrideID == jarID)
+    }
+
+    @Test("Incomplete capture clears old values so they cannot be saved by mistake")
+    func incompleteCaptureClearsOldValues() {
+        var draft = makeDraft()
+        let capture = ParsedTransactionCapture(
+            rawText: "lunch", kind: .expense, amount: nil,
+            occurredAt: occurredAt, note: "lunch", accountID: nil,
+            categoryID: nil, issues: [.missingAmount, .ambiguousAccount, .ambiguousCategory])
+
+        draft.apply(capture: capture)
+
+        #expect(draft.amountText.isEmpty)
+        #expect(draft.accountID == nil)
+        #expect(draft.categoryID == nil)
+        #expect(throws: TransactionFormError.invalidAmount) { try draft.validate() }
+    }
+
+    @Test("Natural-language income clears expense-only trip routing")
+    func incomeCaptureClearsTrip() {
+        var draft = TransactionDraft(
+            occurredAt: occurredAt, tripWorkspaceID: UUID(), budgetJarOverrideID: UUID())
+        let capture = ParsedTransactionCapture(
+            rawText: "salary 10tr", kind: .income, amount: 10_000_000,
+            occurredAt: occurredAt, note: "salary", accountID: accountID,
+            categoryID: categoryID, issues: [])
+
+        draft.apply(capture: capture)
+
+        #expect(draft.kind == .income)
+        #expect(draft.tripWorkspaceID == nil)
+        #expect(draft.budgetJarOverrideID == nil)
+    }
 
     private func makeDraft(
         kind: TransactionKind = .expense,

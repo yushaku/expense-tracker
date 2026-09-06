@@ -101,7 +101,7 @@ private struct BudgetTransactionRouting {
     private let fallbackJarID: UUID?
 
     init(jars: [BudgetJar], categories: [TransactionCategory]) {
-        categoryJars = Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0.budgetJarID) })
+        categoryJars = Dictionary(firstWins: categories.map { ($0.id, $0.budgetJarID) })
         validJarIDs = Set(jars.map(\.id))
         fallbackJarID = BudgetJarRouting.fallback(in: jars)?.id
     }
@@ -151,7 +151,7 @@ enum BudgetSummary {
         )
 
         return Dictionary(
-            uniqueKeysWithValues: jars.map { jar in
+            firstWins: jars.map { jar in
                 (jar.id, allocation(of: projectedIncome, percent: jar.allocationPercent))
             }
         )

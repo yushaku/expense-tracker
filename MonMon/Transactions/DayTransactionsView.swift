@@ -14,6 +14,8 @@ struct DayPeriod: Hashable {
 /// What one day of the month calendar was made of: what came in, what went out,
 /// and every transaction behind those two figures.
 struct DayTransactionsView: View {
+    @Environment(\.appDateFormat) private var dateFormat
+
     @Environment(\.locale) private var locale
 
     @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
@@ -38,8 +40,7 @@ struct DayTransactionsView: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                     SpendingOverviewCard(
-                        title: TransactionPeriod.format(Self.headerTemplate, in: locale)
-                            .format(period.day),
+                        title: dateFormat.format(period.day),
                         income: income,
                         expense: expense,
                         count: matching.count
@@ -70,7 +71,7 @@ struct DayTransactionsView: View {
             }
         }
         .navigationTitle(
-            TransactionPeriod.format(Self.titleTemplate, in: locale).format(period.day)
+            dateFormat.format(period.day)
         )
         .accessibilityIdentifier("day-transactions")
         .appSheet(item: $editorMode) { mode in
@@ -113,8 +114,4 @@ struct DayTransactionsView: View {
     private func account(for transaction: MoneyTransaction) -> CashAccount? {
         accounts.first { $0.id == transaction.accountID }
     }
-
-    /// The bar has room for a short date; the card below it spells the day out.
-    private static let titleTemplate = Date.FormatStyle().day().month(.abbreviated).year()
-    private static let headerTemplate = Date.FormatStyle().weekday(.wide).day().month(.wide).year()
 }

@@ -15,6 +15,29 @@
 		N10000000000000000000212 /* DailyExpenseReminderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000112 /* DailyExpenseReminderTests.swift */; };
 		N10000000000000000000213 /* RecurringDueReminderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000113 /* RecurringDueReminderTests.swift */; };
 		N10000000000000000000214 /* NotificationCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000114 /* NotificationCoordinatorTests.swift */; };
+		M40000000000000000000201 /* MCPTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000101 /* MCPTypes.swift */; platformFilters = (macos, ); };
+		M40000000000000000000202 /* MCPRecordSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000102 /* MCPRecordSerializer.swift */; platformFilters = (macos, ); };
+		M40000000000000000000203 /* MCPRecordSerializerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000103 /* MCPRecordSerializerTests.swift */; };
+		M40000000000000000000204 /* MCPQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000104 /* MCPQuery.swift */; platformFilters = (macos, ); };
+		M40000000000000000000205 /* MCPDataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000105 /* MCPDataRepository.swift */; platformFilters = (macos, ); };
+		M40000000000000000000206 /* MCPQueryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000106 /* MCPQueryTests.swift */; };
+		M40000000000000000000207 /* MCPRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000107 /* MCPRuntime.swift */; platformFilters = (macos, ); };
+		M40000000000000000000208 /* MCPRuntimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000108 /* MCPRuntimeTests.swift */; };
+		M50000000000000000000201 /* MCPServerAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = M50000000000000000000101 /* MCPServerAdapter.swift */; };
+		M50000000000000000000202 /* MCPServerContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M50000000000000000000102 /* MCPServerContractTests.swift */; };
+		M50000000000000000000203 /* MCP in Frameworks */ = {isa = PBXBuildFile; productRef = M50000000000000000000702 /* MCP */; };
+		M40000000000000000000209 /* MCPClientInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000109 /* MCPClientInstaller.swift */; platformFilters = (macos, ); };
+		M40000000000000000000210 /* MCPClientInstallerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000110 /* MCPClientInstallerTests.swift */; };
+		M40000000000000000000211 /* MCPAccessManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000111 /* MCPAccessManager.swift */; platformFilters = (macos, ); };
+		M40000000000000000000212 /* MCPAccessManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000112 /* MCPAccessManagerTests.swift */; };
+		M40000000000000000000213 /* MCPSettingsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000113 /* MCPSettingsCard.swift */; platformFilters = (macos, ); };
+		M50000000000000000000204 /* MonMonMCPServer in Embed MCP Helper */ = {isa = PBXBuildFile; fileRef = M50000000000000000000105 /* MonMonMCPServer */; platformFilters = (macos, ); settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		M50000000000000000000205 /* MCP in Frameworks */ = {isa = PBXBuildFile; productRef = M50000000000000000000702 /* MCP */; };
+		M60000000000000000000201 /* MCPTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000101 /* MCPTypes.swift */; };
+		M60000000000000000000203 /* MCPQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000104 /* MCPQuery.swift */; };
+		M60000000000000000000205 /* MCPRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000107 /* MCPRuntime.swift */; };
+		M60000000000000000000206 /* MCPServerAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = M50000000000000000000101 /* MCPServerAdapter.swift */; };
+		M60000000000000000000207 /* MonMonMCPServerMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = M50000000000000000000103 /* MonMonMCPServerMain.swift */; };
 		Y10000000000000000000201 /* TripWorkspaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000101 /* TripWorkspaceTests.swift */; };
 		Y10000000000000000000202 /* TripWorkspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000102 /* TripWorkspace.swift */; };
 		Y10000000000000000000203 /* TripWorkspaceLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000103 /* TripWorkspaceLifecycle.swift */; };
@@ -55,6 +78,7 @@
 		U10000000000000000000213 /* BudgetJarDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000113 /* BudgetJarDetailView.swift */; };
 		J10000000000000000000201 /* QuickExpenseWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000102 /* QuickExpenseWidget.swift */; };
 		J10000000000000000000202 /* QuickExpensePreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000102 /* QuickExpensePreset.swift */; };
+		J10000000000000000000207 /* QuickExpenseWidgetLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000107 /* QuickExpenseWidgetLayout.swift */; };
 		J10000000000000000000203 /* QuickExpenseIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000103 /* QuickExpenseIntent.swift */; };
 		J10000000000000000000204 /* VNDCurrency.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000122 /* VNDCurrency.swift */; };
 		J10000000000000000000205 /* MonMonQuickExpenseWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = J10000000000000000000101 /* MonMonQuickExpenseWidget.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -62,9 +86,11 @@
 		W10000000000000000000203 /* QuickExpenseIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000103 /* QuickExpenseIntent.swift */; };
 		W10000000000000000000204 /* QuickExpensePresetDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000104 /* QuickExpensePresetDraft.swift */; };
 		W10000000000000000000205 /* QuickExpensePresetsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000105 /* QuickExpensePresetsCard.swift */; };
-		W10000000000000000000206 /* QuickExpensePresetRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000106 /* QuickExpensePresetRow.swift */; };
+		W10000000000000000000206 /* QuickExpensePresetEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000106 /* QuickExpensePresetEditor.swift */; };
 		W10000000000000000000202 /* QuickExpensePreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000102 /* QuickExpensePreset.swift */; };
+		W10000000000000000000207 /* QuickExpenseWidgetLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000107 /* QuickExpenseWidgetLayout.swift */; };
 		W10000000000000000000201 /* QuickExpensePresetStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000101 /* QuickExpensePresetStoreTests.swift */; };
+		W10000000000000000000208 /* QuickExpenseWidgetLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000108 /* QuickExpenseWidgetLayoutTests.swift */; };
 		K10000000000000000000210 /* MonMonBackupDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000110 /* MonMonBackupDocument.swift */; };
 		K10000000000000000000211 /* MonMonBackupDocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000111 /* MonMonBackupDocumentTests.swift */; };
 		K10000000000000000000212 /* MonMonBackupValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000112 /* MonMonBackupValidator.swift */; };
@@ -74,7 +100,7 @@
 		K10000000000000000000216 /* BackupRestoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000116 /* BackupRestoreView.swift */; };
 		K10000000000000000000217 /* BackupRestorePresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = K10000000000000000000117 /* BackupRestorePresentationTests.swift */; };
 		Q10000000000000000000210 /* AppRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = Q10000000000000000000110 /* AppRoute.swift */; };
-		Q10000000000000000000211 /* QuickTransactionCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = Q10000000000000000000111 /* QuickTransactionCaptureView.swift */; };
+		Q10000000000000000000211 /* TransactionCaptureEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = Q10000000000000000000111 /* TransactionCaptureEntry.swift */; };
 		Q10000000000000000000212 /* AppRouteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Q10000000000000000000112 /* AppRouteTests.swift */; };
 		Q10000000000000000000209 /* PendingTransactionCaptureListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = Q10000000000000000000109 /* PendingTransactionCaptureListView.swift */; };
 		Q10000000000000000000208 /* AppShortcuts.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = Q10000000000000000000108 /* AppShortcuts.xcstrings */; };
@@ -283,6 +309,12 @@
 		A00000000000000000000943 /* FundQuoteTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000942 /* FundQuoteTransport.swift */; };
 		A00000000000000000000945 /* FmarketQuoteProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000944 /* FmarketQuoteProvider.swift */; };
 		A00000000000000000000947 /* VNDirectQuoteProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000946 /* VNDirectQuoteProvider.swift */; };
+		Z10000000000000000000201 /* CoinGeckoQuoteProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = Z10000000000000000000101 /* CoinGeckoQuoteProvider.swift */; };
+		Z10000000000000000000204 /* USDPrice.swift in Sources */ = {isa = PBXBuildFile; fileRef = Z10000000000000000000104 /* USDPrice.swift */; };
+		Z10000000000000000000206 /* USDExchangeRateLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = Z10000000000000000000106 /* USDExchangeRateLoader.swift */; };
+		Z10000000000000000000208 /* CryptoSwapDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = Z10000000000000000000108 /* CryptoSwapDraft.swift */; };
+		Z10000000000000000000210 /* CryptoSwapEditorForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = Z10000000000000000000110 /* CryptoSwapEditorForm.swift */; };
+		Z10000000000000000000211 /* CryptoSwapEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = Z10000000000000000000111 /* CryptoSwapEditorView.swift */; };
 		A00000000000000000000949 /* FundQuoteFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000948 /* FundQuoteFixtures.swift */; };
 		A00000000000000000000951 /* FundQuoteProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000950 /* FundQuoteProviderTests.swift */; };
 		A00000000000000000000953 /* FundPriceRefresher.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000952 /* FundPriceRefresher.swift */; };
@@ -296,6 +328,11 @@
 		A00000000000000000000973 /* CloudSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000971 /* CloudSyncTests.swift */; };
 		A00000000000000000000981 /* VangTodayQuoteProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000980 /* VangTodayQuoteProvider.swift */; };
 		A00000000000000000000983 /* VangTodayQuoteProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000982 /* VangTodayQuoteProviderTests.swift */; };
+		Z10000000000000000000202 /* CoinGeckoQuoteProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Z10000000000000000000102 /* CoinGeckoQuoteProviderTests.swift */; };
+		Z10000000000000000000205 /* USDPriceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Z10000000000000000000105 /* USDPriceTests.swift */; };
+		Z10000000000000000000207 /* USDExchangeRateLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Z10000000000000000000107 /* USDExchangeRateLoaderTests.swift */; };
+		Z10000000000000000000209 /* CryptoSwapDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Z10000000000000000000109 /* CryptoSwapDraftTests.swift */; };
+		Z10000000000000000000203 /* FundInstrumentKindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Z10000000000000000000103 /* FundInstrumentKindTests.swift */; };
 		A00000000000000000000985 /* GoldWeight.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000984 /* GoldWeight.swift */; };
 		A00000000000000000000987 /* GoldWeightTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000986 /* GoldWeightTests.swift */; };
 		A00000000000000000000A02 /* AccountSeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000A01 /* AccountSeed.swift */; };
@@ -361,6 +398,7 @@
 		C10000000000000000000105 /* PeriodRail.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000005 /* PeriodRail.swift */; };
 		C10000000000000000000106 /* SpendingOverviewCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000006 /* SpendingOverviewCard.swift */; };
 		C10000000000000000000107 /* AppLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000007 /* AppLanguage.swift */; };
+		DA7E00000000000000000107 /* AppDateFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7E00000000000000000007 /* AppDateFormat.swift */; };
 		C10000000000000000000108 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000008 /* Localizable.xcstrings */; };
 		C10000000000000000000109 /* AppLanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000009 /* AppLanguageTests.swift */; };
 		C1000000000000000000010A /* LanguageResolutionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000000000000000000000A /* LanguageResolutionTests.swift */; };
@@ -394,6 +432,13 @@
 			remoteGlobalIDString = D10000000000000000000001;
 			remoteInfo = MonMonShareExtension;
 		};
+		M50000000000000000000602 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A00000000000000000000003 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = M50000000000000000000002;
+			remoteInfo = MonMonMCPServer;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -409,6 +454,17 @@
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		M50000000000000000000304 /* Embed MCP Helper */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Contents/Helpers;
+			dstSubfolderSpec = 1;
+			files = (
+				M50000000000000000000204 /* MonMonMCPServer in Embed MCP Helper */,
+			);
+			name = "Embed MCP Helper";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -420,6 +476,24 @@
 		N10000000000000000000112 /* DailyExpenseReminderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyExpenseReminderTests.swift; sourceTree = "<group>"; };
 		N10000000000000000000113 /* RecurringDueReminderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringDueReminderTests.swift; sourceTree = "<group>"; };
 		N10000000000000000000114 /* NotificationCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCoordinatorTests.swift; sourceTree = "<group>"; };
+		M40000000000000000000101 /* MCPTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPTypes.swift; sourceTree = "<group>"; };
+		M40000000000000000000102 /* MCPRecordSerializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPRecordSerializer.swift; sourceTree = "<group>"; };
+		M40000000000000000000103 /* MCPRecordSerializerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPRecordSerializerTests.swift; sourceTree = "<group>"; };
+		M40000000000000000000104 /* MCPQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPQuery.swift; sourceTree = "<group>"; };
+		M40000000000000000000105 /* MCPDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPDataRepository.swift; sourceTree = "<group>"; };
+		M40000000000000000000106 /* MCPQueryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPQueryTests.swift; sourceTree = "<group>"; };
+		M40000000000000000000107 /* MCPRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPRuntime.swift; sourceTree = "<group>"; };
+		M40000000000000000000108 /* MCPRuntimeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPRuntimeTests.swift; sourceTree = "<group>"; };
+		M50000000000000000000101 /* MCPServerAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPServerAdapter.swift; sourceTree = "<group>"; };
+		M50000000000000000000102 /* MCPServerContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPServerContractTests.swift; sourceTree = "<group>"; };
+		M40000000000000000000109 /* MCPClientInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPClientInstaller.swift; sourceTree = "<group>"; };
+		M40000000000000000000110 /* MCPClientInstallerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPClientInstallerTests.swift; sourceTree = "<group>"; };
+		M40000000000000000000111 /* MCPAccessManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPAccessManager.swift; sourceTree = "<group>"; };
+		M40000000000000000000112 /* MCPAccessManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPAccessManagerTests.swift; sourceTree = "<group>"; };
+		M40000000000000000000113 /* MCPSettingsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPSettingsCard.swift; sourceTree = "<group>"; };
+		M50000000000000000000103 /* MonMonMCPServerMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonMonMCPServerMain.swift; sourceTree = "<group>"; };
+		M50000000000000000000104 /* MonMonMCPServer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MonMonMCPServer.entitlements; sourceTree = "<group>"; };
+		M50000000000000000000105 /* MonMonMCPServer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MonMonMCPServer; sourceTree = BUILT_PRODUCTS_DIR; };
 		Y10000000000000000000101 /* TripWorkspaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspaceTests.swift; sourceTree = "<group>"; };
 		Y10000000000000000000102 /* TripWorkspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspace.swift; sourceTree = "<group>"; };
 		Y10000000000000000000103 /* TripWorkspaceLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWorkspaceLifecycle.swift; sourceTree = "<group>"; };
@@ -465,9 +539,11 @@
 		W10000000000000000000103 /* QuickExpenseIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpenseIntent.swift; sourceTree = "<group>"; };
 		W10000000000000000000104 /* QuickExpensePresetDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpensePresetDraft.swift; sourceTree = "<group>"; };
 		W10000000000000000000105 /* QuickExpensePresetsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpensePresetsCard.swift; sourceTree = "<group>"; };
-		W10000000000000000000106 /* QuickExpensePresetRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpensePresetRow.swift; sourceTree = "<group>"; };
+		W10000000000000000000106 /* QuickExpensePresetEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpensePresetEditor.swift; sourceTree = "<group>"; };
 		W10000000000000000000102 /* QuickExpensePreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpensePreset.swift; sourceTree = "<group>"; };
+		W10000000000000000000107 /* QuickExpenseWidgetLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpenseWidgetLayout.swift; sourceTree = "<group>"; };
 		W10000000000000000000101 /* QuickExpensePresetStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpensePresetStoreTests.swift; sourceTree = "<group>"; };
+		W10000000000000000000108 /* QuickExpenseWidgetLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpenseWidgetLayoutTests.swift; sourceTree = "<group>"; };
 		K10000000000000000000110 /* MonMonBackupDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonMonBackupDocument.swift; sourceTree = "<group>"; };
 		K10000000000000000000111 /* MonMonBackupDocumentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonMonBackupDocumentTests.swift; sourceTree = "<group>"; };
 		K10000000000000000000112 /* MonMonBackupValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonMonBackupValidator.swift; sourceTree = "<group>"; };
@@ -477,7 +553,7 @@
 		K10000000000000000000116 /* BackupRestoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupRestoreView.swift; sourceTree = "<group>"; };
 		K10000000000000000000117 /* BackupRestorePresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupRestorePresentationTests.swift; sourceTree = "<group>"; };
 		Q10000000000000000000110 /* AppRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRoute.swift; sourceTree = "<group>"; };
-		Q10000000000000000000111 /* QuickTransactionCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickTransactionCaptureView.swift; sourceTree = "<group>"; };
+		Q10000000000000000000111 /* TransactionCaptureEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureEntry.swift; sourceTree = "<group>"; };
 		Q10000000000000000000112 /* AppRouteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouteTests.swift; sourceTree = "<group>"; };
 		Q10000000000000000000109 /* PendingTransactionCaptureListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingTransactionCaptureListView.swift; sourceTree = "<group>"; };
 		Q10000000000000000000108 /* AppShortcuts.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = AppShortcuts.xcstrings; sourceTree = "<group>"; };
@@ -693,6 +769,12 @@
 		A00000000000000000000942 /* FundQuoteTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundQuoteTransport.swift; sourceTree = "<group>"; };
 		A00000000000000000000944 /* FmarketQuoteProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FmarketQuoteProvider.swift; sourceTree = "<group>"; };
 		A00000000000000000000946 /* VNDirectQuoteProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VNDirectQuoteProvider.swift; sourceTree = "<group>"; };
+		Z10000000000000000000101 /* CoinGeckoQuoteProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinGeckoQuoteProvider.swift; sourceTree = "<group>"; };
+		Z10000000000000000000104 /* USDPrice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USDPrice.swift; sourceTree = "<group>"; };
+		Z10000000000000000000106 /* USDExchangeRateLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USDExchangeRateLoader.swift; sourceTree = "<group>"; };
+		Z10000000000000000000108 /* CryptoSwapDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CryptoSwapDraft.swift; sourceTree = "<group>"; };
+		Z10000000000000000000110 /* CryptoSwapEditorForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CryptoSwapEditorForm.swift; sourceTree = "<group>"; };
+		Z10000000000000000000111 /* CryptoSwapEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CryptoSwapEditorView.swift; sourceTree = "<group>"; };
 		A00000000000000000000948 /* FundQuoteFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundQuoteFixtures.swift; sourceTree = "<group>"; };
 		A00000000000000000000950 /* FundQuoteProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundQuoteProviderTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000952 /* FundPriceRefresher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundPriceRefresher.swift; sourceTree = "<group>"; };
@@ -706,6 +788,11 @@
 		A00000000000000000000971 /* CloudSyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000980 /* VangTodayQuoteProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VangTodayQuoteProvider.swift; sourceTree = "<group>"; };
 		A00000000000000000000982 /* VangTodayQuoteProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VangTodayQuoteProviderTests.swift; sourceTree = "<group>"; };
+		Z10000000000000000000102 /* CoinGeckoQuoteProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinGeckoQuoteProviderTests.swift; sourceTree = "<group>"; };
+		Z10000000000000000000105 /* USDPriceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USDPriceTests.swift; sourceTree = "<group>"; };
+		Z10000000000000000000107 /* USDExchangeRateLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USDExchangeRateLoaderTests.swift; sourceTree = "<group>"; };
+		Z10000000000000000000109 /* CryptoSwapDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CryptoSwapDraftTests.swift; sourceTree = "<group>"; };
+		Z10000000000000000000103 /* FundInstrumentKindTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundInstrumentKindTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000984 /* GoldWeight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoldWeight.swift; sourceTree = "<group>"; };
 		A00000000000000000000986 /* GoldWeightTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoldWeightTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000A01 /* AccountSeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSeed.swift; sourceTree = "<group>"; };
@@ -771,6 +858,7 @@
 		C10000000000000000000005 /* PeriodRail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodRail.swift; sourceTree = "<group>"; };
 		C10000000000000000000006 /* SpendingOverviewCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendingOverviewCard.swift; sourceTree = "<group>"; };
 		C10000000000000000000007 /* AppLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguage.swift; sourceTree = "<group>"; };
+		DA7E00000000000000000007 /* AppDateFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDateFormat.swift; sourceTree = "<group>"; };
 		C10000000000000000000008 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		C10000000000000000000009 /* AppLanguageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguageTests.swift; sourceTree = "<group>"; };
 		C1000000000000000000000A /* LanguageResolutionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageResolutionTests.swift; sourceTree = "<group>"; };
@@ -803,6 +891,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				M50000000000000000000203 /* MCP in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		M50000000000000000000302 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				M50000000000000000000205 /* MCP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -822,6 +919,7 @@
 				A00000000000000000000011 /* Config */,
 				A00000000000000000000012 /* MonMon */,
 				A00000000000000000000015 /* MonMonTests */,
+				M50000000000000000000001 /* MonMonMCPServer */,
 				D10000000000000000000010 /* MonMonShareExtension */,
 				J10000000000000000000010 /* MonMonQuickExpenseWidget */,
 				A00000000000000000000016 /* Products */,
@@ -842,6 +940,7 @@
 			isa = PBXGroup;
 			children = (
 				N10000000000000000000001 /* Notifications */,
+				M40000000000000000000001 /* MCP */,
 				Y10000000000000000000001 /* Trips */,
 				X10000000000000000000001 /* IncomeAllocation */,
 				V10000000000000000000001 /* Goals */,
@@ -912,8 +1011,9 @@
 				W10000000000000000000103 /* QuickExpenseIntent.swift */,
 				W10000000000000000000104 /* QuickExpensePresetDraft.swift */,
 				W10000000000000000000105 /* QuickExpensePresetsCard.swift */,
-				W10000000000000000000106 /* QuickExpensePresetRow.swift */,
+				W10000000000000000000106 /* QuickExpensePresetEditor.swift */,
 				W10000000000000000000102 /* QuickExpensePreset.swift */,
+				W10000000000000000000107 /* QuickExpenseWidgetLayout.swift */,
 			);
 			path = QuickExpense;
 			sourceTree = "<group>";
@@ -948,6 +1048,7 @@
 			isa = PBXGroup;
 			children = (
 				N10000000000000000000002 /* Notifications */,
+				M40000000000000000000002 /* MCP */,
 				Y10000000000000000000002 /* Trips */,
 				X10000000000000000000002 /* IncomeAllocation */,
 				V10000000000000000000002 /* Goals */,
@@ -967,6 +1068,44 @@
 				B10000000000000000000002 /* Imports */,
 			);
 			path = MonMonTests;
+			sourceTree = "<group>";
+		};
+		M40000000000000000000001 /* MCP */ = {
+			isa = PBXGroup;
+			children = (
+				M40000000000000000000101 /* MCPTypes.swift */,
+				M40000000000000000000102 /* MCPRecordSerializer.swift */,
+				M40000000000000000000104 /* MCPQuery.swift */,
+				M40000000000000000000105 /* MCPDataRepository.swift */,
+				M40000000000000000000107 /* MCPRuntime.swift */,
+				M40000000000000000000109 /* MCPClientInstaller.swift */,
+				M40000000000000000000111 /* MCPAccessManager.swift */,
+				M40000000000000000000113 /* MCPSettingsCard.swift */,
+			);
+			path = MCP;
+			sourceTree = "<group>";
+		};
+		M40000000000000000000002 /* MCP */ = {
+			isa = PBXGroup;
+			children = (
+				M40000000000000000000103 /* MCPRecordSerializerTests.swift */,
+				M40000000000000000000106 /* MCPQueryTests.swift */,
+				M40000000000000000000108 /* MCPRuntimeTests.swift */,
+				M50000000000000000000102 /* MCPServerContractTests.swift */,
+				M40000000000000000000110 /* MCPClientInstallerTests.swift */,
+				M40000000000000000000112 /* MCPAccessManagerTests.swift */,
+			);
+			path = MCP;
+			sourceTree = "<group>";
+		};
+		M50000000000000000000001 /* MonMonMCPServer */ = {
+			isa = PBXGroup;
+			children = (
+				M50000000000000000000101 /* MCPServerAdapter.swift */,
+				M50000000000000000000103 /* MonMonMCPServerMain.swift */,
+				M50000000000000000000104 /* MonMonMCPServer.entitlements */,
+			);
+			path = MonMonMCPServer;
 			sourceTree = "<group>";
 		};
 		X10000000000000000000002 /* IncomeAllocation */ = {
@@ -1001,6 +1140,7 @@
 			isa = PBXGroup;
 			children = (
 				W10000000000000000000101 /* QuickExpensePresetStoreTests.swift */,
+				W10000000000000000000108 /* QuickExpenseWidgetLayoutTests.swift */,
 			);
 			path = QuickExpense;
 			sourceTree = "<group>";
@@ -1061,6 +1201,7 @@
 				A00000000000000000000121 /* MonMonTests.xctest */,
 				D10000000000000000000101 /* MonMonShareExtension.appex */,
 				J10000000000000000000101 /* MonMonQuickExpenseWidget.appex */,
+				M50000000000000000000105 /* MonMonMCPServer */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1132,6 +1273,7 @@
 				A00000000000000000000187 /* AppTheme.swift */,
 				D30000000000000000000001 /* AppSheetPresentation.swift */,
 				C10000000000000000000007 /* AppLanguage.swift */,
+				DA7E00000000000000000007 /* AppDateFormat.swift */,
 				A00000000000000000000192 /* FloatingAddButton.swift */,
 				A00000000000000000000803 /* ProminentActionButtonStyle.swift */,
 				A0000000000000000000080B /* DateRangeFilter.swift */,
@@ -1205,6 +1347,12 @@
 				A00000000000000000000942 /* FundQuoteTransport.swift */,
 				A00000000000000000000944 /* FmarketQuoteProvider.swift */,
 				A00000000000000000000946 /* VNDirectQuoteProvider.swift */,
+				Z10000000000000000000101 /* CoinGeckoQuoteProvider.swift */,
+				Z10000000000000000000104 /* USDPrice.swift */,
+				Z10000000000000000000106 /* USDExchangeRateLoader.swift */,
+				Z10000000000000000000108 /* CryptoSwapDraft.swift */,
+				Z10000000000000000000110 /* CryptoSwapEditorForm.swift */,
+				Z10000000000000000000111 /* CryptoSwapEditorView.swift */,
 				A00000000000000000000980 /* VangTodayQuoteProvider.swift */,
 				A00000000000000000000984 /* GoldWeight.swift */,
 				A00000000000000000000952 /* FundPriceRefresher.swift */,
@@ -1249,6 +1397,11 @@
 				A00000000000000000000960 /* FundCatalogueImportTests.swift */,
 				A00000000000000000000962 /* FundLogoCatalogueTests.swift */,
 				A00000000000000000000982 /* VangTodayQuoteProviderTests.swift */,
+				Z10000000000000000000102 /* CoinGeckoQuoteProviderTests.swift */,
+				Z10000000000000000000105 /* USDPriceTests.swift */,
+				Z10000000000000000000107 /* USDExchangeRateLoaderTests.swift */,
+				Z10000000000000000000109 /* CryptoSwapDraftTests.swift */,
+				Z10000000000000000000103 /* FundInstrumentKindTests.swift */,
 				A00000000000000000000986 /* GoldWeightTests.swift */,
 				A00000000000000000000158 /* FundSummaryTests.swift */,
 				A00000000000000000000F20 /* FundPositionGroupTests.swift */,
@@ -1260,7 +1413,7 @@
 		A00000000000000000000024 /* Transactions */ = {
 			isa = PBXGroup;
 			children = (
-				Q10000000000000000000111 /* QuickTransactionCaptureView.swift */,
+				Q10000000000000000000111 /* TransactionCaptureEntry.swift */,
 				Q10000000000000000000109 /* PendingTransactionCaptureListView.swift */,
 				Q10000000000000000000103 /* PendingTransactionCapture.swift */,
 				Q10000000000000000000104 /* TransactionCaptureService.swift */,
@@ -1553,12 +1706,14 @@
 				A00000000000000000000302 /* Frameworks */,
 				A00000000000000000000303 /* Resources */,
 				D10000000000000000000304 /* Embed App Extensions */,
+				M50000000000000000000304 /* Embed MCP Helper */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				D10000000000000000000601 /* PBXTargetDependency */,
 				J10000000000000000000601 /* PBXTargetDependency */,
+				M50000000000000000000601 /* PBXTargetDependency */,
 			);
 			name = MonMon;
 			packageProductDependencies = (
@@ -1582,6 +1737,9 @@
 				A00000000000000000000601 /* PBXTargetDependency */,
 			);
 			name = MonMonTests;
+			packageProductDependencies = (
+				M50000000000000000000702 /* MCP */,
+			);
 			productName = MonMonTests;
 			productReference = A00000000000000000000121 /* MonMonTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -1620,6 +1778,25 @@
 			productReference = J10000000000000000000101 /* MonMonQuickExpenseWidget.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		M50000000000000000000002 /* MonMonMCPServer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = M50000000000000000000401 /* Build configuration list for PBXNativeTarget "MonMonMCPServer" */;
+			buildPhases = (
+				M50000000000000000000303 /* Sources */,
+				M50000000000000000000302 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MonMonMCPServer;
+			packageProductDependencies = (
+				M50000000000000000000702 /* MCP */,
+			);
+			productName = MonMonMCPServer;
+			productReference = M50000000000000000000105 /* MonMonMCPServer */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -1643,6 +1820,9 @@
 					J10000000000000000000001 = {
 						CreatedOnToolsVersion = 26.6;
 					};
+					M50000000000000000000002 = {
+						CreatedOnToolsVersion = 26.6;
+					};
 				};
 			};
 			buildConfigurationList = A00000000000000000000401 /* Build configuration list for PBXProject "MonMon" */;
@@ -1657,6 +1837,7 @@
 			mainGroup = A00000000000000000000010;
 			packageReferences = (
 				33A69BFD303AE3A900432AF4 /* XCRemoteSwiftPackageReference "CalendarView" */,
+				M50000000000000000000701 /* XCRemoteSwiftPackageReference "swift-sdk" */,
 			);
 			productRefGroup = A00000000000000000000016 /* Products */;
 			projectDirPath = "";
@@ -1666,6 +1847,7 @@
 				A00000000000000000000002 /* MonMonTests */,
 				D10000000000000000000001 /* MonMonShareExtension */,
 				J10000000000000000000001 /* MonMonQuickExpenseWidget */,
+				M50000000000000000000002 /* MonMonMCPServer */,
 			);
 		};
 /* End PBXProject section */
@@ -1712,6 +1894,7 @@
 			files = (
 				J10000000000000000000201 /* QuickExpenseWidget.swift in Sources */,
 				J10000000000000000000202 /* QuickExpensePreset.swift in Sources */,
+				J10000000000000000000207 /* QuickExpenseWidgetLayout.swift in Sources */,
 				J10000000000000000000203 /* QuickExpenseIntent.swift in Sources */,
 				J10000000000000000000204 /* VNDCurrency.swift in Sources */,
 			);
@@ -1725,6 +1908,14 @@
 				N10000000000000000000202 /* NotificationPlan.swift in Sources */,
 				N10000000000000000000203 /* NotificationCenterClient.swift in Sources */,
 				N10000000000000000000204 /* NotificationCoordinator.swift in Sources */,
+				M40000000000000000000201 /* MCPTypes.swift in Sources */,
+				M40000000000000000000202 /* MCPRecordSerializer.swift in Sources */,
+				M40000000000000000000204 /* MCPQuery.swift in Sources */,
+				M40000000000000000000205 /* MCPDataRepository.swift in Sources */,
+				M40000000000000000000207 /* MCPRuntime.swift in Sources */,
+				M40000000000000000000209 /* MCPClientInstaller.swift in Sources */,
+				M40000000000000000000211 /* MCPAccessManager.swift in Sources */,
+				M40000000000000000000213 /* MCPSettingsCard.swift in Sources */,
 				Y10000000000000000000202 /* TripWorkspace.swift in Sources */,
 				Y10000000000000000000203 /* TripWorkspaceLifecycle.swift in Sources */,
 				Y10000000000000000000205 /* TripSummary.swift in Sources */,
@@ -1754,10 +1945,11 @@
 				U10000000000000000000212 /* BudgetJarEditorView.swift in Sources */,
 				U10000000000000000000213 /* BudgetJarDetailView.swift in Sources */,
 				W10000000000000000000205 /* QuickExpensePresetsCard.swift in Sources */,
-				W10000000000000000000206 /* QuickExpensePresetRow.swift in Sources */,
+				W10000000000000000000206 /* QuickExpensePresetEditor.swift in Sources */,
 				W10000000000000000000204 /* QuickExpensePresetDraft.swift in Sources */,
 				W10000000000000000000203 /* QuickExpenseIntent.swift in Sources */,
 				W10000000000000000000202 /* QuickExpensePreset.swift in Sources */,
+				W10000000000000000000207 /* QuickExpenseWidgetLayout.swift in Sources */,
 				K10000000000000000000210 /* MonMonBackupDocument.swift in Sources */,
 				K10000000000000000000212 /* MonMonBackupValidator.swift in Sources */,
 				K10000000000000000000214 /* MonMonBackupService.swift in Sources */,
@@ -1770,7 +1962,7 @@
 				S10000000000000000000212 /* SavingsWithdrawalSummary.swift in Sources */,
 				S10000000000000000000211 /* SavingsWithdrawal.swift in Sources */,
 				Q10000000000000000000210 /* AppRoute.swift in Sources */,
-				Q10000000000000000000211 /* QuickTransactionCaptureView.swift in Sources */,
+				Q10000000000000000000211 /* TransactionCaptureEntry.swift in Sources */,
 				Q10000000000000000000209 /* PendingTransactionCaptureListView.swift in Sources */,
 				Q10000000000000000000206 /* TransactionCaptureIntent.swift in Sources */,
 				Q10000000000000000000207 /* MonMonAppShortcuts.swift in Sources */,
@@ -1822,6 +2014,7 @@
 				A0000000000000000000080C /* DateRangeFilter.swift in Sources */,
 				C10000000000000000000105 /* PeriodRail.swift in Sources */,
 				C10000000000000000000107 /* AppLanguage.swift in Sources */,
+				DA7E00000000000000000107 /* AppDateFormat.swift in Sources */,
 				A00000000000000000000F02 /* WebPage.swift in Sources */,
 				A0000000000000000000080E /* PeriodGridPicker.swift in Sources */,
 				A00000000000000000000802 /* SegmentedTabs.swift in Sources */,
@@ -1921,6 +2114,12 @@
 				A00000000000000000000943 /* FundQuoteTransport.swift in Sources */,
 				A00000000000000000000945 /* FmarketQuoteProvider.swift in Sources */,
 				A00000000000000000000947 /* VNDirectQuoteProvider.swift in Sources */,
+				Z10000000000000000000201 /* CoinGeckoQuoteProvider.swift in Sources */,
+				Z10000000000000000000204 /* USDPrice.swift in Sources */,
+				Z10000000000000000000206 /* USDExchangeRateLoader.swift in Sources */,
+				Z10000000000000000000208 /* CryptoSwapDraft.swift in Sources */,
+				Z10000000000000000000210 /* CryptoSwapEditorForm.swift in Sources */,
+				Z10000000000000000000211 /* CryptoSwapEditorView.swift in Sources */,
 				A00000000000000000000981 /* VangTodayQuoteProvider.swift in Sources */,
 				A00000000000000000000985 /* GoldWeight.swift in Sources */,
 				A00000000000000000000953 /* FundPriceRefresher.swift in Sources */,
@@ -1968,6 +2167,13 @@
 				N10000000000000000000212 /* DailyExpenseReminderTests.swift in Sources */,
 				N10000000000000000000213 /* RecurringDueReminderTests.swift in Sources */,
 				N10000000000000000000214 /* NotificationCoordinatorTests.swift in Sources */,
+				M40000000000000000000203 /* MCPRecordSerializerTests.swift in Sources */,
+				M40000000000000000000206 /* MCPQueryTests.swift in Sources */,
+				M40000000000000000000208 /* MCPRuntimeTests.swift in Sources */,
+				M50000000000000000000201 /* MCPServerAdapter.swift in Sources */,
+				M50000000000000000000202 /* MCPServerContractTests.swift in Sources */,
+				M40000000000000000000210 /* MCPClientInstallerTests.swift in Sources */,
+				M40000000000000000000212 /* MCPAccessManagerTests.swift in Sources */,
 				Y10000000000000000000201 /* TripWorkspaceTests.swift in Sources */,
 				Y10000000000000000000204 /* TripSummaryTests.swift in Sources */,
 				X10000000000000000000201 /* IncomeAllocationSnapshotTests.swift in Sources */,
@@ -1979,6 +2185,7 @@
 				U10000000000000000000204 /* BudgetSummaryTests.swift in Sources */,
 				U10000000000000000000206 /* BudgetJarDraftTests.swift in Sources */,
 				W10000000000000000000201 /* QuickExpensePresetStoreTests.swift in Sources */,
+				W10000000000000000000208 /* QuickExpenseWidgetLayoutTests.swift in Sources */,
 				K10000000000000000000211 /* MonMonBackupDocumentTests.swift in Sources */,
 				K10000000000000000000213 /* MonMonBackupValidatorTests.swift in Sources */,
 				K10000000000000000000215 /* MonMonBackupServiceTests.swift in Sources */,
@@ -2057,6 +2264,11 @@
 				A00000000000000000000961 /* FundCatalogueImportTests.swift in Sources */,
 				A00000000000000000000963 /* FundLogoCatalogueTests.swift in Sources */,
 				A00000000000000000000983 /* VangTodayQuoteProviderTests.swift in Sources */,
+				Z10000000000000000000202 /* CoinGeckoQuoteProviderTests.swift in Sources */,
+				Z10000000000000000000205 /* USDPriceTests.swift in Sources */,
+				Z10000000000000000000207 /* USDExchangeRateLoaderTests.swift in Sources */,
+				Z10000000000000000000209 /* CryptoSwapDraftTests.swift in Sources */,
+				Z10000000000000000000203 /* FundInstrumentKindTests.swift in Sources */,
 				A00000000000000000000987 /* GoldWeightTests.swift in Sources */,
 				A00000000000000000000247 /* FundSummaryTests.swift in Sources */,
 				A00000000000000000000F21 /* FundPositionGroupTests.swift in Sources */,
@@ -2080,6 +2292,18 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		M50000000000000000000303 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				M60000000000000000000201 /* MCPTypes.swift in Sources */,
+				M60000000000000000000203 /* MCPQuery.swift in Sources */,
+				M60000000000000000000205 /* MCPRuntime.swift in Sources */,
+				M60000000000000000000206 /* MCPServerAdapter.swift in Sources */,
+				M60000000000000000000207 /* MonMonMCPServerMain.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -2099,6 +2323,14 @@
 			platformFilter = ios;
 			target = D10000000000000000000001 /* MonMonShareExtension */;
 			targetProxy = D10000000000000000000602 /* PBXContainerItemProxy */;
+		};
+		M50000000000000000000601 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilters = (
+				macos,
+			);
+			target = M50000000000000000000002 /* MonMonMCPServer */;
+			targetProxy = M50000000000000000000602 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -2195,6 +2427,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) MCP_ADAPTER_TEST";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -2210,6 +2443,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) MCP_ADAPTER_TEST";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -2263,6 +2497,44 @@
 			};
 			name = Release;
 		};
+		M50000000000000000000503 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A00000000000000000000102 /* Debug.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = MonMonMCPServer/MonMonMCPServer.entitlements;
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/MCPHelper";
+				DEVELOPMENT_TEAM = VB5AW63GJ8;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_MODULE_NAME = MonMon;
+				PRODUCT_NAME = MonMonMCPServer;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_INCLUDE_PATHS = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) MONMON_MCP_HELPER";
+			};
+			name = Debug;
+		};
+		M50000000000000000000504 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A00000000000000000000103 /* Release.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = MonMonMCPServer/MonMonMCPServer.entitlements;
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/MCPHelper";
+				DEVELOPMENT_TEAM = VB5AW63GJ8;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_MODULE_NAME = MonMon;
+				PRODUCT_NAME = MonMonMCPServer;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_INCLUDE_PATHS = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) MONMON_MCP_HELPER";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -2311,9 +2583,26 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		M50000000000000000000401 /* Build configuration list for PBXNativeTarget "MonMonMCPServer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				M50000000000000000000503 /* Debug */,
+				M50000000000000000000504 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		M50000000000000000000701 /* XCRemoteSwiftPackageReference "swift-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/modelcontextprotocol/swift-sdk.git";
+			requirement = {
+				kind = exactVersion;
+				version = 0.12.1;
+			};
+		};
 		33A69BFD303AE3A900432AF4 /* XCRemoteSwiftPackageReference "CalendarView" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Mijick/CalendarView.git";
@@ -2325,6 +2614,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		M50000000000000000000702 /* MCP */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = M50000000000000000000701 /* XCRemoteSwiftPackageReference "swift-sdk" */;
+			productName = MCP;
+		};
 		33A69BFE303AE3A900432AF4 /* MijickCalendarView */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 33A69BFD303AE3A900432AF4 /* XCRemoteSwiftPackageReference "CalendarView" */;

@@ -53,7 +53,7 @@ enum AccountSeed {
         uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1)
     )
 
-    static let unassignedName = "Unassigned"
+    static let unassignedName = "Cash"
 
     /// Adds the starter Bank once per installation, including when upgrading a
     /// store created before this seed existed. The marker keeps a later owner
@@ -124,7 +124,7 @@ enum AccountSeed {
 
         let account = CashAccount(
             id: unassignedID,
-            name: AppText.string(key: unassignedName, in: locale),
+            name: unassignedName,
             kind: .normal,
             openingBalance: .zero,
             currencyCode: VNDCurrency.code,

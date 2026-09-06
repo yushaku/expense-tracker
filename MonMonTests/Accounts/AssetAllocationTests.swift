@@ -327,6 +327,100 @@ final class AssetAllocationTests {
         )
     }
 
+    @Test("Crypto draws its own wedge and neither funds nor gold count it")
+    func cryptoHasItsOwnWedge() {
+        // Enough to have funded all three positions: cash is the opening
+        // balance less what was spent on them, and an overdrawn account would
+        // leave the ring instead of sitting in it.
+        let account = makeAccount(openingBalance: 500_000_000)
+        let fund = makeHolding(
+            units: 1_000,
+            averageCostPerUnit: 20_000,
+            pricePerUnit: 25_000,
+            sourceAccountID: account.id
+        )
+        let gold = makeHolding(
+            units: 1,
+            averageCostPerUnit: 140_000_000,
+            pricePerUnit: 147_000_000,
+            symbol: "SJL1L10",
+            kind: .gold,
+            sourceAccountID: account.id
+        )
+        let coin = makeHolding(
+            units: Decimal(string: "0.05") ?? 0,
+            averageCostPerUnit: 1_800_000_000,
+            pricePerUnit: 2_000_000_000,
+            symbol: "BTC",
+            kind: .crypto,
+            sourceAccountID: account.id
+        )
+        let holdings = [fund, gold, coin]
+
+        let slices = AssetAllocation.slices(
+            accounts: [account],
+            deposits: [],
+            withdrawals: [],
+            holdings: holdings,
+            instruments: catalogue,
+            transactions: [],
+            transfers: [],
+            debts: [],
+            payments: [],
+            sales: []
+        )
+
+        #expect(slices.first { $0.kind == .funds }?.amount == 25_000_000)
+        #expect(slices.first { $0.kind == .gold }?.amount == 147_000_000)
+        #expect(slices.first { $0.kind == .crypto }?.amount == 100_000_000)
+        #expect(
+            AssetAllocation.total(of: slices)
+                == AssetSummary.netWorth(
+                    accounts: [account],
+                    deposits: [],
+                    withdrawals: [],
+                    holdings: holdings,
+                    instruments: catalogue,
+                    transactions: [],
+                    transfers: [],
+                    debts: [],
+                    payments: [],
+                    sales: []
+                )
+        )
+    }
+
+    /// A fractional coin is the case the đồng-rounded arithmetic has to survive:
+    /// the units carry eight decimal places and the value must not.
+    @Test("A fraction of a coin is valued to the whole đồng")
+    func fractionalCoinIsValuedWhole() {
+        let account = makeAccount(openingBalance: 0)
+        let coin = makeHolding(
+            units: Decimal(string: "0.00000001") ?? 0,
+            averageCostPerUnit: 1_800_000_000,
+            pricePerUnit: 2_110_324_943,
+            symbol: "BTC",
+            kind: .crypto,
+            sourceAccountID: account.id
+        )
+
+        let slices = AssetAllocation.slices(
+            accounts: [account],
+            deposits: [],
+            withdrawals: [],
+            holdings: [coin],
+            instruments: catalogue,
+            transactions: [],
+            transfers: [],
+            debts: [],
+            payments: [],
+            sales: []
+        )
+
+        // 0.00000001 × 2_110_324_943 = 21.10324943, rounded to the đồng.
+        #expect(slices.first { $0.kind == .crypto }?.amount == 21)
+    }
+
     @Test("Nothing overdrawn owes nothing")
     func noOverdraftOwesNothing() {
         let account = makeAccount(openingBalance: 10_000_000)

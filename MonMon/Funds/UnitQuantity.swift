@@ -1,10 +1,14 @@
 import Foundation
 
-/// Parses and formats a fractional unit count for a fund or ETF holding.
+/// Parses and formats a fractional unit count for a fund, ETF, or coin holding.
 /// Accepts both the Vietnamese decimal comma (`1234,56`) and the dot
 /// (`1234.56`) so the owner can type whichever the current keyboard offers.
 enum UnitQuantity {
-    static let maximumFractionDigits = 4
+    /// Eight, because a coin is divisible to eight places and a holding of
+    /// `0,00000001` has to survive being written down. Nothing is padded to
+    /// that width: the format keeps only the digits a number actually carries,
+    /// so a fund quoted to four still reads as four.
+    static let maximumFractionDigits = 8
 
     private static let locale = Locale(identifier: "vi_VN")
     private static let displayFormat = Decimal.FormatStyle(locale: locale)
