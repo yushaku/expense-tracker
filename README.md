@@ -162,6 +162,12 @@ funding jar; income entries clear that expense-only routing.
 **Record Transaction** is the only Siri app shortcut. The former Quick Capture
 shortcut has been removed; existing quick-capture URLs open Add Transaction.
 
+### Gold unit labels
+
+Gold forms, quotes, and holding summaries use **mace / tael** in English and
+**chỉ / lượng** in Vietnamese, following the selected app language. This changes
+labels only: stored weights and the ten-to-one conversion are unchanged.
+
 ### Date display
 
 In Settings → Date format, choose `dd/MM/yyyy` (default),

@@ -1,6 +1,17 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@ mace (%@ tael)": {
+      "comment": "Gold weight in mace and Vietnamese tael; one tael is ten mace. Values are already formatted.",
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ chỉ (%@ lượng)"
+          }
+        }
+      }
+    },
     "Review the details below, then tap Save.": {
       "localizations": {
         "en": {
@@ -262,7 +273,7 @@
     "unit": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "đơn vị" } } }
     },
-    "lượng": {
+    "tael": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "lượng" } } }
     },
     "Filled in from today's buy price. Change it to what you actually paid.": {
@@ -3316,7 +3327,7 @@
         }
       }
     },
-    "Average cost per lượng": {
+    "Average cost per tael": {
       "localizations": {
         "vi": {
           "stringUnit": {
@@ -4616,7 +4627,7 @@
         }
       }
     },
-    "Enter a valid weight in chỉ.": {
+    "Enter a valid weight in mace.": {
       "localizations": {
         "vi": {
           "stringUnit": {
@@ -5027,7 +5038,7 @@
         }
       }
     },
-    "Gold is valued at the shop's buy price per lượng.": {
+    "Gold is valued at the shop's buy price per tael.": {
       "localizations": {
         "vi": {
           "stringUnit": {
@@ -6477,7 +6488,7 @@
         }
       }
     },
-    "Pick a gold product, then enter its weight in chỉ.": {
+    "Pick a gold product, then enter its weight in mace.": {
       "localizations": {
         "vi": {
           "stringUnit": {
@@ -6677,7 +6688,7 @@
         }
       }
     },
-    "Price per lượng": {
+    "Price per tael": {
       "localizations": {
         "vi": {
           "stringUnit": {
@@ -7137,7 +7148,7 @@
         }
       }
     },
-    "Shop buy price per lượng": {
+    "Shop buy price per tael": {
       "localizations": {
         "vi": {
           "stringUnit": {
@@ -7147,7 +7158,7 @@
         }
       }
     },
-    "Shop buys %@ · sells %@ per lượng": {
+    "Shop buys %@ · sells %@ per tael": {
       "localizations": {
         "vi": {
           "stringUnit": {
@@ -7939,7 +7950,7 @@
         }
       }
     },
-    "Weight (chỉ)": {
+    "Weight (mace)": {
       "localizations": {
         "vi": {
           "stringUnit": {
@@ -8149,7 +8160,7 @@
         }
       }
     },
-    "chỉ": {
+    "mace": {
       "localizations": {
         "vi": {
           "stringUnit": {
