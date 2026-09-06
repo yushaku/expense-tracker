@@ -177,4 +177,39 @@ struct AccountDraftTests {
         #expect(VNDCurrency.format(Decimal(12_345_678)) == "12,3M")
         #expect(VNDCurrency.formatPlain(Decimal(12_345_678)) == "12.345.678")
     }
+
+    /// An account nobody has coloured keeps following its kind, which is what
+    /// every account did before a colour could be picked.
+    @Test("An unpicked colour stays empty and the picker still shows the kind's")
+    func unpickedColourInheritsFromTheKind() throws {
+        let draft = AccountDraft(
+            name: "Visa",
+            kind: .credit,
+            openingBalanceText: "0",
+            creditLimitText: "20.000.000"
+        )
+
+        #expect(draft.colorName.isEmpty)
+        #expect(draft.effectiveColorName == "peach")
+
+        let account = try draft.makeAccount(id: fixedID, createdAt: fixedDate)
+
+        #expect(account.colorName.isEmpty)
+    }
+
+    @Test("A picked colour is saved, and one outside the palette is not")
+    func pickedColourIsSaved() throws {
+        var draft = AccountDraft(name: "Wallet", kind: .normal, openingBalanceText: "0")
+        draft.colorName = "sky"
+
+        let account = try draft.makeAccount(id: fixedID, createdAt: fixedDate)
+        #expect(account.colorName == "sky")
+        #expect(AccountDraft(account: account).effectiveColorName == "sky")
+
+        draft.colorName = "chartreuse"
+        try draft.apply(to: account)
+        // Not a colour the app draws in, so it goes back to inheriting rather
+        // than claiming a name that renders as something else.
+        #expect(account.colorName == "green")
+    }
 }

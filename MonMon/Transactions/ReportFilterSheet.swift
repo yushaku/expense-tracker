@@ -196,7 +196,7 @@ struct ReportFilterSheet: View {
                             toggleRow(
                                 name: account.name,
                                 symbolName: account.kind.iconName,
-                                tint: account.kind.tint,
+                                tint: account.tint,
                                 isOn: query.accountIDs.contains(account.id),
                                 identifier: "\(identifierPrefix)account-\(account.id.uuidString)"
                             ) {

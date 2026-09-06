@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SwiftUI
 
 @Model
 final class CashAccount {
@@ -8,6 +9,13 @@ final class CashAccount {
     var kind: CashAccountKind = CashAccountKind.normal
     var openingBalance: Decimal = Decimal.zero
     var creditLimit: Decimal = Decimal.zero
+    /// The colour this account is drawn in, named from `CategoryPalette`.
+    ///
+    /// Empty until somebody picks one, and empty means something: the account
+    /// follows its kind on its own card and keeps its place in the accounts
+    /// ring's palette, which is exactly how every account looked before a
+    /// colour could be chosen at all.
+    var colorName: String = ""
     var currencyCode: String = VNDCurrency.code
     var createdAt: Date = Date(timeIntervalSince1970: 0)
 
@@ -17,6 +25,7 @@ final class CashAccount {
         kind: CashAccountKind,
         openingBalance: Decimal,
         creditLimit: Decimal = .zero,
+        colorName: String = "",
         currencyCode: String,
         createdAt: Date
     ) {
@@ -25,8 +34,17 @@ final class CashAccount {
         self.kind = kind
         self.openingBalance = openingBalance
         self.creditLimit = creditLimit
+        self.colorName = colorName
         self.currencyCode = currencyCode
         self.createdAt = createdAt
+    }
+}
+
+extension CashAccount {
+    /// The colour this account is drawn in wherever the account itself appears.
+    /// Falls back to its kind while no colour has been picked.
+    var tint: Color {
+        colorName.isEmpty ? kind.tint : CategoryPalette.color(named: colorName)
     }
 }
 
@@ -37,6 +55,7 @@ final class CashAccount {
             kind: CashAccountKind,
             openingBalance: Decimal,
             creditLimit: Decimal = .zero,
+            colorName: String = "",
             createdOffset: TimeInterval = 0
         ) -> CashAccount {
             CashAccount(
@@ -45,6 +64,7 @@ final class CashAccount {
                 kind: kind,
                 openingBalance: openingBalance,
                 creditLimit: creditLimit,
+                colorName: colorName,
                 currencyCode: VNDCurrency.code,
                 createdAt: Date(timeIntervalSince1970: 1_700_000_000 + createdOffset)
             )

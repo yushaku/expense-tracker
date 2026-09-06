@@ -40,9 +40,9 @@ struct CashAccountCard: View {
         HStack(spacing: 14) {
             Image(systemName: account.kind.iconName)
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(account.kind.tint)
+                .foregroundStyle(account.tint)
                 .frame(width: 44, height: 44)
-                .background(account.kind.tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 13))
+                .background(account.tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 13))
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 3) {
