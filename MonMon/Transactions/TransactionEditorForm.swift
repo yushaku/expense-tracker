@@ -1,7 +1,39 @@
 import SwiftUI
 
+enum TransactionEntryTab: Int, CaseIterable {
+    case income
+    case expense
+    case quickAdd
+
+    init(kind: TransactionKind) {
+        self = kind == .income ? .income : .expense
+    }
+
+    var kind: TransactionKind? {
+        switch self {
+        case .income: .income
+        case .expense: .expense
+        case .quickAdd: nil
+        }
+    }
+
+    func swiped(
+        horizontal: CGFloat, vertical: CGFloat, allowsQuickAdd: Bool = true
+    ) -> Self {
+        // Require an intentional horizontal swipe, leaving vertical scrolling
+        // and short drags within form controls alone.
+        guard abs(horizontal) >= 60, abs(horizontal) > abs(vertical) * 1.5 else {
+            return self
+        }
+        let last = allowsQuickAdd ? Self.quickAdd.rawValue : Self.expense.rawValue
+        let next = min(max(rawValue + (horizontal < 0 ? 1 : -1), 0), last)
+        return Self(rawValue: next) ?? self
+    }
+}
+
 struct TransactionEditorForm: View {
     @Environment(\.locale) private var locale
+    @Environment(\.layoutDirection) private var layoutDirection
 
     @Binding var draft: TransactionDraft
     @Binding var isQuickAdding: Bool
@@ -56,6 +88,19 @@ struct TransactionEditorForm: View {
             // pulls where it should take one. Content that already fits has
             // nothing to scroll and so has no reason to bounce.
             .scrollBounceBehavior(.basedOnSize)
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 30)
+                    .onEnded { value in
+                        let horizontal =
+                            layoutDirection == .rightToLeft
+                            ? -value.translation.width : value.translation.width
+                        entrySelection.wrappedValue = entrySelection.wrappedValue.swiped(
+                            horizontal: horizontal,
+                            vertical: value.translation.height,
+                            allowsQuickAdd: !isEditing
+                        )
+                    }
+            )
         }
     }
 
@@ -63,11 +108,11 @@ struct TransactionEditorForm: View {
         Picker("Entry method", selection: entrySelection) {
             ForEach(TransactionKind.allCases, id: \.rawValue) { kind in
                 Text(kind.displayName)
-                    .tag(Optional(kind))
+                    .tag(TransactionEntryTab(kind: kind))
             }
             if !isEditing {
                 Text("Quick Add")
-                    .tag(TransactionKind?.none)
+                    .tag(TransactionEntryTab.quickAdd)
             }
         }
         .pickerStyle(.segmented)
@@ -75,13 +120,12 @@ struct TransactionEditorForm: View {
         .accessibilityIdentifier("transaction-kind")
     }
 
-    // A nil selection represents Quick Add without changing the draft's direction.
-    private var entrySelection: Binding<TransactionKind?> {
+    private var entrySelection: Binding<TransactionEntryTab> {
         Binding(
-            get: { isQuickAdding ? nil : draft.kind },
-            set: { kind in
-                isQuickAdding = kind == nil
-                if let kind {
+            get: { isQuickAdding ? .quickAdd : TransactionEntryTab(kind: draft.kind) },
+            set: { tab in
+                isQuickAdding = tab == .quickAdd
+                if let kind = tab.kind {
                     draft.kind = kind
                 }
             }

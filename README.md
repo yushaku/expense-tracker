@@ -156,7 +156,9 @@ rtk swift format lint --strict --recursive MonMon MonMonTests MonMonShareExtensi
 Add Transaction has Expense, Income, and Quick Add tabs. In **Quick Add**, type a
 sentence such as `50k lunch cash yesterday`, then choose **Fill transaction details**.
 The editor switches to the matching Expense or Income tab to review or complete
-the fields before tapping **Save**. Quick Add text is retained when switching tabs.
+the fields before tapping **Save**. Quick Add text is retained when switching tabs. Swipe left or right across the
+form to move between Income, Expense, and Quick Add; vertical drags still scroll
+the form. Swipes stop at the first and last tab.
 Filling the form does not write transactions or pending captures. Expense entries retain the selected trip and
 funding jar; income entries clear that expense-only routing.
 
