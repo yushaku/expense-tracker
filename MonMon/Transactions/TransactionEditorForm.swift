@@ -165,7 +165,7 @@ struct TransactionEditorForm: View {
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(isEditing ? "Fix what you recorded" : "Where the money went")
+                Text(introductionTitle)
                     .font(.title3.weight(.semibold))
 
                 Text("The account you pick moves by exactly this amount.")
@@ -173,6 +173,13 @@ struct TransactionEditorForm: View {
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
         }
+    }
+
+    private var introductionTitle: LocalizedStringKey {
+        if isEditing {
+            return "Fix what you recorded"
+        }
+        return draft.kind == .income ? "Where the money came from" : "Where the money went"
     }
 
     private var directionTint: Color {
