@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 
 enum AccountLinkedSourceKind: CaseIterable, Identifiable {
     case savings
@@ -45,5 +46,123 @@ enum AccountLinkedSourceSummary {
             }
             return AccountLinkedSourceRow(kind: kind, count: count)
         }
+    }
+}
+
+/// Moving everything that names one account onto another, so an account can be
+/// deleted without leaving records pointing at a row that is no longer there.
+///
+/// Every account-shaped foreign key in the store is listed in `apply`, and that
+/// list is the whole point of this type. `AccountSeed` explains why a dangling
+/// one is the single state the app cannot have: a default applies when a field
+/// is absent, never when it holds an id that has stopped resolving. A new
+/// reference to an account added anywhere else belongs in that list too.
+enum AccountMerge {
+    /// How many records name this account. Counts the transfers at either end
+    /// and the captures still waiting to be reviewed, because both would
+    /// outlive the account.
+    @MainActor
+    static func linkedRecordCount(for account: CashAccount, in context: ModelContext) -> Int {
+        apply(from: account, to: nil, in: context)
+    }
+
+    /// Repoints every record naming `source` at `destination`, hands over the
+    /// opening balance, and deletes the account.
+    ///
+    /// The balance moves because the records do. Leaving it behind would shrink
+    /// the owner's net worth by whatever the account opened with, which is a
+    /// deletion of money rather than of an account.
+    @MainActor
+    static func move(
+        from source: CashAccount,
+        to destination: CashAccount,
+        in context: ModelContext
+    ) throws {
+        _ = apply(from: source, to: destination, in: context)
+        destination.openingBalance += source.openingBalance
+        context.delete(source)
+        try context.save()
+    }
+
+    /// Counts when `destination` is `nil` and rewrites when it is not, so the
+    /// figure the confirmation quotes comes from the same walk that does the
+    /// work and cannot drift from it.
+    @MainActor
+    private static func apply(
+        from source: CashAccount,
+        to destination: CashAccount?,
+        in context: ModelContext
+    ) -> Int {
+        let sourceID = source.id
+        var touched = 0
+
+        func fetch<Model: PersistentModel>(_ type: Model.Type) -> [Model] {
+            (try? context.fetch(FetchDescriptor<Model>())) ?? []
+        }
+
+        func repoint<Model: PersistentModel>(
+            _ field: ReferenceWritableKeyPath<Model, UUID>
+        ) {
+            for record in fetch(Model.self) where record[keyPath: field] == sourceID {
+                touched += 1
+                if let destination {
+                    record[keyPath: field] = destination.id
+                }
+            }
+        }
+
+        func repointOptional<Model: PersistentModel>(
+            _ field: ReferenceWritableKeyPath<Model, UUID?>
+        ) {
+            for record in fetch(Model.self) where record[keyPath: field] == sourceID {
+                touched += 1
+                if let destination {
+                    record[keyPath: field] = destination.id
+                }
+            }
+        }
+
+        repoint(\MoneyTransaction.accountID)
+        repoint(\SavingsWithdrawal.destinationAccountID)
+        repoint(\FundSale.proceedsAccountID)
+        repoint(\DebtPayment.accountID)
+        repoint(\RecurringRule.accountID)
+        repointOptional(\SavingsDeposit.sourceAccountID)
+        repointOptional(\FundHolding.sourceAccountID)
+        repointOptional(\Debt.accountID)
+        repointOptional(\PendingTransactionCapture.accountID)
+
+        for transfer in fetch(AccountTransfer.self) {
+            let leaves = transfer.sourceAccountID == sourceID
+            let lands = transfer.destinationAccountID == sourceID
+            guard leaves || lands else {
+                continue
+            }
+
+            touched += 1
+
+            guard let destination else {
+                continue
+            }
+
+            // A transfer whose other end is the destination would name the same
+            // account twice, and money moved to where it already is moves
+            // nothing. It goes, rather than staying as a row saying nothing
+            // happened — the balances agree either way, since what it took off
+            // one end it put back on the other.
+            let otherEnd = leaves ? transfer.destinationAccountID : transfer.sourceAccountID
+            guard otherEnd != destination.id else {
+                context.delete(transfer)
+                continue
+            }
+
+            if leaves {
+                transfer.sourceAccountID = destination.id
+            } else {
+                transfer.destinationAccountID = destination.id
+            }
+        }
+
+        return touched
     }
 }
