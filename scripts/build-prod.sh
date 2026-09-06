@@ -15,7 +15,7 @@ set -euo pipefail
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$project_root"
 
-derived_data_path="${MONMON_PROD_DERIVED_DATA_PATH:-/tmp/MonMonProdDerivedData}"
+derived_data_path="${MONMON_PROD_DERIVED_DATA_PATH:-${MONMON_DERIVED_DATA_PATH:-$project_root/build/DerivedData}}"
 output_dir="${MONMON_PROD_OUTPUT_DIR:-$project_root/build/prod}"
 archive_path="$output_dir/MonMon.xcarchive"
 

@@ -2,9 +2,9 @@
 
 PRODUCT_NAME = MonMon
 
-// Flavour identity. APP_BUNDLE_ID, ICLOUD_CONTAINER_ID and APP_DISPLAY_NAME are
-// set per configuration in Debug.xcconfig (dev) and Release.xcconfig (prod), so
-// the two builds never share a container, an app group, or an iCloud database.
+// Flavour identity. APP_BUNDLE_ID and APP_DISPLAY_NAME are set per
+// configuration in Debug.xcconfig (dev) and Release.xcconfig (prod), so the two
+// builds never share a bundle identifier or an app group.
 PRODUCT_BUNDLE_IDENTIFIER = $(APP_BUNDLE_ID)
 APP_GROUP_ID = group.$(APP_BUNDLE_ID)
 

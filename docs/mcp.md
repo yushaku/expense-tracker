@@ -35,16 +35,14 @@ overwritten automatically.
 MonMon serializes the 16 domain models into a separate SwiftData SQLite snapshot
 named `MonMonMCPSnapshot` in the flavour's App Group. The app replaces that
 snapshot atomically after its main model context saves and when AI access is
-enabled. The helper opens the snapshot without save permission. It has no
-CloudKit entitlement, imports no domain model declarations, and never opens the
-app's live SwiftData store.
+enabled. The helper opens the snapshot without save permission. It imports
+no domain model declarations and never opens the app's live SwiftData store.
 
 Every response includes `sync.source`, `sync.freshness`, and `lastSnapshotAt`.
 A snapshot no more than five minutes old is reported as `fresh`; an older one is
 `stale`. The timestamp is the honest boundary: when MonMon is closed, MCP keeps
-serving the last snapshot and cannot see changes made on another device until
-MonMon runs on this Mac and receives them. iCloud Sync remains optional for the
-app and is not required by MCP.
+serving the last snapshot. It sees what this Mac's own store holds and nothing
+else; MonMon does not synchronise between devices.
 
 ## Tools
 
@@ -87,8 +85,8 @@ written to operational logs.
   cancel replacement.
 - **Repair needed**: the app or helper path changed; choose Repair and restart
   the client.
-- **Stale data**: open MonMon on this Mac. If the change was made on another
-  device, allow the app's optional iCloud Sync to receive it first.
+- **Stale data**: open MonMon on this Mac. A change made on another device is
+  not visible here; MonMon keeps each device's records to itself.
 
 The helper uses the official Swift MCP SDK pinned exactly to `0.12.1`:
 <https://github.com/modelcontextprotocol/swift-sdk/tree/0.12.1>.

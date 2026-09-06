@@ -324,8 +324,6 @@
 		A00000000000000000000961 /* FundCatalogueImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000960 /* FundCatalogueImportTests.swift */; };
 		A00000000000000000000963 /* FundLogoCatalogueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000962 /* FundLogoCatalogueTests.swift */; };
 		A00000000000000000000965 /* FundLogoCatalogue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000964 /* FundLogoCatalogue.swift */; };
-		A00000000000000000000972 /* CloudSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000970 /* CloudSync.swift */; };
-		A00000000000000000000973 /* CloudSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000971 /* CloudSyncTests.swift */; };
 		A00000000000000000000981 /* VangTodayQuoteProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000980 /* VangTodayQuoteProvider.swift */; };
 		A00000000000000000000983 /* VangTodayQuoteProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000982 /* VangTodayQuoteProviderTests.swift */; };
 		Z10000000000000000000202 /* CoinGeckoQuoteProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Z10000000000000000000102 /* CoinGeckoQuoteProviderTests.swift */; };
@@ -784,8 +782,6 @@
 		A00000000000000000000960 /* FundCatalogueImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundCatalogueImportTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000962 /* FundLogoCatalogueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundLogoCatalogueTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000964 /* FundLogoCatalogue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundLogoCatalogue.swift; sourceTree = "<group>"; };
-		A00000000000000000000970 /* CloudSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSync.swift; sourceTree = "<group>"; };
-		A00000000000000000000971 /* CloudSyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000980 /* VangTodayQuoteProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VangTodayQuoteProvider.swift; sourceTree = "<group>"; };
 		A00000000000000000000982 /* VangTodayQuoteProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VangTodayQuoteProviderTests.swift; sourceTree = "<group>"; };
 		Z10000000000000000000102 /* CoinGeckoQuoteProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinGeckoQuoteProviderTests.swift; sourceTree = "<group>"; };
@@ -1491,7 +1487,6 @@
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000188 /* AppLock.swift */,
-				A00000000000000000000970 /* CloudSync.swift */,
 				A00000000000000000000189 /* LockScreenView.swift */,
 				A00000000000000000000190 /* SettingsView.swift */,
 				N10000000000000000000105 /* NotificationSettingsCard.swift */,
@@ -1505,7 +1500,6 @@
 				A00000000000000000000191 /* AppLockTests.swift */,
 				C10000000000000000000009 /* AppLanguageTests.swift */,
 				C1000000000000000000000A /* LanguageResolutionTests.swift */,
-				A00000000000000000000971 /* CloudSyncTests.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -2022,7 +2016,6 @@
 				N10000000000000000000205 /* NotificationSettingsCard.swift in Sources */,
 				A00000000000000000000278 /* LockScreenView.swift in Sources */,
 				A00000000000000000000277 /* AppLock.swift in Sources */,
-				A00000000000000000000972 /* CloudSync.swift in Sources */,
 				A00000000000000000000276 /* AppTheme.swift in Sources */,
 				D30000000000000000000002 /* AppSheetPresentation.swift in Sources */,
 				A00000000000000000000275 /* DateField.swift in Sources */,
@@ -2222,7 +2215,6 @@
 				A00000000000000000000280 /* AppLockTests.swift in Sources */,
 				C10000000000000000000109 /* AppLanguageTests.swift in Sources */,
 				C1000000000000000000010A /* LanguageResolutionTests.swift in Sources */,
-				A00000000000000000000973 /* CloudSyncTests.swift in Sources */,
 				A00000000000000000000274 /* AssetAllocationTests.swift in Sources */,
 				A00000000000000000000271 /* MoneyTransactionPersistenceTests.swift in Sources */,
 				D20000000000000000000002 /* TransactionSwipeActionTests.swift in Sources */,

@@ -8,7 +8,6 @@ struct MonMonApp: App {
     private let container: ModelContainer
     @State private var appLock: AppLock
     @State private var appRoute: AppRoute
-    @State private var cloudSync = CloudSync()
     @State private var notificationCoordinator: NotificationCoordinator
     #if os(macOS)
         @State private var mcpAccessManager: MCPAccessManager
@@ -88,14 +87,7 @@ struct MonMonApp: App {
             return ModelConfiguration(isStoredInMemoryOnly: true)
         }
 
-        // The owner's switch is read here and nowhere else: SwiftData fixes a
-        // store's mirroring when the container is built, so this launch is the
-        // only moment the choice can take effect.
-        guard CloudSync.isEnabled() else {
-            return ModelConfiguration(cloudKitDatabase: .none)
-        }
-
-        return ModelConfiguration(cloudKitDatabase: .private(CloudSync.containerIdentifier))
+        return ModelConfiguration(cloudKitDatabase: .none)
     }
 
     var body: some Scene {
@@ -103,10 +95,8 @@ struct MonMonApp: App {
             ContentView()
                 .environment(appLock)
                 .environment(appRoute)
-                .environment(cloudSync)
                 .environment(notificationCoordinator)
                 .task {
-                    cloudSync.startObserving()
                     await notificationCoordinator.reconcile(in: container.mainContext)
                 }
                 #if os(macOS)

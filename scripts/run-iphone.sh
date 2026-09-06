@@ -4,7 +4,7 @@ set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 device_name="${1:-Yushaku}"
-derived_data_path="${MONMON_DERIVED_DATA_PATH:-/tmp/MonMonDeviceDerivedData}"
+derived_data_path="${MONMON_DERIVED_DATA_PATH:-$project_root/build/DerivedData}"
 app_path="$derived_data_path/Build/Products/Debug-iphoneos/MonMon.app"
 
 cd "$project_root"

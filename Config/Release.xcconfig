@@ -4,7 +4,6 @@
 // com.sonlv.monmon is already registered to another team and Apple will not
 // hand it to VB5AW63GJ8.
 APP_BUNDLE_ID = com.sonlv.monmon.app
-ICLOUD_CONTAINER_ID = iCloud.monmon
 APP_DISPLAY_NAME = MonMon
 APP_ICON_NAME = AppIcon
 QUICK_CAPTURE_URL_SCHEME = monmon

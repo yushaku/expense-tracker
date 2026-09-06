@@ -15,8 +15,6 @@
 	</array>
 	<key>MonMonAppGroupIdentifier</key>
 	<string>$(APP_GROUP_ID)</string>
-	<key>MonMonCloudKitContainer</key>
-	<string>$(ICLOUD_CONTAINER_ID)</string>
 	<key>MonMonQuickCaptureURLScheme</key>
 	<string>$(QUICK_CAPTURE_URL_SCHEME)</string>
 	<key>UIBackgroundModes</key>
