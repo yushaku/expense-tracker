@@ -1,6 +1,38 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Review the details below, then tap Save.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review the details below, then tap Save."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiểm tra thông tin bên dưới, rồi nhấn Lưu."
+          }
+        }
+      }
+    },
+    "Fill transaction details": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fill transaction details"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Điền thông tin giao dịch"
+          }
+        }
+      }
+    },
     "Cannot import income: fix budget jar allocations and reopen this report": {
       "localizations": { "vi": { "stringUnit": { "state": "translated", "value": "Không thể nhập khoản thu: hãy sửa tỷ lệ phân bổ hũ và mở lại sao kê này" } } }
     },
@@ -1570,22 +1602,22 @@
         }
       }
     },
-    "They are installed automatically with MonMon—nothing else to download.": {
+    "This shortcut is installed automatically with MonMon.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hai phím tắt được cài tự động cùng MonMon—không cần tải thêm."
+            "value": "Phím tắt này được cài tự động cùng MonMon."
           }
         }
       }
     },
-    "Two shortcuts are ready": {
+    "Record Transaction is ready": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hai phím tắt đã sẵn sàng"
+            "value": "Phím tắt Ghi giao dịch đã sẵn sàng"
           }
         }
       }

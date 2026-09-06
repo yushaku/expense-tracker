@@ -43,7 +43,7 @@ MonMon is a private personal-finance app for iPhone and Mac, built with SwiftUI 
 
 ### Capture without typing
 
-- **Quick capture** — an App Intent and Siri phrase that parses a spoken or typed line into a transaction. A clean parse is saved outright; an incomplete one is staged for review rather than guessed at.
+- **Natural-language entry** — type a sentence in Add Transaction to fill the form before saving. The Record Transaction Siri shortcut saves a clean parse directly and stages incomplete entries for review.
 - **Quick-expense widget** — configurable one-tap presets on the Home Screen.
 - **Bank-statement import** — a PDF shared from the bank app lands in the extension's inbox and is parsed off the main thread. Valid new rows are checked by default. Invalid rows appear first, unchecked, with a reason; uncheck any row to leave it out, or tap its details to edit category and note. Import creates income/expense transactions only, without reconciling account balances or statement totals. The selected rows are committed in one atomic save. If validation fails at save time, affected rows move to Needs attention with a reason and are unchecked; the remaining valid selections can be retried. A storage failure keeps selections and explicitly reports that nothing was saved. Existing import fingerprints prevent duplicates when the same report is imported again.
 
@@ -150,6 +150,17 @@ Check Swift formatting:
 ```sh
 rtk swift format lint --strict --recursive MonMon MonMonTests MonMonShareExtension
 ```
+
+### Adding transactions
+
+Add Transaction includes natural-language entry above the manual fields. Type a
+sentence such as `50k lunch cash yesterday`, choose **Fill transaction details**,
+review or complete the fields, then tap **Save**. Filling the form does not write
+transactions or pending captures. Expense entries retain the selected trip and
+funding jar; income entries clear that expense-only routing.
+
+**Record Transaction** is the only Siri app shortcut. The former Quick Capture
+shortcut has been removed; existing quick-capture URLs open Add Transaction.
 
 ### Date display
 

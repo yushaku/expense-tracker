@@ -43,9 +43,6 @@ struct MonMonApp: App {
                 _ = try await transactionCaptureDependency.recordQuickExpense(preset)
             }
         )
-        AppDependencyManager.shared.add(
-            dependency: QuickCaptureIntentDependency(appRoute: appRoute, appLock: appLock)
-        )
 
         AccountSeed.seedDefaultBankIfNeeded(in: modelContainer.mainContext)
         AccountSeed.ensureUnassignedExists(in: modelContainer.mainContext)

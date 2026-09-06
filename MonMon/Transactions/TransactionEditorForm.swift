@@ -13,6 +13,7 @@ struct TransactionEditorForm: View {
     let validationError: TransactionFormError?
     let saveErrorMessage: LocalizedStringKey?
     let onDelete: () -> Void
+    let onCapture: (String) -> Void
 
     var body: some View {
         ZStack {
@@ -22,6 +23,9 @@ struct TransactionEditorForm: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                     introduction
+                    if !isEditing {
+                        TransactionCaptureEntry(onApply: onCapture)
+                    }
                     amountCard
                     detailsCard
 

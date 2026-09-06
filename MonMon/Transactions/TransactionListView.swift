@@ -40,7 +40,6 @@ struct TransactionListView: View {
     @State private var navigationPath = NavigationPath()
 
     @State private var isShowingCaptureInbox = false
-    @State private var isShowingQuickCapture = false
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -175,9 +174,6 @@ struct TransactionListView: View {
             .appSheet(isPresented: $isShowingCaptureInbox) {
                 PendingTransactionCaptureListView()
             }
-            .appSheet(isPresented: $isShowingQuickCapture) {
-                QuickTransactionCaptureView()
-            }
             .transactionActions(
                 transactionActions,
                 undoBottomInset: FloatingAddButton.contentInset,
@@ -198,15 +194,20 @@ struct TransactionListView: View {
             .onAppear {
                 presentQuickCaptureIfNeeded(appRoute.quickCaptureRequestID)
             }
+            .onChange(of: editorMode?.id) { _, modeID in
+                if modeID == nil {
+                    presentQuickCaptureIfNeeded(appRoute.quickCaptureRequestID)
+                }
+            }
             .tint(MonMonTheme.accent)
         }
     }
 
     private func presentQuickCaptureIfNeeded(_ requestID: UUID?) {
-        guard requestID != nil, !isShowingQuickCapture else {
+        guard requestID != nil, editorMode == nil else {
             return
         }
-        isShowingQuickCapture = true
+        editorMode = .add
         appRoute.consumeQuickCapture()
     }
 

@@ -213,11 +213,11 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 sectionHeader("Siri & Shortcuts", systemImage: "waveform.badge.mic")
 
-                Label("Two shortcuts are ready", systemImage: "checkmark.circle.fill")
+                Label("Record Transaction is ready", systemImage: "checkmark.circle.fill")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(MonMonTheme.accent)
 
-                Text("They are installed automatically with MonMon—nothing else to download.")
+                Text("This shortcut is installed automatically with MonMon.")
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
 
@@ -227,12 +227,6 @@ struct SettingsView: View {
                 shortcutRow(
                     title: "Record Transaction",
                     detail: "Say “Siri, record a transaction in MonMon”, then answer “cafe 50k”.",
-                    systemImage: "square.and.pencil"
-                )
-
-                shortcutRow(
-                    title: "Quick Capture",
-                    detail: "Opens the focused entry form when voice is not convenient.",
                     systemImage: "square.and.pencil"
                 )
 
