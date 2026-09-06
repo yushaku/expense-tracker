@@ -345,6 +345,9 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         var kind: String
         var openingBalance: String
         var creditLimit: String? = nil
+        /// Absent in every backup written before an account could be coloured,
+        /// and absent for an account still following its kind.
+        var colorName: String? = nil
         var currencyCode: String
         var createdAt: String
     }

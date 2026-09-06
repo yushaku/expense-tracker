@@ -13,6 +13,9 @@ struct AccountDraft: Equatable {
     var kind: CashAccountKind
     var openingBalanceText: String
     var creditLimitText: String
+    /// Empty until a colour is picked, and left empty when it is not: an
+    /// account nobody has coloured keeps following its kind.
+    var colorName: String
 
     /// A new account starts at zero rather than blank: most accounts are opened
     /// with nothing in them yet, and an owner who does have a balance types over
@@ -22,12 +25,20 @@ struct AccountDraft: Equatable {
         name: String = "",
         kind: CashAccountKind = .normal,
         openingBalanceText: String = "0",
-        creditLimitText: String = ""
+        creditLimitText: String = "",
+        colorName: String = ""
     ) {
         self.name = name
         self.kind = kind
         self.openingBalanceText = openingBalanceText
         self.creditLimitText = creditLimitText
+        self.colorName = colorName
+    }
+
+    /// Which swatch the picker shows as chosen — the colour the account is
+    /// actually drawn in, picked or inherited.
+    var effectiveColorName: String {
+        colorName.isEmpty ? kind.defaultColorName : colorName
     }
 
     /// Seeds the editor with an existing account. The balance is formatted with
@@ -38,7 +49,8 @@ struct AccountDraft: Equatable {
             name: account.name,
             kind: account.kind,
             openingBalanceText: VNDCurrency.formatPlain(account.openingBalance),
-            creditLimitText: VNDCurrency.formatPlain(account.creditLimit)
+            creditLimitText: VNDCurrency.formatPlain(account.creditLimit),
+            colorName: account.colorName
         )
     }
 
@@ -46,6 +58,7 @@ struct AccountDraft: Equatable {
         let name: String
         let openingBalance: Decimal
         let creditLimit: Decimal
+        let colorName: String
     }
 
     private func validate() throws -> ValidatedValues {
@@ -78,7 +91,11 @@ struct AccountDraft: Equatable {
         return ValidatedValues(
             name: trimmedName,
             openingBalance: openingBalance,
-            creditLimit: creditLimit
+            creditLimit: creditLimit,
+            // An unknown name would draw as the palette's fallback while
+            // claiming to be something else, so it is dropped back to
+            // inheriting instead.
+            colorName: colorName.isEmpty ? "" : CategoryPalette.colorName(colorName)
         )
     }
 
@@ -91,6 +108,7 @@ struct AccountDraft: Equatable {
             kind: kind,
             openingBalance: values.openingBalance,
             creditLimit: values.creditLimit,
+            colorName: values.colorName,
             currencyCode: VNDCurrency.code,
             createdAt: createdAt
         )
@@ -105,5 +123,6 @@ struct AccountDraft: Equatable {
         account.kind = kind
         account.openingBalance = values.openingBalance
         account.creditLimit = values.creditLimit
+        account.colorName = values.colorName
     }
 }

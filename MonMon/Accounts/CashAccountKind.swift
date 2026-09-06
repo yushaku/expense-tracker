@@ -81,12 +81,19 @@ extension CashAccountKind {
         }
     }
 
-    var tint: Color {
+    /// The colour an account of this kind takes while nobody has picked one.
+    /// Named from `CategoryPalette` rather than taken straight from the theme,
+    /// so the picker can show the inherited colour as the chosen swatch.
+    var defaultColorName: String {
         switch self {
         case .normal:
-            MonMonTheme.accent
+            "green"
         case .credit:
-            MonMonTheme.credit
+            "peach"
         }
+    }
+
+    var tint: Color {
+        CategoryPalette.color(named: defaultColorName)
     }
 }

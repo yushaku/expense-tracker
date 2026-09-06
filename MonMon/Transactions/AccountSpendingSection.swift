@@ -151,7 +151,10 @@ struct AccountSpendingSection: View {
             return AccountSpendingDisplayRow(
                 account: accounts[accountIndex],
                 summary: summary,
-                tint: AccountPalette.tint(at: accountIndex)
+                tint: AccountPalette.tint(
+                    at: accountIndex,
+                    colorName: accounts[accountIndex].colorName
+                )
             )
         }
     }

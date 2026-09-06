@@ -16,6 +16,8 @@ struct AccountEditorForm: View {
     let saveErrorMessage: LocalizedStringKey?
     let onDelete: () -> Void
 
+    private let colorColumns = [GridItem(.adaptive(minimum: 44), spacing: 10)]
+
     var body: some View {
         ZStack {
             MonMonTheme.canvas
@@ -25,6 +27,7 @@ struct AccountEditorForm: View {
                 VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                     introduction
                     accountDetailsCard
+                    colorCard
                     openingBalanceCard
 
                     if draft.kind == .credit {
@@ -53,7 +56,10 @@ struct AccountEditorForm: View {
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(MonMonTheme.onAccent)
                 .frame(width: 46, height: 46)
-                .background(MonMonTheme.accent, in: RoundedRectangle(cornerRadius: 14))
+                .background(
+                    CategoryPalette.color(named: draft.effectiveColorName),
+                    in: RoundedRectangle(cornerRadius: 14)
+                )
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
@@ -186,6 +192,49 @@ struct AccountEditorForm: View {
                 }
             }
         }
+    }
+
+    /// The colour this account is drawn in — its card, its wedge in the cash
+    /// ring, its row in a spending report. Ten swatches rather than a colour
+    /// well, so an account can only ever take a colour the rest of the app
+    /// already draws in.
+    private var colorCard: some View {
+        card {
+            VStack(alignment: .leading, spacing: 14) {
+                sectionHeader("Colour", systemImage: "paintpalette.fill")
+
+                LazyVGrid(columns: colorColumns, spacing: 10) {
+                    ForEach(CategoryPalette.colorNames, id: \.self) { colorName in
+                        colorButton(colorName)
+                    }
+                }
+                .accessibilityIdentifier("account-color")
+            }
+        }
+    }
+
+    private func colorButton(_ colorName: String) -> some View {
+        let isSelected = draft.effectiveColorName == colorName
+
+        return Button {
+            draft.colorName = colorName
+        } label: {
+            Circle()
+                .fill(CategoryPalette.color(named: colorName))
+                .frame(width: 34, height: 34)
+                .overlay {
+                    // The tick, not the ring alone, says which colour is chosen.
+                    if isSelected {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(MonMonTheme.onAccent)
+                    }
+                }
+                .frame(width: 44, height: 44)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(colorName)
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 
     private var openingBalanceCard: some View {
