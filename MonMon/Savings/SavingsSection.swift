@@ -9,7 +9,7 @@ struct SavingsSection: View {
     let accounts: [CashAccount]
     /// Which order the books are listed in. Owned by the screen, so switching
     /// segments and coming back finds the same order.
-    let sort: InvestmentSort
+    @Binding var sort: InvestmentSort
     let onAdd: () -> Void
 
     var body: some View {
@@ -125,6 +125,8 @@ struct SavingsSection: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
                     .background(MonMonTheme.savings.opacity(0.16), in: Capsule())
+
+                InvestmentSortMenu(selection: $sort, tint: MonMonTheme.savings)
             }
 
             ForEach(sortedDeposits) { deposit in
