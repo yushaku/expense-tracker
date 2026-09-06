@@ -74,6 +74,8 @@ struct TransactionEditorView: View {
     @State private var isConfirmingDelete = false
     @State private var didApplyDefaults = false
     @State private var isApplyingCaptureDirection = false
+    @State private var isQuickAdding = false
+    @State private var rawEntry = ""
 
     init(mode: TransactionEditorMode, defaultDate: Date = .now) {
         self.mode = mode
@@ -109,6 +111,8 @@ struct TransactionEditorView: View {
         NavigationStack {
             TransactionEditorForm(
                 draft: $draft,
+                isQuickAdding: $isQuickAdding,
+                rawEntry: $rawEntry,
                 accounts: accounts,
                 categories: categories,
                 tripWorkspaces: tripWorkspaces,
@@ -128,12 +132,14 @@ struct TransactionEditorView: View {
                     .accessibilityIdentifier("cancel-transaction")
                 }
 
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        save()
+                if !isQuickAdding {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Save") {
+                            save()
+                        }
+                        .fontWeight(.semibold)
+                        .accessibilityIdentifier("save-transaction")
                     }
-                    .fontWeight(.semibold)
-                    .accessibilityIdentifier("save-transaction")
                 }
             }
             .confirmationDialog(
@@ -251,6 +257,7 @@ struct TransactionEditorView: View {
             // instead of filling them through the manual direction-change handler.
             isApplyingCaptureDirection = draft.kind != capture.kind
             draft.apply(capture: capture)
+            isQuickAdding = false
         } catch {
             saveErrorMessage = "Couldn’t understand that entry. Try again."
         }

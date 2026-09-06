@@ -153,10 +153,11 @@ rtk swift format lint --strict --recursive MonMon MonMonTests MonMonShareExtensi
 
 ### Adding transactions
 
-Add Transaction includes natural-language entry above the manual fields. Type a
-sentence such as `50k lunch cash yesterday`, choose **Fill transaction details**,
-review or complete the fields, then tap **Save**. Filling the form does not write
-transactions or pending captures. Expense entries retain the selected trip and
+Add Transaction has Expense, Income, and Quick Add tabs. In **Quick Add**, type a
+sentence such as `50k lunch cash yesterday`, then choose **Fill transaction details**.
+The editor switches to the matching Expense or Income tab to review or complete
+the fields before tapping **Save**. Quick Add text is retained when switching tabs.
+Filling the form does not write transactions or pending captures. Expense entries retain the selected trip and
 funding jar; income entries clear that expense-only routing.
 
 **Record Transaction** is the only Siri app shortcut. The former Quick Capture
