@@ -34,6 +34,9 @@ enum TransactionEntryTab: Int, CaseIterable {
 struct TransactionEditorForm: View {
     @Environment(\.locale) private var locale
     @Environment(\.layoutDirection) private var layoutDirection
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    @State private var pageTurnDirection = -1.0
 
     @Binding var draft: TransactionDraft
     @Binding var isQuickAdding: Bool
@@ -58,24 +61,13 @@ struct TransactionEditorForm: View {
                 VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                     entryTabs
 
-                    if isQuickAdding {
-                        TransactionCaptureEntry(rawEntry: $rawEntry, onApply: onCapture)
-                    } else {
-                        introduction
-                        amountCard
-                        detailsCard
-
-                        if showsTripRouting {
-                            tripRoutingCard
-                        }
-                    }
-
-                    if let saveErrorMessage {
-                        errorBanner(saveErrorMessage)
-                    }
-
-                    if isEditing {
-                        deleteButton
+                    ZStack(alignment: .top) {
+                        entryPage
+                            .id(entrySelection.wrappedValue)
+                            .transition(
+                                TransactionPageTurn(
+                                    direction: pageTurnDirection, reduceMotion: reduceMotion)
+                            )
                     }
                 }
                 .frame(maxWidth: 560)
@@ -94,14 +86,45 @@ struct TransactionEditorForm: View {
                         let horizontal =
                             layoutDirection == .rightToLeft
                             ? -value.translation.width : value.translation.width
-                        entrySelection.wrappedValue = entrySelection.wrappedValue.swiped(
+                        let current = entrySelection.wrappedValue
+                        let next = current.swiped(
                             horizontal: horizontal,
                             vertical: value.translation.height,
                             allowsQuickAdd: !isEditing
                         )
+                        guard next != current else { return }
+                        pageTurnDirection = value.translation.width < 0 ? -1 : 1
+                        withAnimation(.easeInOut(duration: reduceMotion ? 0.15 : 0.35)) {
+                            entrySelection.wrappedValue = next
+                        }
                     }
             )
         }
+    }
+
+    private var entryPage: some View {
+        VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+            if isQuickAdding {
+                TransactionCaptureEntry(rawEntry: $rawEntry, onApply: onCapture)
+            } else {
+                introduction
+                amountCard
+                detailsCard
+
+                if showsTripRouting {
+                    tripRoutingCard
+                }
+            }
+
+            if let saveErrorMessage {
+                errorBanner(saveErrorMessage)
+            }
+
+            if isEditing {
+                deleteButton
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var entryTabs: some View {
@@ -480,5 +503,22 @@ struct TransactionEditorForm: View {
         default:
             nil
         }
+    }
+}
+
+/// Rotate incoming and outgoing pages in opposite directions. The tab bar stays
+/// stationary; Reduce Motion replaces the depth effect with a brief crossfade.
+private struct TransactionPageTurn: Transition {
+    let direction: Double
+    let reduceMotion: Bool
+
+    func body(content: Content, phase: TransitionPhase) -> some View {
+        content
+            .rotation3DEffect(
+                .degrees(reduceMotion ? 0 : phase.value * direction * 85),
+                axis: (x: 0, y: 1, z: 0),
+                perspective: 0.3
+            )
+            .opacity(phase.isIdentity ? 1 : 0)
     }
 }

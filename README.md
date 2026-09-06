@@ -158,7 +158,8 @@ sentence such as `50k lunch cash yesterday`, then choose **Fill transaction deta
 The editor switches to the matching Expense or Income tab to review or complete
 the fields before tapping **Save**. Quick Add text is retained when switching tabs. Swipe left or right across the
 form to move between Income, Expense, and Quick Add; vertical drags still scroll
-the form. Swipes stop at the first and last tab.
+the form. Swipes stop at the first and last tab. A directional 3D page-turn animation
+accompanies each swipe, with a short crossfade when Reduce Motion is enabled.
 Filling the form does not write transactions or pending captures. Expense entries retain the selected trip and
 funding jar; income entries clear that expense-only routing.
 
