@@ -20,6 +20,8 @@ private enum AccountDetailTab: CaseIterable, Hashable {
 struct AccountDetailView: View {
     @Environment(\.appDateFormat) private var dateFormat
 
+    @Environment(\.dismiss) private var dismiss
+
     @Environment(\.locale) private var locale
 
     @Query(sort: \CashAccount.createdAt, order: .forward)
@@ -105,6 +107,14 @@ struct AccountDetailView: View {
             onEdit: { transactionEditorMode = .edit($0) }
         )
         .tint(MonMonTheme.accent)
+        // Deleting the account this screen is about leaves nothing here to
+        // show, so the screen goes with it rather than staying as an empty
+        // page under the account's old name.
+        .onChange(of: account?.id) { _, id in
+            if id == nil {
+                dismiss()
+            }
+        }
     }
 
     private func content(for account: CashAccount) -> some View {

@@ -3,23 +3,34 @@ import SwiftUI
 
 enum AccountEditorMode: Identifiable {
     case add
-    case edit(CashAccount)
+    /// The account's id travels beside the account itself, and every identity
+    /// question is answered from the id.
+    ///
+    /// Deleting an account is the reason. SwiftUI asks a presented sheet for
+    /// its `id` again as soon as the screen behind it changes — which deleting
+    /// an account is — and reading any property off a deleted model traps.
+    /// The id is a copy, so it answers after the row it names is gone.
+    case editing(id: UUID, account: CashAccount)
+
+    static func edit(_ account: CashAccount) -> AccountEditorMode {
+        .editing(id: account.id, account: account)
+    }
 
     var id: String {
         switch self {
         case .add:
             "add"
-        case .edit(let account):
-            account.id.uuidString
+        case .editing(let id, _):
+            id.uuidString
         }
     }
 
-    var editedAccount: CashAccount? {
+    var editedAccountID: UUID? {
         switch self {
         case .add:
             nil
-        case .edit(let account):
-            account
+        case .editing(let id, _):
+            id
         }
     }
 }
@@ -52,9 +63,20 @@ struct AccountEditorView: View {
         switch mode {
         case .add:
             _draft = State(initialValue: AccountDraft())
-        case .edit(let account):
+        case .editing(_, let account):
             _draft = State(initialValue: AccountDraft(account: account))
         }
+    }
+
+    /// The account being edited, as the store has it now. Resolved by id rather
+    /// than held, so deleting it leaves this `nil` instead of leaving the sheet
+    /// holding a row that no longer exists.
+    private var editedAccount: CashAccount? {
+        guard let id = mode.editedAccountID else {
+            return nil
+        }
+
+        return accounts.first { $0.id == id }
     }
 
     var body: some View {
@@ -70,7 +92,7 @@ struct AccountEditorView: View {
         NavigationStack {
             AccountEditorForm(
                 draft: $draft,
-                isEditing: mode.editedAccount != nil,
+                isEditing: mode.editedAccountID != nil,
                 canDelete: canDelete,
                 deleteBlockedReason: deleteBlockedReason,
                 requiresDestination: requiresDestination,
@@ -82,7 +104,7 @@ struct AccountEditorView: View {
                 onDelete: { isConfirmingDelete = true }
             )
             .task {
-                guard let editedAccount = mode.editedAccount else {
+                guard let editedAccount else {
                     return
                 }
 
@@ -91,7 +113,7 @@ struct AccountEditorView: View {
                     in: modelContext
                 )
             }
-            .navigationTitle(mode.editedAccount == nil ? "Add account" : "Edit account")
+            .navigationTitle(mode.editedAccountID == nil ? "Add account" : "Edit account")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -133,7 +155,7 @@ struct AccountEditorView: View {
     /// cannot do is take them with it: `AccountMerge` moves every record and
     /// the opening balance to another account first.
     private var canDelete: Bool {
-        guard let editedAccount = mode.editedAccount else {
+        guard let editedAccount else {
             return false
         }
 
@@ -151,7 +173,7 @@ struct AccountEditorView: View {
     /// much as its records: deleting an account holding money would take the
     /// money with it.
     private var requiresDestination: Bool {
-        guard let editedAccount = mode.editedAccount else {
+        guard let editedAccount else {
             return false
         }
 
@@ -162,7 +184,7 @@ struct AccountEditorView: View {
     /// unassigned one is in here on purpose: it is where money with nowhere
     /// else to go belongs.
     private var moveDestinations: [CashAccount] {
-        guard let editedAccount = mode.editedAccount else {
+        guard let editedAccount else {
             return []
         }
 
@@ -174,7 +196,7 @@ struct AccountEditorView: View {
     }
 
     private var deleteBlockedReason: LocalizedStringKey? {
-        guard let editedAccount = mode.editedAccount, !canDelete else {
+        guard let editedAccount, !canDelete else {
             return nil
         }
 
@@ -208,7 +230,7 @@ struct AccountEditorView: View {
         saveErrorMessage = nil
 
         do {
-            if let editedAccount = mode.editedAccount {
+            if let editedAccount {
                 try draft.apply(to: editedAccount)
             } else {
                 let account = try draft.makeAccount(id: UUID(), createdAt: .now)
@@ -232,7 +254,7 @@ struct AccountEditorView: View {
     }
 
     private func delete() {
-        guard let editedAccount = mode.editedAccount, canDelete else {
+        guard let editedAccount, canDelete else {
             return
         }
 
