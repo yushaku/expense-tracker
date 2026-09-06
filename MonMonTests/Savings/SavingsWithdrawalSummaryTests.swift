@@ -167,31 +167,64 @@ struct SavingsWithdrawalSummaryTests {
         #expect(presentation == .detailed)
     }
 
-    @Test("Matured books lead, active books follow, and settled books stay last")
-    func depositsAreSortedForAction() {
-        let active = makeDeposit()
-        active.name = "Active"
-        active.termMonths = 24
+    @Test("Deposits sort newest first by default")
+    func depositsSortByOpeningDate() {
+        let older = makeDeposit()
+        older.name = "Older"
+        older.openedAt = openedAt
 
-        let matured = makeDeposit()
-        matured.name = "Matured"
-        matured.termMonths = 1
-
-        let settled = makeDeposit()
-        settled.name = "Settled"
-        let settlement = makeWithdrawal(
-            from: settled,
-            principal: settled.principal,
-            received: settled.principal
-        )
-        let asOf = openedAt.addingTimeInterval(180 * 86_400)
+        let newer = makeDeposit()
+        newer.name = "Newer"
+        newer.openedAt = openedAt.addingTimeInterval(30 * 86_400)
 
         let sorted = SavingsWithdrawalSummary.sortedDeposits(
-            [settled, active, matured],
-            withdrawals: [settlement],
-            asOf: asOf
+            [older, newer],
+            withdrawals: [],
+            by: .date
         )
 
-        #expect(sorted.map(\.name) == ["Matured", "Active", "Settled"])
+        #expect(sorted.map(\.name) == ["Newer", "Older"])
+    }
+
+    /// What is still in the book, not what was put in it: a book half withdrawn
+    /// is worth half as much as the figure it was opened with.
+    @Test("Value sorts on the principal still held, largest first")
+    func depositsSortByRemainingPrincipal() {
+        let large = makeDeposit(principal: 100_000_000)
+        large.name = "Large"
+
+        let small = makeDeposit(principal: 40_000_000)
+        small.name = "Small"
+
+        let withdrawal = makeWithdrawal(
+            from: large,
+            principal: 90_000_000,
+            received: 90_000_000
+        )
+
+        let sorted = SavingsWithdrawalSummary.sortedDeposits(
+            [large, small],
+            withdrawals: [withdrawal],
+            by: .value
+        )
+
+        #expect(sorted.map(\.name) == ["Small", "Large"])
+    }
+
+    @Test("Name sorts A to Z")
+    func depositsSortByName() {
+        let bank = makeDeposit()
+        bank.name = "Vietcombank"
+
+        let coop = makeDeposit()
+        coop.name = "Agribank"
+
+        let sorted = SavingsWithdrawalSummary.sortedDeposits(
+            [bank, coop],
+            withdrawals: [],
+            by: .name
+        )
+
+        #expect(sorted.map(\.name) == ["Agribank", "Vietcombank"])
     }
 }

@@ -15,6 +15,9 @@ struct FundSection: View {
     /// positions as open.
     let sales: [FundSale]
     let kinds: [FundInstrumentKind]
+    /// Which order the cards are listed in. Owned by the screen, so switching
+    /// segments and coming back finds the same order.
+    var sort: InvestmentSort = .value
     let sectionTitle: LocalizedStringKey
     /// The key naming what one row holds — "fund" or "gold product". Kept as a
     /// key rather than a word, so the sentences built from it below read in the
@@ -205,7 +208,12 @@ struct FundSection: View {
     }
 
     private var groups: [FundPositionGroup] {
-        FundSummary.groups(holdings: displayedHoldings, instruments: instruments, sales: sales)
+        FundSummary.groups(
+            holdings: displayedHoldings,
+            instruments: instruments,
+            sales: sales,
+            by: sort
+        )
     }
 
     /// Counts both, because they answer different questions: how many funds are

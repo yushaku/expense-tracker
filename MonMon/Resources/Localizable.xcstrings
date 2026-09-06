@@ -13646,6 +13646,36 @@
           }
         }
       }
+    },
+    "Sort": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sắp xếp"
+          }
+        }
+      }
+    },
+    "Purchase date": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngày mua"
+          }
+        }
+      }
+    },
+    "Value": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giá trị"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
