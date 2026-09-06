@@ -80,8 +80,13 @@ enum BudgetJarSeed {
         locale: Locale = AppLanguage.stored.locale,
         saveChanges: Bool = true
     ) {
-        let existing = (try? context.fetchCount(FetchDescriptor<BudgetJar>())) ?? 0
+        guard let initialized = try? SeedState.isInitialized("budgetJars", in: context),
+            !initialized,
+            let existing = try? context.fetchCount(FetchDescriptor<BudgetJar>())
+        else { return }
+        do { try SeedState.mark("budgetJars", in: context) } catch { return }
         guard existing == 0 else {
+            if saveChanges { do { try SyncWriteGate.save(context) } catch { context.rollback() } }
             return
         }
 
@@ -107,7 +112,7 @@ enum BudgetJarSeed {
         }
 
         if saveChanges {
-            try? context.save()
+            do { try SyncWriteGate.save(context) } catch { context.rollback() }
         }
     }
 }

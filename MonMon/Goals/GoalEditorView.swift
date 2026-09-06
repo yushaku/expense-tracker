@@ -145,7 +145,7 @@ struct GoalEditorView: View {
         }
 
         do {
-            try modelContext.save()
+            try SyncWriteGate.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()
@@ -160,7 +160,7 @@ struct GoalEditorView: View {
 
         modelContext.delete(goal)
         do {
-            try modelContext.save()
+            try SyncWriteGate.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()

@@ -14526,6 +14526,746 @@
           }
         }
       }
+    },
+    "A sync is unfinished. Reconnect the paired device to finish it. Data already saved will not be applied twice.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Có phiên đồng bộ chưa hoàn tất. Kết nối lại thiết bị đã ghép để tiếp tục. Dữ liệu đã lưu sẽ không được áp dụng hai lần."
+          }
+        }
+      }
+    },
+    "Account ID": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tài khoản"
+          }
+        }
+      }
+    },
+    "Added": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã thêm"
+          }
+        }
+      }
+    },
+    "Added: %lld · Updated: %lld · Deleted: %lld": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm: %lld · Sửa: %lld · Xóa: %lld"
+          }
+        }
+      }
+    },
+    "After": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sau"
+          }
+        }
+      }
+    },
+    "Allocation percent": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tỷ lệ phân bổ"
+          }
+        }
+      }
+    },
+    "Allow camera access in Settings, or enter the pairing code manually.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cho phép camera trong Cài đặt hoặc nhập mã ghép đôi thủ công."
+          }
+        }
+      }
+    },
+    "Apply to both devices": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Áp dụng cho cả hai thiết bị"
+          }
+        }
+      }
+    },
+    "Applying changes": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang áp dụng thay đổi"
+          }
+        }
+      }
+    },
+    "Before": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trước"
+          }
+        }
+      }
+    },
+    "Camera access needed": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cần quyền truy cập camera"
+          }
+        }
+      }
+    },
+    "Category ID": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Danh mục"
+          }
+        }
+      }
+    },
+    "Choose a version for every conflict before syncing.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn phiên bản cho từng xung đột trước khi đồng bộ."
+          }
+        }
+      }
+    },
+    "Choose which version to keep": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn phiên bản muốn giữ"
+          }
+        }
+      }
+    },
+    "Color name": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Màu sắc"
+          }
+        }
+      }
+    },
+    "Comparing data": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang đối chiếu dữ liệu"
+          }
+        }
+      }
+    },
+    "Connect": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kết nối"
+          }
+        }
+      }
+    },
+    "Connected": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã kết nối"
+          }
+        }
+      }
+    },
+    "Connection interrupted. Reconnect both devices to continue.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kết nối bị gián đoạn. Kết nối lại hai thiết bị để tiếp tục."
+          }
+        }
+      }
+    },
+    "Could not save a recovery backup. Sync has stopped.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không lưu được bản sao phục hồi. Đồng bộ đã dừng."
+          }
+        }
+      }
+    },
+    "Created At": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thời điểm tạo"
+          }
+        }
+      }
+    },
+    "Created at": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thời điểm tạo"
+          }
+        }
+      }
+    },
+    "Currency code": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiền tệ"
+          }
+        }
+      }
+    },
+    "Data changed since the preview. Start sync again to review it.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dữ liệu đã thay đổi sau khi xem trước. Bắt đầu đồng bộ lại để kiểm tra."
+          }
+        }
+      }
+    },
+    "Delete / keep absent": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xóa / không thêm lại"
+          }
+        }
+      }
+    },
+    "Deleted": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã xóa"
+          }
+        }
+      }
+    },
+    "Device Sync": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đồng bộ thiết bị"
+          }
+        }
+      }
+    },
+    "Drafts and device settings stay on this device. Devices on guest Wi-Fi may be unable to discover each other. Allow Local Network access in system settings if discovery is blocked.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bản nháp và cài đặt thiết bị được giữ riêng. Wi-Fi khách có thể chặn các thiết bị tìm nhau. Nếu không tìm được, hãy cho phép truy cập Mạng cục bộ trong cài đặt hệ thống."
+          }
+        }
+      }
+    },
+    "Enter pairing code manually": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập mã ghép đôi thủ công"
+          }
+        }
+      }
+    },
+    "Export recovery backup": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xuất bản sao lưu khôi phục"
+          }
+        }
+      }
+    },
+    "Income allocation snapshot": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phân bổ thu nhập"
+          }
+        }
+      }
+    },
+    "Interest is an estimate on the original amount, shown but never counted. What you actually pay is an expense on the Spending screen.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lãi chỉ là ước tính trên số tiền gốc, hiển thị nhưng không bao giờ được cộng vào. Số bạn thực trả là một khoản chi ở màn hình Chi tiêu."
+          }
+        }
+      }
+    },
+    "Keep referenced item": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giữ mục đang được tham chiếu"
+          }
+        }
+      }
+    },
+    "Kind": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loại"
+          }
+        }
+      }
+    },
+    "No account yet. Add one on the Home tab first.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có tài khoản. Hãy thêm ở tab Trang chính trước."
+          }
+        }
+      }
+    },
+    "Occurred at": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thời điểm phát sinh"
+          }
+        }
+      }
+    },
+    "Occurred At": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thời điểm phát sinh"
+          }
+        }
+      }
+    },
+    "Open Device Sync": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở đồng bộ thiết bị"
+          }
+        }
+      }
+    },
+    "Open MonMon on both devices on the same Wi-Fi. Review changes before applying them to both devices.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở MonMon trên cả hai thiết bị cùng Wi-Fi. Xem trước thay đổi rồi áp dụng cho cả hai."
+          }
+        }
+      }
+    },
+    "Other device": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thiết bị kia"
+          }
+        }
+      }
+    },
+    "Pair": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghép đôi"
+          }
+        }
+      }
+    },
+    "Pair an iPhone": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghép đôi iPhone"
+          }
+        }
+      }
+    },
+    "Pair these devices first.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hãy ghép đôi hai thiết bị trước."
+          }
+        }
+      }
+    },
+    "Pairing code": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mã ghép đôi"
+          }
+        }
+      }
+    },
+    "Pairing QR code": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mã QR ghép đôi"
+          }
+        }
+      }
+    },
+    "Ready to connect": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sẵn sàng kết nối"
+          }
+        }
+      }
+    },
+    "Recent syncs": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Các lần đồng bộ gần đây"
+          }
+        }
+      }
+    },
+    "Reconnect to finish the pending sync first.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kết nối lại để hoàn tất phiên đồng bộ đang chờ trước."
+          }
+        }
+      }
+    },
+    "Review changes": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xem trước thay đổi"
+          }
+        }
+      }
+    },
+    "Role": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vai trò"
+          }
+        }
+      }
+    },
+    "Scan Mac pairing code": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quét mã ghép đôi trên Mac"
+          }
+        }
+      }
+    },
+    "Scan pairing code": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quét mã ghép đôi"
+          }
+        }
+      }
+    },
+    "Scan this code in MonMon on your iPhone.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quét mã này bằng MonMon trên iPhone."
+          }
+        }
+      }
+    },
+    "Show pairing code": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hiện mã ghép đôi"
+          }
+        }
+      }
+    },
+    "Some retained records need an item marked for deletion. Keep that item or change your choices.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Một số dữ liệu được giữ lại đang tham chiếu mục được chọn xóa. Hãy giữ mục đó hoặc thay đổi lựa chọn."
+          }
+        }
+      }
+    },
+    "Source import ID": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nguồn nhập sao kê"
+          }
+        }
+      }
+    },
+    "Source rule ID": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quy tắc định kỳ"
+          }
+        }
+      }
+    },
+    "Symbol name": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biểu tượng"
+          }
+        }
+      }
+    },
+    "Sync": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đồng bộ"
+          }
+        }
+      }
+    },
+    "Sync complete": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đồng bộ hoàn tất"
+          }
+        }
+      }
+    },
+    "Sync data exceeds the 100 MiB limit.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dữ liệu đồng bộ vượt giới hạn 100 MiB."
+          }
+        }
+      }
+    },
+    "Sync data is invalid. No changes were applied.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dữ liệu đồng bộ không hợp lệ. Chưa áp dụng thay đổi."
+          }
+        }
+      }
+    },
+    "Sync directly between your devices": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đồng bộ trực tiếp giữa các thiết bị"
+          }
+        }
+      }
+    },
+    "Sync incomplete": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đồng bộ chưa hoàn tất"
+          }
+        }
+      }
+    },
+    "Sync with your paired device over the same Wi-Fi. You review every change.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đồng bộ với thiết bị đã ghép đôi qua cùng Wi-Fi. Bạn xem trước mọi thay đổi."
+          }
+        }
+      }
+    },
+    "The devices need the same MonMon flavour and sync version.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hai thiết bị cần cùng bản MonMon Dev hoặc Prod và phiên bản đồng bộ tương thích."
+          }
+        }
+      }
+    },
+    "The other device is reviewing changes": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thiết bị kia đang xem trước thay đổi"
+          }
+        }
+      }
+    },
+    "The pairing code is invalid or belongs to another MonMon flavour.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mã ghép đôi không hợp lệ hoặc thuộc bản MonMon khác."
+          }
+        }
+      }
+    },
+    "This device": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thiết bị này"
+          }
+        }
+      }
+    },
+    "Transfers need two accounts. Add another on the Home tab first.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyển khoản cần hai tài khoản. Hãy thêm một tài khoản nữa ở tab Trang chính."
+          }
+        }
+      }
+    },
+    "Unpair": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hủy ghép đôi"
+          }
+        }
+      }
+    },
+    "Unpair this device?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hủy ghép đôi thiết bị này?"
+          }
+        }
+      }
+    },
+    "Waiting for the other device": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang chờ thiết bị kia"
+          }
+        }
+      }
+    },
+    "Your local data stays intact. Pair again to sync with another device.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dữ liệu trên máy được giữ nguyên. Ghép đôi lại để đồng bộ với thiết bị khác."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

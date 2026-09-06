@@ -142,7 +142,7 @@ struct FundInstrumentEditorView: View {
         }
 
         do {
-            try modelContext.save()
+            try SyncWriteGate.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()
@@ -158,7 +158,7 @@ struct FundInstrumentEditorView: View {
         modelContext.delete(instrument)
 
         do {
-            try modelContext.save()
+            try SyncWriteGate.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()

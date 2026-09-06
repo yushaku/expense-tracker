@@ -62,6 +62,7 @@ struct ContentView: View {
     #Preview("App · accounts") {
         ContentView()
             .modelContainer(PreviewData.populated)
+            .environment(SyncCoordinator(store: SyncSessionStore(container: PreviewData.populated)))
             .environment(AppLock(isLocked: false))
             .environment(AppRoute())
             .environment(NotificationCoordinator())
@@ -70,6 +71,7 @@ struct ContentView: View {
     #Preview("App · empty") {
         ContentView()
             .modelContainer(PreviewData.empty)
+            .environment(SyncCoordinator(store: SyncSessionStore(container: PreviewData.empty)))
             .environment(AppLock(isLocked: false))
             .environment(AppRoute())
             .environment(NotificationCoordinator())

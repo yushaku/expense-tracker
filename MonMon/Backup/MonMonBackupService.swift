@@ -8,8 +8,10 @@ enum MonMonBackupServiceError: Error, Equatable, Sendable {
     case invalidSnapshot
 }
 
-private extension MonMonBackupService {
-    func apply(_ payload: MonMonBackupPayload, in context: ModelContext) throws {
+extension MonMonBackupService {
+    func apply(
+        _ payload: MonMonBackupPayload, in context: ModelContext, includeDeviceData: Bool = true
+    ) throws {
         try reconcile(
             current: context.fetch(FetchDescriptor<CashAccount>()),
             records: payload.accounts,
@@ -120,16 +122,18 @@ private extension MonMonBackupService {
             make: makeTransaction,
             update: updateTransaction
         )
-        try reconcile(
-            current: context.fetch(FetchDescriptor<PendingTransactionCapture>()),
-            records: payload.pendingCaptures,
-            in: context,
-            modelID: \PendingTransactionCapture.id,
-            createdAt: \PendingTransactionCapture.createdAt,
-            recordID: { try MonMonBackupScalar.parseUUID($0.id) },
-            make: makePendingCapture,
-            update: updatePendingCapture
-        )
+        if includeDeviceData {
+            try reconcile(
+                current: context.fetch(FetchDescriptor<PendingTransactionCapture>()),
+                records: payload.pendingCaptures,
+                in: context,
+                modelID: \PendingTransactionCapture.id,
+                createdAt: \PendingTransactionCapture.createdAt,
+                recordID: { try MonMonBackupScalar.parseUUID($0.id) },
+                make: makePendingCapture,
+                update: updatePendingCapture
+            )
+        }
         try reconcile(
             current: context.fetch(FetchDescriptor<AccountTransfer>()),
             records: payload.transfers,
@@ -171,7 +175,12 @@ private extension MonMonBackupService {
             update: updateDebtPayment
         )
 
-        if payload.budgetJars.isEmpty {
+        if includeDeviceData && payload.budgetJars.isEmpty {
+            // Explicit backup restore historically installs default jars for an
+            // empty payload. Ordinary startup and P2P never reset this marker.
+            if let marker = try SyncMetadata.entry("seed/budgetJars", in: context) {
+                context.delete(marker)
+            }
             BudgetJarSeed.seedIfNeeded(in: context, saveChanges: false)
         }
     }
@@ -808,7 +817,7 @@ struct MonMonBackupService {
         container: ModelContainer,
         defaults: UserDefaults = .standard,
         recoveryURL: URL = MonMonBackupService.defaultRecoveryURL,
-        save: @escaping Save = { try $0.save() },
+        save: @escaping Save = { try SyncWriteGate.save($0) },
         writeRecovery: @escaping RecoveryWriter = MonMonBackupService.writeRecoveryData
     ) {
         self.container = container
@@ -901,7 +910,12 @@ struct MonMonBackupService {
         let context = ModelContext(container)
         context.autosaveEnabled = false
         do {
+            guard !SyncWriteGate.isLocked(container) else { throw SyncError.sessionPending }
+            guard try SyncSessionStore(container: container).state().pending == nil else {
+                throw SyncError.sessionPending
+            }
             try apply(validated.payload, in: context)
+            try SyncSessionStore.invalidateAfterRestore(in: context)
             try save(context)
         } catch {
             context.rollback()
@@ -916,9 +930,15 @@ struct MonMonBackupService {
         return MonMonBackupRestoreReport(restoredRecordCount: validated.payload.recordCount)
     }
 
-    private func snapshotPayload() throws -> MonMonBackupPayload {
+    func snapshotPayload() throws -> MonMonBackupPayload {
         let context = ModelContext(container)
         context.autosaveEnabled = false
+        return try Self.snapshotPayload(in: context, preferences: preferenceRecord())
+    }
+
+    static func snapshotPayload(
+        in context: ModelContext, preferences: MonMonBackupPayload.Preferences = .empty
+    ) throws -> MonMonBackupPayload {
         return MonMonBackupPayload(
             accounts: try context.fetch(FetchDescriptor<CashAccount>()).map(accountRecord),
             savingsDeposits: try context.fetch(FetchDescriptor<SavingsDeposit>()).map(
@@ -954,11 +974,11 @@ struct MonMonBackupService {
             recurringRules: try context.fetch(FetchDescriptor<RecurringRule>()).map(
                 recurringRuleRecord
             ),
-            preferences: preferenceRecord()
+            preferences: preferences
         )
     }
 
-    private func accountRecord(_ model: CashAccount) -> MonMonBackupPayload.AccountRecord {
+    private static func accountRecord(_ model: CashAccount) -> MonMonBackupPayload.AccountRecord {
         MonMonBackupPayload.AccountRecord(
             id: MonMonBackupScalar.uuid(model.id),
             name: model.name,
@@ -971,7 +991,7 @@ struct MonMonBackupService {
         )
     }
 
-    private func savingsDepositRecord(
+    private static func savingsDepositRecord(
         _ model: SavingsDeposit
     ) -> MonMonBackupPayload.SavingsDepositRecord {
         MonMonBackupPayload.SavingsDepositRecord(
@@ -987,7 +1007,7 @@ struct MonMonBackupService {
         )
     }
 
-    private func savingsWithdrawalRecord(
+    private static func savingsWithdrawalRecord(
         _ model: SavingsWithdrawal
     ) -> MonMonBackupPayload.SavingsWithdrawalRecord {
         MonMonBackupPayload.SavingsWithdrawalRecord(
@@ -1003,7 +1023,7 @@ struct MonMonBackupService {
         )
     }
 
-    private func fundInstrumentRecord(
+    private static func fundInstrumentRecord(
         _ model: FundInstrument
     ) -> MonMonBackupPayload.FundInstrumentRecord {
         MonMonBackupPayload.FundInstrumentRecord(
@@ -1024,7 +1044,7 @@ struct MonMonBackupService {
         )
     }
 
-    private func fundHoldingRecord(
+    private static func fundHoldingRecord(
         _ model: FundHolding
     ) -> MonMonBackupPayload.FundHoldingRecord {
         MonMonBackupPayload.FundHoldingRecord(
@@ -1040,7 +1060,7 @@ struct MonMonBackupService {
         )
     }
 
-    private func fundSaleRecord(_ model: FundSale) -> MonMonBackupPayload.FundSaleRecord {
+    private static func fundSaleRecord(_ model: FundSale) -> MonMonBackupPayload.FundSaleRecord {
         MonMonBackupPayload.FundSaleRecord(
             id: MonMonBackupScalar.uuid(model.id),
             holdingID: model.holdingID.map(MonMonBackupScalar.uuid),
@@ -1057,7 +1077,7 @@ struct MonMonBackupService {
         )
     }
 
-    private func categoryRecord(
+    private static func categoryRecord(
         _ model: TransactionCategory
     ) -> MonMonBackupPayload.CategoryRecord {
         MonMonBackupPayload.CategoryRecord(
@@ -1071,7 +1091,7 @@ struct MonMonBackupService {
         )
     }
 
-    private func budgetJarRecord(
+    private static func budgetJarRecord(
         _ model: BudgetJar
     ) -> MonMonBackupPayload.BudgetJarRecord {
         MonMonBackupPayload.BudgetJarRecord(
@@ -1099,7 +1119,8 @@ struct MonMonBackupService {
         try GoalContributionStore.replace(entries: contributions, on: goal)
     }
 
-    private func goalRecord(_ model: FinancialGoal) throws -> MonMonBackupPayload.GoalRecord {
+    private static func goalRecord(_ model: FinancialGoal) throws -> MonMonBackupPayload.GoalRecord
+    {
         guard let fundingJarID = model.fundingJarID else {
             throw MonMonBackupServiceError.invalidSnapshot
         }
@@ -1126,7 +1147,7 @@ struct MonMonBackupService {
         )
     }
 
-    private func tripWorkspaceRecord(
+    private static func tripWorkspaceRecord(
         _ model: TripWorkspace
     ) -> MonMonBackupPayload.TripWorkspaceRecord {
         MonMonBackupPayload.TripWorkspaceRecord(
@@ -1144,7 +1165,7 @@ struct MonMonBackupService {
         )
     }
 
-    private func transactionRecord(
+    private static func transactionRecord(
         _ model: MoneyTransaction
     ) -> MonMonBackupPayload.TransactionRecord {
         MonMonBackupPayload.TransactionRecord(
@@ -1165,7 +1186,7 @@ struct MonMonBackupService {
         )
     }
 
-    private func pendingCaptureRecord(
+    private static func pendingCaptureRecord(
         _ model: PendingTransactionCapture
     ) -> MonMonBackupPayload.PendingCaptureRecord {
         MonMonBackupPayload.PendingCaptureRecord(
@@ -1182,7 +1203,7 @@ struct MonMonBackupService {
         )
     }
 
-    private func transferRecord(
+    private static func transferRecord(
         _ model: AccountTransfer
     ) -> MonMonBackupPayload.TransferRecord {
         MonMonBackupPayload.TransferRecord(
@@ -1199,7 +1220,7 @@ struct MonMonBackupService {
         )
     }
 
-    private func debtRecord(_ model: Debt) -> MonMonBackupPayload.DebtRecord {
+    private static func debtRecord(_ model: Debt) -> MonMonBackupPayload.DebtRecord {
         MonMonBackupPayload.DebtRecord(
             id: MonMonBackupScalar.uuid(model.id),
             counterparty: model.counterparty,
@@ -1215,7 +1236,7 @@ struct MonMonBackupService {
         )
     }
 
-    private func debtPaymentRecord(
+    private static func debtPaymentRecord(
         _ model: DebtPayment
     ) -> MonMonBackupPayload.DebtPaymentRecord {
         MonMonBackupPayload.DebtPaymentRecord(
@@ -1230,7 +1251,7 @@ struct MonMonBackupService {
         )
     }
 
-    private func recurringRuleRecord(
+    private static func recurringRuleRecord(
         _ model: RecurringRule
     ) -> MonMonBackupPayload.RecurringRuleRecord {
         MonMonBackupPayload.RecurringRuleRecord(

@@ -4,6 +4,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(SyncCoordinator.self) private var syncCoordinator
     @Environment(AppLock.self) private var appLock
     @Environment(NotificationCoordinator.self) private var notificationCoordinator
     @Environment(\.modelContext) private var modelContext
@@ -53,6 +54,21 @@ struct SettingsView: View {
                         notificationCard
                         voiceCaptureCard
                         securityCard
+                        card {
+                            VStack(alignment: .leading, spacing: 12) {
+                                sectionHeader(
+                                    "Device Sync", systemImage: "laptopcomputer.and.iphone")
+                                Text(
+                                    "Sync with your paired device over the same Wi-Fi. You review every change."
+                                )
+                                .font(.subheadline).foregroundStyle(MonMonTheme.textSecondary)
+                                Button("Open Device Sync") {
+                                    syncCoordinator.refresh()
+                                    syncCoordinator.isPresented = true
+                                }
+                                .accessibilityIdentifier("settings-device-sync")
+                            }
+                        }
                         backupCard
                         #if os(macOS)
                             MCPSettingsCard()
@@ -437,6 +453,7 @@ struct SettingsView: View {
             .environment(AppLock(isLocked: false))
             .environment(NotificationCoordinator())
             .modelContainer(PreviewData.populated)
+            .environment(SyncCoordinator(store: SyncSessionStore(container: PreviewData.populated)))
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
             .preferredColorScheme(MonMonTheme.colorScheme)

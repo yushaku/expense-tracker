@@ -7,6 +7,7 @@ import SwiftUI
 struct MonMonApp: App {
     private let container: ModelContainer
     @State private var appLock: AppLock
+    @State private var syncCoordinator: SyncCoordinator
     @State private var appRoute: AppRoute
     @State private var notificationCoordinator: NotificationCoordinator
     #if os(macOS)
@@ -31,6 +32,16 @@ struct MonMonApp: App {
             fatalError("Model container failed: \(error)")
         }
         container = modelContainer
+        modelContainer.mainContext.autosaveEnabled = false
+        let sync = SyncCoordinator(store: SyncSessionStore(container: modelContainer))
+        sync.mayConnect = { !appLock.isLocked }
+        _syncCoordinator = State(initialValue: sync)
+        var canInitializeStore = !sync.writesLocked
+        if canInitializeStore {
+            do { try SeedState.migrateExistingStore(in: modelContainer.mainContext) } catch {
+                canInitializeStore = false
+            }
+        }
 
         let transactionCaptureDependency = TransactionCaptureIntentDependency(
             container: modelContainer
@@ -43,30 +54,32 @@ struct MonMonApp: App {
             }
         )
 
-        AccountSeed.seedDefaultBankIfNeeded(in: modelContainer.mainContext)
-        AccountSeed.ensureUnassignedExists(in: modelContainer.mainContext)
-        CategorySeed.seedIfEmpty(in: modelContainer.mainContext)
-        BudgetJarSeed.seedIfNeeded(in: modelContainer.mainContext)
+        if canInitializeStore {
+            AccountSeed.seedDefaultBankIfNeeded(in: modelContainer.mainContext)
+            AccountSeed.ensureUnassignedExists(in: modelContainer.mainContext)
+            CategorySeed.seedIfEmpty(in: modelContainer.mainContext)
+            BudgetJarSeed.seedIfNeeded(in: modelContainer.mainContext)
 
-        do {
-            try StoreReconciler.reconcile(in: modelContainer.mainContext)
-        } catch {
-            // A store that opened is worth showing. A duplicate that survives
-            // renders as two rows the owner can merge by hand, which is worse
-            // than folding it and better than not launching.
-            assertionFailure("Reconcile failed: \(error)")
+            do {
+                try StoreReconciler.reconcile(in: modelContainer.mainContext)
+            } catch {
+                // A store that opened is worth showing. A duplicate that survives
+                // renders as two rows the owner can merge by hand, which is worse
+                // than folding it and better than not launching.
+                assertionFailure("Reconcile failed: \(error)")
+            }
+
+            do {
+                // After reconciling, so a rule that arrived twice has been folded
+                // into one before either copy is asked what it owes.
+                try RecurringGenerator.generate(in: modelContainer.mainContext)
+            } catch {
+                // The same bargain: an entry the owner adds by hand is a smaller
+                // loss than a launch that does not happen.
+                assertionFailure("Recurring generation failed: \(error)")
+            }
+
         }
-
-        do {
-            // After reconciling, so a rule that arrived twice has been folded
-            // into one before either copy is asked what it owes.
-            try RecurringGenerator.generate(in: modelContainer.mainContext)
-        } catch {
-            // The same bargain: an entry the owner adds by hand is a smaller
-            // loss than a launch that does not happen.
-            assertionFailure("Recurring generation failed: \(error)")
-        }
-
         #if os(macOS)
             do {
                 let configuration = try MCPRuntimeConfiguration.current()
@@ -93,11 +106,44 @@ struct MonMonApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .id(syncCoordinator.contentRevision)
+                .disabled(syncCoordinator.writesLocked)
+                .environment(syncCoordinator)
                 .environment(appLock)
                 .environment(appRoute)
                 .environment(notificationCoordinator)
+                .sheet(isPresented: $syncCoordinator.isPresented) {
+                    SyncView()
+                        .environment(syncCoordinator)
+                        .environment(appLock)
+                }
                 .task {
+                    syncCoordinator.onApplied = {
+                        if let snapshot = try? syncCoordinator.store.snapshot() {
+                            try? SyncLocalReferences.reconcile(snapshot)
+                        }
+                        Task { await notificationCoordinator.reconcile(in: container.mainContext) }
+                        #if os(macOS)
+                            mcpAccessManager.refreshSnapshotIfAllowed()
+                        #endif
+                    }
+                    if !MonMonProcess.isRunningUnitTests,
+                        let snapshot = try? syncCoordinator.store.snapshot(),
+                        (try? syncCoordinator.store.state().baseline) != nil
+                    {
+                        try? SyncLocalReferences.reconcile(snapshot)
+                    }
+                    if syncCoordinator.writesLocked && !appLock.isLocked {
+                        syncCoordinator.isPresented = true
+                    }
                     await notificationCoordinator.reconcile(in: container.mainContext)
+                }
+                .onChange(of: appLock.isLocked) { _, locked in
+                    if locked {
+                        syncCoordinator.disconnect()
+                    } else if syncCoordinator.writesLocked {
+                        syncCoordinator.isPresented = true
+                    }
                 }
                 #if os(macOS)
                     .environment(mcpAccessManager)
@@ -108,6 +154,11 @@ struct MonMonApp: App {
                 // owner could see one.
                 .onChange(of: scenePhase) { _, phase in
                     guard phase == .active else {
+                        if phase == .background { syncCoordinator.disconnect() }
+                        return
+                    }
+                    guard !syncCoordinator.writesLocked else {
+                        if !appLock.isLocked { syncCoordinator.isPresented = true }
                         return
                     }
                     _ = try? StoreReconciler.reconcile(in: container.mainContext)
