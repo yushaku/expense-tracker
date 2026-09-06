@@ -79,10 +79,6 @@ struct InvestmentsScreen: View {
 
                     segmentPicker
 
-                    if !isSelectedSectionEmpty {
-                        sortMenu
-                    }
-
                     selectedSection
                 }
                 .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -300,26 +296,6 @@ struct InvestmentsScreen: View {
         sorts[segment] ?? .date
     }
 
-    /// A menu rather than another row of tabs: the segment picker directly above
-    /// already spends the width, and the order is picked far less often than the
-    /// segment is.
-    private var sortMenu: some View {
-        Menu {
-            Picker("Sort", selection: sortBinding) {
-                ForEach(InvestmentSort.allCases) { option in
-                    Label(option.title, systemImage: option.systemImage)
-                        .tag(option)
-                }
-            }
-        } label: {
-            Label(sort.title, systemImage: "arrow.up.arrow.down")
-                .font(.subheadline.weight(.semibold))
-        }
-        .frame(maxWidth: .infinity, alignment: .trailing)
-        .accessibilityLabel("Sort")
-        .accessibilityIdentifier("investment-sort")
-    }
-
     private var sortBinding: Binding<InvestmentSort> {
         Binding(
             get: { sort },
@@ -335,7 +311,7 @@ struct InvestmentsScreen: View {
                 deposits: deposits,
                 withdrawals: withdrawals,
                 accounts: accounts,
-                sort: sort
+                sort: sortBinding
             ) {
                 add()
             }
@@ -345,7 +321,7 @@ struct InvestmentsScreen: View {
                 instruments: instruments,
                 sales: sales,
                 kinds: [.fund, .etf],
-                sort: sort,
+                sort: sortBinding,
                 sectionTitle: "Funds",
                 itemNameKey: "fund",
                 emptyTitle: "Track your funds and ETFs",
@@ -370,7 +346,7 @@ struct InvestmentsScreen: View {
                 instruments: instruments,
                 sales: sales,
                 kinds: [.gold],
-                sort: sort,
+                sort: sortBinding,
                 sectionTitle: "Gold",
                 itemNameKey: "gold product",
                 emptyTitle: "Track your physical gold",
@@ -394,7 +370,7 @@ struct InvestmentsScreen: View {
                 instruments: instruments,
                 sales: sales,
                 kinds: [.crypto],
-                sort: sort,
+                sort: sortBinding,
                 sectionTitle: "Crypto",
                 itemNameKey: "coin",
                 emptyTitle: "Track your coins",

@@ -17,7 +17,7 @@ struct FundSection: View {
     let kinds: [FundInstrumentKind]
     /// Which order the cards are listed in. Owned by the screen, so switching
     /// segments and coming back finds the same order.
-    var sort: InvestmentSort = .value
+    @Binding var sort: InvestmentSort
     let sectionTitle: LocalizedStringKey
     /// The key naming what one row holds — "fund" or "gold product". Kept as a
     /// key rather than a word, so the sentences built from it below read in the
@@ -312,6 +312,8 @@ struct FundSection: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
                     .background(MonMonTheme.funds.opacity(0.16), in: Capsule())
+
+                InvestmentSortMenu(selection: $sort, tint: MonMonTheme.funds)
 
                 if let onRefresh {
                     refreshButton(onRefresh)
