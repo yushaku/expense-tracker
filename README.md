@@ -121,19 +121,32 @@ before signing succeeds. Xcode registers them when you add the capability under
 
 ### Build
 
+Run the commands below from the repository root. All build/test commands and
+install scripts share `build/DerivedData/` inside this workspace. It retains
+compiled intermediates, package checkouts, and test results between runs; `build/`
+is ignored by Git. Keep this directory to reuse the cache. After deleting it,
+the next build recreates it and takes longer. Xcode separates products by SDK
+and configuration within this directory; run builds/tests sequentially.
+
+Scripts resolve this default relative to their project root, even when invoked
+from another directory. `MONMON_DERIVED_DATA_PATH` overrides the shared script
+cache; `MONMON_MAC_DERIVED_DATA_PATH` and `MONMON_PROD_DERIVED_DATA_PATH` take
+precedence for their respective scripts. For direct `xcodebuild` commands, use
+`-derivedDataPath build/DerivedData` as shown below.
+
 Both commands compile without signing, so neither needs a device, a signing
 team, or an installed Simulator runtime.
 
 Build the native Mac app:
 
 ```sh
-rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO build
+rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath build/DerivedData CODE_SIGNING_ALLOWED=NO build
 ```
 
 Build against the iPhone Simulator SDK without requiring an installed runtime:
 
 ```sh
-rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -sdk iphonesimulator -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=NO build
+rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -sdk iphonesimulator -derivedDataPath build/DerivedData CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=NO build
 ```
 
 ### Test and format
@@ -141,7 +154,7 @@ rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -sd
 Run the macOS unit and in-memory persistence tests:
 
 ```sh
-rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/MonMonDerivedData CODE_SIGNING_ALLOWED=NO test
+rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath build/DerivedData CODE_SIGNING_ALLOWED=NO test
 ```
 
 Check Swift formatting:

@@ -4,7 +4,8 @@ set -euo pipefail
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 script="$project_root/scripts/install-mac.sh"
-test_root="$(mktemp -d "${TMPDIR:-/tmp}/monmon-install-mac-tests.XXXXXX")"
+mkdir -p "$project_root/build/tests"
+test_root="$(mktemp -d "$project_root/build/tests/monmon-install-mac-tests.XXXXXX")"
 fake_bin="$test_root/bin"
 command_log="$test_root/commands.log"
 
