@@ -9,7 +9,7 @@ project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$project_root"
 
 flavour="${1:-dev}"
-derived_data_path="${MONMON_MAC_DERIVED_DATA_PATH:-/tmp/MonMonMacDerivedData}"
+derived_data_path="${MONMON_MAC_DERIVED_DATA_PATH:-${MONMON_DERIVED_DATA_PATH:-$project_root/build/DerivedData}}"
 install_dir="${MONMON_MAC_INSTALL_DIR:-$HOME/Applications}"
 
 case "$flavour" in

@@ -56,9 +56,12 @@ the identifiers.
 ## Quality gates
 
 Three gates, cheapest first. All of them use the fixed
-`-derivedDataPath /tmp/MonMonDerivedData` from the build and test sections of
+`-derivedDataPath build/DerivedData` from the build and test sections of
 `README.md`: that is what makes a repeat run incremental instead of near-cold.
-Measured on this project, the whole loop is about five seconds warm.
+Run these commands from the repository root. The install/archive scripts use
+this same workspace cache by default. Keep `build/DerivedData/` between runs;
+do not clean it routinely. `build/` is ignored by Git. Run builds/tests one at
+a time because they share the cache.
 
 - **Format** — `xcrun swift-format lint -r MonMon MonMonTests`. A second or
   so, and it is the gate most often forgotten.
