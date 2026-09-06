@@ -4,6 +4,8 @@ struct TransactionEditorForm: View {
     @Environment(\.locale) private var locale
 
     @Binding var draft: TransactionDraft
+    @Binding var isQuickAdding: Bool
+    @Binding var rawEntry: String
 
     let accounts: [CashAccount]
     let categories: [TransactionCategory]
@@ -22,15 +24,18 @@ struct TransactionEditorForm: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                    introduction
-                    if !isEditing {
-                        TransactionCaptureEntry(onApply: onCapture)
-                    }
-                    amountCard
-                    detailsCard
+                    entryTabs
 
-                    if showsTripRouting {
-                        tripRoutingCard
+                    if isQuickAdding {
+                        TransactionCaptureEntry(rawEntry: $rawEntry, onApply: onCapture)
+                    } else {
+                        introduction
+                        amountCard
+                        detailsCard
+
+                        if showsTripRouting {
+                            tripRoutingCard
+                        }
                     }
 
                     if let saveErrorMessage {
@@ -52,6 +57,35 @@ struct TransactionEditorForm: View {
             // nothing to scroll and so has no reason to bounce.
             .scrollBounceBehavior(.basedOnSize)
         }
+    }
+
+    private var entryTabs: some View {
+        Picker("Entry method", selection: entrySelection) {
+            ForEach(TransactionKind.allCases, id: \.rawValue) { kind in
+                Text(kind.displayName)
+                    .tag(Optional(kind))
+            }
+            if !isEditing {
+                Text("Quick Add")
+                    .tag(TransactionKind?.none)
+            }
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .accessibilityIdentifier("transaction-kind")
+    }
+
+    // A nil selection represents Quick Add without changing the draft's direction.
+    private var entrySelection: Binding<TransactionKind?> {
+        Binding(
+            get: { isQuickAdding ? nil : draft.kind },
+            set: { kind in
+                isQuickAdding = kind == nil
+                if let kind {
+                    draft.kind = kind
+                }
+            }
+        )
     }
 
     private var introduction: some View {
@@ -81,16 +115,6 @@ struct TransactionEditorForm: View {
     private var amountCard: some View {
         card {
             VStack(alignment: .leading, spacing: 14) {
-                Picker("Direction", selection: $draft.kind) {
-                    ForEach(TransactionKind.allCases, id: \.rawValue) {
-                        Text($0.displayName)
-                            .tag($0)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .accessibilityIdentifier("transaction-kind")
-
                 HStack(spacing: 12) {
                     Text(draft.kind.signLabel)
                         .font(.title2.weight(.bold))

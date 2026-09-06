@@ -3,9 +3,9 @@ import SwiftUI
 /// Inline natural-language input for the transaction editor. Applying an entry
 /// only fills the draft; the editor owns validation and saving.
 struct TransactionCaptureEntry: View {
+    @Binding var rawEntry: String
     let onApply: (String) -> Void
 
-    @State private var rawEntry = ""
     @FocusState private var isEntryFocused: Bool
 
     var body: some View {
@@ -34,7 +34,7 @@ struct TransactionCaptureEntry: View {
             .disabled(rawEntry.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             .accessibilityIdentifier("quick-capture-submit")
 
-            Text("Review the details below, then tap Save.")
+            Text("Fill the details, then review them in Income or Expense before saving.")
                 .font(.caption)
                 .foregroundStyle(MonMonTheme.textSecondary)
         }

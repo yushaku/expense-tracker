@@ -1,18 +1,38 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "Review the details below, then tap Save.": {
+    "Entry method": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cách nhập"
+          }
+        }
+      }
+    },
+    "Quick Add": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm nhanh"
+          }
+        }
+      }
+    },
+    "Fill the details, then review them in Income or Expense before saving.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Review the details below, then tap Save."
+            "value": "Fill the details, then review them in Income or Expense before saving."
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kiểm tra thông tin bên dưới, rồi nhấn Lưu."
+            "value": "Điền thông tin, rồi kiểm tra trong tab Thu hoặc Chi trước khi lưu."
           }
         }
       }
