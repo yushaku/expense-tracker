@@ -5,6 +5,36 @@ import Testing
 
 @Suite("Gold weight")
 struct GoldWeightTests {
+    @Test("Gold sale summaries follow the selected app language")
+    func saleSummaryUsesSelectedLanguage() {
+        let quantity = FundInstrumentKind.gold.policy.quantity
+        let weight = Decimal(string: "0.55") ?? 0
+        #expect(
+            quantity.saleDescription(storedUnits: weight, locale: Locale(identifier: "en"))
+                == "5,5 mace (0,55 tael)")
+        #expect(
+            quantity.saleDescription(storedUnits: weight, locale: Locale(identifier: "vi"))
+                == "5,5 chỉ (0,55 lượng)")
+    }
+
+    @Test("Gold units and price labels are translated in both languages")
+    func goldLabelsAreLocalized() {
+        let english = Locale(identifier: "en")
+        let vietnamese = Locale(identifier: "vi")
+        #expect(AppText.string(key: GoldUnit.luong.displayNameKey, in: english) == "tael")
+        #expect(AppText.string(key: GoldUnit.luong.displayNameKey, in: vietnamese) == "lượng")
+        #expect(AppText.string(key: GoldUnit.chi.displayNameKey, in: english) == "mace")
+        #expect(AppText.string(key: GoldUnit.chi.displayNameKey, in: vietnamese) == "chỉ")
+        #expect(FundInstrumentKind.gold.priceLabel(in: english) == "Shop buy price per tael")
+        #expect(FundInstrumentKind.gold.priceLabel(in: vietnamese) == "Giá tiệm mua vào mỗi lượng")
+        #expect(
+            FundInstrumentKind.gold.policy.quantity.summaryValue(storedUnits: 1, locale: english)
+                == "10 mace (1 tael)")
+        #expect(
+            FundInstrumentKind.gold.policy.quantity.summaryValue(storedUnits: 1, locale: vietnamese)
+                == "10 chỉ (1 lượng)")
+    }
+
     @Test("Ten chỉ make one lượng")
     func chiConvertToLuong() {
         #expect(GoldWeight.chiPerLuong == 10)
@@ -27,7 +57,9 @@ struct GoldWeightTests {
 
     @Test("The label renders both units")
     func labelRendersBothUnits() {
-        #expect(GoldWeight.label(luong: Decimal(string: "0.55") ?? 0) == "5,5 chỉ (0,55 lượng)")
+        #expect(
+            GoldWeight.label(luong: Decimal(string: "0.55") ?? 0, locale: Locale(identifier: "vi"))
+                == "5,5 chỉ (0,55 lượng)")
     }
 
     @Test("Zero and negative input keep their sign for draft validation")
@@ -97,7 +129,7 @@ struct GoldWeightTests {
 
     @Test("Each unit names itself")
     func unitsAreNamed() {
-        #expect(GoldUnit.chi.displayNameKey == "chỉ")
-        #expect(GoldUnit.luong.displayNameKey == "lượng")
+        #expect(GoldUnit.chi.displayNameKey == "mace")
+        #expect(GoldUnit.luong.displayNameKey == "tael")
     }
 }

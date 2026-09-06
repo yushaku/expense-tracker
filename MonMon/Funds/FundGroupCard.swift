@@ -112,7 +112,7 @@ struct FundGroupCard: View {
     }
 
     private var quantityValue: String {
-        instrumentPolicy.quantity.summaryValue(storedUnits: group.units)
+        instrumentPolicy.quantity.summaryValue(storedUnits: group.units, locale: locale)
     }
 
     private var instrumentPolicy: FundInstrumentPolicy {

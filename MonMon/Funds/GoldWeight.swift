@@ -13,8 +13,9 @@ enum GoldWeight {
         UnitQuantity.format(luong * chiPerLuong)
     }
 
-    static func label(luong: Decimal) -> String {
-        "\(formatChi(luong: luong)) chỉ (\(UnitQuantity.format(luong)) lượng)"
+    static func label(luong: Decimal, locale: Locale) -> String {
+        AppText.string(
+            "\(formatChi(luong: luong)) mace (\(UnitQuantity.format(luong)) tael)", in: locale)
     }
 }
 
@@ -48,9 +49,9 @@ enum GoldUnit: String, CaseIterable, Identifiable, Sendable {
     var displayNameKey: String {
         switch self {
         case .chi:
-            "chỉ"
+            "mace"
         case .luong:
-            "lượng"
+            "tael"
         }
     }
 

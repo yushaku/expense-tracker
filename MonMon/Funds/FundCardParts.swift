@@ -224,7 +224,7 @@ struct FundPriceStatusRow: View {
         let sell =
             instrument.askPricePerUnit > 0
             ? VNDCurrency.formatUnitPrice(instrument.askPricePerUnit) : "—"
-        return AppText.string("Shop buys \(buy) · sells \(sell) per lượng", in: locale)
+        return AppText.string("Shop buys \(buy) · sells \(sell) per tael", in: locale)
     }
 }
 

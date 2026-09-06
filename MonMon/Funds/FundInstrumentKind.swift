@@ -37,13 +37,13 @@ struct FundInstrumentPolicy: Equatable, Sendable {
         static let goldWeight = Quantity(
             displayedUnitsPerStoredUnit: GoldWeight.chiPerLuong,
             saleFieldTitleKey: "Weight to sell",
-            holdingFieldTitleKey: "Weight (chỉ)",
+            holdingFieldTitleKey: "Weight (mace)",
             accessibilityLabelKey: "Weight",
-            entryUnitLabelKey: "chỉ",
+            entryUnitLabelKey: "mace",
             metricTitle: "WEIGHT",
             soldMetricTitle: "SOLD WEIGHT",
             invalidEntryMessageKey: "Enter a valid weight.",
-            invalidHoldingMessageKey: "Enter a valid weight in chỉ.",
+            invalidHoldingMessageKey: "Enter a valid weight in mace.",
             nonPositiveHoldingMessageKey: "Weight must be greater than zero.",
             usesGoldSummary: true
         )
@@ -74,9 +74,10 @@ struct FundInstrumentPolicy: Equatable, Sendable {
             UnitQuantity.parse(text).map(storedUnits(fromDisplayed:))
         }
 
-        func summaryValue(storedUnits: Decimal) -> String {
+        func summaryValue(storedUnits: Decimal, locale: Locale) -> String {
             usesGoldSummary
-                ? GoldWeight.label(luong: storedUnits) : UnitQuantity.format(storedUnits)
+                ? GoldWeight.label(luong: storedUnits, locale: locale)
+                : UnitQuantity.format(storedUnits)
         }
 
         func entryDescription(_ units: Decimal, locale: Locale) -> String {
@@ -87,7 +88,7 @@ struct FundInstrumentPolicy: Equatable, Sendable {
 
         func saleDescription(storedUnits: Decimal, locale: Locale) -> String {
             usesGoldSummary
-                ? GoldWeight.label(luong: storedUnits)
+                ? GoldWeight.label(luong: storedUnits, locale: locale)
                 : entryDescription(storedUnits, locale: locale)
         }
     }
@@ -134,14 +135,14 @@ struct FundInstrumentPolicy: Equatable, Sendable {
 
         static let gold = Editor(
             catalogueRoute: .goldCatalogue,
-            averageCostTitleKey: "Average cost per lượng",
+            averageCostTitleKey: "Average cost per tael",
             missingInstrumentMessageKey: "Pick the gold product this position is held in.",
             emptyCatalogueMessageKey:
                 "No gold product in the catalogue yet. Add one from vang.today.",
             addInstrumentTitleKey: "Add from vang.today",
             introductionSymbol: "seal.fill",
             introductionTitleKey: "The gold you hold",
-            introductionDescriptionKey: "Pick a gold product, then enter its weight in chỉ.",
+            introductionDescriptionKey: "Pick a gold product, then enter its weight in mace.",
             newTitleKey: "Add gold",
             editTitleKey: "Edit gold"
         )
@@ -230,10 +231,10 @@ enum FundInstrumentKind: String, Codable, CaseIterable, Sendable {
                 fee: .shopDeduction,
                 supportsSwap: false,
                 quoteStyle: .shopBuy,
-                priceUnitLabelKey: "lượng",
+                priceUnitLabelKey: "tael",
                 marketPriceLabelKey: "Buy",
-                instrumentPriceFieldTitleKey: "Shop buy price per lượng",
-                salePriceTitleKey: "Price per lượng",
+                instrumentPriceFieldTitleKey: "Shop buy price per tael",
+                salePriceTitleKey: "Price per tael",
                 priceMetricTitle: "BUY",
                 editor: .gold,
                 editorKinds: [.gold]

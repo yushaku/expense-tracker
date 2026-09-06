@@ -276,7 +276,7 @@ struct FundHoldingCard: View {
 
     private var soldValue: String {
         let sold = FundSaleSummary.unitsSold(for: holding, sales: sales)
-        return instrumentPolicy.quantity.summaryValue(storedUnits: sold)
+        return instrumentPolicy.quantity.summaryValue(storedUnits: sold, locale: locale)
     }
 
     private var priceTitle: String {
@@ -291,7 +291,7 @@ struct FundHoldingCard: View {
     /// reachable — it is this plus the sold column beside it — and showing it
     /// here would put a number on the card that no longer describes anything.
     private var quantityValue: String {
-        instrumentPolicy.quantity.summaryValue(storedUnits: remainingUnits)
+        instrumentPolicy.quantity.summaryValue(storedUnits: remainingUnits, locale: locale)
     }
 
     private var instrumentPolicy: FundInstrumentPolicy {
