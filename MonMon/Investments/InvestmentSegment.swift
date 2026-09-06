@@ -109,3 +109,35 @@ enum InvestmentSort: String, CaseIterable, Identifiable {
         }
     }
 }
+
+/// The sort control, drawn to match the refresh button beside it: an icon on
+/// the section title's line rather than a row of its own, because ordering is
+/// something done to the list already on screen.
+struct InvestmentSortMenu: View {
+    @Binding var selection: InvestmentSort
+    /// The section's own colour, so the control reads as part of the list it
+    /// orders rather than as a screen-level chrome.
+    let tint: Color
+
+    var body: some View {
+        Menu {
+            Picker("Sort", selection: $selection) {
+                ForEach(InvestmentSort.allCases) { option in
+                    Label(option.title, systemImage: option.systemImage)
+                        .tag(option)
+                }
+            }
+        } label: {
+            Image(systemName: "arrow.up.arrow.down")
+                .font(.subheadline.weight(.semibold))
+                .frame(width: 32, height: 32)
+                .background(tint.opacity(0.16), in: Circle())
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(tint)
+        .accessibilityLabel("Sort")
+        .accessibilityValue(Text(selection.title))
+        .accessibilityIdentifier("investment-sort")
+    }
+}
