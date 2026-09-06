@@ -28,35 +28,8 @@ struct AccountEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
-    @Query(sort: \SavingsDeposit.createdAt, order: .forward)
-    private var deposits: [SavingsDeposit]
-
-    @Query(sort: \SavingsWithdrawal.withdrawnAt, order: .reverse)
-    private var withdrawals: [SavingsWithdrawal]
-
-    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
-    private var transactions: [MoneyTransaction]
-
-    @Query(sort: \FundHolding.createdAt, order: .forward)
-    private var holdings: [FundHolding]
-
-    @Query(sort: \FundSale.soldAt, order: .reverse)
-    private var sales: [FundSale]
-
-    @Query(sort: \FundInstrument.symbol, order: .forward)
-    private var instruments: [FundInstrument]
-
-    @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
-    private var transfers: [AccountTransfer]
-
-    @Query(sort: \Debt.createdAt, order: .forward)
-    private var debts: [Debt]
-
-    @Query(sort: \DebtPayment.occurredAt, order: .reverse)
-    private var payments: [DebtPayment]
-
-    @Query(sort: \RecurringRule.createdAt, order: .forward)
-    private var recurringRules: [RecurringRule]
+    @Query(sort: \CashAccount.createdAt, order: .forward)
+    private var accounts: [CashAccount]
 
     private let mode: AccountEditorMode
 
@@ -64,6 +37,14 @@ struct AccountEditorView: View {
     @State private var validationError: AccountFormError?
     @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
+    /// Where this account's records land when it goes. Nil until the owner
+    /// picks, because moving somebody's whole history is not a default worth
+    /// guessing at.
+    @State private var moveDestinationID: UUID?
+    /// How many records name this account. Read once when the sheet opens
+    /// rather than on every redraw: nothing can write to the store while it is
+    /// in front, and the count walks ten tables.
+    @State private var linkedRecordCount = 0
 
     init(mode: AccountEditorMode) {
         self.mode = mode
@@ -92,10 +73,24 @@ struct AccountEditorView: View {
                 isEditing: mode.editedAccount != nil,
                 canDelete: canDelete,
                 deleteBlockedReason: deleteBlockedReason,
+                requiresDestination: requiresDestination,
+                moveDestinations: moveDestinations,
+                moveDestinationID: $moveDestinationID,
+                linkedRecordCount: linkedRecordCount,
                 validationError: validationError,
                 saveErrorMessage: saveErrorMessage,
                 onDelete: { isConfirmingDelete = true }
             )
+            .task {
+                guard let editedAccount = mode.editedAccount else {
+                    return
+                }
+
+                linkedRecordCount = AccountMerge.linkedRecordCount(
+                    for: editedAccount,
+                    in: modelContext
+                )
+            }
             .navigationTitle(mode.editedAccount == nil ? "Add account" : "Edit account")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -125,7 +120,7 @@ struct AccountEditorView: View {
 
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("It disappears from your cash overview. This cannot be undone.")
+                Text(deleteConfirmationMessage)
             }
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
@@ -133,17 +128,10 @@ struct AccountEditorView: View {
         }
     }
 
-    /// An account may only be removed once it holds nothing and nothing points
-    /// at it. A zero available balance rules out a savings deposit or a fund
-    /// holding, but not a transaction, a transfer, or a sale: a position bought
-    /// from this account and sold back into it nets to zero while two records
-    /// still name it. The same is true of a transaction or a transfer: an account with 100 in and
-    /// 100 out sits at zero while still owning two records, so both counts are
-    /// checked too. The same is true of a debt: borrowing a sum and repaying it
-    /// nets to zero while two records still name the account. A transfer names
-    /// two accounts, and deleting either end would leave the other pointing at
-    /// nothing. A recurring rule holds no money at all and would still be
-    /// generating into a deleted account on every launch, so it is counted too.
+    /// Deletion is offered for every account but one, because an account that
+    /// still holds records can hand them over instead of blocking. What it
+    /// cannot do is take them with it: `AccountMerge` moves every record and
+    /// the opening balance to another account first.
     private var canDelete: Bool {
         guard let editedAccount = mode.editedAccount else {
             return false
@@ -156,116 +144,63 @@ struct AccountEditorView: View {
             return false
         }
 
-        let isEmpty =
-            CashBalanceSummary.available(
-                for: editedAccount,
-                deposits: deposits,
-                holdings: holdings,
-                withdrawals: withdrawals,
-                transactions: transactions,
-                transfers: transfers,
-                debts: debts,
-                payments: payments,
-                sales: sales
-            ) == 0
-
-        return isEmpty && transactionCount == 0 && transferCount == 0 && debtCount == 0
-            && recurringCount == 0 && saleCount == 0 && withdrawalCount == 0
+        return !requiresDestination || moveDestination != nil
     }
 
-    /// Sales that paid into this account. A closed position keeps its record
-    /// forever, and that record has to keep naming somewhere the money went.
-    private var saleCount: Int {
+    /// Whether this account has anything to hand over. Its balance counts as
+    /// much as its records: deleting an account holding money would take the
+    /// money with it.
+    private var requiresDestination: Bool {
         guard let editedAccount = mode.editedAccount else {
-            return 0
+            return false
         }
 
-        return FundSaleSummary.count(for: editedAccount, sales: sales)
+        return linkedRecordCount > 0 || editedAccount.openingBalance != 0
     }
 
-    private var withdrawalCount: Int {
+    /// Every other account, in the order the accounts screen lists them. The
+    /// unassigned one is in here on purpose: it is where money with nowhere
+    /// else to go belongs.
+    private var moveDestinations: [CashAccount] {
         guard let editedAccount = mode.editedAccount else {
-            return 0
+            return []
         }
 
-        return SavingsWithdrawalSummary.count(for: editedAccount, withdrawals: withdrawals)
+        return accounts.filter { $0.id != editedAccount.id }
     }
 
-    private var transactionCount: Int {
-        guard let editedAccount = mode.editedAccount else {
-            return 0
-        }
-
-        return TransactionSummary.count(for: editedAccount, transactions: transactions)
+    private var moveDestination: CashAccount? {
+        moveDestinations.first { $0.id == moveDestinationID }
     }
 
-    private var transferCount: Int {
-        guard let editedAccount = mode.editedAccount else {
-            return 0
-        }
-
-        return TransferSummary.count(for: editedAccount, transfers: transfers)
-    }
-
-    /// Debts and their payments together. A debt that names no account counts
-    /// for none, which is right: it points at nothing to orphan.
-    private var debtCount: Int {
-        guard let editedAccount = mode.editedAccount else {
-            return 0
-        }
-
-        return DebtSummary.count(for: editedAccount, debts: debts, payments: payments)
-    }
-
-    private var recurringCount: Int {
-        guard let editedAccount = mode.editedAccount else {
-            return 0
-        }
-
-        return RecurringSummary.count(for: editedAccount, rules: recurringRules)
-    }
-
-    private var deleteBlockedReason: String? {
+    private var deleteBlockedReason: LocalizedStringKey? {
         guard let editedAccount = mode.editedAccount, !canDelete else {
             return nil
         }
 
-        let fundedAmount = CashBalanceSummary.fundedAmount(
-            for: editedAccount,
-            deposits: deposits,
-            holdings: holdings
-        )
-
-        if fundedAmount > 0 {
-            return "This account still funds savings books or funds. Move them first."
+        if AccountSeed.isUnassigned(editedAccount) {
+            return """
+                This is where records with no account of their own land, so it \
+                stays.
+                """
         }
 
-        if transactionCount > 0 {
-            return "This account still has \(transactionCount) transactions. Delete them first."
+        if moveDestinations.isEmpty {
+            return "Add another account first, so this one has somewhere to move its records."
         }
 
-        if transferCount > 0 {
-            return "This account still has \(transferCount) transfers. Delete them first."
+        return "Pick where this account's records should go."
+    }
+
+    private var deleteConfirmationMessage: LocalizedStringKey {
+        guard let destination = moveDestination else {
+            return "It disappears from your cash overview. This cannot be undone."
         }
 
-        if debtCount > 0 {
-            return "This account still has \(debtCount) debt records. Delete them first."
-        }
-
-        if recurringCount > 0 {
-            return "This account still has \(recurringCount) recurring rules. Delete them first."
-        }
-
-        if saleCount > 0 {
-            return "This account received \(saleCount) sales. Delete them first."
-        }
-
-        if withdrawalCount > 0 {
-            return
-                "This account received \(withdrawalCount) savings withdrawals. Delete them first."
-        }
-
-        return "Set the balance to 0 before deleting this account."
+        return """
+            \(linkedRecordCount) records and this account's balance move to \
+            \(destination.name). This cannot be undone.
+            """
     }
 
     private func save() {
@@ -302,10 +237,18 @@ struct AccountEditorView: View {
         }
 
         saveErrorMessage = nil
-        modelContext.delete(editedAccount)
 
         do {
-            try modelContext.save()
+            if let destination = moveDestination {
+                try AccountMerge.move(
+                    from: editedAccount,
+                    to: destination,
+                    in: modelContext
+                )
+            } else {
+                modelContext.delete(editedAccount)
+                try modelContext.save()
+            }
             dismiss()
         } catch {
             modelContext.rollback()
