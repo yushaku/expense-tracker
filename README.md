@@ -192,3 +192,12 @@ immediately, independently of the interface language. Each option shows a sample
 date, and the selected option has a checkmark. Date-time labels retain
 the localized time, and month/year headings retain their existing labels.
 Backup files, bank imports, and API date encodings keep their existing formats.
+
+### Reordering quick expenses
+
+In **Defaults → Quick expenses**, touch and hold a preset, then drag it onto another
+preset to move it to that position. Tapping still opens the editor. The order saves
+immediately and the widget uses the same order. Preset names, amounts, categories,
+and shortcut identities stay with their items. Hidden presets keep their order;
+increase **Presets shown** to include them. VoiceOver offers **Move earlier** and
+**Move later** actions. Dropping outside the grid leaves the order unchanged.
