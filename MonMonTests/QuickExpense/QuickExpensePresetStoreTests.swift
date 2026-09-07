@@ -26,7 +26,7 @@ struct QuickExpensePresetStoreTests {
         )
     }
 
-    @Test("A complete configuration round trips in slot order")
+    @Test("A complete configuration preserves the chosen display order")
     func validSetRoundTrips() throws {
         let fixture = try makeFixture()
         let presets = try customizedPresets().reversed()
@@ -36,9 +36,9 @@ struct QuickExpensePresetStoreTests {
         )
 
         let loaded = fixture.store.load()
-        let expectedPresets = try customizedPresets()
+        let expectedPresets = Array(try customizedPresets().reversed())
         #expect(loaded.visibleCount == 9)
-        #expect(loaded.presets.map(\.slot) == QuickExpenseSlot.allCases)
+        #expect(loaded.presets.map(\.slot) == expectedPresets.map(\.slot))
         #expect(loaded.presets.map(\.symbol) == expectedPresets.map(\.symbol))
         #expect(loaded.activePresets.count == 9)
     }
@@ -281,6 +281,75 @@ struct QuickExpensePresetStoreTests {
         #expect(throws: QuickExpensePresetError.invalidAmount) {
             try draft.makePreset()
         }
+    }
+
+    @Test("Moves in both directions persist without changing preset identities or hidden values")
+    func reorderPreservesValues() throws {
+        let fixture = try makeFixture()
+        let originals = try customizedPresets()
+        try fixture.store.save(QuickExpenseConfiguration(visibleCount: 3, presets: originals))
+        #expect(try fixture.store.movePreset(.coffee, to: .fuel))
+        let reopened = QuickExpensePresetStore(defaults: fixture.defaults)
+        #expect(reopened.load().activePresets.map(\.slot) == [.lunch, .fuel, .coffee])
+        #expect(Array(reopened.load().presets.dropFirst(3)) == Array(originals.dropFirst(3)))
+        for preset in originals { #expect(reopened.preset(for: preset.slot) == preset) }
+        #expect(try reopened.movePreset(.coffee, to: .lunch))
+        #expect(reopened.load().presets == originals)
+    }
+
+    @Test("Editing and changing the count preserve a custom order")
+    func editingAfterReorder() throws {
+        let fixture = try makeFixture()
+        #expect(try fixture.store.movePreset(.fuel, to: .coffee))
+        let edited = try QuickExpensePreset(
+            slot: .fuel, symbol: "Taxi", amount: 120000, categoryID: UUID())
+        try fixture.store.savePreset(edited)
+        try fixture.store.setVisibleCount(9)
+        let loaded = fixture.store.load()
+        #expect(loaded.presets.first == edited)
+        #expect(
+            loaded.presets.map(\.slot) == [
+                .fuel, .coffee, .lunch, .groceries, .parking, .transit, .medicine, .entertainment,
+                .bills,
+            ])
+        #expect(loaded.visibleCount == 9)
+    }
+
+    @Test("A stale or canceled move cannot move hidden presets or write storage")
+    func invalidMovesDoNotWrite() throws {
+        let fixture = try makeFixture()
+        try fixture.store.setVisibleCount(2)
+        let before = fixture.defaults.data(forKey: QuickExpensePresetStore.storageKey)
+        #expect(try !fixture.store.movePreset(.coffee, to: .coffee))
+        #expect(try !fixture.store.movePreset(.fuel, to: .coffee))
+        #expect(try !fixture.store.movePreset(.coffee, to: .fuel))
+        #expect(fixture.defaults.data(forKey: QuickExpensePresetStore.storageKey) == before)
+    }
+
+    @Test("Reordering keeps newer edits from another store instance")
+    func reorderUsesLatestValues() throws {
+        let fixture = try makeFixture()
+        let otherWindow = QuickExpensePresetStore(defaults: fixture.defaults)
+        let edited = try QuickExpensePreset(
+            slot: .lunch, symbol: "Meal", amount: 72000, categoryID: UUID())
+        try otherWindow.savePreset(edited)
+        try otherWindow.setVisibleCount(6)
+        #expect(try fixture.store.movePreset(.lunch, to: .coffee))
+        #expect(otherWindow.load().presets.first == edited)
+        #expect(otherWindow.load().visibleCount == 6)
+    }
+
+    @Test("Duplicate slots in a full-size set are rejected without replacing stored presets")
+    func duplicateSlotsAreRejected() throws {
+        let fixture = try makeFixture()
+        try fixture.store.setVisibleCount(6)
+        let before = fixture.store.load()
+        var invalid = before.presets
+        invalid[1] = invalid[0]
+        #expect(throws: QuickExpensePresetError.incompleteSet) {
+            try fixture.store.save(QuickExpenseConfiguration(visibleCount: 6, presets: invalid))
+        }
+        #expect(fixture.store.load() == before)
     }
 
     private func makeFixture() throws -> Fixture {

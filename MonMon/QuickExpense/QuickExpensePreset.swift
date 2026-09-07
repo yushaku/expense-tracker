@@ -270,6 +270,22 @@ struct QuickExpensePresetStore {
         try save(QuickExpenseConfiguration(visibleCount: count, presets: load().presets))
     }
 
+    /// Move to the target's current position, preserving slot identity and all
+    /// hidden presets. Read fresh values so another editor's changes survive.
+    @discardableResult
+    func movePreset(_ slot: QuickExpenseSlot, to target: QuickExpenseSlot) throws -> Bool {
+        let current = load()
+        guard slot != target,
+            let sourceIndex = current.activePresets.firstIndex(where: { $0.slot == slot }),
+            let targetIndex = current.activePresets.firstIndex(where: { $0.slot == target })
+        else { return false }
+        var presets = current.presets
+        let moved = presets.remove(at: sourceIndex)
+        presets.insert(moved, at: targetIndex)
+        try save(QuickExpenseConfiguration(visibleCount: current.visibleCount, presets: presets))
+        return true
+    }
+
     func preset(for slot: QuickExpenseSlot) -> QuickExpensePreset {
         load().presets.first { $0.slot == slot }
             ?? QuickExpensePreset.defaultPreset(for: slot)
@@ -289,11 +305,10 @@ struct QuickExpensePresetStore {
             throw QuickExpensePresetError.incompleteSet
         }
 
-        return try QuickExpenseSlot.allCases.map { slot in
-            let matches = presets.filter { $0.slot == slot }
-            guard matches.count == 1, let preset = matches.first else {
-                throw QuickExpensePresetError.incompleteSet
-            }
+        guard Set(presets.map(\.slot)) == Set(QuickExpenseSlot.allCases) else {
+            throw QuickExpensePresetError.incompleteSet
+        }
+        return try presets.map { preset in
             return try QuickExpensePreset(
                 slot: preset.slot,
                 symbol: preset.symbol,

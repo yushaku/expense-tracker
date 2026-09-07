@@ -13756,6 +13756,36 @@
           }
         }
       }
+    },
+    "Tap to edit a preset. Touch and hold, then drag onto another preset to change its position.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chạm để sửa mục chi nhanh. Nhấn giữ rồi kéo lên mục khác để đổi vị trí."
+          }
+        }
+      }
+    },
+    "Move earlier": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyển lên trước"
+          }
+        }
+      }
+    },
+    "Move later": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyển ra sau"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
