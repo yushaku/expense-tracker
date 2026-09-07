@@ -17,6 +17,17 @@
 	<string>$(APP_GROUP_ID)</string>
 	<key>MonMonQuickCaptureURLScheme</key>
 	<string>$(QUICK_CAPTURE_URL_SCHEME)</string>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.monmon.quick-expense-position</string>
+			<key>UTTypeConformsTo</key>
+			<array><string>public.data</string></array>
+			<key>UTTypeDescription</key>
+			<string>Quick Expense Position</string>
+		</dict>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

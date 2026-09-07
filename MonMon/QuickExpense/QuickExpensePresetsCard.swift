@@ -1,9 +1,12 @@
+import CoreTransferable
 import SwiftData
 import SwiftUI
+import UniformTypeIdentifiers
 import WidgetKit
 
 struct QuickExpensePresetsCard: View {
     @Environment(\.locale) private var locale
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Query(sort: \TransactionCategory.createdAt, order: .forward)
@@ -19,7 +22,8 @@ struct QuickExpensePresetsCard: View {
     @State private var configuration = QuickExpenseConfiguration.defaults
     @State private var selectedPreset: QuickExpensePreset?
     @State private var saveFailed = false
-    @State private var didSaveCount = false
+    @State private var didSave = false
+    @State private var reorderSessionID = UUID()
 
     private let store = QuickExpensePresetStore()
 
@@ -27,9 +31,11 @@ struct QuickExpensePresetsCard: View {
         VStack(alignment: .leading, spacing: 18) {
             Label("Quick expenses", systemImage: "bolt.fill")
                 .font(.headline)
-            Text("Tap a preset to edit its name, amount, and category.")
-                .font(.subheadline)
-                .foregroundStyle(MonMonTheme.textSecondary)
+            Text(
+                "Tap to edit a preset. Touch and hold, then drag onto another preset to change its position."
+            )
+            .font(.subheadline)
+            .foregroundStyle(MonMonTheme.textSecondary)
 
             QuickExpenseAccountSummary()
 
@@ -68,6 +74,21 @@ struct QuickExpensePresetsCard: View {
                     .buttonStyle(.plain)
                     .accessibilityHint("Edit this preset. No expense will be recorded.")
                     .accessibilityIdentifier("edit-quick-expense-\(preset.slot.rawValue)")
+                    .modifier(
+                        QuickExpenseReorderDrag(
+                            item: QuickExpenseDragItem(
+                                slot: preset.slot, sessionID: reorderSessionID),
+                            move: { source in movePreset(source, to: preset.slot) }
+                        )
+                    )
+                    .accessibilityActions {
+                        if preset.slot != configuration.activePresets.first?.slot {
+                            Button("Move earlier") { movePreset(preset.slot, offset: -1) }
+                        }
+                        if preset.slot != configuration.activePresets.last?.slot {
+                            Button("Move later") { movePreset(preset.slot, offset: 1) }
+                        }
+                    }
                 }
             }
 
@@ -76,7 +97,7 @@ struct QuickExpensePresetsCard: View {
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.danger)
                     .accessibilityIdentifier("quick-expense-status")
-            } else if didSaveCount {
+            } else if didSave {
                 Label("Saved. The widget is up to date.", systemImage: "checkmark.circle")
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
@@ -136,16 +157,78 @@ struct QuickExpensePresetsCard: View {
         configuration = store.load()
     }
 
+    private func movePreset(_ slot: QuickExpenseSlot, offset: Int) {
+        let visible = store.load().activePresets
+        guard let index = visible.firstIndex(where: { $0.slot == slot }),
+            visible.indices.contains(index + offset)
+        else { return }
+        _ = movePreset(slot, to: visible[index + offset].slot)
+    }
+
+    private func movePreset(_ slot: QuickExpenseSlot, to target: QuickExpenseSlot) -> Bool {
+        do {
+            guard try store.movePreset(slot, to: target) else { return false }
+            withAnimation(reduceMotion ? nil : .snappy) { reload() }
+            saveFailed = false
+            didSave = true
+            WidgetCenter.shared.reloadTimelines(ofKind: QuickExpenseWidgetConfiguration.kind)
+            return true
+        } catch {
+            saveFailed = true
+            return false
+        }
+    }
+
     private func saveCount(_ count: Int) {
         do {
             try store.setVisibleCount(count)
             reload()
             saveFailed = false
-            didSaveCount = true
+            didSave = true
             WidgetCenter.shared.reloadTimelines(ofKind: QuickExpenseWidgetConfiguration.kind)
         } catch {
             saveFailed = true
         }
+    }
+}
+
+private struct QuickExpenseDragItem: Codable, Transferable {
+    let slot: QuickExpenseSlot
+    let sessionID: UUID
+
+    static var transferRepresentation: some TransferRepresentation {
+        CodableRepresentation(contentType: UTType(exportedAs: "com.monmon.quick-expense-position"))
+    }
+}
+
+private struct QuickExpenseReorderDrag: ViewModifier {
+    let item: QuickExpenseDragItem
+    let move: (QuickExpenseSlot) -> Bool
+
+    func body(content: Content) -> some View {
+        if #available(iOS 26, macOS 26, *) {
+            content
+                .draggable(item)
+                .dropDestination(for: QuickExpenseDragItem.self, isEnabled: true) { items, _ in
+                    _ = accept(items)
+                }
+        } else {
+            // Compatibility path for OS versions without DropSession.
+            content
+                .draggable(item)
+                .dropDestination(for: QuickExpenseDragItem.self) { items, _ in
+                    accept(items)
+                }
+        }
+    }
+
+    private func accept(_ items: [QuickExpenseDragItem]) -> Bool {
+        // Only reorder inside this card; a drop from another app/window must
+        // not reinterpret its slot as one of this device's presets.
+        guard items.count == 1, let source = items.first,
+            source.sessionID == item.sessionID
+        else { return false }
+        return move(source.slot)
     }
 }
 
