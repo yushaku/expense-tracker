@@ -34,6 +34,7 @@ struct BudgetScreen: View {
     @State private var isShowingIncomeTimeline = false
     @State private var selectedJarID: UUID?
     @State private var selectedGoalID: UUID?
+    @State private var selectedTripID: UUID?
     @State private var selectedMonth: Date?
 
     private let asOf: Date
@@ -121,6 +122,11 @@ struct BudgetScreen: View {
             }
             .navigationDestination(item: $selectedGoalID) { goalID in
                 GoalDetailView(goalID: goalID, capacityByJar: goalCapacityByJar, asOf: asOf)
+            }
+            .navigationDestination(item: $selectedTripID) { tripID in
+                if let workspace = tripWorkspaces.first(where: { $0.id == tripID }) {
+                    TripDetailView(workspace: workspace)
+                }
             }
             .tint(MonMonTheme.accent)
         }
@@ -299,7 +305,7 @@ struct BudgetScreen: View {
 
             ForEach(activeTrips) { workspace in
                 Button {
-                    isShowingGoals = true
+                    selectedTripID = workspace.id
                 } label: {
                     TripWorkspaceCard(
                         workspace: workspace,
@@ -311,7 +317,7 @@ struct BudgetScreen: View {
                     )
                 }
                 .buttonStyle(.plain)
-                .accessibilityHint("Opens all goals")
+                .accessibilityHint("Opens this trip workspace")
                 .accessibilityIdentifier("budget-active-trip-\(workspace.id.uuidString)")
             }
         }
