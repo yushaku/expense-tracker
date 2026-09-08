@@ -12,6 +12,11 @@ struct GoalListSnapshot {
     let activeTrips: [TripWorkspace]
     let completedTrips: [TripWorkspace]
 
+    var isEmpty: Bool {
+        activeGoals.isEmpty && completedGoals.isEmpty && activeTrips.isEmpty
+            && completedTrips.isEmpty
+    }
+
     static func snapshot(
         goals: [FinancialGoal],
         workspaces: [TripWorkspace]
@@ -43,8 +48,6 @@ struct GoalListSnapshot {
 
 private enum GoalListFilter: String, CaseIterable, Identifiable {
     case active
-    case completed
-    case trips
     case archived
 
     var id: String { rawValue }
@@ -52,8 +55,6 @@ private enum GoalListFilter: String, CaseIterable, Identifiable {
     var title: LocalizedStringResource {
         switch self {
         case .active: "Active"
-        case .completed: "Completed"
-        case .trips: "Trips"
         case .archived: "Archived"
         }
     }
@@ -61,8 +62,6 @@ private enum GoalListFilter: String, CaseIterable, Identifiable {
     var systemImage: String {
         switch self {
         case .active: "target"
-        case .completed: "checkmark.circle.fill"
-        case .trips: "airplane"
         case .archived: "archivebox.fill"
         }
     }
@@ -142,44 +141,28 @@ struct GoalListView: View {
     private var filteredContent: some View {
         switch selectedFilter {
         case .active:
+            let snapshot = listSnapshot
+
             GoalCommitmentWarnings(
                 jars: jars,
                 goals: goals,
                 capacityByJar: capacityByJar
             )
 
-            if listSnapshot.activeGoals.isEmpty {
+            if snapshot.isEmpty {
                 GoalEmptyState { editorMode = .add }
             } else {
-                goalCollection(title: "Accumulating", goals: listSnapshot.activeGoals)
-            }
-        case .completed:
-            if listSnapshot.completedGoals.isEmpty {
-                filteredEmptyState(
-                    "No completed goals",
-                    systemImage: "checkmark.circle",
-                    description: "Goals that reach their target will appear here."
-                )
-            } else {
-                goalCollection(title: "Completed", goals: listSnapshot.completedGoals)
-            }
-        case .trips:
-            if listSnapshot.activeTrips.isEmpty && listSnapshot.completedTrips.isEmpty {
-                filteredEmptyState(
-                    "No trips yet",
-                    systemImage: "airplane",
-                    description: "Start a spending workspace from a funded goal."
-                )
-            } else {
+                goalCollection(title: "Accumulating", goals: snapshot.activeGoals)
+                goalCollection(title: "Completed", goals: snapshot.completedGoals)
                 TripWorkspaceSection(
                     title: "Active trips",
-                    workspaces: listSnapshot.activeTrips,
+                    workspaces: snapshot.activeTrips,
                     transactions: transactions,
                     categories: categories
                 )
                 TripWorkspaceSection(
-                    title: "History",
-                    workspaces: listSnapshot.completedTrips,
+                    title: "Trip history",
+                    workspaces: snapshot.completedTrips,
                     transactions: transactions,
                     categories: categories
                 )
@@ -357,24 +340,26 @@ private struct GoalCollection: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(title)
-                .font(.title3.weight(.semibold))
+        if !goals.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(title)
+                    .font(.title3.weight(.semibold))
 
-            ForEach(goals) { goal in
-                Button {
-                    onSelect(goal)
-                } label: {
-                    GoalCard(
-                        goal: goal,
-                        jarName: goal.fundingJarID.flatMap { jarNames[$0] }
-                            ?? String(localized: "No jar"),
-                        asOf: asOf
-                    )
+                ForEach(goals) { goal in
+                    Button {
+                        onSelect(goal)
+                    } label: {
+                        GoalCard(
+                            goal: goal,
+                            jarName: goal.fundingJarID.flatMap { jarNames[$0] }
+                                ?? String(localized: "No jar"),
+                            asOf: asOf
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("goal-\(goal.id.uuidString)")
+                    .accessibilityHint("Opens this goal's details")
                 }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("goal-\(goal.id.uuidString)")
-                .accessibilityHint("Opens this goal's details")
             }
         }
     }
