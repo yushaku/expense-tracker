@@ -65,6 +65,9 @@ struct AccountDetailView: View {
     @State private var transactionActions = TransactionActions()
     @State private var selectedTab: AccountDetailTab = .transactions
     @State private var transactionRange = TransactionRange.month(containing: .now)
+    @State private var trendMetric: AccountTrendMetric = .net
+    @State private var trendRange = TransactionRange.month(containing: .now)
+    @State private var isTrendCollapsed = false
 
     private var account: CashAccount? {
         accounts.first { $0.id == route.accountID }
@@ -123,18 +126,6 @@ struct AccountDetailView: View {
 
         return ScrollView {
             LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                CashAccountCard(
-                    account: account,
-                    deposits: deposits,
-                    withdrawals: withdrawals,
-                    holdings: holdings,
-                    transactions: transactions,
-                    transfers: transfers,
-                    debts: debts,
-                    payments: payments,
-                    sales: sales
-                )
-
                 SegmentedTabs(
                     label: "Account Detail",
                     selection: $selectedTab,
@@ -170,6 +161,69 @@ struct AccountDetailView: View {
             .padding(.vertical, 16)
             .frame(maxWidth: .infinity)
         }
+        .safeAreaInset(edge: .top, spacing: 0) {
+            overview(for: account)
+        }
+        // Reading the history is what the screen is for, so the chart steps
+        // aside once the list is being scrolled and comes back at the top.
+        .onScrollGeometryChange(for: CGFloat.self) { geometry in
+            geometry.contentOffset.y + geometry.contentInsets.top
+        } action: { _, distance in
+            collapseTrend(scrolledBy: distance)
+        }
+    }
+
+    private func overview(for account: CashAccount) -> some View {
+        VStack(spacing: 12) {
+            CashAccountCard(
+                account: account,
+                deposits: deposits,
+                withdrawals: withdrawals,
+                holdings: holdings,
+                transactions: transactions,
+                transfers: transfers,
+                debts: debts,
+                payments: payments,
+                sales: sales
+            )
+
+            if !isTrendCollapsed {
+                AccountTrendCard(
+                    points: trendPoints(for: account),
+                    metric: $trendMetric,
+                    range: $trendRange
+                )
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .frame(maxWidth: MonMonTheme.maxContentWidth)
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+        .frame(maxWidth: .infinity)
+        .background(MonMonTheme.canvas)
+    }
+
+    private func collapseTrend(scrolledBy distance: CGFloat) {
+        let isCollapsed = distance > 40
+
+        guard isCollapsed != isTrendCollapsed, isCollapsed || distance < 8 else {
+            return
+        }
+
+        withAnimation(.snappy) {
+            isTrendCollapsed = isCollapsed
+        }
+    }
+
+    private func trendPoints(for account: CashAccount) -> [SpendingTrendPoint] {
+        SpendingTrend.points(
+            of: AccountActivityItem.transactions(
+                for: account.id,
+                during: trendRange,
+                in: transactions
+            ),
+            in: trendRange
+        )
     }
 
     private func transferHistorySection(_ accountTransfers: [AccountTransfer]) -> some View {

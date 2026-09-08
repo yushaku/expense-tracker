@@ -1,6 +1,36 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Account trend": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xu hướng tài khoản"
+          }
+        }
+      }
+    },
+    "Expenses": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khoản chi"
+          }
+        }
+      }
+    },
+    "Net": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ròng"
+          }
+        }
+      }
+    },
     "%@ mace (%@ tael)": {
       "comment": "Gold weight in mace and Vietnamese tael; one tael is ten mace. Values are already formatted.",
       "localizations": {
