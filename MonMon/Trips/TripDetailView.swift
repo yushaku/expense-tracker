@@ -21,9 +21,20 @@ struct TripDetailView: View {
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
 
+    @Query(sort: \BudgetJar.createdAt, order: .forward)
+    private var jars: [BudgetJar]
+
+    @Query(sort: \RecurringRule.createdAt, order: .forward)
+    private var recurringRules: [RecurringRule]
+
+    @Query(sort: \FinancialGoal.createdAt, order: .forward)
+    private var goals: [FinancialGoal]
+
     let workspace: TripWorkspace
+    var asOf: Date = .now
 
     @State private var editorMode: TransactionEditorMode?
+    @State private var goalEditorMode: GoalEditorMode?
     @State private var confirmation: TripLifecycleConfirmation?
     @State private var saveErrorMessage: LocalizedStringKey?
 
@@ -46,8 +57,21 @@ struct TripDetailView: View {
             )
         }
         .navigationTitle(workspace.name)
+        .toolbar {
+            if let goal = sourceGoal {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Edit goal", systemImage: "pencil") {
+                        goalEditorMode = .edit(goal)
+                    }
+                    .accessibilityIdentifier("trip-detail-edit-goal")
+                }
+            }
+        }
         .appSheet(item: $editorMode) { mode in
             TransactionEditorView(mode: mode)
+        }
+        .appSheet(item: $goalEditorMode) { mode in
+            GoalEditorView(mode: mode, capacityByJar: goalCapacityByJar, asOf: asOf)
         }
         .confirmationDialog(
             confirmationTitle,
@@ -66,6 +90,20 @@ struct TripDetailView: View {
         }
         .tint(MonMonTheme.accent)
         .accessibilityIdentifier("trip-detail-\(workspace.id.uuidString)")
+    }
+
+    private var sourceGoal: FinancialGoal? {
+        workspace.sourceGoalID.flatMap { goalID in goals.first { $0.id == goalID } }
+    }
+
+    private var goalCapacityByJar: [UUID: Decimal] {
+        BudgetSummary.goalCapacityByJar(
+            monthContaining: asOf,
+            asOf: asOf,
+            jars: jars,
+            recurringRules: recurringRules,
+            transactions: transactions
+        )
     }
 
     private var confirmationBinding: Binding<Bool> {
