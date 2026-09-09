@@ -233,7 +233,7 @@ private struct RootScreenHeader: ViewModifier {
                         .foregroundStyle(MonMonTheme.textPrimary)
                         .lineLimit(1)
                 } icon: {
-                    AvatarImage()
+                    AvatarImage(size: 35.2)
                         .frame(minWidth: 44, minHeight: 44)
                 }
                 // Toolbar labels otherwise adapt to icon-only presentation.
