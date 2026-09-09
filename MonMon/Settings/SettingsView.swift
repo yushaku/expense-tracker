@@ -56,6 +56,7 @@ struct SettingsView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Close", systemImage: "xmark") { dismiss() }
                         .labelStyle(.iconOnly)
+                        .tint(MonMonTheme.textSecondary)
                         .accessibilityIdentifier("settings-done")
                 }
             }
