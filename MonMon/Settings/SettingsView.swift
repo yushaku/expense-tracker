@@ -53,7 +53,7 @@ struct SettingsView: View {
             }
             .compactRootNavigationTitle("Settings")
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItem(placement: .primaryAction) {
                     Button("Close", systemImage: "xmark") { dismiss() }
                         .labelStyle(.iconOnly)
                         .tint(MonMonTheme.textSecondary)

@@ -83,7 +83,7 @@ struct TransactionDetailSheet: View {
                 .navigationBarTitleDisplayMode(.inline)
             #endif
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
+                ToolbarItem(placement: .primaryAction) {
                     Button {
                         dismiss()
                     } label: {
