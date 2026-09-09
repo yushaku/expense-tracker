@@ -53,9 +53,18 @@ struct RecurringEditorView: View {
     @State private var isConfirmingDelete = false
     @State private var didApplyDefaults = false
 
-    init(mode: RecurringEditorMode, defaultDate: Date = .now, asOf: Date = .now) {
+    init(
+        mode: RecurringEditorMode, defaultDate: Date = .now, asOf: Date = .now,
+        initialDraft: RecurringRuleDraft? = nil
+    ) {
         self.mode = mode
         self.asOf = asOf
+
+        if let initialDraft {
+            _draft = State(initialValue: initialDraft)
+            _didApplyDefaults = State(initialValue: true)
+            return
+        }
 
         switch mode {
         case .add:

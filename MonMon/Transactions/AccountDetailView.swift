@@ -65,6 +65,8 @@ struct AccountDetailView: View {
     @State private var transactionActions = TransactionActions()
     @State private var selectedTab: AccountDetailTab = .transactions
     @State private var transactionRange = TransactionRange.month(containing: .now)
+    @State private var trendMetric: AccountTrendMetric = .net
+    @State private var trendRange = TransactionRange.month(containing: .now)
 
     private var account: CashAccount? {
         accounts.first { $0.id == route.accountID }
@@ -135,6 +137,12 @@ struct AccountDetailView: View {
                     sales: sales
                 )
 
+                AccountTrendCard(
+                    points: trendPoints(for: account),
+                    metric: $trendMetric,
+                    range: $trendRange
+                )
+
                 SegmentedTabs(
                     label: "Account Detail",
                     selection: $selectedTab,
@@ -170,6 +178,17 @@ struct AccountDetailView: View {
             .padding(.vertical, 16)
             .frame(maxWidth: .infinity)
         }
+    }
+
+    private func trendPoints(for account: CashAccount) -> [SpendingTrendPoint] {
+        SpendingTrend.points(
+            of: AccountActivityItem.transactions(
+                for: account.id,
+                during: trendRange,
+                in: transactions
+            ),
+            in: trendRange
+        )
     }
 
     private func transferHistorySection(_ accountTransfers: [AccountTransfer]) -> some View {

@@ -81,7 +81,7 @@ struct WealthView: View {
                     .frame(maxWidth: .infinity)
                 }
             }
-            .compactRootNavigationTitle("Wealth")
+            .rootScreenHeader("Wealth")
             .accessibilityIdentifier("wealth")
             .navigationDestination(for: WealthDestination.self) { destination in
                 switch destination {

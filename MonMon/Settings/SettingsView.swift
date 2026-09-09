@@ -3,6 +3,7 @@ import SwiftData
 import SwiftUI
 
 struct SettingsView: View {
+    @Environment(\.dismiss) private var dismiss
     @Environment(AppLock.self) private var appLock
     @Environment(NotificationCoordinator.self) private var notificationCoordinator
     @Environment(\.modelContext) private var modelContext
@@ -13,9 +14,19 @@ struct SettingsView: View {
     @AppStorage(AppLanguage.storageKey) private var language = AppLanguage.system
     @AppStorage(AppLock.enabledKey) private var isLockEnabled = false
     @AppStorage(AppDateFormat.storageKey) private var dateFormat = AppDateFormat.dayMonthYear
+    @State private var isSalaryCalculatorPresented = false
     @State private var instrumentScope: FundInstrumentListScope?
 
     var body: some View {
+        #if os(macOS)
+            settingsContent
+                .frame(minWidth: 500, minHeight: 640)
+        #else
+            settingsContent
+        #endif
+    }
+
+    private var settingsContent: some View {
         NavigationStack {
             ZStack {
                 MonMonTheme.canvas
@@ -23,11 +34,24 @@ struct SettingsView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+                        card { AvatarSettingsContent() }
                         appearanceCard
-                        dateFormatCard
+                        instrumentsCard
+                        card {
+                            Button {
+                                isSalaryCalculatorPresented = true
+                            } label: {
+                                HStack {
+                                    Label("Salary calculator", systemImage: "banknote")
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                }
+                                .frame(minHeight: 44)
+                            }
+                            .accessibilityIdentifier("settings-salary-calculator")
+                        }
                         notificationCard
                         voiceCaptureCard
-                        instrumentsCard
                         securityCard
                         backupCard
                         #if os(macOS)
@@ -42,10 +66,21 @@ struct SettingsView: View {
                 }
             }
             .compactRootNavigationTitle("Settings")
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Close", systemImage: "xmark") { dismiss() }
+                        .labelStyle(.iconOnly)
+                        .tint(MonMonTheme.textSecondary)
+                        .accessibilityIdentifier("settings-done")
+                }
+            }
             .accessibilityIdentifier("settings")
             .tint(MonMonTheme.accent)
             .appSheet(item: $instrumentScope) { scope in
                 FundInstrumentListView(scope: scope)
+            }
+            .appSheet(isPresented: $isSalaryCalculatorPresented) {
+                SalaryCalculatorView()
             }
             .onChange(of: language) { _, newLanguage in
                 Task {
@@ -94,6 +129,25 @@ struct SettingsView: View {
                 .labelsHidden()
                 .accessibilityIdentifier("language-picker")
 
+                Divider()
+                    .overlay(MonMonTheme.border)
+
+                HStack {
+                    Text("Date format")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(MonMonTheme.textPrimary)
+                    Spacer(minLength: 8)
+                    Picker("Date format", selection: $dateFormat) {
+                        ForEach(AppDateFormat.allCases) { option in
+                            Text(option.format(Self.dateFormatExample))
+                                .tag(option)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .labelsHidden()
+                    .accessibilityIdentifier("date-format-picker")
+                }
+
             }
         }
     }
@@ -102,77 +156,6 @@ struct SettingsView: View {
         TransactionPeriod.calendar.date(
             from: DateComponents(year: 2026, month: 12, day: 24)
         ) ?? .distantPast
-
-    private var dateFormatCard: some View {
-        card {
-            VStack(alignment: .leading, spacing: 14) {
-                sectionHeader("Date format", systemImage: "calendar")
-
-                Text("Choose how dates appear throughout the app. Changes apply immediately.")
-                    .font(.subheadline)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                Text("Example: December 24, 2026")
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-
-                VStack(spacing: 8) {
-                    ForEach(AppDateFormat.allCases) { option in
-                        dateFormatOption(option)
-                    }
-                }
-                .accessibilityIdentifier("date-format-picker")
-            }
-        }
-    }
-
-    private func dateFormatOption(_ option: AppDateFormat) -> some View {
-        let isSelected = dateFormat == option
-
-        return Button {
-            dateFormat = option
-        } label: {
-            HStack(spacing: 14) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(option.displayName)
-                        .font(.subheadline)
-                        .foregroundStyle(MonMonTheme.textSecondary)
-
-                    Text(option.format(Self.dateFormatExample))
-                        .font(.headline)
-                        .monospacedDigit()
-                        .foregroundStyle(MonMonTheme.textPrimary)
-                }
-                .fixedSize(horizontal: false, vertical: true)
-
-                Spacer(minLength: 0)
-
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.title3)
-                    .foregroundStyle(isSelected ? MonMonTheme.accent : MonMonTheme.textSecondary)
-                    .accessibilityHidden(true)
-            }
-            .padding(14)
-            .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading)
-            .background(
-                isSelected ? MonMonTheme.accent.opacity(0.10) : MonMonTheme.field,
-                in: RoundedRectangle(cornerRadius: 12)
-            )
-            .overlay {
-                RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(
-                        isSelected ? MonMonTheme.accent : MonMonTheme.border,
-                        lineWidth: isSelected ? 1.5 : 1
-                    )
-            }
-            .contentShape(RoundedRectangle(cornerRadius: 12))
-        }
-        .buttonStyle(.plain)
-        .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
-        .accessibilityIdentifier("date-format-option-\(option.id)")
-    }
 
     private var securityCard: some View {
         card {

@@ -253,7 +253,7 @@ struct DebtEditorForm: View {
                 Text(
                     """
                     Interest is an estimate on the original amount, shown but never counted. \
-                    What you actually pay is an expense on the Spending screen.
+                    What you actually pay is an expense on the Transactions screen.
                     """
                 )
                 .font(.caption)
