@@ -3,6 +3,7 @@ import SwiftData
 import SwiftUI
 
 struct SettingsView: View {
+    @Environment(\.dismiss) private var dismiss
     @Environment(AppLock.self) private var appLock
     @Environment(NotificationCoordinator.self) private var notificationCoordinator
     @Environment(\.modelContext) private var modelContext
@@ -16,6 +17,15 @@ struct SettingsView: View {
     @State private var instrumentScope: FundInstrumentListScope?
 
     var body: some View {
+        #if os(macOS)
+            settingsContent
+                .frame(minWidth: 500, minHeight: 640)
+        #else
+            settingsContent
+        #endif
+    }
+
+    private var settingsContent: some View {
         NavigationStack {
             ZStack {
                 MonMonTheme.canvas
@@ -42,6 +52,12 @@ struct SettingsView: View {
                 }
             }
             .compactRootNavigationTitle("Settings")
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                        .accessibilityIdentifier("settings-done")
+                }
+            }
             .accessibilityIdentifier("settings")
             .tint(MonMonTheme.accent)
             .appSheet(item: $instrumentScope) { scope in

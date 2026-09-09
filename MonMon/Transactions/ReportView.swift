@@ -132,6 +132,7 @@ struct ReportView: View {
                 content
             }
             .compactRootNavigationTitle("Report")
+            .settingsAvatar()
             .accessibilityIdentifier("report")
             .safeAreaInset(edge: .top, spacing: 0) {
                 periodRail

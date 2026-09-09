@@ -82,6 +82,7 @@ struct WealthView: View {
                 }
             }
             .compactRootNavigationTitle("Wealth")
+            .settingsAvatar()
             .accessibilityIdentifier("wealth")
             .navigationDestination(for: WealthDestination.self) { destination in
                 switch destination {

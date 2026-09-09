@@ -1,13 +1,12 @@
 import SwiftUI
 
 /// Declaration order is the order of the bar: recording money comes first,
-/// planning and looking back follow, then what the owner has, then settings.
+/// planning and looking back follow, then what the owner has.
 enum RootTab: String, CaseIterable, Identifiable {
     case spending
     case budget
     case report
     case wealth
-    case settings
 
     var id: String { rawValue }
 
@@ -21,8 +20,6 @@ enum RootTab: String, CaseIterable, Identifiable {
             "Wealth"
         case .spending:
             "Transactions"
-        case .settings:
-            "Settings"
         }
     }
 
@@ -36,8 +33,6 @@ enum RootTab: String, CaseIterable, Identifiable {
             "chart.pie.fill"
         case .spending:
             "arrow.left.arrow.right"
-        case .settings:
-            "gearshape.fill"
         }
     }
 
@@ -101,8 +96,6 @@ struct RootTabView: View {
                 WealthView()
             case .spending:
                 TransactionListView()
-            case .settings:
-                SettingsView()
             }
         }
 
@@ -195,16 +188,52 @@ struct RootTabView: View {
                     }
                     .accessibilityIdentifier(RootTab.wealth.accessibilityIdentifier)
                     .tag(RootTab.wealth)
-
-                SettingsView()
-                    .tabItem {
-                        Label(RootTab.settings.title, systemImage: RootTab.settings.symbolName)
-                    }
-                    .accessibilityIdentifier(RootTab.settings.accessibilityIdentifier)
-                    .tag(RootTab.settings)
             }
         }
     #endif
+}
+
+/// Keeps Settings one tap away from each root screen without taking a tab slot.
+private struct SettingsAvatar: ViewModifier {
+    @State private var isShowingSettings = false
+
+    private var placement: ToolbarItemPlacement {
+        #if os(iOS)
+            .topBarLeading
+        #else
+            .navigation
+        #endif
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .toolbar {
+                ToolbarItem(placement: placement) {
+                    Button {
+                        isShowingSettings = true
+                    } label: {
+                        Image(systemName: "person.crop.circle.fill")
+                            .font(.title)
+                            .foregroundStyle(MonMonTheme.accent)
+                            .frame(minWidth: 44, minHeight: 44)
+                            .contentShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Settings")
+                    .accessibilityIdentifier("settings-avatar")
+                    .help("Settings")
+                }
+            }
+            .appSheet(isPresented: $isShowingSettings) {
+                SettingsView()
+            }
+    }
+}
+
+extension View {
+    func settingsAvatar() -> some View {
+        modifier(SettingsAvatar())
+    }
 }
 
 /// Root tabs keep their title compact so the navigation bar identifies each

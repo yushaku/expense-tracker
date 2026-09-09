@@ -146,6 +146,7 @@ struct TransactionListView: View {
                 AccountDetailView(route: route)
             }
             .compactRootNavigationTitle("Transactions")
+            .settingsAvatar()
             .accessibilityIdentifier("spending-list")
             .appSheet(item: $editorMode) { mode in
                 TransactionEditorView(mode: mode, defaultDate: defaultDate)
