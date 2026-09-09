@@ -199,7 +199,7 @@ struct FundInstrumentListView: View {
             .compactRootNavigationTitle(scope.title)
             .accessibilityIdentifier("instrument-list")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
+                ToolbarItem(placement: .primaryAction) {
                     Button("Close", systemImage: "xmark") { dismiss() }
                         .labelStyle(.iconOnly)
                         .tint(MonMonTheme.textSecondary)
