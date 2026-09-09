@@ -7855,12 +7855,12 @@
         }
       }
     },
-    "Interest is an estimate on the original amount, shown but never counted. What you actually pay is an expense on the Spending screen.": {
+    "Interest is an estimate on the original amount, shown but never counted. What you actually pay is an expense on the Transactions screen.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lãi chỉ là ước tính trên số tiền gốc, hiển thị nhưng không bao giờ được cộng vào. Số bạn thực trả là một khoản chi ở màn hình Chi tiêu."
+            "value": "Lãi chỉ là ước tính trên số tiền gốc, hiển thị nhưng không bao giờ được cộng vào. Số bạn thực trả là một khoản chi ở màn hình Giao dịch."
           }
         }
       }

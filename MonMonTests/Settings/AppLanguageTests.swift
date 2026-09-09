@@ -29,8 +29,8 @@ struct AppLanguageTests {
     /// argument formats what is interpolated, it does not choose the catalogue.
     @Test("Text built outside a view answers in the language it is asked for")
     func catalogueAnswersPerLocale() {
-        #expect(AppText.string("Spending", in: Locale(identifier: "vi")) == "Chi tiêu")
-        #expect(AppText.string("Spending", in: Locale(identifier: "en")) == "Spending")
+        #expect(AppText.string("Transactions", in: Locale(identifier: "vi")) == "Giao dịch")
+        #expect(AppText.string("Transactions", in: Locale(identifier: "en")) == "Transactions")
         #expect(AppText.string("Settings", in: Locale(identifier: "vi")) == "Cài đặt")
     }
 

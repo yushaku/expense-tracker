@@ -31,9 +31,9 @@ struct LanguageResolutionTests {
 
     @Test("An interface written from a key follows the language in the environment")
     func textFollowsEnvironmentLocale() {
-        let asked = render(Text("Spending").environment(\.locale, Locale(identifier: "vi")))
-        let english = render(Text(verbatim: "Spending"))
-        let vietnamese = render(Text(verbatim: "Chi tiêu"))
+        let asked = render(Text("Transactions").environment(\.locale, Locale(identifier: "vi")))
+        let english = render(Text(verbatim: "Transactions"))
+        let vietnamese = render(Text(verbatim: "Giao dịch"))
 
         #expect(asked != nil)
         #expect(asked == vietnamese)

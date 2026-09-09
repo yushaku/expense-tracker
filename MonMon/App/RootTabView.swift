@@ -20,7 +20,7 @@ enum RootTab: String, CaseIterable, Identifiable {
         case .wealth:
             "Wealth"
         case .spending:
-            "Spending"
+            "Transactions"
         case .settings:
             "Settings"
         }
