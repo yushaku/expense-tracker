@@ -35,9 +35,9 @@ struct SettingsView: View {
                     VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                         card { AvatarSettingsContent() }
                         appearanceCard
+                        instrumentsCard
                         notificationCard
                         voiceCaptureCard
-                        instrumentsCard
                         securityCard
                         backupCard
                         #if os(macOS)
