@@ -6,6 +6,25 @@ struct FundInstrumentImportOption: Identifiable {
 
     var id: String { source.rawValue }
 
+    var subtitle: LocalizedStringKey {
+        switch source {
+        case .fmarket: "Open-ended funds · latest NAV"
+        case .vndirect: "Listed ETFs · closing prices"
+        case .vangToday: "Gold products · shop buy prices"
+        case .coinGecko: "Crypto · search by ticker or name"
+        case .manual: "Enter details yourself"
+        }
+    }
+
+    var symbolName: String {
+        switch source {
+        case .fmarket, .vndirect: "chart.line.uptrend.xyaxis"
+        case .vangToday: "seal.fill"
+        case .coinGecko: "bitcoinsign.circle.fill"
+        case .manual: "plus"
+        }
+    }
+
     var sheetTitle: LocalizedStringKey {
         switch source {
         case .fmarket:
@@ -126,6 +145,7 @@ struct FundInstrumentListView: View {
 
     @Environment(\.modelContext) private var modelContext
 
+    @State private var searchText = ""
     @State private var editorMode: FundInstrumentEditorMode?
     @State private var refresher = FundPriceRefresher()
     @State private var importSource: FundQuoteSource?
@@ -160,8 +180,10 @@ struct FundInstrumentListView: View {
                     LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                         actionBar
 
-                        if filteredInstruments.isEmpty {
+                        if scopedInstruments.isEmpty {
                             emptyState
+                        } else if filteredInstruments.isEmpty {
+                            ContentUnavailableView.search(text: searchText)
                         } else {
                             ForEach(filteredInstruments) { instrument in
                                 row(instrument)
@@ -174,11 +196,13 @@ struct FundInstrumentListView: View {
                     .frame(maxWidth: .infinity)
                 }
             }
-            .navigationTitle(scope.title)
+            .compactRootNavigationTitle(scope.title)
             .accessibilityIdentifier("instrument-list")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
+                    Button("Close", systemImage: "xmark") { dismiss() }
+                        .labelStyle(.iconOnly)
+                        .tint(MonMonTheme.textSecondary)
                 }
             }
             .appSheet(item: $editorMode) { mode in
@@ -341,48 +365,92 @@ struct FundInstrumentListView: View {
         .accessibilityIdentifier("open-fmarket-\(symbol.lowercased())")
     }
 
-    /// Refresh, direct imports, and manual add stay in the content rather than
-    /// the toolbar. macOS collapses extra primary toolbar actions into an
-    /// overflow, which is how Refresh managed to ship invisible.
-    ///
-    /// Refresh and manual add use icons so each provider can have its own import
-    /// button without wrapping the row. Full wording stays available to
-    /// accessibility technologies.
     private var actionBar: some View {
-        HStack(spacing: 8) {
-            actionButton(
-                title: refresher.isRunning ? "Refreshing…" : "Refresh",
-                systemImage: "arrow.clockwise",
-                accessibilityLabel: "Refresh prices",
-                identifier: "refresh-quotes",
-                isProminent: true,
-                showsTitle: false
-            ) {
-                refresh()
-            }
-            .disabled(refresher.isRunning || !canRefresh)
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Import from a provider")
+                .font(.headline)
+                .foregroundStyle(MonMonTheme.textPrimary)
 
             ForEach(scope.importOptions) { option in
-                actionButton(
-                    title: option.source.displayName,
-                    systemImage: "square.and.arrow.down",
-                    accessibilityLabel: option.sheetTitle,
-                    identifier: "import-from-\(option.source.rawValue)"
-                ) {
+                Button {
                     importSource = option.source
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: option.symbolName)
+                            .font(.title3)
+                            .foregroundStyle(MonMonTheme.accent)
+                            .frame(width: 44, height: 44)
+                            .background(
+                                MonMonTheme.accent.opacity(0.12),
+                                in: RoundedRectangle(cornerRadius: 12))
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(option.source.displayName)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(MonMonTheme.textPrimary)
+                            Text(option.subtitle)
+                                .font(.caption)
+                                .foregroundStyle(MonMonTheme.textSecondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        Spacer(minLength: 8)
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(MonMonTheme.textMuted)
+                    }
+                    .padding(14)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(
+                        MonMonTheme.surface,
+                        in: RoundedRectangle(cornerRadius: MonMonTheme.cardRadius)
+                    )
+                    .overlay {
+                        RoundedRectangle(cornerRadius: MonMonTheme.cardRadius)
+                            .strokeBorder(MonMonTheme.border, lineWidth: 1)
+                    }
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel(option.sheetTitle)
+                .accessibilityIdentifier("import-from-\(option.source.rawValue)")
             }
 
-            actionButton(
-                title: "Add",
-                systemImage: "plus",
-                accessibilityLabel: "Add by hand",
-                identifier: "add-instrument",
-                showsTitle: false
-            ) {
-                editorMode = .add
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 8) { secondaryActions }
+                VStack(spacing: 8) { secondaryActions }
+            }
+
+            if !scopedInstruments.isEmpty {
+                Text("Your catalogue")
+                    .font(.headline)
+                    .padding(.top, 8)
+                HStack(spacing: 10) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                        .accessibilityHidden(true)
+                    TextField("Search instruments", text: $searchText)
+                        .textFieldStyle(.plain)
+                        .autocorrectionDisabled()
+                        .accessibilityIdentifier("instrument-search")
+                }
+                .padding(12)
+                .background(MonMonTheme.field, in: RoundedRectangle(cornerRadius: 12))
             }
         }
+    }
+
+    @ViewBuilder
+    private var secondaryActions: some View {
+        actionButton(
+            title: "Add by hand", systemImage: "plus",
+            accessibilityLabel: "Add by hand", identifier: "add-instrument"
+        ) { editorMode = .add }
+
+        actionButton(
+            title: refresher.isRunning ? "Refreshing…" : "Refresh prices",
+            systemImage: "arrow.clockwise", accessibilityLabel: "Refresh prices",
+            identifier: "refresh-quotes"
+        ) { refresh() }
+        .disabled(refresher.isRunning || !canRefresh)
     }
 
     private func actionButton(
@@ -390,37 +458,23 @@ struct FundInstrumentListView: View {
         systemImage: String,
         accessibilityLabel: LocalizedStringKey,
         identifier: String,
-        isProminent: Bool = false,
-        showsTitle: Bool = true,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
-            Group {
-                if showsTitle {
-                    Label(title, systemImage: systemImage)
-                } else {
-                    Image(systemName: systemImage)
-                }
-            }
-            .font(.subheadline.weight(.semibold))
-            .lineLimit(1)
-            .minimumScaleFactor(0.7)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 11)
-            .frame(maxWidth: .infinity)
-            .background {
-                if isProminent {
-                    Capsule().fill(MonMonTheme.accent.opacity(0.16))
-                } else {
+            Label(title, systemImage: systemImage)
+                .font(.subheadline.weight(.semibold))
+                .fixedSize(horizontal: true, vertical: false)
+                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .background {
                     Capsule()
                         .fill(MonMonTheme.surface)
                         .overlay(Capsule().stroke(MonMonTheme.border, lineWidth: 1))
                 }
-            }
-            .contentShape(Capsule())
+                .contentShape(Capsule())
         }
         .buttonStyle(.plain)
-        .foregroundStyle(isProminent ? MonMonTheme.accent : MonMonTheme.textPrimary)
+        .foregroundStyle(MonMonTheme.textPrimary)
         .accessibilityLabel(Text(accessibilityLabel))
         .accessibilityIdentifier(identifier)
     }
@@ -429,7 +483,7 @@ struct FundInstrumentListView: View {
     /// a held instrument, with automatic quotes left on.
     private var canRefresh: Bool {
         refresher.hasAnythingToRefresh(
-            instruments: filteredInstruments,
+            instruments: scopedInstruments,
             holdings: holdings,
             sales: sales
         )
@@ -440,7 +494,7 @@ struct FundInstrumentListView: View {
     private func refresh() {
         Task {
             await refresher.refresh(
-                instruments: filteredInstruments,
+                instruments: scopedInstruments,
                 holdings: holdings,
                 sales: sales,
                 in: modelContext
@@ -448,8 +502,16 @@ struct FundInstrumentListView: View {
         }
     }
 
-    private var filteredInstruments: [FundInstrument] {
+    private var scopedInstruments: [FundInstrument] {
         instruments.filter { scope.kinds.contains($0.kind) }
+    }
+
+    private var filteredInstruments: [FundInstrument] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        return scopedInstruments.filter {
+            query.isEmpty || $0.symbol.localizedStandardContains(query)
+                || $0.name.localizedStandardContains(query)
+        }
     }
 
     private func isStale(_ instrument: FundInstrument) -> Bool {

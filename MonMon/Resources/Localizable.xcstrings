@@ -1,6 +1,216 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Price fetched when added": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tải giá khi thêm"
+          }
+        }
+      }
+    },
+    "Couldn’t fetch prices for %@. These items are still selected; try Add again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không tải được giá cho %@. Các mã này vẫn được chọn; hãy thử Thêm lại."
+          }
+        }
+      }
+    },
+    "Search by ticker or coin name to find more coins.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tìm theo mã hoặc tên để tìm thêm đồng tiền."
+          }
+        }
+      }
+    },
+    "Choose instruments to add to your catalogue.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn mã tài sản để thêm vào danh mục."
+          }
+        }
+      }
+    },
+    "Choose coins or search CoinGecko for more. Prices are in VND.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn đồng tiền hoặc tìm thêm trên CoinGecko. Giá được tính bằng VND."
+          }
+        }
+      }
+    },
+    "Choose gold products. Prices shown are shop buy prices.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn sản phẩm vàng. Giá hiển thị là giá mua vào của cửa hàng."
+          }
+        }
+      }
+    },
+    "Choose ETFs. Closing prices are fetched before adding.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn ETF. Giá đóng cửa sẽ được tải trước khi thêm."
+          }
+        }
+      }
+    },
+    "Choose funds to add with the latest published NAV.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn quỹ để thêm cùng NAV công bố mới nhất."
+          }
+        }
+      }
+    },
+    "Tap a %@ to select its %@.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chạm vào một %@ để chọn các %@ thuộc nhóm đó."
+          }
+        }
+      }
+    },
+    "Adding instruments…": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang thêm mã tài sản…"
+          }
+        }
+      }
+    },
+    "%lld results": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld kết quả"
+          }
+        }
+      }
+    },
+    "%lld selected": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã chọn %lld"
+          }
+        }
+      }
+    },
+    "Try again": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thử lại"
+          }
+        }
+      }
+    },
+    "Search instruments": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tìm mã tài sản"
+          }
+        }
+      }
+    },
+    "Your catalogue": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Danh mục của bạn"
+          }
+        }
+      }
+    },
+    "Import from a provider": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập từ nhà cung cấp"
+          }
+        }
+      }
+    },
+    "Enter details yourself": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tự nhập thông tin"
+          }
+        }
+      }
+    },
+    "Crypto · search by ticker or name": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiền mã hóa · tìm theo mã hoặc tên"
+          }
+        }
+      }
+    },
+    "Gold products · shop buy prices": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sản phẩm vàng · giá mua vào tại cửa hàng"
+          }
+        }
+      }
+    },
+    "Listed ETFs · closing prices": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ETF niêm yết · giá đóng cửa"
+          }
+        }
+      }
+    },
+    "Open-ended funds · latest NAV": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quỹ mở · NAV mới nhất"
+          }
+        }
+      }
+    },
     "Opens Settings": {
       "localizations": {
         "vi": {

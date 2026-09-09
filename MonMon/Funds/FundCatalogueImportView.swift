@@ -42,28 +42,22 @@ struct FundCatalogueImportView: View {
 
                 content
             }
-            .navigationTitle(title)
+            .compactRootNavigationTitle(title)
             .accessibilityIdentifier("\(importer.source.rawValue)-import")
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if importer.phase == .loaded && (!importer.importable.isEmpty || isCrypto) {
+                    selectionBar
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Close", systemImage: "xmark") { dismiss() }
+                        .labelStyle(.iconOnly)
+                        .tint(MonMonTheme.textSecondary)
                         .disabled(isSaving)
                         .accessibilityIdentifier("cancel-import")
                 }
 
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(action: addChosen) {
-                        if isSaving {
-                            ProgressView()
-                                .controlSize(.small)
-                        } else {
-                            Text("Add \(chosen.count)")
-                        }
-                    }
-                    .disabled(chosen.isEmpty || isSaving)
-                    .accessibilityLabel(confirmAccessibilityLabel)
-                    .accessibilityIdentifier("confirm-import")
-                }
             }
         }
         .tint(MonMonTheme.accent)
@@ -100,17 +94,24 @@ struct FundCatalogueImportView: View {
             .accessibilityIdentifier("import-loading")
 
         case .failed:
-            message(
-                LocalizedStringKey(
-                    importer.phase.message(providerName: providerName, in: locale)
-                        ?? AppText.string("\(providerName) could not be reached.", in: locale)
-                ),
-                systemImage: "xmark.circle.fill",
-                tint: MonMonTheme.danger,
-                id: "import-error"
-            )
+            VStack(spacing: 12) {
+                message(
+                    LocalizedStringKey(
+                        importer.phase.message(providerName: providerName, in: locale)
+                            ?? AppText.string("\(providerName) could not be reached.", in: locale)
+                    ),
+                    systemImage: "wifi.exclamationmark",
+                    tint: MonMonTheme.textSecondary,
+                    id: "import-error"
+                )
+                Button("Try again", systemImage: "arrow.clockwise") {
+                    Task { await importer.load(existing: instruments) }
+                }
+                .buttonStyle(.borderedProminent)
+                .accessibilityIdentifier("retry-import")
+            }
 
-        case .loaded where importer.importable.isEmpty:
+        case .loaded where importer.importable.isEmpty && !isCrypto:
             message(
                 "Every \(itemNoun) \(providerName) lists is already in your catalogue.",
                 systemImage: "checkmark.circle.fill",
@@ -119,40 +120,92 @@ struct FundCatalogueImportView: View {
             )
 
         case .loaded:
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 10) {
-                    header
+            VStack(spacing: 0) {
+                header
+                    .frame(maxWidth: MonMonTheme.maxContentWidth)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
 
-                    if let quoteFailureMessage {
-                        message(
-                            quoteFailureMessage,
-                            systemImage: "exclamationmark.circle.fill",
-                            tint: MonMonTheme.danger,
-                            id: "quote-import-error"
-                        )
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 10) {
+                        Text(headerText)
+                            .font(.subheadline)
+                            .foregroundStyle(MonMonTheme.textSecondary)
+
+                        if !isETF && !isCrypto {
+                            Text(
+                                """
+                                Tap a \(groupNoun) to select its \(itemNoun).
+                                """
+                            )
+                            .font(.caption)
+                            .foregroundStyle(MonMonTheme.textSecondary)
+                        }
+
+                        if shown.isEmpty {
+                            noMatches
+                        } else {
+                            candidateContent
+                        }
                     }
+                    .frame(maxWidth: MonMonTheme.maxContentWidth)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 16)
+                    .frame(maxWidth: .infinity)
+                }
+            }
+            .disabled(isSaving)
+        }
+    }
 
-                    if let saveErrorMessage {
-                        message(
-                            saveErrorMessage,
-                            systemImage: "xmark.circle.fill",
-                            tint: MonMonTheme.danger,
-                            id: "save-import-error"
-                        )
-                    }
-
-                    if shown.isEmpty {
-                        noMatches
+    private var selectionBar: some View {
+        VStack(spacing: 10) {
+            if let quoteFailureMessage {
+                Text(quoteFailureMessage)
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.danger)
+                    .lineLimit(3)
+                    .accessibilityIdentifier("quote-import-error")
+            }
+            if let saveErrorMessage {
+                Text(saveErrorMessage)
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.danger)
+                    .lineLimit(3)
+                    .accessibilityIdentifier("save-import-error")
+            }
+            HStack {
+                Text("\(chosen.count) selected")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textPrimary)
+                Spacer(minLength: 8)
+                Button("Clear") { chosen.removeAll() }
+                    .disabled(chosen.isEmpty || isSaving)
+                    .accessibilityIdentifier("clear-import")
+            }
+            Button(action: addChosen) {
+                HStack(spacing: 10) {
+                    if isSaving { ProgressView().tint(MonMonTheme.onAccent) }
+                    if isSaving {
+                        Text("Adding instruments…")
                     } else {
-                        candidateContent
+                        Text("Add \(chosen.count)")
                     }
                 }
-                .frame(maxWidth: MonMonTheme.maxContentWidth)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-                .frame(maxWidth: .infinity)
+                .font(.headline)
+                .frame(maxWidth: .infinity, minHeight: 44)
             }
+            .buttonStyle(.borderedProminent)
+            .disabled(chosen.isEmpty || isSaving)
+            .accessibilityLabel(confirmAccessibilityLabel)
+            .accessibilityIdentifier("confirm-import")
         }
+        .frame(maxWidth: MonMonTheme.maxContentWidth)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity)
+        .background(MonMonTheme.surface)
+        .overlay(alignment: .top) { Divider() }
     }
 
     /// The entries on show: everything importable, narrowed by the search.
@@ -201,20 +254,26 @@ struct FundCatalogueImportView: View {
 
                 Spacer(minLength: 8)
 
-                Image(systemName: isGroupChosen(group) ? "checkmark.circle.fill" : "circle")
+                Image(systemName: groupSelectionSymbol(group))
                     .foregroundStyle(
                         isGroupChosen(group) ? MonMonTheme.accent : MonMonTheme.textSecondary
                     )
                     .accessibilityHidden(true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.top, 14)
-            .padding(.bottom, 2)
+            .frame(minHeight: 44)
+            .padding(.top, 8)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .foregroundStyle(MonMonTheme.textPrimary)
         .accessibilityIdentifier("import-owner-\(group.owner)")
         .accessibilityHint("Selects every \(itemNoun) from this \(groupNoun)")
+    }
+
+    private func groupSelectionSymbol(_ group: FundCatalogueImport.OwnerGroup) -> String {
+        if isGroupChosen(group) { return "checkmark.circle.fill" }
+        return group.funds.contains { chosen.contains($0.symbol) } ? "minus.circle.fill" : "circle"
     }
 
     private func isGroupChosen(_ group: FundCatalogueImport.OwnerGroup) -> Bool {
@@ -232,21 +291,6 @@ struct FundCatalogueImportView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(headerText)
-                .font(.subheadline)
-                .foregroundStyle(MonMonTheme.textSecondary)
-
-            if !isETF {
-                Text(
-                    """
-                    Grouped by \(groupNoun) · \(groupCountText). Tap a \(groupNoun) to \
-                    take all of its \(itemNoun).
-                    """
-                )
-                .font(.caption)
-                .foregroundStyle(MonMonTheme.textSecondary)
-            }
-
             searchField
 
             HStack(spacing: 12) {
@@ -258,9 +302,10 @@ struct FundCatalogueImportView: View {
                 .disabled(shown.isEmpty)
                 .accessibilityIdentifier("select-all-import")
 
-                Button("Clear") { chosen.removeAll() }
-                    .disabled(chosen.isEmpty)
-                    .accessibilityIdentifier("clear-import")
+                Spacer(minLength: 8)
+                Text("\(shown.count) results")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
             }
             .font(.subheadline.weight(.medium))
             .buttonStyle(.plain)
@@ -270,39 +315,15 @@ struct FundCatalogueImportView: View {
     }
 
     private var headerText: String {
-        let total = importer.importable.count
-        guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            if isGold {
-                return AppText.string(
-                    """
-                    \(total) gold products, each with the shop buy price \(providerName) \
-                    publishes. Pick the ones you hold — nothing is added until you do.
-                    """,
-                    in: locale
-                )
-            }
-            if isETF {
-                return AppText.string(
-                    """
-                    \(total) HOSE-listed ETFs. Pick the ones you hold — their closing prices are \
-                    fetched before they are added.
-                    """,
-                    in: locale
-                )
-            }
-            return AppText.string(
-                """
-                \(total) open-ended funds, each with the NAV Fmarket publishes. Pick the ones you \
-                hold — nothing is added until you do.
-                """,
-                in: locale
-            )
+        let key: String
+        switch importer.source {
+        case .fmarket: key = "Choose funds to add with the latest published NAV."
+        case .vndirect: key = "Choose ETFs. Closing prices are fetched before adding."
+        case .vangToday: key = "Choose gold products. Prices shown are shop buy prices."
+        case .coinGecko: key = "Choose coins or search CoinGecko for more. Prices are in VND."
+        case .manual: key = "Choose instruments to add to your catalogue."
         }
-        return AppText.string("\(shown.count) of \(total) \(itemNoun) match.", in: locale)
-    }
-
-    private var groupCountText: String {
-        AppText.string("\(groups.count) \(groupNoun)", in: locale)
+        return AppText.string(key: key, in: locale)
     }
 
     private var searchField: some View {
@@ -313,6 +334,7 @@ struct FundCatalogueImportView: View {
 
             TextField(searchPlaceholder, text: $searchText)
                 .textFieldStyle(.plain)
+                .autocorrectionDisabled()
                 .accessibilityIdentifier("import-search")
 
             if importer.isSearchingRemotely {
@@ -327,6 +349,8 @@ struct FundCatalogueImportView: View {
                 } label: {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundStyle(MonMonTheme.textSecondary)
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Clear search")
@@ -342,7 +366,11 @@ struct FundCatalogueImportView: View {
 
     private var noMatches: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("No \(itemNoun) matches “\(searchText)”.")
+            if isCrypto && searchText.isEmpty {
+                Text("Search by ticker or coin name to find more coins.")
+            } else {
+                Text("No \(itemNoun) matches “\(searchText)”.")
+            }
 
             if let remoteMessage {
                 Text(remoteMessage)
@@ -360,54 +388,50 @@ struct FundCatalogueImportView: View {
         Button {
             toggle(candidate.symbol)
         } label: {
-            HStack(spacing: 12) {
-                Image(
-                    systemName: chosen.contains(candidate.symbol)
-                        ? "checkmark.circle.fill" : "circle"
-                )
-                .font(.title3)
-                .foregroundStyle(
-                    chosen.contains(candidate.symbol)
-                        ? MonMonTheme.accent : MonMonTheme.textSecondary
-                )
-                .accessibilityHidden(true)
-
-                FundLogoView(
-                    symbol: candidate.symbol,
-                    logoURL: candidate.logoURL,
-                    size: 34
-                )
-
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(candidate.symbol)
-                        .font(.headline)
-                        .monospaced()
-
-                    Text(candidate.name)
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 12) {
+                    Image(
+                        systemName: chosen.contains(candidate.symbol)
+                            ? "checkmark.circle.fill" : "circle"
+                    )
+                    .font(.title3)
+                    .foregroundStyle(
+                        chosen.contains(candidate.symbol)
+                            ? MonMonTheme.accent : MonMonTheme.textSecondary
+                    )
+                    .accessibilityHidden(true)
+                    FundLogoView(symbol: candidate.symbol, logoURL: candidate.logoURL, size: 34)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(candidate.symbol)
+                            .font(.headline)
+                            .monospaced()
+                            .foregroundStyle(MonMonTheme.textPrimary)
+                        Text(candidate.name)
+                            .font(.subheadline)
+                            .foregroundStyle(MonMonTheme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 0)
+                }
+                HStack(alignment: .firstTextBaseline) {
+                    Text(priceText(candidate))
+                        .font(.subheadline.weight(.semibold))
+                        .monospacedDigit()
+                        .foregroundStyle(MonMonTheme.textPrimary)
+                    Spacer(minLength: 8)
+                    Text(dayText(candidate))
                         .font(.caption)
                         .foregroundStyle(MonMonTheme.textSecondary)
-                        .lineLimit(2)
-                }
-
-                Spacer(minLength: 12)
-
-                VStack(alignment: .trailing, spacing: 3) {
-                    Text(priceText(candidate))
-                        .font(.subheadline.weight(.medium))
-                        .monospacedDigit()
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.75)
-
-                    Text(dayText(candidate))
-                        .font(.caption2)
-                        .foregroundStyle(MonMonTheme.textSecondary)
+                        .multilineTextAlignment(.trailing)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(14)
             .background {
                 RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                    .fill(MonMonTheme.surface)
+                    .fill(
+                        chosen.contains(candidate.symbol)
+                            ? MonMonTheme.accent.opacity(0.08) : MonMonTheme.surface)
             }
             .overlay {
                 RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
@@ -419,6 +443,7 @@ struct FundCatalogueImportView: View {
             }
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(chosen.contains(candidate.symbol) ? [.isSelected] : [])
         .accessibilityIdentifier("import-\(candidate.symbol)")
     }
 
@@ -446,7 +471,7 @@ struct FundCatalogueImportView: View {
     private func dayText(_ candidate: FundInstrumentCandidate) -> String {
         guard let day = candidate.priceAsOf else {
             return AppText.string(
-                key: isETF ? "Close fetched when added" : "Refresh will fetch it",
+                key: (isETF || isCrypto) ? "Price fetched when added" : "Refresh will fetch it",
                 in: locale
             )
         }
@@ -494,7 +519,7 @@ struct FundCatalogueImportView: View {
 
     private var confirmAccessibilityLabel: Text {
         if isSaving {
-            Text("Fetching closing prices")
+            Text("Adding instruments…")
         } else {
             Text("Add \(chosen.count)")
         }
@@ -503,7 +528,8 @@ struct FundCatalogueImportView: View {
     private var quoteFailureMessage: LocalizedStringKey? {
         guard !failedSymbols.isEmpty else { return nil }
         let symbols = failedSymbols.joined(separator: ", ")
-        return "Couldn’t fetch a closing price for \(symbols). Try Add again."
+        return
+            "Couldn’t fetch prices for \(symbols). These items are still selected; try Add again."
     }
 
     private var isGold: Bool { importer.source == .vangToday }
