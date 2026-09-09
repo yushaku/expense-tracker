@@ -82,8 +82,7 @@ struct BudgetScreen: View {
                     }
                 }
             }
-            .compactRootNavigationTitle("Budget")
-            .settingsAvatar()
+            .rootScreenHeader("Budget")
             .accessibilityIdentifier("budget")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {

@@ -1,6 +1,66 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Choose another photo or try again. Your current avatar has not changed.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hãy chọn ảnh khác hoặc thử lại. Ảnh đại diện hiện tại chưa thay đổi."
+          }
+        }
+      }
+    },
+    "Could not load avatar": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể tải ảnh đại diện"
+          }
+        }
+      }
+    },
+    "Loading avatar": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang tải ảnh đại diện"
+          }
+        }
+      }
+    },
+    "Remove photo": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xóa ảnh"
+          }
+        }
+      }
+    },
+    "Change avatar": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đổi ảnh đại diện"
+          }
+        }
+      }
+    },
+    "Avatar": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ảnh đại diện"
+          }
+        }
+      }
+    },
     "Account trend": {
       "localizations": {
         "vi": {

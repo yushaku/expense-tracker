@@ -194,7 +194,8 @@ struct RootTabView: View {
 }
 
 /// Keeps Settings one tap away from each root screen without taking a tab slot.
-private struct SettingsAvatar: ViewModifier {
+private struct RootScreenHeader: ViewModifier {
+    let title: LocalizedStringKey
     @State private var isShowingSettings = false
 
     private var placement: ToolbarItemPlacement {
@@ -207,32 +208,48 @@ private struct SettingsAvatar: ViewModifier {
 
     func body(content: Content) -> some View {
         content
+            .compactRootNavigationTitle("")
             .toolbar {
-                ToolbarItem(placement: placement) {
-                    Button {
-                        isShowingSettings = true
-                    } label: {
-                        Image(systemName: "person.crop.circle.fill")
-                            .font(.title)
-                            .foregroundStyle(MonMonTheme.accent)
-                            .frame(minWidth: 44, minHeight: 44)
-                            .contentShape(Circle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Settings")
-                    .accessibilityIdentifier("settings-avatar")
-                    .help("Settings")
+                if #available(iOS 26.0, macOS 26.0, *) {
+                    headerItem
+                        .sharedBackgroundVisibility(.hidden)
+                } else {
+                    headerItem
                 }
             }
             .appSheet(isPresented: $isShowingSettings) {
                 SettingsView()
             }
     }
+
+    private var headerItem: some ToolbarContent {
+        ToolbarItem(placement: placement) {
+            HStack(spacing: 8) {
+                Button {
+                    isShowingSettings = true
+                } label: {
+                    AvatarImage()
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Settings")
+                .accessibilityIdentifier("settings-avatar")
+                .help("Settings")
+
+                Text(title)
+                    .font(.headline)
+                    .foregroundStyle(MonMonTheme.textPrimary)
+                    .lineLimit(1)
+                    .accessibilityAddTraits(.isHeader)
+            }
+        }
+    }
 }
 
 extension View {
-    func settingsAvatar() -> some View {
-        modifier(SettingsAvatar())
+    func rootScreenHeader(_ title: LocalizedStringKey) -> some View {
+        modifier(RootScreenHeader(title: title))
     }
 }
 
