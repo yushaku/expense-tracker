@@ -63,38 +63,72 @@ struct AvatarImage: View {
 
 struct AvatarSettingsContent: View {
     @AppStorage(AppAvatar.storageKey) private var data = Data()
+    @AppStorage("profile.name") private var name = ""
     @State private var selectedPhoto: PhotosPickerItem?
+    @State private var isPhotoPickerPresented = false
     @State private var isLoading = false
     @State private var hasLoadError = false
 
     var body: some View {
         HStack(spacing: 20) {
-            AvatarImage(size: 72)
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Avatar")
-                    .font(.headline)
-                    .foregroundStyle(MonMonTheme.textPrimary)
-
-                PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                    Text("Change avatar")
+            Menu {
+                Button("Change avatar", systemImage: "photo") {
+                    isPhotoPickerPresented = true
                 }
-                .disabled(isLoading)
                 .accessibilityIdentifier("change-avatar")
 
-                if isLoading {
-                    ProgressView()
-                        .accessibilityLabel("Loading avatar")
-                } else if !data.isEmpty {
-                    Button("Remove photo", role: .destructive) {
+                if !data.isEmpty {
+                    Button("Remove photo", systemImage: "trash", role: .destructive) {
                         data = Data()
                     }
                     .accessibilityIdentifier("remove-avatar")
                 }
+            } label: {
+                AvatarImage(size: 72)
+                    .overlay(alignment: .bottomTrailing) {
+                        Image(systemName: "camera.fill")
+                            .font(.caption)
+                            .foregroundStyle(MonMonTheme.onAccent)
+                            .padding(6)
+                            .background(MonMonTheme.accent, in: Circle())
+                            .accessibilityHidden(true)
+                    }
+                    .contentShape(Circle())
             }
-            Spacer(minLength: 0)
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .disabled(isLoading)
+            .accessibilityLabel("Change avatar")
+            .accessibilityIdentifier("avatar-options")
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Name")
+                    .font(.headline)
+                    .foregroundStyle(MonMonTheme.textPrimary)
+
+                TextField("Name", text: $name)
+                    .textFieldStyle(.plain)
+                    .autocorrectionDisabled()
+                    .foregroundStyle(MonMonTheme.textPrimary)
+                    .padding(.horizontal, 12)
+                    .frame(minHeight: 44)
+                    .background(MonMonTheme.field, in: RoundedRectangle(cornerRadius: 10))
+                    .accessibilityIdentifier("profile-name")
+
+                if isLoading {
+                    ProgressView()
+                        .accessibilityLabel("Loading avatar")
+                }
+            }
         }
         .buttonStyle(.plain)
         .foregroundStyle(MonMonTheme.accent)
+        .photosPicker(
+            isPresented: $isPhotoPickerPresented,
+            selection: $selectedPhoto,
+            matching: .images
+        )
         .task(id: selectedPhoto) {
             guard let selectedPhoto else { return }
             isLoading = true
