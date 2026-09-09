@@ -224,25 +224,28 @@ private struct RootScreenHeader: ViewModifier {
 
     private var headerItem: some ToolbarContent {
         ToolbarItem(placement: placement) {
-            HStack(spacing: 8) {
-                Button {
-                    isShowingSettings = true
-                } label: {
+            Button {
+                isShowingSettings = true
+            } label: {
+                Label {
+                    Text(title)
+                        .font(.headline)
+                        .foregroundStyle(MonMonTheme.textPrimary)
+                        .lineLimit(1)
+                } icon: {
                     AvatarImage()
                         .frame(minWidth: 44, minHeight: 44)
-                        .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Settings")
-                .accessibilityIdentifier("settings-avatar")
-                .help("Settings")
-
-                Text(title)
-                    .font(.headline)
-                    .foregroundStyle(MonMonTheme.textPrimary)
-                    .lineLimit(1)
-                    .accessibilityAddTraits(.isHeader)
+                // Toolbar labels otherwise adapt to icon-only presentation.
+                .labelStyle(.titleAndIcon)
+                .fixedSize(horizontal: true, vertical: false)
+                .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel(title)
+            .accessibilityHint("Opens Settings")
+            .accessibilityIdentifier("settings-avatar")
+            .help("Settings")
         }
     }
 }
