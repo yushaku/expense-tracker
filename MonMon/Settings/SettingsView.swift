@@ -14,6 +14,7 @@ struct SettingsView: View {
     @AppStorage(AppLanguage.storageKey) private var language = AppLanguage.system
     @AppStorage(AppLock.enabledKey) private var isLockEnabled = false
     @AppStorage(AppDateFormat.storageKey) private var dateFormat = AppDateFormat.dayMonthYear
+    @State private var isSalaryCalculatorPresented = false
     @State private var instrumentScope: FundInstrumentListScope?
 
     var body: some View {
@@ -36,6 +37,19 @@ struct SettingsView: View {
                         card { AvatarSettingsContent() }
                         appearanceCard
                         instrumentsCard
+                        card {
+                            Button {
+                                isSalaryCalculatorPresented = true
+                            } label: {
+                                HStack {
+                                    Label("Salary calculator", systemImage: "banknote")
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                }
+                                .frame(minHeight: 44)
+                            }
+                            .accessibilityIdentifier("settings-salary-calculator")
+                        }
                         notificationCard
                         voiceCaptureCard
                         securityCard
@@ -64,6 +78,9 @@ struct SettingsView: View {
             .tint(MonMonTheme.accent)
             .appSheet(item: $instrumentScope) { scope in
                 FundInstrumentListView(scope: scope)
+            }
+            .appSheet(isPresented: $isSalaryCalculatorPresented) {
+                SalaryCalculatorView()
             }
             .onChange(of: language) { _, newLanguage in
                 Task {

@@ -1,6 +1,316 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Salary calculator": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tính lương"
+          }
+        }
+      }
+    },
+    "Use Net for recurring salary": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dùng lương Net cho khoản lương định kỳ"
+          }
+        }
+      }
+    },
+    "Review the account and payment date before saving a new monthly Salary rule.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiểm tra tài khoản và ngày nhận lương trước khi lưu khoản lương hằng tháng mới."
+          }
+        }
+      }
+    },
+    "Review changes to your first monthly Salary rule. Its account and schedule are kept.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiểm tra thay đổi cho khoản lương hằng tháng đầu tiên. Tài khoản và lịch nhận lương được giữ nguyên."
+          }
+        }
+      }
+    },
+    "Enter a valid salary and insurance amount (up to 1 trillion VND).": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập lương và mức đóng bảo hiểm hợp lệ (tối đa 1 nghìn tỷ VND)."
+          }
+        }
+      }
+    },
+    "Reference: TopCV": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tham khảo: TopCV"
+          }
+        }
+      }
+    },
+    "2026 estimate for resident employees with contracts of at least 3 months. Excludes tax-exempt allowances and other deductions. Amounts are rounded to VND.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ước tính năm 2026 cho người lao động cư trú có hợp đồng từ 3 tháng. Chưa bao gồm phụ cấp miễn thuế và các khoản giảm trừ khác. Số tiền làm tròn đến đồng."
+          }
+        }
+      }
+    },
+    "Conversion": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyển đổi"
+          }
+        }
+      }
+    },
+    "Gross → Net": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gross → Net"
+          }
+        }
+      }
+    },
+    "Net → Gross": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Net → Gross"
+          }
+        }
+      }
+    },
+    "Monthly Net (VND)": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lương Net hằng tháng (VND)"
+          }
+        }
+      }
+    },
+    "Monthly Gross (VND)": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lương Gross hằng tháng (VND)"
+          }
+        }
+      }
+    },
+    "Calculation period": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kỳ tính lương"
+          }
+        }
+      }
+    },
+    "Jan–Jun 2026": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tháng 1–6/2026"
+          }
+        }
+      }
+    },
+    "Jul–Dec 2026": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tháng 7–12/2026"
+          }
+        }
+      }
+    },
+    "Dependants": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Người phụ thuộc"
+          }
+        }
+      }
+    },
+    "Prefilled from your first monthly Salary rule, treated as take-home pay (Net).": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Điền sẵn từ khoản lương hằng tháng đầu tiên, được hiểu là lương thực nhận (Net)."
+          }
+        }
+      }
+    },
+    "Insurance": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bảo hiểm"
+          }
+        }
+      }
+    },
+    "Region": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vùng"
+          }
+        }
+      }
+    },
+    "Custom insurance salary": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mức lương đóng bảo hiểm riêng"
+          }
+        }
+      }
+    },
+    "Insurance salary (VND)": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lương đóng bảo hiểm (VND)"
+          }
+        }
+      }
+    },
+    "Insurance is calculated on full Gross, subject to statutory caps.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bảo hiểm tính trên toàn bộ lương Gross, áp dụng mức trần theo quy định."
+          }
+        }
+      }
+    },
+    "Salary breakdown": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chi tiết lương"
+          }
+        }
+      }
+    },
+    "Gross salary": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lương Gross"
+          }
+        }
+      }
+    },
+    "Social insurance (8%)": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BHXH (8%)"
+          }
+        }
+      }
+    },
+    "Health insurance (1.5%)": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BHYT (1,5%)"
+          }
+        }
+      }
+    },
+    "Unemployment insurance (1%)": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BHTN (1%)"
+          }
+        }
+      }
+    },
+    "Family deductions": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giảm trừ gia cảnh"
+          }
+        }
+      }
+    },
+    "Taxable income": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thu nhập tính thuế"
+          }
+        }
+      }
+    },
+    "Personal income tax": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thuế thu nhập cá nhân"
+          }
+        }
+      }
+    },
+    "Net salary": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lương Net"
+          }
+        }
+      }
+    },
     "Price fetched when added": {
       "localizations": {
         "vi": {
