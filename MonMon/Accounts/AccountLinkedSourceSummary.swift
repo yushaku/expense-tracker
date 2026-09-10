@@ -166,3 +166,24 @@ enum AccountMerge {
         return touched
     }
 }
+
+/// Linked investments are unique parent positions, whether this account funded
+/// them or received their cash proceeds. Swaps never link a cash account.
+enum AccountLinkedInvestments {
+    static func deposits(
+        for accountID: UUID, deposits: [SavingsDeposit], withdrawals: [SavingsWithdrawal]
+    ) -> [SavingsDeposit] {
+        let receivedIDs = Set(
+            withdrawals.filter { $0.destinationAccountID == accountID }.compactMap(\.depositID))
+        return deposits.filter { $0.sourceAccountID == accountID || receivedIDs.contains($0.id) }
+    }
+
+    static func holdings(
+        for accountID: UUID, holdings: [FundHolding], sales: [FundSale]
+    ) -> [FundHolding] {
+        let receivedIDs = Set(
+            sales.filter { !$0.isSwap && $0.proceedsAccountID == accountID }.compactMap(\.holdingID)
+        )
+        return holdings.filter { $0.sourceAccountID == accountID || receivedIDs.contains($0.id) }
+    }
+}

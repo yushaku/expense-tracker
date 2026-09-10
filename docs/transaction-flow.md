@@ -25,3 +25,5 @@ Transactions and internal transfers share the same row gestures: swipe left to d
 Transfer and transaction details reuse the same amount header, bordered information card, icon rows and Delete/Edit action bar. Both open at medium height and expand to large. Transfer account rows link to their respective account details; missing accounts remain read-only.
 
 Account detail uses a single date filter beside Edit in the navigation header. Its selected period controls both the report and history, including internal transfers; the report card displays the active period without its own filter.
+
+Linked Investments displays the same savings-book and grouped-position cards as Investments, in Savings, Funds/ETFs, Gold and Crypto sections. Links include funding and cash withdrawals/sale proceeds, deduplicated by parent investment; swaps do not create cash-account links. Cards retain all withdrawal/sale data for accurate balances. Fund details stay scoped to the linked account; whole-instrument bulk closure is available only from the full Investments screen.

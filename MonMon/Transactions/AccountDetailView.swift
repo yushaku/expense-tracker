@@ -54,8 +54,8 @@ struct AccountDetailView: View {
     @Query(sort: \DebtPayment.occurredAt, order: .reverse)
     private var payments: [DebtPayment]
 
-    @Query(sort: \RecurringRule.createdAt, order: .forward)
-    private var recurringRules: [RecurringRule]
+    @Query(sort: \FundInstrument.symbol, order: .forward)
+    private var instruments: [FundInstrument]
 
     let route: AccountDetailRoute
 
@@ -166,7 +166,11 @@ struct AccountDetailView: View {
                     )
 
                 case .linkedInvestments:
-                    AccountLinkedSourcesCard(rows: linkedSources(for: account))
+                    AccountLinkedInvestmentSections(
+                        accountID: account.id, deposits: deposits, withdrawals: withdrawals,
+                        holdings: holdings, sales: sales, instruments: instruments,
+                        accounts: accounts
+                    )
                 }
             }
             .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -204,19 +208,6 @@ struct AccountDetailView: View {
             .filter { selectedRange.contains($0.occurredAt) }
     }
 
-    private func linkedSources(for account: CashAccount) -> [AccountLinkedSourceRow] {
-        AccountLinkedSourceSummary.rows(
-            for: account,
-            deposits: deposits,
-            withdrawals: withdrawals,
-            holdings: holdings,
-            sales: sales,
-            debts: debts,
-            payments: payments,
-            recurringRules: recurringRules
-        )
-    }
-
     private func category(for transaction: MoneyTransaction) -> TransactionCategory? {
         guard let categoryID = transaction.categoryID else {
             return nil
@@ -233,103 +224,105 @@ struct AccountDetailView: View {
     }
 }
 
-private struct AccountLinkedSourcesCard: View {
-    let rows: [AccountLinkedSourceRow]
+private struct AccountLinkedInvestmentSections: View {
+    let accountID: UUID
+    let deposits: [SavingsDeposit]
+    let withdrawals: [SavingsWithdrawal]
+    let holdings: [FundHolding]
+    let sales: [FundSale]
+    let instruments: [FundInstrument]
+    let accounts: [CashAccount]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Label("LINKED SOURCES", systemImage: "link")
-                .font(.caption.weight(.semibold))
-                .tracking(0.8)
-                .foregroundStyle(MonMonTheme.textSecondary)
-
-            if rows.isEmpty {
-                Text("No savings, funds, debts, or recurring rules use this account.")
-                    .font(.subheadline)
-                    .foregroundStyle(MonMonTheme.textSecondary)
+        VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+            if linkedDeposits.isEmpty && linkedHoldings.isEmpty {
+                ContentUnavailableView(
+                    "No linked investments", systemImage: "chart.pie",
+                    description: Text(
+                        "Investments funded by this account or paid back into it appear here.")
+                )
             } else {
-                VStack(spacing: 14) {
-                    ForEach(rows) { row in
-                        linkedSourceRow(row)
+                if !linkedDeposits.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        sectionHeader("Savings", count: linkedDeposits.count)
+                        ForEach(linkedDeposits) { deposit in
+                            NavigationLink {
+                                SavingsDepositDetailView(
+                                    route: SavingsDepositRoute(depositID: deposit.id))
+                            } label: {
+                                SavingsDepositCard(
+                                    deposit: deposit,
+                                    sourceAccountName: accounts.first {
+                                        $0.id == deposit.sourceAccountID
+                                    }?.name,
+                                    withdrawals: withdrawals
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityIdentifier("linked-savings-\(deposit.id.uuidString)")
+                            .accessibilityHint("Opens this savings book")
+                        }
+                    }
+                }
+                ForEach([InvestmentSegment.funds, .gold, .crypto]) { segment in
+                    let groups = groups(for: segment)
+                    if !groups.isEmpty {
+                        VStack(alignment: .leading, spacing: 12) {
+                            sectionHeader(segment.displayName, count: groups.count)
+                            ForEach(groups) { group in
+                                NavigationLink {
+                                    FundGroupDetailView(
+                                        route: FundGroupRoute(
+                                            instrumentID: group.instrumentID,
+                                            linkedAccountID: accountID
+                                        ))
+                                } label: {
+                                    FundGroupCard(group: group)
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityIdentifier("linked-investment-\(group.id)")
+                                .accessibilityHint("Opens linked details")
+                            }
+                        }
                     }
                 }
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(20)
-        .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 16))
-        .overlay {
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(MonMonTheme.border, lineWidth: 1)
-        }
-        .accessibilityIdentifier("account-detail-linked-sources")
+        .accessibilityIdentifier("account-detail-linked-investments")
     }
 
-    private func linkedSourceRow(_ row: AccountLinkedSourceRow) -> some View {
-        HStack(spacing: 14) {
-            Image(systemName: row.kind.iconName)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(row.kind.tint)
-                .frame(width: 40, height: 40)
-                .background(row.kind.tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 12))
-                .accessibilityHidden(true)
+    private var linkedDeposits: [SavingsDeposit] {
+        SavingsWithdrawalSummary.sortedDeposits(
+            AccountLinkedInvestments.deposits(
+                for: accountID, deposits: deposits, withdrawals: withdrawals),
+            withdrawals: withdrawals, by: .date
+        )
+    }
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(row.kind.title)
-                    .font(.subheadline.weight(.semibold))
+    private var linkedHoldings: [FundHolding] {
+        AccountLinkedInvestments.holdings(for: accountID, holdings: holdings, sales: sales)
+    }
 
-                Text(row.kind.description)
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-            }
+    private func groups(for segment: InvestmentSegment) -> [FundPositionGroup] {
+        var matching = FundSummary.holdings(
+            linkedHoldings, in: instruments, matching: segment.instrumentKinds)
+        if segment == .funds {
+            matching += FundSummary.unpriced(holdings: linkedHoldings, instruments: instruments)
+        }
+        return FundSummary.groups(
+            holdings: matching, instruments: instruments, sales: sales, by: .date)
+    }
 
-            Spacer(minLength: 8)
-
-            Text(row.count.formatted())
+    private func sectionHeader(_ title: LocalizedStringKey, count: Int) -> some View {
+        HStack {
+            Text(title).font(.title3.weight(.semibold))
+            Spacer()
+            Text(count.formatted())
                 .font(.caption.weight(.bold))
-                .foregroundStyle(row.kind.tint)
-                .padding(.horizontal, 9)
+                .foregroundStyle(MonMonTheme.accent)
+                .padding(.horizontal, 10)
                 .padding(.vertical, 5)
-                .background(row.kind.tint.opacity(0.16), in: Capsule())
-        }
-        .accessibilityElement(children: .combine)
-    }
-}
-
-private extension AccountLinkedSourceKind {
-    var title: LocalizedStringKey {
-        switch self {
-        case .savings: "Savings"
-        case .funds: "Funds"
-        case .debts: "Debts"
-        case .recurring: "Recurring"
-        }
-    }
-
-    var description: LocalizedStringKey {
-        switch self {
-        case .savings: "Deposits funded or withdrawals received"
-        case .funds: "Holdings funded or sale proceeds received"
-        case .debts: "Debts opened or payments recorded"
-        case .recurring: "Rules that record into this account"
-        }
-    }
-
-    var iconName: String {
-        switch self {
-        case .savings: "banknote.fill"
-        case .funds: "chart.line.uptrend.xyaxis"
-        case .debts: "person.2.fill"
-        case .recurring: "repeat"
-        }
-    }
-
-    var tint: Color {
-        switch self {
-        case .savings: MonMonTheme.savings
-        case .funds: MonMonTheme.funds
-        case .debts: MonMonTheme.lent
-        case .recurring: MonMonTheme.accent
+                .background(MonMonTheme.accent.opacity(0.16), in: Capsule())
         }
     }
 }
