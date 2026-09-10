@@ -10,18 +10,12 @@ import SwiftUI
 /// one. The stack keeps the route instead, so nothing below depends on the row
 /// that started it still being on screen.
 enum WealthDestination: Hashable {
-    case accounts
     case investments(InvestmentSegment)
     case debts(DebtDirection)
 }
 
-/// Everything the owner has, in one picture: how it splits between cash,
-/// savings, funds, gold and what is lent out, then concise account, investment,
-/// and debt summaries.
-///
-/// The detail behind each part lives one push in — the Accounts screen, the
-/// Investments screen, a debt and its payments — so this screen stays a summary
-/// rather than a second copy of any of them.
+/// Wealth combines overall allocation, account management, investments and debts.
+/// Account cards open their details directly; no intermediate Accounts screen.
 struct WealthView: View {
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
@@ -68,7 +62,7 @@ struct WealthView: View {
                             )
                         }
 
-                        accountsSection
+                        WealthAccountsSection()
 
                         investmentsSection
 
@@ -85,8 +79,6 @@ struct WealthView: View {
             .accessibilityIdentifier("wealth")
             .navigationDestination(for: WealthDestination.self) { destination in
                 switch destination {
-                case .accounts:
-                    AccountsScreen()
                 case .investments(let segment):
                     InvestmentsScreen(segment: segment)
                 case .debts(let direction):
@@ -126,28 +118,6 @@ struct WealthView: View {
             debts: debts,
             payments: payments,
             sales: sales
-        )
-    }
-
-    private var accountsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            sectionHeader("Accounts")
-
-            ForEach(CashAccountKind.allCases, id: \.rawValue) { kind in
-                accountRow(kind)
-            }
-        }
-    }
-
-    private func accountRow(_ kind: CashAccountKind) -> some View {
-        summaryNavigationRow(
-            title: kind.displayName,
-            amount: accountsTotal(kind),
-            systemImage: kind.iconName,
-            tint: kind.tint,
-            accessibilityIdentifier: "open-accounts-\(kind.rawValue)",
-            accessibilityHint: "Opens the Accounts screen.",
-            destination: .accounts
         )
     }
 
@@ -213,21 +183,6 @@ struct WealthView: View {
         .buttonStyle(.plain)
         .accessibilityIdentifier(accessibilityIdentifier)
         .accessibilityHint(accessibilityHint)
-    }
-
-    private func accountsTotal(_ kind: CashAccountKind) -> Decimal {
-        CashBalanceSummary.totalAvailable(
-            of: accounts,
-            matching: kind,
-            deposits: deposits,
-            holdings: holdings,
-            withdrawals: withdrawals,
-            transactions: transactions,
-            transfers: transfers,
-            debts: debts,
-            payments: payments,
-            sales: sales
-        )
     }
 
     /// The four places parked money sits, each worth what it is worth today and

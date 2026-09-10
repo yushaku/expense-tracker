@@ -9065,12 +9065,12 @@
         }
       }
     },
-    "No account yet. Add one on the Home tab first.": {
+    "No account yet. Add one on the Wealth tab first.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Chưa có tài khoản. Hãy thêm ở tab Trang chính trước."
+            "value": "Chưa có tài khoản. Hãy thêm ở tab Tài sản trước."
           }
         }
       }
@@ -10935,12 +10935,12 @@
         }
       }
     },
-    "Transfers need two accounts. Add another on the Home tab first.": {
+    "Transfers need two accounts. Add another on the Wealth tab first.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Chuyển khoản cần hai tài khoản. Hãy thêm một tài khoản nữa ở tab Trang chính."
+            "value": "Chuyển khoản cần hai tài khoản. Hãy thêm một tài khoản nữa ở tab Tài sản."
           }
         }
       }

@@ -106,7 +106,7 @@ struct TransferEditorForm: View {
                 }
 
                 if accounts.count < 2 {
-                    Text("Transfers need two accounts. Add another on the Home tab first.")
+                    Text("Transfers need two accounts. Add another on the Wealth tab first.")
                         .font(.caption)
                         .foregroundStyle(MonMonTheme.textSecondary)
                 } else {
