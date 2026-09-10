@@ -264,42 +264,33 @@ private struct TransferDetailSheet: View {
     let onDelete: () throws -> Void
     @State private var confirmsDelete = false
     @State private var deleteFailed = false
+    @State private var selectedDetent = PresentationDetent.medium
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    Label("Internal transfer", systemImage: "arrow.left.arrow.right")
-                        .foregroundStyle(MonMonTheme.textSecondary)
-                    Text(VNDCurrency.format(transfer.amount))
-                        .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                        .monospacedDigit()
-                        .minimumScaleFactor(0.6)
-                        .lineLimit(1)
-                    VStack(spacing: 16) {
-                        detail(
-                            "From",
-                            value: sourceAccount?.name
-                                ?? AppText.string("Unknown account", in: locale))
-                        Divider()
-                        detail(
-                            "To",
-                            value: destinationAccount?.name
-                                ?? AppText.string("Unknown account", in: locale))
-                        Divider()
-                        detail("Date", value: dateFormat.format(transfer.occurredAt))
-                        if !transfer.note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            Divider()
-                            detail("Note", value: transfer.note)
+                VStack(spacing: MonMonTheme.contentSpacing) {
+                    LedgerDetailHero(
+                        symbolName: "arrow.left.arrow.right",
+                        tint: MonMonTheme.accent,
+                        amount: VNDCurrency.format(transfer.amount),
+                        subtitle:
+                            "\(AppText.string("Internal transfer", in: locale)) • \(dateFormat.dateTime(transfer.occurredAt, in: locale))"
+                    )
+                    LedgerDetailCard {
+                        accountRow("From", account: sourceAccount)
+                        Divider().overlay(MonMonTheme.border)
+                        accountRow("To", account: destinationAccount)
+                        if let note {
+                            Divider().overlay(MonMonTheme.border)
+                            LedgerDetailRow(title: "Note", value: note, systemImage: "note.text")
                         }
                     }
-                    .padding(20)
-                    .background(
-                        MonMonTheme.surface,
-                        in: RoundedRectangle(cornerRadius: MonMonTheme.cardRadius))
                 }
-                .frame(maxWidth: MonMonTheme.maxContentWidth, alignment: .leading)
-                .padding(20)
+                .frame(maxWidth: MonMonTheme.maxContentWidth)
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
+                .padding(.bottom, 20)
                 .frame(maxWidth: .infinity)
             }
             .scrollBounceBehavior(.basedOnSize)
@@ -320,20 +311,16 @@ private struct TransferDetailSheet: View {
                     .accessibilityIdentifier("close-transfer-details")
                 }
             }
-            .safeAreaInset(edge: .bottom) {
-                HStack(spacing: 16) {
-                    Button("Delete", systemImage: "trash", role: .destructive) {
-                        confirmsDelete = true
-                    }
-                    .frame(maxWidth: .infinity, minHeight: 44)
-                    .accessibilityIdentifier("delete-transfer-detail")
-                    Button("Edit", systemImage: "pencil", action: onEdit)
-                        .frame(maxWidth: .infinity, minHeight: 44)
-                        .accessibilityIdentifier("edit-transfer-detail")
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 8)
-                .background(MonMonTheme.surface)
+            .navigationDestination(for: AccountDetailRoute.self) { route in
+                AccountDetailView(route: route)
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                LedgerDetailActionBar(
+                    deleteIdentifier: "delete-transfer-detail",
+                    editIdentifier: "edit-transfer-detail",
+                    onDelete: { confirmsDelete = true },
+                    onEdit: onEdit
+                )
             }
             .confirmationDialog(
                 "Delete this transfer?", isPresented: $confirmsDelete, titleVisibility: .visible
@@ -355,17 +342,32 @@ private struct TransferDetailSheet: View {
             .foregroundStyle(MonMonTheme.textPrimary)
             .preferredColorScheme(MonMonTheme.colorScheme)
         }
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.medium, .large], selection: $selectedDetent)
         .presentationDragIndicator(.visible)
         .accessibilityIdentifier("transfer-details")
     }
 
-    private func detail(_ title: LocalizedStringKey, value: String) -> some View {
-        HStack(alignment: .top, spacing: 20) {
-            Text(title).foregroundStyle(MonMonTheme.textSecondary)
-            Spacer(minLength: 0)
-            Text(value).multilineTextAlignment(.trailing)
+    private var note: String? {
+        let trimmed = transfer.note.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    @ViewBuilder
+    private func accountRow(_ title: LocalizedStringKey, account: CashAccount?) -> some View {
+        if let account {
+            NavigationLink(value: AccountDetailRoute(accountID: account.id)) {
+                LedgerDetailRow(
+                    title: title, value: account.name,
+                    systemImage: account.kind.iconName, showsDisclosure: true
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint("Opens linked details")
+        } else {
+            LedgerDetailRow(
+                title: title, value: AppText.string("Unknown account", in: locale),
+                systemImage: "wallet.bifold"
+            )
         }
-        .accessibilityElement(children: .combine)
     }
 }
