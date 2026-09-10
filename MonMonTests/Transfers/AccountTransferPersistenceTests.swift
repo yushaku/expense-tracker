@@ -162,8 +162,7 @@ struct AccountTransferPersistenceTests {
         context.insert(transfer)
         try context.save()
 
-        context.delete(transfer)
-        try context.save()
+        try TransferDeletion.delete(transfer, from: context)
 
         let transfers = try context.fetch(FetchDescriptor<AccountTransfer>())
         let storedBank = try #require(
@@ -184,6 +183,44 @@ struct AccountTransferPersistenceTests {
                 sales: []
             ) == 10_000_000
         )
+    }
+
+    @Test("Undo restores both balances and preserves transfer import identities")
+    func undoRestoresTransfer() throws {
+        let container = try makeContainer()
+        let context = ModelContext(container)
+        let bank = makeAccount(name: "Bank", openingBalance: 10_000_000)
+        let wallet = makeAccount(name: "Wallet", openingBalance: 1_000_000)
+        context.insert(bank)
+        context.insert(wallet)
+        let transfer = AccountTransfer(
+            id: UUID(), amount: 2_000_000, occurredAt: occurredAt, note: "Cash",
+            sourceAccountID: bank.id, destinationAccountID: wallet.id,
+            currencyCode: VNDCurrency.code, createdAt: occurredAt.addingTimeInterval(-60),
+            sourceAccountImportID: "bank-statement", destinationAccountImportID: "wallet-statement"
+        )
+        context.insert(transfer)
+        try context.save()
+        let expected = DeletedTransfer(transfer)
+        let deleted = try TransferDeletion.delete(transfer, from: context)
+        #expect(try context.fetch(FetchDescriptor<AccountTransfer>()).isEmpty)
+        try TransferDeletion.restore(deleted, in: context)
+        let transfers = try context.fetch(FetchDescriptor<AccountTransfer>())
+        let restored = try #require(transfers.first)
+        #expect(transfers.count == 1)
+        #expect(DeletedTransfer(restored) == expected)
+        #expect(restored.signedAmount(for: bank.id) == -2_000_000)
+        #expect(restored.signedAmount(for: wallet.id) == 2_000_000)
+        #expect(
+            CashBalanceSummary.available(
+                for: bank, deposits: [], holdings: [], withdrawals: [], transactions: [],
+                transfers: transfers, debts: [], payments: [], sales: []
+            ) == 8_000_000)
+        #expect(
+            CashBalanceSummary.available(
+                for: wallet, deposits: [], holdings: [], withdrawals: [], transactions: [],
+                transfers: transfers, debts: [], payments: [], sales: []
+            ) == 3_000_000)
     }
 
     @Test("Recorded income and a transfer stack on the same account")

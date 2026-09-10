@@ -12,8 +12,14 @@ Validation: format lint, full Mac unit suite and iOS SDK compile. Unit coverage 
 
 ## Account management in Wealth
 
-Wealth directly embeds the account allocation chart, individual account cards and Add Account action. Account cards open AccountDetailView within the Wealth navigation stack. Transactions also offers an Accounts shortcut, opening a standalone screen that reuses this same account-management content. There is no dedicated Transfers section or add-transfer action in Wealth; transfers remain in the shared transaction history and Add Transaction flow. Transfer data still contributes to account balances and allocation.
+Wealth directly embeds individual account cards and the Add Account action. The cash allocation donut is shown only on the standalone Accounts screen. Account cards open AccountDetailView within the Wealth navigation stack. Transactions also offers an Accounts shortcut, opening a standalone screen that reuses this same account-management content. There is no dedicated Transfers section or add-transfer action in Wealth; transfers remain in the shared transaction history and Add Transaction flow. Transfer data still contributes to account balances and allocation.
 
 ## Transfer form
 
 Account selection comes first, using full-width source and destination controls, a centered icon-only Swap button. The opposite account is disabled in each picker. The amount card labels its input and shows the existing source-balance limit when applicable, including the edit adjustment. Date and optional note follow. Scroll gestures dismiss the keyboard.
+
+## History interactions
+
+Transactions and internal transfers share the same row gestures: swipe left to delete with a five-second Undo, swipe right to edit, and tap to view details. Transfer details show the amount, source, destination, date and note, with Edit and confirmed Delete actions. Undo preserves transfer IDs and both statement import fingerprints. The screen owns transfer sheets and Undo so removing a row does not remove its undo action.
+
+Transfer and transaction details reuse the same amount header, bordered information card, icon rows and Delete/Edit action bar. Both open at medium height and expand to large. Transfer account rows link to their respective account details; missing accounts remain read-only.

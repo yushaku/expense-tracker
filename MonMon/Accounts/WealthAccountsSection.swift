@@ -3,6 +3,8 @@ import SwiftUI
 
 /// Account allocation and management embedded directly in Wealth.
 struct WealthAccountsSection: View {
+    var showsBalanceChart = false
+
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
 
@@ -37,7 +39,7 @@ struct WealthAccountsSection: View {
             if accounts.isEmpty {
                 emptyState
             } else {
-                if !balanceSlices.isEmpty {
+                if showsBalanceChart && !balanceSlices.isEmpty {
                     AccountBalanceCard(slices: balanceSlices, overdraft: overdraft)
                 }
                 accountsSection
@@ -217,7 +219,7 @@ struct WealthAccountsSection: View {
 struct AccountsScreen: View {
     var body: some View {
         ScrollView {
-            WealthAccountsSection()
+            WealthAccountsSection(showsBalanceChart: true)
                 .frame(maxWidth: MonMonTheme.maxContentWidth)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)

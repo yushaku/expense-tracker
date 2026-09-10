@@ -63,6 +63,7 @@ struct TransferListView: View {
             .appSheet(item: $editorMode) { mode in
                 TransferEditorView(mode: mode)
             }
+            .transferActions()
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
             .preferredColorScheme(MonMonTheme.colorScheme)
@@ -119,18 +120,12 @@ struct TransferListView: View {
                 .font(.title3.weight(.semibold))
 
             ForEach(transfers) { transfer in
-                Button {
-                    editorMode = .edit(transfer)
-                } label: {
-                    TransferCard(
-                        transfer: transfer,
-                        sourceAccount: account(transfer.sourceAccountID),
-                        destinationAccount: account(transfer.destinationAccountID)
-                    )
-                }
-                .buttonStyle(.plain)
+                TransferItem(
+                    transfer: transfer,
+                    sourceAccount: account(transfer.sourceAccountID),
+                    destinationAccount: account(transfer.destinationAccountID)
+                )
                 .accessibilityIdentifier("transfer-\(transfer.id.uuidString)")
-                .accessibilityHint("Opens the transfer editor.")
             }
         }
     }

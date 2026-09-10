@@ -46,7 +46,7 @@ enum TransactionRowGestureIntent: Equatable {
 /// finger and nothing rests behind it: carry it far enough and letting go
 /// performs the action, the way a mail app does it.
 ///
-/// Movement to the right aims at delete, to the left at edit.
+/// Movement to the left aims at delete, to the right at edit.
 enum TransactionSwipeAction: Equatable {
     case delete
     case edit
@@ -57,11 +57,11 @@ enum TransactionSwipeAction: Equatable {
     static let commitDistance: CGFloat = 76
 
     static func aimed(by translation: CGFloat) -> Self? {
-        if translation > 0 {
+        if translation < 0 {
             return .delete
         }
 
-        if translation < 0 {
+        if translation > 0 {
             return .edit
         }
 
@@ -264,14 +264,14 @@ struct TransactionSwipeRow<Content: View>: View {
     private var background: some View {
         if let action = motion.aimedAction {
             HStack(spacing: 0) {
-                if action == .edit {
+                if motion.displayedOffset < 0 {
                     Spacer(minLength: 0)
                 }
 
                 icon(for: action)
                     .frame(width: TransactionSwipeAction.commitDistance)
 
-                if action == .delete {
+                if motion.displayedOffset > 0 {
                     Spacer(minLength: 0)
                 }
             }

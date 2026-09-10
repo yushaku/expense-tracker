@@ -64,3 +64,74 @@ extension AccountTransfer {
         }
     }
 }
+
+/// A value snapshot keeps Undo independent of a deleted SwiftData model.
+struct DeletedTransfer: Equatable, Identifiable {
+    let id: UUID
+    let amount: Decimal
+    let occurredAt: Date
+    let note: String
+    let sourceAccountID: UUID
+    let destinationAccountID: UUID
+    let currencyCode: String
+    let createdAt: Date
+    let sourceAccountImportID: String?
+    let destinationAccountImportID: String?
+
+    init(_ transfer: AccountTransfer) {
+        id = transfer.id
+        amount = transfer.amount
+        occurredAt = transfer.occurredAt
+        note = transfer.note
+        sourceAccountID = transfer.sourceAccountID
+        destinationAccountID = transfer.destinationAccountID
+        currencyCode = transfer.currencyCode
+        createdAt = transfer.createdAt
+        sourceAccountImportID = transfer.sourceAccountImportID
+        destinationAccountImportID = transfer.destinationAccountImportID
+    }
+
+    func makeTransfer() -> AccountTransfer {
+        AccountTransfer(
+            id: id, amount: amount, occurredAt: occurredAt, note: note,
+            sourceAccountID: sourceAccountID, destinationAccountID: destinationAccountID,
+            currencyCode: currencyCode, createdAt: createdAt,
+            sourceAccountImportID: sourceAccountImportID,
+            destinationAccountImportID: destinationAccountImportID
+        )
+    }
+}
+
+enum TransferDeletion {
+    @MainActor
+    @discardableResult
+    static func delete(_ transfer: AccountTransfer, from context: ModelContext) throws
+        -> DeletedTransfer
+    {
+        let snapshot = DeletedTransfer(transfer)
+        context.delete(transfer)
+        do {
+            try context.save()
+            return snapshot
+        } catch {
+            context.rollback()
+            throw error
+        }
+    }
+
+    @MainActor
+    @discardableResult
+    static func restore(_ snapshot: DeletedTransfer, in context: ModelContext) throws
+        -> AccountTransfer
+    {
+        let transfer = snapshot.makeTransfer()
+        context.insert(transfer)
+        do {
+            try context.save()
+            return transfer
+        } catch {
+            context.rollback()
+            throw error
+        }
+    }
+}
