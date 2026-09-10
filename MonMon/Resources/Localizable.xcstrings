@@ -1,6 +1,26 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "No linked investments": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có khoản đầu tư liên kết"
+          }
+        }
+      }
+    },
+    "Investments funded by this account or paid back into it appear here.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Các khoản đầu tư dùng vốn từ tài khoản này hoặc trả tiền về tài khoản sẽ xuất hiện ở đây."
+          }
+        }
+      }
+    },
     "Couldn’t restore this transfer. Try adding it again.": {
       "localizations": {
         "vi": {
