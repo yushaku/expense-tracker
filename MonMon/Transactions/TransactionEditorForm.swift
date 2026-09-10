@@ -3,7 +3,7 @@ import SwiftUI
 enum TransactionEntryTab: Int, CaseIterable {
     case income
     case expense
-    case quickAdd
+    case transfer
 
     init(kind: TransactionKind) {
         self = kind == .income ? .income : .expense
@@ -13,19 +13,19 @@ enum TransactionEntryTab: Int, CaseIterable {
         switch self {
         case .income: .income
         case .expense: .expense
-        case .quickAdd: nil
+        case .transfer: nil
         }
     }
 
     func swiped(
-        horizontal: CGFloat, vertical: CGFloat, allowsQuickAdd: Bool = true
+        horizontal: CGFloat, vertical: CGFloat, allowsTransfer: Bool = true
     ) -> Self {
         // Require an intentional horizontal swipe, leaving vertical scrolling
         // and short drags within form controls alone.
         guard abs(horizontal) >= 60, abs(horizontal) > abs(vertical) * 1.5 else {
             return self
         }
-        let last = allowsQuickAdd ? Self.quickAdd.rawValue : Self.expense.rawValue
+        let last = allowsTransfer ? Self.transfer.rawValue : Self.expense.rawValue
         let next = min(max(rawValue + (horizontal < 0 ? 1 : -1), 0), last)
         return Self(rawValue: next) ?? self
     }
@@ -39,8 +39,6 @@ struct TransactionEditorForm: View {
     @State private var pageTurnDirection = -1.0
 
     @Binding var draft: TransactionDraft
-    @Binding var isQuickAdding: Bool
-    @Binding var rawEntry: String
 
     let accounts: [CashAccount]
     let categories: [TransactionCategory]
@@ -50,7 +48,8 @@ struct TransactionEditorForm: View {
     let validationError: TransactionFormError?
     let saveErrorMessage: LocalizedStringKey?
     let onDelete: () -> Void
-    let onCapture: (String) -> Void
+    @Binding var selectedTab: TransactionEntryTab
+    let allowsTransfer: Bool
 
     var body: some View {
         ZStack {
@@ -59,11 +58,9 @@ struct TransactionEditorForm: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                    entryTabs
-
                     ZStack(alignment: .top) {
                         entryPage
-                            .id(entrySelection.wrappedValue)
+                            .id(draft.kind)
                             .transition(
                                 TransactionPageTurn(
                                     direction: pageTurnDirection, reduceMotion: reduceMotion)
@@ -86,16 +83,15 @@ struct TransactionEditorForm: View {
                         let horizontal =
                             layoutDirection == .rightToLeft
                             ? -value.translation.width : value.translation.width
-                        let current = entrySelection.wrappedValue
+                        let current = selectedTab
                         let next = current.swiped(
                             horizontal: horizontal,
-                            vertical: value.translation.height,
-                            allowsQuickAdd: !isEditing
+                            vertical: value.translation.height, allowsTransfer: allowsTransfer
                         )
                         guard next != current else { return }
                         pageTurnDirection = value.translation.width < 0 ? -1 : 1
                         withAnimation(.easeInOut(duration: reduceMotion ? 0.15 : 0.35)) {
-                            entrySelection.wrappedValue = next
+                            selectedTab = next
                         }
                     }
             )
@@ -104,16 +100,12 @@ struct TransactionEditorForm: View {
 
     private var entryPage: some View {
         VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-            if isQuickAdding {
-                TransactionCaptureEntry(rawEntry: $rawEntry, onApply: onCapture)
-            } else {
-                introduction
-                amountCard
-                detailsCard
+            introduction
+            amountCard
+            detailsCard
 
-                if showsTripRouting {
-                    tripRoutingCard
-                }
+            if showsTripRouting {
+                tripRoutingCard
             }
 
             if let saveErrorMessage {
@@ -125,34 +117,6 @@ struct TransactionEditorForm: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private var entryTabs: some View {
-        Picker("Entry method", selection: entrySelection) {
-            ForEach(TransactionKind.allCases, id: \.rawValue) { kind in
-                Text(kind.displayName)
-                    .tag(TransactionEntryTab(kind: kind))
-            }
-            if !isEditing {
-                Text("Quick Add")
-                    .tag(TransactionEntryTab.quickAdd)
-            }
-        }
-        .pickerStyle(.segmented)
-        .labelsHidden()
-        .accessibilityIdentifier("transaction-kind")
-    }
-
-    private var entrySelection: Binding<TransactionEntryTab> {
-        Binding(
-            get: { isQuickAdding ? .quickAdd : TransactionEntryTab(kind: draft.kind) },
-            set: { tab in
-                isQuickAdding = tab == .quickAdd
-                if let kind = tab.kind {
-                    draft.kind = kind
-                }
-            }
-        )
     }
 
     private var introduction: some View {
@@ -372,7 +336,7 @@ struct TransactionEditorForm: View {
             fieldLabel("Account")
 
             if accounts.isEmpty {
-                Text("No account yet. Add one on the Home tab first.")
+                Text("No account yet. Add one on the Wealth tab first.")
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
             } else {

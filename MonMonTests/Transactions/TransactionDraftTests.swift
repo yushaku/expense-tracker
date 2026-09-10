@@ -8,9 +8,10 @@ struct TransactionEntryTabSwipeTests {
     @Test("Left and right swipes follow the visible tab order")
     func swipeOrder() {
         #expect(TransactionEntryTab.income.swiped(horizontal: -80, vertical: 5) == .expense)
-        #expect(TransactionEntryTab.expense.swiped(horizontal: -80, vertical: 5) == .quickAdd)
-        #expect(TransactionEntryTab.quickAdd.swiped(horizontal: 80, vertical: 5) == .expense)
         #expect(TransactionEntryTab.expense.swiped(horizontal: 80, vertical: 5) == .income)
+        #expect(TransactionEntryTab.expense.swiped(horizontal: -80, vertical: 5) == .transfer)
+        #expect(TransactionEntryTab.transfer.swiped(horizontal: 80, vertical: 5) == .expense)
+        #expect(TransactionEntryTab.transfer.kind == nil)
     }
 
     @Test("Short, vertical, and diagonal drags do not change tabs")
@@ -20,13 +21,12 @@ struct TransactionEntryTabSwipeTests {
         #expect(TransactionEntryTab.expense.swiped(horizontal: -60, vertical: 55) == .expense)
     }
 
-    @Test("Swipes stop at either end and never reveal Quick Add while editing")
+    @Test("Swipes respect the available entry tabs")
     func boundaries() {
         #expect(TransactionEntryTab.income.swiped(horizontal: 80, vertical: 0) == .income)
-        #expect(TransactionEntryTab.quickAdd.swiped(horizontal: -80, vertical: 0) == .quickAdd)
         #expect(
             TransactionEntryTab.expense.swiped(
-                horizontal: -80, vertical: 0, allowsQuickAdd: false) == .expense)
+                horizontal: -80, vertical: 0, allowsTransfer: false) == .expense)
     }
 }
 

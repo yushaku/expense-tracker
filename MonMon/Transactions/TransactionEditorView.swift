@@ -73,12 +73,12 @@ struct TransactionEditorView: View {
     @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
     @State private var didApplyDefaults = false
-    @State private var isApplyingCaptureDirection = false
-    @State private var isQuickAdding = false
-    @State private var rawEntry = ""
+    @State private var selectedTab = TransactionEntryTab.expense
+    @State private var transferDraft: TransferDraft
 
     init(mode: TransactionEditorMode, defaultDate: Date = .now) {
         self.mode = mode
+        _transferDraft = State(initialValue: TransferDraft(occurredAt: defaultDate))
 
         switch mode {
         case .add:
@@ -109,58 +109,26 @@ struct TransactionEditorView: View {
 
     private var form: some View {
         NavigationStack {
-            TransactionEditorForm(
-                draft: $draft,
-                isQuickAdding: $isQuickAdding,
-                rawEntry: $rawEntry,
-                accounts: accounts,
-                categories: categories,
-                tripWorkspaces: tripWorkspaces,
-                budgetJars: budgetJars,
-                isEditing: mode.canDelete,
-                validationError: validationError,
-                saveErrorMessage: saveErrorMessage,
-                onDelete: { isConfirmingDelete = true },
-                onCapture: applyCapture
-            )
-            .navigationTitle(navigationTitle)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                    .accessibilityIdentifier("cancel-transaction")
-                }
-
-                if !isQuickAdding {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Save") {
-                            save()
-                        }
-                        .fontWeight(.semibold)
-                        .accessibilityIdentifier("save-transaction")
-                    }
+            VStack(spacing: 0) {
+                entryTabs
+                if selectedTab == .transfer && allowsTransfer {
+                    TransferEditorContent(mode: .add, draft: $transferDraft)
+                } else {
+                    transactionForm
                 }
             }
-            .confirmationDialog(
-                deleteConfirmationTitle,
-                isPresented: $isConfirmingDelete,
-                titleVisibility: .visible
-            ) {
-                Button("Delete", role: .destructive) {
-                    delete()
+            .background(MonMonTheme.canvas)
+            .navigationTitle(navigationTitle)
+            .onAppear {
+                if !didApplyDefaults {
+                    applyDefaultsIfNeeded()
+                    selectedTab = TransactionEntryTab(kind: draft.kind)
                 }
-                .accessibilityIdentifier("confirm-delete-transaction")
-
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text(deleteConfirmationMessage)
+            }
+            .onChange(of: selectedTab) { _, tab in
+                if let kind = tab.kind { draft.kind = kind }
             }
             .onChange(of: draft.kind) { _, _ in
-                if isApplyingCaptureDirection {
-                    isApplyingCaptureDirection = false
-                    return
-                }
                 applyDefaultCategoryIfDirectionChanged()
                 if draft.kind == .income {
                     TripTransactionSelection.apply(
@@ -180,13 +148,74 @@ struct TransactionEditorView: View {
                     to: &draft
                 )
             }
-            .onAppear {
-                applyDefaultsIfNeeded()
-            }
             .tint(MonMonTheme.accent)
-            .foregroundStyle(MonMonTheme.textPrimary)
             .preferredColorScheme(MonMonTheme.colorScheme)
         }
+    }
+
+    private var entryTabs: some View {
+        Picker("Entry method", selection: $selectedTab) {
+            Text("Income").tag(TransactionEntryTab.income)
+            Text("Expense").tag(TransactionEntryTab.expense)
+            if allowsTransfer {
+                Text("Transfer").tag(TransactionEntryTab.transfer)
+            }
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .accessibilityIdentifier("transaction-kind")
+        .frame(maxWidth: 560)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity)
+    }
+
+    private var transactionForm: some View {
+        TransactionEditorForm(
+            draft: $draft,
+            accounts: accounts,
+            categories: categories,
+            tripWorkspaces: tripWorkspaces,
+            budgetJars: budgetJars,
+            isEditing: mode.canDelete,
+            validationError: validationError,
+            saveErrorMessage: saveErrorMessage,
+            onDelete: { isConfirmingDelete = true },
+            selectedTab: $selectedTab,
+            allowsTransfer: allowsTransfer
+        )
+        .navigationTitle(navigationTitle)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") {
+                    dismiss()
+                }
+                .accessibilityIdentifier("cancel-transaction")
+            }
+
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Save") { save() }
+                    .fontWeight(.semibold)
+                    .accessibilityIdentifier("save-transaction")
+            }
+        }
+        .confirmationDialog(
+            deleteConfirmationTitle,
+            isPresented: $isConfirmingDelete,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                delete()
+            }
+            .accessibilityIdentifier("confirm-delete-transaction")
+
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text(deleteConfirmationMessage)
+        }
+        .tint(MonMonTheme.accent)
+        .foregroundStyle(MonMonTheme.textPrimary)
+        .preferredColorScheme(MonMonTheme.colorScheme)
     }
 
     private func applyDefaultsIfNeeded() {
@@ -247,20 +276,9 @@ struct TransactionEditorView: View {
         )
     }
 
-    private func applyCapture(_ rawEntry: String) {
-        validationError = nil
-        saveErrorMessage = nil
-        do {
-            let capture = try TransactionCaptureService(container: modelContext.container)
-                .prepare(rawEntry)
-            // Parsing has already resolved defaults. Keep ambiguous fields empty
-            // instead of filling them through the manual direction-change handler.
-            isApplyingCaptureDirection = draft.kind != capture.kind
-            draft.apply(capture: capture)
-            isQuickAdding = false
-        } catch {
-            saveErrorMessage = "Couldn’t understand that entry. Try again."
-        }
+    private var allowsTransfer: Bool {
+        if case .add = mode { return true }
+        return false
     }
 
     private func save() {

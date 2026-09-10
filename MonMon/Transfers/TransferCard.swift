@@ -8,20 +8,26 @@ struct TransferCard: View {
     let transfer: AccountTransfer
     let sourceAccount: CashAccount?
     let destinationAccount: CashAccount?
+    var showsDate = true
 
     var body: some View {
         HStack(spacing: 14) {
             icon
 
             VStack(alignment: .leading, spacing: 3) {
+                Text("Internal transfer")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textSecondary)
                 Text(route)
                     .font(.headline)
-                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
 
-                Text(subtitle)
-                    .font(.subheadline)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-                    .lineLimit(2)
+                if !subtitle.isEmpty {
+                    Text(subtitle)
+                        .font(.subheadline)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                        .lineLimit(2)
+                }
             }
 
             Spacer(minLength: 12)
@@ -60,23 +66,23 @@ struct TransferCard: View {
                 .minimumScaleFactor(0.75)
                 .foregroundStyle(MonMonTheme.textPrimary)
 
-            Label(
-                dateFormat.format(transfer.occurredAt),
-                systemImage: "calendar"
-            )
-            .font(.caption2.weight(.semibold))
-            .foregroundStyle(MonMonTheme.textSecondary)
+            if showsDate {
+                Label(
+                    dateFormat.format(transfer.occurredAt),
+                    systemImage: "calendar"
+                )
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(MonMonTheme.textSecondary)
+            }
         }
     }
 
     private var route: String {
-        "\(name(of: sourceAccount)) to \(name(of: destinationAccount))"
+        "\(name(of: sourceAccount)) → \(name(of: destinationAccount))"
     }
 
     private var subtitle: String {
-        let trimmedNote = transfer.note.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        return trimmedNote.isEmpty ? AppText.string("Internal transfer", in: locale) : trimmedNote
+        transfer.note.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private func name(of account: CashAccount?) -> String {

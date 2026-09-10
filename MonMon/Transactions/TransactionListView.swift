@@ -16,6 +16,9 @@ struct TransactionListView: View {
     @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
     private var transactions: [MoneyTransaction]
 
+    @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
+    private var transfers: [AccountTransfer]
+
     @Query(sort: \TransactionCategory.createdAt, order: .forward)
     private var categories: [TransactionCategory]
 
@@ -470,9 +473,6 @@ struct TransactionListView: View {
             isEditingDefaults = true
         }
 
-        // The one that pushes rather than opening a sheet: accounts are a screen
-        // of their own, and reaching them from the Wealth tab is two taps from
-        // where the money is being recorded.
         quickAction(
             "Accounts",
             systemImage: "wallet.bifold.fill",
@@ -481,10 +481,11 @@ struct TransactionListView: View {
         ) {
             navigationPath.append(SpendingDestination.accounts)
         }
+
     }
 
     private func quickAction(
-        _ title: String,
+        _ title: LocalizedStringKey,
         systemImage: String,
         isStacked: Bool,
         accessibilityIdentifier: String,
@@ -556,6 +557,9 @@ struct TransactionListView: View {
         TransactionListSection(
             title: "Transactions",
             transactions: visibleTransactions,
+            transfers: TransactionSearch.transferResults(
+                of: query, transfers: transfers, accountNames: accountNames
+            ),
             categories: categories,
             accounts: accounts,
             emptyNotice: emptyFilterNotice

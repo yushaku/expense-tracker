@@ -9,6 +9,7 @@ struct TransferEditorForm: View {
     let saveErrorMessage: LocalizedStringKey?
     let onSwap: () -> Void
     let onDelete: () -> Void
+    var availableSourceBalance: Decimal? = nil
 
     var body: some View {
         ZStack {
@@ -17,9 +18,8 @@ struct TransferEditorForm: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                    introduction
-                    amountCard
                     routeCard
+                    amountCard
                     detailsCard
 
                     if let saveErrorMessage {
@@ -35,32 +35,15 @@ struct TransferEditorForm: View {
                 .padding(.vertical, 16)
                 .frame(maxWidth: .infinity)
             }
-        }
-    }
-
-    private var introduction: some View {
-        HStack(spacing: 16) {
-            Image(systemName: "arrow.left.arrow.right")
-                .font(.system(size: 18, weight: .bold))
-                .foregroundStyle(MonMonTheme.onAccent)
-                .frame(width: 46, height: 46)
-                .background(MonMonTheme.accent, in: RoundedRectangle(cornerRadius: 14))
-                .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(isEditing ? "Fix what you moved" : "Move money you already have")
-                    .font(.title3.weight(.semibold))
-
-                Text("One account falls by this amount and the other rises by it.")
-                    .font(.subheadline)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-            }
+            .scrollDismissesKeyboard(.interactively)
+            .scrollBounceBehavior(.basedOnSize)
         }
     }
 
     private var amountCard: some View {
         card {
             VStack(alignment: .leading, spacing: 14) {
+                fieldLabel("Transfer amount")
                 HStack(spacing: 12) {
                     Text("₫")
                         .font(.title2.weight(.bold))
@@ -71,7 +54,7 @@ struct TransferEditorForm: View {
                         .textFieldStyle(.plain)
                         .font(.system(.title2, design: .rounded, weight: .semibold))
                         .monospacedDigit()
-                        .multilineTextAlignment(.trailing)
+                        .multilineTextAlignment(.leading)
                         .accessibilityLabel("Amount")
                 }
                 .padding(16)
@@ -79,6 +62,15 @@ struct TransferEditorForm: View {
                     MonMonTheme.field,
                     in: RoundedRectangle(cornerRadius: 12, style: .continuous)
                 )
+
+                if let availableSourceBalance {
+                    LabeledContent("Available to transfer") {
+                        Text(VNDCurrency.format(availableSourceBalance))
+                            .monospacedDigit()
+                    }
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                }
 
                 if let amountErrorMessage {
                     validationMessage(amountErrorMessage, id: "transfer-amount-error")
@@ -93,36 +85,45 @@ struct TransferEditorForm: View {
 
     private var routeCard: some View {
         card {
-            VStack(alignment: .leading, spacing: 18) {
-                HStack {
-                    sectionHeader("Route", systemImage: "arrow.left.arrow.right")
-
-                    Spacer()
-
-                    Button("Swap", systemImage: "arrow.up.arrow.down", action: onSwap)
-                        .font(.subheadline.weight(.semibold))
-                        .labelStyle(.titleAndIcon)
-                        .accessibilityIdentifier("swap-transfer-accounts")
-                }
-
+            VStack(alignment: .leading, spacing: 12) {
+                sectionHeader("Transfer between accounts", systemImage: "arrow.left.arrow.right")
                 if accounts.count < 2 {
-                    Text("Transfers need two accounts. Add another on the Home tab first.")
-                        .font(.caption)
-                        .foregroundStyle(MonMonTheme.textSecondary)
+                    Label(
+                        "Transfers need two accounts. Add another on the Wealth tab first.",
+                        systemImage: "info.circle"
+                    )
+                    .font(.subheadline)
+                    .foregroundStyle(MonMonTheme.textSecondary)
                 } else {
                     accountPicker(
-                        title: "From",
-                        selection: $draft.sourceAccountID,
+                        title: "From", selection: $draft.sourceAccountID,
+                        otherID: draft.destinationAccountID, symbol: "arrow.up.right",
                         identifier: "transfer-source-account"
                     )
-
+                    HStack {
+                        Spacer()
+                        Button(action: onSwap) {
+                            Label("Swap", systemImage: "arrow.up.arrow.down")
+                                .font(.subheadline.weight(.semibold))
+                                .labelStyle(.iconOnly)
+                                .frame(width: 44, height: 44)
+                                .contentShape(.capsule)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(MonMonTheme.accent)
+                        .background(MonMonTheme.accent.opacity(0.12), in: .capsule)
+                        .disabled(
+                            draft.sourceAccountID == nil && draft.destinationAccountID == nil
+                        )
+                        .accessibilityIdentifier("swap-transfer-accounts")
+                        Spacer()
+                    }
                     accountPicker(
-                        title: "To",
-                        selection: $draft.destinationAccountID,
+                        title: "To", selection: $draft.destinationAccountID,
+                        otherID: draft.sourceAccountID, symbol: "arrow.down.left",
                         identifier: "transfer-destination-account"
                     )
                 }
-
                 if let routeErrorMessage {
                     validationMessage(routeErrorMessage, id: "transfer-route-error")
                 }
@@ -133,23 +134,56 @@ struct TransferEditorForm: View {
     private func accountPicker(
         title: LocalizedStringKey,
         selection: Binding<UUID?>,
+        otherID: UUID?,
+        symbol: String,
         identifier: String
     ) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            fieldLabel(title)
-
+        let selected = accounts.first { $0.id == selection.wrappedValue }
+        return Menu {
             Picker(title, selection: selection) {
-                Text("Choose")
-                    .tag(UUID?.none)
-
+                Text("Choose").tag(UUID?.none)
                 ForEach(accounts) { account in
-                    Text(account.name)
+                    Label(account.name, systemImage: account.kind.iconName)
                         .tag(UUID?.some(account.id))
+                        .disabled(account.id == otherID)
                 }
             }
-            .labelsHidden()
-            .accessibilityIdentifier(identifier)
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: selected?.kind.iconName ?? symbol)
+                    .font(.title3)
+                    .foregroundStyle(selected?.tint ?? MonMonTheme.textSecondary)
+                    .frame(width: 36, height: 36)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.caption)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                    if let selected {
+                        Text(selected.name)
+                            .font(.headline)
+                            .foregroundStyle(MonMonTheme.textPrimary)
+                    } else {
+                        Text("Choose account")
+                            .font(.headline)
+                            .foregroundStyle(MonMonTheme.textPrimary)
+                    }
+                }
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 8)
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .accessibilityHidden(true)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading)
+            .background(MonMonTheme.field, in: .rect(cornerRadius: 14))
+            .contentShape(.rect(cornerRadius: 14))
         }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier(identifier)
     }
 
     private var detailsCard: some View {
