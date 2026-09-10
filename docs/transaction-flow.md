@@ -21,3 +21,5 @@ Account selection comes first, using full-width source and destination controls,
 ## History interactions
 
 Transactions and internal transfers share the same row gestures: swipe left to delete with a five-second Undo, swipe right to edit, and tap to view details. Transfer details show the amount, source, destination, date and note, with Edit and confirmed Delete actions. Undo preserves transfer IDs and both statement import fingerprints. The screen owns transfer sheets and Undo so removing a row does not remove its undo action.
+
+Transfer and transaction details reuse the same amount header, bordered information card, icon rows and Delete/Edit action bar. Both open at medium height and expand to large. Transfer account rows link to their respective account details; missing accounts remain read-only.

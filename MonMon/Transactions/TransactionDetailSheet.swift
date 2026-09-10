@@ -89,6 +89,7 @@ struct TransactionDetailSheet: View {
                     } label: {
                         Image(systemName: "xmark")
                     }
+                    .tint(MonMonTheme.textSecondary)
                     .accessibilityLabel("Close")
                     .accessibilityIdentifier("close-transaction-details")
                 }
@@ -144,33 +145,13 @@ struct TransactionDetailSheet: View {
     }
 
     private var hero: some View {
-        HStack(spacing: 14) {
-            Image(systemName: symbolName)
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(tint)
-                .frame(width: 48, height: 48)
-                .background(tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 14))
-                .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text("\(transaction.kind.signLabel)\(VNDCurrency.format(transaction.amount))")
-                    .font(.system(.title2, design: .rounded, weight: .bold))
-                    .monospacedDigit()
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.64)
-                    .foregroundStyle(
-                        transaction.kind == .income ? MonMonTheme.gain : MonMonTheme.textPrimary
-                    )
-
-                Text("\(transaction.kind.displayName(in: locale)) • \(formattedDate)")
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-                    .lineLimit(2)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, 8)
-        .accessibilityElement(children: .combine)
+        LedgerDetailHero(
+            symbolName: symbolName,
+            tint: tint,
+            amount: "\(transaction.kind.signLabel)\(VNDCurrency.format(transaction.amount))",
+            amountColor: transaction.kind == .income ? MonMonTheme.gain : MonMonTheme.textPrimary,
+            subtitle: "\(transaction.kind.displayName(in: locale)) • \(formattedDate)"
+        )
     }
 
     private var details: some View {
@@ -190,7 +171,7 @@ struct TransactionDetailSheet: View {
     }
 
     private var actions: some View {
-        TransactionDetailActionBar(
+        LedgerDetailActionBar(
             onDelete: {
                 isConfirmingDelete = true
             },
@@ -259,7 +240,7 @@ private struct TransactionDetailCard: View {
     let tripDestination: TransactionDetailDestination?
 
     var body: some View {
-        VStack(spacing: 0) {
+        LedgerDetailCard {
             destinationRow(
                 title: "Category",
                 value: category,
@@ -291,13 +272,6 @@ private struct TransactionDetailCard: View {
                     showsDisclosure: false
                 )
             }
-        }
-        .padding(.horizontal, 14)
-        .background(MonMonTheme.surface)
-        .clipShape(RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                .stroke(MonMonTheme.border, lineWidth: 1)
         }
     }
 
@@ -339,6 +313,110 @@ private struct TransactionDetailCard: View {
         systemImage: String,
         showsDisclosure: Bool
     ) -> some View {
+        LedgerDetailRow(
+            title: title, value: value, systemImage: systemImage,
+            showsDisclosure: showsDisclosure
+        )
+    }
+}
+
+struct LedgerDetailActionBar: View {
+    var deleteIdentifier = "delete-report-transaction"
+    var editIdentifier = "edit-report-transaction"
+    let onDelete: () -> Void
+    let onEdit: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Button(role: .destructive, action: onDelete) {
+                Label("Delete", systemImage: "trash")
+                    .font(.subheadline.weight(.semibold))
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .foregroundStyle(MonMonTheme.danger)
+                    .background(MonMonTheme.danger.opacity(0.12), in: Capsule())
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier(deleteIdentifier)
+
+            Button(action: onEdit) {
+                Label("Edit", systemImage: "pencil")
+                    .frame(maxWidth: .infinity, minHeight: 20)
+            }
+            .buttonStyle(.prominentAction)
+            .accessibilityIdentifier(editIdentifier)
+        }
+        .frame(maxWidth: MonMonTheme.maxContentWidth)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity)
+        .background(MonMonTheme.surface)
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(MonMonTheme.border)
+                .frame(height: 1)
+        }
+    }
+}
+
+/// Shared visual components keep transaction and transfer details consistent.
+struct LedgerDetailHero: View {
+    let symbolName: String
+    let tint: Color
+    let amount: String
+    var amountColor: Color = MonMonTheme.textPrimary
+    let subtitle: String
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Image(systemName: symbolName)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(tint)
+                .frame(width: 48, height: 48)
+                .background(tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 14))
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(amount)
+                    .font(.system(.title2, design: .rounded, weight: .bold))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.64)
+                    .foregroundStyle(amountColor)
+
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .lineLimit(2)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 8)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+struct LedgerDetailCard<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        VStack(spacing: 0) { content }
+            .padding(.horizontal, 14)
+            .background(MonMonTheme.surface)
+            .clipShape(RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
+                    .stroke(MonMonTheme.border, lineWidth: 1)
+            }
+    }
+}
+
+struct LedgerDetailRow: View {
+    let title: LocalizedStringKey
+    let value: String
+    let systemImage: String
+    var showsDisclosure = false
+
+    var body: some View {
         HStack(spacing: 10) {
             Image(systemName: systemImage)
                 .font(.caption.weight(.semibold))
@@ -368,41 +446,5 @@ private struct TransactionDetailCard: View {
         .padding(.vertical, 11)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
-    }
-}
-
-private struct TransactionDetailActionBar: View {
-    let onDelete: () -> Void
-    let onEdit: () -> Void
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Button(role: .destructive, action: onDelete) {
-                Label("Delete", systemImage: "trash")
-                    .font(.subheadline.weight(.semibold))
-                    .frame(maxWidth: .infinity, minHeight: 44)
-                    .foregroundStyle(MonMonTheme.danger)
-                    .background(MonMonTheme.danger.opacity(0.12), in: Capsule())
-            }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("delete-report-transaction")
-
-            Button(action: onEdit) {
-                Label("Edit", systemImage: "pencil")
-                    .frame(maxWidth: .infinity, minHeight: 20)
-            }
-            .buttonStyle(.prominentAction)
-            .accessibilityIdentifier("edit-report-transaction")
-        }
-        .frame(maxWidth: MonMonTheme.maxContentWidth)
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
-        .frame(maxWidth: .infinity)
-        .background(MonMonTheme.surface)
-        .overlay(alignment: .top) {
-            Rectangle()
-                .fill(MonMonTheme.border)
-                .frame(height: 1)
-        }
     }
 }
