@@ -418,3 +418,69 @@ struct AccountReportSummaryTests {
         )
     }
 }
+
+@Suite("Account linked investments")
+struct AccountLinkedInvestmentTests {
+    @Test("Savings includes funding and withdrawal links once, excluding unrelated books")
+    func savingsLinks() {
+        let accountID = UUID()
+        let otherID = UUID()
+        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        func book(source: UUID) -> SavingsDeposit {
+            SavingsDeposit(
+                id: UUID(), name: "Book", principal: 1_000_000,
+                annualInterestRate: 5, termMonths: 6, openedAt: now,
+                currencyCode: VNDCurrency.code, createdAt: now, sourceAccountID: source)
+        }
+        let funded = book(source: accountID)
+        let received = book(source: otherID)
+        let unrelated = book(source: otherID)
+        func withdrawal(_ id: UUID?) -> SavingsWithdrawal {
+            SavingsWithdrawal(
+                id: UUID(), depositID: id, principal: 100_000,
+                amountReceived: 110_000, destinationAccountID: accountID,
+                withdrawnAt: now, createdAt: now)
+        }
+        let linked = AccountLinkedInvestments.deposits(
+            for: accountID, deposits: [funded, received, unrelated],
+            withdrawals: [
+                withdrawal(funded.id), withdrawal(received.id), withdrawal(received.id),
+                withdrawal(nil),
+            ]
+        )
+        #expect(linked.map(\.id) == [funded.id, received.id])
+    }
+
+    @Test("Holdings include cash proceeds, exclude swaps, and keep account groups scoped")
+    func holdingLinks() {
+        let accountID = UUID()
+        let otherID = UUID()
+        let instrumentID = UUID()
+        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        func holding(source: UUID) -> FundHolding {
+            FundHolding(
+                id: UUID(), instrumentID: instrumentID, units: 10,
+                averageCostPerUnit: 100_000, createdAt: now, sourceAccountID: source)
+        }
+        let funded = holding(source: accountID)
+        let received = holding(source: otherID)
+        let swapped = holding(source: otherID)
+        let unrelated = holding(source: otherID)
+        func sale(_ id: UUID?, swapID: UUID? = nil) -> FundSale {
+            FundSale(
+                id: UUID(), holdingID: id, units: 1, pricePerUnit: 120_000,
+                proceedsAccountID: accountID, soldAt: now, swapHoldingID: swapID, createdAt: now)
+        }
+        let sales = [
+            sale(funded.id), sale(received.id), sale(received.id), sale(swapped.id, swapID: UUID()),
+            sale(nil),
+        ]
+        let linked = AccountLinkedInvestments.holdings(
+            for: accountID, holdings: [funded, received, swapped, unrelated], sales: sales
+        )
+        #expect(linked.map(\.id) == [funded.id, received.id])
+        #expect(FundSummary.positions(forInstrumentID: instrumentID, holdings: linked).count == 2)
+        #expect(funded.remainingUnits(sales: sales) == 9)
+        #expect(received.remainingUnits(sales: sales) == 8)
+    }
+}

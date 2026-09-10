@@ -7,6 +7,7 @@ import SwiftUI
 struct FundGroupRoute: Hashable {
     /// `nil` for positions whose instrument is missing from the catalogue.
     let instrumentID: UUID?
+    var linkedAccountID: UUID? = nil
 }
 
 /// Every purchase of one fund, newest first, under the totals for the stack.
@@ -61,7 +62,7 @@ struct FundGroupDetailView: View {
         .navigationTitle(group.symbol)
         .accessibilityIdentifier("fund-group-\(group.id)")
         .toolbar {
-            if group.units > 0 {
+            if group.units > 0 && route.linkedAccountID == nil {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Close position", systemImage: "arrow.up.right.circle") {
                         saleEditorMode = .closeGroup(instrumentID: route.instrumentID)
@@ -114,7 +115,11 @@ struct FundGroupDetailView: View {
     }
 
     private var positions: [FundHolding] {
-        FundSummary.positions(forInstrumentID: route.instrumentID, holdings: holdings)
+        let scopedHoldings =
+            route.linkedAccountID.map {
+                AccountLinkedInvestments.holdings(for: $0, holdings: holdings, sales: sales)
+            } ?? holdings
+        return FundSummary.positions(forInstrumentID: route.instrumentID, holdings: scopedHoldings)
     }
 
     private var group: FundPositionGroup {
