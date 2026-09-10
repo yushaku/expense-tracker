@@ -1,8 +1,8 @@
 # Transaction flow (tasks 14 and 15)
 
-The ordinary Add Transaction screen offers a prominent Transfer between accounts action alongside the Income/Expense entry tabs. Quick Add is removed from this form; capture processing and pending review remain available through their existing entry points. Editing, capture review and trip-specific entry stay focused on their existing record.
+The ordinary Add Transaction screen offers Income, Expense and Transfer tabs. Transfer displays its form inline and preserves a separate draft when switching tabs. Quick Add is removed from this form; capture processing and pending review remain available through their existing entry points. Editing, capture review and trip-specific entry stay focused on their existing record.
 
-Transfer uses the existing editor and balance validation. Cancel returns to the untouched income/expense draft; successful save closes both sheets to reveal history. Only an AccountTransfer is saved.
+Transfer uses the existing editor and balance validation. Cancel closes the add screen; successful save closes it to reveal history. Save acts on the selected tab. Only an AccountTransfer is saved.
 
 Main transaction history, day history and account history interleave transactions and transfers by occurrence date, creation date and stable typed ID. Transfer cards identify the source → destination, keep neutral unsigned amounts, and open the existing editor for editing/deletion. Transfer-only days are visible. No income/expense totals or balance calculations change.
 

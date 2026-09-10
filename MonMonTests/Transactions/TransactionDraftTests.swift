@@ -9,6 +9,9 @@ struct TransactionEntryTabSwipeTests {
     func swipeOrder() {
         #expect(TransactionEntryTab.income.swiped(horizontal: -80, vertical: 5) == .expense)
         #expect(TransactionEntryTab.expense.swiped(horizontal: 80, vertical: 5) == .income)
+        #expect(TransactionEntryTab.expense.swiped(horizontal: -80, vertical: 5) == .transfer)
+        #expect(TransactionEntryTab.transfer.swiped(horizontal: 80, vertical: 5) == .expense)
+        #expect(TransactionEntryTab.transfer.kind == nil)
     }
 
     @Test("Short, vertical, and diagonal drags do not change tabs")
@@ -18,12 +21,12 @@ struct TransactionEntryTabSwipeTests {
         #expect(TransactionEntryTab.expense.swiped(horizontal: -60, vertical: 55) == .expense)
     }
 
-    @Test("Swipes stop at either end of income and expense")
+    @Test("Swipes respect the available entry tabs")
     func boundaries() {
         #expect(TransactionEntryTab.income.swiped(horizontal: 80, vertical: 0) == .income)
         #expect(
             TransactionEntryTab.expense.swiped(
-                horizontal: -80, vertical: 0) == .expense)
+                horizontal: -80, vertical: 0, allowsTransfer: false) == .expense)
     }
 }
 
