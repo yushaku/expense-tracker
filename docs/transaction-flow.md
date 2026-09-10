@@ -28,4 +28,4 @@ Account detail uses a single date filter beside Edit in the navigation header. I
 
 Linked Investments displays the same savings-book and grouped-position cards as Investments, in Savings, Funds/ETFs, Gold and Crypto sections. Links include funding and cash withdrawals/sale proceeds, deduplicated by parent investment; swaps do not create cash-account links. Cards retain all withdrawal/sale data for accurate balances. Fund details stay scoped to the linked account; whole-instrument bulk closure is available only from the full Investments screen.
 
-The account report uses bars for Net, Income and Expenses, with daily or monthly buckets matching the selected period.
+The account report uses bars for Net, Income and Expenses, with daily or monthly buckets matching the selected period. It appears inside the Transactions tab above History; Linked Investments does not show the chart.

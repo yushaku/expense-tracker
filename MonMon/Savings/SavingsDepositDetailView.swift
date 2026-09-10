@@ -67,12 +67,19 @@ struct SavingsDepositDetailView: View {
         .navigationTitle(deposit?.name ?? "Savings book")
         .accessibilityIdentifier("savings-detail-\(route.depositID.uuidString)")
         .toolbar {
-            if let deposit, deposit.remainingPrincipal(withdrawals: withdrawals) > 0 {
-                ToolbarItem(placement: .primaryAction) {
-                    Button(withdrawActionTitle(for: deposit), systemImage: "arrow.down.to.line") {
-                        editor = .withdrawal(.add(deposit))
+            if let deposit {
+                ToolbarItemGroup(placement: .primaryAction) {
+                    Button("Edit", systemImage: "pencil") {
+                        editor = .deposit(.edit(deposit))
                     }
-                    .accessibilityIdentifier("savings-withdraw")
+                    .accessibilityIdentifier("edit-savings")
+
+                    if deposit.remainingPrincipal(withdrawals: withdrawals) > 0 {
+                        Button(withdrawActionTitle(for: deposit), systemImage: "banknote") {
+                            editor = .withdrawal(.add(deposit))
+                        }
+                        .accessibilityIdentifier("savings-withdraw")
+                    }
                 }
             }
         }
@@ -119,11 +126,6 @@ struct SavingsDepositDetailView: View {
 
                 Spacer(minLength: 8)
 
-                Button("Edit", systemImage: "pencil") {
-                    editor = .deposit(.edit(deposit))
-                }
-                .font(.subheadline.weight(.semibold))
-                .accessibilityIdentifier("edit-savings")
             }
 
             HStack(spacing: 12) {

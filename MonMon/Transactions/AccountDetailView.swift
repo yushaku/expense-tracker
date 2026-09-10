@@ -138,12 +138,6 @@ struct AccountDetailView: View {
                     sales: sales
                 )
 
-                AccountTrendCard(
-                    points: trendPoints(for: account),
-                    metric: $trendMetric,
-                    range: selectedRange
-                )
-
                 SegmentedTabs(
                     label: "Account Detail",
                     selection: $selectedTab,
@@ -154,6 +148,12 @@ struct AccountDetailView: View {
 
                 switch selectedTab {
                 case .transactions:
+                    AccountTrendCard(
+                        points: trendPoints(for: account),
+                        metric: $trendMetric,
+                        range: selectedRange
+                    )
+
                     TransactionListSection(
                         title: "History",
                         transactions: accountTransactions,
