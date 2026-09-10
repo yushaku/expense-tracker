@@ -25,6 +25,29 @@ enum TransferEditorMode: Identifiable {
 }
 
 struct TransferEditorView: View {
+    let mode: TransferEditorMode
+    let onSave: (() -> Void)?
+    @State private var draft: TransferDraft
+
+    init(mode: TransferEditorMode, defaultDate: Date = .now, onSave: (() -> Void)? = nil) {
+        self.mode = mode
+        self.onSave = onSave
+        _draft = State(
+            initialValue: mode.editedTransfer.map(TransferDraft.init(transfer:))
+                ?? TransferDraft(occurredAt: defaultDate))
+    }
+
+    var body: some View {
+        NavigationStack {
+            TransferEditorContent(mode: mode, draft: $draft, onSave: onSave)
+                .navigationTitle(mode.editedTransfer == nil ? "Add transfer" : "Edit transfer")
+        }
+    }
+}
+
+/// Shared editor with its draft owned by the presenting screen, so switching
+/// entry tabs preserves an unfinished transfer without presenting another sheet.
+struct TransferEditorContent: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
@@ -55,25 +78,13 @@ struct TransferEditorView: View {
     @Query(sort: \DebtPayment.occurredAt, order: .reverse)
     private var payments: [DebtPayment]
 
-    private let mode: TransferEditorMode
-    private let onSave: (() -> Void)?
+    let mode: TransferEditorMode
+    @Binding var draft: TransferDraft
+    var onSave: (() -> Void)? = nil
 
-    @State private var draft: TransferDraft
     @State private var validationError: TransferFormError?
     @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
-
-    init(mode: TransferEditorMode, defaultDate: Date = .now, onSave: (() -> Void)? = nil) {
-        self.mode = mode
-        self.onSave = onSave
-
-        switch mode {
-        case .add:
-            _draft = State(initialValue: TransferDraft(occurredAt: defaultDate))
-        case .edit(let transfer):
-            _draft = State(initialValue: TransferDraft(transfer: transfer))
-        }
-    }
 
     var body: some View {
         #if os(macOS)
@@ -85,51 +96,49 @@ struct TransferEditorView: View {
     }
 
     private var form: some View {
-        NavigationStack {
-            TransferEditorForm(
-                draft: $draft,
-                accounts: accounts,
-                isEditing: mode.editedTransfer != nil,
-                validationError: validationError,
-                saveErrorMessage: saveErrorMessage,
-                onSwap: { draft.swapEnds() },
-                onDelete: { isConfirmingDelete = true }
-            )
-            .navigationTitle(mode.editedTransfer == nil ? "Add transfer" : "Edit transfer")
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                    .accessibilityIdentifier("cancel-transfer")
+        TransferEditorForm(
+            draft: $draft,
+            accounts: accounts,
+            isEditing: mode.editedTransfer != nil,
+            validationError: validationError,
+            saveErrorMessage: saveErrorMessage,
+            onSwap: { draft.swapEnds() },
+            onDelete: { isConfirmingDelete = true },
+            availableSourceBalance: availableSourceBalance
+        )
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") {
+                    dismiss()
                 }
-
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        save()
-                    }
-                    .fontWeight(.semibold)
-                    .accessibilityIdentifier("save-transfer")
-                }
+                .accessibilityIdentifier("cancel-transfer")
             }
-            .confirmationDialog(
-                "Delete this transfer?",
-                isPresented: $isConfirmingDelete,
-                titleVisibility: .visible
-            ) {
-                Button("Delete", role: .destructive) {
-                    delete()
-                }
-                .accessibilityIdentifier("confirm-delete-transfer")
 
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("Both account balances return to what they were.")
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Save") {
+                    save()
+                }
+                .fontWeight(.semibold)
+                .accessibilityIdentifier("save-transfer")
             }
-            .tint(MonMonTheme.accent)
-            .foregroundStyle(MonMonTheme.textPrimary)
-            .preferredColorScheme(MonMonTheme.colorScheme)
         }
+        .confirmationDialog(
+            "Delete this transfer?",
+            isPresented: $isConfirmingDelete,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                delete()
+            }
+            .accessibilityIdentifier("confirm-delete-transfer")
+
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Both account balances return to what they were.")
+        }
+        .tint(MonMonTheme.accent)
+        .foregroundStyle(MonMonTheme.textPrimary)
+        .preferredColorScheme(MonMonTheme.colorScheme)
     }
 
     private var sourceAccount: CashAccount? {

@@ -73,11 +73,12 @@ struct TransactionEditorView: View {
     @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
     @State private var didApplyDefaults = false
-    @State private var isTransferring = false
-    @State private var didSaveTransfer = false
+    @State private var selectedTab = TransactionEntryTab.expense
+    @State private var transferDraft: TransferDraft
 
     init(mode: TransactionEditorMode, defaultDate: Date = .now) {
         self.mode = mode
+        _transferDraft = State(initialValue: TransferDraft(occurredAt: defaultDate))
 
         switch mode {
         case .add:
@@ -108,56 +109,24 @@ struct TransactionEditorView: View {
 
     private var form: some View {
         NavigationStack {
-            TransactionEditorForm(
-                draft: $draft,
-                accounts: accounts,
-                categories: categories,
-                tripWorkspaces: tripWorkspaces,
-                budgetJars: budgetJars,
-                isEditing: mode.canDelete,
-                validationError: validationError,
-                saveErrorMessage: saveErrorMessage,
-                onDelete: { isConfirmingDelete = true },
-                onTransfer: allowsTransfer ? { isTransferring = true } : nil
-            )
+            VStack(spacing: 0) {
+                entryTabs
+                if selectedTab == .transfer && allowsTransfer {
+                    TransferEditorContent(mode: .add, draft: $transferDraft)
+                } else {
+                    transactionForm
+                }
+            }
+            .background(MonMonTheme.canvas)
             .navigationTitle(navigationTitle)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                    .accessibilityIdentifier("cancel-transaction")
-                }
-
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { save() }
-                        .fontWeight(.semibold)
-                        .accessibilityIdentifier("save-transaction")
+            .onAppear {
+                if !didApplyDefaults {
+                    applyDefaultsIfNeeded()
+                    selectedTab = TransactionEntryTab(kind: draft.kind)
                 }
             }
-            .appSheet(
-                isPresented: $isTransferring,
-                onDismiss: {
-                    if didSaveTransfer { dismiss() }
-                }
-            ) {
-                TransferEditorView(mode: .add, defaultDate: draft.occurredAt) {
-                    didSaveTransfer = true
-                }
-            }
-            .confirmationDialog(
-                deleteConfirmationTitle,
-                isPresented: $isConfirmingDelete,
-                titleVisibility: .visible
-            ) {
-                Button("Delete", role: .destructive) {
-                    delete()
-                }
-                .accessibilityIdentifier("confirm-delete-transaction")
-
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text(deleteConfirmationMessage)
+            .onChange(of: selectedTab) { _, tab in
+                if let kind = tab.kind { draft.kind = kind }
             }
             .onChange(of: draft.kind) { _, _ in
                 applyDefaultCategoryIfDirectionChanged()
@@ -179,13 +148,74 @@ struct TransactionEditorView: View {
                     to: &draft
                 )
             }
-            .onAppear {
-                applyDefaultsIfNeeded()
-            }
             .tint(MonMonTheme.accent)
-            .foregroundStyle(MonMonTheme.textPrimary)
             .preferredColorScheme(MonMonTheme.colorScheme)
         }
+    }
+
+    private var entryTabs: some View {
+        Picker("Entry method", selection: $selectedTab) {
+            Text("Income").tag(TransactionEntryTab.income)
+            Text("Expense").tag(TransactionEntryTab.expense)
+            if allowsTransfer {
+                Text("Transfer").tag(TransactionEntryTab.transfer)
+            }
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .accessibilityIdentifier("transaction-kind")
+        .frame(maxWidth: 560)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity)
+    }
+
+    private var transactionForm: some View {
+        TransactionEditorForm(
+            draft: $draft,
+            accounts: accounts,
+            categories: categories,
+            tripWorkspaces: tripWorkspaces,
+            budgetJars: budgetJars,
+            isEditing: mode.canDelete,
+            validationError: validationError,
+            saveErrorMessage: saveErrorMessage,
+            onDelete: { isConfirmingDelete = true },
+            selectedTab: $selectedTab,
+            allowsTransfer: allowsTransfer
+        )
+        .navigationTitle(navigationTitle)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") {
+                    dismiss()
+                }
+                .accessibilityIdentifier("cancel-transaction")
+            }
+
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Save") { save() }
+                    .fontWeight(.semibold)
+                    .accessibilityIdentifier("save-transaction")
+            }
+        }
+        .confirmationDialog(
+            deleteConfirmationTitle,
+            isPresented: $isConfirmingDelete,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                delete()
+            }
+            .accessibilityIdentifier("confirm-delete-transaction")
+
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text(deleteConfirmationMessage)
+        }
+        .tint(MonMonTheme.accent)
+        .foregroundStyle(MonMonTheme.textPrimary)
+        .preferredColorScheme(MonMonTheme.colorScheme)
     }
 
     private func applyDefaultsIfNeeded() {
