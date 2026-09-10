@@ -101,16 +101,12 @@ struct TransferEditorForm: View {
                         identifier: "transfer-source-account"
                     )
                     HStack {
-                        Image(systemName: "arrow.down")
-                            .foregroundStyle(MonMonTheme.textSecondary)
-                            .accessibilityHidden(true)
                         Spacer()
                         Button(action: onSwap) {
                             Label("Swap", systemImage: "arrow.up.arrow.down")
                                 .font(.subheadline.weight(.semibold))
-                                .labelStyle(.titleAndIcon)
-                                .padding(.horizontal, 12)
-                                .frame(minHeight: 44)
+                                .labelStyle(.iconOnly)
+                                .frame(width: 44, height: 44)
                                 .contentShape(.capsule)
                         }
                         .buttonStyle(.plain)
@@ -120,8 +116,8 @@ struct TransferEditorForm: View {
                             draft.sourceAccountID == nil && draft.destinationAccountID == nil
                         )
                         .accessibilityIdentifier("swap-transfer-accounts")
+                        Spacer()
                     }
-                    .padding(.leading, 14)
                     accountPicker(
                         title: "To", selection: $draft.destinationAccountID,
                         otherID: draft.sourceAccountID, symbol: "arrow.down.left",

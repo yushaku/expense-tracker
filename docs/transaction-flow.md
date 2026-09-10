@@ -16,4 +16,4 @@ Wealth directly embeds the account allocation chart, individual account cards an
 
 ## Transfer form
 
-Account selection comes first, using full-width source and destination controls, an explicit direction arrow and a Swap button. The opposite account is disabled in each picker. The amount card labels its input and shows the existing source-balance limit when applicable, including the edit adjustment. Date and optional note follow. Scroll gestures dismiss the keyboard.
+Account selection comes first, using full-width source and destination controls, a centered icon-only Swap button. The opposite account is disabled in each picker. The amount card labels its input and shows the existing source-balance limit when applicable, including the edit adjustment. Date and optional note follow. Scroll gestures dismiss the keyboard.
