@@ -63,9 +63,8 @@ struct AccountDetailView: View {
     @State private var transactionEditorMode: TransactionEditorMode?
     @State private var transactionActions = TransactionActions()
     @State private var selectedTab: AccountDetailTab = .transactions
-    @State private var transactionRange = TransactionRange.month(containing: .now)
+    @State private var selectedRange = TransactionRange.month(containing: .now)
     @State private var trendMetric: AccountTrendMetric = .net
-    @State private var trendRange = TransactionRange.month(containing: .now)
 
     private var account: CashAccount? {
         accounts.first { $0.id == route.accountID }
@@ -84,7 +83,13 @@ struct AccountDetailView: View {
         .accessibilityIdentifier("account-detail")
         .toolbar {
             if let account {
-                ToolbarItem(placement: .primaryAction) {
+                ToolbarItemGroup(placement: .primaryAction) {
+                    DateRangeFilterButton(
+                        range: $selectedRange,
+                        identifierPrefix: "account-detail",
+                        systemImage: "calendar"
+                    )
+
                     Button("Edit", systemImage: "pencil") {
                         accountEditorMode = .edit(account)
                     }
@@ -136,7 +141,7 @@ struct AccountDetailView: View {
                 AccountTrendCard(
                     points: trendPoints(for: account),
                     metric: $trendMetric,
-                    range: $trendRange
+                    range: selectedRange
                 )
 
                 SegmentedTabs(
@@ -158,9 +163,7 @@ struct AccountDetailView: View {
                         emptyNotice: emptyTransactionNotice,
                         accessibilityIdentifierPrefix: "account-detail-transaction",
                         showsCount: true
-                    ) {
-                        transactionFilter
-                    }
+                    )
 
                 case .linkedInvestments:
                     AccountLinkedSourcesCard(rows: linkedSources(for: account))
@@ -177,45 +180,28 @@ struct AccountDetailView: View {
         SpendingTrend.points(
             of: AccountActivityItem.transactions(
                 for: account.id,
-                during: trendRange,
+                during: selectedRange,
                 in: transactions
             ),
-            in: trendRange
+            in: selectedRange
         )
     }
 
     private func accountTransactions(for account: CashAccount) -> [MoneyTransaction] {
         AccountActivityItem.transactions(
             for: account.id,
-            during: transactionRange,
+            during: selectedRange,
             in: transactions
         )
     }
 
-    private var transactionFilter: some View {
-        HStack(spacing: 8) {
-            Text(transactionRange.title(in: locale, dateFormat: dateFormat).uppercased())
-                .font(.caption.weight(.semibold))
-                .tracking(0.6)
-                .foregroundStyle(MonMonTheme.textSecondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .accessibilityHidden(true)
-
-            DateRangeFilterButton(
-                range: $transactionRange,
-                identifierPrefix: "account-detail-transactions"
-            )
-        }
-    }
-
     private var emptyTransactionNotice: LocalizedStringKey {
-        "No transactions recorded \(transactionRange.phrase(in: locale, dateFormat: dateFormat))."
+        "No transactions recorded \(selectedRange.phrase(in: locale, dateFormat: dateFormat))."
     }
 
     private func accountTransfers(for account: CashAccount) -> [AccountTransfer] {
         AccountActivityItem.transfers(for: account.id, in: transfers)
-            .filter { transactionRange.contains($0.occurredAt) }
+            .filter { selectedRange.contains($0.occurredAt) }
     }
 
     private func linkedSources(for account: CashAccount) -> [AccountLinkedSourceRow] {

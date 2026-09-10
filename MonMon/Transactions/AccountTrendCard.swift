@@ -38,7 +38,7 @@ struct AccountTrendCard: View {
     let points: [SpendingTrendPoint]
 
     @Binding var metric: AccountTrendMetric
-    @Binding var range: TransactionRange
+    let range: TransactionRange
 
     private var total: Decimal {
         points.reduce(Decimal.zero) { $0 + metric.amount(in: $1) }
@@ -105,11 +105,6 @@ struct AccountTrendCard: View {
 
             Spacer(minLength: 8)
 
-            DateRangeFilterButton(
-                range: $range,
-                identifierPrefix: "account-detail-trend",
-                systemImage: "calendar"
-            )
         }
     }
 
