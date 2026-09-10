@@ -2,6 +2,7 @@ import SwiftData
 import SwiftUI
 
 private enum SpendingDestination: Hashable {
+    case accounts
     case trip(UUID)
 }
 
@@ -130,6 +131,8 @@ struct TransactionListView: View {
             }
             .navigationDestination(for: SpendingDestination.self) { destination in
                 switch destination {
+                case .accounts:
+                    AccountsScreen()
                 case .trip(let workspaceID):
                     if let workspace = tripWorkspaces.first(where: { $0.id == workspaceID }) {
                         TripDetailView(workspace: workspace)
@@ -470,10 +473,19 @@ struct TransactionListView: View {
             isEditingDefaults = true
         }
 
+        quickAction(
+            "Accounts",
+            systemImage: "wallet.bifold.fill",
+            isStacked: isStacked,
+            accessibilityIdentifier: "open-accounts"
+        ) {
+            navigationPath.append(SpendingDestination.accounts)
+        }
+
     }
 
     private func quickAction(
-        _ title: String,
+        _ title: LocalizedStringKey,
         systemImage: String,
         isStacked: Bool,
         accessibilityIdentifier: String,

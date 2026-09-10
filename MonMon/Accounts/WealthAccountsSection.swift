@@ -213,6 +213,23 @@ struct WealthAccountsSection: View {
     }
 }
 
+/// The Transactions shortcut reuses Wealth's account management content.
+struct AccountsScreen: View {
+    var body: some View {
+        ScrollView {
+            WealthAccountsSection()
+                .frame(maxWidth: MonMonTheme.maxContentWidth)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .frame(maxWidth: .infinity)
+        }
+        .background(MonMonTheme.canvas.ignoresSafeArea())
+        .navigationTitle("Accounts")
+        .accessibilityIdentifier("accounts-screen")
+        .tint(MonMonTheme.accent)
+    }
+}
+
 #if DEBUG
     #Preview("Wealth accounts") {
         NavigationStack {
