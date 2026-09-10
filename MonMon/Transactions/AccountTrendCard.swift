@@ -1,7 +1,7 @@
 import Charts
 import SwiftUI
 
-/// Which line the account trend draws. One question at a time: what the account
+/// Which metric the account bars show. One question at a time: what the account
 /// took in, what it paid out, or where the two left it.
 enum AccountTrendMetric: CaseIterable, Hashable {
     case net
@@ -110,25 +110,12 @@ struct AccountTrendCard: View {
 
     private var chart: some View {
         Chart(points) { point in
-            AreaMark(
-                x: .value("Date", point.start),
-                y: .value(metric.title, metric.amount(in: point).chartValue)
+            BarMark(
+                x: .value(
+                    "Date", point.start, unit: SpendingTrend.unit(for: range)?.component ?? .day),
+                y: .value(metric.title, metric.amount(in: point).chartValue),
+                width: .ratio(0.7)
             )
-            .interpolationMethod(.monotone)
-            .foregroundStyle(
-                LinearGradient(
-                    colors: [tint.opacity(0.28), tint.opacity(0.02)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
-
-            LineMark(
-                x: .value("Date", point.start),
-                y: .value(metric.title, metric.amount(in: point).chartValue)
-            )
-            .interpolationMethod(.monotone)
-            .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
             .foregroundStyle(tint)
         }
         .chartYScale(domain: .automatic(includesZero: true))
@@ -159,7 +146,7 @@ struct AccountTrendCard: View {
         }
         .frame(height: 150)
         // The figure in the header states what the period came to, which is the
-        // only reading of the line that survives being read aloud.
+        // summary of the bars for VoiceOver.
         .accessibilityHidden(true)
     }
 }
