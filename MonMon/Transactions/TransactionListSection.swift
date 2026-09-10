@@ -5,7 +5,7 @@ import SwiftUI
 ///
 /// Spending defines the visual language: transactions are grouped by day, the
 /// day's net sits in its header. Transactions keep their edit/delete gestures;
-/// transfers open their existing editor. The enclosing screen owns the shared transaction
+/// transfers share the same details, edit and delete interactions. The enclosing screen owns the shared transaction
 /// actions so sheets and the Undo banner stay anchored to its viewport.
 struct TransactionListSection<Accessory: View>: View {
     @Environment(\.appDateFormat) private var dateFormat
@@ -16,7 +16,6 @@ struct TransactionListSection<Accessory: View>: View {
     private var tripWorkspaces: [TripWorkspace]
 
     let title: LocalizedStringKey
-    @State private var editingTransfer: AccountTransfer?
 
     let transactions: [MoneyTransaction]
     let transfers: [AccountTransfer]
@@ -76,30 +75,19 @@ struct TransactionListSection<Accessory: View>: View {
                                     "\(accessibilityIdentifierPrefix)-\(transaction.id.uuidString)"
                             )
                         case .transfer(let transfer):
-                            Button {
-                                editingTransfer = transfer
-                            } label: {
-                                TransferCard(
-                                    transfer: transfer,
-                                    sourceAccount: accounts.first {
-                                        $0.id == transfer.sourceAccountID
-                                    },
-                                    destinationAccount: accounts.first {
-                                        $0.id == transfer.destinationAccountID
-                                    },
-                                    showsDate: false
-                                )
-                            }
-                            .buttonStyle(.plain)
+                            TransferItem(
+                                transfer: transfer,
+                                sourceAccount: accounts.first { $0.id == transfer.sourceAccountID },
+                                destinationAccount: accounts.first {
+                                    $0.id == transfer.destinationAccountID
+                                },
+                                showsDate: false
+                            )
                             .accessibilityIdentifier("history-transfer-\(transfer.id.uuidString)")
-                            .accessibilityHint("Opens transfer details for editing or deletion.")
                         }
                     }
                 }
             }
-        }
-        .appSheet(item: $editingTransfer) { transfer in
-            TransferEditorView(mode: .edit(transfer))
         }
     }
 

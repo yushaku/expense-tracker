@@ -1,6 +1,56 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Couldn’t restore this transfer. Try adding it again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể khôi phục chuyển tiền này. Hãy thử thêm lại."
+          }
+        }
+      }
+    },
+    "Opens transaction details. Swipe left to delete or right to edit.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở chi tiết giao dịch. Vuốt trái để xóa hoặc phải để sửa."
+          }
+        }
+      }
+    },
+    "Opens transfer details. Swipe left to delete or right to edit.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở chi tiết chuyển tiền. Vuốt trái để xóa hoặc phải để sửa."
+          }
+        }
+      }
+    },
+    "Transfer deleted": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã xóa chuyển tiền"
+          }
+        }
+      }
+    },
+    "Transfer details": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chi tiết chuyển tiền"
+          }
+        }
+      }
+    },
     "Transfer amount": {
       "localizations": {
         "vi": {
