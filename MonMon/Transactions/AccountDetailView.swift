@@ -61,7 +61,6 @@ struct AccountDetailView: View {
 
     @State private var accountEditorMode: AccountEditorMode?
     @State private var transactionEditorMode: TransactionEditorMode?
-    @State private var transferEditorMode: TransferEditorMode?
     @State private var transactionActions = TransactionActions()
     @State private var selectedTab: AccountDetailTab = .transactions
     @State private var transactionRange = TransactionRange.month(containing: .now)
@@ -98,9 +97,6 @@ struct AccountDetailView: View {
         }
         .appSheet(item: $transactionEditorMode) { mode in
             TransactionEditorView(mode: mode)
-        }
-        .appSheet(item: $transferEditorMode) { mode in
-            TransferEditorView(mode: mode)
         }
         .transactionActions(
             transactionActions,
@@ -156,6 +152,7 @@ struct AccountDetailView: View {
                     TransactionListSection(
                         title: "History",
                         transactions: accountTransactions,
+                        transfers: accountTransfers,
                         categories: categories,
                         accounts: accounts,
                         emptyNotice: emptyTransactionNotice,
@@ -163,10 +160,6 @@ struct AccountDetailView: View {
                         showsCount: true
                     ) {
                         transactionFilter
-                    }
-
-                    if !accountTransfers.isEmpty {
-                        transferHistorySection(accountTransfers)
                     }
 
                 case .linkedInvestments:
@@ -189,39 +182,6 @@ struct AccountDetailView: View {
             ),
             in: trendRange
         )
-    }
-
-    private func transferHistorySection(_ accountTransfers: [AccountTransfer]) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 10) {
-                Text("Transfers")
-                    .font(.title3.weight(.semibold))
-
-                Text(accountTransfers.count.formatted())
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(MonMonTheme.accent)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(MonMonTheme.accent.opacity(0.16), in: Capsule())
-
-                Spacer(minLength: 0)
-            }
-
-            ForEach(accountTransfers) { transfer in
-                Button {
-                    transferEditorMode = .edit(transfer)
-                } label: {
-                    TransferCard(
-                        transfer: transfer,
-                        sourceAccount: self.account(transfer.sourceAccountID),
-                        destinationAccount: self.account(transfer.destinationAccountID)
-                    )
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("account-detail-transfer-\(transfer.id.uuidString)")
-                .accessibilityHint("Opens the transfer editor.")
-            }
-        }
     }
 
     private func accountTransactions(for account: CashAccount) -> [MoneyTransaction] {
@@ -255,6 +215,7 @@ struct AccountDetailView: View {
 
     private func accountTransfers(for account: CashAccount) -> [AccountTransfer] {
         AccountActivityItem.transfers(for: account.id, in: transfers)
+            .filter { transactionRange.contains($0.occurredAt) }
     }
 
     private func linkedSources(for account: CashAccount) -> [AccountLinkedSourceRow] {

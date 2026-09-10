@@ -8,8 +8,6 @@ struct TransactionEntryTabSwipeTests {
     @Test("Left and right swipes follow the visible tab order")
     func swipeOrder() {
         #expect(TransactionEntryTab.income.swiped(horizontal: -80, vertical: 5) == .expense)
-        #expect(TransactionEntryTab.expense.swiped(horizontal: -80, vertical: 5) == .quickAdd)
-        #expect(TransactionEntryTab.quickAdd.swiped(horizontal: 80, vertical: 5) == .expense)
         #expect(TransactionEntryTab.expense.swiped(horizontal: 80, vertical: 5) == .income)
     }
 
@@ -20,13 +18,12 @@ struct TransactionEntryTabSwipeTests {
         #expect(TransactionEntryTab.expense.swiped(horizontal: -60, vertical: 55) == .expense)
     }
 
-    @Test("Swipes stop at either end and never reveal Quick Add while editing")
+    @Test("Swipes stop at either end of income and expense")
     func boundaries() {
         #expect(TransactionEntryTab.income.swiped(horizontal: 80, vertical: 0) == .income)
-        #expect(TransactionEntryTab.quickAdd.swiped(horizontal: -80, vertical: 0) == .quickAdd)
         #expect(
             TransactionEntryTab.expense.swiped(
-                horizontal: -80, vertical: 0, allowsQuickAdd: false) == .expense)
+                horizontal: -80, vertical: 0) == .expense)
     }
 }
 

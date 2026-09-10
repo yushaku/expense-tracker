@@ -92,6 +92,34 @@ enum TransactionSearch {
         }
     }
 
+    /// Both ends participate in account and text searches. A category or an
+    /// income/expense filter excludes transfers, which have neither attribute.
+    static func transferResults(
+        of query: TransactionQuery,
+        transfers: [AccountTransfer],
+        accountNames: [UUID: String] = [:]
+    ) -> [AccountTransfer] {
+        guard query.filter == .all, query.categoryIDs.isEmpty else { return [] }
+        let terms = terms(of: query.trimmedText)
+        return transfers.filter { transfer in
+            guard query.range.contains(transfer.occurredAt) else { return false }
+            if !query.accountIDs.isEmpty,
+                !query.accountIDs.contains(transfer.sourceAccountID),
+                !query.accountIDs.contains(transfer.destinationAccountID)
+            {
+                return false
+            }
+            let haystack = fold(
+                [
+                    transfer.note,
+                    accountNames[transfer.sourceAccountID] ?? "",
+                    accountNames[transfer.destinationAccountID] ?? "",
+                    "Transfer Internal transfer Chuyển tiền Chuyển khoản",
+                ].joined(separator: " "))
+            return terms.allSatisfy { matches($0, in: haystack, amount: transfer.amount) }
+        }
+    }
+
     /// The words a search field was asked for, folded so accents and case never
     /// decide whether a Vietnamese note is found.
     static func terms(of text: String) -> [String] {

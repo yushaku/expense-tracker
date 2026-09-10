@@ -56,14 +56,16 @@ struct TransferEditorView: View {
     private var payments: [DebtPayment]
 
     private let mode: TransferEditorMode
+    private let onSave: (() -> Void)?
 
     @State private var draft: TransferDraft
     @State private var validationError: TransferFormError?
     @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
 
-    init(mode: TransferEditorMode, defaultDate: Date = .now) {
+    init(mode: TransferEditorMode, defaultDate: Date = .now, onSave: (() -> Void)? = nil) {
         self.mode = mode
+        self.onSave = onSave
 
         switch mode {
         case .add:
@@ -195,6 +197,7 @@ struct TransferEditorView: View {
 
         do {
             try modelContext.save()
+            onSave?()
             dismiss()
         } catch {
             modelContext.rollback()

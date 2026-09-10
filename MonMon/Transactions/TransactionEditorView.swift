@@ -73,9 +73,8 @@ struct TransactionEditorView: View {
     @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
     @State private var didApplyDefaults = false
-    @State private var isApplyingCaptureDirection = false
-    @State private var isQuickAdding = false
-    @State private var rawEntry = ""
+    @State private var isTransferring = false
+    @State private var didSaveTransfer = false
 
     init(mode: TransactionEditorMode, defaultDate: Date = .now) {
         self.mode = mode
@@ -111,8 +110,6 @@ struct TransactionEditorView: View {
         NavigationStack {
             TransactionEditorForm(
                 draft: $draft,
-                isQuickAdding: $isQuickAdding,
-                rawEntry: $rawEntry,
                 accounts: accounts,
                 categories: categories,
                 tripWorkspaces: tripWorkspaces,
@@ -121,7 +118,7 @@ struct TransactionEditorView: View {
                 validationError: validationError,
                 saveErrorMessage: saveErrorMessage,
                 onDelete: { isConfirmingDelete = true },
-                onCapture: applyCapture
+                onTransfer: allowsTransfer ? { isTransferring = true } : nil
             )
             .navigationTitle(navigationTitle)
             .toolbar {
@@ -132,14 +129,20 @@ struct TransactionEditorView: View {
                     .accessibilityIdentifier("cancel-transaction")
                 }
 
-                if !isQuickAdding {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Save") {
-                            save()
-                        }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") { save() }
                         .fontWeight(.semibold)
                         .accessibilityIdentifier("save-transaction")
-                    }
+                }
+            }
+            .appSheet(
+                isPresented: $isTransferring,
+                onDismiss: {
+                    if didSaveTransfer { dismiss() }
+                }
+            ) {
+                TransferEditorView(mode: .add, defaultDate: draft.occurredAt) {
+                    didSaveTransfer = true
                 }
             }
             .confirmationDialog(
@@ -157,10 +160,6 @@ struct TransactionEditorView: View {
                 Text(deleteConfirmationMessage)
             }
             .onChange(of: draft.kind) { _, _ in
-                if isApplyingCaptureDirection {
-                    isApplyingCaptureDirection = false
-                    return
-                }
                 applyDefaultCategoryIfDirectionChanged()
                 if draft.kind == .income {
                     TripTransactionSelection.apply(
@@ -247,20 +246,9 @@ struct TransactionEditorView: View {
         )
     }
 
-    private func applyCapture(_ rawEntry: String) {
-        validationError = nil
-        saveErrorMessage = nil
-        do {
-            let capture = try TransactionCaptureService(container: modelContext.container)
-                .prepare(rawEntry)
-            // Parsing has already resolved defaults. Keep ambiguous fields empty
-            // instead of filling them through the manual direction-change handler.
-            isApplyingCaptureDirection = draft.kind != capture.kind
-            draft.apply(capture: capture)
-            isQuickAdding = false
-        } catch {
-            saveErrorMessage = "Couldn’t understand that entry. Try again."
-        }
+    private var allowsTransfer: Bool {
+        if case .add = mode { return true }
+        return false
     }
 
     private func save() {

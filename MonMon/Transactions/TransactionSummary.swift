@@ -134,3 +134,66 @@ enum TransactionListFilter: String, CaseIterable, Identifiable {
         }
     }
 }
+
+/// Presentation-only union: transfers retain their own ledger records and never
+/// become income or expenses just because they appear in the same history.
+enum TransactionHistoryEntry: Identifiable {
+    case transaction(MoneyTransaction)
+    case transfer(AccountTransfer)
+
+    var id: String {
+        switch self {
+        case .transaction(let value): "transaction-\(value.id.uuidString)"
+        case .transfer(let value): "transfer-\(value.id.uuidString)"
+        }
+    }
+
+    var occurredAt: Date {
+        switch self {
+        case .transaction(let value): value.occurredAt
+        case .transfer(let value): value.occurredAt
+        }
+    }
+
+    var createdAt: Date {
+        switch self {
+        case .transaction(let value): value.createdAt
+        case .transfer(let value): value.createdAt
+        }
+    }
+
+    var signedAmount: Decimal {
+        switch self {
+        case .transaction(let value): value.signedAmount
+        case .transfer: 0
+        }
+    }
+}
+
+struct TransactionHistoryDay: Identifiable {
+    let day: Date
+    let entries: [TransactionHistoryEntry]
+    var id: Date { day }
+    var net: Decimal { entries.reduce(0) { $0 + $1.signedAmount } }
+}
+
+enum TransactionHistory {
+    static func byDay(
+        transactions: [MoneyTransaction], transfers: [AccountTransfer]
+    ) -> [TransactionHistoryDay] {
+        let entries =
+            transactions.map(TransactionHistoryEntry.transaction)
+            + transfers.map(TransactionHistoryEntry.transfer)
+        let sorted = entries.sorted {
+            if $0.occurredAt != $1.occurredAt { return $0.occurredAt > $1.occurredAt }
+            if $0.createdAt != $1.createdAt { return $0.createdAt > $1.createdAt }
+            return $0.id < $1.id
+        }
+        let groups = Dictionary(grouping: sorted) {
+            TransactionPeriod.calendar.startOfDay(for: $0.occurredAt)
+        }
+        return groups.keys.sorted(by: >).map {
+            TransactionHistoryDay(day: $0, entries: groups[$0] ?? [])
+        }
+    }
+}
