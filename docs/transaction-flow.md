@@ -13,3 +13,7 @@ Validation: format lint, full Mac unit suite and iOS SDK compile. Unit coverage 
 ## Account management in Wealth
 
 Wealth directly embeds the account allocation chart, individual account cards and Add Account action. Account cards open AccountDetailView within the Wealth navigation stack. The intermediate Accounts screen and Transactions shortcut are removed. There is no dedicated Transfers section or add-transfer action in Wealth; transfers remain in the shared transaction history and Add Transaction flow. Transfer data still contributes to account balances and allocation.
+
+## Transfer form
+
+Account selection comes first, using full-width source and destination controls, an explicit direction arrow and a Swap button. The opposite account is disabled in each picker. The amount card labels its input and shows the existing source-balance limit when applicable, including the edit adjustment. Date and optional note follow. Scroll gestures dismiss the keyboard.

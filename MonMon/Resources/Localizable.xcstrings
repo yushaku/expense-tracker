@@ -1,6 +1,36 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Transfer amount": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền chuyển"
+          }
+        }
+      }
+    },
+    "Available to transfer": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Có thể chuyển"
+          }
+        }
+      }
+    },
+    "Choose account": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn tài khoản"
+          }
+        }
+      }
+    },
     "Transfer between accounts": {
       "localizations": {
         "vi": {

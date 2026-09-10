@@ -103,7 +103,8 @@ struct TransferEditorContent: View {
             validationError: validationError,
             saveErrorMessage: saveErrorMessage,
             onSwap: { draft.swapEnds() },
-            onDelete: { isConfirmingDelete = true }
+            onDelete: { isConfirmingDelete = true },
+            availableSourceBalance: availableSourceBalance
         )
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
