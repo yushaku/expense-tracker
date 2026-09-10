@@ -12,7 +12,7 @@ Validation: format lint, full Mac unit suite and iOS SDK compile. Unit coverage 
 
 ## Account management in Wealth
 
-Wealth directly embeds the account allocation chart, individual account cards and Add Account action. Account cards open AccountDetailView within the Wealth navigation stack. Transactions also offers an Accounts shortcut, opening a standalone screen that reuses this same account-management content. There is no dedicated Transfers section or add-transfer action in Wealth; transfers remain in the shared transaction history and Add Transaction flow. Transfer data still contributes to account balances and allocation.
+Wealth directly embeds individual account cards and the Add Account action. The cash allocation donut is shown only on the standalone Accounts screen. Account cards open AccountDetailView within the Wealth navigation stack. Transactions also offers an Accounts shortcut, opening a standalone screen that reuses this same account-management content. There is no dedicated Transfers section or add-transfer action in Wealth; transfers remain in the shared transaction history and Add Transaction flow. Transfer data still contributes to account balances and allocation.
 
 ## Transfer form
 
