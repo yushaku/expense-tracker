@@ -129,6 +129,7 @@ extension View {
                 onEdit: onEdit
             )
         )
+        .transferActions(undoBottomInset: undoBottomInset)
     }
 }
 
@@ -255,12 +256,14 @@ private struct TransactionActionHost: ViewModifier {
     }
 }
 
-private struct TransactionUndoBanner: View {
+struct TransactionUndoBanner: View {
+    var title: LocalizedStringKey = "Transaction deleted"
+    var identifier = "undo-delete-transaction"
     let undo: () -> Void
 
     var body: some View {
         HStack(spacing: 12) {
-            Text("Transaction deleted")
+            Text(title)
                 .font(.subheadline.weight(.medium))
 
             Spacer(minLength: 8)
@@ -269,7 +272,7 @@ private struct TransactionUndoBanner: View {
                 .font(.subheadline.weight(.bold))
                 .foregroundStyle(MonMonTheme.accent)
                 .frame(minHeight: 44)
-                .accessibilityIdentifier("undo-delete-transaction")
+                .accessibilityIdentifier(identifier)
         }
         .padding(.leading, 16)
         .padding(.trailing, 10)
@@ -280,12 +283,12 @@ private struct TransactionUndoBanner: View {
                 .stroke(MonMonTheme.border, lineWidth: 1)
         }
         .shadow(color: .black.opacity(0.24), radius: 14, y: 6)
-        .accessibilityIdentifier("transaction-delete-undo-banner")
+        .accessibilityIdentifier("\(identifier)-banner")
     }
 }
 
 /// The shared transaction interaction used by lists across the app: tap for
-/// details, swipe left to edit, and swipe right to delete with a brief Undo.
+/// details, swipe left to delete with a brief Undo, and swipe right to edit.
 ///
 /// The row asks; the list its screen set up with `transactionActions` answers.
 struct TransactionItem: View {
@@ -336,7 +339,7 @@ struct TransactionItem: View {
         }
         .accessibilityIdentifier(accessibilityIdentifier)
         .accessibilityHint(
-            "Opens transaction details. Swipe left to edit or right to delete."
+            "Opens transaction details. Swipe left to delete or right to edit."
         )
     }
 }

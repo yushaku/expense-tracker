@@ -17,3 +17,7 @@ Wealth directly embeds individual account cards and the Add Account action. The 
 ## Transfer form
 
 Account selection comes first, using full-width source and destination controls, a centered icon-only Swap button. The opposite account is disabled in each picker. The amount card labels its input and shows the existing source-balance limit when applicable, including the edit adjustment. Date and optional note follow. Scroll gestures dismiss the keyboard.
+
+## History interactions
+
+Transactions and internal transfers share the same row gestures: swipe left to delete with a five-second Undo, swipe right to edit, and tap to view details. Transfer details show the amount, source, destination, date and note, with Edit and confirmed Delete actions. Undo preserves transfer IDs and both statement import fingerprints. The screen owns transfer sheets and Undo so removing a row does not remove its undo action.

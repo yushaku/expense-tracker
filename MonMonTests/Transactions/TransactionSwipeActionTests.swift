@@ -7,22 +7,22 @@ import Testing
 struct TransactionSwipeActionTests {
     private static let commitDistance = TransactionSwipeAction.commitDistance
 
-    @Test("Carrying a row right far enough deletes it on release")
-    func farRightSwipeCommitsToDelete() {
+    @Test("Carrying a row right far enough edits it on release")
+    func farRightSwipeCommitsToEdit() {
         let released = TransactionSwipeMotion()
             .dragging(CGSize(width: Self.commitDistance, height: 8))
 
         #expect(released.isCommitted)
-        #expect(released.committedAction == .delete)
+        #expect(released.committedAction == .edit)
     }
 
-    @Test("Carrying a row left far enough edits it on release")
-    func farLeftSwipeCommitsToEdit() {
+    @Test("Carrying a row left far enough deletes it on release")
+    func farLeftSwipeCommitsToDelete() {
         let released = TransactionSwipeMotion()
             .dragging(CGSize(width: -Self.commitDistance, height: 8))
 
         #expect(released.isCommitted)
-        #expect(released.committedAction == .edit)
+        #expect(released.committedAction == .delete)
     }
 
     @Test("A swipe stopped short of the distance does nothing on release")
@@ -47,7 +47,7 @@ struct TransactionSwipeActionTests {
         let dragging = TransactionSwipeMotion()
             .dragging(CGSize(width: 20, height: 2))
 
-        #expect(dragging.aimedAction == .delete)
+        #expect(dragging.aimedAction == .edit)
         #expect(dragging.isCommitted == false)
     }
 
