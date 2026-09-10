@@ -44,6 +44,8 @@ enum TransactionEditorMode: Identifiable {
 }
 
 struct TransactionEditorView: View {
+    @Environment(\.layoutDirection) private var layoutDirection
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
@@ -73,6 +75,7 @@ struct TransactionEditorView: View {
     @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
     @State private var didApplyDefaults = false
+    @State private var pageTurnDirection = -1.0
     @State private var selectedTab = TransactionEntryTab.expense
     @State private var transferDraft: TransferDraft
 
@@ -111,11 +114,14 @@ struct TransactionEditorView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 entryTabs
-                if selectedTab == .transfer && allowsTransfer {
-                    TransferEditorContent(mode: .add, draft: $transferDraft)
-                } else {
-                    transactionForm
+                ZStack {
+                    if selectedTab == .transfer && allowsTransfer {
+                        TransferEditorContent(mode: .add, draft: $transferDraft)
+                    } else {
+                        transactionForm
+                    }
                 }
+                .simultaneousGesture(entryTabSwipe)
             }
             .background(MonMonTheme.canvas)
             .navigationTitle(navigationTitle)
@@ -153,6 +159,25 @@ struct TransactionEditorView: View {
         }
     }
 
+    /// All entry tabs share one gesture, including the inline transfer form.
+    private var entryTabSwipe: some Gesture {
+        DragGesture(minimumDistance: 30)
+            .onEnded { value in
+                let horizontal =
+                    layoutDirection == .rightToLeft
+                    ? -value.translation.width : value.translation.width
+                let next = selectedTab.swiped(
+                    horizontal: horizontal, vertical: value.translation.height,
+                    allowsTransfer: allowsTransfer
+                )
+                guard next != selectedTab else { return }
+                pageTurnDirection = value.translation.width < 0 ? -1 : 1
+                withAnimation(.easeInOut(duration: reduceMotion ? 0.15 : 0.35)) {
+                    selectedTab = next
+                }
+            }
+    }
+
     private var entryTabs: some View {
         Picker("Entry method", selection: $selectedTab) {
             Text("Income").tag(TransactionEntryTab.income)
@@ -172,6 +197,7 @@ struct TransactionEditorView: View {
 
     private var transactionForm: some View {
         TransactionEditorForm(
+            pageTurnDirection: pageTurnDirection,
             draft: $draft,
             accounts: accounts,
             categories: categories,
@@ -180,9 +206,7 @@ struct TransactionEditorView: View {
             isEditing: mode.canDelete,
             validationError: validationError,
             saveErrorMessage: saveErrorMessage,
-            onDelete: { isConfirmingDelete = true },
-            selectedTab: $selectedTab,
-            allowsTransfer: allowsTransfer
+            onDelete: { isConfirmingDelete = true }
         )
         .navigationTitle(navigationTitle)
         .toolbar {
