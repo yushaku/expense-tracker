@@ -3,7 +3,6 @@ import SwiftUI
 enum TransactionEntryTab: Int, CaseIterable {
     case income
     case expense
-    case quickAdd
 
     init(kind: TransactionKind) {
         self = kind == .income ? .income : .expense
@@ -13,19 +12,18 @@ enum TransactionEntryTab: Int, CaseIterable {
         switch self {
         case .income: .income
         case .expense: .expense
-        case .quickAdd: nil
         }
     }
 
     func swiped(
-        horizontal: CGFloat, vertical: CGFloat, allowsQuickAdd: Bool = true
+        horizontal: CGFloat, vertical: CGFloat
     ) -> Self {
         // Require an intentional horizontal swipe, leaving vertical scrolling
         // and short drags within form controls alone.
         guard abs(horizontal) >= 60, abs(horizontal) > abs(vertical) * 1.5 else {
             return self
         }
-        let last = allowsQuickAdd ? Self.quickAdd.rawValue : Self.expense.rawValue
+        let last = Self.expense.rawValue
         let next = min(max(rawValue + (horizontal < 0 ? 1 : -1), 0), last)
         return Self(rawValue: next) ?? self
     }
@@ -39,8 +37,6 @@ struct TransactionEditorForm: View {
     @State private var pageTurnDirection = -1.0
 
     @Binding var draft: TransactionDraft
-    @Binding var isQuickAdding: Bool
-    @Binding var rawEntry: String
 
     let accounts: [CashAccount]
     let categories: [TransactionCategory]
@@ -50,7 +46,7 @@ struct TransactionEditorForm: View {
     let validationError: TransactionFormError?
     let saveErrorMessage: LocalizedStringKey?
     let onDelete: () -> Void
-    let onCapture: (String) -> Void
+    let onTransfer: (() -> Void)?
 
     var body: some View {
         ZStack {
@@ -59,6 +55,17 @@ struct TransactionEditorForm: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+                    if let onTransfer {
+                        Button(action: onTransfer) {
+                            Label(
+                                "Transfer between accounts", systemImage: "arrow.left.arrow.right"
+                            )
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                        }
+                        .buttonStyle(.prominentAction)
+                        .accessibilityIdentifier("transaction-add-transfer")
+                    }
+
                     entryTabs
 
                     ZStack(alignment: .top) {
@@ -89,8 +96,7 @@ struct TransactionEditorForm: View {
                         let current = entrySelection.wrappedValue
                         let next = current.swiped(
                             horizontal: horizontal,
-                            vertical: value.translation.height,
-                            allowsQuickAdd: !isEditing
+                            vertical: value.translation.height
                         )
                         guard next != current else { return }
                         pageTurnDirection = value.translation.width < 0 ? -1 : 1
@@ -104,16 +110,12 @@ struct TransactionEditorForm: View {
 
     private var entryPage: some View {
         VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-            if isQuickAdding {
-                TransactionCaptureEntry(rawEntry: $rawEntry, onApply: onCapture)
-            } else {
-                introduction
-                amountCard
-                detailsCard
+            introduction
+            amountCard
+            detailsCard
 
-                if showsTripRouting {
-                    tripRoutingCard
-                }
+            if showsTripRouting {
+                tripRoutingCard
             }
 
             if let saveErrorMessage {
@@ -133,10 +135,6 @@ struct TransactionEditorForm: View {
                 Text(kind.displayName)
                     .tag(TransactionEntryTab(kind: kind))
             }
-            if !isEditing {
-                Text("Quick Add")
-                    .tag(TransactionEntryTab.quickAdd)
-            }
         }
         .pickerStyle(.segmented)
         .labelsHidden()
@@ -145,9 +143,8 @@ struct TransactionEditorForm: View {
 
     private var entrySelection: Binding<TransactionEntryTab> {
         Binding(
-            get: { isQuickAdding ? .quickAdd : TransactionEntryTab(kind: draft.kind) },
+            get: { TransactionEntryTab(kind: draft.kind) },
             set: { tab in
-                isQuickAdding = tab == .quickAdd
                 if let kind = tab.kind {
                     draft.kind = kind
                 }

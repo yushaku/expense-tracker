@@ -1,6 +1,26 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Transfer between accounts": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyển tiền giữa tài khoản"
+          }
+        }
+      }
+    },
+    "Opens transfer details for editing or deletion.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở chi tiết chuyển tiền để chỉnh sửa hoặc xóa."
+          }
+        }
+      }
+    },
     "Salary calculator": {
       "localizations": {
         "vi": {

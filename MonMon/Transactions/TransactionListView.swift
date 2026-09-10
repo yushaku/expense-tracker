@@ -16,6 +16,9 @@ struct TransactionListView: View {
     @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
     private var transactions: [MoneyTransaction]
 
+    @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
+    private var transfers: [AccountTransfer]
+
     @Query(sort: \TransactionCategory.createdAt, order: .forward)
     private var categories: [TransactionCategory]
 
@@ -556,6 +559,9 @@ struct TransactionListView: View {
         TransactionListSection(
             title: "Transactions",
             transactions: visibleTransactions,
+            transfers: TransactionSearch.transferResults(
+                of: query, transfers: transfers, accountNames: accountNames
+            ),
             categories: categories,
             accounts: accounts,
             emptyNotice: emptyFilterNotice

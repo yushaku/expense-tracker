@@ -301,3 +301,92 @@ struct TransactionSummaryTests {
         #expect(points.map(\.net) == [1_000_000, 600_000, 500_000])
     }
 }
+
+@Suite("Unified transaction history")
+struct TransactionHistoryTests {
+    private let day =
+        TransactionPeriod.calendar.date(from: DateComponents(year: 2026, month: 9, day: 10))
+        ?? .distantPast
+    private let source = UUID()
+    private let destination = UUID()
+
+    private func transfer(at date: Date, id: UUID = UUID()) -> AccountTransfer {
+        AccountTransfer(
+            id: id, amount: 150_000, occurredAt: date, note: "Cash for lunch",
+            sourceAccountID: source, destinationAccountID: destination,
+            currencyCode: VNDCurrency.code, createdAt: date
+        )
+    }
+
+    @Test("Transfers interleave by time, including transfer-only days, without changing net")
+    func mixedHistory() {
+        let income = MoneyTransaction.preview(
+            kind: .income, amount: 500_000, accountID: source, categoryID: nil)
+        income.occurredAt = day.addingTimeInterval(100)
+        let older = transfer(at: day.addingTimeInterval(50))
+        let newer = transfer(at: day.addingTimeInterval(200))
+        let tomorrow = transfer(at: day.addingTimeInterval(86_400))
+        let groups = TransactionHistory.byDay(
+            transactions: [income], transfers: [older, tomorrow, newer])
+        #expect(groups.count == 2)
+        #expect(groups[0].entries.count == 1)
+        #expect(groups[0].net == 0)
+        #expect(
+            groups[1].entries.map(\.id) == [
+                TransactionHistoryEntry.transfer(newer).id,
+                TransactionHistoryEntry.transaction(income).id,
+                TransactionHistoryEntry.transfer(older).id,
+            ])
+        #expect(groups[1].net == 500_000)
+    }
+
+    @Test("Typed IDs do not collide and equal timestamps have deterministic ordering")
+    func stableIdentity() {
+        let income = MoneyTransaction.preview(
+            kind: .income, amount: 500_000, accountID: source, categoryID: nil)
+        income.occurredAt = day
+        income.createdAt = day
+        let moved = transfer(at: day, id: income.id)
+        let a = TransactionHistoryEntry.transaction(income)
+        let b = TransactionHistoryEntry.transfer(moved)
+        #expect(a.id != b.id)
+        let first = TransactionHistory.byDay(transactions: [income], transfers: [moved])
+        let second = TransactionHistory.byDay(transactions: [income], transfers: [moved])
+        #expect(first[0].entries.map(\.id) == second[0].entries.map(\.id))
+        #expect(TransactionHistory.byDay(transactions: [], transfers: []).isEmpty)
+    }
+
+    @Test("Transfer search respects period, both accounts, note, amount and accent folding")
+    func transferSearch() {
+        let moved = transfer(at: day)
+        let outside = transfer(at: day.addingTimeInterval(86_400))
+        var query = TransactionQuery(range: .day(containing: day))
+        let names = [source: "Ngân hàng", destination: "Wallet"]
+        func results() -> [UUID] {
+            TransactionSearch.transferResults(
+                of: query, transfers: [moved, outside], accountNames: names
+            ).map(\.id)
+        }
+        #expect(results() == [moved.id])
+        query.accountIDs = [source]
+        #expect(results() == [moved.id])
+        query.accountIDs = [destination]
+        #expect(results() == [moved.id])
+        query.accountIDs = [UUID()]
+        #expect(results().isEmpty)
+        query.accountIDs = []
+        query.text = "NGAN wallet lunch 150"
+        #expect(results() == [moved.id])
+        query.text = "missing"
+        #expect(results().isEmpty)
+        query.text = "transfer"
+        #expect(results() == [moved.id])
+        query.filter = .income
+        #expect(results().isEmpty)
+        query.filter = .expense
+        #expect(results().isEmpty)
+        query.filter = .all
+        query.categoryIDs = [UUID()]
+        #expect(results().isEmpty)
+    }
+}

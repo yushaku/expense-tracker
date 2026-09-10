@@ -1,11 +1,11 @@
 import SwiftData
 import SwiftUI
 
-/// The transaction list shared by every transaction-only screen.
+/// Shared dated history; callers may include internal transfers.
 ///
 /// Spending defines the visual language: transactions are grouped by day, the
-/// day's net sits in its header, and every row opens details with the same edit
-/// and delete gestures. The enclosing screen owns the shared transaction
+/// day's net sits in its header. Transactions keep their edit/delete gestures;
+/// transfers open their existing editor. The enclosing screen owns the shared transaction
 /// actions so sheets and the Undo banner stay anchored to its viewport.
 struct TransactionListSection<Accessory: View>: View {
     @Environment(\.appDateFormat) private var dateFormat
@@ -16,7 +16,10 @@ struct TransactionListSection<Accessory: View>: View {
     private var tripWorkspaces: [TripWorkspace]
 
     let title: LocalizedStringKey
+    @State private var editingTransfer: AccountTransfer?
+
     let transactions: [MoneyTransaction]
+    let transfers: [AccountTransfer]
     let categories: [TransactionCategory]
     let accounts: [CashAccount]
     let emptyNotice: LocalizedStringKey
@@ -27,6 +30,7 @@ struct TransactionListSection<Accessory: View>: View {
     init(
         title: LocalizedStringKey,
         transactions: [MoneyTransaction],
+        transfers: [AccountTransfer] = [],
         categories: [TransactionCategory],
         accounts: [CashAccount],
         emptyNotice: LocalizedStringKey,
@@ -36,6 +40,7 @@ struct TransactionListSection<Accessory: View>: View {
     ) {
         self.title = title
         self.transactions = transactions
+        self.transfers = transfers
         self.categories = categories
         self.accounts = accounts
         self.emptyNotice = emptyNotice
@@ -48,7 +53,7 @@ struct TransactionListSection<Accessory: View>: View {
         VStack(alignment: .leading, spacing: 20) {
             header
 
-            if transactions.isEmpty {
+            if transactions.isEmpty && transfers.isEmpty {
                 Text(emptyNotice)
                     .font(.subheadline)
                     .foregroundStyle(MonMonTheme.textSecondary)
@@ -58,19 +63,43 @@ struct TransactionListSection<Accessory: View>: View {
                 VStack(alignment: .leading, spacing: 12) {
                     dayHeader(for: group)
 
-                    ForEach(group.transactions) { transaction in
-                        TransactionItem(
-                            transaction: transaction,
-                            category: category(for: transaction),
-                            account: account(for: transaction),
-                            tripName: tripName(for: transaction),
-                            showsDate: false,
-                            accessibilityIdentifier:
-                                "\(accessibilityIdentifierPrefix)-\(transaction.id.uuidString)"
-                        )
+                    ForEach(group.entries) { entry in
+                        switch entry {
+                        case .transaction(let transaction):
+                            TransactionItem(
+                                transaction: transaction,
+                                category: category(for: transaction),
+                                account: account(for: transaction),
+                                tripName: tripName(for: transaction),
+                                showsDate: false,
+                                accessibilityIdentifier:
+                                    "\(accessibilityIdentifierPrefix)-\(transaction.id.uuidString)"
+                            )
+                        case .transfer(let transfer):
+                            Button {
+                                editingTransfer = transfer
+                            } label: {
+                                TransferCard(
+                                    transfer: transfer,
+                                    sourceAccount: accounts.first {
+                                        $0.id == transfer.sourceAccountID
+                                    },
+                                    destinationAccount: accounts.first {
+                                        $0.id == transfer.destinationAccountID
+                                    },
+                                    showsDate: false
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityIdentifier("history-transfer-\(transfer.id.uuidString)")
+                            .accessibilityHint("Opens transfer details for editing or deletion.")
+                        }
                     }
                 }
             }
+        }
+        .appSheet(item: $editingTransfer) { transfer in
+            TransferEditorView(mode: .edit(transfer))
         }
     }
 
@@ -82,7 +111,7 @@ struct TransactionListSection<Accessory: View>: View {
                 .minimumScaleFactor(0.8)
 
             if showsCount {
-                Text(transactions.count.formatted())
+                Text((transactions.count + transfers.count).formatted())
                     .font(.caption.weight(.bold))
                     .foregroundStyle(MonMonTheme.accent)
                     .padding(.horizontal, 10)
@@ -96,8 +125,8 @@ struct TransactionListSection<Accessory: View>: View {
         }
     }
 
-    private var dayGroups: [TransactionDayGroup] {
-        TransactionSummary.byDay(transactions)
+    private var dayGroups: [TransactionHistoryDay] {
+        TransactionHistory.byDay(transactions: transactions, transfers: transfers)
     }
 
     private func tripName(for transaction: MoneyTransaction) -> String? {
@@ -105,7 +134,7 @@ struct TransactionListSection<Accessory: View>: View {
         return tripWorkspaces.first { $0.id == workspaceID }?.name
     }
 
-    private func dayHeader(for group: TransactionDayGroup) -> some View {
+    private func dayHeader(for group: TransactionHistoryDay) -> some View {
         HStack(spacing: 12) {
             Text(
                 dateFormat.format(group.day)
@@ -153,6 +182,7 @@ extension TransactionListSection where Accessory == EmptyView {
     init(
         title: LocalizedStringKey = "Transactions",
         transactions: [MoneyTransaction],
+        transfers: [AccountTransfer] = [],
         categories: [TransactionCategory],
         accounts: [CashAccount],
         emptyNotice: LocalizedStringKey,
@@ -162,6 +192,7 @@ extension TransactionListSection where Accessory == EmptyView {
         self.init(
             title: title,
             transactions: transactions,
+            transfers: transfers,
             categories: categories,
             accounts: accounts,
             emptyNotice: emptyNotice,

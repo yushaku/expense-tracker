@@ -21,6 +21,9 @@ struct DayTransactionsView: View {
     @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
     private var transactions: [MoneyTransaction]
 
+    @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
+    private var transfers: [AccountTransfer]
+
     @Query(sort: \TransactionCategory.createdAt, order: .forward)
     private var categories: [TransactionCategory]
 
@@ -43,11 +46,12 @@ struct DayTransactionsView: View {
                         title: dateFormat.format(period.day),
                         income: income,
                         expense: expense,
-                        count: matching.count
+                        count: matching.count + matchingTransfers.count
                     )
 
                     TransactionListSection(
                         transactions: matching,
+                        transfers: matchingTransfers,
                         categories: categories,
                         accounts: accounts,
                         emptyNotice: "Nothing recorded on this day."
@@ -93,6 +97,10 @@ struct DayTransactionsView: View {
     /// transaction is edited, moved to another day, or deleted from this screen.
     private var matching: [MoneyTransaction] {
         TransactionSummary.inRange(period.range, transactions: transactions)
+    }
+
+    private var matchingTransfers: [AccountTransfer] {
+        transfers.filter { period.range.contains($0.occurredAt) }
     }
 
     private var income: Decimal {
