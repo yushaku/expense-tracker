@@ -151,6 +151,20 @@ final class SyncCoordinator {
         refresh()
     }
 
+    /// Which device leads when both are ready. The Mac created the pairing, so
+    /// it holds the host side of it.
+    var isHost: Bool {
+        guard let pair, let deviceID = try? store.state().deviceID else { return false }
+        return deviceID == pair.hostID
+    }
+
+    /// Opening this screen on a paired device is the intent to sync. Pairing
+    /// was the consent; going on the air again needs no second tap.
+    func connectIfPaired() {
+        guard isPaired, phase == .idle || phase == .interrupted, mayConnect() else { return }
+        connect()
+    }
+
     func connect() {
         perform {
             guard mayConnect() else { throw SyncError.disconnected }
@@ -252,7 +266,7 @@ final class SyncCoordinator {
                 SyncMessage(
                     kind: .prepare, id: id, snapshot: target, expectedDigest: otherDigest,
                     otherDigest: ownDigest, choices: choices))
-            stageTimeout?.cancel()  // The other device must approve its preview.
+            stageTimeout?.cancel()  // The other device is waiting on a person.
         }
     }
 
@@ -357,6 +371,13 @@ final class SyncCoordinator {
                 isPresented = true
                 stageTimeout?.cancel()
                 updatePreview()
+                // One approval, both devices. The owner chose this exact result
+                // on the other device, and every check above re-derived it here
+                // from this device's own data: the merge was recomputed, both
+                // digests matched, deletions were validated, and the live store
+                // still equals the snapshot that was compared. A second tap
+                // would only ask the same person the same question.
+                apply()
             case .prepared:
                 guard initiator, let id = message.id, id == requestID else {
                     throw SyncError.invalidData
@@ -588,7 +609,7 @@ final class SyncCoordinator {
         phase = .interrupted
     }
 
-    private static var deviceName: String {
+    static var deviceName: String {
         #if os(iOS)
             return String(UIDevice.current.name.prefix(256))
         #else

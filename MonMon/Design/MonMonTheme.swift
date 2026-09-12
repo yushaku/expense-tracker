@@ -136,3 +136,20 @@ extension Color {
         #endif
     }
 }
+
+extension View {
+    /// The app's panel: a surface card on the canvas, rounded and bordered the
+    /// same way wherever it appears.
+    func appCard(padding: CGFloat = 20) -> some View {
+        frame(maxWidth: .infinity, alignment: .leading)
+            .padding(padding)
+            .background {
+                RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
+                    .fill(MonMonTheme.surface)
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
+                    .stroke(MonMonTheme.border, lineWidth: 1)
+            }
+    }
+}

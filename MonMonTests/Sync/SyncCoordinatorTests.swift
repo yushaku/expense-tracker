@@ -68,6 +68,38 @@ struct SyncCoordinatorTests {
         try drain(ta, tb)
     }
 
+    @Test("Opening a paired device connects itself, and only the host leads")
+    func connectsWithoutASecondTap() throws {
+        let a = try store(), b = try store()
+        let pair = try SyncPairing.make(hostID: a.state().deviceID)
+        let ta = TestSyncTransport(), tb = TestSyncTransport()
+        let ca = SyncCoordinator(store: a, transport: ta, loadPairing: { _ in pair })
+
+        // Unpaired devices stay off the air until someone pairs them.
+        ca.connectIfPaired()
+        #expect(ca.phase == .idle)
+        #expect(!ta.started)
+
+        try a.updateState { $0.pairID = pair.pairID }
+        try b.updateState { $0.pairID = pair.pairID }
+        ca.refresh()
+        ca.connectIfPaired()
+        #expect(ca.phase == .waiting)
+        #expect(ta.started)
+        #expect(ca.isHost)
+
+        let cb = SyncCoordinator(store: b, transport: tb, loadPairing: { _ in pair })
+        cb.connectIfPaired()
+        #expect(cb.phase == .waiting)
+        #expect(!cb.isHost)
+
+        // A connected pair is ready to compare without either device asking.
+        ta.onConnected?()
+        tb.onConnected?()
+        try drain(ta, tb)
+        #expect(ca.canStart && cb.canStart)
+    }
+
     @Test("Initial union and repeated sync converge without changing local drafts")
     func fullSession() throws {
         let a = try store(), b = try store()
@@ -87,12 +119,9 @@ struct SyncCoordinatorTests {
         ca.startSync()
         try drain(ta, tb)
         #expect(ca.canApply)
+        // One approval carries both devices: the receiver re-derives the same
+        // result and commits without asking the same person again.
         ca.apply()
-        try drain(ta, tb)
-        #expect(cb.canApply)
-        #expect(try b.state().pending == nil)
-        #expect(try b.snapshot().records.count == 1)
-        cb.apply()
         try drain(ta, tb)
         #expect(ca.phase == .complete, "\(ca.errorMessage ?? "")")
         #expect(cb.phase == .complete, "\(cb.errorMessage ?? "")")
@@ -102,8 +131,6 @@ struct SyncCoordinatorTests {
         try drain(ta, tb)
         #expect(cb.previewLocal.isEmpty && cb.previewRemote.isEmpty)
         cb.apply()
-        try drain(ta, tb)
-        ca.apply()
         try drain(ta, tb)
         #expect(try a.state().reports.count == 2)
         #expect(try b.state().reports.count == 2)
@@ -144,10 +171,7 @@ struct SyncCoordinatorTests {
         initiator.updatePreview()
         initiator.apply()
         try drain(ta, tb)
-        #expect(responder.canApply)
-        #expect(phoneAccount.name == "iPhone version")
-        responder.apply()
-        try drain(ta, tb)
+        _ = responder
         #expect(ca.phase == .complete && cb.phase == .complete)
         #expect(try a.snapshot().records.first?.fields["name"] == .string("Mac version"))
         #expect(try a.snapshot().digest() == b.snapshot().digest())
@@ -172,8 +196,8 @@ struct SyncCoordinatorTests {
         initiator.startSync()
         try drain(ta, tb)
         initiator.apply()
-        try drain(ta, tb)
-        #expect(responder.canApply)
+        // The receiver prepared and answered, but the answer never arrived.
+        try drain(ta, tb, drop: .prepared)
         let pendingID = try #require(initiatorStore.state().pending?.id)
 
         // Use transport errors, without dismissing the sheet or recreating coordinators.
@@ -196,8 +220,6 @@ struct SyncCoordinatorTests {
         try drain(ta, tb)
         initiator.apply()
         try drain(ta, tb)
-        responder.apply()
-        try drain(ta, tb)
         #expect(ca.phase == .complete && cb.phase == .complete)
         #expect(try a.snapshot().digest() == b.snapshot().digest())
     }
@@ -215,8 +237,6 @@ struct SyncCoordinatorTests {
         ca.startSync()
         try drain(ta, tb)
         ca.apply()
-        try drain(ta, tb)
-        cb.apply()
         try drain(ta, tb, drop: .commit)
         #expect(try a.state().pending?.applied == true)
         #expect(try b.state().pending?.applied == false)
@@ -237,8 +257,7 @@ struct SyncCoordinatorTests {
         #expect(ra.plan?.conflicts.isEmpty == true)
         ra.apply()
         try drain(ta, tb)
-        rb.apply()
-        try drain(ta, tb)
+        _ = rb
         #expect(try a.snapshot().digest() == b.snapshot().digest())
     }
     @Test(
@@ -260,11 +279,6 @@ struct SyncCoordinatorTests {
         try drain(ta, tb)
         initiator.apply()
         try drain(ta, tb, drop: boundary)
-        let responder = phoneInitiates ? ca : cb
-        if responder.canApply {
-            responder.apply()
-            try drain(ta, tb, drop: boundary)
-        }
         ca.disconnect()
         cb.disconnect()
         let ra = SyncCoordinator(store: a, transport: ta, loadPairing: { _ in pair })
@@ -278,14 +292,12 @@ struct SyncCoordinatorTests {
         #expect(ra.canApply)
         ra.apply()
         try drain(ta, tb)
-        rb.apply()
-        try drain(ta, tb)
         #expect(ra.phase == .complete && rb.phase == .complete)
         #expect(try a.snapshot().digest() == b.snapshot().digest())
     }
 
     @Test(
-        "A receiver can reject a proposal and an early commit cannot bypass consent",
+        "A receiver can reject a session and a commit cannot bypass a prepared one",
         arguments: [false, true])
     func receiverConsent(earlyCommit: Bool) throws {
         let a = try store(), b = try store()
@@ -299,15 +311,16 @@ struct SyncCoordinatorTests {
         let before = try b.snapshot().digest()
         ca.startSync()
         try drain(ta, tb)
-        ca.apply()
-        try drain(ta, tb)
-        #expect(cb.canApply)
+        #expect(cb.phase == .receiving)
         #expect(try b.state().pending == nil)
         if earlyCommit {
-            let id = try #require(a.state().pending?.id)
-            tb.onMessage?(try SyncCoding.encode(SyncMessage(kind: .commit, id: id)))
+            // A commit is only ever honoured against a session this device
+            // prepared itself, so one arriving early writes nothing.
+            tb.onMessage?(try SyncCoding.encode(SyncMessage(kind: .commit, id: UUID())))
             #expect(cb.phase == .interrupted)
         } else {
+            // The receiver can still end the session while the other device is
+            // reviewing, which is before anything has been proposed to it.
             cb.cancelReview()
             try drain(ta, tb)
             #expect(ca.canStart && cb.canStart)

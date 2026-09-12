@@ -136,6 +136,10 @@ struct MonMonApp: App {
                     if syncCoordinator.writesLocked && !appLock.isLocked {
                         syncCoordinator.isPresented = true
                     }
+                    // Two paired devices on one Wi-Fi find each other while both
+                    // apps are simply open. Pairing was the consent; the review
+                    // is still the only thing that writes anything.
+                    syncCoordinator.connectIfPaired()
                     await notificationCoordinator.reconcile(in: container.mainContext)
                 }
                 .onChange(of: appLock.isLocked) { _, locked in
@@ -143,7 +147,23 @@ struct MonMonApp: App {
                         syncCoordinator.disconnect()
                     } else if syncCoordinator.writesLocked {
                         syncCoordinator.isPresented = true
+                    } else {
+                        syncCoordinator.connectIfPaired()
                     }
+                }
+                // Closing the sheet ends the session it held open. The link
+                // itself belongs to the app, so it comes straight back.
+                .onChange(of: syncCoordinator.isPresented) { _, presented in
+                    guard !presented else { return }
+                    syncCoordinator.connectIfPaired()
+                }
+                // The other device started a comparison. Its owner is this
+                // owner, seconds ago, on their other screen — so bring the
+                // review up rather than letting it sit unseen while they carry
+                // on editing the data it snapshotted.
+                .onChange(of: syncCoordinator.phase) { _, phase in
+                    guard phase == .receiving, !appLock.isLocked else { return }
+                    syncCoordinator.isPresented = true
                 }
                 #if os(macOS)
                     .environment(mcpAccessManager)
@@ -161,6 +181,7 @@ struct MonMonApp: App {
                         if !appLock.isLocked { syncCoordinator.isPresented = true }
                         return
                     }
+                    syncCoordinator.connectIfPaired()
                     _ = try? StoreReconciler.reconcile(in: container.mainContext)
                     // Coming back is also the moment a rule can have fallen due
                     // since the app was opened — an app left running overnight

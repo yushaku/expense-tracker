@@ -1,6 +1,46 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "What each device saves when you apply.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Những gì mỗi máy sẽ lưu khi bạn áp dụng."
+          }
+        }
+      }
+    },
+    "Choose the version to keep. Nothing is saved until you apply.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn bản muốn giữ. Chưa có gì được lưu cho tới khi bạn áp dụng."
+          }
+        }
+      }
+    },
+    "Will change on %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sẽ thay đổi trên %@"
+          }
+        }
+      }
+    },
+    "Nothing changes on %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không có gì thay đổi trên %@"
+          }
+        }
+      }
+    },
     "iPhone versions are selected by default. You can change any selection.": {
       "localizations": {
         "vi": {
@@ -37,16 +77,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mở MonMon trên Mac và iPhone, sử dụng cùng mạng Wi-Fi."
-          }
-        }
-      }
-    },
-    "Choose the version to keep. Nothing is saved until both devices approve.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chọn phiên bản muốn giữ. Dữ liệu chỉ được lưu khi cả hai thiết bị xác nhận."
           }
         }
       }

@@ -40,6 +40,24 @@ struct SettingsView: View {
                         appearanceCard
                         instrumentsCard
                         card {
+                            VStack(alignment: .leading, spacing: 14) {
+                                sectionHeader(
+                                    "Device Sync", systemImage: "laptopcomputer.and.iphone")
+                                Text(
+                                    "Sync with your paired device over the same Wi-Fi. You review every change."
+                                )
+                                .font(.subheadline).foregroundStyle(MonMonTheme.textSecondary)
+                                Button(
+                                    "Open Device Sync",
+                                    systemImage: "laptopcomputer.and.iphone"
+                                ) {
+                                    onOpenDeviceSync()
+                                }
+                                .buttonStyle(.prominentAction)
+                                .accessibilityIdentifier("settings-device-sync")
+                            }
+                        }
+                        card {
                             Button {
                                 isSalaryCalculatorPresented = true
                             } label: {
@@ -55,20 +73,6 @@ struct SettingsView: View {
                         notificationCard
                         voiceCaptureCard
                         securityCard
-                        card {
-                            VStack(alignment: .leading, spacing: 12) {
-                                sectionHeader(
-                                    "Device Sync", systemImage: "laptopcomputer.and.iphone")
-                                Text(
-                                    "Sync with your paired device over the same Wi-Fi. You review every change."
-                                )
-                                .font(.subheadline).foregroundStyle(MonMonTheme.textSecondary)
-                                Button("Open Device Sync") {
-                                    onOpenDeviceSync()
-                                }
-                                .accessibilityIdentifier("settings-device-sync")
-                            }
-                        }
                         backupCard
                         #if os(macOS)
                             MCPSettingsCard()
@@ -428,16 +432,7 @@ struct SettingsView: View {
 
     private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {
         content()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(20)
-            .background {
-                RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                    .fill(MonMonTheme.surface)
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                    .stroke(MonMonTheme.border, lineWidth: 1)
-            }
+            .appCard()
     }
 
     private func sectionHeader(_ title: LocalizedStringKey, systemImage: String) -> some View {

@@ -214,13 +214,17 @@ increase **Presets shown** to include them. VoiceOver offers **Move earlier** an
 Open **Settings → Device Sync** on both devices. On Mac, choose **Pair an iPhone**;
 on iPhone, scan that QR code. Keep the pairing code private: it authorizes access
 to this pair's financial data. Camera access is only needed for scanning; a manual
-code entry is available. Subsequent sessions use **Connect**, then **Sync** from
-either device. Both apps must be open and unlocked on the same Wi-Fi. Local Network
-permission is required; guest-network isolation and firewalls can prevent discovery.
+code entry is available. After pairing, a device connects by itself whenever the
+app is open, unlocked, and on the same Wi-Fi as its pair, and opening **Device
+Sync** on either one opens the review. Local Network permission is required;
+guest-network isolation and firewalls can prevent discovery.
 
-Every sync shows a preview. The initiating device chooses between conflicting
-records and confirms **Apply to both devices**. The receiving device then reviews
-the final changes and must apply or cancel. Initial sync unions existing data;
+Every sync shows a preview. The reviewing device chooses between conflicting
+records and confirms **Apply to both devices**, which is the only approval needed:
+the receiving device re-derives the same merge from its own data, checks both
+digests and the deletions, and commits only if its store still matches the
+snapshot that was compared. While the other device is reviewing, the receiving
+device can still cancel the session. Initial sync unions existing data;
 a starter category/account/jar missing on one device requires an explicit keep or
 remove decision. Hand-entered transactions with different IDs remain separate,
 even when their date and amount match. Recurring occurrences and imported records
