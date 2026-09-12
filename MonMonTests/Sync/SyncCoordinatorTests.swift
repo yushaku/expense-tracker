@@ -29,9 +29,6 @@ struct SyncCoordinatorTests {
         let container = try ModelContainer(
             for: Schema(MonMonSchema.models),
             configurations: ModelConfiguration(isStoredInMemoryOnly: true))
-        // Each fixture is a new store. A prior fixture can leave a write-gate
-        // identifier behind that this allocation reuses.
-        SyncWriteGate.unlock(container)
         container.mainContext.autosaveEnabled = false
         AccountSeed.ensureUnassignedExists(in: container.mainContext)
         return SyncSessionStore(

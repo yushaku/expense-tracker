@@ -247,11 +247,15 @@ struct SyncSessionStore {
 /// transaction is the sole writer while a reviewed plan is being committed.
 @MainActor
 enum SyncWriteGate {
-    private static var locked: Set<ObjectIdentifier> = []
-    static func lock(_ container: ModelContainer) { locked.insert(ObjectIdentifier(container)) }
-    static func unlock(_ container: ModelContainer) { locked.remove(ObjectIdentifier(container)) }
+    // A retired container's address can be reused by a new store. Weak identity
+    // tracking removes that lock with its owner instead of locking the new store.
+    private static let locked = NSHashTable<ModelContainer>(options: [
+        .weakMemory, .objectPointerPersonality,
+    ])
+    static func lock(_ container: ModelContainer) { locked.add(container) }
+    static func unlock(_ container: ModelContainer) { locked.remove(container) }
     static func isLocked(_ container: ModelContainer) -> Bool {
-        locked.contains(ObjectIdentifier(container))
+        locked.contains(container)
     }
     static func save(_ context: ModelContext) throws {
         guard !isLocked(context.container) else {

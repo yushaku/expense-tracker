@@ -7,6 +7,25 @@ import Testing
 @Suite("P2P durable session")
 @MainActor
 struct SyncSessionTests {
+    @Test("A new store never inherits the lock of a retired container")
+    func retiredStoreLocks() throws {
+        for _ in 0..<20 {
+            try autoreleasepool {
+                let container = try ModelContainer(
+                    for: Schema(MonMonSchema.models),
+                    configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+                #expect(!SyncWriteGate.isLocked(container))
+                SyncWriteGate.lock(container)
+                #expect(SyncWriteGate.isLocked(container))
+                #expect(throws: SyncError.sessionPending) {
+                    try SyncWriteGate.save(container.mainContext)
+                }
+                // Simulate closing a store while its durable session is pending.
+                // Its replacement must inspect its own metadata to acquire a lock.
+            }
+        }
+    }
+
     private func store() throws -> SyncSessionStore {
         let container = try ModelContainer(
             for: Schema(MonMonSchema.models),

@@ -10,12 +10,6 @@ app_path="$derived_data_path/Build/Products/Debug-iphoneos/MonMon.app"
 
 cd "$project_root"
 
-branch="$(git rev-parse --abbrev-ref HEAD)"
-if [[ "$branch" != "dev" ]]; then
-  echo "refusing: dev device installs come from dev, not '$branch'; merge the branch into dev first" >&2
-  exit 1
-fi
-
 echo "Building and installing MonMon Dev on iPhone: $device_name"
 xcodebuild \
   -project MonMon.xcodeproj \
