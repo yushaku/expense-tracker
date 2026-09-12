@@ -22,7 +22,7 @@ struct SettingsView: View {
     var body: some View {
         #if os(macOS)
             settingsContent
-                .frame(minWidth: 500, minHeight: 640)
+                .frame(width: 600, height: 720)
         #else
             settingsContent
         #endif
