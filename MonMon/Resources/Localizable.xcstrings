@@ -1,6 +1,126 @@
 {
   "sourceLanguage": "en",
   "strings": {
+  "Highlights": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Điểm nổi bật"
+        }
+      }
+    }
+  },
+  "Income compared with previous period": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Thu nhập so với kỳ trước"
+        }
+      }
+    }
+  },
+  "Spending compared with previous period": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Chi tiêu so với kỳ trước"
+        }
+      }
+    }
+  },
+  "Current: %@": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Kỳ này: %@"
+        }
+      }
+    }
+  },
+  "Previous: %@": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Kỳ trước: %@"
+        }
+      }
+    }
+  },
+  "%@ now · %@ previously": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Kỳ này %@ · Kỳ trước %@"
+        }
+      }
+    }
+  },
+  "Shows matching transactions in both periods": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Xem giao dịch phù hợp trong cả hai kỳ"
+        }
+      }
+    }
+  },
+  "No matching transactions in either period.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Chưa có giao dịch phù hợp trong cả hai kỳ."
+        }
+      }
+    }
+  },
+  "Unchanged from previous period": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Không đổi so với kỳ trước"
+        }
+      }
+    }
+  },
+  "Up %@": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Tăng %@"
+        }
+      }
+    }
+  },
+  "Down %@": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Giảm %@"
+        }
+      }
+    }
+  },
+  "No matching transactions": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Không có giao dịch phù hợp"
+        }
+      }
+    }
+  },
   "Savings goal": {
     "localizations": {
       "vi": {

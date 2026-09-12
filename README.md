@@ -279,3 +279,14 @@ atomic transaction: one store can temporarily be ahead of the other.
 No financial changes are committed while the receiving device is still reviewing.
 Transfers imported from complementary statement sides without a common provenance
 key remain separate; equal amounts and dates alone do not prove identity.
+
+### Report highlights
+
+The Highlights card compares recorded spending (or income when filtered to income)
+with the previous period, retaining the same account, category, and search filters.
+Ongoing periods compare equal elapsed calendar days, including today; when the
+previous month is shorter, both comparison windows are shortened to match. Finished
+months and years compare whole periods. Custom ranges use the immediately preceding
+range of the same length. The card labels both date windows, omits percentages when
+the prior total is zero, and opens the contributing transactions for its two largest
+category changes. Future periods have no comparison card.
