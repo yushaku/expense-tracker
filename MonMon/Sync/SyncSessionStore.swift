@@ -161,6 +161,7 @@ struct SyncSessionStore {
         // incoming version. The app recreates its content tree after this call.
         container.mainContext.rollback()
         GoalWidgetSnapshot.refresh(in: ModelContext(container))
+        WidgetTodayExpenses.refresh(in: ModelContext(container))
     }
 
     func complete(_ sessionID: UUID) throws {
@@ -265,5 +266,6 @@ enum SyncWriteGate {
         }
         try context.save()
         GoalWidgetSnapshot.refresh(in: context)
+        WidgetTodayExpenses.refresh(in: context)
     }
 }

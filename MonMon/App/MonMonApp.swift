@@ -81,6 +81,7 @@ struct MonMonApp: App {
 
         }
         GoalWidgetSnapshot.refresh(in: modelContainer.mainContext)
+        WidgetTodayExpenses.refresh(in: modelContainer.mainContext)
         #if os(macOS)
             do {
                 let configuration = try MCPRuntimeConfiguration.current()
@@ -184,6 +185,7 @@ struct MonMonApp: App {
                     }
                     syncCoordinator.connectIfPaired()
                     GoalWidgetSnapshot.refresh(in: container.mainContext)
+                    WidgetTodayExpenses.refresh(in: container.mainContext)
                     _ = try? StoreReconciler.reconcile(in: container.mainContext)
                     // Coming back is also the moment a rule can have fallen due
                     // since the app was opened — an app left running overnight

@@ -46,4 +46,20 @@ struct AppRouteTests {
         #expect(!route.receive(url, isLocked: false))
         #expect(route.quickCaptureRequestID == nil)
     }
+
+    @Test("The control's URL is the flavour's own scheme, and the app routes it back")
+    func quickCaptureURLRoundTrips() throws {
+        let url = try #require(
+            AppRoute.quickCaptureURL(in: ["MonMonQuickCaptureURLScheme": "monmon-dev"])
+        )
+
+        #expect(url.absoluteString == "monmon-dev://quick-capture")
+        #expect(AppRoute().receive(url, isLocked: false))
+    }
+
+    @Test("A target that forgot the Info.plist key gets no URL, never the wrong flavour")
+    func quickCaptureURLNeedsTheScheme() {
+        #expect(AppRoute.quickCaptureURL(in: [:]) == nil)
+        #expect(AppRoute.quickCaptureURL(in: ["MonMonQuickCaptureURLScheme": ""]) == nil)
+    }
 }

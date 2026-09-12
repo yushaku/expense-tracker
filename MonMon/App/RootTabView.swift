@@ -65,6 +65,11 @@ struct RootTabView: View {
             selection = .budget
             appRoute.consumeGoalTabRequest()
         }
+        .onChange(of: appRoute.expensesRequestID, initial: true) { _, requestID in
+            guard requestID != nil else { return }
+            selection = .spending
+            appRoute.consumeExpenses()
+        }
         .onChange(of: appRoute.quickCaptureRequestID) { _, requestID in
             guard requestID != nil else {
                 return

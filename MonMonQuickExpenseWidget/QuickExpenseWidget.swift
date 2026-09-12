@@ -5,6 +5,7 @@ struct QuickExpenseEntry: TimelineEntry {
     let date: Date
     let presets: [QuickExpensePreset]
     let feedback: QuickExpenseFeedback?
+    var today: WidgetTodayExpenses? = nil
 }
 
 struct QuickExpenseProvider: TimelineProvider {
@@ -34,11 +35,24 @@ struct QuickExpenseProvider: TimelineProvider {
                 QuickExpenseEntry(
                     date: feedback.expirationDate,
                     presets: entry.presets,
-                    feedback: nil
+                    feedback: nil,
+                    today: WidgetTodayExpensesStore().load(at: feedback.expirationDate)
                 )
             )
         }
-        completion(Timeline(entries: entries, policy: .never))
+        // A dated entry clears yesterday even if the app stays closed overnight.
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Asia/Ho_Chi_Minh") ?? .gmt
+        let tomorrow =
+            calendar.date(
+                byAdding: .day, value: 1, to: calendar.startOfDay(for: entry.date))
+            ?? entry.date.addingTimeInterval(86_400)
+        entries.append(
+            QuickExpenseEntry(
+                date: tomorrow, presets: entry.presets, feedback: nil,
+                today: WidgetTodayExpensesStore().load(at: tomorrow)))
+        completion(
+            Timeline(entries: entries.sorted { $0.date < $1.date }, policy: .after(tomorrow)))
     }
 
     private var currentEntry: QuickExpenseEntry {
@@ -46,7 +60,8 @@ struct QuickExpenseProvider: TimelineProvider {
         return QuickExpenseEntry(
             date: now,
             presets: QuickExpensePresetStore().load().activePresets,
-            feedback: QuickExpenseFeedbackStore().latestSuccess(at: now)
+            feedback: QuickExpenseFeedbackStore().latestSuccess(at: now),
+            today: WidgetTodayExpensesStore().load(at: now)
         )
     }
 }
@@ -57,15 +72,19 @@ struct QuickExpenseWidgetView: View {
     let entry: QuickExpenseEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if family != .systemSmall {
-                Label("Quick Expense", systemImage: "bolt.fill")
-                    .font(.headline)
-                    .foregroundStyle(.tint)
-
-                LazyVGrid(columns: columns, spacing: 8) {
-                    presetButtons
+        Group {
+            if family == .systemLarge {
+                VStack(spacing: 8) {
+                    todayExpenses
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    Rectangle()
+                        .fill(MonMonTheme.border)
+                        .frame(height: 1)
+                    quickExpenseGrid
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
                 }
+            } else if family == .systemMedium {
+                quickExpenseGrid
             } else {
                 VStack(spacing: 5) {
                     presetButtons
@@ -73,8 +92,76 @@ struct QuickExpenseWidgetView: View {
             }
         }
         .containerBackground(for: .widget) {
-            Color(uiColor: .systemBackground)
+            MonMonTheme.canvas
         }
+    }
+
+    private var quickExpenseGrid: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Quick Expense", systemImage: "bolt.fill")
+                .font(.headline)
+                .foregroundStyle(MonMonTheme.accent)
+            LazyVGrid(columns: columns, spacing: family == .systemLarge ? 5 : 8) {
+                presetButtons
+            }
+        }
+    }
+
+    private var expensesURL: URL? {
+        let scheme =
+            Bundle.main.object(forInfoDictionaryKey: "MonMonQuickCaptureURLScheme") as? String
+        return URL(string: "\(scheme ?? "monmon")://expenses")
+    }
+
+    private var todayExpenses: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack {
+                Text("Today’s expenses")
+                    .font(.headline)
+                Spacer(minLength: 4)
+                if let today = entry.today {
+                    Text(VNDCurrency.format(today.total))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(MonMonTheme.accent)
+                        .monospacedDigit()
+                        .minimumScaleFactor(0.7)
+                }
+            }
+            .lineLimit(1)
+            if let today = entry.today {
+                if today.count == 0 {
+                    Text("No expenses today")
+                        .font(.caption)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                } else {
+                    ForEach(today.expenses) { expense in
+                        HStack {
+                            Text(expense.title)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            Text(VNDCurrency.format(expense.amount))
+                                .monospacedDigit()
+                                .fixedSize()
+                        }
+                        .font(.caption)
+                        .lineLimit(1)
+                        .accessibilityElement(children: .combine)
+                    }
+                    if today.count > today.expenses.count, let expensesURL {
+                        Link(destination: expensesURL) {
+                            Text("\(today.count - today.expenses.count) more · Open app")
+                                .font(.caption2)
+                                .foregroundStyle(MonMonTheme.accent)
+                        }
+                    }
+                }
+            } else {
+                Text("Open MonMon to load today’s expenses")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            }
+        }
+        .foregroundStyle(MonMonTheme.textPrimary)
+        .privacySensitive()
     }
 
     @ViewBuilder
@@ -143,11 +230,15 @@ private struct QuickExpenseButton: View {
             }
             .frame(maxWidth: .infinity, minHeight: 38)
             .padding(.horizontal, 6)
-            .background(.secondary.opacity(0.12), in: .rect(cornerRadius: 10))
+            .background(MonMonTheme.surface, in: .rect(cornerRadius: 10))
+            .overlay {
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(MonMonTheme.border, lineWidth: 1)
+            }
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        .foregroundStyle(showsSuccess ? Color.green : Color.primary)
+        .foregroundStyle(showsSuccess ? MonMonTheme.accent : MonMonTheme.textPrimary)
         .invalidatableContent()
         .accessibilityLabel(Text(accessibilityLabel))
     }
@@ -171,13 +262,5 @@ struct MonMonQuickExpenseWidget: Widget {
         .configurationDisplayName("Quick Expense")
         .description("Record one of your configured preset expenses with one tap.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
-    }
-}
-
-@main
-struct MonMonWidgetBundle: WidgetBundle {
-    var body: some Widget {
-        MonMonQuickExpenseWidget()
-        SavingsGoalWidget()
     }
 }
