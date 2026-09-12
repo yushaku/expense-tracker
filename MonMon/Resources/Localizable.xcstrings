@@ -15396,6 +15396,16 @@
           }
         }
       }
+    },
+    "Open MonMon and start a new transaction.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở MonMon và bắt đầu một giao dịch mới."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

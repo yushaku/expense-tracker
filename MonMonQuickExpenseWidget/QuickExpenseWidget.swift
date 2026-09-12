@@ -160,7 +160,6 @@ private struct QuickExpenseButton: View {
     }
 }
 
-@main
 struct MonMonQuickExpenseWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(

@@ -77,6 +77,8 @@
 		U10000000000000000000212 /* BudgetJarEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000112 /* BudgetJarEditorView.swift */; };
 		U10000000000000000000213 /* BudgetJarDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000113 /* BudgetJarDetailView.swift */; };
 		J10000000000000000000201 /* QuickExpenseWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000102 /* QuickExpenseWidget.swift */; };
+		J30000000000000000000201 /* QuickCaptureControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = J30000000000000000000101 /* QuickCaptureControl.swift */; };
+		J30000000000000000000202 /* AppRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = Q10000000000000000000110 /* AppRoute.swift */; };
 		J10000000000000000000202 /* QuickExpensePreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000102 /* QuickExpensePreset.swift */; };
 		J10000000000000000000207 /* QuickExpenseWidgetLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000107 /* QuickExpenseWidgetLayout.swift */; };
 		J10000000000000000000203 /* QuickExpenseIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000103 /* QuickExpenseIntent.swift */; };
@@ -553,6 +555,7 @@
 		J10000000000000000000102 /* QuickExpenseWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpenseWidget.swift; sourceTree = "<group>"; };
 		J10000000000000000000103 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		J10000000000000000000104 /* MonMonQuickExpenseWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MonMonQuickExpenseWidget.entitlements; sourceTree = "<group>"; };
+		J30000000000000000000101 /* QuickCaptureControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickCaptureControl.swift; sourceTree = "<group>"; };
 		W10000000000000000000103 /* QuickExpenseIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpenseIntent.swift; sourceTree = "<group>"; };
 		W10000000000000000000104 /* QuickExpensePresetDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpensePresetDraft.swift; sourceTree = "<group>"; };
 		W10000000000000000000105 /* QuickExpensePresetsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpensePresetsCard.swift; sourceTree = "<group>"; };
@@ -1742,6 +1745,7 @@
 				J10000000000000000000104 /* MonMonQuickExpenseWidget.entitlements */,
 				J10000000000000000000103 /* Info.plist */,
 				J10000000000000000000102 /* QuickExpenseWidget.swift */,
+				J30000000000000000000101 /* QuickCaptureControl.swift */,
 			);
 			path = MonMonQuickExpenseWidget;
 			sourceTree = "<group>";
@@ -1944,6 +1948,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				J10000000000000000000201 /* QuickExpenseWidget.swift in Sources */,
+				J30000000000000000000201 /* QuickCaptureControl.swift in Sources */,
+				J30000000000000000000202 /* AppRoute.swift in Sources */,
 				J10000000000000000000202 /* QuickExpensePreset.swift in Sources */,
 				J10000000000000000000207 /* QuickExpenseWidgetLayout.swift in Sources */,
 				J10000000000000000000203 /* QuickExpenseIntent.swift in Sources */,
