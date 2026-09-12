@@ -36,6 +36,7 @@ struct TripDetailView: View {
     @State private var editorMode: TransactionEditorMode?
     @State private var goalEditorMode: GoalEditorMode?
     @State private var confirmation: TripLifecycleConfirmation?
+    @State private var transactionActions = TransactionActions()
     @State private var saveErrorMessage: LocalizedStringKey?
 
     var body: some View {
@@ -49,7 +50,6 @@ struct TripDetailView: View {
                 categories: categories,
                 accounts: accounts,
                 onAddExpense: { editorMode = .addToTrip(workspace) },
-                onEditTransaction: { editorMode = .edit($0) },
                 onComplete: { confirmation = .complete },
                 onReopen: reopen,
                 onCancel: { confirmation = .cancel },
@@ -70,6 +70,12 @@ struct TripDetailView: View {
         .appSheet(item: $editorMode) { mode in
             TransactionEditorView(mode: mode)
         }
+        .transactionActions(
+            transactionActions,
+            category: category(for:),
+            account: account(for:),
+            onEdit: { editorMode = .edit($0) }
+        )
         .appSheet(item: $goalEditorMode) { mode in
             GoalEditorView(mode: mode, capacityByJar: goalCapacityByJar, asOf: asOf)
         }
@@ -94,6 +100,14 @@ struct TripDetailView: View {
 
     private var sourceGoal: FinancialGoal? {
         workspace.sourceGoalID.flatMap { goalID in goals.first { $0.id == goalID } }
+    }
+
+    private func category(for transaction: MoneyTransaction) -> TransactionCategory? {
+        transaction.categoryID.flatMap { categoryID in categories.first { $0.id == categoryID } }
+    }
+
+    private func account(for transaction: MoneyTransaction) -> CashAccount? {
+        accounts.first { $0.id == transaction.accountID }
     }
 
     private var goalCapacityByJar: [UUID: Decimal] {
@@ -169,10 +183,9 @@ private struct TripDetailContent: View {
     let workspace: TripWorkspace
     let snapshot: TripSummarySnapshot
     let linkedTransactions: [MoneyTransaction]
-    let categoriesByID: [UUID: TransactionCategory]
-    let accountsByID: [UUID: CashAccount]
+    let categories: [TransactionCategory]
+    let accounts: [CashAccount]
     let onAddExpense: () -> Void
-    let onEditTransaction: (MoneyTransaction) -> Void
     let onComplete: () -> Void
     let onReopen: () -> Void
     let onCancel: () -> Void
@@ -184,7 +197,6 @@ private struct TripDetailContent: View {
         categories: [TransactionCategory],
         accounts: [CashAccount],
         onAddExpense: @escaping () -> Void,
-        onEditTransaction: @escaping (MoneyTransaction) -> Void,
         onComplete: @escaping () -> Void,
         onReopen: @escaping () -> Void,
         onCancel: @escaping () -> Void,
@@ -200,10 +212,9 @@ private struct TripDetailContent: View {
             workspaceID: workspace.id,
             in: transactions
         )
-        categoriesByID = Dictionary(firstWins: categories.map { ($0.id, $0) })
-        accountsByID = Dictionary(firstWins: accounts.map { ($0.id, $0) })
+        self.categories = categories
+        self.accounts = accounts
         self.onAddExpense = onAddExpense
-        self.onEditTransaction = onEditTransaction
         self.onComplete = onComplete
         self.onReopen = onReopen
         self.onCancel = onCancel
@@ -227,13 +238,21 @@ private struct TripDetailContent: View {
                         "Food, accommodation, transport, and other spending will appear here."
                 )
 
-                TripTransactionSection(
+                TransactionListSection(
+                    title: "Trip expenses",
                     transactions: linkedTransactions,
-                    categoriesByID: categoriesByID,
-                    accountsByID: accountsByID,
-                    onAddExpense: workspace.status == .active ? onAddExpense : nil,
-                    onEdit: onEditTransaction
-                )
+                    categories: categories,
+                    accounts: accounts,
+                    emptyNotice: "Record an expense and keep its normal category.",
+                    accessibilityIdentifierPrefix: "trip-expense",
+                    showsCount: true
+                ) {
+                    if workspace.status == .active {
+                        Button("Add expense", systemImage: "plus", action: onAddExpense)
+                            .font(.subheadline.weight(.semibold))
+                            .accessibilityIdentifier("trip-add-expense")
+                    }
+                }
 
                 TripLifecycleSection(
                     status: workspace.status,
@@ -303,56 +322,6 @@ private struct TripSummarySection: View {
 
     private var tint: Color {
         CategoryPalette.color(named: workspace.colorName)
-    }
-}
-
-private struct TripTransactionSection: View {
-    let transactions: [MoneyTransaction]
-    let categoriesByID: [UUID: TransactionCategory]
-    let accountsByID: [UUID: CashAccount]
-    let onAddExpense: (() -> Void)?
-    let onEdit: (MoneyTransaction) -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Trip expenses")
-                    .font(.title3.weight(.semibold))
-
-                Spacer(minLength: 12)
-
-                if let onAddExpense {
-                    Button("Add expense", systemImage: "plus", action: onAddExpense)
-                        .font(.subheadline.weight(.semibold))
-                        .accessibilityIdentifier("trip-add-expense")
-                }
-            }
-
-            if transactions.isEmpty {
-                ContentUnavailableView(
-                    "No trip expenses",
-                    systemImage: "receipt",
-                    description: Text("Record an expense and keep its normal category.")
-                )
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
-                .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 16))
-            } else {
-                ForEach(transactions) { transaction in
-                    Button {
-                        onEdit(transaction)
-                    } label: {
-                        TransactionCard(
-                            transaction: transaction,
-                            category: transaction.categoryID.flatMap { categoriesByID[$0] },
-                            account: accountsByID[transaction.accountID]
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityHint("Opens this trip expense for editing")
-                }
-            }
-        }
     }
 }
 
