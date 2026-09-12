@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		J20000000000000000000201 /* WidgetTodayExpenses.swift in Sources */ = {isa = PBXBuildFile; fileRef = J20000000000000000000101 /* WidgetTodayExpenses.swift */; };
+		J20000000000000000000202 /* WidgetTodayExpenses.swift in Sources */ = {isa = PBXBuildFile; fileRef = J20000000000000000000101 /* WidgetTodayExpenses.swift */; };
+
 		N10000000000000000000201 /* NotificationPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000101 /* NotificationPreferences.swift */; };
 		N10000000000000000000202 /* NotificationPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000102 /* NotificationPlan.swift */; };
 		N10000000000000000000203 /* NotificationCenterClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000103 /* NotificationCenterClient.swift */; };
@@ -487,6 +490,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		J20000000000000000000101 /* WidgetTodayExpenses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetTodayExpenses.swift; sourceTree = "<group>"; };
 		N10000000000000000000101 /* NotificationPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPreferences.swift; sourceTree = "<group>"; };
 		N10000000000000000000102 /* NotificationPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPlan.swift; sourceTree = "<group>"; };
 		N10000000000000000000103 /* NotificationCenterClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterClient.swift; sourceTree = "<group>"; };
@@ -1059,6 +1063,7 @@
 				W10000000000000000000106 /* QuickExpensePresetEditor.swift */,
 				W10000000000000000000102 /* QuickExpensePreset.swift */,
 				W10000000000000000000107 /* QuickExpenseWidgetLayout.swift */,
+				J20000000000000000000101 /* WidgetTodayExpenses.swift */,
 			);
 			path = QuickExpense;
 			sourceTree = "<group>";
@@ -1950,6 +1955,7 @@
 				J10000000000000000000209 /* AppTheme.swift in Sources */,
 				J10000000000000000000202 /* QuickExpensePreset.swift in Sources */,
 				J10000000000000000000207 /* QuickExpenseWidgetLayout.swift in Sources */,
+				J20000000000000000000202 /* WidgetTodayExpenses.swift in Sources */,
 				J10000000000000000000203 /* QuickExpenseIntent.swift in Sources */,
 				J10000000000000000000204 /* VNDCurrency.swift in Sources */,
 			);
@@ -2014,6 +2020,7 @@
 				W10000000000000000000203 /* QuickExpenseIntent.swift in Sources */,
 				W10000000000000000000202 /* QuickExpensePreset.swift in Sources */,
 				W10000000000000000000207 /* QuickExpenseWidgetLayout.swift in Sources */,
+				J20000000000000000000201 /* WidgetTodayExpenses.swift in Sources */,
 				K10000000000000000000210 /* MonMonBackupDocument.swift in Sources */,
 				K10000000000000000000212 /* MonMonBackupValidator.swift in Sources */,
 				K10000000000000000000214 /* MonMonBackupService.swift in Sources */,

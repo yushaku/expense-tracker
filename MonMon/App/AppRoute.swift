@@ -5,6 +5,7 @@ import Observation
 @Observable
 final class AppRoute {
     private(set) var quickCaptureRequestID: UUID?
+    private(set) var expensesRequestID: UUID?
     private var hasQueuedQuickCapture = false
 
     func requestQuickCapture(isLocked: Bool) {
@@ -17,6 +18,10 @@ final class AppRoute {
 
     @discardableResult
     func receive(_ url: URL, isLocked: Bool) -> Bool {
+        if url.host == "expenses" {
+            expensesRequestID = UUID()
+            return true
+        }
         guard Self.isQuickCaptureURL(url) else {
             return false
         }
@@ -32,6 +37,10 @@ final class AppRoute {
 
         hasQueuedQuickCapture = false
         quickCaptureRequestID = UUID()
+    }
+
+    func consumeExpenses() {
+        expensesRequestID = nil
     }
 
     func consumeQuickCapture() {
