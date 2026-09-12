@@ -76,6 +76,8 @@
 		U10000000000000000000211 /* BudgetConfigurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000111 /* BudgetConfigurationView.swift */; };
 		U10000000000000000000212 /* BudgetJarEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000112 /* BudgetJarEditorView.swift */; };
 		U10000000000000000000213 /* BudgetJarDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = U10000000000000000000113 /* BudgetJarDetailView.swift */; };
+		J10000000000000000000208 /* MonMonTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000127 /* MonMonTheme.swift */; };
+		J10000000000000000000209 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000187 /* AppTheme.swift */; };
 		J10000000000000000000201 /* QuickExpenseWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000102 /* QuickExpenseWidget.swift */; };
 		J10000000000000000000202 /* QuickExpensePreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000102 /* QuickExpensePreset.swift */; };
 		J10000000000000000000207 /* QuickExpenseWidgetLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000107 /* QuickExpenseWidgetLayout.swift */; };
@@ -1944,6 +1946,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				J10000000000000000000201 /* QuickExpenseWidget.swift in Sources */,
+				J10000000000000000000208 /* MonMonTheme.swift in Sources */,
+				J10000000000000000000209 /* AppTheme.swift in Sources */,
 				J10000000000000000000202 /* QuickExpensePreset.swift in Sources */,
 				J10000000000000000000207 /* QuickExpenseWidgetLayout.swift in Sources */,
 				J10000000000000000000203 /* QuickExpenseIntent.swift in Sources */,

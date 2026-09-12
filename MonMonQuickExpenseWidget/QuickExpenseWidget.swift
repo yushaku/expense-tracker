@@ -61,7 +61,7 @@ struct QuickExpenseWidgetView: View {
             if family != .systemSmall {
                 Label("Quick Expense", systemImage: "bolt.fill")
                     .font(.headline)
-                    .foregroundStyle(.tint)
+                    .foregroundStyle(MonMonTheme.accent)
 
                 LazyVGrid(columns: columns, spacing: 8) {
                     presetButtons
@@ -73,7 +73,7 @@ struct QuickExpenseWidgetView: View {
             }
         }
         .containerBackground(for: .widget) {
-            Color(uiColor: .systemBackground)
+            MonMonTheme.canvas
         }
     }
 
@@ -143,11 +143,15 @@ private struct QuickExpenseButton: View {
             }
             .frame(maxWidth: .infinity, minHeight: 38)
             .padding(.horizontal, 6)
-            .background(.secondary.opacity(0.12), in: .rect(cornerRadius: 10))
+            .background(MonMonTheme.surface, in: .rect(cornerRadius: 10))
+            .overlay {
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(MonMonTheme.border, lineWidth: 1)
+            }
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        .foregroundStyle(showsSuccess ? Color.green : Color.primary)
+        .foregroundStyle(showsSuccess ? MonMonTheme.accent : MonMonTheme.textPrimary)
         .invalidatableContent()
         .accessibilityLabel(Text(accessibilityLabel))
     }
