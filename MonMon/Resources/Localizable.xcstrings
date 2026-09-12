@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "iPhone versions are selected by default. You can change any selection.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mặc định chọn phiên bản iPhone. Bạn có thể thay đổi từng lựa chọn."
+          }
+        }
+      }
+    },
     "About device sync": {
       "localizations": {
         "vi": {

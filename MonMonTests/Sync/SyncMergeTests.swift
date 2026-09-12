@@ -8,6 +8,22 @@ struct SyncMergeTests {
     private let first = UUID(uuid: (16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1))
     private let second = UUID(uuid: (16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2))
 
+    @Test("Preferred device can select absence, while ambiguous duplicates stay unselected")
+    func preferredDeviceChoices() {
+        let a = record(first)
+        let deletion = SyncConflict(
+            id: "deletion", options: [a, nil], origins: ["This device", "Other device"])
+        let duplicate = SyncConflict(
+            id: "duplicates", options: [a, a, a],
+            origins: ["This device", "Other device", "Other device"])
+        let parent = SyncConflict(
+            id: "parent", options: [a, nil],
+            origins: ["Keep referenced item", "Delete / keep absent"])
+        let plan = SyncMergePlan(
+            automatic: [], conflicts: [deletion, duplicate, parent], deletedSeeds: [], aliases: [:])
+        #expect(plan.preferredChoices(origin: "Other device") == ["deletion": 1])
+    }
+
     @Test("Review amounts use grouping without rounding away differences or changing identifiers")
     func readableReviewNumbers() {
         let locale = Locale(identifier: "en_US")

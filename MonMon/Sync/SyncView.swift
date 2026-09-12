@@ -195,6 +195,8 @@ struct SyncView: View {
         VStack(alignment: .leading, spacing: 16) {
             if let plan = sync.plan {
                 if !plan.conflicts.isEmpty {
+                    Text("iPhone versions are selected by default. You can change any selection.")
+                        .font(.callout).foregroundStyle(.secondary)
                     HStack {
                         Text("Choose versions").font(.headline)
                         Spacer()

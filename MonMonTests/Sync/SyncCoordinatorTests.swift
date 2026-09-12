@@ -29,6 +29,9 @@ struct SyncCoordinatorTests {
         let container = try ModelContainer(
             for: Schema(MonMonSchema.models),
             configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        // Each fixture is a new store. A prior fixture can leave a write-gate
+        // identifier behind that this allocation reuses.
+        SyncWriteGate.unlock(container)
         container.mainContext.autosaveEnabled = false
         AccountSeed.ensureUnassignedExists(in: container.mainContext)
         return SyncSessionStore(
@@ -107,6 +110,50 @@ struct SyncCoordinatorTests {
         try drain(ta, tb)
         #expect(try a.state().reports.count == 2)
         #expect(try b.state().reports.count == 2)
+    }
+
+    @Test(
+        "Conflicts prefer iPhone regardless of the initiator and remain editable",
+        arguments: [false, true])
+    func prefersPhoneVersion(phoneInitiates: Bool) throws {
+        let a = try store(), b = try store()
+        let pair = try SyncPairing.make(hostID: a.state().deviceID)
+        try a.updateState { $0.pairID = pair.pairID }
+        try b.updateState { $0.pairID = pair.pairID }
+        let macAccount = try #require(
+            a.container.mainContext.fetch(FetchDescriptor<CashAccount>()).first)
+        let phoneAccount = try #require(
+            b.container.mainContext.fetch(FetchDescriptor<CashAccount>()).first)
+        macAccount.name = "Mac version"
+        phoneAccount.name = "iPhone version"
+        try a.container.mainContext.save()
+        try b.container.mainContext.save()
+        let ta = TestSyncTransport(), tb = TestSyncTransport()
+        let ca = SyncCoordinator(store: a, transport: ta, loadPairing: { _ in pair })
+        let cb = SyncCoordinator(store: b, transport: tb, loadPairing: { _ in pair })
+        try connect(ca, cb, ta, tb)
+        let initiator = phoneInitiates ? cb : ca
+        let responder = phoneInitiates ? ca : cb
+        initiator.startSync()
+        try drain(ta, tb)
+        let conflict = try #require(initiator.plan?.conflicts.first)
+        let preferred = try #require(initiator.choices[conflict.id])
+        #expect(conflict.options[preferred]?.fields["name"] == .string("iPhone version"))
+        #expect(initiator.canApply)
+        #expect(try a.state().pending == nil && b.state().pending == nil)
+        let macIndex = try #require(
+            conflict.options.firstIndex { $0?.fields["name"] == .string("Mac version") })
+        initiator.choices[conflict.id] = macIndex
+        initiator.updatePreview()
+        initiator.apply()
+        try drain(ta, tb)
+        #expect(responder.canApply)
+        #expect(phoneAccount.name == "iPhone version")
+        responder.apply()
+        try drain(ta, tb)
+        #expect(ca.phase == .complete && cb.phase == .complete)
+        #expect(try a.snapshot().records.first?.fields["name"] == .string("Mac version"))
+        #expect(try a.snapshot().digest() == b.snapshot().digest())
     }
 
     @Test(

@@ -27,6 +27,16 @@ struct SyncMergePlan: Sendable {
     var aliases: [String: String]
     var sourceRecords: [SyncRecord] = []
 
+    func preferredChoices(origin: String) -> [String: Int] {
+        var choices: [String: Int] = [:]
+        for conflict in conflicts {
+            let candidates = conflict.origins.indices.filter { conflict.origins[$0] == origin }
+            // Multiple versions on one device still need an explicit choice.
+            if candidates.count == 1 { choices[conflict.id] = candidates[0] }
+        }
+        return choices
+    }
+
     func resolved(_ choices: [String: Int]) throws -> SyncSnapshot {
         var result = automatic
         var tombstones = deletedSeeds

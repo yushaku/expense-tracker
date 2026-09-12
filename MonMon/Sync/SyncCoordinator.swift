@@ -316,7 +316,11 @@ final class SyncCoordinator {
                 let baseline = state.commonBaselineValid ? state.baseline : nil
                 plan = try SyncMergePlanner.plan(
                     base: baseline, local: localSnapshot, remote: snapshot)
-                choices = [:]
+                // The Mac creates the pairing as host; the iPhone joins it.
+                // Resolve provenance relative to the initiator, not its display name.
+                guard let pair else { throw SyncError.notPaired }
+                let phoneOrigin = state.deviceID == pair.hostID ? "Other device" : "This device"
+                choices = plan?.preferredChoices(origin: phoneOrigin) ?? [:]
                 phase = .review
                 stageTimeout?.cancel()
                 updatePreview()
