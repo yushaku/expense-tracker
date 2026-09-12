@@ -5,6 +5,9 @@ import Observation
 @Observable
 final class AppRoute {
     private(set) var quickCaptureRequestID: UUID?
+    private(set) var goalRequestID: UUID?
+    private(set) var goalRequestRevision: UUID?
+    private var queuedGoalID: UUID?
     private(set) var expensesRequestID: UUID?
     private var hasQueuedQuickCapture = false
 
@@ -18,6 +21,15 @@ final class AppRoute {
 
     @discardableResult
     func receive(_ url: URL, isLocked: Bool) -> Bool {
+        if url.host == "goal", let id = UUID(uuidString: url.lastPathComponent) {
+            if isLocked {
+                queuedGoalID = id
+            } else {
+                goalRequestID = id
+                goalRequestRevision = UUID()
+            }
+            return true
+        }
         if url.host == "expenses" {
             expensesRequestID = UUID()
             return true
@@ -31,6 +43,11 @@ final class AppRoute {
     }
 
     func releaseQueuedQuickCapture(isLocked: Bool) {
+        if !isLocked, let id = queuedGoalID {
+            goalRequestID = id
+            goalRequestRevision = UUID()
+            queuedGoalID = nil
+        }
         guard hasQueuedQuickCapture, !isLocked else {
             return
         }
@@ -39,6 +56,8 @@ final class AppRoute {
         quickCaptureRequestID = UUID()
     }
 
+    func consumeGoal() { goalRequestID = nil }
+    func consumeGoalTabRequest() { goalRequestRevision = nil }
     func consumeExpenses() {
         expensesRequestID = nil
     }

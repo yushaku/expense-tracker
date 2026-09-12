@@ -80,6 +80,7 @@ struct MonMonApp: App {
             }
 
         }
+        GoalWidgetSnapshot.refresh(in: modelContainer.mainContext)
         WidgetTodayExpenses.refresh(in: modelContainer.mainContext)
         #if os(macOS)
             do {
@@ -183,6 +184,7 @@ struct MonMonApp: App {
                         return
                     }
                     syncCoordinator.connectIfPaired()
+                    GoalWidgetSnapshot.refresh(in: container.mainContext)
                     WidgetTodayExpenses.refresh(in: container.mainContext)
                     _ = try? StoreReconciler.reconcile(in: container.mainContext)
                     // Coming back is also the moment a rule can have fallen due

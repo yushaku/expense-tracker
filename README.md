@@ -44,6 +44,11 @@ MonMon is a private personal-finance app for iPhone and Mac, built with SwiftUI 
 ### Capture without typing
 
 - **Natural-language entry** — type a sentence in Add Transaction to fill the form before saving. The Record Transaction Siri shortcut saves a clean parse directly and stages incomplete entries for review.
+- **Savings-goal widget** — choose one goal per Small or Medium widget. Shows
+  earmarked progress, remaining money, and the next 25/50/75/100% milestone in
+  Catppuccin colours. Tap to open the goal; unlock the app first when required.
+  Open the app once to publish goals, then choose one in Edit Widget. Completed
+  goals stay pinned; deleted or archived goals require a new selection.
 - **Quick-expense widget** — configurable one-tap presets on the Home Screen, with
   the app’s Catppuccin palette. The large size shows today’s total and five latest
   expenses above up to nine quick buttons; overflow opens Transactions in the app.

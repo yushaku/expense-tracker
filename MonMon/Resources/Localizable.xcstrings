@@ -1,6 +1,86 @@
 {
   "sourceLanguage": "en",
   "strings": {
+  "Savings goal": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Mục tiêu tiết kiệm"
+        }
+      }
+    }
+  },
+  "Choose the goal you want to keep in sight.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Chọn mục tiêu bạn muốn theo dõi."
+        }
+      }
+    }
+  },
+  "Choose a savings goal": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Chọn mục tiêu tiết kiệm"
+        }
+      }
+    }
+  },
+  "Open MonMon to refresh goals, then choose one in Edit Widget.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Mở MonMon để cập nhật mục tiêu, rồi chọn trong Sửa Widget."
+        }
+      }
+    }
+  },
+  "Goal reached": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Đã đạt mục tiêu"
+        }
+      }
+    }
+  },
+  "%@ to go": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Còn %@"
+        }
+      }
+    }
+  },
+  "%@ to reach %lld%%": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Còn %@ để đạt mốc %lld%%"
+        }
+      }
+    }
+  },
+  "Keep your goal and next milestone in sight.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Theo dõi mục tiêu và cột mốc tiếp theo."
+        }
+      }
+    }
+  },
   "Today’s expenses": {
     "localizations": {
       "vi": {

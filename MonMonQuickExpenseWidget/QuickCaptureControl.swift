@@ -38,5 +38,6 @@ struct MonMonWidgets: WidgetBundle {
     var body: some Widget {
         MonMonQuickExpenseWidget()
         QuickCaptureControl()
+        SavingsGoalWidget()
     }
 }
