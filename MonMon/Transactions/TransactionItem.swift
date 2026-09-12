@@ -65,7 +65,7 @@ enum TransactionDeletion {
         context.delete(transaction)
 
         do {
-            try context.save()
+            try SyncWriteGate.save(context)
             return deleted
         } catch {
             context.rollback()
@@ -83,7 +83,7 @@ enum TransactionDeletion {
         context.insert(transaction)
 
         do {
-            try context.save()
+            try SyncWriteGate.save(context)
             return transaction
         } catch {
             context.rollback()

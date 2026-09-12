@@ -119,7 +119,7 @@ struct TransactionCaptureService {
                 disposition = .pendingReview
             }
 
-            try context.save()
+            try SyncWriteGate.save(context)
             return TransactionCaptureCommitResult(id: id, disposition: disposition)
         } catch let error as TransactionCaptureServiceError {
             context.rollback()

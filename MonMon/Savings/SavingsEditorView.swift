@@ -221,7 +221,7 @@ struct SavingsEditorView: View {
         }
 
         do {
-            try modelContext.save()
+            try SyncWriteGate.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()
@@ -239,7 +239,7 @@ struct SavingsEditorView: View {
         modelContext.delete(editedDeposit)
 
         do {
-            try modelContext.save()
+            try SyncWriteGate.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()

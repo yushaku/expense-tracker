@@ -33,6 +33,6 @@ enum BudgetJarStore {
         }
 
         context.delete(jar)
-        try context.save()
+        try SyncWriteGate.save(context)
     }
 }

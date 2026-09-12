@@ -442,7 +442,7 @@ struct FundSaleEditorView: View {
         }
 
         do {
-            try modelContext.save()
+            try SyncWriteGate.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()
@@ -507,7 +507,7 @@ struct FundSaleEditorView: View {
         modelContext.delete(editedSale)
 
         do {
-            try modelContext.save()
+            try SyncWriteGate.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()

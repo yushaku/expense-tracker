@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>MonMon connects directly to your paired device to sync data you review.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Scan the pairing code displayed by MonMon on your Mac.</string>
+    <key>NSBonjourServices</key>
+    <array><string>_monmon-dev._tcp</string><string>_monmon._tcp</string></array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

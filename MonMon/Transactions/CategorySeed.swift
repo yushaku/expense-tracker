@@ -156,15 +156,18 @@ enum CategorySeed {
         createdAt: Date = .now,
         locale: Locale = AppLanguage.stored.locale
     ) {
-        let existing = (try? context.fetchCount(FetchDescriptor<TransactionCategory>())) ?? 0
-        guard existing == 0 else {
-            return
+        do {
+            guard try !SeedState.isInitialized("categories", in: context) else { return }
+            let existing = try context.fetchCount(FetchDescriptor<TransactionCategory>())
+            if existing == 0 {
+                for category in makeCategories(createdAt: createdAt, locale: locale) {
+                    context.insert(category)
+                }
+            }
+            try SeedState.mark("categories", in: context)
+            try SyncWriteGate.save(context)
+        } catch {
+            context.rollback()
         }
-
-        for category in makeCategories(createdAt: createdAt, locale: locale) {
-            context.insert(category)
-        }
-
-        try? context.save()
     }
 }

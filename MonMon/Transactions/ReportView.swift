@@ -204,6 +204,13 @@ struct ReportView: View {
                 )
                 .accessibilityIdentifier("report-overview")
 
+                if let highlights = ReportHighlights(
+                    query: query, transactions: transactions,
+                    categoryNames: categoryNames, accountNames: accountNames, asOf: .now
+                ) {
+                    ReportHighlightsCard(highlights: highlights)
+                }
+
                 if visibility.showsCalendar {
                     TransactionCalendarCard(
                         month: calendarMonth,

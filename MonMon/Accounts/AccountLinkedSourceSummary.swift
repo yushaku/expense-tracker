@@ -81,7 +81,7 @@ enum AccountMerge {
         _ = apply(from: source, to: destination, in: context)
         destination.openingBalance += source.openingBalance
         context.delete(source)
-        try context.save()
+        try SyncWriteGate.save(context)
     }
 
     /// Counts when `destination` is `nil` and rewrites when it is not, so the

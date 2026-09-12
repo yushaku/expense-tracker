@@ -60,6 +60,16 @@ struct RootTabView: View {
                 nativeTabs
             #endif
         }
+        .onChange(of: appRoute.goalRequestRevision, initial: true) { _, id in
+            guard id != nil else { return }
+            selection = .budget
+            appRoute.consumeGoalTabRequest()
+        }
+        .onChange(of: appRoute.expensesRequestID, initial: true) { _, requestID in
+            guard requestID != nil else { return }
+            selection = .spending
+            appRoute.consumeExpenses()
+        }
         .onChange(of: appRoute.quickCaptureRequestID) { _, requestID in
             guard requestID != nil else {
                 return
@@ -196,7 +206,9 @@ struct RootTabView: View {
 /// Keeps Settings one tap away from each root screen without taking a tab slot.
 private struct RootScreenHeader: ViewModifier {
     let title: LocalizedStringKey
+    @Environment(SyncCoordinator.self) private var syncCoordinator
     @State private var isShowingSettings = false
+    @State private var opensSyncAfterSettings = false
 
     private var placement: ToolbarItemPlacement {
         #if os(iOS)
@@ -217,8 +229,20 @@ private struct RootScreenHeader: ViewModifier {
                     headerItem
                 }
             }
-            .appSheet(isPresented: $isShowingSettings) {
-                SettingsView()
+            .appSheet(
+                isPresented: $isShowingSettings,
+                onDismiss: {
+                    guard opensSyncAfterSettings else { return }
+                    opensSyncAfterSettings = false
+                    // The root can present Sync only after the Settings sheet is gone.
+                    syncCoordinator.refresh()
+                    syncCoordinator.isPresented = true
+                }
+            ) {
+                SettingsView {
+                    opensSyncAfterSettings = true
+                    isShowingSettings = false
+                }
             }
     }
 

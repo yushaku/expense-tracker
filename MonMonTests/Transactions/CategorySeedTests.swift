@@ -67,4 +67,16 @@ struct CategorySeedTests {
 
         #expect(resolved == CategorySeed.defaultID(for: .expense))
     }
+    @Test("Deleting every category does not recreate the seed after reopening")
+    func deletingAllDoesNotReseed() throws {
+        let context = try makeContext()
+        CategorySeed.seedIfEmpty(in: context)
+        for category in try context.fetch(FetchDescriptor<TransactionCategory>()) {
+            context.delete(category)
+        }
+        try context.save()
+        CategorySeed.seedIfEmpty(in: context)
+        #expect(try context.fetchCount(FetchDescriptor<TransactionCategory>()) == 0)
+    }
+
 }

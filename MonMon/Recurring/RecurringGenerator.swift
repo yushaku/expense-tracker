@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 import SwiftData
 
@@ -77,7 +78,7 @@ enum RecurringGenerator {
                 written.insert(key)
 
                 let transaction = MoneyTransaction(
-                    id: UUID(),
+                    id: occurrenceID(ruleID: rule.id, occurredAt: occurredAt),
                     kind: rule.kind,
                     amount: rule.amount,
                     occurredAt: occurredAt,
@@ -114,16 +115,30 @@ enum RecurringGenerator {
         // dates were all already present wrote no transaction and still moved
         // its `lastGeneratedAt`.
         if context.hasChanges {
-            try context.save()
+            try SyncWriteGate.save(context)
         }
 
         return report
     }
 
     /// One rule, one day. The pair `StoreReconciler` folds duplicates on.
-    static func key(ruleID: UUID, occurredAt: Date) -> String {
+    nonisolated static func key(ruleID: UUID, occurredAt: Date) -> String {
         let day = RecurrenceSchedule.calendar.startOfDay(for: occurredAt)
         return "\(ruleID.uuidString)|\(day.timeIntervalSince1970)"
+    }
+
+    nonisolated static func occurrenceID(ruleID: UUID, occurredAt: Date) -> UUID {
+        var bytes = Array(
+            SHA256.hash(
+                data: Data(("monmon/recurring/" + key(ruleID: ruleID, occurredAt: occurredAt)).utf8)
+            ).prefix(16))
+        bytes[6] = (bytes[6] & 0x0f) | 0x80
+        bytes[8] = (bytes[8] & 0x3f) | 0x80
+        return UUID(
+            uuid: (
+                bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
+                bytes[8], bytes[9], bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15]
+            ))
     }
 
     private static func existingKeys(in transactions: [MoneyTransaction]) -> Set<String> {

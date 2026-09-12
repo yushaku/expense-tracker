@@ -18,6 +18,8 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>MonMonQuickCaptureURLScheme</key>
+	<string>$(QUICK_CAPTURE_URL_SCHEME)</string>
 	<key>MonMonAppGroupIdentifier</key>
 	<string>$(APP_GROUP_ID)</string>
 	<key>NSExtension</key>

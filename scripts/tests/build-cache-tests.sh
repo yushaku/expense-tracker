@@ -19,7 +19,7 @@ EOF
 cat >"$test_root/bin/git" <<'EOF'
 #!/usr/bin/env bash
 case "$*" in
-  "rev-parse --abbrev-ref HEAD") printf 'main\n' ;;
+  "rev-parse --abbrev-ref HEAD") printf '%s\n' "${MONMON_TEST_GIT_BRANCH:-main}" ;;
   "status --porcelain" | "fetch --quiet origin main") ;;
   *) printf 'fixture-head\n' ;;
 esac
@@ -30,11 +30,14 @@ check_path() {
   local script="$1" argument="$2" expected="$3"
   shift 3
   local status=0
+  local branch="main"
+  [[ "$script" != run-iphone.sh ]] || branch="dev"
   (
     cd "$test_root"
     env -u MONMON_DERIVED_DATA_PATH -u MONMON_MAC_DERIVED_DATA_PATH \
       -u MONMON_PROD_DERIVED_DATA_PATH -u MONMON_PROD_OUTPUT_DIR \
       PATH="$test_root/bin:/usr/bin:/bin" \
+      MONMON_TEST_GIT_BRANCH="$branch" \
       MONMON_TEST_COMMAND_LOG="$test_root/command.log" "$@" \
       bash "$fixture/scripts/$script" "$argument"
   ) || status=$?

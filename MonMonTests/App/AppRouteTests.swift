@@ -46,4 +46,33 @@ struct AppRouteTests {
         #expect(!route.receive(url, isLocked: false))
         #expect(route.quickCaptureRequestID == nil)
     }
+
+    @Test("The control's URL is the flavour's own scheme, and the app routes it back")
+    func quickCaptureURLRoundTrips() throws {
+        let url = try #require(
+            AppRoute.quickCaptureURL(in: ["MonMonQuickCaptureURLScheme": "monmon-dev"])
+        )
+
+        #expect(url.absoluteString == "monmon-dev://quick-capture")
+        #expect(AppRoute().receive(url, isLocked: false))
+    }
+
+    /// The control shipped once with a bare `OpenURLIntent` as its action. It
+    /// compiled, the suite passed, and tapping the control did nothing: an
+    /// action that does not ask for the foreground runs in the widget process.
+    /// These are the two flags that ask, one per OS range.
+    @Test("The control's intent asks for the foreground, or tapping it opens nothing")
+    func controlIntentOpensTheApp() {
+        #expect(OpenQuickCaptureIntent.openAppWhenRun)
+
+        if #available(iOS 26.0, macOS 26.0, *) {
+            #expect(OpenQuickCaptureIntent.supportedModes.contains(.foreground))
+        }
+    }
+
+    @Test("A target that forgot the Info.plist key gets no URL, never the wrong flavour")
+    func quickCaptureURLNeedsTheScheme() {
+        #expect(AppRoute.quickCaptureURL(in: [:]) == nil)
+        #expect(AppRoute.quickCaptureURL(in: ["MonMonQuickCaptureURLScheme": ""]) == nil)
+    }
 }

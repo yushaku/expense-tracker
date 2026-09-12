@@ -200,7 +200,7 @@ struct RecurringEditorView: View {
         }
 
         do {
-            try modelContext.save()
+            try SyncWriteGate.save(modelContext)
             // Saved first, so a rule that fails to write records nothing. What
             // it owes is recorded now rather than at the next launch, because a
             // rule the owner just wrote should show its entries straight away.
@@ -224,7 +224,7 @@ struct RecurringEditorView: View {
         modelContext.delete(editedRule)
 
         do {
-            try modelContext.save()
+            try SyncWriteGate.save(modelContext)
             reconcileNotifications()
             dismiss()
         } catch {

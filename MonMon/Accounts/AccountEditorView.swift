@@ -245,7 +245,7 @@ struct AccountEditorView: View {
         }
 
         do {
-            try modelContext.save()
+            try SyncWriteGate.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()
@@ -269,7 +269,7 @@ struct AccountEditorView: View {
                 )
             } else {
                 modelContext.delete(editedAccount)
-                try modelContext.save()
+                try SyncWriteGate.save(modelContext)
             }
             dismiss()
         } catch {

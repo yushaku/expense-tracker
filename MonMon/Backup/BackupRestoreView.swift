@@ -229,7 +229,7 @@ struct BackupRestoreView: View {
             await Task.yield()
             defer { isWorking = false }
             do {
-                try modelContext.save()
+                try SyncWriteGate.save(modelContext)
                 let now = Date.now
                 exportDocument = MonMonBackupFileDocument(
                     data: try service.exportData(exportedAt: now))
@@ -320,7 +320,7 @@ struct BackupRestoreView: View {
             }
 
             do {
-                try modelContext.save()
+                try SyncWriteGate.save(modelContext)
                 _ = try service.restore(selection.validated)
                 hasRecovery = true
                 self.selection = nil

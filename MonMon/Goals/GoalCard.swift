@@ -527,7 +527,7 @@ private struct GoalArchiveMenu: View {
     private func archive() {
         do {
             try GoalArchive.archive(goal, at: .now)
-            try modelContext.save()
+            try SyncWriteGate.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()
@@ -538,7 +538,7 @@ private struct GoalArchiveMenu: View {
     private func restore() {
         GoalArchive.restore(goal)
         do {
-            try modelContext.save()
+            try SyncWriteGate.save(modelContext)
         } catch {
             modelContext.rollback()
             updateFailed = true
@@ -681,7 +681,7 @@ private struct GoalContributionEditor: View {
                 id: UUID(),
                 occurredAt: occurredAt
             )
-            try modelContext.save()
+            try SyncWriteGate.save(modelContext)
             dismiss()
         } catch GoalContributionError.nonPositiveAmount {
             errorMessage = "The contribution must be greater than zero."

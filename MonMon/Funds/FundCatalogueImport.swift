@@ -257,7 +257,7 @@ final class FundCatalogueImport {
         }
 
         if !addedSymbols.isEmpty {
-            try context.save()
+            try SyncWriteGate.save(context)
         }
 
         alreadyHeld.formUnion(addedSymbols)

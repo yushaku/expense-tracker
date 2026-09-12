@@ -97,7 +97,7 @@ struct AvatarSettingsContent: View {
             }
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
-            .fixedSize()
+            .frame(width: 72, height: 72)
             .disabled(isLoading)
             .accessibilityLabel("Change avatar")
             .accessibilityIdentifier("avatar-options")

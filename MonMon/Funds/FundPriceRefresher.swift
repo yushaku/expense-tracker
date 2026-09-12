@@ -154,7 +154,7 @@ final class FundPriceRefresher {
         }
 
         do {
-            try context.save()
+            try SyncWriteGate.save(context)
         } catch {
             // Rolling back drops the fetched prices, which is the honest
             // outcome: nothing was persisted, so nothing should be on screen

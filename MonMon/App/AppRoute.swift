@@ -5,6 +5,10 @@ import Observation
 @Observable
 final class AppRoute {
     private(set) var quickCaptureRequestID: UUID?
+    private(set) var goalRequestID: UUID?
+    private(set) var goalRequestRevision: UUID?
+    private var queuedGoalID: UUID?
+    private(set) var expensesRequestID: UUID?
     private var hasQueuedQuickCapture = false
 
     func requestQuickCapture(isLocked: Bool) {
@@ -17,6 +21,19 @@ final class AppRoute {
 
     @discardableResult
     func receive(_ url: URL, isLocked: Bool) -> Bool {
+        if url.host == "goal", let id = UUID(uuidString: url.lastPathComponent) {
+            if isLocked {
+                queuedGoalID = id
+            } else {
+                goalRequestID = id
+                goalRequestRevision = UUID()
+            }
+            return true
+        }
+        if url.host == "expenses" {
+            expensesRequestID = UUID()
+            return true
+        }
         guard Self.isQuickCaptureURL(url) else {
             return false
         }
@@ -26,6 +43,11 @@ final class AppRoute {
     }
 
     func releaseQueuedQuickCapture(isLocked: Bool) {
+        if !isLocked, let id = queuedGoalID {
+            goalRequestID = id
+            goalRequestRevision = UUID()
+            queuedGoalID = nil
+        }
         guard hasQueuedQuickCapture, !isLocked else {
             return
         }
@@ -34,9 +56,31 @@ final class AppRoute {
         quickCaptureRequestID = UUID()
     }
 
+    func consumeGoal() { goalRequestID = nil }
+    func consumeGoalTabRequest() { goalRequestRevision = nil }
+    func consumeExpenses() {
+        expensesRequestID = nil
+    }
+
     func consumeQuickCapture() {
         quickCaptureRequestID = nil
     }
+
+    /// The URL that opens this build's own quick capture. Built from the
+    /// flavour's registered scheme so the dev control opens the dev app, and
+    /// read from the caller's Info.plist because an extension cannot read the
+    /// app's. A target that wants this key must declare it.
+    nonisolated static func quickCaptureURL(in infoDictionary: [String: Any]) -> URL? {
+        guard
+            let scheme = infoDictionary[urlSchemeInfoKey] as? String,
+            !scheme.isEmpty
+        else {
+            return nil
+        }
+        return URL(string: "\(scheme)://quick-capture")
+    }
+
+    private nonisolated static let urlSchemeInfoKey = "MonMonQuickCaptureURLScheme"
 
     private static func isQuickCaptureURL(_ url: URL) -> Bool {
         url.host == "quick-capture"

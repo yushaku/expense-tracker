@@ -343,7 +343,7 @@ struct TransactionEditorView: View {
         }
 
         do {
-            try modelContext.save()
+            try SyncWriteGate.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()
@@ -363,7 +363,7 @@ struct TransactionEditorView: View {
         saveErrorMessage = nil
 
         do {
-            try modelContext.save()
+            try SyncWriteGate.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()
