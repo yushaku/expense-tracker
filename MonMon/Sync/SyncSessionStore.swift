@@ -160,6 +160,7 @@ struct SyncSessionStore {
         // A main-context object loaded by an old editor must not save over the
         // incoming version. The app recreates its content tree after this call.
         container.mainContext.rollback()
+        GoalWidgetSnapshot.refresh(in: ModelContext(container))
     }
 
     func complete(_ sessionID: UUID) throws {
@@ -263,5 +264,6 @@ enum SyncWriteGate {
             throw SyncError.sessionPending
         }
         try context.save()
+        GoalWidgetSnapshot.refresh(in: context)
     }
 }

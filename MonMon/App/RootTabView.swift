@@ -60,6 +60,11 @@ struct RootTabView: View {
                 nativeTabs
             #endif
         }
+        .onChange(of: appRoute.goalRequestRevision, initial: true) { _, id in
+            guard id != nil else { return }
+            selection = .budget
+            appRoute.consumeGoalTabRequest()
+        }
         .onChange(of: appRoute.quickCaptureRequestID) { _, requestID in
             guard requestID != nil else {
                 return

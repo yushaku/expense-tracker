@@ -160,7 +160,6 @@ private struct QuickExpenseButton: View {
     }
 }
 
-@main
 struct MonMonQuickExpenseWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(
@@ -172,5 +171,13 @@ struct MonMonQuickExpenseWidget: Widget {
         .configurationDisplayName("Quick Expense")
         .description("Record one of your configured preset expenses with one tap.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+    }
+}
+
+@main
+struct MonMonWidgetBundle: WidgetBundle {
+    var body: some Widget {
+        MonMonQuickExpenseWidget()
+        SavingsGoalWidget()
     }
 }

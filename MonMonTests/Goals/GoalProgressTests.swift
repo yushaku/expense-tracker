@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 import Testing
 
 @testable import MonMon
@@ -345,5 +346,113 @@ struct GoalArchiveTests {
             colorName: "blue",
             createdAt: Date(timeIntervalSince1970: 1_800_000_000)
         )
+    }
+}
+
+@Suite("Savings goal widget")
+@MainActor
+struct SavingsGoalWidgetTests {
+    private func snapshot(amount: Decimal, target: Decimal = 50_000_000) -> GoalWidgetSnapshot {
+        GoalWidgetSnapshot(
+            id: UUID(), name: "Japan", targetAmount: target,
+            earmarkedAmount: amount, symbolName: "airplane", colorName: "mauve", isArchived: false)
+    }
+
+    @Test("Milestones advance at exact boundaries and use earmarked money")
+    func milestones() {
+        let goal = snapshot(amount: 30_000_000)
+        #expect(goal.progress == 0.6)
+        #expect(goal.nextMilestonePercent == 75)
+        #expect(goal.amountToNextMilestone == 7_500_000)
+        #expect(goal.remainingAmount == 20_000_000)
+        #expect(snapshot(amount: 0).nextMilestonePercent == 25)
+        #expect(snapshot(amount: 12_500_000).nextMilestonePercent == 50)
+        #expect(snapshot(amount: 25_000_000).nextMilestonePercent == 75)
+        #expect(snapshot(amount: 37_500_000).nextMilestonePercent == 100)
+    }
+
+    @Test("Completed and invalid targets never produce another milestone")
+    func completion() {
+        for amount: Decimal in [50_000_000, 60_000_000] {
+            let goal = snapshot(amount: amount)
+            #expect(goal.isComplete)
+            #expect(goal.progress == 1)
+            #expect(goal.remainingAmount == 0)
+            #expect(goal.nextMilestonePercent == nil)
+        }
+        #expect(snapshot(amount: 0, target: 0).progress == 0)
+        #expect(snapshot(amount: 0, target: 0).nextMilestonePercent == nil)
+    }
+
+    @Test("Pinned widgets retain identity and never switch after deletion or archiving")
+    func selection() throws {
+        let defaults = try #require(UserDefaults(suiteName: "goal-widget-\(UUID())"))
+        defer { defaults.removeObject(forKey: GoalWidgetStore.storageKey) }
+        let store = GoalWidgetStore(defaults: defaults)
+        let first = snapshot(amount: 10_000_000)
+        let second = snapshot(amount: 30_000_000)
+        #expect(try store.save([first, second]))
+        #expect(try !store.save([first, second]))
+        #expect(store.selected(id: first.id) == first)
+        #expect(store.selected(id: nil) == nil)
+        try store.save([second])
+        #expect(store.selected(id: first.id) == nil)
+        try store.save([
+            GoalWidgetSnapshot(
+                id: second.id, name: second.name,
+                targetAmount: second.targetAmount, earmarkedAmount: second.earmarkedAmount,
+                symbolName: second.symbolName, colorName: second.colorName, isArchived: true)
+        ])
+        #expect(store.selected(id: second.id) == nil)
+        try store.save([])
+        #expect(store.load().isEmpty)
+    }
+
+    @Test("Projection follows saved contributions, renames, archiving and deletion")
+    func projection() throws {
+        let container = try ModelContainer(
+            for: FinancialGoal.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let context = container.mainContext
+        let goal = FinancialGoal(
+            id: UUID(), name: "Japan", targetAmount: 50_000_000,
+            earmarkedAmount: 10_000_000, targetDate: .now, monthlyContribution: 9_000_000,
+            fundingJarID: nil, symbolName: "airplane", colorName: "mauve", createdAt: .now)
+        context.insert(goal)
+        try context.save()
+        #expect(try GoalWidgetSnapshot.make(in: context).first?.earmarkedAmount == 10_000_000)
+        try GoalContributionStore.record(amount: 5_000_000, on: goal, id: UUID(), occurredAt: .now)
+        goal.name = "Japan holiday"
+        try context.save()
+        let snapshot = try #require(try GoalWidgetSnapshot.make(in: context).first)
+        #expect(snapshot.id == goal.id)
+        #expect(snapshot.name == "Japan holiday")
+        #expect(snapshot.earmarkedAmount == 15_000_000)
+        goal.archivedAt = .now
+        try context.save()
+        #expect(try GoalWidgetSnapshot.make(in: context).first?.isArchived == true)
+        context.delete(goal)
+        try context.save()
+        #expect(try GoalWidgetSnapshot.make(in: context).isEmpty)
+    }
+
+    @Test("Goal links wait for unlock and can request the same goal again")
+    func deepLinks() throws {
+        let route = AppRoute()
+        let id = UUID()
+        let url = try #require(URL(string: "monmon-dev://goal/\(id)"))
+        #expect(route.receive(url, isLocked: true))
+        #expect(route.goalRequestID == nil)
+        route.releaseQueuedQuickCapture(isLocked: false)
+        #expect(route.goalRequestID == id)
+        let revision = route.goalRequestRevision
+        route.consumeGoal()
+        #expect(route.goalRequestRevision == revision)
+        route.consumeGoalTabRequest()
+        #expect(route.goalRequestRevision == nil)
+        #expect(route.receive(url, isLocked: false))
+        #expect(route.goalRequestRevision != revision)
+        #expect(route.quickCaptureRequestID == nil)
+        #expect(!route.receive(try #require(URL(string: "monmon://goal/invalid")), isLocked: false))
     }
 }

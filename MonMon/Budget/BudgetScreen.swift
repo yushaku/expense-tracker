@@ -2,6 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct BudgetScreen: View {
+    @Environment(AppRoute.self) private var appRoute
     @Environment(\.locale) private var locale
 
     @Query(sort: \BudgetJar.createdAt, order: .forward)
@@ -81,6 +82,17 @@ struct BudgetScreen: View {
                         .frame(maxWidth: .infinity)
                     }
                 }
+            }
+            .onChange(of: appRoute.goalRequestID, initial: true) { _, id in
+                guard let id else { return }
+                isShowingGoals = false
+                isShowingRecurringIncome = false
+                isShowingConfiguration = false
+                isShowingIncomeTimeline = false
+                selectedJarID = nil
+                selectedTripID = nil
+                selectedGoalID = id
+                appRoute.consumeGoal()
             }
             .rootScreenHeader("Budget")
             .accessibilityIdentifier("budget")
@@ -377,6 +389,7 @@ struct BudgetScreen: View {
             locale: Locale(identifier: "en")
         )
         return BudgetScreen(asOf: Date(timeIntervalSince1970: 1_700_000_000))
+            .environment(AppRoute())
             .modelContainer(container)
             .preferredColorScheme(MonMonTheme.colorScheme)
     }

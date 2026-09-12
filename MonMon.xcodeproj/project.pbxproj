@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		857F58A5B671400C889FEAB4 /* CategoryPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000163 /* CategoryPalette.swift */; };
+		4A5262432687475BBBC1C79A /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000187 /* AppTheme.swift */; };
+		63349334F8D24E188F252BAD /* MonMonTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000127 /* MonMonTheme.swift */; };
+		AA3839C47C894D66BBAC77DA /* SavingsGoalWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C71E351B684A7AB63CDA94 /* SavingsGoalWidget.swift */; };
+		4A711F0DFE644FE0BA9DB07C /* GoalWidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18BE00010F164453B72DEE83 /* GoalWidgetSnapshot.swift */; };
+		DF80C46ED798496FA32E5E51 /* GoalWidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18BE00010F164453B72DEE83 /* GoalWidgetSnapshot.swift */; };
 		N10000000000000000000201 /* NotificationPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000101 /* NotificationPreferences.swift */; };
 		N10000000000000000000202 /* NotificationPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000102 /* NotificationPlan.swift */; };
 		N10000000000000000000203 /* NotificationCenterClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = N10000000000000000000103 /* NotificationCenterClient.swift */; };
@@ -485,6 +491,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C2C71E351B684A7AB63CDA94 /* SavingsGoalWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsGoalWidget.swift; sourceTree = "<group>"; };
+		18BE00010F164453B72DEE83 /* GoalWidgetSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalWidgetSnapshot.swift; sourceTree = "<group>"; };
 		N10000000000000000000101 /* NotificationPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPreferences.swift; sourceTree = "<group>"; };
 		N10000000000000000000102 /* NotificationPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPlan.swift; sourceTree = "<group>"; };
 		N10000000000000000000103 /* NotificationCenterClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterClient.swift; sourceTree = "<group>"; };
@@ -1038,6 +1046,7 @@
 			isa = PBXGroup;
 			children = (
 				V10000000000000000000103 /* FinancialGoal.swift */,
+				18BE00010F164453B72DEE83 /* GoalWidgetSnapshot.swift */,
 				V10000000000000000000104 /* GoalProgress.swift */,
 				V10000000000000000000105 /* FinancialGoalDraft.swift */,
 				V10000000000000000000106 /* GoalCommitment.swift */,
@@ -1742,6 +1751,7 @@
 				J10000000000000000000104 /* MonMonQuickExpenseWidget.entitlements */,
 				J10000000000000000000103 /* Info.plist */,
 				J10000000000000000000102 /* QuickExpenseWidget.swift */,
+				C2C71E351B684A7AB63CDA94 /* SavingsGoalWidget.swift */,
 			);
 			path = MonMonQuickExpenseWidget;
 			sourceTree = "<group>";
@@ -1944,6 +1954,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				J10000000000000000000201 /* QuickExpenseWidget.swift in Sources */,
+				857F58A5B671400C889FEAB4 /* CategoryPalette.swift in Sources */,
+				4A5262432687475BBBC1C79A /* AppTheme.swift in Sources */,
+				63349334F8D24E188F252BAD /* MonMonTheme.swift in Sources */,
+				AA3839C47C894D66BBAC77DA /* SavingsGoalWidget.swift in Sources */,
+				4A711F0DFE644FE0BA9DB07C /* GoalWidgetSnapshot.swift in Sources */,
 				J10000000000000000000202 /* QuickExpensePreset.swift in Sources */,
 				J10000000000000000000207 /* QuickExpenseWidgetLayout.swift in Sources */,
 				J10000000000000000000203 /* QuickExpenseIntent.swift in Sources */,
@@ -2135,6 +2150,7 @@
 				A00000000000000000000741 /* InvestmentSummary.swift in Sources */,
 				A00000000000000000000742 /* InvestmentsScreen.swift in Sources */,
 				A00000000000000000000252 /* CategoryPalette.swift in Sources */,
+				DF80C46ED798496FA32E5E51 /* GoalWidgetSnapshot.swift in Sources */,
 				A00000000000000000000251 /* MoneyTransaction.swift in Sources */,
 				A00000000000000000000250 /* TransactionCategory.swift in Sources */,
 				A00000000000000000000249 /* TransactionKind.swift in Sources */,
