@@ -346,7 +346,7 @@ struct CryptoSwapEditorView: View {
                 modelContext.insert(swap.sale)
             }
 
-            try modelContext.save()
+            try SyncWriteGate.save(modelContext)
             dismiss()
         } catch let error as CryptoSwapFormError {
             validationError = error
@@ -370,7 +370,7 @@ struct CryptoSwapEditorView: View {
         modelContext.delete(sale)
 
         do {
-            try modelContext.save()
+            try SyncWriteGate.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()

@@ -3,6 +3,8 @@ import SwiftData
 import SwiftUI
 
 struct SettingsView: View {
+    let onOpenDeviceSync: () -> Void
+
     @Environment(\.dismiss) private var dismiss
     @Environment(AppLock.self) private var appLock
     @Environment(NotificationCoordinator.self) private var notificationCoordinator
@@ -20,7 +22,7 @@ struct SettingsView: View {
     var body: some View {
         #if os(macOS)
             settingsContent
-                .frame(minWidth: 500, minHeight: 640)
+                .frame(width: 600, height: 720)
         #else
             settingsContent
         #endif
@@ -37,6 +39,24 @@ struct SettingsView: View {
                         card { AvatarSettingsContent() }
                         appearanceCard
                         instrumentsCard
+                        card {
+                            VStack(alignment: .leading, spacing: 14) {
+                                sectionHeader(
+                                    "Device Sync", systemImage: "laptopcomputer.and.iphone")
+                                Text(
+                                    "Sync with your paired device over the same Wi-Fi. You review every change."
+                                )
+                                .font(.subheadline).foregroundStyle(MonMonTheme.textSecondary)
+                                Button(
+                                    "Open Device Sync",
+                                    systemImage: "laptopcomputer.and.iphone"
+                                ) {
+                                    onOpenDeviceSync()
+                                }
+                                .buttonStyle(.prominentAction)
+                                .accessibilityIdentifier("settings-device-sync")
+                            }
+                        }
                         card {
                             Button {
                                 isSalaryCalculatorPresented = true
@@ -412,16 +432,7 @@ struct SettingsView: View {
 
     private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {
         content()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(20)
-            .background {
-                RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                    .fill(MonMonTheme.surface)
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                    .stroke(MonMonTheme.border, lineWidth: 1)
-            }
+            .appCard()
     }
 
     private func sectionHeader(_ title: LocalizedStringKey, systemImage: String) -> some View {
@@ -433,10 +444,11 @@ struct SettingsView: View {
 
 #if DEBUG
     #Preview("Settings") {
-        SettingsView()
+        SettingsView(onOpenDeviceSync: {})
             .environment(AppLock(isLocked: false))
             .environment(NotificationCoordinator())
             .modelContainer(PreviewData.populated)
+            .environment(SyncCoordinator(store: SyncSessionStore(container: PreviewData.populated)))
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
             .preferredColorScheme(MonMonTheme.colorScheme)

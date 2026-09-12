@@ -58,7 +58,7 @@ enum TripWorkspaceLifecycle {
         )
         context.insert(workspace)
         do {
-            try context.save()
+            try SyncWriteGate.save(context)
             return workspace
         } catch {
             context.rollback()
@@ -91,7 +91,7 @@ enum TripWorkspaceLifecycle {
 
         context.delete(workspace)
         do {
-            try context.save()
+            try SyncWriteGate.save(context)
         } catch {
             context.rollback()
             throw error

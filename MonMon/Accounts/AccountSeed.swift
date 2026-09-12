@@ -65,15 +65,23 @@ enum AccountSeed {
         createdAt: Date = .now,
         locale: Locale = AppLanguage.stored.locale
     ) {
-        guard !defaults.bool(forKey: defaultBankSeedKey) else {
+        guard let initialized = try? SeedState.isInitialized("defaultBank", in: context),
+            !initialized,
+            let accounts = try? context.fetch(FetchDescriptor<CashAccount>())
+        else { return }
+        do { try SeedState.mark("defaultBank", in: context) } catch { return }
+        if defaults.bool(forKey: defaultBankSeedKey) {
+            do { try SyncWriteGate.save(context) } catch { context.rollback() }
             return
         }
-
-        let accounts = (try? context.fetch(FetchDescriptor<CashAccount>())) ?? []
         let alreadyExists = accounts.contains {
             $0.id == defaultBankID || $0.name == defaultBankName && $0.kind == .normal
         }
         guard !alreadyExists else {
+            do { try SyncWriteGate.save(context) } catch {
+                context.rollback()
+                return
+            }
             defaults.set(true, forKey: defaultBankSeedKey)
             return
         }
@@ -89,7 +97,7 @@ enum AccountSeed {
         context.insert(account)
 
         do {
-            try context.save()
+            try SyncWriteGate.save(context)
             defaults.set(true, forKey: defaultBankSeedKey)
         } catch {
             context.rollback()
@@ -131,7 +139,7 @@ enum AccountSeed {
             createdAt: createdAt
         )
         context.insert(account)
-        try? context.save()
+        try? SyncWriteGate.save(context)
         return account
     }
 

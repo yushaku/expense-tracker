@@ -56,7 +56,7 @@ MonMon is a private personal-finance app for iPhone and Mac, built with SwiftUI 
 
 ### Data, sync, and privacy
 
-- **On-device only** — the store never leaves the device. No account, no server, no sync.
+- **Local first** — data stays on your devices. Optional, manually initiated P2P sync connects one iPhone–Mac pair on the same local network. No account, cloud storage, or relay server.
 - **Optional read-only AI access on Mac** — an embedded local MCP helper exposes raw records from an App Group SQLite snapshot to Codex or Claude Desktop after explicit consent. The helper has no write tools.
 - **Backup and restore** — a validated document covering every model, including jars, goals, and trips, with a confirmation step before a restore replaces what is on the device.
 - **App lock** — Face ID or Touch ID with device-passcode fallback, re-locking after time in the background.
@@ -91,11 +91,18 @@ The installed apps are `~/Applications/MonMon Dev.app` and
 `~/Applications/MonMon.app`. Override the destination with
 `MONMON_MAC_INSTALL_DIR` when needed.
 
-Build and install the dev flavour on an iPhone:
+From `dev`, build, install, and launch the dev flavour on both a physical iPhone
+and this Mac with one command:
 
 ```sh
 scripts/run-iphone.sh Yushaku
 ```
+
+The iPhone must be connected, unlocked, and have Developer Mode enabled. The
+script installs on the iPhone first, then calls `scripts/install-mac.sh dev`.
+Builds run sequentially using the workspace cache. If a step fails, the script
+stops and does not report both devices as installed. Mac installation still
+supports `MONMON_MAC_INSTALL_DIR` and `MONMON_MAC_DERIVED_DATA_PATH` overrides.
 
 Build and install Prod on an iPhone (clean `main` only):
 
@@ -201,3 +208,65 @@ immediately and the widget uses the same order. Preset names, amounts, categorie
 and shortcut identities stay with their items. Hidden presets keep their order;
 increase **Presets shown** to include them. VoiceOver offers **Move earlier** and
 **Move later** actions. Dropping outside the grid leaves the order unchanged.
+
+### Peer-to-peer device sync
+
+Open **Settings → Device Sync** on both devices. On Mac, choose **Pair an iPhone**;
+on iPhone, scan that QR code. Keep the pairing code private: it authorizes access
+to this pair's financial data. Camera access is only needed for scanning; a manual
+code entry is available. After pairing, a device connects by itself whenever the
+app is open, unlocked, and on the same Wi-Fi as its pair, and opening **Device
+Sync** on either one opens the review. Local Network permission is required;
+guest-network isolation and firewalls can prevent discovery.
+
+Every sync shows a preview. The reviewing device chooses between conflicting
+records and confirms **Apply to both devices**, which is the only approval needed:
+the receiving device re-derives the same merge from its own data, checks both
+digests and the deletions, and commits only if its store still matches the
+snapshot that was compared. While the other device is reviewing, the receiving
+device can still cancel the session. Initial sync unions existing data;
+a starter category/account/jar missing on one device requires an explicit keep or
+remove decision. Hand-entered transactions with different IDs remain separate,
+even when their date and amount match. Recurring occurrences and imported records
+use their existing domain identities. A deletion cannot strand a retained record
+that needs the deleted item: retain the referenced item or change the choices.
+Existing optional provenance, such as a deleted recurring rule, is preserved.
+
+Financial records sync; pending captures and preferences stay local. Local draft,
+default-account/category, import mapping, and Quick Expense references follow
+merged IDs or become unselected if their target was deleted. Theme, language,
+app lock, notification choices, and MCP authorization never come from the peer.
+
+No background or remote-Internet sync is attempted. Leaving the app or locking it
+interrupts the connection. Reconnect to finish an interrupted session. The status
+is complete only after both stores have saved the reviewed result. An uncommitted
+prepared store stays read-only until recovery; an already committed store can keep
+new edits, which participate in the next sync rather than being overwritten on retry.
+A prepared session with no preparation on its peer is safely abandoned on reconnect.
+
+The most recent 20 completed sessions show per-device change counts. A recovery
+backup is written locally before every commit; completed sessions offer export of
+that backup. Recovery files are in the app's Application Support directory under
+`MonMon/p2p-recovery/<dev|prod>/`. Files are retained locally until removed by the owner. They contain financial data and local preferences,
+not pairing secrets. A recovery from an already-corrupt store preserves its duplicate
+rows; ordinary backup import will reject conflicting duplicate IDs rather than
+silently discard a version. Preserve that file for explicit reconciliation.
+
+Unpairing keeps financial data. An unfinished session must finish first. Restoring
+a backup invalidates pairing and the common baseline, so unpair the other device
+and pair again to preview an initial merge. Missing/corrupt sync metadata or different
+protocol versions never trigger a blind replacement of a store. Dev and Prod use
+separate service identifiers, pairing namespaces, and recovery directories.
+
+Implementation notes: SwiftData remains local; a versioned canonical snapshot
+and common baseline drive three-way reconciliation. Messages are length-prefixed
+and each snapshot is capped at 100 MiB. TLS-PSK uses TLS 1.2 with AES-GCM because
+[Apple's Network framework does not support TLS 1.3 PSK](https://developer.apple.com/documentation/technotes/tn3213-moving-from-multipeer-connectivity-to-network-framework).
+The 256-bit pairing secret lives in non-synchronizing, device-only Keychain storage.
+Data and local apply receipts commit in one SwiftData save; reconnect retries use
+receipts, not a repeated restore. This is resumable synchronization, not a distributed
+atomic transaction: one store can temporarily be ahead of the other.
+
+No financial changes are committed while the receiving device is still reviewing.
+Transfers imported from complementary statement sides without a common provenance
+key remain separate; equal amounts and dates alone do not prove identity.

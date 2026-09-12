@@ -155,7 +155,7 @@ struct TripDetailView: View {
 
     private func saveWorkspaceChange() {
         do {
-            try modelContext.save()
+            try SyncWriteGate.save(modelContext)
         } catch {
             modelContext.rollback()
             saveErrorMessage = "Couldn’t update this trip. Try again."

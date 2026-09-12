@@ -412,6 +412,19 @@
 		D625B1F0894A4B68A85E065F /* SalaryCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACBEFD298AFF4FCD903ECB40 /* SalaryCalculator.swift */; };
 		FAC313B3BA4345D4BA992263 /* SalaryCalculatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A99B1CAF79C41E0950B20EE /* SalaryCalculatorView.swift */; };
 		2B1230D554EF4DF199447F90 /* SalaryCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1EDFDF371AD424DB36E02D6 /* SalaryCalculatorTests.swift */; };
+		AF93A4007C91C0774A8A7C01 /* SyncSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D79D516595C63AC7B1498C /* SyncSnapshot.swift */; };
+		91994D21711FB73C09CC0B6E /* SyncMergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD5441149C5B1FA36CF8004D /* SyncMergeTests.swift */; };
+		65F8A088ABC36759ED8976AB /* SyncMergePlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15B41060E5D0B0130297D83 /* SyncMergePlanner.swift */; };
+		9C5288F68FE76288223D2A92 /* SyncMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45AAC78F089D52044E14EE94 /* SyncMetadata.swift */; };
+		A9C37C6A4C3E40C88211709E /* SyncSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45BF8721DF88C05A8ACDC88B /* SyncSessionStore.swift */; };
+		2F7C5CD12D162991E206F71E /* SyncSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25AECCD3D621BF1F81343B7D /* SyncSessionTests.swift */; };
+		A3468E5421ED31225A7B0297 /* PeerSyncTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C54897D0E87932F3D1D10807 /* PeerSyncTransport.swift */; };
+		F65C7FB1794298D4657BDDE2 /* SyncTransportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5F738BC8668D1A70950FD57 /* SyncTransportTests.swift */; };
+		C677505B9FDF03BF6B278E66 /* SyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A902C2664C1E8D521F8B2BC2 /* SyncCoordinator.swift */; };
+		5A0401DD6282303B7FDA30FB /* SyncQRScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01BE9A0D0BB4C4510A910C32 /* SyncQRScanner.swift */; };
+		C1187471AD5F703D1F5D248A /* SyncView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E01A20331E4BF155DB7A8132 /* SyncView.swift */; };
+		05B38961CB87288FCC4B068A /* SyncCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E51EEFE00A97D32C489903 /* SyncCoordinatorTests.swift */; };
+		792C7098BB48A170C0EE7EEB /* SyncLocalReferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAF6DF297F463B4DA74955B /* SyncLocalReferences.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -877,6 +890,19 @@
 		ACBEFD298AFF4FCD903ECB40 /* SalaryCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SalaryCalculator.swift; sourceTree = "<group>"; };
 		1A99B1CAF79C41E0950B20EE /* SalaryCalculatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SalaryCalculatorView.swift; sourceTree = "<group>"; };
 		C1EDFDF371AD424DB36E02D6 /* SalaryCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SalaryCalculatorTests.swift; sourceTree = "<group>"; };
+		A3D79D516595C63AC7B1498C /* SyncSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sync/SyncSnapshot.swift"; sourceTree = "<group>"; };
+		CD5441149C5B1FA36CF8004D /* SyncMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sync/SyncMergeTests.swift"; sourceTree = "<group>"; };
+		E15B41060E5D0B0130297D83 /* SyncMergePlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sync/SyncMergePlanner.swift"; sourceTree = "<group>"; };
+		45AAC78F089D52044E14EE94 /* SyncMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sync/SyncMetadata.swift"; sourceTree = "<group>"; };
+		45BF8721DF88C05A8ACDC88B /* SyncSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sync/SyncSessionStore.swift"; sourceTree = "<group>"; };
+		25AECCD3D621BF1F81343B7D /* SyncSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sync/SyncSessionTests.swift"; sourceTree = "<group>"; };
+		C54897D0E87932F3D1D10807 /* PeerSyncTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sync/PeerSyncTransport.swift"; sourceTree = "<group>"; };
+		E5F738BC8668D1A70950FD57 /* SyncTransportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sync/SyncTransportTests.swift"; sourceTree = "<group>"; };
+		A902C2664C1E8D521F8B2BC2 /* SyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sync/SyncCoordinator.swift"; sourceTree = "<group>"; };
+		01BE9A0D0BB4C4510A910C32 /* SyncQRScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sync/SyncQRScanner.swift"; sourceTree = "<group>"; };
+		E01A20331E4BF155DB7A8132 /* SyncView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sync/SyncView.swift"; sourceTree = "<group>"; };
+		A5E51EEFE00A97D32C489903 /* SyncCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sync/SyncCoordinatorTests.swift"; sourceTree = "<group>"; };
+		CEAF6DF297F463B4DA74955B /* SyncLocalReferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sync/SyncLocalReferences.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -947,6 +973,15 @@
 		A00000000000000000000012 /* MonMon */ = {
 			isa = PBXGroup;
 			children = (
+				CEAF6DF297F463B4DA74955B /* SyncLocalReferences.swift */,
+				E01A20331E4BF155DB7A8132 /* SyncView.swift */,
+				01BE9A0D0BB4C4510A910C32 /* SyncQRScanner.swift */,
+				A902C2664C1E8D521F8B2BC2 /* SyncCoordinator.swift */,
+				C54897D0E87932F3D1D10807 /* PeerSyncTransport.swift */,
+				45BF8721DF88C05A8ACDC88B /* SyncSessionStore.swift */,
+				45AAC78F089D52044E14EE94 /* SyncMetadata.swift */,
+				E15B41060E5D0B0130297D83 /* SyncMergePlanner.swift */,
+				A3D79D516595C63AC7B1498C /* SyncSnapshot.swift */,
 				N10000000000000000000001 /* Notifications */,
 				M40000000000000000000001 /* MCP */,
 				Y10000000000000000000001 /* Trips */,
@@ -1055,6 +1090,10 @@
 		A00000000000000000000015 /* MonMonTests */ = {
 			isa = PBXGroup;
 			children = (
+				A5E51EEFE00A97D32C489903 /* SyncCoordinatorTests.swift */,
+				E5F738BC8668D1A70950FD57 /* SyncTransportTests.swift */,
+				25AECCD3D621BF1F81343B7D /* SyncSessionTests.swift */,
+				CD5441149C5B1FA36CF8004D /* SyncMergeTests.swift */,
 				N10000000000000000000002 /* Notifications */,
 				M40000000000000000000002 /* MCP */,
 				Y10000000000000000000002 /* Trips */,
@@ -1916,6 +1955,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				792C7098BB48A170C0EE7EEB /* SyncLocalReferences.swift in Sources */,
+				C1187471AD5F703D1F5D248A /* SyncView.swift in Sources */,
+				5A0401DD6282303B7FDA30FB /* SyncQRScanner.swift in Sources */,
+				C677505B9FDF03BF6B278E66 /* SyncCoordinator.swift in Sources */,
+				A3468E5421ED31225A7B0297 /* PeerSyncTransport.swift in Sources */,
+				A9C37C6A4C3E40C88211709E /* SyncSessionStore.swift in Sources */,
+				9C5288F68FE76288223D2A92 /* SyncMetadata.swift in Sources */,
+				65F8A088ABC36759ED8976AB /* SyncMergePlanner.swift in Sources */,
+				AF93A4007C91C0774A8A7C01 /* SyncSnapshot.swift in Sources */,
 				N10000000000000000000201 /* NotificationPreferences.swift in Sources */,
 				N10000000000000000000202 /* NotificationPlan.swift in Sources */,
 				N10000000000000000000203 /* NotificationCenterClient.swift in Sources */,
@@ -2178,6 +2226,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				05B38961CB87288FCC4B068A /* SyncCoordinatorTests.swift in Sources */,
+				F65C7FB1794298D4657BDDE2 /* SyncTransportTests.swift in Sources */,
+				2F7C5CD12D162991E206F71E /* SyncSessionTests.swift in Sources */,
+				91994D21711FB73C09CC0B6E /* SyncMergeTests.swift in Sources */,
 				N10000000000000000000211 /* NotificationPreferencesTests.swift in Sources */,
 				N10000000000000000000212 /* DailyExpenseReminderTests.swift in Sources */,
 				N10000000000000000000213 /* RecurringDueReminderTests.swift in Sources */,
