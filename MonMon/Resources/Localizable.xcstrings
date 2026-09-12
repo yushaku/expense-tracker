@@ -1,6 +1,46 @@
 {
   "sourceLanguage": "en",
   "strings": {
+  "Today’s expenses": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Chi tiêu hôm nay"
+        }
+      }
+    }
+  },
+  "No expenses today": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Hôm nay chưa có khoản chi"
+        }
+      }
+    }
+  },
+  "Open MonMon to load today’s expenses": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Mở MonMon để tải chi tiêu hôm nay"
+        }
+      }
+    }
+  },
+  "%lld more · Open app": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Còn %lld khoản · Mở app"
+        }
+      }
+    }
+  },
     "What each device saves when you apply.": {
       "localizations": {
         "vi": {
@@ -15393,6 +15433,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dữ liệu trên máy được giữ nguyên. Ghép đôi lại để đồng bộ với thiết bị khác."
+          }
+        }
+      }
+    },
+    "Open MonMon and start a new transaction.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở MonMon và bắt đầu một giao dịch mới."
           }
         }
       }

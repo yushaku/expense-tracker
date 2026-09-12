@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 import Testing
 
 @testable import MonMon
@@ -87,5 +88,92 @@ struct QuickExpenseWidgetLayoutTests {
             return 0
         }
         return (count + columns - 1) / columns
+    }
+}
+
+@Suite("Widget today expenses")
+@MainActor
+struct WidgetTodayExpensesTests {
+    @Test("Today excludes income and adjacent days, sorts newest first, totals every expense")
+    func todaySnapshot() throws {
+        let container = try ModelContainer(
+            for: MoneyTransaction.self, TransactionCategory.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let context = container.mainContext
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let start = TransactionPeriod.calendar.startOfDay(for: now)
+        for index in 0..<7 {
+            context.insert(
+                MoneyTransaction(
+                    id: UUID(), kind: .expense, amount: 10_000,
+                    occurredAt: start.addingTimeInterval(Double(index)), note: "Expense \(index)",
+                    accountID: UUID(), categoryID: nil, sourceRuleID: nil,
+                    currencyCode: "VND", createdAt: now))
+        }
+        for (kind, date) in [
+            (TransactionKind.income, now), (.expense, start.addingTimeInterval(-1)),
+            (.expense, start.addingTimeInterval(86_400)),
+        ] {
+            context.insert(
+                MoneyTransaction(
+                    id: UUID(), kind: kind, amount: 999_000, occurredAt: date, note: "Excluded",
+                    accountID: UUID(), categoryID: nil, sourceRuleID: nil,
+                    currencyCode: "VND", createdAt: now))
+        }
+        try context.save()
+        let snapshot = try WidgetTodayExpenses.make(in: context, at: now)
+        #expect(snapshot.total == 70_000)
+        #expect(snapshot.count == 7)
+        #expect(
+            snapshot.expenses.map(\.title) == [
+                "Expense 6", "Expense 5", "Expense 4", "Expense 3", "Expense 2",
+            ])
+        #expect(snapshot.startOfDay == start)
+        let newest = try #require(
+            try context.fetch(FetchDescriptor<MoneyTransaction>()).first {
+                $0.note == "Expense 6"
+            })
+        newest.amount = 30_000
+        try context.save()
+        #expect(try WidgetTodayExpenses.make(in: context, at: now).total == 90_000)
+        context.delete(newest)
+        try context.save()
+        let afterDeletion = try WidgetTodayExpenses.make(in: context, at: now)
+        #expect(afterDeletion.count == 6)
+        #expect(afterDeletion.total == 60_000)
+        #expect(afterDeletion.expenses.first?.title == "Expense 5")
+
+    }
+
+    @Test("Widget link opens expenses without starting capture, including behind the app lock")
+    func expensesLink() throws {
+        for locked in [false, true] {
+            let route = AppRoute()
+            let url = try #require(URL(string: "monmon-dev://expenses"))
+            #expect(route.receive(url, isLocked: locked))
+            #expect(route.expensesRequestID != nil)
+            #expect(route.quickCaptureRequestID == nil)
+            route.consumeExpenses()
+            #expect(route.expensesRequestID == nil)
+        }
+    }
+
+    @Test("Shared snapshot expires at midnight and reflects replacement after deletion")
+    func snapshotStorage() throws {
+        let defaults = try #require(UserDefaults(suiteName: "widget-test-\(UUID())"))
+        defer { defaults.removeObject(forKey: WidgetTodayExpensesStore.storageKey) }
+        let store = WidgetTodayExpensesStore(defaults: defaults)
+        let start = Date(timeIntervalSince1970: 1_800_000_000)
+        let end = start.addingTimeInterval(86_400)
+        #expect(store.load(at: start) == nil)
+        let snapshot = WidgetTodayExpenses(
+            startOfDay: start, endOfDay: end,
+            total: 20_000, count: 1,
+            expenses: [.init(id: UUID(), title: "Coffee", amount: 20_000)])
+        try store.save(snapshot)
+        #expect(store.load(at: start)?.total == 20_000)
+        #expect(store.load(at: end)?.count == 0)
+        try store.save(.init(startOfDay: start, endOfDay: end, total: 0, count: 0, expenses: []))
+        #expect(store.load(at: start)?.expenses.isEmpty == true)
     }
 }
