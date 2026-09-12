@@ -1,6 +1,96 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "About device sync": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Về đồng bộ thiết bị"
+          }
+        }
+      }
+    },
+    "Pair your devices": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghép nối thiết bị"
+          }
+        }
+      }
+    },
+    "Keep MonMon open on your Mac and iPhone, using the same Wi-Fi.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở MonMon trên Mac và iPhone, sử dụng cùng mạng Wi-Fi."
+          }
+        }
+      }
+    },
+    "Choose the version to keep. Nothing is saved until both devices approve.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn phiên bản muốn giữ. Dữ liệu chỉ được lưu khi cả hai thiết bị xác nhận."
+          }
+        }
+      }
+    },
+    "Choose versions": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn phiên bản"
+          }
+        }
+      }
+    },
+    "%lld of %lld selected": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã chọn %lld / %lld"
+          }
+        }
+      }
+    },
+    "%lld choices remaining": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Còn %lld mục cần chọn"
+          }
+        }
+      }
+    },
+    "Changes to apply": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thay đổi sẽ áp dụng"
+          }
+        }
+      }
+    },
+    "All details": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tất cả chi tiết"
+          }
+        }
+      }
+    },
     "No linked investments": {
       "localizations": {
         "vi": {

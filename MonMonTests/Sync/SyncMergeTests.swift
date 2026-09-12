@@ -8,6 +8,43 @@ struct SyncMergeTests {
     private let first = UUID(uuid: (16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1))
     private let second = UUID(uuid: (16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2))
 
+    @Test("Review amounts use grouping without rounding away differences or changing identifiers")
+    func readableReviewNumbers() {
+        let locale = Locale(identifier: "en_US")
+        #expect(
+            SyncLabels.formattedNumber(.string("5000000"), field: "openingBalance", locale: locale)
+                == "5,000,000")
+        #expect(
+            SyncLabels.formattedNumber(.string("0.000000123"), field: "units", locale: locale)
+                == "0.000000123")
+        #expect(
+            SyncLabels.formattedNumber(.string("001234"), field: "accountID", locale: locale) == nil
+        )
+        #expect(SyncLabels.formattedNumber(.null, field: "amount", locale: locale) == nil)
+    }
+
+    @Test("Conflict summaries show changed and cleared fields, not shared values or IDs")
+    func conflictSummaryFields() {
+        let a = record(first)
+        var b = record(second, note: "Dinner")
+        b.fields["categoryID"] = .string(first.uuidString)
+        let conflict = SyncConflict(
+            id: a.id, options: [a, b], origins: ["This device", "Other device"])
+        #expect(conflict.differingFields == ["categoryID", "note"])
+        b.fields["categoryID"] = .null
+        let cleared = SyncConflict(
+            id: a.id, options: [a, b], origins: ["This device", "Other device"])
+        #expect(cleared.differingFields == ["note"])
+    }
+
+    @Test("Delete conflicts retain the surviving record's fields in the summary")
+    func deletionSummaryFields() {
+        let a = record(first)
+        let conflict = SyncConflict(
+            id: a.id, options: [nil, a], origins: ["This device", "Other device"])
+        #expect(conflict.differingFields == ["createdAt", "note"])
+    }
+
     private func record(_ id: UUID, note: String = "Lunch", type: String = "transactions")
         -> SyncRecord
     {
