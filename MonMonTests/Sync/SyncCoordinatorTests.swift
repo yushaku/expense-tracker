@@ -109,6 +109,55 @@ struct SyncCoordinatorTests {
         #expect(try b.state().reports.count == 2)
     }
 
+    @Test(
+        "A failed review exposes reconnect without losing the pending session",
+        arguments: [false, true])
+    func reconnectAfterReviewFailure(phoneInitiates: Bool) throws {
+        let a = try store(), b = try store()
+        let pair = try SyncPairing.make(hostID: a.state().deviceID)
+        try a.updateState { $0.pairID = pair.pairID }
+        try b.updateState { $0.pairID = pair.pairID }
+        let ta = TestSyncTransport(), tb = TestSyncTransport()
+        let ca = SyncCoordinator(store: a, transport: ta, loadPairing: { _ in pair })
+        let cb = SyncCoordinator(store: b, transport: tb, loadPairing: { _ in pair })
+        try connect(ca, cb, ta, tb)
+        let initiator = phoneInitiates ? cb : ca
+        let responder = phoneInitiates ? ca : cb
+        let initiatorStore = phoneInitiates ? b : a
+        let before = try initiatorStore.snapshot().digest()
+        initiator.startSync()
+        try drain(ta, tb)
+        initiator.apply()
+        try drain(ta, tb)
+        #expect(responder.canApply)
+        let pendingID = try #require(initiatorStore.state().pending?.id)
+
+        // Use transport errors, without dismissing the sheet or recreating coordinators.
+        ta.onError?(SyncError.disconnected)
+        tb.onError?(SyncError.disconnected)
+        #expect(initiator.phase == .interrupted)
+        #expect(initiator.plan == nil)
+        #expect(responder.plan == nil)
+        #expect(initiator.hasPending && initiator.writesLocked)
+        #expect(try initiatorStore.state().pending?.id == pendingID)
+        #expect(try initiatorStore.state().pending?.applied == false)
+        #expect(try initiatorStore.snapshot().digest() == before)
+
+        try connect(ca, cb, ta, tb)
+        #expect(ca.canStart && cb.canStart)
+        #expect(!ca.writesLocked && !cb.writesLocked)
+        #expect(try a.state().pending == nil)
+        #expect(try b.state().pending == nil)
+        initiator.startSync()
+        try drain(ta, tb)
+        initiator.apply()
+        try drain(ta, tb)
+        responder.apply()
+        try drain(ta, tb)
+        #expect(ca.phase == .complete && cb.phase == .complete)
+        #expect(try a.snapshot().digest() == b.snapshot().digest())
+    }
+
     @Test("Reconnect completes a session interrupted after only the initiator committed")
     func interruptedCommit() throws {
         let a = try store(), b = try store()

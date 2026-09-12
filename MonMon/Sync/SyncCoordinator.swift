@@ -577,6 +577,9 @@ final class SyncCoordinator {
         peer = nil
         pairingCode = nil
         errorMessage = error.localizedDescription
+        // Remove the stale review so SyncView exposes Connect. The durable pending
+        // session stays intact for recovery, and refresh keeps its write lock.
+        resetReview()
         refresh()
         phase = .interrupted
     }
