@@ -91,11 +91,18 @@ The installed apps are `~/Applications/MonMon Dev.app` and
 `~/Applications/MonMon.app`. Override the destination with
 `MONMON_MAC_INSTALL_DIR` when needed.
 
-Build and install the dev flavour on an iPhone:
+From `dev`, build, install, and launch the dev flavour on both a physical iPhone
+and this Mac with one command:
 
 ```sh
 scripts/run-iphone.sh Yushaku
 ```
+
+The iPhone must be connected, unlocked, and have Developer Mode enabled. The
+script installs on the iPhone first, then calls `scripts/install-mac.sh dev`.
+Builds run sequentially using the workspace cache. If a step fails, the script
+stops and does not report both devices as installed. Mac installation still
+supports `MONMON_MAC_INSTALL_DIR` and `MONMON_MAC_DERIVED_DATA_PATH` overrides.
 
 Build and install Prod on an iPhone (clean `main` only):
 
