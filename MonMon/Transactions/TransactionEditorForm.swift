@@ -33,10 +33,9 @@ enum TransactionEntryTab: Int, CaseIterable {
 
 struct TransactionEditorForm: View {
     @Environment(\.locale) private var locale
-    @Environment(\.layoutDirection) private var layoutDirection
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    @State private var pageTurnDirection = -1.0
+    let pageTurnDirection: Double
 
     @Binding var draft: TransactionDraft
 
@@ -48,8 +47,6 @@ struct TransactionEditorForm: View {
     let validationError: TransactionFormError?
     let saveErrorMessage: LocalizedStringKey?
     let onDelete: () -> Void
-    @Binding var selectedTab: TransactionEntryTab
-    let allowsTransfer: Bool
 
     var body: some View {
         ZStack {
@@ -77,24 +74,7 @@ struct TransactionEditorForm: View {
             // pulls where it should take one. Content that already fits has
             // nothing to scroll and so has no reason to bounce.
             .scrollBounceBehavior(.basedOnSize)
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 30)
-                    .onEnded { value in
-                        let horizontal =
-                            layoutDirection == .rightToLeft
-                            ? -value.translation.width : value.translation.width
-                        let current = selectedTab
-                        let next = current.swiped(
-                            horizontal: horizontal,
-                            vertical: value.translation.height, allowsTransfer: allowsTransfer
-                        )
-                        guard next != current else { return }
-                        pageTurnDirection = value.translation.width < 0 ? -1 : 1
-                        withAnimation(.easeInOut(duration: reduceMotion ? 0.15 : 0.35)) {
-                            selectedTab = next
-                        }
-                    }
-            )
+
         }
     }
 
