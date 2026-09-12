@@ -114,7 +114,7 @@ struct QuickExpenseWidgetView: View {
     }
 
     private var todayExpenses: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 3) {
             HStack {
                 Text("Today’s expenses")
                     .font(.headline)

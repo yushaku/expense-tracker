@@ -70,7 +70,7 @@ struct WidgetTodayExpensesStore {
                 return $0.id.uuidString < $1.id.uuidString
             }
             let categories = try context.fetch(FetchDescriptor<TransactionCategory>())
-            let rows = transactions.prefix(3).map { transaction in
+            let rows = transactions.prefix(5).map { transaction in
                 let note = transaction.note.trimmingCharacters(in: .whitespacesAndNewlines)
                 let category = categories.first { $0.id == transaction.categoryID }
                 return Expense(

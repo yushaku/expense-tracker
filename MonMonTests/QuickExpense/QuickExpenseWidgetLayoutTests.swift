@@ -102,7 +102,7 @@ struct WidgetTodayExpensesTests {
         let context = container.mainContext
         let now = Date(timeIntervalSince1970: 1_800_000_000)
         let start = TransactionPeriod.calendar.startOfDay(for: now)
-        for index in 0..<5 {
+        for index in 0..<7 {
             context.insert(
                 MoneyTransaction(
                     id: UUID(), kind: .expense, amount: 10_000,
@@ -122,23 +122,26 @@ struct WidgetTodayExpensesTests {
         }
         try context.save()
         let snapshot = try WidgetTodayExpenses.make(in: context, at: now)
-        #expect(snapshot.total == 50_000)
-        #expect(snapshot.count == 5)
-        #expect(snapshot.expenses.map(\.title) == ["Expense 4", "Expense 3", "Expense 2"])
+        #expect(snapshot.total == 70_000)
+        #expect(snapshot.count == 7)
+        #expect(
+            snapshot.expenses.map(\.title) == [
+                "Expense 6", "Expense 5", "Expense 4", "Expense 3", "Expense 2",
+            ])
         #expect(snapshot.startOfDay == start)
         let newest = try #require(
             try context.fetch(FetchDescriptor<MoneyTransaction>()).first {
-                $0.note == "Expense 4"
+                $0.note == "Expense 6"
             })
         newest.amount = 30_000
         try context.save()
-        #expect(try WidgetTodayExpenses.make(in: context, at: now).total == 70_000)
+        #expect(try WidgetTodayExpenses.make(in: context, at: now).total == 90_000)
         context.delete(newest)
         try context.save()
         let afterDeletion = try WidgetTodayExpenses.make(in: context, at: now)
-        #expect(afterDeletion.count == 4)
-        #expect(afterDeletion.total == 40_000)
-        #expect(afterDeletion.expenses.first?.title == "Expense 3")
+        #expect(afterDeletion.count == 6)
+        #expect(afterDeletion.total == 60_000)
+        #expect(afterDeletion.expenses.first?.title == "Expense 5")
 
     }
 
