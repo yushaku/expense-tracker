@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1830A82886604C5A8156B9DE /* ReportHighlightsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFBFF40EFA0D46F6BEB1D71B /* ReportHighlightsTests.swift */; };
+		49E870A6003140BCA748DB0A /* ReportHighlightsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F9202B198804F918ADB263D /* ReportHighlightsCard.swift */; };
+		8243BEFF5CD84AB8AE2FA2EA /* ReportHighlights.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D17D81F04142CBAB5891BE /* ReportHighlights.swift */; };
 		857F58A5B671400C889FEAB4 /* CategoryPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000163 /* CategoryPalette.swift */; };
 		AA3839C47C894D66BBAC77DA /* SavingsGoalWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C71E351B684A7AB63CDA94 /* SavingsGoalWidget.swift */; };
 		4A711F0DFE644FE0BA9DB07C /* GoalWidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18BE00010F164453B72DEE83 /* GoalWidgetSnapshot.swift */; };
@@ -496,6 +499,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		BFBFF40EFA0D46F6BEB1D71B /* ReportHighlightsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportHighlightsTests.swift; sourceTree = "<group>"; };
+		2F9202B198804F918ADB263D /* ReportHighlightsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportHighlightsCard.swift; sourceTree = "<group>"; };
+		47D17D81F04142CBAB5891BE /* ReportHighlights.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportHighlights.swift; sourceTree = "<group>"; };
 		C2C71E351B684A7AB63CDA94 /* SavingsGoalWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsGoalWidget.swift; sourceTree = "<group>"; };
 		18BE00010F164453B72DEE83 /* GoalWidgetSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalWidgetSnapshot.swift; sourceTree = "<group>"; };
 		J20000000000000000000101 /* WidgetTodayExpenses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetTodayExpenses.swift; sourceTree = "<group>"; };
@@ -1493,6 +1499,8 @@
 				A00000000000000000000165 /* TransactionSummary.swift */,
 				A00000000000000000009106 /* ReportFilterSheet.swift */,
 				A00000000000000000009105 /* ReportView.swift */,
+				2F9202B198804F918ADB263D /* ReportHighlightsCard.swift */,
+				47D17D81F04142CBAB5891BE /* ReportHighlights.swift */,
 				R20000000000000000000001 /* AccountReportSummary.swift */,
 				R20000000000000000000002 /* AccountSpendingSection.swift */,
 				R20000000000000000000003 /* AccountDetailView.swift */,
@@ -1539,6 +1547,7 @@
 				A00000000000000000000167 /* TransactionSummaryTests.swift */,
 				A00000000000000000009102 /* TransactionSearchTests.swift */,
 				R20000000000000000000004 /* AccountReportSummaryTests.swift */,
+				BFBFF40EFA0D46F6BEB1D71B /* ReportHighlightsTests.swift */,
 				C10000000000000000000004 /* TransactionCalendarTests.swift */,
 				A00000000000000000000174 /* CategoryDraftTests.swift */,
 				A00000000000000000000175 /* TransactionCategoryPersistenceTests.swift */,
@@ -2141,6 +2150,8 @@
 				A00000000000000000000254 /* TransactionSummary.swift in Sources */,
 				A00000000000000000009006 /* ReportFilterSheet.swift in Sources */,
 				A00000000000000000009005 /* ReportView.swift in Sources */,
+				49E870A6003140BCA748DB0A /* ReportHighlightsCard.swift in Sources */,
+				8243BEFF5CD84AB8AE2FA2EA /* ReportHighlights.swift in Sources */,
 				R20000000000000000000101 /* AccountReportSummary.swift in Sources */,
 				R20000000000000000000102 /* AccountSpendingSection.swift in Sources */,
 				R20000000000000000000103 /* AccountDetailView.swift in Sources */,
@@ -2330,6 +2341,7 @@
 				A00000000000000000000256 /* TransactionSummaryTests.swift in Sources */,
 				A00000000000000000009002 /* TransactionSearchTests.swift in Sources */,
 				R20000000000000000000104 /* AccountReportSummaryTests.swift in Sources */,
+				1830A82886604C5A8156B9DE /* ReportHighlightsTests.swift in Sources */,
 				C10000000000000000000104 /* TransactionCalendarTests.swift in Sources */,
 				A00000000000000000000255 /* TransactionPeriodTests.swift in Sources */,
 				A00000000000000000000613 /* TransactionRangeTests.swift in Sources */,
