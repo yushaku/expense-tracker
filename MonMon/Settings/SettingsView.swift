@@ -3,8 +3,9 @@ import SwiftData
 import SwiftUI
 
 struct SettingsView: View {
+    let onOpenDeviceSync: () -> Void
+
     @Environment(\.dismiss) private var dismiss
-    @Environment(SyncCoordinator.self) private var syncCoordinator
     @Environment(AppLock.self) private var appLock
     @Environment(NotificationCoordinator.self) private var notificationCoordinator
     @Environment(\.modelContext) private var modelContext
@@ -63,8 +64,7 @@ struct SettingsView: View {
                                 )
                                 .font(.subheadline).foregroundStyle(MonMonTheme.textSecondary)
                                 Button("Open Device Sync") {
-                                    syncCoordinator.refresh()
-                                    syncCoordinator.isPresented = true
+                                    onOpenDeviceSync()
                                 }
                                 .accessibilityIdentifier("settings-device-sync")
                             }
@@ -449,7 +449,7 @@ struct SettingsView: View {
 
 #if DEBUG
     #Preview("Settings") {
-        SettingsView()
+        SettingsView(onOpenDeviceSync: {})
             .environment(AppLock(isLocked: false))
             .environment(NotificationCoordinator())
             .modelContainer(PreviewData.populated)
