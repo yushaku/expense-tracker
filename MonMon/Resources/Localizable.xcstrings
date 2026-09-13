@@ -1,6 +1,36 @@
 {
   "sourceLanguage": "en",
   "strings": {
+  "Current period": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Kỳ này"
+        }
+      }
+    }
+  },
+  "Previous period": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Kỳ trước"
+        }
+      }
+    }
+  },
+  "Current period · %lld days": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Kỳ này · %lld ngày"
+        }
+      }
+    }
+  },
   "Spending rhythm": {
     "localizations": {
       "vi": {

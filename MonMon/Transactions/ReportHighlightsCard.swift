@@ -3,6 +3,7 @@ import SwiftUI
 struct ReportHighlightsCard: View {
     @Environment(\.locale) private var locale
     @Environment(\.appDateFormat) private var dateFormat
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let highlights: ReportHighlights
     @State private var selectedChange: ReportCategoryChange?
 
@@ -17,24 +18,10 @@ struct ReportHighlightsCard: View {
                     : "Spending compared with previous period"
             )
             .font(.subheadline.weight(.semibold))
-            VStack(alignment: .leading, spacing: 4) {
-                Text(
-                    "Current: \(highlights.periods.current.title(in: locale, dateFormat: dateFormat))"
-                )
-                Text(
-                    "Previous: \(highlights.periods.previous.title(in: locale, dateFormat: dateFormat))"
-                )
-            }
-            .font(.caption)
-            .foregroundStyle(MonMonTheme.textSecondary)
+            comparisonPeriods
 
             if highlights.hasTransactions {
                 changeSummary
-                Text(
-                    "\(VNDCurrency.format(highlights.current)) now · \(VNDCurrency.format(highlights.previous)) previously"
-                )
-                .font(.caption)
-                .foregroundStyle(MonMonTheme.textSecondary)
                 ForEach(highlights.changes) { change in
                     Button {
                         selectedChange = change
@@ -78,14 +65,37 @@ struct ReportHighlightsCard: View {
         }
     }
 
+    private var comparisonPeriods: some View {
+        let layout =
+            dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: 8))
+        return layout {
+            ReportPeriodBadge(
+                title: "Current period", range: highlights.periods.current,
+                amount: highlights.current, isCurrent: true)
+            ReportPeriodBadge(
+                title: "Previous period", range: highlights.periods.previous,
+                amount: highlights.previous, isCurrent: false)
+        }
+    }
+
     private func spendingRhythm(_ rhythm: ReportSpendingRhythm) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Label("Spending rhythm", systemImage: "chart.bar.xaxis")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(MonMonTheme.accent)
-            Text("Period: \(rhythm.period.title(in: locale, dateFormat: dateFormat))")
-                .font(.caption)
-                .foregroundStyle(MonMonTheme.textSecondary)
+            Group {
+                if rhythm.period == highlights.periods.current {
+                    Label("Current period · \(rhythm.dayCount) days", systemImage: "calendar")
+                } else {
+                    Label(
+                        rhythm.period.title(in: locale, dateFormat: dateFormat),
+                        systemImage: "calendar")
+                }
+            }
+            .font(.caption)
+            .foregroundStyle(MonMonTheme.textSecondary)
             rhythmMetric("Average per day", value: VNDCurrency.format(rhythm.averagePerDay))
             rhythmMetric("Expense count", value: rhythm.count.formatted(.number.locale(locale)))
             if let average = rhythm.averagePerExpense {
@@ -147,6 +157,72 @@ struct ReportHighlightsCard: View {
 
     private func signed(_ amount: Decimal) -> String {
         "\(amount > 0 ? "+" : "−")\(VNDCurrency.format(abs(amount)))"
+    }
+}
+
+/// Separate day numbers from their shared month so the comparison reads at a
+/// glance. Cross-month ranges retain full dates and the owner's date format.
+private struct ReportPeriodBadge: View {
+    @Environment(\.locale) private var locale
+    @Environment(\.appDateFormat) private var dateFormat
+    let title: LocalizedStringKey
+    let range: TransactionRange
+    let amount: Decimal
+    let isCurrent: Bool
+
+    private var sharesMonth: Bool {
+        TransactionPeriod.calendar.isDate(
+            range.start, equalTo: range.lastDay, toGranularity: .month)
+    }
+
+    private var days: String {
+        let style = TransactionPeriod.format(Date.FormatStyle().day(), in: locale)
+        let start = style.format(range.start)
+        return range.start == range.lastDay ? start : "\(start)–\(style.format(range.lastDay))"
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(isCurrent ? MonMonTheme.accent : MonMonTheme.textSecondary)
+            Group {
+                if sharesMonth {
+                    Text(days)
+                        .font(.title2.weight(.semibold))
+                        .monospacedDigit()
+                    Text(
+                        TransactionPeriod.format(
+                            Date.FormatStyle().month(.abbreviated).year(), in: locale
+                        ).format(range.start)
+                    )
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                } else {
+                    Text(dateFormat.format(range.start))
+                    Text("→ \(dateFormat.format(range.lastDay))")
+                }
+            }
+            .font(.subheadline.weight(.medium))
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(range.title(in: locale, dateFormat: dateFormat))
+            Text(VNDCurrency.format(amount))
+                .font(.subheadline.weight(.semibold))
+                .monospacedDigit()
+                .padding(.top, 2)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(
+            isCurrent ? MonMonTheme.accent.opacity(0.08) : MonMonTheme.canvas,
+            in: .rect(cornerRadius: 12)
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(
+                    isCurrent ? MonMonTheme.accent.opacity(0.25) : MonMonTheme.border, lineWidth: 1)
+        }
+        .accessibilityElement(children: .combine)
     }
 }
 
