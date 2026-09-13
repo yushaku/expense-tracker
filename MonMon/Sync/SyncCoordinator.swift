@@ -206,6 +206,23 @@ final class SyncCoordinator {
         }
     }
 
+    /// Reset is synchronous on the main actor: a peer cannot apply data between
+    /// the backup and deletion. Forget pairing only after the database save succeeds.
+    func resetDatabase(using service: MonMonBackupService, backupURL: URL) throws {
+        let state = try store.state()
+        try service.reset(backupURL: backupURL)
+        if let id = state.pairID { deletePairing(id) }
+        pair = nil
+        localSnapshot = nil
+        remoteSnapshot = nil
+        proposedSession = nil
+        choices = [:]
+        previewLocal = []
+        previewRemote = []
+        disconnect()
+        onApplied?()
+    }
+
     func startSync() {
         perform {
             guard canStart else { throw SyncError.sessionPending }
