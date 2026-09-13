@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "en",
   "strings": {
+  "Database reset complete. Find your backup in Settings → Backup.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Đã đặt lại cơ sở dữ liệu. Bản sao lưu nằm trong Cài đặt → Sao lưu."
+        }
+      }
+    }
+  },
   "Reset local database?": {
     "localizations": {
       "vi": {
