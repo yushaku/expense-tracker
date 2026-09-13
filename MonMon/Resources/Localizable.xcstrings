@@ -31,6 +31,16 @@
       }
     }
   },
+    "You reached your goal!": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bạn đã đạt mục tiêu!"
+          }
+        }
+      }
+    },
   "Spending rhythm": {
     "localizations": {
       "vi": {

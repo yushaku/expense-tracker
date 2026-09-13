@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B7A402B869FA4370879CFAE6 /* GoalCelebration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8997F500F62B4B1EBF575157 /* GoalCelebration.swift */; };
 		1830A82886604C5A8156B9DE /* ReportHighlightsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFBFF40EFA0D46F6BEB1D71B /* ReportHighlightsTests.swift */; };
 		49E870A6003140BCA748DB0A /* ReportHighlightsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F9202B198804F918ADB263D /* ReportHighlightsCard.swift */; };
 		8243BEFF5CD84AB8AE2FA2EA /* ReportHighlights.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D17D81F04142CBAB5891BE /* ReportHighlights.swift */; };
@@ -497,6 +498,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8997F500F62B4B1EBF575157 /* GoalCelebration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalCelebration.swift; sourceTree = "<group>"; };
 		BFBFF40EFA0D46F6BEB1D71B /* ReportHighlightsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportHighlightsTests.swift; sourceTree = "<group>"; };
 		2F9202B198804F918ADB263D /* ReportHighlightsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportHighlightsCard.swift; sourceTree = "<group>"; };
 		47D17D81F04142CBAB5891BE /* ReportHighlights.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportHighlights.swift; sourceTree = "<group>"; };
@@ -1061,6 +1063,7 @@
 				V10000000000000000000105 /* FinancialGoalDraft.swift */,
 				V10000000000000000000106 /* GoalCommitment.swift */,
 				V10000000000000000000107 /* GoalCard.swift */,
+				8997F500F62B4B1EBF575157 /* GoalCelebration.swift */,
 				V10000000000000000000108 /* GoalListView.swift */,
 				V10000000000000000000109 /* GoalEditorView.swift */,
 			);
@@ -2022,6 +2025,7 @@
 				V10000000000000000000205 /* FinancialGoalDraft.swift in Sources */,
 				V10000000000000000000206 /* GoalCommitment.swift in Sources */,
 				V10000000000000000000207 /* GoalCard.swift in Sources */,
+				B7A402B869FA4370879CFAE6 /* GoalCelebration.swift in Sources */,
 				V10000000000000000000208 /* GoalListView.swift in Sources */,
 				V10000000000000000000209 /* GoalEditorView.swift in Sources */,
 				U10000000000000000000202 /* BudgetJar.swift in Sources */,
