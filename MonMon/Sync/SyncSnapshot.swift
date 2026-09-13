@@ -96,17 +96,20 @@ struct SyncRecord: Codable, Equatable, Sendable, Identifiable {
     var uuid: String { fields["id"]?.text ?? "" }
     var id: String { type + "/" + uuid }
     var title: String {
-        fields["name"]?.text ?? fields["note"]?.text ?? fields["symbol"]?.text ?? uuid
+        fields["title"]?.text ?? fields["name"]?.text ?? fields["reason"]?.text ?? fields["note"]?
+            .text ?? fields["symbol"]?.text ?? uuid
     }
     var isSeed: Bool { SyncSnapshot.seedIDs[type]?.contains(uuid) == true }
 }
 
 struct SyncSnapshot: Codable, Equatable, Sendable {
-    static let types = [
+    static let financialTypes = [
         "accounts", "savingsDeposits", "savingsWithdrawals", "fundInstruments",
         "fundHoldings", "fundSales", "budgetJars", "goals", "tripWorkspaces", "categories",
         "transactions", "transfers", "debts", "debtPayments", "recurringRules",
     ]
+    static let researchTypes = ["researchNotes", "investmentProposals", "researchDecisions"]
+    static let types = financialTypes + researchTypes
     static let seedIDs: [String: Set<String>] = [
         "accounts": Set([1, 2].map { String(format: "00000000-0000-0000-0000-%012x", $0) }),
         "categories": Set(
@@ -129,7 +132,7 @@ struct SyncSnapshot: Codable, Equatable, Sendable {
     init(payload: MonMonBackupPayload, deletedSeeds: Set<String> = []) throws {
         let root = try JSONDecoder().decode(
             [String: SyncValue].self, from: SyncCoding.encode(payload))
-        records = try Self.types.flatMap { type -> [SyncRecord] in
+        records = try Self.financialTypes.flatMap { type -> [SyncRecord] in
             guard case .array(let values) = root[type] else { throw SyncError.invalidData }
             return try values.map {
                 guard case .object(let fields) = $0 else { throw SyncError.invalidData }
@@ -142,7 +145,7 @@ struct SyncSnapshot: Codable, Equatable, Sendable {
     func payload() throws -> MonMonBackupPayload {
         var root = try JSONDecoder().decode(
             [String: SyncValue].self, from: SyncCoding.encode(MonMonBackupPayload.empty))
-        for type in Self.types {
+        for type in Self.financialTypes {
             root[type] = .array(records.filter { $0.type == type }.map { .object($0.fields) })
         }
         return try JSONDecoder().decode(MonMonBackupPayload.self, from: SyncCoding.encode(root))
@@ -153,6 +156,7 @@ struct SyncSnapshot: Codable, Equatable, Sendable {
         guard Set(records.map(\.id)).count == records.count,
             records.allSatisfy({ Self.types.contains($0.type) && UUID(uuidString: $0.uuid) != nil })
         else { throw SyncError.invalidData }
+        _ = try researchNotebook()
         let payload = try payload()
         let document = try MonMonBackupDocument.make(
             payload: payload, exportedAt: .now, appVersion: "p2p-v1", flavour: .current)
@@ -162,12 +166,16 @@ struct SyncSnapshot: Codable, Equatable, Sendable {
         // introducing dangling relationships by deleting a still-needed parent.
         let roundTrip = try SyncSnapshot(payload: validated.payload)
         guard
-            roundTrip.records.sorted(by: { $0.id < $1.id }) == records.sorted(by: { $0.id < $1.id })
+            roundTrip.records.sorted(by: { $0.id < $1.id })
+                == records.filter({ Self.financialTypes.contains($0.type) }).sorted(by: {
+                    $0.id < $1.id
+                })
         else { throw SyncError.invalidData }
         return validated.payload
     }
 
     static let referenceTypes: [String: String] = [
+        "proposalID": "investmentProposals",
         "swapHoldingID": "fundHoldings",
         "accountID": "accounts", "sourceAccountID": "accounts", "destinationAccountID": "accounts",
         "proceedsAccountID": "accounts", "categoryID": "categories", "budgetJarID": "budgetJars",
@@ -179,15 +187,23 @@ struct SyncSnapshot: Codable, Equatable, Sendable {
     ]
 
     static func requiredParents(of record: SyncRecord) -> Set<String> {
-        Set(
-            referenceTypes.compactMap { field, type in
-                // These identifiers retain provenance even after the originating
-                // rule or goal is removed; they are not ownership relationships.
-                guard field != "sourceRuleID", field != "sourceGoalID",
-                    let id = record.fields[field]?.text
-                else { return nil }
-                return type + "/" + id
-            })
+        let noteParents: Set<String>
+        if case .array(let ids) = record.fields["noteIDs"] {
+            noteParents = Set(ids.compactMap { $0.text.map { "researchNotes/" + $0 } })
+        } else {
+            noteParents = []
+        }
+        return noteParents.union(
+            Set(
+                referenceTypes.compactMap { field, type in
+                    // These identifiers retain provenance even after the originating
+                    // rule or goal is removed; they are not ownership relationships.
+                    guard field != "sourceRuleID", field != "sourceGoalID",
+                        !(record.type == "researchNotes" && field == "instrumentID"),
+                        let id = record.fields[field]?.text
+                    else { return nil }
+                    return type + "/" + id
+                }))
     }
 
     func validateDeletions(from previous: [SyncRecord]) throws {
@@ -224,5 +240,57 @@ enum SyncCoding {
     }
     static func digest<T: Encodable>(_ value: T) throws -> String {
         SHA256.hash(data: try encode(value)).map { String(format: "%02x", $0) }.joined()
+    }
+}
+
+extension SyncSnapshot {
+    mutating func includeResearch(_ notebook: ResearchNotebook) throws {
+        records.removeAll { Self.researchTypes.contains($0.type) }
+        records += try Self.researchRecords(notebook)
+    }
+
+    static func researchRecords(_ notebook: ResearchNotebook) throws -> [SyncRecord] {
+        let root = try JSONDecoder().decode(
+            [String: SyncValue].self, from: SyncCoding.encode(notebook))
+        return try [
+            ("notes", "researchNotes"), ("proposals", "investmentProposals"),
+            ("decisions", "researchDecisions"),
+        ].flatMap { key, type in
+            guard case .array(let values) = root[key] else { throw SyncError.invalidData }
+            return try values.map { value in
+                guard case .object(var fields) = value else { throw SyncError.invalidData }
+                for key in ["id", "instrumentID", "proposalID"] {
+                    if let id = fields[key]?.text { fields[key] = .string(id.lowercased()) }
+                }
+                if case .array(let ids) = fields["noteIDs"] {
+                    fields["noteIDs"] = .array(ids.map { .string(($0.text ?? "").lowercased()) })
+                }
+                return SyncRecord(type: type, fields: fields)
+            }
+        }
+    }
+
+    func researchNotebook() throws -> ResearchNotebook {
+        let selected = records.filter { Self.researchTypes.contains($0.type) }
+        let root: [String: SyncValue] = [
+            "schemaVersion": .number(1),
+            "notes": .array(
+                selected.filter { $0.type == "researchNotes" }.map { .object($0.fields) }),
+            "proposals": .array(
+                selected.filter { $0.type == "investmentProposals" }.map { .object($0.fields) }),
+            "decisions": .array(
+                selected.filter { $0.type == "researchDecisions" }.map { .object($0.fields) }),
+        ]
+        do {
+            let data = try SyncCoding.encode(root)
+            guard data.count <= ResearchNotebookStore.maximumBytes else { throw SyncError.tooLarge }
+            let notebook = try JSONDecoder().decode(ResearchNotebook.self, from: data)
+            try notebook.validateForSync()
+            guard
+                try Self.researchRecords(notebook).sorted(by: { $0.id < $1.id })
+                    == selected.sorted(by: { $0.id < $1.id })
+            else { throw SyncError.invalidData }
+            return notebook
+        } catch let error as SyncError { throw error } catch { throw SyncError.invalidData }
     }
 }

@@ -67,6 +67,7 @@ enum MCPServerAdapter {
                 return try errorResult(error)
             } catch let error as ResearchStoreError {
                 switch error {
+                case .invalidArgument: return try errorResult(.invalidArgument)
                 case .duplicateID: return try errorResult(.researchConflict)
                 case .missingReference: return try errorResult(.researchNotFound)
                 case .expired: return try errorResult(.researchExpired)

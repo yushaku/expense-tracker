@@ -139,7 +139,12 @@ enum SyncMergePlanner {
             let forcedSeedDecision =
                 base == nil && key != SyncSnapshot.anchorID && SyncSnapshot.isSeedKey(key)
                 && (l == nil) != (r == nil)
-            if !forcedSeedDecision && equivalent(l, r) {
+            if SyncSnapshot.researchTypes.contains((l ?? r ?? o)?.type ?? ""),
+                (l == nil || r == nil), let kept = l ?? r
+            {
+                // Notes, proposals and decision events are append-only across devices.
+                result.automatic.append(kept)
+            } else if !forcedSeedDecision && equivalent(l, r) {
                 if let kept = canonical(l, r) { result.automatic.append(kept) }
             } else if !forcedSeedDecision && old.count <= 1 && base != nil && equivalent(l, o) {
                 if let r {
@@ -188,6 +193,7 @@ enum SyncMergePlanner {
 
     private static func equivalent(_ a: SyncRecord?, _ b: SyncRecord?) -> Bool {
         guard var a, var b else { return a == b }
+        if SyncSnapshot.researchTypes.contains(a.type) { return a == b }
         // Creation time describes provenance, not a user's concurrent edit.
         a.fields.removeValue(forKey: "createdAt")
         b.fields.removeValue(forKey: "createdAt")
