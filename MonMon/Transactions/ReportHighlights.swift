@@ -50,6 +50,22 @@ struct ReportCategoryChange: Identifiable {
     var delta: Decimal { current - previous }
 }
 
+struct ReportSpendingRhythm {
+    let period: TransactionRange
+    let count: Int
+    let total: Decimal
+
+    var dayCount: Int {
+        max(
+            1,
+            TransactionPeriod.calendar.dateComponents(
+                [.day], from: period.start, to: period.end
+            ).day ?? 1)
+    }
+    var averagePerDay: Decimal { total / Decimal(dayCount) }
+    var averagePerExpense: Decimal? { count > 0 ? total / Decimal(count) : nil }
+}
+
 struct ReportHighlights {
     let periods: ReportComparisonPeriods
     let kind: TransactionKind
@@ -57,6 +73,7 @@ struct ReportHighlights {
     let previous: Decimal
     let changes: [ReportCategoryChange]
     let hasTransactions: Bool
+    let spendingRhythm: ReportSpendingRhythm?
 
     var delta: Decimal { current - previous }
     var percentageChange: Double? {
@@ -87,6 +104,22 @@ struct ReportHighlights {
         current = currentRows.reduce(0) { $0 + $1.amount }
         previous = previousRows.reduce(0) { $0 + $1.amount }
         hasTransactions = !currentRows.isEmpty || !previousRows.isEmpty
+        if kind == .expense {
+            var rhythmQuery = currentQuery
+            // Rhythm describes the entire selected period through today, even
+            // when a shorter previous month trims the comparison windows.
+            rhythmQuery.range = TransactionRange(
+                scope: .custom, start: query.range.start,
+                end: min(query.range.end, TransactionRange.day(containing: asOf).end))
+            let rows = TransactionSearch.results(
+                of: rhythmQuery, transactions: transactions,
+                categoryNames: categoryNames, accountNames: accountNames)
+            spendingRhythm = ReportSpendingRhythm(
+                period: rhythmQuery.range, count: rows.count,
+                total: rows.reduce(0) { $0 + $1.amount })
+        } else {
+            spendingRhythm = nil
+        }
         func categoryID(_ transaction: MoneyTransaction) -> UUID? {
             guard let id = transaction.categoryID, categoryNames[id] != nil else { return nil }
             return id

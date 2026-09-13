@@ -290,3 +290,9 @@ months and years compare whole periods. Custom ranges use the immediately preced
 range of the same length. The card labels both date windows, omits percentages when
 the prior total is zero, and opens the contributing transactions for its two largest
 category changes. Future periods have no comparison card.
+
+Within Highlights, Spending rhythm shows the expense count, daily average across
+all elapsed calendar days (including days without recorded expenses), and average
+expense amount. It retains all report filters, excludes future days, and uses the
+full selected period through today even when the comparison window is shortened.
+Income-only reports hide this section; empty periods have no per-expense average.
