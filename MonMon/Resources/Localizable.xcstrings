@@ -4764,16 +4764,6 @@
         }
       }
     },
-    "MonMon couldn’t open. Reinstall the app to restore its URL scheme.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MonMon không mở được. Hãy cài lại app để phục hồi scheme URL của nó."
-          }
-        }
-      }
-    },
     "MonMon couldn’t record that transaction. Open the app and check your defaults.": {
       "localizations": {
         "vi": {
@@ -15643,16 +15633,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dữ liệu trên máy được giữ nguyên. Ghép đôi lại để đồng bộ với thiết bị khác."
-          }
-        }
-      }
-    },
-    "Open MonMon and start a new transaction.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mở MonMon và bắt đầu một giao dịch mới."
           }
         }
       }

@@ -89,10 +89,6 @@
 		J10000000000000000000208 /* MonMonTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000127 /* MonMonTheme.swift */; };
 		J10000000000000000000209 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000187 /* AppTheme.swift */; };
 		J10000000000000000000201 /* QuickExpenseWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = J10000000000000000000102 /* QuickExpenseWidget.swift */; };
-		J30000000000000000000201 /* QuickCaptureControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = J30000000000000000000101 /* QuickCaptureControl.swift */; };
-		J30000000000000000000202 /* AppRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = Q10000000000000000000110 /* AppRoute.swift */; };
-		J30000000000000000000203 /* QuickCaptureIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = J30000000000000000000102 /* QuickCaptureIntent.swift */; };
-		J30000000000000000000204 /* QuickCaptureIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = J30000000000000000000102 /* QuickCaptureIntent.swift */; };
 		J10000000000000000000202 /* QuickExpensePreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000102 /* QuickExpensePreset.swift */; };
 		J10000000000000000000207 /* QuickExpenseWidgetLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000107 /* QuickExpenseWidgetLayout.swift */; };
 		J10000000000000000000203 /* QuickExpenseIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = W10000000000000000000103 /* QuickExpenseIntent.swift */; };
@@ -575,7 +571,6 @@
 		J10000000000000000000102 /* QuickExpenseWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpenseWidget.swift; sourceTree = "<group>"; };
 		J10000000000000000000103 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		J10000000000000000000104 /* MonMonQuickExpenseWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MonMonQuickExpenseWidget.entitlements; sourceTree = "<group>"; };
-		J30000000000000000000101 /* QuickCaptureControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickCaptureControl.swift; sourceTree = "<group>"; };
 		W10000000000000000000103 /* QuickExpenseIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpenseIntent.swift; sourceTree = "<group>"; };
 		W10000000000000000000104 /* QuickExpensePresetDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpensePresetDraft.swift; sourceTree = "<group>"; };
 		W10000000000000000000105 /* QuickExpensePresetsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpensePresetsCard.swift; sourceTree = "<group>"; };
@@ -593,7 +588,6 @@
 		K10000000000000000000116 /* BackupRestoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupRestoreView.swift; sourceTree = "<group>"; };
 		K10000000000000000000117 /* BackupRestorePresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupRestorePresentationTests.swift; sourceTree = "<group>"; };
 		Q10000000000000000000110 /* AppRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRoute.swift; sourceTree = "<group>"; };
-		J30000000000000000000102 /* QuickCaptureIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickCaptureIntent.swift; sourceTree = "<group>"; };
 		Q10000000000000000000111 /* TransactionCaptureEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureEntry.swift; sourceTree = "<group>"; };
 		Q10000000000000000000112 /* AppRouteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouteTests.swift; sourceTree = "<group>"; };
 		Q10000000000000000000109 /* PendingTransactionCaptureListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingTransactionCaptureListView.swift; sourceTree = "<group>"; };
@@ -1091,7 +1085,6 @@
 			isa = PBXGroup;
 			children = (
 				Q10000000000000000000110 /* AppRoute.swift */,
-				J30000000000000000000102 /* QuickCaptureIntent.swift */,
 				Q10000000000000000000106 /* TransactionCaptureIntent.swift */,
 				Q10000000000000000000107 /* MonMonAppShortcuts.swift */,
 				A00000000000000000000816 /* MonMonSchema.swift */,
@@ -1773,7 +1766,6 @@
 				J10000000000000000000103 /* Info.plist */,
 				J10000000000000000000102 /* QuickExpenseWidget.swift */,
 				C2C71E351B684A7AB63CDA94 /* SavingsGoalWidget.swift */,
-				J30000000000000000000101 /* QuickCaptureControl.swift */,
 			);
 			path = MonMonQuickExpenseWidget;
 			sourceTree = "<group>";
@@ -1979,9 +1971,6 @@
 				857F58A5B671400C889FEAB4 /* CategoryPalette.swift in Sources */,
 				AA3839C47C894D66BBAC77DA /* SavingsGoalWidget.swift in Sources */,
 				4A711F0DFE644FE0BA9DB07C /* GoalWidgetSnapshot.swift in Sources */,
-				J30000000000000000000201 /* QuickCaptureControl.swift in Sources */,
-				J30000000000000000000202 /* AppRoute.swift in Sources */,
-				J30000000000000000000204 /* QuickCaptureIntent.swift in Sources */,
 				J10000000000000000000208 /* MonMonTheme.swift in Sources */,
 				J10000000000000000000209 /* AppTheme.swift in Sources */,
 				J10000000000000000000202 /* QuickExpensePreset.swift in Sources */,
@@ -2064,7 +2053,6 @@
 				S10000000000000000000212 /* SavingsWithdrawalSummary.swift in Sources */,
 				S10000000000000000000211 /* SavingsWithdrawal.swift in Sources */,
 				Q10000000000000000000210 /* AppRoute.swift in Sources */,
-				J30000000000000000000203 /* QuickCaptureIntent.swift in Sources */,
 				Q10000000000000000000211 /* TransactionCaptureEntry.swift in Sources */,
 				Q10000000000000000000209 /* PendingTransactionCaptureListView.swift in Sources */,
 				Q10000000000000000000206 /* TransactionCaptureIntent.swift in Sources */,

@@ -264,3 +264,11 @@ struct MonMonQuickExpenseWidget: Widget {
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
+
+@main
+struct MonMonWidgets: WidgetBundle {
+    var body: some Widget {
+        MonMonQuickExpenseWidget()
+        SavingsGoalWidget()
+    }
+}
