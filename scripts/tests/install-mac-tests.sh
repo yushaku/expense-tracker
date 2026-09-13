@@ -41,7 +41,13 @@ while (($#)); do
 done
 
 app_path="$derived_data_path/Build/Products/$configuration/MonMon.app"
-mkdir -p "$app_path"
+mkdir -p "$app_path/Contents/MacOS"
+cat >"$app_path/Contents/MacOS/MonMon" <<'PROBE'
+#!/usr/bin/env bash
+printf 'keychain-check %s\n' "$*" >>"$MONMON_TEST_COMMAND_LOG"
+exit "${MONMON_TEST_KEYCHAIN_STATUS:-0}"
+PROBE
+chmod +x "$app_path/Contents/MacOS/MonMon"
 touch "$app_path/built-by-test"
 EOF
 
@@ -134,5 +140,16 @@ if run_installer preview >"$test_root/usage-error.log" 2>&1; then
 fi
 grep -F "usage: scripts/install-mac.sh [dev|prod]" "$test_root/usage-error.log" >/dev/null \
   || fail "unsupported flavour did not print usage"
+
+: >"$command_log"
+touch "$test_root/Applications/MonMon Dev.app/keep-existing"
+if MONMON_TEST_KEYCHAIN_STATUS=1 run_installer dev >"$test_root/keychain-error.log" 2>&1; then
+  fail "installed an app whose Keychain probe failed"
+fi
+[[ -f "$test_root/Applications/MonMon Dev.app/keep-existing" ]] || fail "removed existing app after failed probe"
+assert_log_contains "keychain-check --check-pairing-keychain"
+if grep -E '^(ditto|open) ' "$command_log" >/dev/null; then
+  fail "copied or opened app after failed probe"
+fi
 
 printf 'install-mac tests passed\n'

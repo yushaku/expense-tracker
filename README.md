@@ -315,3 +315,16 @@ Notes/proposals (stored separately), appearance/security settings, exported file
 and other devices are not erased. Default accounts, categories and jars may be
 created again on the next launch. This is a database reset, not an uninstall or a
 reset of macOS permissions.
+
+### macOS pairing Keychain validation
+
+The app explicitly claims its own `$(AppIdentifierPrefix)$(PRODUCT_BUNDLE_IDENTIFIER)`
+Keychain group, keeping Dev and Prod keys separate. The signing profile must authorize
+this group. Keep the existing App Group identifier when refreshing provisioning so
+financial data remains in its current container.
+
+`scripts/install-mac.sh` runs the signed app with `--check-pairing-keychain` before
+replacing an installed copy. This writes, reads and removes a temporary pairing key;
+it does not open the database or change an existing pairing. If it fails, the script
+keeps the installed app and reports the Keychain error. This check is necessary because
+an app can build and pass code-signature verification yet fail Keychain access at runtime.
