@@ -29,6 +29,7 @@ MonMon is a private personal-finance app for iPhone and Mac, built with SwiftUI 
 - **Jar routing** — an expense follows its category's jar, or a trip's explicit override, or a fallback jar, so nothing drops out of the month's picture.
 - **Income allocation snapshots** — each income keeps a frozen, versioned record of how it was split, so changing today's percentages cannot rewrite last month's payslip.
 - **Goals** — a target amount earmarked _inside_ a jar, never a second asset. Progress, the required monthly figure, and the forecast date are all derived; the earmarked amount itself only changes when the owner edits it. A goal may not commit more than the jar's current-month projected capacity.
+- **Goal celebration** — a successful contribution that reaches the target shows the Catppuccin cat, confetti, and a short congratulations. The effect fades out after two seconds and does not replay when reopening a completed goal. Reduce Motion uses a gentle fade without the bounce or confetti.
 - **Trip workspaces** — a goal with money set aside opens a spending lens whose budget is that earmarked amount. Tagged expenses stay ordinary expenses, so spent and remaining are derived from money that already counted once.
 
 ### Wealth

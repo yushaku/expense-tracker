@@ -456,3 +456,56 @@ struct SavingsGoalWidgetTests {
         #expect(!route.receive(try #require(URL(string: "monmon://goal/invalid")), isLocked: false))
     }
 }
+
+@Suite("Goal completion event")
+@MainActor
+struct GoalCompletionEventTests {
+    private func fixture() throws -> (ModelContainer, FinancialGoal) {
+        let container = try ModelContainer(
+            for: FinancialGoal.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        container.mainContext.autosaveEnabled = false
+        let goal = FinancialGoal(
+            id: UUID(), name: "Camera", targetAmount: 200, earmarkedAmount: 100,
+            targetDate: .now, monthlyContribution: 50, fundingJarID: nil,
+            symbolName: "camera", colorName: "mauve", createdAt: .now)
+        container.mainContext.insert(goal)
+        try container.mainContext.save()
+        return (container, goal)
+    }
+
+    @Test("Only a saved contribution reaching the target emits completion")
+    func completionBoundary() throws {
+        let (container, goal) = try fixture()
+        let context = container.mainContext
+        #expect(
+            try !GoalContributionCommit.save(amount: 50, goal: goal, occurredAt: .now, in: context))
+        #expect(goal.earmarkedAmount == 150)
+        #expect(
+            try GoalContributionCommit.save(amount: 50, goal: goal, occurredAt: .now, in: context))
+        let reopened = try #require(
+            ModelContext(container).fetch(FetchDescriptor<FinancialGoal>()).first)
+        #expect(reopened.earmarkedAmount == 200)
+        #expect(throws: GoalContributionError.self) {
+            try GoalContributionCommit.save(amount: 1, goal: goal, occurredAt: .now, in: context)
+        }
+        #expect(goal.earmarkedAmount == 200)
+    }
+
+    @Test("A blocked save rolls back completion and its contribution history")
+    func failedSave() throws {
+        let (container, goal) = try fixture()
+        let originalHistory = goal.contributionHistoryData
+        SyncWriteGate.lock(container)
+        defer { SyncWriteGate.unlock(container) }
+        #expect(throws: SyncError.self) {
+            try GoalContributionCommit.save(
+                amount: 100, goal: goal, occurredAt: .now, in: container.mainContext)
+        }
+        #expect(goal.earmarkedAmount == 100)
+        #expect(goal.contributionHistoryData == originalHistory)
+        let reopened = try #require(
+            ModelContext(container).fetch(FetchDescriptor<FinancialGoal>()).first)
+        #expect(reopened.earmarkedAmount == 100)
+    }
+}
