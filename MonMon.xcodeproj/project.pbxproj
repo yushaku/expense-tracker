@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7086E22C2333497B9D7264A9 /* MCPResearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3C10BC4F574A6AAB81F9B9 /* MCPResearchTests.swift */; platformFilters = (macos, ); };
+		81DC62B34406437A85CC4056 /* MCPResearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5D8916801F1478AB72A80EE /* MCPResearchService.swift */; platformFilters = (macos, ); };
+		68CFDBC298854B97B5A09C66 /* ResearchNotebook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0FEA3C7ABC42D88EB7AA1E /* ResearchNotebook.swift */; platformFilters = (macos, ); };
 		5401CD67261742D2BA1623AB /* MCP in Frameworks */ = {isa = PBXBuildFile; productRef = M50000000000000000000702 /* MCP */; platformFilters = (macos, ); };
 		B7A402B869FA4370879CFAE6 /* GoalCelebration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8997F500F62B4B1EBF575157 /* GoalCelebration.swift */; };
 		1830A82886604C5A8156B9DE /* ReportHighlightsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFBFF40EFA0D46F6BEB1D71B /* ReportHighlightsTests.swift */; };
@@ -495,6 +498,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CB3C10BC4F574A6AAB81F9B9 /* MCPResearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPResearchTests.swift; sourceTree = "<group>"; };
+		C5D8916801F1478AB72A80EE /* MCPResearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPResearchService.swift; sourceTree = "<group>"; };
+		5D0FEA3C7ABC42D88EB7AA1E /* ResearchNotebook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResearchNotebook.swift; sourceTree = "<group>"; };
 		8997F500F62B4B1EBF575157 /* GoalCelebration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalCelebration.swift; sourceTree = "<group>"; };
 		BFBFF40EFA0D46F6BEB1D71B /* ReportHighlightsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportHighlightsTests.swift; sourceTree = "<group>"; };
 		2F9202B198804F918ADB263D /* ReportHighlightsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportHighlightsCard.swift; sourceTree = "<group>"; };
@@ -1140,6 +1146,8 @@
 		M40000000000000000000001 /* MCP */ = {
 			isa = PBXGroup;
 			children = (
+				C5D8916801F1478AB72A80EE /* MCPResearchService.swift */,
+				5D0FEA3C7ABC42D88EB7AA1E /* ResearchNotebook.swift */,
 				M40000000000000000000101 /* MCPTypes.swift */,
 				M40000000000000000000102 /* MCPRecordSerializer.swift */,
 				M40000000000000000000104 /* MCPQuery.swift */,
@@ -1155,6 +1163,7 @@
 		M40000000000000000000002 /* MCP */ = {
 			isa = PBXGroup;
 			children = (
+				CB3C10BC4F574A6AAB81F9B9 /* MCPResearchTests.swift */,
 				M40000000000000000000103 /* MCPRecordSerializerTests.swift */,
 				M40000000000000000000106 /* MCPQueryTests.swift */,
 				M40000000000000000000108 /* MCPRuntimeTests.swift */,
@@ -1985,6 +1994,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				81DC62B34406437A85CC4056 /* MCPResearchService.swift in Sources */,
+				68CFDBC298854B97B5A09C66 /* ResearchNotebook.swift in Sources */,
 				792C7098BB48A170C0EE7EEB /* SyncLocalReferences.swift in Sources */,
 				C1187471AD5F703D1F5D248A /* SyncView.swift in Sources */,
 				5A0401DD6282303B7FDA30FB /* SyncQRScanner.swift in Sources */,
@@ -2262,6 +2273,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7086E22C2333497B9D7264A9 /* MCPResearchTests.swift in Sources */,
 				05B38961CB87288FCC4B068A /* SyncCoordinatorTests.swift in Sources */,
 				F65C7FB1794298D4657BDDE2 /* SyncTransportTests.swift in Sources */,
 				2F7C5CD12D162991E206F71E /* SyncSessionTests.swift in Sources */,

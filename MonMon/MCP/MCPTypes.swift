@@ -71,6 +71,13 @@ enum MCPJSONValue: Codable, Equatable, Sendable {
 
 enum MCPToolError: String, Error, Equatable, Sendable {
     case disabled = "MCP_DISABLED"
+    case researchWritingDisabled = "RESEARCH_WRITING_DISABLED"
+    case researchConflict = "RESEARCH_ID_CONFLICT"
+    case researchNotFound = "RESEARCH_NOT_FOUND"
+    case researchExpired = "RESEARCH_EXPIRED"
+    case researchBusy = "RESEARCH_BUSY"
+    case researchCapacity = "RESEARCH_CAPACITY"
+    case researchUnavailable = "RESEARCH_UNAVAILABLE"
     case storeUnavailable = "STORE_UNAVAILABLE"
     case invalidArgument = "INVALID_ARGUMENT"
     case invalidCursor = "INVALID_CURSOR"
@@ -78,7 +85,7 @@ enum MCPToolError: String, Error, Equatable, Sendable {
 
     var retryable: Bool {
         switch self {
-        case .storeUnavailable:
+        case .storeUnavailable, .researchBusy, .researchUnavailable:
             true
         default:
             false
@@ -87,6 +94,20 @@ enum MCPToolError: String, Error, Equatable, Sendable {
 
     var safeMessage: String {
         switch self {
+        case .researchWritingDisabled:
+            "Allow AI drafts in MonMon Research settings before creating notes or proposals."
+        case .researchConflict:
+            "This request ID already exists with different content. Use a new UUID for new content."
+        case .researchNotFound:
+            "The requested note or proposal is missing, or its research needs updating."
+        case .researchExpired:
+            "This proposal or its research has expired. Create updated research before accepting."
+        case .researchBusy:
+            "The notebook is being updated. Retry this request with the same request ID."
+        case .researchCapacity:
+            "The local research notebook has reached its storage limit."
+        case .researchUnavailable:
+            "The local research notebook could not be read or saved safely."
         case .disabled:
             "AI access is disabled in MonMon settings."
         case .storeUnavailable:

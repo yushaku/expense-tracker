@@ -64,6 +64,7 @@ final class MCPConsentStore: MCPConsentManaging, @unchecked Sendable {
 
     func revoke() {
         defaults.removeObject(forKey: Self.allowedKey)
+        defaults.removeObject(forKey: MCPResearchService.writingAllowedKey)
     }
 }
 
