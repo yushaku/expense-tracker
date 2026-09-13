@@ -114,6 +114,69 @@ struct ReportHighlightsTests {
         #expect(empty.changes.isEmpty)
     }
 
+    @Test("Spending rhythm averages across elapsed calendar days, not only spending days")
+    func spendingRhythm() throws {
+        let account = UUID(), category = UUID()
+        var query = TransactionQuery(range: .month(containing: date(2026, 9, 13)))
+        query.accountIDs = [account]
+        query.categoryIDs = [category]
+        query.text = "Lunch"
+        let future = transaction(999, month: 9, account: account, category: category)
+        future.occurredAt = date(2026, 9, 20)
+        let highlights = try #require(
+            ReportHighlights(
+                query: query,
+                transactions: [
+                    transaction(100, month: 9, account: account, category: category),
+                    transaction(160, month: 9, account: account, category: category),
+                    transaction(999, month: 9, account: UUID(), category: category),
+                    transaction(999, month: 9, account: account, category: category, kind: .income),
+                    transaction(999, month: 9, account: account, category: UUID()),
+                    transaction(
+                        999, month: 9, account: account, category: category, note: "Dinner"),
+                    future,
+                ], categoryNames: [category: "Food"], accountNames: [:], asOf: date(2026, 9, 13)))
+        let rhythm = try #require(highlights.spendingRhythm)
+        #expect(rhythm.dayCount == 13)
+        #expect(rhythm.count == 2)
+        #expect(rhythm.averagePerDay == 20)
+        #expect(rhythm.averagePerExpense == 130)
+    }
+
+    @Test("Rhythm includes all elapsed days even when the comparison month is shorter")
+    func rhythmShortMonth() throws {
+        let row = transaction(310, month: 3, account: UUID(), category: nil)
+        row.occurredAt = date(2026, 3, 31)
+        let highlights = try #require(
+            ReportHighlights(
+                query: TransactionQuery(range: .month(containing: date(2026, 3, 31))),
+                transactions: [row], categoryNames: [:], accountNames: [:], asOf: date(2026, 3, 31))
+        )
+        #expect(highlights.current == 0)
+        #expect(highlights.spendingRhythm?.dayCount == 31)
+        #expect(highlights.spendingRhythm?.count == 1)
+        #expect(highlights.spendingRhythm?.averagePerDay == 10)
+    }
+
+    @Test("Empty rhythm has no per-expense average; income-only reports hide rhythm")
+    func emptyRhythm() throws {
+        var query = TransactionQuery(range: .day(containing: date(2026, 9, 13)))
+        let empty = try #require(
+            ReportHighlights(
+                query: query, transactions: [],
+                categoryNames: [:], accountNames: [:], asOf: date(2026, 9, 13)))
+        #expect(empty.spendingRhythm?.dayCount == 1)
+        #expect(empty.spendingRhythm?.count == 0)
+        #expect(empty.spendingRhythm?.averagePerDay == 0)
+        #expect(empty.spendingRhythm?.averagePerExpense == nil)
+        query.filter = .income
+        let income = try #require(
+            ReportHighlights(
+                query: query, transactions: [],
+                categoryNames: [:], accountNames: [:], asOf: date(2026, 9, 13)))
+        #expect(income.spendingRhythm == nil)
+    }
+
     private func transaction(
         _ amount: Decimal, month: Int, account: UUID, category: UUID?,
         note: String = "Lunch", kind: TransactionKind = .expense

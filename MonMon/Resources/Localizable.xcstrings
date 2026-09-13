@@ -1,6 +1,76 @@
 {
   "sourceLanguage": "en",
   "strings": {
+  "Spending rhythm": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Nhịp chi tiêu"
+        }
+      }
+    }
+  },
+  "Period: %@": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Khoảng ngày: %@"
+        }
+      }
+    }
+  },
+  "Average per day": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Chi trung bình/ngày"
+        }
+      }
+    }
+  },
+  "Expense count": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Số khoản chi"
+        }
+      }
+    }
+  },
+  "Average per expense": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Trung bình mỗi khoản"
+        }
+      }
+    }
+  },
+  "No expenses recorded in this period.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Chưa ghi nhận khoản chi trong kỳ này."
+        }
+      }
+    }
+  },
+  "Across %lld calendar days, including days without recorded expenses.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Tính trên %lld ngày, gồm cả ngày chưa ghi nhận chi tiêu."
+        }
+      }
+    }
+  },
   "Highlights": {
     "localizations": {
       "vi": {

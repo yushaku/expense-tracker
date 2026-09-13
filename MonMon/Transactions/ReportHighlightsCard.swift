@@ -65,6 +65,10 @@ struct ReportHighlightsCard: View {
                     .font(.subheadline)
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
+            if let rhythm = highlights.spendingRhythm {
+                Divider().overlay(MonMonTheme.border)
+                spendingRhythm(rhythm)
+            }
         }
         .foregroundStyle(MonMonTheme.textPrimary)
         .appCard()
@@ -72,6 +76,45 @@ struct ReportHighlightsCard: View {
         .appSheet(item: $selectedChange) { change in
             ReportHighlightDetails(change: change, periods: highlights.periods)
         }
+    }
+
+    private func spendingRhythm(_ rhythm: ReportSpendingRhythm) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("Spending rhythm", systemImage: "chart.bar.xaxis")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(MonMonTheme.accent)
+            Text("Period: \(rhythm.period.title(in: locale, dateFormat: dateFormat))")
+                .font(.caption)
+                .foregroundStyle(MonMonTheme.textSecondary)
+            rhythmMetric("Average per day", value: VNDCurrency.format(rhythm.averagePerDay))
+            rhythmMetric("Expense count", value: rhythm.count.formatted(.number.locale(locale)))
+            if let average = rhythm.averagePerExpense {
+                rhythmMetric("Average per expense", value: VNDCurrency.format(average))
+            } else {
+                Text("No expenses recorded in this period.")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+            }
+            Text(
+                "Across \(rhythm.dayCount) calendar days, including days without recorded expenses."
+            )
+            .font(.caption)
+            .foregroundStyle(MonMonTheme.textSecondary)
+        }
+        .accessibilityIdentifier("report-spending-rhythm")
+    }
+
+    private func rhythmMetric(_ title: LocalizedStringKey, value: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Text(title)
+                .foregroundStyle(MonMonTheme.textSecondary)
+            Spacer(minLength: 0)
+            Text(value)
+                .monospacedDigit()
+                .multilineTextAlignment(.trailing)
+        }
+        .font(.subheadline)
+        .accessibilityElement(children: .combine)
     }
 
     private var changeSummary: some View {
