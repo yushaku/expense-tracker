@@ -9,7 +9,7 @@ struct MCPQueryTests {
     @Test("Tools reject parameters that do not apply to their records")
     func specificSchemas() throws {
         for key in ["limit", "cursor", "id", "ids", "dateFrom", "createdAtFrom"] {
-            #expect(throws: MCPToolError.invalidArgument) {
+            #expect(throws: MCPArgumentError.self) {
                 try MCPQuery.parse(arguments: [key: .string("unused")], for: .dataStatus)
             }
         }
@@ -17,7 +17,7 @@ struct MCPQueryTests {
             #expect(!tool.filterKeys.contains("dateFrom"))
             #expect(tool.filterKeys.contains("createdAtFrom"))
         }
-        #expect(throws: MCPToolError.invalidArgument) {
+        #expect(throws: MCPArgumentError.self) {
             try MCPQuery.parse(arguments: [:], for: .summary)
         }
     }
@@ -79,6 +79,17 @@ struct MCPQueryTests {
         #expect(vnd["transactionCount"] == .int(206))
         #expect(totals.count == 2)
         #expect(result.fields["expenseGroups"]?.arrayValue?.count == 2)
+        #expect(
+            result.fields["excludes"]
+                == .array(["transfers", "savings", "investments"].map(MCPJSONValue.string)))
+        var ungroupedArguments = arguments
+        ungroupedArguments["groupBy"] = .string("none")
+        let ungrouped = try #require(
+            repository.records(
+                for: .summary,
+                query: MCPQuery.parse(arguments: ungroupedArguments, for: .summary)
+            ).first)
+        #expect(ungrouped.fields["expenseGroups"] == nil)
         arguments["accountID"] = .string(UUID().uuidString)
         let empty = try repository.records(
             for: .summary,
@@ -95,15 +106,15 @@ struct MCPQueryTests {
             } == true)
     }
 
-    @Test("Defaults to 50, caps at 200, and rejects invalid limits")
+    @Test("Defaults to 50, caps at 500, and rejects invalid limits")
     func limits() throws {
         #expect(try MCPQuery.parse(arguments: [:], for: .transactions).limit == 50)
         #expect(
-            try MCPQuery.parse(arguments: ["limit": .int(200)], for: .transactions).limit == 200)
-        #expect(throws: MCPToolError.invalidArgument) {
-            try MCPQuery.parse(arguments: ["limit": .int(201)], for: .transactions)
+            try MCPQuery.parse(arguments: ["limit": .int(500)], for: .transactions).limit == 500)
+        #expect(throws: MCPArgumentError.self) {
+            try MCPQuery.parse(arguments: ["limit": .int(501)], for: .transactions)
         }
-        #expect(throws: MCPToolError.invalidArgument) {
+        #expect(throws: MCPArgumentError.self) {
             try MCPQuery.parse(arguments: ["limit": .int(0)], for: .transactions)
         }
     }
@@ -183,22 +194,30 @@ struct MCPQueryTests {
 
     @Test("Rejects unknown filters, malformed values, and cross-tool cursors")
     func validation() throws {
-        #expect(throws: MCPToolError.invalidArgument) {
+        do {
+            _ = try MCPQuery.parse(
+                arguments: ["dateFrom": .string("2026-09-01")], for: .transactions)
+            Issue.record("Expected a field-specific date validation error")
+        } catch let error as MCPArgumentError {
+            #expect(error.field == "dateFrom")
+            #expect(error.reason.contains("timezone"))
+        }
+        #expect(throws: MCPArgumentError.self) {
             try MCPQuery.parse(arguments: ["direction": .string("borrowed")], for: .transactions)
         }
-        #expect(throws: MCPToolError.invalidArgument) {
+        #expect(throws: MCPArgumentError.self) {
             try MCPQuery.parse(arguments: ["id": .string("not-a-uuid")], for: .transactions)
         }
-        #expect(throws: MCPToolError.invalidArgument) {
+        #expect(throws: MCPArgumentError.self) {
             try MCPQuery.parse(arguments: ["dateFrom": .string("yesterday")], for: .transactions)
         }
-        #expect(throws: MCPToolError.invalidArgument) {
+        #expect(throws: MCPArgumentError.self) {
             try MCPQuery.parse(arguments: ["accountID": .string("not-a-uuid")], for: .transactions)
         }
-        #expect(throws: MCPToolError.invalidArgument) {
+        #expect(throws: MCPArgumentError.self) {
             try MCPQuery.parse(arguments: ["kind": .string("refund")], for: .transactions)
         }
-        #expect(throws: MCPToolError.invalidArgument) {
+        #expect(throws: MCPArgumentError.self) {
             try MCPQuery.parse(
                 arguments: ["recordType": .string("MoneyTransaction")], for: .savings)
         }
@@ -262,5 +281,132 @@ struct MCPQueryTests {
 
         let records = try MCPDataRepository(context: container.mainContext).records(for: .savings)
         #expect(Set(records.map(\.recordType)) == ["SavingsDeposit", "SavingsWithdrawal"])
+    }
+
+    @MainActor
+    @Test("Account balances and portfolio expose calculated values and reconciliation gaps")
+    func financialAggregates() throws {
+        let container = try ModelContainer(
+            for: Schema(MonMonSchema.models),
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let context = container.mainContext
+        let date = Date(timeIntervalSince1970: 1_700_000_000)
+        let account = CashAccount(
+            id: UUID(), name: "TP Bank", kind: .normal, openingBalance: 100,
+            currencyCode: "VND", createdAt: date)
+        let secondAccount = CashAccount(
+            id: UUID(), name: "Cash", kind: .normal, openingBalance: 50,
+            currencyCode: "VND", createdAt: date.addingTimeInterval(-1))
+        let instrument = FundInstrument(
+            id: UUID(), symbol: "FUEVFVND", name: "VN Diamond", kind: .etf,
+            currentPricePerUnit: 3, priceAsOf: date, currencyCode: "VND", createdAt: date)
+        let jar = BudgetJar(
+            id: UUID(), name: "Daily", allocationPercent: 100, role: .custom,
+            symbolName: "tag", colorName: "blue", createdAt: date)
+        let tripJar = BudgetJar(
+            id: UUID(), name: "Trip", allocationPercent: 0, role: .custom,
+            symbolName: "airplane", colorName: "sky", createdAt: date)
+        let category = TransactionCategory(
+            id: UUID(), name: "Transport", kind: .expense, symbolName: "car",
+            colorName: "blue", createdAt: date, budgetJarID: jar.id)
+        context.insert(account)
+        context.insert(secondAccount)
+        context.insert(instrument)
+        context.insert(jar)
+        context.insert(tripJar)
+        context.insert(category)
+        context.insert(
+            MoneyTransaction(
+                id: UUID(), kind: .expense, amount: 10, occurredAt: date, note: "Xăng",
+                accountID: account.id, categoryID: category.id, sourceRuleID: nil,
+                currencyCode: "VND", createdAt: date, budgetJarOverrideID: tripJar.id))
+        context.insert(
+            MoneyTransaction(
+                id: UUID(), kind: .expense, amount: 99, occurredAt: .distantFuture,
+                note: "Future", accountID: account.id, categoryID: category.id,
+                sourceRuleID: nil, currencyCode: "VND", createdAt: date))
+        let snapshot = try IncomeAllocationSnapshotCodec.encode(
+            IncomeAllocationSnapshot.capture(
+                amount: 5, jars: [jar], capturedAt: date, isEstimated: false))
+        context.insert(
+            MoneyTransaction(
+                id: UUID(), kind: .income, amount: 5, occurredAt: date, note: "Salary",
+                accountID: account.id, categoryID: nil, sourceRuleID: nil,
+                currencyCode: "VND", createdAt: date, incomeAllocationSnapshot: snapshot))
+        context.insert(
+            SavingsDeposit(
+                id: UUID(), name: "Emergency", principal: 20, annualInterestRate: 5,
+                termMonths: 6, openedAt: date, currencyCode: "VND", createdAt: date))
+        context.insert(
+            FundHolding(
+                id: UUID(), instrumentID: instrument.id, units: 10, averageCostPerUnit: 2,
+                createdAt: date))
+        try context.save()
+
+        let repository = MCPDataRepository(context: context)
+        let balanceRecords = try repository.records(for: .accountBalances)
+        let balance = try #require(
+            balanceRecords.first {
+                $0.fields["accountID"] == .string(account.id.uuidString.lowercased())
+            })
+        #expect(balance.fields["name"] == .string("TP Bank"))
+        #expect(balance.fields["currentBalance"] == .string("95"))
+        #expect(balance.fields["unattributedSavingsPrincipal"] == nil)
+        let diagnostics = try #require(
+            balanceRecords.first { $0.recordType == "AccountBalanceDiagnostics" })
+        #expect(diagnostics.fields["hasUnlinkedFundingSources"] == .bool(true))
+        #expect(diagnostics.fields["unlinkedSavingsCount"] == .int(1))
+        #expect(diagnostics.fields["unlinkedHoldingCount"] == .int(1))
+        let diagnosticAmounts = try #require(
+            diagnostics.fields["amounts"]?.arrayValue?.first?.objectValue)
+        #expect(diagnosticAmounts["savingsPrincipal"] == .string("20"))
+        #expect(diagnosticAmounts["investmentCostBasis"] == .string("20"))
+
+        var balanceQuery = try MCPQuery.parse(
+            arguments: ["limit": .int(1)], for: .accountBalances)
+        var pagedIDs: [UUID] = []
+        repeat {
+            let page = try MCPPaginator.page(
+                records: repository.records(for: .accountBalances, query: balanceQuery),
+                query: balanceQuery, tool: .accountBalances)
+            pagedIDs.append(contentsOf: page.records.map(\.id))
+            balanceQuery.cursor = page.nextCursor
+        } while balanceQuery.cursor != nil
+        #expect(pagedIDs.count == 3)
+        #expect(Set(pagedIDs).count == 3)
+
+        let portfolio = try #require(repository.records(for: .portfolio).first)
+        let totals = try #require(portfolio.fields["totals"]?.arrayValue?.first?.objectValue)
+        #expect(totals["costBasis"] == .string("20"))
+        #expect(totals["marketValue"] == .string("30"))
+        #expect(totals["totalProfitLoss"] == .string("10"))
+        #expect(portfolio.fields["unattributedSourceHoldingCount"] == .int(1))
+
+        let noteQuery = try MCPQuery.parse(
+            arguments: ["noteContains": .string("xĂ")], for: .transactions)
+        let expense = try #require(
+            MCPPaginator.page(
+                records: repository.records(for: .transactions, query: noteQuery),
+                query: noteQuery, tool: .transactions
+            ).records.first)
+        #expect(expense.fields["accountName"] == .string("TP Bank"))
+        #expect(expense.fields["categoryName"] == .string("Transport"))
+        #expect(expense.fields["jarName"] == .string("Daily"))
+
+        let compactTransactions = try repository.records(for: .transactions)
+        let compactSnapshot = try #require(
+            compactTransactions.first { $0.fields["kind"] == .string("income") }?
+                .fields["incomeAllocationSnapshot"]?.objectValue)
+        #expect(compactSnapshot["jarCount"] == .int(1))
+        #expect(compactSnapshot["allocationSlices"] == nil)
+        let detailedQuery = try MCPQuery.parse(
+            arguments: ["include": .array([.string("allocationSlices")])],
+            for: .transactions)
+        let detailedSnapshot = try #require(
+            repository.records(for: .transactions, query: detailedQuery)
+                .first { $0.fields["kind"] == .string("income") }?
+                .fields["incomeAllocationSnapshot"]?.objectValue)
+        #expect(detailedSnapshot["allocationSlices"]?.arrayValue?.count == 1)
     }
 }
