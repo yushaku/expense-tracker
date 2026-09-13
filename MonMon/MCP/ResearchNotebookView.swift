@@ -23,15 +23,22 @@ struct ResearchNotebookView: View {
                     )
                     .font(.subheadline).foregroundStyle(MonMonTheme.textSecondary)
                     Text(
-                        "Stored on this Mac only. Not included in Device Sync or financial backups. Export a copy to keep your research."
+                        "Sync research and decisions with your paired device using Device Sync. Financial backups do not include research; export a copy to keep it."
                     )
                     .font(.caption).foregroundStyle(MonMonTheme.textSecondary)
-                    Toggle("Allow AI to create research and proposals", isOn: writingPermission)
-                        .disabled(!canRead || defaults == nil)
-                    if !canRead {
-                        Text("Enable Allow AI access in Settings first.")
-                            .font(.caption).foregroundStyle(MonMonTheme.textSecondary)
-                    }
+                    #if os(macOS)
+                        Toggle("Allow AI to create research and proposals", isOn: writingPermission)
+                            .disabled(!canRead || defaults == nil)
+                        if !canRead {
+                            Text("Enable Allow AI access in Settings first.")
+                                .font(.caption).foregroundStyle(MonMonTheme.textSecondary)
+                        }
+                    #else
+                        Text(
+                            "Create research with your agent on Mac, then use Device Sync to bring it here."
+                        )
+                        .font(.caption).foregroundStyle(MonMonTheme.textSecondary)
+                    #endif
                 }
                 .researchCard()
                 if let errorMessage {
@@ -121,6 +128,7 @@ struct ResearchNotebookView: View {
             }
         }
         .task { reload() }
+        .refreshable { reload() }
         .onChange(of: scenePhase) { _, phase in if phase == .active { reload() } }
         .fileExporter(
             isPresented: $isExporting, document: ResearchExportDocument(notebook: notebook),
@@ -130,32 +138,37 @@ struct ResearchNotebookView: View {
         }
     }
 
-    private var writingPermission: Binding<Bool> {
-        Binding(
-            get: { canWrite },
-            set: { value in
-                guard let defaults else { return }
-                guard !value || defaults.bool(forKey: MCPConsentStore.allowedKey) else {
-                    reload()
-                    return
-                }
-                defaults.set(value, forKey: MCPResearchService.writingAllowedKey)
-                canWrite = value
-            })
-    }
+    #if os(macOS)
+        private var writingPermission: Binding<Bool> {
+            Binding(
+                get: { canWrite },
+                set: { value in
+                    guard let defaults else { return }
+                    guard !value || defaults.bool(forKey: MCPConsentStore.allowedKey) else {
+                        reload()
+                        return
+                    }
+                    defaults.set(value, forKey: MCPResearchService.writingAllowedKey)
+                    canWrite = value
+                })
+        }
+
+    #endif
 
     private func reload() {
         do {
-            let config = try MCPRuntimeConfiguration.current()
-            guard let defaults = UserDefaults(suiteName: config.appGroupIdentifier) else {
-                throw ResearchStoreError.unavailable
-            }
-            let store = try ResearchNotebookStore.current(configuration: config)
+            let store = try ResearchNotebookStore.current()
             notebook = try store.load()
             self.store = store
-            self.defaults = defaults
-            canRead = defaults.bool(forKey: MCPConsentStore.allowedKey)
-            canWrite = canRead && defaults.bool(forKey: MCPResearchService.writingAllowedKey)
+            #if os(macOS)
+                let config = try MCPRuntimeConfiguration.current()
+                guard let defaults = UserDefaults(suiteName: config.appGroupIdentifier) else {
+                    throw ResearchStoreError.unavailable
+                }
+                self.defaults = defaults
+                canRead = defaults.bool(forKey: MCPConsentStore.allowedKey)
+                canWrite = canRead && defaults.bool(forKey: MCPResearchService.writingAllowedKey)
+            #endif
             errorMessage = nil
         } catch {
             errorMessage = "Could not load research. Your existing notes have not been changed."
@@ -289,6 +302,7 @@ private struct ResearchProposalDetail: View {
         .navigationTitle("Investment proposal")
         .toolbar { Button("Refresh", systemImage: "arrow.clockwise") { reload() } }
         .task { reload() }
+        .refreshable { reload() }
         .onChange(of: scenePhase) { _, phase in if phase == .active { reload() } }
     }
 

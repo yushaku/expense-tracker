@@ -114,9 +114,9 @@ written to operational logs.
 The helper uses the official Swift MCP SDK pinned exactly to `0.12.1`:
 <https://github.com/modelcontextprotocol/swift-sdk/tree/0.12.1>.
 
-## Research notes and investment proposals (Mac)
+## Research notes and investment proposals
 
-Settings → AI access → Research & proposals opens the local notebook. Enable
+On Mac, Settings → AI access → Research & proposals opens the notebook. On iPhone, open Settings → Research & proposals. Enable
 **Allow AI to create research and proposals** separately after enabling AI read
 access. Both permissions are required to create drafts. Turning AI access off
 also clears draft-writing consent; it does not delete the owner's notebook.
@@ -181,9 +181,7 @@ returns a retryable error. List pagination uses creation time and ID cursors; ne
 No content is generated automatically by MonMon and no source URLs are opened
 until the owner follows a link.
 
-This first version is local to Mac and excluded from Device Sync and financial
-backups. Use **Export research** to save an ISO-8601 JSON copy of notes, proposals
-and decisions. Disabling AI access preserves the local notebook for the owner.
+Notes, proposals and decision history are available on Mac and iPhone and included in reviewed Device Sync. Financial backups still exclude the notebook. Use **Export research** on either device to save an ISO-8601 JSON copy. Disabling AI access preserves local research and does not disable owner access on iPhone.
 
 ## MCP contract v2
 
@@ -210,3 +208,13 @@ On macOS, AI access also configures Hermes installed at `~/.local/bin/hermes` (t
 MonMon uses `hermes config get mcp_servers.<server-name> --json`, `config set`, and `config unset` to manage only its own entry in the active Hermes profile. It requires a Hermes version supporting these commands. A moved helper can be repaired; conflicting entries require confirmation. Unreadable configuration is never treated as an empty config. The Dev and Prod server names remain separate.
 
 See [Hermes MCP documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp) for the stdio `command` / `args` configuration.
+
+## Research on iPhone and Device Sync
+
+Open **Settings → Research & proposals** on iPhone. Create drafts through MCP on Mac, open Device Sync on both paired devices, review the changes, and apply. Decisions recorded on iPhone return to Mac during the next sync and can then be read by the agent. MCP and its read/write permissions remain Mac-local; no permission flags are synchronized.
+
+Both devices must run sync protocol v2. Existing pairing credentials remain valid, but a v1 peer is refused rather than silently omitting research. Complete any pending sync before upgrading both devices.
+
+The existing App Group notebook JSON path is retained, so Mac notes need no migration. Sync treats notes, proposals and decisions as append-only records keyed by UUID. Different content under the same ID requires an explicit conflict choice. Independent decisions are retained, including contradictory decisions; the displayed latest event uses timestamp then UUID for deterministic ties. Device clocks therefore affect which decision is displayed as latest.
+
+The notebook is locked while committing. Financial data and the sync receipt are saved together; an interrupted notebook replacement is completed from that receipt on reconnect, without replaying financial data or deleting newer decision events. Each recovery backup has a companion `<session-id>.research.json` in the same recovery directory. Use Export research for an ordinary portable notebook backup.

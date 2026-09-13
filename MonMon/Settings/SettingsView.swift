@@ -76,6 +76,16 @@ struct SettingsView: View {
                         backupCard
                         #if os(macOS)
                             MCPSettingsCard()
+                        #else
+                            card {
+                                NavigationLink {
+                                    ResearchNotebookView()
+                                } label: {
+                                    Label("Research & proposals", systemImage: "text.book.closed")
+                                        .frame(minHeight: 44)
+                                }
+                                .accessibilityIdentifier("settings-research-notebook")
+                            }
                         #endif
                         aboutCard
                     }

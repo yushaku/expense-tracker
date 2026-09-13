@@ -67,7 +67,7 @@ MonMon is a private personal-finance app for iPhone and Mac, built with SwiftUI 
 ### Data, sync, and privacy
 
 - **Local first** — data stays on your devices. Optional, manually initiated P2P sync connects one iPhone–Mac pair on the same local network. No account, cloud storage, or relay server.
-- **Optional read-only AI access on Mac** — an embedded local MCP helper exposes committed records directly from the local store, even while the app is closed to Codex or Claude Desktop after explicit consent. Financial tools cannot write data. A separate Mac research notebook lets the agent create sourced notes and investment drafts with additional consent; the owner reviews and records decisions without executing trades.
+- **Optional read-only AI access on Mac** — an embedded local MCP helper exposes committed records directly from the local store, even while the app is closed to Codex or Claude Desktop after explicit consent. Financial tools cannot write data. A research notebook shared through Device Sync lets the Mac agent create sourced notes and investment drafts with additional consent; the owner reviews and records decisions without executing trades.
 - **Backup and restore** — a validated document covering every model, including jars, goals, and trips, with a confirmation step before a restore replaces what is on the device.
 - **App lock** — Face ID or Touch ID with device-passcode fallback, re-locking after time in the background.
 - **Language** — Vietnamese, English, or whatever the system is set to.
@@ -297,3 +297,5 @@ all elapsed calendar days (including days without recorded expenses), and averag
 expense amount. It retains all report filters, excludes future days, and uses the
 full selected period through today even when the comparison window is shortened.
 Income-only reports hide this section; empty periods have no per-expense average.
+
+Research notes and proposals are available in Settings on iPhone and Mac. Device Sync includes notes, proposals and decision history (both devices need the current sync version); AI draft-writing permissions remain local to Mac. Research stays outside financial backups and can be exported separately as JSON.

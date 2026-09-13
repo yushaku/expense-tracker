@@ -1,6 +1,36 @@
 {
   "sourceLanguage": "en",
   "strings": {
+  "Decision history": {
+  "localizations": {
+    "vi": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "Lịch sử quyết định"
+      }
+    }
+  }
+},
+  "Create research with your agent on Mac, then use Device Sync to bring it here.": {
+  "localizations": {
+    "vi": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "Tạo nghiên cứu với agent trên Mac, sau đó dùng Đồng bộ thiết bị để đưa dữ liệu sang đây."
+      }
+    }
+  }
+},
+  "Sync research and decisions with your paired device using Device Sync. Financial backups do not include research; export a copy to keep it.": {
+  "localizations": {
+    "vi": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "Đồng bộ nghiên cứu và quyết định với thiết bị đã ghép đôi qua Đồng bộ thiết bị. Bản sao lưu tài chính không chứa nghiên cứu; hãy xuất một bản để lưu giữ."
+      }
+    }
+  }
+},
   "AI access is enabled. Restart your AI client to connect.": {
   "localizations": {
     "vi": {
