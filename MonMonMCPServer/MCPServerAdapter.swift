@@ -231,7 +231,7 @@ enum MCPServerAdapter {
         case .summary:
             "Sum saved income and expenses using exact decimals, separately per currency. Required dateFrom inclusive/dateTo exclusive are ISO 8601 instants with timezone. Optional groupBy: none, category or budgetJar returns expense breakdowns. Jar filters select expenses only and follow app routing. Excludes transfers, pending captures, savings and investment movements; not account balances or jar allocation totals."
         case .accountBalances:
-            "Calculate each cash or credit account's current ledger balance and available credit as of now. Includes reconciliation diagnostics when savings or holdings have no sourceAccountID. Filter by accountID or kind."
+            "Calculate each cash or credit account's current ledger balance and available credit as of now, excluding future-dated records. A separate diagnostics record summarizes savings and holdings with no sourceAccountID. Filter by accountID or kind."
         case .portfolio:
             "Value open investment positions from remaining units and current instrument prices. Returns totals and profit/loss per currency plus each instrument position. Filter by instrumentID or kind."
         case .accounts:

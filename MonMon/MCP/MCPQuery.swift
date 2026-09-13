@@ -113,6 +113,7 @@ enum MCPTool: String, CaseIterable, Sendable {
         switch self {
         case .dataStatus: "single record"
         case .summary: "totals by currency asc; expense groups by currency asc, groupID asc"
+        case .accountBalances: "account createdAt desc, accountID asc; diagnostics last"
         case .portfolio: "positions by marketValue desc, symbol asc; totals by currency asc"
         default: "businessDate desc, id asc, recordType asc"
         }

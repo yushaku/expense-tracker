@@ -189,16 +189,20 @@ final class MCPDataRepository {
     }
 
     private func enriched(_ records: [MCPRecord]) throws -> [MCPRecord] {
+        let selfContainedTypes: Set<String> = [
+            "Summary", "Portfolio", "AccountBalance", "AccountBalanceDiagnostics",
+            "CashAccount", "BudgetJar",
+        ]
+        if records.allSatisfy({ selfContainedTypes.contains($0.recordType) }) {
+            return records
+        }
         let accountNames = Dictionary(
             firstWins: try context.fetch(FetchDescriptor<CashAccount>()).map { ($0.id, $0.name) })
         let categories = try context.fetch(FetchDescriptor<TransactionCategory>())
         let categoryNames = Dictionary(firstWins: categories.map { ($0.id, $0.name) })
-        let categoryJarIDs = Dictionary(
-            firstWins: categories.compactMap { category in
-                category.budgetJarID.map { (category.id, $0) }
-            })
-        let jarNames = Dictionary(
-            firstWins: try context.fetch(FetchDescriptor<BudgetJar>()).map { ($0.id, $0.name) })
+        let jars = try context.fetch(FetchDescriptor<BudgetJar>())
+        let jarNames = Dictionary(firstWins: jars.map { ($0.id, $0.name) })
+        let jarRouting = BudgetTransactionRouting(jars: jars, categories: categories)
         let instrumentNames = Dictionary(
             firstWins: try context.fetch(FetchDescriptor<FundInstrument>()).map {
                 ($0.id, $0.name)
@@ -218,7 +222,6 @@ final class MCPDataRepository {
             ("proceedsAccountID", "proceedsAccountName", accountNames),
             ("categoryID", "categoryName", categoryNames),
             ("budgetJarID", "budgetJarName", jarNames),
-            ("budgetJarOverrideID", "jarName", jarNames),
             ("fundingJarID", "fundingJarName", jarNames),
             ("instrumentID", "instrumentName", instrumentNames),
             ("depositID", "depositName", depositNames),
@@ -233,59 +236,73 @@ final class MCPDataRepository {
                 }
                 fields[nameKey] = names[id].map(MCPJSONValue.string) ?? .null
             }
-            if record.recordType == "MoneyTransaction", fields["jarName"]?.stringValue == nil,
-                let rawCategoryID = fields["categoryID"]?.stringValue,
-                let categoryID = UUID(uuidString: rawCategoryID),
-                let jarID = categoryJarIDs[categoryID]
-            {
-                fields["jarName"] = jarNames[jarID].map(MCPJSONValue.string) ?? .null
+            if record.recordType == "MoneyTransaction" {
+                fields["jarName"] = routedJarName(
+                    fields: fields, routing: jarRouting, names: jarNames)
             }
             return MCPRecord(
                 recordType: record.recordType, id: record.id, sortDate: record.sortDate,
                 fields: fields)
         }
     }
+
+    private func routedJarName(
+        fields: [String: MCPJSONValue],
+        routing: BudgetTransactionRouting,
+        names: [UUID: String]
+    ) -> MCPJSONValue {
+        let categoryID = fields["categoryID"]?.stringValue.flatMap(UUID.init(uuidString:))
+        let tripWorkspaceID = fields["tripWorkspaceID"]?.stringValue.flatMap(
+            UUID.init(uuidString:))
+        let overrideJarID = fields["budgetJarOverrideID"]?.stringValue.flatMap(
+            UUID.init(uuidString:))
+        return routing.jarID(
+            categoryID: categoryID,
+            tripWorkspaceID: tripWorkspaceID,
+            overrideJarID: overrideJarID
+        ).flatMap { names[$0] }.map(MCPJSONValue.string) ?? .null
+    }
 }
 
 // Aggregation stays in the store context: no transaction pages are sent to the agent.
 extension MCPDataRepository {
     private func accountBalances(query: MCPQuery) throws -> [MCPRecord] {
-        let accounts = try context.fetch(FetchDescriptor<CashAccount>())
-        let deposits = try context.fetch(FetchDescriptor<SavingsDeposit>())
-        let withdrawals = try context.fetch(FetchDescriptor<SavingsWithdrawal>())
-        let holdings = try context.fetch(FetchDescriptor<FundHolding>())
-        let instruments = try context.fetch(FetchDescriptor<FundInstrument>())
-        let transactions = try context.fetch(FetchDescriptor<MoneyTransaction>())
-        let transfers = try context.fetch(FetchDescriptor<AccountTransfer>())
-        let debts = try context.fetch(FetchDescriptor<Debt>())
-        let payments = try context.fetch(FetchDescriptor<DebtPayment>())
-        let sales = try context.fetch(FetchDescriptor<FundSale>())
-        let instrumentByID = Dictionary(firstWins: instruments.map { ($0.id, $0) })
         let asOf = Date.now
+        let accounts = try context.fetch(FetchDescriptor<CashAccount>())
+        let deposits = try context.fetch(FetchDescriptor<SavingsDeposit>()).filter {
+            $0.openedAt <= asOf
+        }
+        let withdrawals = try context.fetch(FetchDescriptor<SavingsWithdrawal>()).filter {
+            $0.withdrawnAt <= asOf
+        }
+        let holdings = try context.fetch(FetchDescriptor<FundHolding>()).filter {
+            $0.boughtOn <= asOf
+        }
+        let instruments = try context.fetch(FetchDescriptor<FundInstrument>())
+        let transactions = try context.fetch(FetchDescriptor<MoneyTransaction>()).filter {
+            $0.occurredAt <= asOf
+        }
+        let transfers = try context.fetch(FetchDescriptor<AccountTransfer>()).filter {
+            $0.occurredAt <= asOf
+        }
+        let debts = try context.fetch(FetchDescriptor<Debt>()).filter { $0.openedAt <= asOf }
+        let payments = try context.fetch(FetchDescriptor<DebtPayment>()).filter {
+            $0.occurredAt <= asOf
+        }
+        let sales = try context.fetch(FetchDescriptor<FundSale>()).filter { $0.soldAt <= asOf }
+        let instrumentByID = Dictionary(firstWins: instruments.map { ($0.id, $0) })
         let wantedAccountID = query.fieldFilters["accountID"].flatMap(UUID.init(uuidString:))
         let wantedKind = query.fieldFilters["kind"]
 
-        return accounts.compactMap { account in
+        var records = accounts.compactMap { account -> MCPRecord? in
             guard wantedAccountID == nil || wantedAccountID == account.id,
                 wantedKind == nil || wantedKind == account.kind.rawValue
             else { return nil }
-            let unattributedSavings = deposits.reduce(Decimal.zero) {
-                $1.sourceAccountID == nil && $1.currencyCode == account.currencyCode
-                    ? $0 + $1.principal : $0
-            }
-            let unattributedInvestments = holdings.reduce(Decimal.zero) { total, holding in
-                guard holding.sourceAccountID == nil,
-                    let instrumentID = holding.instrumentID,
-                    instrumentByID[instrumentID]?.currencyCode == account.currencyCode
-                else { return total }
-                return total + holding.costBasis
-            }
             let currentBalance = CashBalanceSummary.available(
                 for: account, deposits: deposits, holdings: holdings, withdrawals: withdrawals,
                 transactions: transactions, transfers: transfers, debts: debts, payments: payments,
                 sales: sales)
-            let reconciled = unattributedSavings == 0 && unattributedInvestments == 0
-            var fields: [String: MCPJSONValue] = [
+            let fields: [String: MCPJSONValue] = [
                 "recordType": .string("AccountBalance"),
                 "accountID": .string(account.id.uuidString.lowercased()),
                 "name": .string(account.name),
@@ -298,20 +315,62 @@ extension MCPDataRepository {
                             limit: account.creditLimit, currentBalance: currentBalance))
                     : .null,
                 "asOf": mcpDate(asOf),
-                "isReconciled": .bool(reconciled),
-                "unattributedSavingsPrincipal": mcpDecimal(unattributedSavings),
-                "unattributedInvestmentCostBasis": mcpDecimal(unattributedInvestments),
             ]
-            if !reconciled {
-                fields["reconciliationIssues"] = .array([
-                    .string(
-                        "Savings or investments without sourceAccountID cannot be assigned to this account."
-                    )
-                ])
-            }
             return MCPRecord(
-                recordType: "AccountBalance", id: account.id, sortDate: asOf, fields: fields)
+                recordType: "AccountBalance", id: account.id, sortDate: account.createdAt,
+                fields: fields)
         }
+        records.append(
+            accountBalanceDiagnostics(
+                deposits: deposits, holdings: holdings, instrumentByID: instrumentByID,
+                asOf: asOf))
+        return records
+    }
+
+    private func accountBalanceDiagnostics(
+        deposits: [SavingsDeposit],
+        holdings: [FundHolding],
+        instrumentByID: [UUID: FundInstrument],
+        asOf: Date
+    ) -> MCPRecord {
+        var savingsByCurrency: [String: Decimal] = [:]
+        for deposit in deposits where deposit.sourceAccountID == nil {
+            savingsByCurrency[deposit.currencyCode, default: .zero] += deposit.principal
+        }
+        var investmentsByCurrency: [String: Decimal] = [:]
+        for holding in holdings where holding.sourceAccountID == nil {
+            let currency =
+                holding.instrumentID.flatMap { instrumentByID[$0]?.currencyCode } ?? "UNKNOWN"
+            investmentsByCurrency[currency, default: .zero] += holding.costBasis
+        }
+        let currencies = Set(savingsByCurrency.keys).union(investmentsByCurrency.keys).sorted()
+        let hasUnlinkedSources = !currencies.isEmpty
+        return MCPRecord(
+            recordType: "AccountBalanceDiagnostics",
+            id: UUID(uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2)),
+            sortDate: .distantPast,
+            fields: [
+                "recordType": .string("AccountBalanceDiagnostics"),
+                "asOf": mcpDate(asOf),
+                "hasUnlinkedFundingSources": .bool(hasUnlinkedSources),
+                "unlinkedSavingsCount": .int(
+                    deposits.filter { $0.sourceAccountID == nil }.count),
+                "unlinkedHoldingCount": .int(
+                    holdings.filter { $0.sourceAccountID == nil }.count),
+                "amounts": .array(
+                    currencies.map { currency in
+                        .object([
+                            "currencyCode": .string(currency),
+                            "savingsPrincipal": mcpDecimal(
+                                savingsByCurrency[currency, default: .zero]),
+                            "investmentCostBasis": mcpDecimal(
+                                investmentsByCurrency[currency, default: .zero]),
+                        ])
+                    }),
+                "meaning": .string(
+                    "Unlinked means no cash account was selected; it may be intentional external funding or missing attribution."
+                ),
+            ])
     }
 
     private func portfolio(query: MCPQuery) throws -> [MCPRecord] {
