@@ -3,7 +3,23 @@ import Foundation
 import SwiftData
 import SwiftUI
 
-@main
+#if os(macOS)
+    @main
+    @MainActor
+    enum MonMonEntryPoint {
+        static func main() async {
+            if CommandLine.arguments.contains("--mcp-stdio") {
+                await MCPServerAdapter.runStdio()
+                return
+            }
+            MonMonApp.main()
+        }
+    }
+#endif
+
+#if !os(macOS)
+    @main
+#endif
 struct MonMonApp: App {
     private let container: ModelContainer
     @State private var appLock: AppLock
@@ -125,9 +141,6 @@ struct MonMonApp: App {
                             try? SyncLocalReferences.reconcile(snapshot)
                         }
                         Task { await notificationCoordinator.reconcile(in: container.mainContext) }
-                        #if os(macOS)
-                            mcpAccessManager.refreshSnapshotIfAllowed()
-                        #endif
                     }
                     if !MonMonProcess.isRunningUnitTests,
                         let snapshot = try? syncCoordinator.store.snapshot(),
@@ -194,9 +207,6 @@ struct MonMonApp: App {
                     Task {
                         await notificationCoordinator.reconcile(in: container.mainContext)
                     }
-                    #if os(macOS)
-                        mcpAccessManager.refreshSnapshotIfAllowed()
-                    #endif
                 }
         }
         .modelContainer(container)

@@ -1,50 +1,25 @@
+import Darwin
 import Foundation
-import MCP
 
+/// Preserve existing client commands while using the app's exact model schema.
+/// exec keeps stdin/stdout and signal handling attached to the MCP client.
 @main
 enum MonMonMCPServerMain {
-    @MainActor
-    static func main() async {
-        do {
-            let bundle = try containingAppBundle()
-            let configuration = try MCPRuntimeConfiguration.current(bundle: bundle)
-            guard let defaults = UserDefaults(suiteName: configuration.appGroupIdentifier) else {
-                throw MCPToolError.storeUnavailable
-            }
-
-            let consent = MCPConsentStore(defaults: defaults)
-            let snapshot = MCPDiskSnapshotReader(configuration: configuration)
-            let provider = MCPSnapshotDataProvider(
-                configuration: configuration,
-                consent: consent,
-                snapshot: snapshot
-            )
-            let server = await MCPServerAdapter.makeServer(
-                service: MCPService(provider: provider)
-            )
-            try await server.start(transport: StdioTransport())
-            await server.waitUntilCompleted()
-        } catch let error as MCPToolError {
-            report(error.rawValue)
-        } catch {
-            report(MCPToolError.storeUnavailable.rawValue)
+    static func main() {
+        let executable = URL(fileURLWithPath: CommandLine.arguments[0]).standardizedFileURL
+        let app = executable.deletingLastPathComponent().deletingLastPathComponent()
+            .deletingLastPathComponent()
+        guard app.pathExtension == "app", let target = Bundle(url: app)?.executableURL else {
+            exit(1)
         }
-    }
-
-    private static func containingAppBundle() throws -> Bundle {
-        let executableURL = URL(fileURLWithPath: CommandLine.arguments[0]).standardizedFileURL
-        let appURL =
-            executableURL
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-        guard appURL.pathExtension == "app", let bundle = Bundle(url: appURL) else {
-            throw MCPToolError.storeUnavailable
+        let strings: [String] = [target.path, "--mcp-stdio"]
+        let arguments = strings.map { string in string.withCString { strdup($0) } }
+        defer { arguments.forEach { free($0) } }
+        var pointers = arguments + [nil]
+        pointers.withUnsafeMutableBufferPointer { buffer in
+            _ = execv(target.path, buffer.baseAddress!)
         }
-        return bundle
-    }
-
-    private static func report(_ code: String) {
-        FileHandle.standardError.write(Data("\(code)\n".utf8))
+        FileHandle.standardError.write(Data("STORE_UNAVAILABLE\n".utf8))
+        exit(1)
     }
 }

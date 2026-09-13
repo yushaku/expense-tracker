@@ -67,7 +67,7 @@ MonMon is a private personal-finance app for iPhone and Mac, built with SwiftUI 
 ### Data, sync, and privacy
 
 - **Local first** — data stays on your devices. Optional, manually initiated P2P sync connects one iPhone–Mac pair on the same local network. No account, cloud storage, or relay server.
-- **Optional read-only AI access on Mac** — an embedded local MCP helper exposes raw records from an App Group SQLite snapshot to Codex or Claude Desktop after explicit consent. The helper has no write tools.
+- **Optional read-only AI access on Mac** — an embedded local MCP helper exposes committed records directly from the local store, even while the app is closed to Codex or Claude Desktop after explicit consent. The helper has no write tools.
 - **Backup and restore** — a validated document covering every model, including jars, goals, and trips, with a confirmation step before a restore replaces what is on the device.
 - **App lock** — Face ID or Touch ID with device-passcode fallback, re-locking after time in the background.
 - **Language** — Vietnamese, English, or whatever the system is set to.

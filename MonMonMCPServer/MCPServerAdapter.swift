@@ -6,6 +6,25 @@ import MCP
 #endif
 
 enum MCPServerAdapter {
+    @MainActor
+    static func runStdio() async {
+        do {
+            let configuration = try MCPRuntimeConfiguration.current()
+            guard let defaults = UserDefaults(suiteName: configuration.appGroupIdentifier) else {
+                throw MCPToolError.storeUnavailable
+            }
+            let reader = MCPDirectStoreReader(defaults: defaults)
+            let provider = MCPDirectDataProvider(
+                configuration: configuration,
+                consent: MCPConsentStore(defaults: defaults), open: { try reader.open() })
+            let server = await makeServer(service: MCPService(provider: provider))
+            try await server.start(transport: StdioTransport())
+            await server.waitUntilCompleted()
+        } catch {
+            FileHandle.standardError.write(Data("STORE_UNAVAILABLE\n".utf8))
+        }
+    }
+
     static let serverVersion = "1.0.0"
 
     static var tools: [Tool] {
@@ -164,7 +183,7 @@ enum MCPServerAdapter {
     private static func description(for tool: MCPTool) -> String {
         if tool == .dataStatus {
             return
-                "Reports access permission, build flavour, and local snapshot freshness."
+                "Reports access permission, build flavour, and direct local-store availability."
         }
         return
             "Returns paginated raw stored records without totals, projections, or financial advice."

@@ -14,8 +14,8 @@ cannot read data.
 
 ## Setup
 
-1. Turn on **Allow AI access** in Settings on Mac. MonMon writes the first local
-   snapshot before granting consent.
+1. Turn on **Allow AI access** in Settings on Mac. MonMon registers the location and schema of its existing local
+   store before granting consent.
 2. Confirm replacement only if MonMon reports an existing entry with the same
    name or an old helper path.
 3. Restart Codex or Claude Desktop. Both clients load local MCP configuration at
@@ -30,19 +30,38 @@ If the app was moved after setup, Settings shows **Repair needed**. Repair write
 the current embedded-helper path. A malformed Claude configuration is never
 overwritten automatically.
 
-## Data source and freshness
+## Direct local-store reads
 
-MonMon serializes the 16 domain models into a separate SwiftData SQLite snapshot
-named `MonMonMCPSnapshot` in the flavour's App Group. The app replaces that
-snapshot atomically after its main model context saves and when AI access is
-enabled. The helper opens the snapshot without save permission. It imports
-no domain model declarations and never opens the app's live SwiftData store.
+The embedded helper executes the same app binary with `--mcp-stdio`. This mode
+starts only the MCP server, before SwiftUI or `MonMonApp.init`: it does not open
+windows, seed data, run recurring rules, or start synchronization. The helper
+therefore uses the exact same domain models as the app without duplicating them.
+It remains a separate process managed by the AI client and works while MonMon
+is closed.
 
-Every response includes `sync.source`, `sync.freshness`, and `lastSnapshotAt`.
-A snapshot no more than five minutes old is reported as `fresh`; an older one is
-`stale`. The timestamp is the honest boundary: when MonMon is closed, MCP keeps
-serving the last snapshot. It sees what this Mac's own store holds and nothing
-else; MonMon does not synchronise between devices.
+After the app opens its store, it registers only the store URL, schema and Core
+Data model hashes in the flavour's App Group defaults. Every data request checks
+consent, validates that registration against the current schema and store metadata,
+and opens a new `ModelContainer` with `allowsSave: false` and CloudKit disabled.
+A missing store or incompatible schema fails closed rather than creating a new
+store. Only the normal app initializes or upgrades data. Open the matching app
+once after upgrading to register the current store. Old MCP snapshot files are
+removed when the store is registered or access is disabled.
+
+Reads include committed changes from imports, capture and other contexts without
+an export step. Unsaved edits are excluded. ID and date filters run in the database;
+remaining field filters, stable ordering and cursor pagination run on the selected
+records in memory. No data snapshot is created after a save.
+
+The response envelope keeps `schemaVersion: "1.0"`, `records`, `page` and `sync`.
+`sync.source` is now `localStore`; `sync.readAt` is the time the request read the
+store. `fresh` means a successful direct read, not an assertion about another
+device. `lastSnapshotAt` remains `null` for compatibility. `disabled` and
+`unavailable` describe revoked access and a store that cannot be opened.
+Pagination is a live view: concurrent writes between pages can change results;
+clients needing a stable report should avoid editing during the read.
+
+The reader uses Apple's [read-only ModelConfiguration](https://developer.apple.com/documentation/swiftdata/modelconfiguration/allowssave).
 
 ## Tools
 
@@ -85,8 +104,10 @@ written to operational logs.
   cancel replacement.
 - **Repair needed**: the app or helper path changed; choose Repair and restart
   the client.
-- **Stale data**: open MonMon on this Mac. A change made on another device is
-  not visible here; MonMon keeps each device's records to itself.
+- **Store unavailable**: open the matching Dev or Release MonMon app once after
+  an upgrade. If needed, turn AI access off and on to register its current store.
+- **Missing changes from another device**: finish MonMon synchronization first;
+  MCP reads this Mac’s committed data and does not initiate synchronization.
 
 The helper uses the official Swift MCP SDK pinned exactly to `0.12.1`:
 <https://github.com/modelcontextprotocol/swift-sdk/tree/0.12.1>.

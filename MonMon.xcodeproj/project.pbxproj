@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5401CD67261742D2BA1623AB /* MCP in Frameworks */ = {isa = PBXBuildFile; productRef = M50000000000000000000702 /* MCP */; platformFilters = (macos, ); };
 		B7A402B869FA4370879CFAE6 /* GoalCelebration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8997F500F62B4B1EBF575157 /* GoalCelebration.swift */; };
 		1830A82886604C5A8156B9DE /* ReportHighlightsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFBFF40EFA0D46F6BEB1D71B /* ReportHighlightsTests.swift */; };
 		49E870A6003140BCA748DB0A /* ReportHighlightsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F9202B198804F918ADB263D /* ReportHighlightsCard.swift */; };
@@ -43,11 +44,7 @@
 		M40000000000000000000212 /* MCPAccessManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000112 /* MCPAccessManagerTests.swift */; };
 		M40000000000000000000213 /* MCPSettingsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000113 /* MCPSettingsCard.swift */; platformFilters = (macos, ); };
 		M50000000000000000000204 /* MonMonMCPServer in Embed MCP Helper */ = {isa = PBXBuildFile; fileRef = M50000000000000000000105 /* MonMonMCPServer */; platformFilters = (macos, ); settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		M50000000000000000000205 /* MCP in Frameworks */ = {isa = PBXBuildFile; productRef = M50000000000000000000702 /* MCP */; };
-		M60000000000000000000201 /* MCPTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000101 /* MCPTypes.swift */; };
-		M60000000000000000000203 /* MCPQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000104 /* MCPQuery.swift */; };
-		M60000000000000000000205 /* MCPRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = M40000000000000000000107 /* MCPRuntime.swift */; };
-		M60000000000000000000206 /* MCPServerAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = M50000000000000000000101 /* MCPServerAdapter.swift */; };
+		M60000000000000000000206 /* MCPServerAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = M50000000000000000000101 /* MCPServerAdapter.swift */; platformFilters = (macos, ); };
 		M60000000000000000000207 /* MonMonMCPServerMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = M50000000000000000000103 /* MonMonMCPServerMain.swift */; };
 		Y10000000000000000000201 /* TripWorkspaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000101 /* TripWorkspaceTests.swift */; };
 		Y10000000000000000000202 /* TripWorkspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = Y10000000000000000000102 /* TripWorkspace.swift */; };
@@ -937,6 +934,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5401CD67261742D2BA1623AB /* MCP in Frameworks */,
 				33A69BFF303AE3A900432AF4 /* MijickCalendarView in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -953,7 +951,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				M50000000000000000000205 /* MCP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1795,6 +1792,7 @@
 			);
 			name = MonMon;
 			packageProductDependencies = (
+				M50000000000000000000702 /* MCP */,
 				33A69BFE303AE3A900432AF4 /* MijickCalendarView */,
 			);
 			productName = MonMon;
@@ -1869,7 +1867,6 @@
 			);
 			name = MonMonMCPServer;
 			packageProductDependencies = (
-				M50000000000000000000702 /* MCP */,
 			);
 			productName = MonMonMCPServer;
 			productReference = M50000000000000000000105 /* MonMonMCPServer */;
@@ -2006,6 +2003,7 @@
 				M40000000000000000000204 /* MCPQuery.swift in Sources */,
 				M40000000000000000000205 /* MCPDataRepository.swift in Sources */,
 				M40000000000000000000207 /* MCPRuntime.swift in Sources */,
+				M60000000000000000000206 /* MCPServerAdapter.swift in Sources */,
 				M40000000000000000000209 /* MCPClientInstaller.swift in Sources */,
 				M40000000000000000000211 /* MCPAccessManager.swift in Sources */,
 				M40000000000000000000213 /* MCPSettingsCard.swift in Sources */,
@@ -2403,10 +2401,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				M60000000000000000000201 /* MCPTypes.swift in Sources */,
-				M60000000000000000000203 /* MCPQuery.swift in Sources */,
-				M60000000000000000000205 /* MCPRuntime.swift in Sources */,
-				M60000000000000000000206 /* MCPServerAdapter.swift in Sources */,
 				M60000000000000000000207 /* MonMonMCPServerMain.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

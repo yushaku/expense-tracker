@@ -25,16 +25,16 @@
 
         private let consent: any MCPConsentManaging
         private let installer: any MCPClientInstalling
-        private let snapshot: any MCPSnapshotExporting
+        private let registration: any MCPStoreRegistering
 
         init(
             consent: any MCPConsentManaging,
             installer: any MCPClientInstalling,
-            snapshot: any MCPSnapshotExporting
+            registration: any MCPStoreRegistering
         ) {
             self.consent = consent
             self.installer = installer
-            self.snapshot = snapshot
+            self.registration = registration
             isAllowed = consent.isAllowed
         }
 
@@ -45,45 +45,34 @@
         ) throws {
             let consent = try MCPConsentStore(configuration: configuration)
             let helperURL = bundle.bundleURL.appending(path: "Contents/Helpers/MonMonMCPServer")
-            let exporter: MCPAppSnapshotExporter?
-            let snapshot: any MCPSnapshotExporting
-            do {
-                let database: MCPSnapshotDatabase
-                if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
-                    database = try MCPSnapshotDatabase(
-                        container: ModelContainer(
-                            for: MCPStoredSnapshotRecord.self,
-                            MCPStoredSnapshotMetadata.self,
-                            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-                        ))
-                } else {
-                    database = try MCPSnapshotDatabase(
-                        configuration: configuration,
-                        allowsSave: true
-                    )
-                }
-                let liveExporter = MCPAppSnapshotExporter(
-                    sourceContext: sourceContext,
-                    database: database,
-                    consent: consent
-                )
-                exporter = liveExporter
-                snapshot = liveExporter
-            } catch {
-                exporter = nil
-                snapshot = MCPUnavailableSnapshotExporter()
+            guard let defaults = UserDefaults(suiteName: configuration.appGroupIdentifier) else {
+                throw MCPToolError.storeUnavailable
             }
+            let registration = MCPStoreRegistration(
+                container: sourceContext.container, defaults: defaults,
+                legacyURL: ModelConfiguration(
+                    "MonMonMCPSnapshot",
+                    groupContainer: .identifier(configuration.appGroupIdentifier),
+                    cloudKitDatabase: .none
+                ).url)
             self.init(
                 consent: consent,
                 installer: MCPClientInstaller(
-                    serverName: configuration.serverName,
-                    helperURL: helperURL
-                ),
-                snapshot: snapshot
-            )
-            exporter?.startObserving()
-            if consent.isAllowed, let exporter {
-                try? exporter.refresh()
+                    serverName: configuration.serverName, helperURL: helperURL),
+                registration: registration)
+            if !MonMonProcess.isRunningUnitTests {
+                do {
+                    if consent.isAllowed {
+                        try registration.register()
+                    } else {
+                        try registration.clear()
+                    }
+                } catch {
+                    try? registration.clear()
+                    message = Message(
+                        kind: .failure,
+                        text: "The local store could not be registered for AI access.")
+                }
             }
         }
 
@@ -124,11 +113,6 @@
             )
         }
 
-        func refreshSnapshotIfAllowed() {
-            guard consent.isAllowed else { return }
-            try? snapshot.refresh()
-        }
-
         func repair() async {
             message = nil
             isWorking = true
@@ -167,7 +151,7 @@
             isWorking = true
             defer { isWorking = false }
             do {
-                try snapshot.refresh()
+                try registration.register()
                 if codexState != .unavailable {
                     try await installer.installCodex(replaceExisting: replaceExisting)
                 }
@@ -196,7 +180,7 @@
             isAllowed = false
             needsReplacementConfirmation = false
             var cleanupFailed = false
-            do { try snapshot.clear() } catch { cleanupFailed = true }
+            do { try registration.clear() } catch { cleanupFailed = true }
 
             await refresh()
             if codexState == .current || codexState == .repairNeeded {
@@ -222,14 +206,4 @@
         }
     }
 
-    @MainActor
-    private final class MCPUnavailableSnapshotExporter: MCPSnapshotExporting {
-        func refresh() throws {
-            throw MCPToolError.storeUnavailable
-        }
-
-        func clear() throws {
-            throw MCPToolError.storeUnavailable
-        }
-    }
 #endif

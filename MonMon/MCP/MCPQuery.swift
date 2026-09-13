@@ -15,8 +15,6 @@ enum MCPTool: String, CaseIterable, Sendable {
     case debts = "monmon_list_debts"
     case pendingCaptures = "monmon_list_pending_captures"
 
-    static let snapshotTools = Self.allCases.filter { $0 != .dataStatus }
-
     var recordTypes: Set<String> {
         switch self {
         case .dataStatus: []

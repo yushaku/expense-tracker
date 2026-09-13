@@ -29,12 +29,12 @@
                 .accessibilityIdentifier("mcp-privacy-warning")
 
                 Label(
-                    "MCP reads a local snapshot. Open MonMon on this Mac to refresh data changed on another device.",
+                    "MCP reads saved data directly from this Mac, even when MonMon is closed. Unsaved edits are not shared.",
                     systemImage: "externaldrive.fill.badge.timemachine"
                 )
                 .font(.caption)
                 .foregroundStyle(MonMonTheme.textSecondary)
-                .accessibilityIdentifier("mcp-snapshot-note")
+                .accessibilityIdentifier("mcp-store-note")
 
                 Divider()
                     .overlay(MonMonTheme.border)

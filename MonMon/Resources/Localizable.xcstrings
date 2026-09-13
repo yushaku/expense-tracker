@@ -1,6 +1,26 @@
 {
   "sourceLanguage": "en",
   "strings": {
+  "The local store could not be registered for AI access.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Không thể đăng ký dữ liệu cục bộ để AI truy cập."
+        }
+      }
+    }
+  },
+  "MCP reads saved data directly from this Mac, even when MonMon is closed. Unsaved edits are not shared.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "MCP đọc trực tiếp dữ liệu đã lưu trên máy Mac này, ngay cả khi MonMon đã đóng. Các chỉnh sửa chưa lưu không được chia sẻ."
+        }
+      }
+    }
+  },
   "Current period": {
     "localizations": {
       "vi": {

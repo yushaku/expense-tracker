@@ -90,7 +90,7 @@ enum MCPToolError: String, Error, Equatable, Sendable {
         case .disabled:
             "AI access is disabled in MonMon settings."
         case .storeUnavailable:
-            "The MonMon data snapshot is unavailable. Open MonMon to refresh it."
+            "The MonMon store is unavailable or incompatible. Open the matching MonMon app to register its current store."
         case .invalidArgument:
             "One or more tool arguments are invalid."
         case .invalidCursor:
