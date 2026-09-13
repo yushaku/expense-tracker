@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B4F2CA028D32490D88AD2D26 /* ResearchNotebookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF8CAB5B92814145A9EBB00E /* ResearchNotebookView.swift */; platformFilters = (macos, ); };
 		7086E22C2333497B9D7264A9 /* MCPResearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3C10BC4F574A6AAB81F9B9 /* MCPResearchTests.swift */; platformFilters = (macos, ); };
 		EA79E4BCCF204494A05697A6 /* MCPResearchTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60363FA0F6B74E25908D0BEB /* MCPResearchTools.swift */; platformFilters = (macos, ); };
 		81DC62B34406437A85CC4056 /* MCPResearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5D8916801F1478AB72A80EE /* MCPResearchService.swift */; platformFilters = (macos, ); };
@@ -499,6 +500,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		DF8CAB5B92814145A9EBB00E /* ResearchNotebookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResearchNotebookView.swift; sourceTree = "<group>"; };
 		CB3C10BC4F574A6AAB81F9B9 /* MCPResearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPResearchTests.swift; sourceTree = "<group>"; };
 		60363FA0F6B74E25908D0BEB /* MCPResearchTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPResearchTools.swift; sourceTree = "<group>"; };
 		C5D8916801F1478AB72A80EE /* MCPResearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPResearchService.swift; sourceTree = "<group>"; };
@@ -1148,6 +1150,7 @@
 		M40000000000000000000001 /* MCP */ = {
 			isa = PBXGroup;
 			children = (
+				DF8CAB5B92814145A9EBB00E /* ResearchNotebookView.swift */,
 				60363FA0F6B74E25908D0BEB /* MCPResearchTools.swift */,
 				C5D8916801F1478AB72A80EE /* MCPResearchService.swift */,
 				5D0FEA3C7ABC42D88EB7AA1E /* ResearchNotebook.swift */,
@@ -1997,6 +2000,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B4F2CA028D32490D88AD2D26 /* ResearchNotebookView.swift in Sources */,
 				EA79E4BCCF204494A05697A6 /* MCPResearchTools.swift in Sources */,
 				81DC62B34406437A85CC4056 /* MCPResearchService.swift in Sources */,
 				68CFDBC298854B97B5A09C66 /* ResearchNotebook.swift in Sources */,

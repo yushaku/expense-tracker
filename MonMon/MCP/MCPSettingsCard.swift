@@ -36,6 +36,13 @@
                 .foregroundStyle(MonMonTheme.textSecondary)
                 .accessibilityIdentifier("mcp-store-note")
 
+                NavigationLink {
+                    ResearchNotebookView()
+                } label: {
+                    Label("Research & proposals", systemImage: "text.book.closed")
+                }
+                .accessibilityIdentifier("mcp-research-notebook")
+
                 Divider()
                     .overlay(MonMonTheme.border)
 

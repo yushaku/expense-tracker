@@ -1,6 +1,496 @@
 {
   "sourceLanguage": "en",
   "strings": {
+  "Content": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Nội dung"
+        }
+      }
+    }
+  },
+  "Draft": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Bản nháp"
+        }
+      }
+    }
+  },
+  "Reject": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Từ chối"
+        }
+      }
+    }
+  },
+  "Defer": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Hoãn"
+        }
+      }
+    }
+  },
+  "Accept": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Chấp thuận"
+        }
+      }
+    }
+  },
+  "Rejected": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Đã từ chối"
+        }
+      }
+    }
+  },
+  "Deferred": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Đã hoãn"
+        }
+      }
+    }
+  },
+  "Accepted · not executed": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Đã chấp thuận · chưa thực hiện"
+        }
+      }
+    }
+  },
+  "Hold cash": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Giữ tiền mặt"
+        }
+      }
+    }
+  },
+  "Save money": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Gửi tiết kiệm"
+        }
+      }
+    }
+  },
+  "Buy fund": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Mua quỹ"
+        }
+      }
+    }
+  },
+  "Could not save your decision. Refresh and try again.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Không thể lưu quyết định. Hãy làm mới và thử lại."
+        }
+      }
+    }
+  },
+  "Investment proposal": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Đề xuất đầu tư"
+        }
+      }
+    }
+  },
+  "Decision reason": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Lý do quyết định"
+        }
+      }
+    }
+  },
+  "Acceptance records your intent only. It does not create a transaction or place an order.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Chấp thuận chỉ ghi nhận ý định của bạn, không tạo giao dịch hoặc đặt lệnh."
+        }
+      }
+    }
+  },
+  "Your decision": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Quyết định của bạn"
+        }
+      }
+    }
+  },
+  "Supporting research": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Nghiên cứu liên quan"
+        }
+      }
+    }
+  },
+  "Alternatives": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Phương án thay thế"
+        }
+      }
+    }
+  },
+  "Assumptions": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Giả định"
+        }
+      }
+    }
+  },
+  "Risks": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Rủi ro"
+        }
+      }
+    }
+  },
+  "Rationale": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Lý do đề xuất"
+        }
+      }
+    }
+  },
+  "Research expired. Request an updated proposal before accepting.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Nghiên cứu đã hết hạn. Hãy yêu cầu đề xuất cập nhật trước khi chấp thuận."
+        }
+      }
+    }
+  },
+  "Check your current finances before deciding. The read time is supplied by the agent.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Kiểm tra tài chính hiện tại trước khi quyết định. Thời điểm đọc do agent cung cấp."
+        }
+      }
+    }
+  },
+  "Valid until": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Có hiệu lực đến"
+        }
+      }
+    }
+  },
+  "Financial data read at": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Dữ liệu tài chính đọc lúc"
+        }
+      }
+    }
+  },
+  "AI draft · requires your review": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Bản nháp AI · cần bạn xem xét"
+        }
+      }
+    }
+  },
+  "Research note": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Ghi chú nghiên cứu"
+        }
+      }
+    }
+  },
+  "Accessed at": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Truy cập lúc"
+        }
+      }
+    }
+  },
+  "Source claims and access times are supplied by the agent.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Nội dung nguồn và thời điểm truy cập do agent cung cấp."
+        }
+      }
+    }
+  },
+  "Sources": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Nguồn tham khảo"
+        }
+      }
+    }
+  },
+  "Instrument ID": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Mã tài sản"
+        }
+      }
+    }
+  },
+  "Researched at": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Nghiên cứu lúc"
+        }
+      }
+    }
+  },
+  "AI-authored research": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Nghiên cứu do AI tạo"
+        }
+      }
+    }
+  },
+  "Could not load research. Your existing notes have not been changed.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Không thể đọc nghiên cứu. Các ghi chú hiện có chưa bị thay đổi."
+        }
+      }
+    }
+  },
+  "Could not export research.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Không thể xuất nghiên cứu."
+        }
+      }
+    }
+  },
+  "Export research": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Xuất nghiên cứu"
+        }
+      }
+    }
+  },
+  "Research & proposals": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Nghiên cứu & đề xuất"
+        }
+      }
+    }
+  },
+  "Review after": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Xem lại sau"
+        }
+      }
+    }
+  },
+  "Notes saved by your agent will appear here after refresh.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Ghi chú agent đã lưu sẽ xuất hiện ở đây sau khi làm mới."
+        }
+      }
+    }
+  },
+  "No research notes yet": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Chưa có ghi chú nghiên cứu"
+        }
+      }
+    }
+  },
+  "Ask your agent to research an option and save a proposal, then refresh this screen.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Nhờ agent nghiên cứu một phương án và lưu đề xuất, sau đó làm mới màn hình này."
+        }
+      }
+    }
+  },
+  "No proposals yet": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Chưa có đề xuất"
+        }
+      }
+    }
+  },
+  "Research notes": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Ghi chú nghiên cứu"
+        }
+      }
+    }
+  },
+  "Proposals": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Đề xuất"
+        }
+      }
+    }
+  },
+  "Enable Allow AI access in Settings first.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Trước tiên hãy bật Cho phép AI truy cập trong Cài đặt."
+        }
+      }
+    }
+  },
+  "Allow AI to create research and proposals": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Cho phép AI tạo nghiên cứu và đề xuất"
+        }
+      }
+    }
+  },
+  "Stored on this Mac only. Not included in Device Sync or financial backups. Export a copy to keep your research.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Chỉ lưu trên máy Mac này, không nằm trong đồng bộ thiết bị hoặc bản sao lưu tài chính. Hãy xuất bản sao để giữ nghiên cứu của bạn."
+        }
+      }
+    }
+  },
+  "Research and proposals are AI drafts. Your decisions do not place orders or move money.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Nghiên cứu và đề xuất là bản nháp do AI tạo. Quyết định của bạn không đặt lệnh hoặc chuyển tiền."
+        }
+      }
+    }
+  },
+  "AI research notebook": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Sổ nghiên cứu AI"
+        }
+      }
+    }
+  },
   "The local store could not be registered for AI access.": {
     "localizations": {
       "vi": {
