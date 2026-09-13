@@ -295,24 +295,37 @@ struct MCPQueryTests {
         let account = CashAccount(
             id: UUID(), name: "TP Bank", kind: .normal, openingBalance: 100,
             currencyCode: "VND", createdAt: date)
+        let secondAccount = CashAccount(
+            id: UUID(), name: "Cash", kind: .normal, openingBalance: 50,
+            currencyCode: "VND", createdAt: date.addingTimeInterval(-1))
         let instrument = FundInstrument(
             id: UUID(), symbol: "FUEVFVND", name: "VN Diamond", kind: .etf,
             currentPricePerUnit: 3, priceAsOf: date, currencyCode: "VND", createdAt: date)
         let jar = BudgetJar(
             id: UUID(), name: "Daily", allocationPercent: 100, role: .custom,
             symbolName: "tag", colorName: "blue", createdAt: date)
+        let tripJar = BudgetJar(
+            id: UUID(), name: "Trip", allocationPercent: 0, role: .custom,
+            symbolName: "airplane", colorName: "sky", createdAt: date)
         let category = TransactionCategory(
             id: UUID(), name: "Transport", kind: .expense, symbolName: "car",
             colorName: "blue", createdAt: date, budgetJarID: jar.id)
         context.insert(account)
+        context.insert(secondAccount)
         context.insert(instrument)
         context.insert(jar)
+        context.insert(tripJar)
         context.insert(category)
         context.insert(
             MoneyTransaction(
                 id: UUID(), kind: .expense, amount: 10, occurredAt: date, note: "Xăng",
                 accountID: account.id, categoryID: category.id, sourceRuleID: nil,
-                currencyCode: "VND", createdAt: date))
+                currencyCode: "VND", createdAt: date, budgetJarOverrideID: tripJar.id))
+        context.insert(
+            MoneyTransaction(
+                id: UUID(), kind: .expense, amount: 99, occurredAt: .distantFuture,
+                note: "Future", accountID: account.id, categoryID: category.id,
+                sourceRuleID: nil, currencyCode: "VND", createdAt: date))
         let snapshot = try IncomeAllocationSnapshotCodec.encode(
             IncomeAllocationSnapshot.capture(
                 amount: 5, jars: [jar], capturedAt: date, isEstimated: false))
@@ -332,12 +345,36 @@ struct MCPQueryTests {
         try context.save()
 
         let repository = MCPDataRepository(context: context)
-        let balance = try #require(repository.records(for: .accountBalances).first)
+        let balanceRecords = try repository.records(for: .accountBalances)
+        let balance = try #require(
+            balanceRecords.first {
+                $0.fields["accountID"] == .string(account.id.uuidString.lowercased())
+            })
         #expect(balance.fields["name"] == .string("TP Bank"))
         #expect(balance.fields["currentBalance"] == .string("95"))
-        #expect(balance.fields["isReconciled"] == .bool(false))
-        #expect(balance.fields["unattributedSavingsPrincipal"] == .string("20"))
-        #expect(balance.fields["unattributedInvestmentCostBasis"] == .string("20"))
+        #expect(balance.fields["unattributedSavingsPrincipal"] == nil)
+        let diagnostics = try #require(
+            balanceRecords.first { $0.recordType == "AccountBalanceDiagnostics" })
+        #expect(diagnostics.fields["hasUnlinkedFundingSources"] == .bool(true))
+        #expect(diagnostics.fields["unlinkedSavingsCount"] == .int(1))
+        #expect(diagnostics.fields["unlinkedHoldingCount"] == .int(1))
+        let diagnosticAmounts = try #require(
+            diagnostics.fields["amounts"]?.arrayValue?.first?.objectValue)
+        #expect(diagnosticAmounts["savingsPrincipal"] == .string("20"))
+        #expect(diagnosticAmounts["investmentCostBasis"] == .string("20"))
+
+        var balanceQuery = try MCPQuery.parse(
+            arguments: ["limit": .int(1)], for: .accountBalances)
+        var pagedIDs: [UUID] = []
+        repeat {
+            let page = try MCPPaginator.page(
+                records: repository.records(for: .accountBalances, query: balanceQuery),
+                query: balanceQuery, tool: .accountBalances)
+            pagedIDs.append(contentsOf: page.records.map(\.id))
+            balanceQuery.cursor = page.nextCursor
+        } while balanceQuery.cursor != nil
+        #expect(pagedIDs.count == 3)
+        #expect(Set(pagedIDs).count == 3)
 
         let portfolio = try #require(repository.records(for: .portfolio).first)
         let totals = try #require(portfolio.fields["totals"]?.arrayValue?.first?.objectValue)
