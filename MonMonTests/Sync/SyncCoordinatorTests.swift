@@ -90,9 +90,13 @@ struct SyncCoordinatorTests {
         }
         #expect(coordinator.isPaired)
         #expect(deletedKeys.isEmpty)
+        #expect(coordinator.contentRevision == 0)
+        #expect(!coordinator.isPresentingResetNotice)
         #expect(transport.started)
         try coordinator.resetDatabase(
             using: MonMonBackupService(container: local.container), backupURL: url)
+        #expect(coordinator.contentRevision == 1)
+        #expect(coordinator.isPresentingResetNotice)
         #expect(deletedKeys == [pair.pairID])
         #expect(!coordinator.isPaired)
         #expect(!transport.started)
