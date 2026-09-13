@@ -267,7 +267,7 @@ struct MCPResponseEnvelope: Codable, Equatable, Sendable {
 
 @MainActor
 final class MCPService {
-    static let schemaVersion = "1.0"
+    static let schemaVersion = "2.0"
 
     private let provider: any MCPDataProviding
 
@@ -307,6 +307,12 @@ final class MCPService {
             let read = try await provider.read(tool: tool, query: query)
             records = read.records
             sync = read.metadata
+        }
+        if tool == .summary {
+            return MCPResponseEnvelope(
+                schemaVersion: Self.schemaVersion,
+                records: records.map(\.fields),
+                page: MCPPageEnvelope(limit: 1, nextCursor: nil, hasMore: false), sync: sync)
         }
         let result = try MCPPaginator.page(records: records, query: query, tool: tool)
         return MCPResponseEnvelope(

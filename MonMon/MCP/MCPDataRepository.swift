@@ -17,6 +17,8 @@ final class MCPDataRepository {
         let dateFrom = query.dateFrom ?? .distantPast
         let dateTo = query.dateTo ?? .distantFuture
         switch tool {
+        case .summary:
+            return try summary(query: query)
         case .dataStatus:
             return []
         case .accounts:
@@ -173,5 +175,115 @@ final class MCPDataRepository {
             ).map(
                 MCPRecordSerializer.serialize)
         }
+    }
+}
+
+// Aggregation stays in the store context: no transaction pages are sent to the agent.
+extension MCPDataRepository {
+    private struct SummaryAmount {
+        var income = Decimal.zero
+        var expense = Decimal.zero
+        var count = 0
+
+        mutating func add(_ amount: Decimal, income isIncome: Bool) throws {
+            if isIncome {
+                income = try sum(income, amount)
+            } else {
+                expense = try sum(expense, amount)
+            }
+            count += 1
+        }
+
+        func fields(currency: String) throws -> [String: MCPJSONValue] {
+            [
+                "currencyCode": .string(currency), "income": decimal(income),
+                "expense": decimal(expense), "net": decimal(try sum(income, -expense)),
+                "transactionCount": .int(count),
+            ]
+        }
+
+        private func decimal(_ value: Decimal) -> MCPJSONValue {
+            .string(NSDecimalNumber(decimal: value).stringValue)
+        }
+
+        private func sum(_ left: Decimal, _ right: Decimal) throws -> Decimal {
+            var lhs = left
+            var rhs = right
+            var result = Decimal.zero
+            guard NSDecimalAdd(&result, &lhs, &rhs, .plain) == .noError else {
+                throw MCPToolError.decodeFailed
+            }
+            return result
+        }
+    }
+
+    private struct ExpenseGroup: Hashable {
+        let id: UUID?
+        let currency: String
+    }
+
+    private func summary(query: MCPQuery) throws -> [MCPRecord] {
+        guard let from = query.dateFrom, let to = query.dateTo else {
+            throw MCPToolError.invalidArgument
+        }
+        let transactions = try context.fetch(
+            FetchDescriptor<MoneyTransaction>(
+                predicate: #Predicate { $0.occurredAt >= from && $0.occurredAt < to }))
+        let categories = try context.fetch(FetchDescriptor<TransactionCategory>())
+        let jars = try context.fetch(FetchDescriptor<BudgetJar>())
+        let routing = BudgetTransactionRouting(jars: jars, categories: categories)
+        let groupBy = query.fieldFilters["groupBy"] ?? "none"
+        let accountID = query.fieldFilters["accountID"].flatMap(UUID.init(uuidString:))
+        let categoryID = query.fieldFilters["categoryID"].flatMap(UUID.init(uuidString:))
+        let jarID = query.fieldFilters["budgetJarID"].flatMap(UUID.init(uuidString:))
+        var totals: [String: SummaryAmount] = [:]
+        var groups: [ExpenseGroup: SummaryAmount] = [:]
+        for transaction in transactions {
+            if let accountID, transaction.accountID != accountID { continue }
+            if let categoryID, transaction.categoryID != categoryID { continue }
+            let routedJar = routing.jarID(for: transaction)
+            if let jarID, transaction.kind != .expense || routedJar != jarID { continue }
+            guard !transaction.amount.isNaN, transaction.amount >= 0,
+                !transaction.currencyCode.isEmpty
+            else { throw MCPToolError.decodeFailed }
+            let currency = transaction.currencyCode
+            try totals[currency, default: SummaryAmount()].add(
+                transaction.amount,
+                income: transaction.kind == .income)
+            if groupBy != "none", transaction.kind == .expense {
+                let id = groupBy == "category" ? transaction.categoryID : routedJar
+                try groups[ExpenseGroup(id: id, currency: currency), default: SummaryAmount()]
+                    .add(transaction.amount, income: false)
+            }
+        }
+        let names = Dictionary(
+            firstWins: groupBy == "category"
+                ? categories.map { ($0.id, $0.name) } : jars.map { ($0.id, $0.name) })
+        let groupRows = try groups.keys.sorted {
+            if $0.currency != $1.currency { return $0.currency < $1.currency }
+            return ($0.id?.uuidString ?? "") < ($1.id?.uuidString ?? "")
+        }.map { key -> MCPJSONValue in
+            var fields = try groups[key, default: SummaryAmount()].fields(currency: key.currency)
+            fields["groupID"] = key.id.map { .string($0.uuidString.lowercased()) } ?? .null
+            fields["name"] = key.id.flatMap { names[$0] }.map(MCPJSONValue.string) ?? .null
+            return .object(fields)
+        }
+        let fields: [String: MCPJSONValue] = [
+            "recordType": .string("Summary"),
+            "dateFrom": .string(from.formatted(.iso8601)),
+            "dateTo": .string(to.formatted(.iso8601)),
+            "groupBy": .string(groupBy),
+            "totals": .array(
+                try totals.keys.sorted().map {
+                    .object(try totals[$0, default: SummaryAmount()].fields(currency: $0))
+                }),
+            "expenseGroups": .array(groupRows),
+        ]
+        return [
+            MCPRecord(
+                recordType: "Summary",
+                id: UUID(uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)),
+                sortDate: from, fields: fields)
+        ]
     }
 }

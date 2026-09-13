@@ -6,6 +6,95 @@ import Testing
 
 @Suite("MCP filtering and pagination")
 struct MCPQueryTests {
+    @Test("Tools reject parameters that do not apply to their records")
+    func specificSchemas() throws {
+        for key in ["limit", "cursor", "id", "ids", "dateFrom", "createdAtFrom"] {
+            #expect(throws: MCPToolError.invalidArgument) {
+                try MCPQuery.parse(arguments: [key: .string("unused")], for: .dataStatus)
+            }
+        }
+        for tool in [MCPTool.accounts, .categories, .budgetJars] {
+            #expect(!tool.filterKeys.contains("dateFrom"))
+            #expect(tool.filterKeys.contains("createdAtFrom"))
+        }
+        #expect(throws: MCPToolError.invalidArgument) {
+            try MCPQuery.parse(arguments: [:], for: .summary)
+        }
+    }
+
+    @MainActor
+    @Test(
+        "Summary sums more than one page exactly, separates currencies and excludes the end instant"
+    )
+    func summaryTotals() throws {
+        let container = try ModelContainer(
+            for: Schema(MonMonSchema.models),
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let context = container.mainContext
+        let from = Date(timeIntervalSince1970: 1_700_000_000)
+        let end = from.addingTimeInterval(86400)
+        let account = UUID()
+        let jar = BudgetJar(
+            id: UUID(), name: "Daily", allocationPercent: 100, role: .custom,
+            symbolName: "tag", colorName: "blue", createdAt: from)
+        context.insert(jar)
+        for _ in 0..<205 {
+            context.insert(
+                MoneyTransaction(
+                    id: UUID(), kind: .expense, amount: Decimal(string: "0.1")!,
+                    occurredAt: from, note: "", accountID: account, categoryID: nil,
+                    sourceRuleID: nil,
+                    currencyCode: "VND", createdAt: from))
+        }
+        for (amount, currency, kind, date) in [
+            (Decimal(30), "VND", TransactionKind.income, from),
+            (Decimal(2), "USD", .expense, from), (Decimal(999), "VND", .expense, end),
+        ] {
+            context.insert(
+                MoneyTransaction(
+                    id: UUID(), kind: kind, amount: amount,
+                    occurredAt: date, note: "", accountID: account, categoryID: nil,
+                    sourceRuleID: nil,
+                    currencyCode: currency, createdAt: from))
+        }
+        context.insert(
+            AccountTransfer(
+                id: UUID(), amount: 999, occurredAt: from, note: "",
+                sourceAccountID: account, destinationAccountID: UUID(), currencyCode: "VND",
+                createdAt: from))
+        try context.save()
+        var arguments: [String: MCPJSONValue] = [
+            "dateFrom": .string(from.formatted(.iso8601)),
+            "dateTo": .string(end.formatted(.iso8601)), "groupBy": .string("budgetJar"),
+        ]
+        let repository = MCPDataRepository(context: context)
+        let query = try MCPQuery.parse(arguments: arguments, for: .summary)
+        let result = try #require(repository.records(for: .summary, query: query).first)
+        let totals = try #require(result.fields["totals"]?.arrayValue)
+        let vnd = try #require(
+            totals.first { $0.objectValue?["currencyCode"] == .string("VND") }?.objectValue)
+        #expect(vnd["expense"] == .string("20.5"))
+        #expect(vnd["income"] == .string("30"))
+        #expect(vnd["net"] == .string("9.5"))
+        #expect(vnd["transactionCount"] == .int(206))
+        #expect(totals.count == 2)
+        #expect(result.fields["expenseGroups"]?.arrayValue?.count == 2)
+        arguments["accountID"] = .string(UUID().uuidString)
+        let empty = try repository.records(
+            for: .summary,
+            query: MCPQuery.parse(arguments: arguments, for: .summary))
+        #expect(empty.first?.fields["totals"] == .array([]))
+        arguments.removeValue(forKey: "accountID")
+        arguments["budgetJarID"] = .string(jar.id.uuidString)
+        let jarResult = try repository.records(
+            for: .summary,
+            query: MCPQuery.parse(arguments: arguments, for: .summary))
+        #expect(
+            jarResult.first?.fields["totals"]?.arrayValue?.allSatisfy {
+                $0.objectValue?["income"] == .string("0")
+            } == true)
+    }
+
     @Test("Defaults to 50, caps at 200, and rejects invalid limits")
     func limits() throws {
         #expect(try MCPQuery.parse(arguments: [:], for: .transactions).limit == 50)

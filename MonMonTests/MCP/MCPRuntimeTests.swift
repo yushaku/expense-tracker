@@ -133,8 +133,8 @@ struct MCPRuntimeTests {
         let arguments: [String: MCPJSONValue] = [
             "limit": .int(1),
             "ids": .array(ids.prefix(4).map { .string($0.uuidString) }),
-            "dateFrom": .string(day.addingTimeInterval(86400).formatted(.iso8601)),
-            "dateTo": .string(day.addingTimeInterval(3 * 86400).formatted(.iso8601)),
+            "createdAtFrom": .string(day.addingTimeInterval(86400).formatted(.iso8601)),
+            "createdAtTo": .string(day.addingTimeInterval(3 * 86400).formatted(.iso8601)),
         ]
         var nextArguments = arguments
         var amounts: [String] = []
@@ -148,7 +148,7 @@ struct MCPRuntimeTests {
         #expect(
             try await service.call(tool: .accounts, arguments: ["ids": .array([])]).records.isEmpty)
         // Exercise each concrete SwiftData predicate, including composite tools.
-        for tool in MCPTool.allCases where tool != .dataStatus {
+        for tool in MCPTool.allCases where tool != .dataStatus && tool != .summary {
             _ = try await service.call(tool: tool, arguments: [:])
         }
     }

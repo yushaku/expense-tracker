@@ -2,7 +2,7 @@
 
 The macOS build embeds a local `stdio` MCP server at
 `MonMon.app/Contents/Helpers/MonMonMCPServer`. It lets Codex and Claude Desktop
-read raw MonMon records after the owner explicitly enables **Allow AI access**
+read MonMon records and period summaries after the owner explicitly enables **Allow AI access**
 in Settings. The helper can run while the MonMon window is closed or App Lock is
 engaged.
 
@@ -53,7 +53,7 @@ an export step. Unsaved edits are excluded. ID and date filters run in the datab
 remaining field filters, stable ordering and cursor pagination run on the selected
 records in memory. No data snapshot is created after a save.
 
-The response envelope keeps `schemaVersion: "1.0"`, `records`, `page` and `sync`.
+The response envelope keeps `schemaVersion: "2.0"`, `records`, `page` and `sync`.
 `sync.source` is now `localStore`; `sync.readAt` is the time the request read the
 store. `fresh` means a successful direct read, not an assertion about another
 device. `lastSnapshotAt` remains `null` for compatibility. `disabled` and
@@ -65,8 +65,9 @@ The reader uses Apple's [read-only ModelConfiguration](https://developer.apple.c
 
 ## Tools
 
-The server exposes 13 financial read tools:
+The server exposes 14 financial read tools:
 
+- `monmon_summary`
 - `monmon_data_status`
 - `monmon_list_accounts`
 - `monmon_list_transactions`
@@ -92,7 +93,7 @@ strings, and missing values are JSON `null`. Stored JSON/Data snapshots are
 decoded into objects or arrays without adding derived totals, forecasts,
 progress, or financial advice.
 
-Pagination defaults to 50 records and accepts at most 200. Opaque cursors use a
+Financial list pagination defaults to 50 records and accepts at most 200. Opaque cursors use a
 stable descending business-date then UUID order. Invalid arguments and cursors
 return a safe structured error; paths, stack traces, notes, and amounts are not
 written to operational logs.
@@ -183,3 +184,20 @@ until the owner follows a link.
 This first version is local to Mac and excluded from Device Sync and financial
 backups. Use **Export research** to save an ISO-8601 JSON copy of notes, proposals
 and decisions. Disabling AI access preserves the local notebook for the owner.
+
+## MCP contract v2
+
+Refresh the client's tool list after installing this version. The server reports `2.0.0`, and financial envelopes report `schemaVersion: "2.0"`.
+
+- `monmon_data_status` accepts only `{}`. Accounts, categories and jars accept creation-time filters, not `dateFrom`/`dateTo`. Other lists document which business date they filter; their bounds remain inclusive.
+- Each tool has a distinct description and advertised enum values. All financial tools (including summary) and research read tools publish `annotations.readOnlyHint: true`; the two research create tools publish `false`. These hints do not replace MonMon's consent checks or a client's own approval policy.
+
+### `monmon_summary`
+
+Required `dateFrom` (inclusive) and `dateTo` (exclusive) are ISO 8601 timestamps with timezone. For September in Vietnam, use `2026-09-01T00:00:00+07:00` through `2026-10-01T00:00:00+07:00`. Pass an earlier end instant for month-to-date. Optional filters: `accountID`, `categoryID`, `budgetJarID`; optional `groupBy`: `none` (default), `category`, `budgetJar`.
+
+Returns one Summary record in the standard envelope. `totals` contains `{currencyCode, income, expense, net, transactionCount}` per currency. `expenseGroups` contains the same amount fields plus `groupID` and `name` for expenses only; missing categories/jars use null identifiers or names. No matching transactions yields empty arrays. Amounts are exact decimal strings; currencies are never combined or converted. Decimal overflow fails instead of returning a rounded total.
+
+Only saved MoneyTransaction records count. Transfers, pending captures, recurring schedules, deposits, withdrawals, fund purchases and sales are excluded. Jar grouping reuses the app's transaction routing (valid trip override, category mapping, fallback jar). `budgetJarID` selects expenses only. This is transaction spending, not budget allocations, account balances, or the Budget screen's savings/investment usage.
+
+Development certificates remain appropriate for local Dev installs. Distribution to other Macs requires a separate Developer ID signing/notarization release flow; this change does not alter signing.

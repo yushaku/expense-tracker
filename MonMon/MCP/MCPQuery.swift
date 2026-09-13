@@ -1,6 +1,7 @@
 import Foundation
 
 enum MCPTool: String, CaseIterable, Sendable {
+    case summary = "monmon_summary"
     case dataStatus = "monmon_data_status"
     case accounts = "monmon_list_accounts"
     case transactions = "monmon_list_transactions"
@@ -17,7 +18,7 @@ enum MCPTool: String, CaseIterable, Sendable {
 
     var recordTypes: Set<String> {
         switch self {
-        case .dataStatus: []
+        case .dataStatus, .summary: []
         case .accounts: ["CashAccount"]
         case .transactions: ["MoneyTransaction"]
         case .transfers: ["AccountTransfer"]
@@ -34,12 +35,19 @@ enum MCPTool: String, CaseIterable, Sendable {
     }
 
     var filterKeys: Set<String> {
-        let common: Set<String> = [
-            "limit", "cursor", "id", "ids", "createdAtFrom", "createdAtTo", "dateFrom", "dateTo",
+        if self == .dataStatus { return [] }
+        if self == .summary {
+            return ["dateFrom", "dateTo", "accountID", "categoryID", "budgetJarID", "groupBy"]
+        }
+        var common: Set<String> = [
+            "limit", "cursor", "id", "ids", "createdAtFrom", "createdAtTo",
         ]
+        if ![MCPTool.accounts, .categories, .budgetJars].contains(self) {
+            common.formUnion(["dateFrom", "dateTo"])
+        }
         let specific: Set<String>
         switch self {
-        case .dataStatus:
+        case .dataStatus, .summary:
             specific = []
         case .accounts:
             specific = ["kind"]
@@ -152,6 +160,11 @@ struct MCPQuery: Equatable, Sendable {
             }
             query.fieldFilters[key] = normalized
         }
+        if tool == .summary {
+            guard let from = query.dateFrom, let to = query.dateTo, from < to else {
+                throw MCPToolError.invalidArgument
+            }
+        }
         return query
     }
 
@@ -179,8 +192,14 @@ struct MCPQuery: Equatable, Sendable {
         if key.hasSuffix("ID") {
             return UUID(uuidString: value) != nil
         }
+        return allowedFilterValues(key: key, tool: tool)?.contains(value) ?? true
+    }
+
+    static func allowedFilterValues(key: String, tool: MCPTool) -> Set<String>? {
         let allowed: Set<String>?
         switch (tool, key) {
+        case (.summary, "groupBy"):
+            allowed = ["none", "category", "budgetJar"]
         case (.accounts, "kind"):
             allowed = ["normal", "credit"]
         case (.transactions, "kind"), (.categories, "kind"),
@@ -205,7 +224,7 @@ struct MCPQuery: Equatable, Sendable {
         default:
             allowed = nil
         }
-        return allowed?.contains(value) ?? true
+        return allowed
     }
 }
 
@@ -228,18 +247,24 @@ enum MCPPaginator {
         query: MCPQuery,
         tool: MCPTool
     ) throws -> MCPPageResult {
+        try page(records: records, query: query, toolName: tool.rawValue)
+    }
+
+    static func page(records: [MCPRecord], query: MCPQuery, toolName: String) throws
+        -> MCPPageResult
+    {
         var filtered = try records.filter { try matches($0, query: query) }
         filtered.sort(by: orderedBefore)
 
         if let rawCursor = query.cursor {
-            let cursor = try decode(rawCursor, for: tool)
+            let cursor = try decode(rawCursor, for: toolName)
             filtered = filtered.filter { isAfter($0, cursor: cursor) }
         }
 
         let selected = Array(filtered.prefix(query.limit))
         let nextCursor: String?
         if filtered.count > selected.count, let last = selected.last {
-            nextCursor = try encode(last, for: tool)
+            nextCursor = try encode(last, for: toolName)
         } else {
             nextCursor = nil
         }
@@ -292,10 +317,10 @@ enum MCPPaginator {
         return record.recordType > cursor.recordType
     }
 
-    private static func encode(_ record: MCPRecord, for tool: MCPTool) throws -> String {
+    private static func encode(_ record: MCPRecord, for tool: String) throws -> String {
         let cursor = Cursor(
             version: 1,
-            tool: tool.rawValue,
+            tool: tool,
             sortTime: record.sortDate.timeIntervalSinceReferenceDate,
             id: record.id.uuidString.lowercased(),
             recordType: record.recordType
@@ -307,7 +332,7 @@ enum MCPPaginator {
             .replacingOccurrences(of: "=", with: "")
     }
 
-    private static func decode(_ raw: String, for tool: MCPTool) throws -> Cursor {
+    private static func decode(_ raw: String, for tool: String) throws -> Cursor {
         var base64 = raw.replacingOccurrences(of: "-", with: "+")
             .replacingOccurrences(of: "_", with: "/")
         base64 += String(repeating: "=", count: (4 - base64.count % 4) % 4)
@@ -315,7 +340,7 @@ enum MCPPaginator {
             let data = Data(base64Encoded: base64),
             let cursor = try? JSONDecoder().decode(Cursor.self, from: data),
             cursor.version == 1,
-            cursor.tool == tool.rawValue,
+            cursor.tool == tool,
             UUID(uuidString: cursor.id) != nil,
             cursor.sortTime.isFinite
         else {

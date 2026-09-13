@@ -30,7 +30,7 @@ enum MCPServerAdapter {
         }
     }
 
-    static let serverVersion = "1.0.0"
+    static let serverVersion = "2.0.0"
 
     static var tools: [Tool] {
         MCPTool.allCases.map(toolDefinition) + MCPResearchTools.definitions
@@ -102,6 +102,12 @@ enum MCPServerAdapter {
     private static func inputSchema(for tool: MCPTool) -> Value {
         var properties: [String: Value] = [:]
         for key in tool.filterKeys {
+            if let values = MCPQuery.allowedFilterValues(key: key, tool: tool) {
+                properties[key] = [
+                    "type": "string", "enum": .array(values.sorted().map(Value.string)),
+                ]
+                continue
+            }
             switch key {
             case "limit":
                 properties[key] = ["type": "integer", "minimum": 1, "maximum": 200, "default": 50]
@@ -121,6 +127,7 @@ enum MCPServerAdapter {
             "type": "object",
             "properties": .object(properties),
             "additionalProperties": false,
+            "required": tool == .summary ? ["dateFrom", "dateTo"] : [],
         ]
     }
 
@@ -185,6 +192,7 @@ enum MCPServerAdapter {
 
     private static func title(for tool: MCPTool) -> String {
         switch tool {
+        case .summary: "Summarize MonMon income and expenses"
         case .dataStatus: "MonMon data status"
         case .accounts: "List MonMon accounts"
         case .transactions: "List MonMon transactions"
@@ -202,11 +210,35 @@ enum MCPServerAdapter {
     }
 
     private static func description(for tool: MCPTool) -> String {
-        if tool == .dataStatus {
-            return
-                "Reports access permission, build flavour, and direct local-store availability."
+        switch tool {
+        case .dataStatus:
+            "Read AI permission, build flavour, local-store availability and read time. No arguments."
+        case .summary:
+            "Sum saved income and expenses using exact decimals, separately per currency. Required dateFrom inclusive/dateTo exclusive are ISO 8601 instants with timezone. Optional groupBy: none, category or budgetJar returns expense breakdowns. Jar filters select expenses only and follow app routing. Excludes transfers, pending captures, savings and investment movements; not account balances or jar allocation totals."
+        case .accounts:
+            "List cash and credit accounts with opening balance, credit limit and currency. Filter kind or creation time; these are not computed current balances."
+        case .transactions:
+            "List posted income and expense transactions with amount, account, category, trip and jar override. dateFrom/dateTo filter occurredAt inclusively. Use monmon_summary for totals."
+        case .transfers:
+            "List internal account transfers with amount, source and destination accounts. Date filters use occurredAt; transfers are not income or expenses."
+        case .categories:
+            "List income and expense categories with names, icons and assigned budget jar. Filter by kind, budgetJarID or creation time."
+        case .recurringRules:
+            "List recurring income/expense schedules with amount, frequency, account, category and pause state. Date filters use anchorDate; rules are not posted transactions."
+        case .budgetJars:
+            "List budget jars with allocation percentages and custom, savings or investment role. Filter role or creation time; use summary for transaction spending."
+        case .goals:
+            "List financial goals with target amount, earmarked amount, monthly contribution and funding jar. Date filters use targetDate."
+        case .trips:
+            "List trip workspaces with status, linked goal and funding jar. Date filters use startedAt."
+        case .savings:
+            "List savings deposits and withdrawals. Select recordType; date filters use openedAt for deposits and withdrawnAt for withdrawals."
+        case .investments:
+            "List fund/ETF/gold instruments, holdings and sales. Select recordType; dates use priceAsOf, purchasedAt (or createdAt), and soldAt respectively."
+        case .debts:
+            "List borrowed/lent debts and debt payments with linked accounts. Select recordType; date filters use openedAt for debts and occurredAt for payments."
+        case .pendingCaptures:
+            "List captured transaction drafts awaiting review, with amount, account and category. Date filters use occurredAt. These are not posted spending."
         }
-        return
-            "Returns paginated raw stored records without totals, projections, or financial advice."
     }
 }
