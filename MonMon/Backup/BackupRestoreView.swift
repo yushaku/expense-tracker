@@ -76,6 +76,7 @@ struct MonMonBackupFileDocument: FileDocument {
 
 struct BackupRestoreView: View {
     @Environment(AppLock.self) private var appLock
+    @Environment(SyncCoordinator.self) private var syncCoordinator
     @Environment(\.modelContext) private var modelContext
     @Environment(\.locale) private var locale
 
@@ -89,6 +90,8 @@ struct BackupRestoreView: View {
     @State private var operationError: String?
     @State private var notice: BackupRestoreNotice?
     @State private var hasRecovery = false
+    @State private var isConfirmingReset = false
+    @AppStorage("backup.lastResetPath") private var lastResetPath = ""
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -149,6 +152,8 @@ struct BackupRestoreView: View {
                 .accessibilityIdentifier("backup-restore-previous")
             }
 
+            resetSection
+
             if isWorking {
                 HStack(spacing: 8) {
                     ProgressView()
@@ -161,6 +166,14 @@ struct BackupRestoreView: View {
             }
         }
         .task { refreshRecoveryAvailability() }
+        .alert("Reset local database?", isPresented: $isConfirmingReset) {
+            Button("Cancel", role: .cancel) {}
+            Button("Back Up and Reset", role: .destructive) { performReset() }
+        } message: {
+            Text(
+                "MonMon will save and verify a financial backup before deleting all local database records and disconnecting Device Sync. Notes, proposals, app settings, and data on other devices are kept. If backup fails, nothing is deleted."
+            )
+        }
         .alert("Export readable JSON?", isPresented: $isPresentingExportWarning) {
             Button("Cancel", role: .cancel) {}
             Button("Continue") { buildExport() }
@@ -215,6 +228,89 @@ struct BackupRestoreView: View {
                 message: Text(notice.message),
                 dismissButton: .default(Text("OK"))
             )
+        }
+    }
+
+    private var resetSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Divider().overlay(MonMonTheme.border)
+            Button(role: .destructive) {
+                isConfirmingReset = true
+            } label: {
+                Label("Reset Data", systemImage: "trash")
+                    .frame(minHeight: 44)
+            }
+            .buttonStyle(.plain)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(MonMonTheme.danger)
+            .disabled(isWorking || syncCoordinator.writesLocked)
+            .accessibilityIdentifier("backup-reset")
+
+            Text("A financial backup is saved on this device before the database is cleared.")
+                .font(.caption)
+                .foregroundStyle(MonMonTheme.textSecondary)
+
+            if !lastResetPath.isEmpty {
+                Text("Last reset backup")
+                    .font(.caption.weight(.semibold))
+                Text(verbatim: lastResetPath)
+                    .font(.caption2)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .textSelection(.enabled)
+                ViewThatFits(in: .horizontal) {
+                    HStack { resetBackupActions }
+                    VStack(alignment: .leading) { resetBackupActions }
+                }
+                .disabled(isWorking)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var resetBackupActions: some View {
+        ShareLink(item: URL(fileURLWithPath: lastResetPath)) {
+            Label("Export Backup", systemImage: "square.and.arrow.up")
+                .frame(minHeight: 44)
+        }
+        Button {
+            prepareImportedPreview(from: URL(fileURLWithPath: lastResetPath))
+        } label: {
+            Label("Restore Reset Backup", systemImage: "arrow.counterclockwise")
+                .frame(minHeight: 44)
+        }
+    }
+
+    private func performReset() {
+        guard !isWorking else { return }
+        isWorking = true
+        Task { @MainActor in
+            await Task.yield()
+            defer { isWorking = false }
+            if appLock.isEnabled {
+                guard await appLock.authenticate(reason: "Back up and reset the MonMon database.")
+                else {
+                    notice = BackupRestoreNotice(
+                        message: appLock.failureMessage ?? localized("Authentication is required."),
+                        isFailure: true)
+                    return
+                }
+            }
+            let url = MonMonBackupService.resetBackupURL()
+            do {
+                try SyncWriteGate.save(modelContext)
+                try syncCoordinator.resetDatabase(using: service, backupURL: url)
+                lastResetPath = url.path
+                notice = BackupRestoreNotice(
+                    message: localized("Database reset complete. Your backup is available below."),
+                    isFailure: false)
+            } catch {
+                // A successful backup remains useful even if the later save failed.
+                if (try? service.preview(MonMonBackupFileReader.read(url))) != nil {
+                    lastResetPath = url.path
+                }
+                notice = BackupRestoreNotice(
+                    message: localized(MonMonBackupUserMessage.error(error)), isFailure: true)
+            }
         }
     }
 
