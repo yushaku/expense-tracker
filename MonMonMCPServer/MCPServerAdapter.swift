@@ -30,7 +30,7 @@ enum MCPServerAdapter {
         }
     }
 
-    static let serverVersion = "2.0.0"
+    static let serverVersion = "3.0.0"
 
     static var tools: [Tool] {
         MCPTool.allCases.map(toolDefinition) + MCPResearchTools.definitions
@@ -63,6 +63,8 @@ enum MCPServerAdapter {
                 }
                 let envelope = try await service.call(tool: tool, arguments: arguments)
                 return try successResult(envelope)
+            } catch let error as MCPArgumentError {
+                return try errorResult(error.payload)
             } catch let error as MCPToolError {
                 return try errorResult(error)
             } catch let error as ResearchStoreError {
@@ -111,9 +113,14 @@ enum MCPServerAdapter {
             }
             switch key {
             case "limit":
-                properties[key] = ["type": "integer", "minimum": 1, "maximum": 200, "default": 50]
+                properties[key] = ["type": "integer", "minimum": 1, "maximum": 500, "default": 50]
             case "ids":
                 properties[key] = ["type": "array", "items": ["type": "string", "format": "uuid"]]
+            case "include":
+                properties[key] = [
+                    "type": "array", "items": ["type": "string", "enum": ["allocationSlices"]],
+                    "uniqueItems": true,
+                ]
             case "createdAtFrom", "createdAtTo", "dateFrom", "dateTo":
                 properties[key] = ["type": "string", "format": "date-time"]
             default:
@@ -137,11 +144,12 @@ enum MCPServerAdapter {
         "type": "object",
         "oneOf": [
             [
-                "required": ["schemaVersion", "records", "page", "sync"],
+                "required": ["schemaVersion", "records", "page", "query", "sync"],
                 "properties": [
                     "schemaVersion": ["type": "string"],
                     "records": ["type": "array", "items": ["type": "object"]],
                     "page": ["type": "object"],
+                    "query": ["type": "object"],
                     "sync": ["type": "object"],
                 ],
             ],
@@ -164,7 +172,11 @@ enum MCPServerAdapter {
     }
 
     private static func errorResult(_ error: MCPToolError) throws -> CallTool.Result {
-        let data = try encoded(error.payload)
+        try errorResult(error.payload)
+    }
+
+    private static func errorResult(_ payload: [String: MCPJSONValue]) throws -> CallTool.Result {
+        let data = try encoded(payload)
         return try CallTool.Result(
             content: [
                 .text(text: String(decoding: data, as: UTF8.self), annotations: nil, _meta: nil)
@@ -194,6 +206,8 @@ enum MCPServerAdapter {
     private static func title(for tool: MCPTool) -> String {
         switch tool {
         case .summary: "Summarize MonMon income and expenses"
+        case .accountBalances: "Calculate current MonMon account balances"
+        case .portfolio: "Value the current MonMon portfolio"
         case .dataStatus: "MonMon data status"
         case .accounts: "List MonMon accounts"
         case .transactions: "List MonMon transactions"
@@ -216,30 +230,34 @@ enum MCPServerAdapter {
             "Read AI permission, build flavour, local-store availability and read time. No arguments."
         case .summary:
             "Sum saved income and expenses using exact decimals, separately per currency. Required dateFrom inclusive/dateTo exclusive are ISO 8601 instants with timezone. Optional groupBy: none, category or budgetJar returns expense breakdowns. Jar filters select expenses only and follow app routing. Excludes transfers, pending captures, savings and investment movements; not account balances or jar allocation totals."
+        case .accountBalances:
+            "Calculate each cash or credit account's current ledger balance and available credit as of now. Includes reconciliation diagnostics when savings or holdings have no sourceAccountID. Filter by accountID or kind."
+        case .portfolio:
+            "Value open investment positions from remaining units and current instrument prices. Returns totals and profit/loss per currency plus each instrument position. Filter by instrumentID or kind."
         case .accounts:
-            "List cash and credit accounts with opening balance, credit limit and currency. Filter kind or creation time; these are not computed current balances."
+            "List cash and credit accounts newest first by createdAt, with opening balance, credit limit and currency. Filter kind or creation time; use monmon_account_balances for current balances."
         case .transactions:
-            "List posted income and expense transactions with amount, account, category, trip and jar override. dateFrom/dateTo filter occurredAt inclusively. Use monmon_summary for totals."
+            "List posted income and expense transactions newest first by occurredAt. dateFrom is inclusive and dateTo exclusive. Names are included beside foreign keys. Income allocations are compact unless include contains allocationSlices. Supports case-insensitive noteContains; use monmon_summary for totals."
         case .transfers:
-            "List internal account transfers with amount, source and destination accounts. Date filters use occurredAt; transfers are not income or expenses."
+            "List internal account transfers newest first by occurredAt, with amount and named source and destination accounts. dateFrom is inclusive and dateTo exclusive; transfers are not income or expenses."
         case .categories:
-            "List income and expense categories with names, icons and assigned budget jar. Filter by kind, budgetJarID or creation time."
+            "List income and expense categories newest first by createdAt, with names, icons and assigned budget jar. Filter by kind, budgetJarID or creation time."
         case .recurringRules:
-            "List recurring income/expense schedules with amount, frequency, account, category and pause state. Date filters use anchorDate; rules are not posted transactions."
+            "List recurring income/expense schedules newest first by anchorDate, with amount, frequency, account, category and pause state. dateFrom is inclusive and dateTo exclusive; rules are not posted transactions."
         case .budgetJars:
-            "List budget jars with allocation percentages and custom, savings or investment role. Filter role or creation time; use summary for transaction spending."
+            "List budget jars newest first by createdAt, with allocation percentages and custom, savings or investment role. Filter role or creation time; use summary for transaction spending."
         case .goals:
-            "List financial goals with target amount, earmarked amount, monthly contribution and funding jar. Date filters use targetDate."
+            "List financial goals newest first by targetDate, with target amount, earmarked amount, monthly contribution and funding jar. dateFrom is inclusive and dateTo exclusive."
         case .trips:
-            "List trip workspaces with status, linked goal and funding jar. Date filters use startedAt."
+            "List trip workspaces newest first by startedAt, with status, linked goal and funding jar. dateFrom is inclusive and dateTo exclusive."
         case .savings:
-            "List savings deposits and withdrawals. Select recordType; date filters use openedAt for deposits and withdrawnAt for withdrawals."
+            "List savings records newest first by openedAt for deposits and withdrawnAt for withdrawals. Select recordType; dateFrom is inclusive and dateTo exclusive."
         case .investments:
-            "List fund/ETF/gold instruments, holdings and sales. Select recordType; dates use priceAsOf, purchasedAt (or createdAt), and soldAt respectively."
+            "List fund, ETF, gold and crypto records newest first by priceAsOf, purchasedAt (or createdAt), or soldAt according to recordType. dateFrom is inclusive and dateTo exclusive."
         case .debts:
-            "List borrowed/lent debts and debt payments with linked accounts. Select recordType; date filters use openedAt for debts and occurredAt for payments."
+            "List debt records newest first by openedAt for debts and occurredAt for payments, with linked account names. Select recordType; dateFrom is inclusive and dateTo exclusive."
         case .pendingCaptures:
-            "List captured transaction drafts awaiting review, with amount, account and category. Date filters use occurredAt. These are not posted spending."
+            "List captured transaction drafts newest first by occurredAt, with amount, account and category. dateFrom is inclusive and dateTo exclusive. These are not posted spending."
         }
     }
 }
