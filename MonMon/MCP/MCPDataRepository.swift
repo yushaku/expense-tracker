@@ -10,6 +10,11 @@ final class MCPDataRepository {
     }
 
     func records(for tool: MCPTool, query: MCPQuery = MCPQuery()) throws -> [MCPRecord] {
+        let records = try rawRecords(for: tool, query: query)
+        return try enriched(records)
+    }
+
+    private func rawRecords(for tool: MCPTool, query: MCPQuery) throws -> [MCPRecord] {
         let hasIDs = query.ids != nil
         let ids = Array(query.ids ?? [])
         let createdFrom = query.createdAtFrom ?? .distantPast
@@ -19,6 +24,10 @@ final class MCPDataRepository {
         switch tool {
         case .summary:
             return try summary(query: query)
+        case .accountBalances:
+            return try accountBalances(query: query)
+        case .portfolio:
+            return try portfolio(query: query)
         case .dataStatus:
             return []
         case .accounts:
@@ -37,17 +46,19 @@ final class MCPDataRepository {
                     predicate: #Predicate { record in
                         (!hasIDs || ids.contains(record.id))
                             && record.createdAt >= createdFrom && record.createdAt <= createdTo
-                            && record.occurredAt >= dateFrom && record.occurredAt <= dateTo
+                            && record.occurredAt >= dateFrom && record.occurredAt < dateTo
                     })
-            ).map(
-                MCPRecordSerializer.serialize)
+            ).map {
+                try MCPRecordSerializer.serialize(
+                    $0, includeAllocationSlices: query.includes.contains("allocationSlices"))
+            }
         case .transfers:
             return try context.fetch(
                 FetchDescriptor<AccountTransfer>(
                     predicate: #Predicate { record in
                         (!hasIDs || ids.contains(record.id))
                             && record.createdAt >= createdFrom && record.createdAt <= createdTo
-                            && record.occurredAt >= dateFrom && record.occurredAt <= dateTo
+                            && record.occurredAt >= dateFrom && record.occurredAt < dateTo
                     })
             ).map(
                 MCPRecordSerializer.serialize)
@@ -67,7 +78,7 @@ final class MCPDataRepository {
                     predicate: #Predicate { record in
                         (!hasIDs || ids.contains(record.id))
                             && record.createdAt >= createdFrom && record.createdAt <= createdTo
-                            && record.anchorDate >= dateFrom && record.anchorDate <= dateTo
+                            && record.anchorDate >= dateFrom && record.anchorDate < dateTo
                     })
             ).map(
                 MCPRecordSerializer.serialize)
@@ -87,7 +98,7 @@ final class MCPDataRepository {
                     predicate: #Predicate { record in
                         (!hasIDs || ids.contains(record.id))
                             && record.createdAt >= createdFrom && record.createdAt <= createdTo
-                            && record.targetDate >= dateFrom && record.targetDate <= dateTo
+                            && record.targetDate >= dateFrom && record.targetDate < dateTo
                     })
             ).map(
                 MCPRecordSerializer.serialize)
@@ -97,7 +108,7 @@ final class MCPDataRepository {
                     predicate: #Predicate { record in
                         (!hasIDs || ids.contains(record.id))
                             && record.createdAt >= createdFrom && record.createdAt <= createdTo
-                            && record.startedAt >= dateFrom && record.startedAt <= dateTo
+                            && record.startedAt >= dateFrom && record.startedAt < dateTo
                     })
             ).map(
                 MCPRecordSerializer.serialize)
@@ -107,7 +118,7 @@ final class MCPDataRepository {
                     predicate: #Predicate { record in
                         (!hasIDs || ids.contains(record.id))
                             && record.createdAt >= createdFrom && record.createdAt <= createdTo
-                            && record.openedAt >= dateFrom && record.openedAt <= dateTo
+                            && record.openedAt >= dateFrom && record.openedAt < dateTo
                     })
             ).map(
                 MCPRecordSerializer.serialize)
@@ -116,7 +127,7 @@ final class MCPDataRepository {
                         predicate: #Predicate { record in
                             (!hasIDs || ids.contains(record.id))
                                 && record.createdAt >= createdFrom && record.createdAt <= createdTo
-                                && record.withdrawnAt >= dateFrom && record.withdrawnAt <= dateTo
+                                && record.withdrawnAt >= dateFrom && record.withdrawnAt < dateTo
                         })
                 ).map(
                     MCPRecordSerializer.serialize)
@@ -126,7 +137,7 @@ final class MCPDataRepository {
                     predicate: #Predicate { record in
                         (!hasIDs || ids.contains(record.id))
                             && record.createdAt >= createdFrom && record.createdAt <= createdTo
-                            && record.priceAsOf >= dateFrom && record.priceAsOf <= dateTo
+                            && record.priceAsOf >= dateFrom && record.priceAsOf < dateTo
                     })
             ).map(
                 MCPRecordSerializer.serialize)
@@ -136,7 +147,7 @@ final class MCPDataRepository {
                             (!hasIDs || ids.contains(record.id))
                                 && record.createdAt >= createdFrom && record.createdAt <= createdTo
                                 && (record.purchasedAt ?? record.createdAt) >= dateFrom
-                                && (record.purchasedAt ?? record.createdAt) <= dateTo
+                                && (record.purchasedAt ?? record.createdAt) < dateTo
                         })
                 ).map(MCPRecordSerializer.serialize)
                 + context.fetch(
@@ -144,7 +155,7 @@ final class MCPDataRepository {
                         predicate: #Predicate { record in
                             (!hasIDs || ids.contains(record.id))
                                 && record.createdAt >= createdFrom && record.createdAt <= createdTo
-                                && record.soldAt >= dateFrom && record.soldAt <= dateTo
+                                && record.soldAt >= dateFrom && record.soldAt < dateTo
                         })
                 ).map(MCPRecordSerializer.serialize)
         case .debts:
@@ -153,7 +164,7 @@ final class MCPDataRepository {
                     predicate: #Predicate { record in
                         (!hasIDs || ids.contains(record.id))
                             && record.createdAt >= createdFrom && record.createdAt <= createdTo
-                            && record.openedAt >= dateFrom && record.openedAt <= dateTo
+                            && record.openedAt >= dateFrom && record.openedAt < dateTo
                     })
             ).map(MCPRecordSerializer.serialize)
                 + context.fetch(
@@ -161,7 +172,7 @@ final class MCPDataRepository {
                         predicate: #Predicate { record in
                             (!hasIDs || ids.contains(record.id))
                                 && record.createdAt >= createdFrom && record.createdAt <= createdTo
-                                && record.occurredAt >= dateFrom && record.occurredAt <= dateTo
+                                && record.occurredAt >= dateFrom && record.occurredAt < dateTo
                         })
                 ).map(MCPRecordSerializer.serialize)
         case .pendingCaptures:
@@ -170,16 +181,268 @@ final class MCPDataRepository {
                     predicate: #Predicate { record in
                         (!hasIDs || ids.contains(record.id))
                             && record.createdAt >= createdFrom && record.createdAt <= createdTo
-                            && record.occurredAt >= dateFrom && record.occurredAt <= dateTo
+                            && record.occurredAt >= dateFrom && record.occurredAt < dateTo
                     })
             ).map(
                 MCPRecordSerializer.serialize)
         }
     }
+
+    private func enriched(_ records: [MCPRecord]) throws -> [MCPRecord] {
+        let selfContainedTypes: Set<String> = [
+            "Summary", "Portfolio", "AccountBalance", "AccountBalanceDiagnostics",
+            "CashAccount", "BudgetJar",
+        ]
+        if records.allSatisfy({ selfContainedTypes.contains($0.recordType) }) {
+            return records
+        }
+        let accountNames = Dictionary(
+            firstWins: try context.fetch(FetchDescriptor<CashAccount>()).map { ($0.id, $0.name) })
+        let categories = try context.fetch(FetchDescriptor<TransactionCategory>())
+        let categoryNames = Dictionary(firstWins: categories.map { ($0.id, $0.name) })
+        let jars = try context.fetch(FetchDescriptor<BudgetJar>())
+        let jarNames = Dictionary(firstWins: jars.map { ($0.id, $0.name) })
+        let jarRouting = BudgetTransactionRouting(jars: jars, categories: categories)
+        let instrumentNames = Dictionary(
+            firstWins: try context.fetch(FetchDescriptor<FundInstrument>()).map {
+                ($0.id, $0.name)
+            })
+        let depositNames = Dictionary(
+            firstWins: try context.fetch(FetchDescriptor<SavingsDeposit>()).map {
+                ($0.id, $0.name)
+            })
+        let goalNames = Dictionary(
+            firstWins: try context.fetch(FetchDescriptor<FinancialGoal>()).map { ($0.id, $0.name) })
+        let tripNames = Dictionary(
+            firstWins: try context.fetch(FetchDescriptor<TripWorkspace>()).map { ($0.id, $0.name) })
+        let lookups: [(String, String, [UUID: String])] = [
+            ("accountID", "accountName", accountNames),
+            ("sourceAccountID", "sourceAccountName", accountNames),
+            ("destinationAccountID", "destinationAccountName", accountNames),
+            ("proceedsAccountID", "proceedsAccountName", accountNames),
+            ("categoryID", "categoryName", categoryNames),
+            ("budgetJarID", "budgetJarName", jarNames),
+            ("fundingJarID", "fundingJarName", jarNames),
+            ("instrumentID", "instrumentName", instrumentNames),
+            ("depositID", "depositName", depositNames),
+            ("sourceGoalID", "sourceGoalName", goalNames),
+            ("tripWorkspaceID", "tripName", tripNames),
+        ]
+        return records.map { record in
+            var fields = record.fields
+            for (idKey, nameKey, names) in lookups {
+                guard let raw = fields[idKey]?.stringValue, let id = UUID(uuidString: raw) else {
+                    continue
+                }
+                fields[nameKey] = names[id].map(MCPJSONValue.string) ?? .null
+            }
+            if record.recordType == "MoneyTransaction" {
+                fields["jarName"] = routedJarName(
+                    fields: fields, routing: jarRouting, names: jarNames)
+            }
+            return MCPRecord(
+                recordType: record.recordType, id: record.id, sortDate: record.sortDate,
+                fields: fields)
+        }
+    }
+
+    private func routedJarName(
+        fields: [String: MCPJSONValue],
+        routing: BudgetTransactionRouting,
+        names: [UUID: String]
+    ) -> MCPJSONValue {
+        let categoryID = fields["categoryID"]?.stringValue.flatMap(UUID.init(uuidString:))
+        let tripWorkspaceID = fields["tripWorkspaceID"]?.stringValue.flatMap(
+            UUID.init(uuidString:))
+        let overrideJarID = fields["budgetJarOverrideID"]?.stringValue.flatMap(
+            UUID.init(uuidString:))
+        return routing.jarID(
+            categoryID: categoryID,
+            tripWorkspaceID: tripWorkspaceID,
+            overrideJarID: overrideJarID
+        ).flatMap { names[$0] }.map(MCPJSONValue.string) ?? .null
+    }
 }
 
 // Aggregation stays in the store context: no transaction pages are sent to the agent.
 extension MCPDataRepository {
+    private func accountBalances(query: MCPQuery) throws -> [MCPRecord] {
+        let asOf = Date.now
+        let accounts = try context.fetch(FetchDescriptor<CashAccount>())
+        let deposits = try context.fetch(FetchDescriptor<SavingsDeposit>()).filter {
+            $0.openedAt <= asOf
+        }
+        let withdrawals = try context.fetch(FetchDescriptor<SavingsWithdrawal>()).filter {
+            $0.withdrawnAt <= asOf
+        }
+        let holdings = try context.fetch(FetchDescriptor<FundHolding>()).filter {
+            $0.boughtOn <= asOf
+        }
+        let instruments = try context.fetch(FetchDescriptor<FundInstrument>())
+        let transactions = try context.fetch(FetchDescriptor<MoneyTransaction>()).filter {
+            $0.occurredAt <= asOf
+        }
+        let transfers = try context.fetch(FetchDescriptor<AccountTransfer>()).filter {
+            $0.occurredAt <= asOf
+        }
+        let debts = try context.fetch(FetchDescriptor<Debt>()).filter { $0.openedAt <= asOf }
+        let payments = try context.fetch(FetchDescriptor<DebtPayment>()).filter {
+            $0.occurredAt <= asOf
+        }
+        let sales = try context.fetch(FetchDescriptor<FundSale>()).filter { $0.soldAt <= asOf }
+        let instrumentByID = Dictionary(firstWins: instruments.map { ($0.id, $0) })
+        let wantedAccountID = query.fieldFilters["accountID"].flatMap(UUID.init(uuidString:))
+        let wantedKind = query.fieldFilters["kind"]
+
+        var records = accounts.compactMap { account -> MCPRecord? in
+            guard wantedAccountID == nil || wantedAccountID == account.id,
+                wantedKind == nil || wantedKind == account.kind.rawValue
+            else { return nil }
+            let currentBalance = CashBalanceSummary.available(
+                for: account, deposits: deposits, holdings: holdings, withdrawals: withdrawals,
+                transactions: transactions, transfers: transfers, debts: debts, payments: payments,
+                sales: sales)
+            let fields: [String: MCPJSONValue] = [
+                "recordType": .string("AccountBalance"),
+                "accountID": .string(account.id.uuidString.lowercased()),
+                "name": .string(account.name),
+                "kind": .string(account.kind.rawValue),
+                "currencyCode": .string(account.currencyCode),
+                "currentBalance": mcpDecimal(currentBalance),
+                "availableCredit": account.kind == .credit
+                    ? mcpDecimal(
+                        CashBalanceSummary.availableCredit(
+                            limit: account.creditLimit, currentBalance: currentBalance))
+                    : .null,
+                "asOf": mcpDate(asOf),
+            ]
+            return MCPRecord(
+                recordType: "AccountBalance", id: account.id, sortDate: account.createdAt,
+                fields: fields)
+        }
+        records.append(
+            accountBalanceDiagnostics(
+                deposits: deposits, holdings: holdings, instrumentByID: instrumentByID,
+                asOf: asOf))
+        return records
+    }
+
+    private func accountBalanceDiagnostics(
+        deposits: [SavingsDeposit],
+        holdings: [FundHolding],
+        instrumentByID: [UUID: FundInstrument],
+        asOf: Date
+    ) -> MCPRecord {
+        var savingsByCurrency: [String: Decimal] = [:]
+        for deposit in deposits where deposit.sourceAccountID == nil {
+            savingsByCurrency[deposit.currencyCode, default: .zero] += deposit.principal
+        }
+        var investmentsByCurrency: [String: Decimal] = [:]
+        for holding in holdings where holding.sourceAccountID == nil {
+            let currency =
+                holding.instrumentID.flatMap { instrumentByID[$0]?.currencyCode } ?? "UNKNOWN"
+            investmentsByCurrency[currency, default: .zero] += holding.costBasis
+        }
+        let currencies = Set(savingsByCurrency.keys).union(investmentsByCurrency.keys).sorted()
+        let hasUnlinkedSources = !currencies.isEmpty
+        return MCPRecord(
+            recordType: "AccountBalanceDiagnostics",
+            id: UUID(uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2)),
+            sortDate: .distantPast,
+            fields: [
+                "recordType": .string("AccountBalanceDiagnostics"),
+                "asOf": mcpDate(asOf),
+                "hasUnlinkedFundingSources": .bool(hasUnlinkedSources),
+                "unlinkedSavingsCount": .int(
+                    deposits.filter { $0.sourceAccountID == nil }.count),
+                "unlinkedHoldingCount": .int(
+                    holdings.filter { $0.sourceAccountID == nil }.count),
+                "amounts": .array(
+                    currencies.map { currency in
+                        .object([
+                            "currencyCode": .string(currency),
+                            "savingsPrincipal": mcpDecimal(
+                                savingsByCurrency[currency, default: .zero]),
+                            "investmentCostBasis": mcpDecimal(
+                                investmentsByCurrency[currency, default: .zero]),
+                        ])
+                    }),
+                "meaning": .string(
+                    "Unlinked means no cash account was selected; it may be intentional external funding or missing attribution."
+                ),
+            ])
+    }
+
+    private func portfolio(query: MCPQuery) throws -> [MCPRecord] {
+        let instruments = try context.fetch(FetchDescriptor<FundInstrument>())
+        let holdings = try context.fetch(FetchDescriptor<FundHolding>())
+        let sales = try context.fetch(FetchDescriptor<FundSale>())
+        let wantedInstrumentID = query.fieldFilters["instrumentID"].flatMap(
+            UUID.init(uuidString:))
+        let wantedKind = query.fieldFilters["kind"]
+        let groups = FundSummary.groups(
+            holdings: holdings, instruments: instruments, sales: sales
+        ).filter { group in
+            (wantedInstrumentID == nil || group.instrumentID == wantedInstrumentID)
+                && (wantedKind == nil || group.instrument?.kind.rawValue == wantedKind)
+        }
+        let positions: [MCPJSONValue] = groups.map { group in
+            .object([
+                "instrumentID": group.instrumentID.map {
+                    .string($0.uuidString.lowercased())
+                } ?? .null,
+                "name": .string(group.name),
+                "symbol": .string(group.symbol),
+                "kind": group.instrument.map { .string($0.kind.rawValue) } ?? .null,
+                "currencyCode": group.instrument.map { .string($0.currencyCode) } ?? .null,
+                "units": mcpDecimal(group.units),
+                "costBasis": mcpDecimal(group.costBasis),
+                "marketValue": mcpDecimal(group.marketValue),
+                "unrealizedProfitLoss": mcpDecimal(group.unrealizedProfitLoss),
+                "realizedProfitLoss": mcpDecimal(group.realizedProfitLoss),
+                "totalProfitLoss": mcpDecimal(
+                    group.unrealizedProfitLoss + group.realizedProfitLoss),
+                "currentPricePerUnit": mcpDecimal(group.pricePerUnit),
+                "priceAsOf": group.instrument.map { mcpDate($0.priceAsOf) } ?? .null,
+                "isPriced": .bool(group.instrument != nil),
+            ])
+        }
+        let totals = Dictionary(grouping: groups) { $0.instrument?.currencyCode ?? "UNKNOWN" }
+            .keys.sorted().map { currency -> MCPJSONValue in
+                let values = groups.filter {
+                    ($0.instrument?.currencyCode ?? "UNKNOWN") == currency
+                }
+                let cost = values.reduce(Decimal.zero) { $0 + $1.costBasis }
+                let market = values.reduce(Decimal.zero) { $0 + $1.marketValue }
+                let realized = values.reduce(Decimal.zero) { $0 + $1.realizedProfitLoss }
+                return .object([
+                    "currencyCode": .string(currency),
+                    "costBasis": mcpDecimal(cost),
+                    "marketValue": mcpDecimal(market),
+                    "unrealizedProfitLoss": mcpDecimal(market - cost),
+                    "realizedProfitLoss": mcpDecimal(realized),
+                    "totalProfitLoss": mcpDecimal(market - cost + realized),
+                ])
+            }
+        let unattributedCount = groups.flatMap(\.holdings).filter {
+            $0.sourceAccountID == nil
+        }.count
+        let asOf = Date.now
+        return [
+            MCPRecord(
+                recordType: "Portfolio",
+                id: UUID(uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1)),
+                sortDate: asOf,
+                fields: [
+                    "recordType": .string("Portfolio"), "asOf": mcpDate(asOf),
+                    "totals": .array(totals), "positions": .array(positions),
+                    "positionCount": .int(groups.count),
+                    "unattributedSourceHoldingCount": .int(unattributedCount),
+                    "isReconciled": .bool(unattributedCount == 0),
+                ])
+        ]
+    }
+
     private struct SummaryAmount {
         var income = Decimal.zero
         var expense = Decimal.zero
@@ -268,7 +531,7 @@ extension MCPDataRepository {
             fields["name"] = key.id.flatMap { names[$0] }.map(MCPJSONValue.string) ?? .null
             return .object(fields)
         }
-        let fields: [String: MCPJSONValue] = [
+        var fields: [String: MCPJSONValue] = [
             "recordType": .string("Summary"),
             "dateFrom": .string(from.formatted(.iso8601)),
             "dateTo": .string(to.formatted(.iso8601)),
@@ -277,8 +540,9 @@ extension MCPDataRepository {
                 try totals.keys.sorted().map {
                     .object(try totals[$0, default: SummaryAmount()].fields(currency: $0))
                 }),
-            "expenseGroups": .array(groupRows),
+            "excludes": .array(["transfers", "savings", "investments"].map(MCPJSONValue.string)),
         ]
+        if groupBy != "none" { fields["expenseGroups"] = .array(groupRows) }
         return [
             MCPRecord(
                 recordType: "Summary",
@@ -286,4 +550,12 @@ extension MCPDataRepository {
                 sortDate: from, fields: fields)
         ]
     }
+}
+
+private func mcpDecimal(_ value: Decimal) -> MCPJSONValue {
+    .string(NSDecimalNumber(decimal: value).stringValue)
+}
+
+private func mcpDate(_ value: Date) -> MCPJSONValue {
+    .string(value.formatted(Date.ISO8601FormatStyle(includingFractionalSeconds: true)))
 }

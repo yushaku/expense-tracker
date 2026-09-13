@@ -107,13 +107,26 @@ struct BudgetTransactionRouting {
     }
 
     func jarID(for transaction: MoneyTransaction) -> UUID? {
-        let overrideJarID = transaction.tripWorkspaceID
-            .flatMap { _ in transaction.budgetJarOverrideID }
+        jarID(
+            categoryID: transaction.categoryID,
+            tripWorkspaceID: transaction.tripWorkspaceID,
+            overrideJarID: transaction.budgetJarOverrideID)
+    }
+
+    func jarID(
+        categoryID: UUID?,
+        tripWorkspaceID: UUID?,
+        overrideJarID: UUID?
+    ) -> UUID? {
+        let routedOverrideJarID =
+            tripWorkspaceID
+            .flatMap { _ in overrideJarID }
             .flatMap { validJarIDs.contains($0) ? $0 : nil }
-        let mappedJarID = transaction.categoryID
+        let mappedJarID =
+            categoryID
             .flatMap { categoryJars[$0] ?? nil }
             .flatMap { validJarIDs.contains($0) ? $0 : nil }
-        return overrideJarID ?? mappedJarID ?? fallbackJarID
+        return routedOverrideJarID ?? mappedJarID ?? fallbackJarID
     }
 }
 

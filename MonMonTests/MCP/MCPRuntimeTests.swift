@@ -61,7 +61,6 @@ struct MCPRuntimeTests {
         let after = try await service.call(tool: .accounts, arguments: [:])
         #expect(after.records.first?["openingBalance"] == .string("123"))
         #expect(after.sync.source == "localStore")
-        #expect(after.sync.lastSnapshotAt == nil)
         #expect(after.sync.readAt != nil)
         account.openingBalance = 456
         try context.save()
@@ -107,7 +106,7 @@ struct MCPRuntimeTests {
         #expect(FileManager.default.fileExists(atPath: descriptor.url.path))
     }
 
-    @Test("Database filters and cursors retain the selected IDs and inclusive date boundaries")
+    @Test("Database filters and cursors retain selected IDs and date boundaries")
     func filteredPages() async throws {
         let fixture = try Fixture()
         defer { fixture.cleanUp() }

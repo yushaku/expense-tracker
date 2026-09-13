@@ -162,22 +162,7 @@ struct MCPSyncMetadata: Codable, Equatable, Sendable {
     let accessAllowed: Bool
     let source: String
     let freshness: MCPDataFreshness
-    // Kept as null for clients using the previous envelope. No snapshot exists.
-    let lastSnapshotAt: Date? = nil
     let readAt: Date?
-
-    private enum CodingKeys: String, CodingKey {
-        case flavour, accessAllowed, source, freshness, lastSnapshotAt, readAt
-    }
-    func encode(to encoder: Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(flavour, forKey: .flavour)
-        try c.encode(accessAllowed, forKey: .accessAllowed)
-        try c.encode(source, forKey: .source)
-        try c.encode(freshness, forKey: .freshness)
-        try c.encodeNil(forKey: .lastSnapshotAt)
-        try c.encodeIfPresent(readAt, forKey: .readAt)
-    }
 }
 
 struct MCPDataRead {
@@ -262,12 +247,19 @@ struct MCPResponseEnvelope: Codable, Equatable, Sendable {
     let schemaVersion: String
     let records: [[String: MCPJSONValue]]
     let page: MCPPageEnvelope
+    let query: MCPQueryMetadata
     let sync: MCPSyncMetadata
+}
+
+struct MCPQueryMetadata: Codable, Equatable, Sendable {
+    let sort: String
+    let dateRange: String
+    let dateFilterFields: [String: String]
 }
 
 @MainActor
 final class MCPService {
-    static let schemaVersion = "2.0"
+    static let schemaVersion = "3.0"
 
     private let provider: any MCPDataProviding
 
@@ -294,7 +286,6 @@ final class MCPService {
                         "accessAllowed": .bool(sync.accessAllowed),
                         "source": .string(sync.source),
                         "freshness": .string(sync.freshness.rawValue),
-                        "lastSnapshotAt": .null,
                         "readAt": sync.readAt.map {
                             .string(
                                 $0.formatted(
@@ -308,11 +299,17 @@ final class MCPService {
             records = read.records
             sync = read.metadata
         }
-        if tool == .summary {
+        let queryMetadata = MCPQueryMetadata(
+            sort: tool.sortDescription,
+            dateRange: tool.dateFilterFields.isEmpty
+                ? "not supported" : "dateFrom inclusive, dateTo exclusive",
+            dateFilterFields: tool.dateFilterFields)
+        if tool == .summary || tool == .portfolio {
             return MCPResponseEnvelope(
                 schemaVersion: Self.schemaVersion,
                 records: records.map(\.fields),
-                page: MCPPageEnvelope(limit: 1, nextCursor: nil, hasMore: false), sync: sync)
+                page: MCPPageEnvelope(limit: 1, nextCursor: nil, hasMore: false),
+                query: queryMetadata, sync: sync)
         }
         let result = try MCPPaginator.page(records: records, query: query, tool: tool)
         return MCPResponseEnvelope(
@@ -322,7 +319,7 @@ final class MCPService {
                 limit: query.limit,
                 nextCursor: result.nextCursor,
                 hasMore: result.nextCursor != nil
-            ),
+            ), query: queryMetadata,
             sync: sync
         )
     }

@@ -132,6 +132,23 @@ enum MCPToolError: String, Error, Equatable, Sendable {
     }
 }
 
+struct MCPArgumentError: Error, Equatable, Sendable {
+    let field: String
+    let reason: String
+
+    var payload: [String: MCPJSONValue] {
+        [
+            "error": .object([
+                "code": .string(MCPToolError.invalidArgument.rawValue),
+                "message": .string("Invalid argument '\(field)': \(reason)"),
+                "retryable": .bool(false),
+                "field": .string(field),
+                "reason": .string(reason),
+            ])
+        ]
+    }
+}
+
 struct MCPRecord: Equatable, Sendable {
     let recordType: String
     let id: UUID

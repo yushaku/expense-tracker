@@ -15,7 +15,10 @@ enum MCPRecordSerializer {
             ])
     }
 
-    static func serialize(_ value: MoneyTransaction) throws -> MCPRecord {
+    static func serialize(
+        _ value: MoneyTransaction,
+        includeAllocationSlices: Bool = false
+    ) throws -> MCPRecord {
         var fields: [String: MCPJSONValue] = [
             "id": uuid(value.id), "kind": .string(value.kind.rawValue),
             "amount": decimal(value.amount), "occurredAt": date(value.occurredAt),
@@ -28,7 +31,7 @@ enum MCPRecordSerializer {
             "budgetJarOverrideID": optionalUUID(value.budgetJarOverrideID),
         ]
         fields["incomeAllocationSnapshot"] = try incomeAllocationSnapshot(
-            value.incomeAllocationSnapshot)
+            value.incomeAllocationSnapshot, includeSlices: includeAllocationSlices)
         return record("MoneyTransaction", id: value.id, sortDate: value.occurredAt, fields)
     }
 
@@ -260,16 +263,20 @@ enum MCPRecordSerializer {
         value.map(MCPJSONValue.string) ?? .null
     }
 
-    private static func incomeAllocationSnapshot(_ value: String?) throws -> MCPJSONValue {
+    private static func incomeAllocationSnapshot(
+        _ value: String?,
+        includeSlices: Bool
+    ) throws -> MCPJSONValue {
         guard let value else { return .null }
         do {
             let snapshot = try IncomeAllocationSnapshotCodec.decode(value)
-            return .object([
-                "version": .int(snapshot.version),
+            var fields: [String: MCPJSONValue] = [
                 "sourceAmount": decimal(snapshot.sourceAmount),
-                "capturedAt": date(snapshot.capturedAt),
-                "isEstimated": .bool(snapshot.isEstimated),
-                "slices": .array(
+                "unallocatedAmount": decimal(snapshot.unallocatedAmount),
+                "jarCount": .int(snapshot.slices.count),
+            ]
+            if includeSlices {
+                fields["allocationSlices"] = .array(
                     snapshot.slices.map { slice in
                         .object([
                             "jarID": uuid(slice.jarID),
@@ -279,9 +286,9 @@ enum MCPRecordSerializer {
                             "percent": decimal(slice.percent),
                             "amount": decimal(slice.amount),
                         ])
-                    }),
-                "unallocatedAmount": decimal(snapshot.unallocatedAmount),
-            ])
+                    })
+            }
+            return .object(fields)
         } catch {
             throw MCPToolError.decodeFailed
         }

@@ -146,7 +146,7 @@ struct MCPServerContractTests {
             )
             let listed = try readLine(from: output.fileHandleForReading)
             let tools = (listed["result"] as? [String: Any])?["tools"] as? [[String: Any]]
-            #expect(tools?.count == 20)
+            #expect(tools?.count == 22)
             for tool in try #require(tools) {
                 let name = try #require(tool["name"] as? String)
                 let annotations = try #require(tool["annotations"] as? [String: Any])
@@ -163,7 +163,7 @@ struct MCPServerContractTests {
     #endif
 
     @MainActor
-    @Test("In-memory handshake exposes 14 read-only financial tools and six research tools")
+    @Test("In-memory handshake exposes 16 read-only financial tools and six research tools")
     func toolList() async throws {
         let provider = ContractDataProvider()
         let server = await MCPServerAdapter.makeServer(service: MCPService(provider: provider))
@@ -179,7 +179,7 @@ struct MCPServerContractTests {
         }
 
         let listed = try await client.listTools()
-        #expect(listed.tools.count == 20)
+        #expect(listed.tools.count == 22)
         #expect(
             Set(listed.tools.map(\.name))
                 == Set(MCPTool.allCases.map(\.rawValue) + MCPResearchTool.allCases.map(\.rawValue)))
@@ -223,7 +223,7 @@ struct MCPServerContractTests {
 
         #expect(result.isError == false)
         #expect(result.structuredContent == textValue)
-        #expect(result.structuredContent?.objectValue?["schemaVersion"]?.stringValue == "2.0")
+        #expect(result.structuredContent?.objectValue?["schemaVersion"]?.stringValue == "3.0")
         #expect(result.structuredContent?.objectValue?["records"]?.arrayValue?.count == 1)
         #expect(fallback["page"]?.objectValue?["nextCursor"] == .null)
         #expect(fallback["sync"]?.objectValue?["source"] == .string("localStore"))

@@ -53,10 +53,12 @@ an export step. Unsaved edits are excluded. ID and date filters run in the datab
 remaining field filters, stable ordering and cursor pagination run on the selected
 records in memory. No data snapshot is created after a save.
 
-The response envelope keeps `schemaVersion: "2.0"`, `records`, `page` and `sync`.
+The response envelope uses `schemaVersion: "3.0"` and contains `records`, `page`,
+`query` and `sync`. `query` states the stable sort, the inclusive/exclusive date
+bounds, and the business-date field used by every returned record type.
 `sync.source` is now `localStore`; `sync.readAt` is the time the request read the
 store. `fresh` means a successful direct read, not an assertion about another
-device. `lastSnapshotAt` remains `null` for compatibility. `disabled` and
+device. `disabled` and
 `unavailable` describe revoked access and a store that cannot be opened.
 Pagination is a live view: concurrent writes between pages can change results;
 clients needing a stable report should avoid editing during the read.
@@ -65,9 +67,11 @@ The reader uses Apple's [read-only ModelConfiguration](https://developer.apple.c
 
 ## Tools
 
-The server exposes 14 financial read tools:
+The server exposes 16 financial read tools:
 
 - `monmon_summary`
+- `monmon_account_balances`
+- `monmon_portfolio`
 - `monmon_data_status`
 - `monmon_list_accounts`
 - `monmon_list_transactions`
@@ -86,17 +90,18 @@ These financial tools are annotated read-only, non-destructive, idempotent, and
 closed-world. The server offers no prompts, sampling, HTTP transport, or financial
 mutation tools. Separate research tools are described below.
 
-Each successful response contains `schemaVersion`, `records`, `page`, and
+Each successful response contains `schemaVersion`, `records`, `page`, `query`, and
 `sync`, both as structured content and as a JSON text fallback. Decimal values
 are exact decimal strings, dates are RFC 3339 UTC, UUIDs and enums use raw
 strings, and missing values are JSON `null`. Stored JSON/Data snapshots are
 decoded into objects or arrays without adding derived totals, forecasts,
 progress, or financial advice.
 
-Financial list pagination defaults to 50 records and accepts at most 200. Opaque cursors use a
-stable descending business-date then UUID order. Invalid arguments and cursors
-return a safe structured error; paths, stack traces, notes, and amounts are not
-written to operational logs.
+Financial list pagination defaults to 50 records and accepts at most 500. Opaque
+cursors use a stable descending business-date then UUID order. `dateFrom` is
+inclusive and `dateTo` exclusive for every financial tool. Invalid arguments
+identify the rejected `field` and a safe `reason`; paths, stack traces, notes,
+and amounts are not written to operational logs.
 
 ## Troubleshooting
 
@@ -121,7 +126,7 @@ On Mac, Settings → AI access → Research & proposals opens the notebook. On i
 access. Both permissions are required to create drafts. Turning AI access off
 also clears draft-writing consent; it does not delete the owner's notebook.
 
-There are six additional tools (19 total):
+There are six additional tools (22 total):
 
 | Tool | Purpose |
 | --- | --- |
@@ -183,13 +188,34 @@ until the owner follows a link.
 
 Notes, proposals and decision history are available on Mac and iPhone and included in reviewed Device Sync. Financial backups still exclude the notebook. Use **Export research** on either device to save an ISO-8601 JSON copy. Disabling AI access preserves local research and does not disable owner access on iPhone.
 
-## MCP contract v2
+## MCP contract v3
 
-Refresh the client's tool list after installing this version. The server reports `2.0.0`, and financial envelopes report `schemaVersion: "2.0"`.
+Refresh the client's tool list after installing this version. The server reports `3.0.0`, and financial envelopes report `schemaVersion: "3.0"`.
 
-- `monmon_data_status` accepts only `{}`. Accounts, categories and jars accept creation-time filters, not `dateFrom`/`dateTo`. Other lists document which business date they filter; their bounds remain inclusive.
+- `monmon_data_status` accepts only `{}`. Accounts, categories and jars accept creation-time filters, not `dateFrom`/`dateTo`. Other lists document which business date they filter; `dateFrom` is inclusive and `dateTo` exclusive.
 - Each tool has a distinct description and advertised enum values. All financial tools (including summary) and research read tools publish `annotations.readOnlyHint: true`; the two research create tools publish `false`. These hints do not replace MonMon's consent checks or a client's own approval policy.
 - Research lists now take `cursor` instead of `offset` and return `page: {limit, nextCursor, hasMore}`. Remove `offset` and `nextOffset` usage; start with no cursor, then reuse `page.nextCursor`. Cursors belong to one tool and order by creation time descending, then ID. Pagination is live, not an immutable snapshot.
+
+### Balances, portfolio, and compact records
+
+`monmon_account_balances` calculates `currentBalance` using the same ledger
+formula as the app, excludes future-dated records, and returns `availableCredit`
+for credit accounts. One `AccountBalanceDiagnostics` record summarizes savings
+deposits and holdings with no `sourceAccountID`, separately by currency. An
+unlinked source may be intentional external funding or missing attribution; the
+tool reports the ambiguity without repeating the amount on every account.
+
+`monmon_portfolio` returns totals per currency and positions per instrument,
+including current value, open cost basis, realized and unrealized profit/loss.
+It also reports holdings whose funding account is not linked. Currencies are
+never combined or converted.
+
+List records include readable names beside common foreign keys. Transaction
+queries support case-insensitive `noteContains`. Income allocation snapshots
+return only `sourceAmount`, `unallocatedAmount`, and `jarCount` by default; pass
+`include: ["allocationSlices"]` to receive slice details. `monmon_summary` omits
+`expenseGroups` when `groupBy` is `none` and returns
+`excludes: ["transfers", "savings", "investments"]`.
 
 ### `monmon_summary`
 
