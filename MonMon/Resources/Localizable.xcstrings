@@ -1,6 +1,36 @@
 {
   "sourceLanguage": "en",
   "strings": {
+  "MonMon cannot access pairing keys. The app's signing or Keychain permissions need to be checked.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "MonMon không thể truy cập khoá ghép đôi. Cần kiểm tra chữ ký ứng dụng hoặc quyền Keychain."
+        }
+      }
+    }
+  },
+  "Keychain access was denied or is unavailable. Unlock this device and try pairing again.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Keychain từ chối truy cập hoặc chưa sẵn sàng. Hãy mở khoá thiết bị và thử ghép đôi lại."
+        }
+      }
+    }
+  },
+  "MonMon could not read or save its pairing key in Keychain.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "MonMon không thể đọc hoặc lưu khoá ghép đôi trong Keychain."
+        }
+      }
+    }
+  },
   "Decision history": {
   "localizations": {
     "vi": {

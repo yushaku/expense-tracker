@@ -30,9 +30,37 @@ struct SyncPairing: Codable, Equatable, Sendable {
     }
 }
 
+struct SyncKeychainError: Error, Equatable, LocalizedError {
+    let status: OSStatus
+
+    var errorDescription: String? {
+        let message: String
+        switch status {
+        case errSecMissingEntitlement:
+            message =
+                "MonMon cannot access pairing keys. The app's signing or Keychain permissions need to be checked."
+        case errSecInteractionNotAllowed, errSecAuthFailed:
+            message =
+                "Keychain access was denied or is unavailable. Unlock this device and try pairing again."
+        default:
+            message = "MonMon could not read or save its pairing key in Keychain."
+        }
+        return AppText.string(key: message, in: AppLanguage.stored.locale)
+            + " (OSStatus: \(status))"
+    }
+}
+
 enum SyncKeychain {
     private static var service: String { "monmon.p2p." + MonMonBackupFlavour.current.rawValue }
     static func save(_ pair: SyncPairing) throws {
+        try save(pair, update: { SecItemUpdate($0, $1) }, add: { SecItemAdd($0, nil) })
+    }
+
+    static func save(
+        _ pair: SyncPairing,
+        update: (CFDictionary, CFDictionary) -> OSStatus,
+        add: (CFDictionary) -> OSStatus
+    ) throws {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service, kSecAttrAccount as String: pair.pairID.uuidString,
@@ -42,14 +70,12 @@ enum SyncKeychain {
             kSecValueData as String: try SyncCoding.encode(pair),
             kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
         ]
-        let update = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
-        if update == errSecItemNotFound {
-            guard
-                SecItemAdd(query.merging(attributes) { _, b in b } as CFDictionary, nil)
-                    == errSecSuccess
-            else { throw SyncError.invalidPairing }
-        } else if update != errSecSuccess {
-            throw SyncError.invalidPairing
+        let status = update(query as CFDictionary, attributes as CFDictionary)
+        if status == errSecItemNotFound {
+            let added = add(query.merging(attributes) { _, b in b } as CFDictionary)
+            guard added == errSecSuccess else { throw SyncKeychainError(status: added) }
+        } else if status != errSecSuccess {
+            throw SyncKeychainError(status: status)
         }
     }
     static func load(_ pairID: UUID) throws -> SyncPairing {
@@ -60,9 +86,10 @@ enum SyncKeychain {
             kSecReturnData as String: true, kSecMatchLimit as String: kSecMatchLimitOne,
         ]
         var item: CFTypeRef?
-        guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess,
-            let data = item as? Data
-        else { throw SyncError.notPaired }
+        let status = SecItemCopyMatching(query as CFDictionary, &item)
+        if status == errSecItemNotFound { throw SyncError.notPaired }
+        guard status == errSecSuccess else { throw SyncKeychainError(status: status) }
+        guard let data = item as? Data else { throw SyncKeychainError(status: errSecDecode) }
         let pair = try JSONDecoder().decode(SyncPairing.self, from: data)
         guard pair.pairID == pairID, pair.secret.count == 32, pair.flavour == .current else {
             throw SyncError.invalidPairing
