@@ -199,10 +199,11 @@ Refresh the client's tool list after installing this version. The server reports
 ### Balances, portfolio, and compact records
 
 `monmon_account_balances` calculates `currentBalance` using the same ledger
-formula as the app and returns `availableCredit` for credit accounts. Savings
-deposits and holdings with no `sourceAccountID` cannot be assigned to an
-account, so the tool returns `isReconciled: false`, the unattributed amounts,
-and a reconciliation issue instead of presenting the balance as certain.
+formula as the app, excludes future-dated records, and returns `availableCredit`
+for credit accounts. One `AccountBalanceDiagnostics` record summarizes savings
+deposits and holdings with no `sourceAccountID`, separately by currency. An
+unlinked source may be intentional external funding or missing attribution; the
+tool reports the ambiguity without repeating the amount on every account.
 
 `monmon_portfolio` returns totals per currency and positions per instrument,
 including current value, open cost basis, realized and unrealized profit/loss.
