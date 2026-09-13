@@ -125,7 +125,7 @@ There are six additional tools (19 total):
 
 | Tool | Purpose |
 | --- | --- |
-| `monmon_list_notes` | Paginated note summaries (`limit` 1–100, `offset`) |
+| `monmon_list_notes` | Paginated note summaries (`limit` 1–100, `cursor`) |
 | `monmon_get_note` | Full note, sources and research/review times by UUID |
 | `monmon_create_research_note` | Create an immutable, sourced research note |
 | `monmon_list_proposals` | Paginated proposals with latest user decision |
@@ -177,7 +177,7 @@ The notebook is separate from the financial SwiftData store, under the flavour's
 App Group (`ResearchNotebook/notebook.json`). Writes use an atomic replacement
 and a nonblocking cross-process file lock. Malformed/unknown-version files are
 never overwritten by a failed read. Storage is bounded at 20 MiB; a busy writer
-returns a retryable error. List pagination is live, so new drafts may shift offsets.
+returns a retryable error. List pagination uses creation time and ID cursors; new drafts do not shift subsequent pages.
 No content is generated automatically by MonMon and no source URLs are opened
 until the owner follows a link.
 
@@ -191,6 +191,7 @@ Refresh the client's tool list after installing this version. The server reports
 
 - `monmon_data_status` accepts only `{}`. Accounts, categories and jars accept creation-time filters, not `dateFrom`/`dateTo`. Other lists document which business date they filter; their bounds remain inclusive.
 - Each tool has a distinct description and advertised enum values. All financial tools (including summary) and research read tools publish `annotations.readOnlyHint: true`; the two research create tools publish `false`. These hints do not replace MonMon's consent checks or a client's own approval policy.
+- Research lists now take `cursor` instead of `offset` and return `page: {limit, nextCursor, hasMore}`. Remove `offset` and `nextOffset` usage; start with no cursor, then reuse `page.nextCursor`. Cursors belong to one tool and order by creation time descending, then ID. Pagination is live, not an immutable snapshot.
 
 ### `monmon_summary`
 

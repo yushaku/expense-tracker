@@ -10,6 +10,35 @@ import Testing
 struct MCPResearchTests {
     private let now = Date(timeIntervalSince1970: 1_800_000_000)
 
+    @Test("Research cursor pages remain stable after inserts and reject cross-tool cursors")
+    func cursorPagination() throws {
+        let fixture = try Fixture()
+        defer { fixture.cleanUp() }
+        for _ in 0..<3 {
+            var input = note()
+            input["requestID"] = .string(UUID().uuidString)
+            _ = try fixture.service(now: now).call(.createNote, arguments: input)
+        }
+        let first = try fixture.service(now: now).call(.listNotes, arguments: ["limit": .int(1)])
+        let cursor = try #require(
+            first.objectValue?["page"]?.objectValue?["nextCursor"]?.stringValue)
+        var added = note()
+        added["requestID"] = .string(UUID().uuidString)
+        _ = try fixture.service(now: now.addingTimeInterval(1)).call(.createNote, arguments: added)
+        let second = try fixture.service(now: now).call(
+            .listNotes, arguments: ["limit": .int(2), "cursor": .string(cursor)])
+        #expect(second.objectValue?["records"]?.arrayValue?.count == 2)
+        #expect(second.objectValue?["page"]?.objectValue?["nextCursor"] == .null)
+        #expect(first.objectValue?["nextOffset"] == nil)
+        #expect(throws: MCPToolError.invalidCursor) {
+            try fixture.service(now: now).call(
+                .listProposals, arguments: ["cursor": .string(cursor)])
+        }
+        #expect(throws: MCPToolError.invalidArgument) {
+            try fixture.service(now: now).call(.listNotes, arguments: ["offset": .int(1)])
+        }
+    }
+
     @Test(
         "Writing needs separate permission and disabling financial access blocks all research tools"
     )

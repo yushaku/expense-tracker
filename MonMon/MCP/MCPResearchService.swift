@@ -65,9 +65,13 @@ final class MCPResearchService {
                 "needsReview": .bool(notebook.needsReview(proposal, now: now())),
             ])
         case .listNotes, .listProposals:
-            try keys(arguments, required: [], optional: ["limit", "offset"])
+            try keys(arguments, required: [], optional: ["limit", "cursor"])
             let limit = try integer(arguments, "limit", default: 50, range: 1...100)
-            let offset = try integer(arguments, "offset", default: 0, range: 0...100000)
+            var query = MCPQuery()
+            query.limit = limit
+            if arguments["cursor"] != nil {
+                query.cursor = try string(arguments, "cursor", maximum: 2048)
+            }
             let notebook = try store().load()
             let values: [MCPJSONValue]
             if tool == .listNotes {
@@ -92,11 +96,26 @@ final class MCPResearchService {
                     ])
                 }
             }
-            let page = Array(values.dropFirst(offset).prefix(limit))
+            let dates = Dictionary(
+                firstWins: tool == .listNotes
+                    ? notebook.notes.map { ($0.id, $0.createdAt) }
+                    : notebook.proposals.map { ($0.id, $0.createdAt) })
+            let records = try values.map { value -> MCPRecord in
+                guard let fields = value.objectValue, let rawID = fields["id"]?.stringValue,
+                    let id = UUID(uuidString: rawID), let date = dates[id]
+                else {
+                    throw MCPToolError.decodeFailed
+                }
+                return MCPRecord(recordType: tool.rawValue, id: id, sortDate: date, fields: fields)
+            }
+            let page = try MCPPaginator.page(
+                records: records, query: query, toolName: tool.rawValue)
             return .object([
-                "records": .array(page),
-                "nextOffset": offset + page.count < values.count
-                    ? .int(offset + page.count) : .null,
+                "records": .array(page.records.map { .object($0.fields) }),
+                "page": try json(
+                    MCPPageEnvelope(
+                        limit: limit, nextCursor: page.nextCursor,
+                        hasMore: page.nextCursor != nil)),
             ])
         }
     }
