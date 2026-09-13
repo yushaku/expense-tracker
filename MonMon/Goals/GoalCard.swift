@@ -238,6 +238,8 @@ struct GoalDetailView: View {
     @State private var editorMode: GoalEditorMode?
     @State private var isShowingUseOptions = false
     @State private var isShowingContribution = false
+    @State private var pendingCelebration: String?
+    @State private var celebrationName: String?
     @State private var selectedWorkspaceID: UUID?
     @State private var startErrorMessage: LocalizedStringKey?
 
@@ -304,11 +306,28 @@ struct GoalDetailView: View {
         .appSheet(item: $editorMode) { mode in
             GoalEditorView(mode: mode, capacityByJar: capacityByJar, asOf: asOf)
         }
-        .appSheet(isPresented: $isShowingContribution) {
+        .appSheet(
+            isPresented: $isShowingContribution,
+            onDismiss: {
+                celebrationName = pendingCelebration
+                pendingCelebration = nil
+            }
+        ) {
             if let goal {
-                GoalContributionEditor(goal: goal)
+                GoalContributionEditor(goal: goal) {
+                    pendingCelebration = goal.name
+                }
             }
         }
+        .overlay {
+            if let celebrationName {
+                GoalCelebrationView(goalName: celebrationName) {
+                    self.celebrationName = nil
+                }
+                .allowsHitTesting(false)
+            }
+        }
+        .onDisappear { celebrationName = nil }
         .navigationDestination(item: $selectedWorkspaceID) { workspaceID in
             if let workspace = tripWorkspaces.first(where: { $0.id == workspaceID }) {
                 TripDetailView(workspace: workspace)
@@ -616,6 +635,7 @@ private struct GoalContributionEditor: View {
     @Environment(\.modelContext) private var modelContext
 
     let goal: FinancialGoal
+    let onCompleted: () -> Void
 
     @State private var amountText = ""
     @State private var occurredAt = Date.now
@@ -675,20 +695,15 @@ private struct GoalContributionEditor: View {
         }
 
         do {
-            try GoalContributionStore.record(
-                amount: amount,
-                on: goal,
-                id: UUID(),
-                occurredAt: occurredAt
-            )
-            try SyncWriteGate.save(modelContext)
+            let completed = try GoalContributionCommit.save(
+                amount: amount, goal: goal, occurredAt: occurredAt, in: modelContext)
+            if completed { onCompleted() }
             dismiss()
         } catch GoalContributionError.nonPositiveAmount {
             errorMessage = "The contribution must be greater than zero."
         } catch GoalContributionError.exceedsRemaining {
             errorMessage = "The contribution cannot exceed the remaining goal amount."
         } catch {
-            modelContext.rollback()
             errorMessage = "Couldn’t save this contribution. Try again."
         }
     }

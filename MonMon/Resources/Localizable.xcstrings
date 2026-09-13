@@ -1,6 +1,116 @@
 {
   "sourceLanguage": "en",
   "strings": {
+  "Current period": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Kỳ này"
+        }
+      }
+    }
+  },
+  "Previous period": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Kỳ trước"
+        }
+      }
+    }
+  },
+  "Current period · %lld days": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Kỳ này · %lld ngày"
+        }
+      }
+    }
+  },
+    "You reached your goal!": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bạn đã đạt mục tiêu!"
+          }
+        }
+      }
+    },
+  "Spending rhythm": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Nhịp chi tiêu"
+        }
+      }
+    }
+  },
+  "Period: %@": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Khoảng ngày: %@"
+        }
+      }
+    }
+  },
+  "Average per day": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Chi trung bình/ngày"
+        }
+      }
+    }
+  },
+  "Expense count": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Số khoản chi"
+        }
+      }
+    }
+  },
+  "Average per expense": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Trung bình mỗi khoản"
+        }
+      }
+    }
+  },
+  "No expenses recorded in this period.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Chưa ghi nhận khoản chi trong kỳ này."
+        }
+      }
+    }
+  },
+  "Across %lld calendar days, including days without recorded expenses.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Tính trên %lld ngày, gồm cả ngày chưa ghi nhận chi tiêu."
+        }
+      }
+    }
+  },
   "Highlights": {
     "localizations": {
       "vi": {
@@ -4760,16 +4870,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Thông tin còn thiếu sẽ được giữ trong mục Cần xem lại."
-          }
-        }
-      }
-    },
-    "MonMon couldn’t open. Reinstall the app to restore its URL scheme.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MonMon không mở được. Hãy cài lại app để phục hồi scheme URL của nó."
           }
         }
       }
@@ -15643,16 +15743,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dữ liệu trên máy được giữ nguyên. Ghép đôi lại để đồng bộ với thiết bị khác."
-          }
-        }
-      }
-    },
-    "Open MonMon and start a new transaction.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mở MonMon và bắt đầu một giao dịch mới."
           }
         }
       }
