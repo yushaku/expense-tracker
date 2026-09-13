@@ -71,6 +71,37 @@ struct SyncCoordinatorTests {
         try drain(ta, tb)
     }
 
+    @Test("Database reset forgets pairing only after a verified backup and successful save")
+    func resetDisconnectsAfterSuccess() throws {
+        let local = try store()
+        let pair = try SyncPairing.make(hostID: local.state().deviceID)
+        try local.updateState { $0.pairID = pair.pairID }
+        let transport = TestSyncTransport()
+        var deletedKeys: [UUID] = []
+        let coordinator = SyncCoordinator(
+            store: local, transport: transport, loadPairing: { _ in pair },
+            deletePairing: { deletedKeys.append($0) })
+        coordinator.connectIfPaired()
+        let url = FileManager.default.temporaryDirectory.appending(path: "reset-\(UUID()).json")
+        defer { try? FileManager.default.removeItem(at: url) }
+        let failing = MonMonBackupService(container: local.container, writeRecovery: { _, _ in })
+        #expect(throws: MonMonBackupServiceError.recoveryFailure) {
+            try coordinator.resetDatabase(using: failing, backupURL: url)
+        }
+        #expect(coordinator.isPaired)
+        #expect(deletedKeys.isEmpty)
+        #expect(transport.started)
+        try coordinator.resetDatabase(
+            using: MonMonBackupService(container: local.container), backupURL: url)
+        #expect(deletedKeys == [pair.pairID])
+        #expect(!coordinator.isPaired)
+        #expect(!transport.started)
+        #expect(try local.state().pairID == nil)
+        #expect(try local.container.mainContext.fetchCount(FetchDescriptor<CashAccount>()) == 0)
+        coordinator.connectIfPaired()
+        #expect(!transport.started)
+    }
+
     @Test("Opening a paired device connects itself, and only the host leads")
     func connectsWithoutASecondTap() throws {
         let a = try store(), b = try store()

@@ -501,6 +501,76 @@ struct MonMonBackupServiceTests {
         #expect(!jars.contains { $0.name == "Old jar" })
     }
 
+    @Test("Reset backs up all financial models before clearing every database model")
+    func resetBacksUpAndClearsDatabase() throws {
+        let container = try makeContainer()
+        let defaults = makeDefaults()
+        _ = try insertCompleteFixture(in: container.mainContext)
+        let before = try service(container: container, defaults: defaults).snapshotPayload()
+            .sorted()
+        let url = temporaryRecoveryURL()
+        defer { try? FileManager.default.removeItem(at: url) }
+        let resetService = service(container: container, defaults: defaults)
+        try resetService.reset(backupURL: url)
+        let backup = try resetService.preview(Data(contentsOf: url))
+        #expect(backup.payload == before)
+        func expectEmpty<T: PersistentModel>(_ type: T.Type) throws {
+            #expect(try container.mainContext.fetchCount(FetchDescriptor<T>()) == 0)
+        }
+        for type in MonMonSchema.models { try expectEmpty(type) }
+        _ = try resetService.restore(backup)
+        #expect(try resetService.snapshotPayload().sorted() == before)
+    }
+
+    @Test("Reset leaves database intact when backup cannot be written or verified")
+    func resetBackupFailurePreservesDatabase() throws {
+        let container = try makeContainer()
+        let defaults = makeDefaults()
+        _ = try insertCompleteFixture(in: container.mainContext)
+        let before = try service(container: container, defaults: defaults).snapshotPayload()
+            .sorted()
+        let resetService = MonMonBackupService(
+            container: container, defaults: defaults,
+            writeRecovery: { _, _ in }
+        )
+        #expect(throws: MonMonBackupServiceError.recoveryFailure) {
+            try resetService.reset(backupURL: temporaryRecoveryURL())
+        }
+        #expect(try resetService.snapshotPayload().sorted() == before)
+    }
+
+    @Test("Reset rolls back deletion if saving fails and retains the backup")
+    func resetSaveFailurePreservesDatabase() throws {
+        let container = try makeContainer()
+        let defaults = makeDefaults()
+        _ = try insertCompleteFixture(in: container.mainContext)
+        let before = try service(container: container, defaults: defaults).snapshotPayload()
+            .sorted()
+        let url = temporaryRecoveryURL()
+        defer { try? FileManager.default.removeItem(at: url) }
+        let resetService = MonMonBackupService(
+            container: container, defaults: defaults,
+            save: { _ in throw MonMonBackupServiceError.storeFailure }
+        )
+        #expect(throws: MonMonBackupServiceError.storeFailure) {
+            try resetService.reset(backupURL: url)
+        }
+        #expect(try resetService.snapshotPayload().sorted() == before)
+        #expect(try resetService.preview(Data(contentsOf: url)).payload == before)
+    }
+
+    @Test("Reset is blocked during sync before creating a backup")
+    func resetRejectsLockedStore() throws {
+        let container = try makeContainer()
+        let url = temporaryRecoveryURL()
+        SyncWriteGate.lock(container)
+        defer { SyncWriteGate.unlock(container) }
+        #expect(throws: SyncError.sessionPending) {
+            try service(container: container, defaults: makeDefaults()).reset(backupURL: url)
+        }
+        #expect(!FileManager.default.fileExists(atPath: url.path))
+    }
+
     private func makeContainer() throws -> ModelContainer {
         try ModelContainer(
             for: Schema(MonMonSchema.models),
