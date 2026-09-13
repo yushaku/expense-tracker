@@ -1,5 +1,6 @@
 import Foundation
 import MCP
+import SwiftData
 import Testing
 
 @testable import MonMon
@@ -7,6 +8,96 @@ import Testing
 @Suite("MCP server contract")
 struct MCPServerContractTests {
     #if os(macOS)
+        @MainActor
+        @Test(
+            "Helper reads an isolated saved store without starting the app UI",
+            .timeLimit(.minutes(1)))
+        func subprocessDirectRead() throws {
+            let directory = FileManager.default.temporaryDirectory.appending(
+                path: "MCPProcess-\(UUID())")
+            try FileManager.default.createDirectory(
+                at: directory, withIntermediateDirectories: true)
+            defer { try? FileManager.default.removeItem(at: directory) }
+            let suite = "MCPProcess.\(UUID())"
+            let defaults = try #require(UserDefaults(suiteName: suite))
+            defer { defaults.removePersistentDomain(forName: suite) }
+            let app = directory.appending(path: "MonMon.app")
+            try FileManager.default.copyItem(at: Bundle.main.bundleURL, to: app)
+            let infoURL = app.appending(path: "Contents/Info.plist")
+            var info = try #require(
+                PropertyListSerialization.propertyList(
+                    from: Data(contentsOf: infoURL), format: nil) as? [String: Any])
+            info["MonMonAppGroupIdentifier"] = suite
+            try PropertyListSerialization.data(fromPropertyList: info, format: .xml, options: 0)
+                .write(to: infoURL)
+            let schema = Schema(MonMonSchema.models)
+            var writer: ModelContainer? = try ModelContainer(
+                for: schema,
+                configurations:
+                    ModelConfiguration(
+                        schema: schema, url: directory.appending(path: "data.store"),
+                        cloudKitDatabase: .none))
+            let id = UUID()
+            try populateStore(try #require(writer), id: id, defaults: defaults)
+            writer = nil
+            defaults.set(true, forKey: MCPConsentStore.allowedKey)
+            defaults.synchronize()
+
+            let process = Process()
+            let input = Pipe()
+            let output = Pipe()
+            let error = Pipe()
+            process.executableURL = app.appending(path: "Contents/Helpers/MonMonMCPServer")
+            process.standardInput = input
+            process.standardOutput = output
+            process.standardError = error
+            try process.run()
+            defer { if process.isRunning { process.terminate() } }
+            try writeLine(
+                [
+                    "jsonrpc": "2.0", "id": 1, "method": "initialize",
+                    "params": [
+                        "protocolVersion": "2025-11-25", "capabilities": [:],
+                        "clientInfo": ["name": "MonMonTests", "version": "1"],
+                    ],
+                ], to: input.fileHandleForWriting)
+            _ = try readLine(from: output.fileHandleForReading)
+            try writeLine(
+                ["jsonrpc": "2.0", "method": "notifications/initialized"],
+                to: input.fileHandleForWriting)
+            try writeLine(
+                [
+                    "jsonrpc": "2.0", "id": 2, "method": "tools/call",
+                    "params": [
+                        "name": "monmon_list_accounts", "arguments": ["id": id.uuidString],
+                    ],
+                ], to: input.fileHandleForWriting)
+            let reply = try readLine(from: output.fileHandleForReading)
+            let result = try #require(reply["result"] as? [String: Any])
+            #expect(result["isError"] as? Bool == false)
+            let envelope = try #require(result["structuredContent"] as? [String: Any])
+            let records = try #require(envelope["records"] as? [[String: Any]])
+            #expect(records.count == 1)
+            #expect(records.first?["openingBalance"] as? String == "123")
+            #expect((envelope["sync"] as? [String: Any])?["source"] as? String == "localStore")
+            try input.fileHandleForWriting.close()
+            process.waitUntilExit()
+            #expect(process.terminationStatus == 0)
+        }
+
+        @MainActor
+        private func populateStore(_ container: ModelContainer, id: UUID, defaults: UserDefaults)
+            throws
+        {
+            let context = ModelContext(container)
+            context.insert(
+                CashAccount(
+                    id: id, name: "Isolated MCP fixture", kind: .normal,
+                    openingBalance: 123, currencyCode: "VND", createdAt: .now))
+            try context.save()
+            try MCPStoreRegistration(container: container, defaults: defaults).register()
+        }
+
         @Test(
             "Embedded stdio helper handshakes, lists tools, and stops at EOF",
             .timeLimit(.minutes(1)))
@@ -55,7 +146,14 @@ struct MCPServerContractTests {
             )
             let listed = try readLine(from: output.fileHandleForReading)
             let tools = (listed["result"] as? [String: Any])?["tools"] as? [[String: Any]]
-            #expect(tools?.count == 13)
+            #expect(tools?.count == 20)
+            for tool in try #require(tools) {
+                let name = try #require(tool["name"] as? String)
+                let annotations = try #require(tool["annotations"] as? [String: Any])
+                #expect(
+                    annotations["readOnlyHint"] as? Bool
+                        == !(MCPResearchTool(rawValue: name)?.writes ?? false))
+            }
 
             try input.fileHandleForWriting.close()
             process.waitUntilExit()
@@ -65,7 +163,7 @@ struct MCPServerContractTests {
     #endif
 
     @MainActor
-    @Test("In-memory handshake exposes exactly 13 annotated read-only tools")
+    @Test("In-memory handshake exposes 14 read-only financial tools and six research tools")
     func toolList() async throws {
         let provider = ContractDataProvider()
         let server = await MCPServerAdapter.makeServer(service: MCPService(provider: provider))
@@ -81,10 +179,18 @@ struct MCPServerContractTests {
         }
 
         let listed = try await client.listTools()
-        #expect(listed.tools.count == 13)
-        #expect(Set(listed.tools.map(\.name)) == Set(MCPTool.allCases.map(\.rawValue)))
+        #expect(listed.tools.count == 20)
+        #expect(
+            Set(listed.tools.map(\.name))
+                == Set(MCPTool.allCases.map(\.rawValue) + MCPResearchTool.allCases.map(\.rawValue)))
+        let financialTools = listed.tools.filter { MCPTool(rawValue: $0.name) != nil }
+        #expect(Set(financialTools.compactMap(\.description)).count == financialTools.count)
+        let status = try #require(listed.tools.first { $0.name == MCPTool.dataStatus.rawValue })
+        #expect(status.inputSchema.objectValue?["properties"]?.objectValue?.isEmpty == true)
         for tool in listed.tools {
-            #expect(tool.annotations.readOnlyHint == true)
+            #expect(
+                tool.annotations.readOnlyHint
+                    == !(MCPResearchTool(rawValue: tool.name)?.writes ?? false))
             #expect(tool.annotations.destructiveHint == false)
             #expect(tool.annotations.idempotentHint == true)
             #expect(tool.annotations.openWorldHint == false)
@@ -117,10 +223,10 @@ struct MCPServerContractTests {
 
         #expect(result.isError == false)
         #expect(result.structuredContent == textValue)
-        #expect(result.structuredContent?.objectValue?["schemaVersion"]?.stringValue == "1.0")
+        #expect(result.structuredContent?.objectValue?["schemaVersion"]?.stringValue == "2.0")
         #expect(result.structuredContent?.objectValue?["records"]?.arrayValue?.count == 1)
         #expect(fallback["page"]?.objectValue?["nextCursor"] == .null)
-        #expect(fallback["sync"]?.objectValue?["source"] == .string("localSnapshot"))
+        #expect(fallback["sync"]?.objectValue?["source"] == .string("localStore"))
 
         await client.disconnect()
         await server.stop()
@@ -191,19 +297,19 @@ private final class ContractDataProvider: MCPDataProviding {
     func status() async -> MCPSyncMetadata {
         MCPSyncMetadata(
             flavour: "dev", accessAllowed: error != .disabled,
-            source: "localSnapshot", freshness: .fresh,
-            lastSnapshotAt: Date(timeIntervalSince1970: 1_700_000_000)
+            source: "localStore", freshness: .fresh,
+            readAt: Date(timeIntervalSince1970: 1_700_000_000)
         )
     }
 
-    func records(for tool: MCPTool) async throws -> [MCPRecord] {
+    func read(tool: MCPTool, query: MCPQuery) async throws -> MCPDataRead {
         if let error { throw error }
         let id = UUID(
             uuid: (
                 0xAA, 0xAA, 0xAA, 0xAA, 0xBB, 0xBB, 0xCC, 0xCC,
                 0xDD, 0xDD, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE
             ))
-        return [
+        let records = [
             MCPRecord(
                 recordType: "CashAccount", id: id,
                 sortDate: Date(timeIntervalSince1970: 1_700_000_000),
@@ -214,6 +320,7 @@ private final class ContractDataProvider: MCPDataProviding {
                 ]
             )
         ]
+        return MCPDataRead(records: records, metadata: await status())
     }
 }
 

@@ -19,22 +19,23 @@
         private(set) var isAllowed: Bool
         private(set) var isWorking = false
         private(set) var codexState: MCPClientState = .notConfigured
+        private(set) var hermesState: MCPClientState = .notConfigured
         private(set) var claudeState: MCPClientState = .notConfigured
         private(set) var message: Message?
         private(set) var needsReplacementConfirmation = false
 
         private let consent: any MCPConsentManaging
         private let installer: any MCPClientInstalling
-        private let snapshot: any MCPSnapshotExporting
+        private let registration: any MCPStoreRegistering
 
         init(
             consent: any MCPConsentManaging,
             installer: any MCPClientInstalling,
-            snapshot: any MCPSnapshotExporting
+            registration: any MCPStoreRegistering
         ) {
             self.consent = consent
             self.installer = installer
-            self.snapshot = snapshot
+            self.registration = registration
             isAllowed = consent.isAllowed
         }
 
@@ -45,49 +46,39 @@
         ) throws {
             let consent = try MCPConsentStore(configuration: configuration)
             let helperURL = bundle.bundleURL.appending(path: "Contents/Helpers/MonMonMCPServer")
-            let exporter: MCPAppSnapshotExporter?
-            let snapshot: any MCPSnapshotExporting
-            do {
-                let database: MCPSnapshotDatabase
-                if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
-                    database = try MCPSnapshotDatabase(
-                        container: ModelContainer(
-                            for: MCPStoredSnapshotRecord.self,
-                            MCPStoredSnapshotMetadata.self,
-                            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-                        ))
-                } else {
-                    database = try MCPSnapshotDatabase(
-                        configuration: configuration,
-                        allowsSave: true
-                    )
-                }
-                let liveExporter = MCPAppSnapshotExporter(
-                    sourceContext: sourceContext,
-                    database: database,
-                    consent: consent
-                )
-                exporter = liveExporter
-                snapshot = liveExporter
-            } catch {
-                exporter = nil
-                snapshot = MCPUnavailableSnapshotExporter()
+            guard let defaults = UserDefaults(suiteName: configuration.appGroupIdentifier) else {
+                throw MCPToolError.storeUnavailable
             }
+            let registration = MCPStoreRegistration(
+                container: sourceContext.container, defaults: defaults,
+                legacyURL: ModelConfiguration(
+                    "MonMonMCPSnapshot",
+                    groupContainer: .identifier(configuration.appGroupIdentifier),
+                    cloudKitDatabase: .none
+                ).url)
             self.init(
                 consent: consent,
                 installer: MCPClientInstaller(
-                    serverName: configuration.serverName,
-                    helperURL: helperURL
-                ),
-                snapshot: snapshot
-            )
-            exporter?.startObserving()
-            if consent.isAllowed, let exporter {
-                try? exporter.refresh()
+                    serverName: configuration.serverName, helperURL: helperURL),
+                registration: registration)
+            if !MonMonProcess.isRunningUnitTests {
+                do {
+                    if consent.isAllowed {
+                        try registration.register()
+                    } else {
+                        try registration.clear()
+                    }
+                } catch {
+                    try? registration.clear()
+                    message = Message(
+                        kind: .failure,
+                        text: "The local store could not be registered for AI access.")
+                }
             }
         }
 
         func refresh() async {
+            hermesState = await installer.hermesState()
             codexState = await installer.codexState()
             do {
                 claudeState = try installer.claudeState()
@@ -124,9 +115,22 @@
             )
         }
 
-        func refreshSnapshotIfAllowed() {
-            guard consent.isAllowed else { return }
-            try? snapshot.refresh()
+        func connectHermes() async {
+            guard isAllowed, !isWorking else { return }
+            isWorking = true
+            defer { isWorking = false }
+            do {
+                try await installer.installHermes(replaceExisting: false)
+                await refresh()
+                message = Message(
+                    kind: .information,
+                    text: "AI access is enabled. Restart your AI client to connect.")
+            } catch {
+                await refresh()
+                message = Message(
+                    kind: .failure,
+                    text: "Client configuration could not be repaired.")
+            }
         }
 
         func repair() async {
@@ -134,6 +138,9 @@
             isWorking = true
             defer { isWorking = false }
             do {
+                if hermesState == .repairNeeded {
+                    try await installer.installHermes(replaceExisting: true)
+                }
                 if codexState == .repairNeeded {
                     try await installer.installCodex(replaceExisting: true)
                 }
@@ -155,8 +162,9 @@
             isWorking = true
             await refresh()
             isWorking = false
-            if [codexState, claudeState].contains(where: { $0 == .conflict || $0 == .repairNeeded })
-            {
+            if [codexState, claudeState, hermesState].contains(where: {
+                $0 == .conflict || $0 == .repairNeeded
+            }) {
                 needsReplacementConfirmation = true
                 return
             }
@@ -167,12 +175,15 @@
             isWorking = true
             defer { isWorking = false }
             do {
-                try snapshot.refresh()
+                try registration.register()
                 if codexState != .unavailable {
                     try await installer.installCodex(replaceExisting: replaceExisting)
                 }
                 if claudeState != .unavailable {
                     try installer.installClaude(replaceExisting: replaceExisting)
+                }
+                if hermesState != .unavailable {
+                    try await installer.installHermes(replaceExisting: replaceExisting)
                 }
                 consent.allow()
                 isAllowed = true
@@ -180,7 +191,7 @@
                 await refresh()
                 message = Message(
                     kind: .information,
-                    text: "AI access is enabled. Restart Codex or Claude Desktop to connect."
+                    text: "AI access is enabled. Restart your AI client to connect."
                 )
             } catch {
                 consent.revoke()
@@ -196,7 +207,7 @@
             isAllowed = false
             needsReplacementConfirmation = false
             var cleanupFailed = false
-            do { try snapshot.clear() } catch { cleanupFailed = true }
+            do { try registration.clear() } catch { cleanupFailed = true }
 
             await refresh()
             if codexState == .current || codexState == .repairNeeded {
@@ -204,6 +215,9 @@
             }
             if claudeState == .current || claudeState == .repairNeeded {
                 do { try installer.removeClaude() } catch { cleanupFailed = true }
+            }
+            if hermesState == .current || hermesState == .repairNeeded {
+                do { try await installer.removeHermes() } catch { cleanupFailed = true }
             }
             await refresh()
             isWorking = false
@@ -222,14 +236,4 @@
         }
     }
 
-    @MainActor
-    private final class MCPUnavailableSnapshotExporter: MCPSnapshotExporting {
-        func refresh() throws {
-            throw MCPToolError.storeUnavailable
-        }
-
-        func clear() throws {
-            throw MCPToolError.storeUnavailable
-        }
-    }
 #endif

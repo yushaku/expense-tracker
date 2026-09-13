@@ -34,15 +34,24 @@ struct SyncLocalState: Codable, Equatable, Sendable {
 struct SyncSessionStore {
     let container: ModelContainer
     let recoveryDirectory: URL
+    private let researchStore: ResearchNotebookStore?
     private static let key = "sync/state"
 
-    init(container: ModelContainer, recoveryDirectory: URL? = nil) {
+    init(
+        container: ModelContainer, researchStore: ResearchNotebookStore? = nil,
+        recoveryDirectory: URL? = nil
+    ) {
         self.container = container
+        self.researchStore = researchStore
         self.recoveryDirectory =
             recoveryDirectory
             ?? MonMonBackupService.defaultRecoveryURL.deletingLastPathComponent().appending(
                 path: "p2p-recovery", directoryHint: .isDirectory
             ).appending(path: MonMonBackupFlavour.current.rawValue)
+    }
+
+    func notebookStore() throws -> ResearchNotebookStore {
+        try researchStore ?? ResearchNotebookStore.current()
     }
 
     func state() throws -> SyncLocalState {
@@ -71,6 +80,7 @@ struct SyncSessionStore {
         let context = ModelContext(container)
         context.autosaveEnabled = false
         var snapshot = try SyncSnapshot(payload: MonMonBackupService.snapshotPayload(in: context))
+        try snapshot.includeResearch(notebookStore().load())
         snapshot.aliases = state.baseline?.aliases ?? [:]
         snapshot.deletedSeeds = state.baseline?.deletedSeeds ?? []
         let present = Set(snapshot.records.map(\.id))
@@ -116,6 +126,10 @@ struct SyncSessionStore {
             try FileManager.default.createDirectory(
                 at: recoveryDirectory, withIntermediateDirectories: true)
             let recoveryURL = recoveryDirectory.appending(path: session.id.uuidString + ".json")
+            let researchData = try SyncCoding.encode(notebookStore().load())
+            try researchData.write(
+                to: recoveryDirectory.appending(path: session.id.uuidString + ".research.json"),
+                options: .atomic)
             #if os(iOS)
                 try data.write(to: recoveryURL, options: [.atomic, .completeFileProtection])
             #else
@@ -125,46 +139,67 @@ struct SyncSessionStore {
         try updateState { $0.pending = session }
     }
 
-    /// Data and receipt share one save. Retrying an applied session never applies
-    /// its old snapshot again, even if the owner has since made new edits.
+    /// Financial data and its receipt share one save. The notebook is locked across
+    /// that save; if its atomic file replacement fails, the persisted receipt lets
+    /// retry finish research without replaying financial data or losing new decisions.
     func commit(_ sessionID: UUID) throws {
         var state = try state()
         guard var pending = state.pending, pending.id == sessionID else {
             if state.reports.contains(where: { $0.id == sessionID }) { return }
             throw SyncError.sessionPending
         }
-        guard !pending.applied else { return }
-        guard try snapshot().digest() == pending.expectedLocalDigest else {
-            throw SyncError.stalePreview
-        }
-        let payload = try pending.target.validated()
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
-        do {
-            try MonMonBackupService(container: container).apply(
-                payload, in: context, includeDeviceData: false)
-            try remapLocalDrafts(pending.target, in: context)
-            for type in ["categories", "budgetJars", "defaultBank", "migration"] {
-                try SeedState.mark(type, in: context)
+        let targetResearch = try pending.target.researchNotebook()
+        var appliedFinancialData = false
+        defer {
+            if appliedFinancialData {
+                // Also invalidate stale editors when the later notebook write fails.
+                container.mainContext.rollback()
+                GoalWidgetSnapshot.refresh(in: ModelContext(container))
+                WidgetTodayExpenses.refresh(in: ModelContext(container))
             }
-            pending.applied = true
-            state.pending = pending
-            state.baseline = pending.target
-            state.commonBaselineValid = true
-            try write(state, in: context)
-            try context.save()
-        } catch {
-            context.rollback()
-            throw error
         }
-        // A main-context object loaded by an old editor must not save over the
-        // incoming version. The app recreates its content tree after this call.
-        container.mainContext.rollback()
-        GoalWidgetSnapshot.refresh(in: ModelContext(container))
-        WidgetTodayExpenses.refresh(in: ModelContext(container))
+        try notebookStore().update { notebook in
+            var merged = notebook
+            try merged.mergeReviewed(targetResearch)
+            if pending.applied {
+                notebook = merged
+                return
+            }
+            guard try snapshot().digest() == pending.expectedLocalDigest else {
+                throw SyncError.stalePreview
+            }
+            let payload = try pending.target.validated()
+            let context = ModelContext(container)
+            context.autosaveEnabled = false
+            do {
+                try MonMonBackupService(container: container).apply(
+                    payload, in: context, includeDeviceData: false)
+                try remapLocalDrafts(pending.target, in: context)
+                for type in ["categories", "budgetJars", "defaultBank", "migration"] {
+                    try SeedState.mark(type, in: context)
+                }
+                pending.applied = true
+                state.pending = pending
+                state.baseline = pending.target
+                state.commonBaselineValid = true
+                try write(state, in: context)
+                try context.save()
+                appliedFinancialData = true
+            } catch {
+                context.rollback()
+                throw error
+            }
+            notebook = merged
+        }
     }
 
     func complete(_ sessionID: UUID) throws {
+        let current = try state()
+        guard current.pending?.id == sessionID, current.pending?.applied == true else {
+            if current.reports.contains(where: { $0.id == sessionID }) { return }
+            throw SyncError.sessionPending
+        }
+        try commit(sessionID)
         try updateState { state in
             guard let pending = state.pending, pending.id == sessionID, pending.applied else {
                 if state.reports.contains(where: { $0.id == sessionID }) { return }
@@ -176,6 +211,13 @@ struct SyncSessionStore {
                 let document = try? MonMonBackupCodec.decode(data)
             {
                 before = (try? SyncSnapshot(payload: document.payload)) ?? .empty
+            }
+            let researchURL = recoveryDirectory.appending(
+                path: sessionID.uuidString + ".research.json")
+            if let data = try? Data(contentsOf: researchURL),
+                let notebook = try? JSONDecoder().decode(ResearchNotebook.self, from: data)
+            {
+                try before.includeResearch(notebook)
             }
             let changes = try SyncMergePlan(
                 automatic: pending.target.records, conflicts: [],

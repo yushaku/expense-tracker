@@ -95,7 +95,7 @@ enum BudgetJarActivity {
     }
 }
 
-private struct BudgetTransactionRouting {
+struct BudgetTransactionRouting {
     private let categoryJars: [UUID: UUID?]
     private let validJarIDs: Set<UUID>
     private let fallbackJarID: UUID?

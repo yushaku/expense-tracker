@@ -831,6 +831,8 @@ enum SyncLabels {
             "savingsWithdrawals": "Withdrawals", "fundInstruments": "Instruments",
             "fundHoldings": "Holdings", "fundSales": "Sales", "budgetJars": "Budget jars",
             "goals": "Goals", "tripWorkspaces": "Trips", "debts": "Debts",
+            "researchNotes": "Research notes", "investmentProposals": "Proposals",
+            "researchDecisions": "Decision history",
             "debtPayments": "Debt payments", "recurringRules": "Recurring rules",
         ]
         return AppText.string(key: names[value] ?? value, in: AppLanguage.stored.locale)

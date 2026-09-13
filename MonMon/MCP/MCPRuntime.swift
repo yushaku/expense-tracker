@@ -1,9 +1,6 @@
+import CoreData
 import Foundation
 import SwiftData
-
-#if os(macOS) && !MONMON_MCP_HELPER
-    import CoreData
-#endif
 
 struct MCPRuntimeConfiguration: Equatable, Sendable {
     let flavour: String
@@ -32,21 +29,6 @@ struct MCPRuntimeConfiguration: Equatable, Sendable {
         )
     }
 
-    @MainActor
-    func makeSnapshotContainer(allowsSave: Bool) throws -> ModelContainer {
-        let schema = Schema([
-            MCPStoredSnapshotRecord.self,
-            MCPStoredSnapshotMetadata.self,
-        ])
-        let modelConfiguration = ModelConfiguration(
-            "MonMonMCPSnapshot",
-            schema: schema,
-            allowsSave: allowsSave,
-            groupContainer: .identifier(appGroupIdentifier),
-            cloudKitDatabase: .none
-        )
-        return try ModelContainer(for: schema, configurations: modelConfiguration)
-    }
 }
 
 @MainActor
@@ -82,373 +64,174 @@ final class MCPConsentStore: MCPConsentManaging, @unchecked Sendable {
 
     func revoke() {
         defaults.removeObject(forKey: Self.allowedKey)
+        defaults.removeObject(forKey: MCPResearchService.writingAllowedKey)
     }
 }
 
-@Model
-final class MCPStoredSnapshotRecord {
-    @Attribute(.unique) var storageKey: String
-    var recordType: String
-    var recordID: UUID
-    var sortDate: Date
-    var fieldsData: Data
-
-    init(record: MCPRecord) throws {
-        storageKey = "\(record.recordType):\(record.id.uuidString.lowercased())"
-        recordType = record.recordType
-        recordID = record.id
-        sortDate = record.sortDate
-        fieldsData = try JSONEncoder().encode(record.fields)
-    }
-
-    func decoded() throws -> MCPRecord {
-        let fields: [String: MCPJSONValue]
-        do {
-            fields = try JSONDecoder().decode([String: MCPJSONValue].self, from: fieldsData)
-        } catch {
-            throw MCPToolError.decodeFailed
-        }
-        guard
-            fields["recordType"] == .string(recordType),
-            fields["id"] == .string(recordID.uuidString.lowercased())
-        else {
-            throw MCPToolError.decodeFailed
-        }
-        return MCPRecord(
-            recordType: recordType,
-            id: recordID,
-            sortDate: sortDate,
-            fields: fields
-        )
-    }
-}
-
-@Model
-final class MCPStoredSnapshotMetadata {
-    @Attribute(.unique) var key: String
-    var schemaVersion: String
-    var generatedAt: Date
-
-    init(schemaVersion: String, generatedAt: Date) {
-        key = "current"
-        self.schemaVersion = schemaVersion
-        self.generatedAt = generatedAt
-    }
-}
-
+/// Only the store location and schema are registered; no financial records are copied.
 @MainActor
-protocol MCPSnapshotReading: AnyObject {
-    func generatedAt() throws -> Date?
-    func records(for tool: MCPTool) throws -> [MCPRecord]
-}
-
-@MainActor
-protocol MCPSnapshotExporting: AnyObject {
-    func refresh() throws
+protocol MCPStoreRegistering: AnyObject {
+    func register() throws
     func clear() throws
 }
 
-/// Opens a fresh read-only SwiftData stack for each request so a long-running
-/// AI client sees the latest committed snapshot written by the MonMon process.
 @MainActor
-final class MCPDiskSnapshotReader: MCPSnapshotReading {
-    private let configuration: MCPRuntimeConfiguration
-
-    init(configuration: MCPRuntimeConfiguration) {
-        self.configuration = configuration
+final class MCPStoreRegistration: MCPStoreRegistering {
+    static let key = "MonMonMCPDirectStore"
+    struct Descriptor: Codable {
+        let url: URL
+        let schema: Schema
+        let modelHashes: [String: Data]
     }
-
-    func generatedAt() throws -> Date? {
-        try database().generatedAt()
-    }
-
-    func records(for tool: MCPTool) throws -> [MCPRecord] {
-        try database().records(for: tool)
-    }
-
-    private func database() throws -> MCPSnapshotDatabase {
-        try MCPSnapshotDatabase(configuration: configuration, allowsSave: false)
-    }
-}
-
-@MainActor
-final class MCPSnapshotDatabase: MCPSnapshotReading {
     private let container: ModelContainer
+    private let defaults: UserDefaults
+    private let legacyURL: URL?
 
-    convenience init(configuration: MCPRuntimeConfiguration, allowsSave: Bool) throws {
-        try self.init(container: configuration.makeSnapshotContainer(allowsSave: allowsSave))
-    }
-
-    init(container: ModelContainer) {
+    init(container: ModelContainer, defaults: UserDefaults, legacyURL: URL? = nil) {
         self.container = container
+        self.defaults = defaults
+        self.legacyURL = legacyURL
     }
 
-    func replace(records: [MCPRecord], generatedAt: Date) throws {
-        let stored = try records.map(MCPStoredSnapshotRecord.init)
-        guard Set(stored.map(\.storageKey)).count == stored.count else {
-            throw MCPToolError.decodeFailed
-        }
-
-        let context = makeContext()
-        do {
-            try context.delete(model: MCPStoredSnapshotRecord.self)
-            try context.delete(model: MCPStoredSnapshotMetadata.self)
-            stored.forEach(context.insert)
-            context.insert(
-                MCPStoredSnapshotMetadata(
-                    schemaVersion: MCPService.schemaVersion,
-                    generatedAt: generatedAt
-                ))
-            try context.save()
-        } catch let error as MCPToolError {
-            context.rollback()
-            throw error
-        } catch {
-            context.rollback()
+    func register() throws {
+        try removeLegacySnapshot()
+        guard let configuration = container.configurations.first,
+            !configuration.isStoredInMemoryOnly
+        else { throw MCPToolError.storeUnavailable }
+        let url = configuration.url
+        let metadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(
+            ofType: NSSQLiteStoreType, at: url, options: [NSReadOnlyPersistentStoreOption: true])
+        guard let hashes = metadata[NSStoreModelVersionHashesKey] as? [String: Data] else {
             throw MCPToolError.storeUnavailable
         }
+        defaults.set(
+            try JSONEncoder().encode(
+                Descriptor(
+                    url: url, schema: container.schema, modelHashes: hashes)), forKey: Self.key)
     }
 
     func clear() throws {
-        let context = makeContext()
-        do {
-            try context.delete(model: MCPStoredSnapshotRecord.self)
-            try context.delete(model: MCPStoredSnapshotMetadata.self)
-            try context.save()
-        } catch {
-            context.rollback()
-            throw MCPToolError.storeUnavailable
-        }
+        defaults.removeObject(forKey: Self.key)
+        try removeLegacySnapshot()
     }
 
-    func generatedAt() throws -> Date? {
-        let context = makeContext()
-        do {
-            var descriptor = FetchDescriptor<MCPStoredSnapshotMetadata>()
-            descriptor.fetchLimit = 1
-            guard let metadata = try context.fetch(descriptor).first else { return nil }
-            guard metadata.schemaVersion == MCPService.schemaVersion else {
-                throw MCPToolError.decodeFailed
+    private func removeLegacySnapshot() throws {
+        guard let legacyURL else { return }
+        for suffix in ["", "-wal", "-shm"] {
+            let url = URL(fileURLWithPath: legacyURL.path + suffix)
+            if FileManager.default.fileExists(atPath: url.path) {
+                try FileManager.default.removeItem(at: url)
             }
-            return metadata.generatedAt
-        } catch let error as MCPToolError {
-            throw error
-        } catch {
-            throw MCPToolError.storeUnavailable
         }
-    }
-
-    func records(for tool: MCPTool) throws -> [MCPRecord] {
-        guard tool != .dataStatus else { throw MCPToolError.invalidArgument }
-        let context = makeContext()
-        do {
-            var metadataDescriptor = FetchDescriptor<MCPStoredSnapshotMetadata>()
-            metadataDescriptor.fetchLimit = 1
-            guard let metadata = try context.fetch(metadataDescriptor).first else {
-                throw MCPToolError.storeUnavailable
-            }
-            guard metadata.schemaVersion == MCPService.schemaVersion else {
-                throw MCPToolError.decodeFailed
-            }
-            return try context.fetch(FetchDescriptor<MCPStoredSnapshotRecord>())
-                .filter { tool.recordTypes.contains($0.recordType) }
-                .map { try $0.decoded() }
-        } catch let error as MCPToolError {
-            throw error
-        } catch {
-            throw MCPToolError.storeUnavailable
-        }
-    }
-
-    private func makeContext() -> ModelContext {
-        let context = ModelContext(container)
-        context.autosaveEnabled = false
-        return context
     }
 }
 
-#if os(macOS) && !MONMON_MCP_HELPER
-    @MainActor
-    final class MCPAppSnapshotExporter: MCPSnapshotExporting {
-        private let sourceContext: ModelContext
-        private let database: MCPSnapshotDatabase
-        private let consent: any MCPConsentManaging
-        private let now: () -> Date
-        nonisolated(unsafe) private var observers: [any NSObjectProtocol] = []
-        private var refreshTask: Task<Void, Never>?
+@MainActor
+final class MCPDirectStoreReader {
+    private let defaults: UserDefaults
+    init(defaults: UserDefaults) { self.defaults = defaults }
 
-        init(
-            sourceContext: ModelContext,
-            database: MCPSnapshotDatabase,
-            consent: any MCPConsentManaging,
-            now: @escaping () -> Date = Date.init
-        ) {
-            self.sourceContext = sourceContext
-            self.database = database
-            self.consent = consent
-            self.now = now
-        }
-
-        deinit {
-            refreshTask?.cancel()
-            for observer in observers {
-                NotificationCenter.default.removeObserver(observer)
-            }
-        }
-
-        func startObserving(center: NotificationCenter = .default) {
-            guard observers.isEmpty else { return }
-            observers = [
-                center.addObserver(
-                    forName: ModelContext.didSave,
-                    object: sourceContext,
-                    queue: .main
-                ) { [weak self] _ in
-                    MainActor.assumeIsolated {
-                        self?.scheduleRefreshIfAllowed()
-                    }
-                },
-                center.addObserver(
-                    forName: NSPersistentCloudKitContainer.eventChangedNotification,
-                    object: nil,
-                    queue: .main
-                ) { [weak self] notification in
-                    guard
-                        let event = notification.userInfo?[
-                            NSPersistentCloudKitContainer.eventNotificationUserInfoKey
-                        ] as? NSPersistentCloudKitContainer.Event,
-                        event.endDate != nil,
-                        event.error == nil
-                    else { return }
-                    MainActor.assumeIsolated {
-                        self?.scheduleRefreshIfAllowed()
-                    }
-                },
-            ]
-        }
-
-        func refresh() throws {
-            let repository = MCPDataRepository(context: sourceContext)
-            let records = try MCPTool.snapshotTools.flatMap { try repository.records(for: $0) }
-            try database.replace(records: records, generatedAt: now())
-        }
-
-        func clear() throws {
-            try database.clear()
-        }
-
-        func waitForScheduledRefresh() async {
-            await refreshTask?.value
-        }
-
-        private func scheduleRefreshIfAllowed() {
-            refreshTask?.cancel()
-            refreshTask = Task { @MainActor [weak self] in
-                guard !Task.isCancelled, let self, consent.isAllowed else { return }
-                try? refresh()
-            }
-        }
+    func open() throws -> ModelContainer {
+        guard let data = defaults.data(forKey: MCPStoreRegistration.key),
+            let descriptor = try? JSONDecoder().decode(
+                MCPStoreRegistration.Descriptor.self, from: data),
+            descriptor.url.isFileURL,
+            FileManager.default.fileExists(atPath: descriptor.url.path)
+        else { throw MCPToolError.storeUnavailable }
+        let schema = Schema(MonMonSchema.models)
+        guard descriptor.schema == schema else { throw MCPToolError.storeUnavailable }
+        let metadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(
+            ofType: NSSQLiteStoreType, at: descriptor.url,
+            options: [NSReadOnlyPersistentStoreOption: true])
+        guard let hashes = metadata[NSStoreModelVersionHashesKey] as? [String: Data],
+            hashes == descriptor.modelHashes
+        else { throw MCPToolError.storeUnavailable }
+        return try ModelContainer(
+            for: schema,
+            configurations: ModelConfiguration(
+                schema: schema, url: descriptor.url, allowsSave: false, cloudKitDatabase: .none))
     }
-#endif
+}
 
-enum MCPSnapshotFreshness: String, Codable, Equatable, Sendable {
-    case disabled
-    case unavailable
-    case stale
-    case fresh
+enum MCPDataFreshness: String, Codable, Equatable, Sendable {
+    case disabled, unavailable, fresh
 }
 
 struct MCPSyncMetadata: Codable, Equatable, Sendable {
     let flavour: String
     let accessAllowed: Bool
     let source: String
-    let freshness: MCPSnapshotFreshness
-    let lastSnapshotAt: Date?
+    let freshness: MCPDataFreshness
+    // Kept as null for clients using the previous envelope. No snapshot exists.
+    let lastSnapshotAt: Date? = nil
+    let readAt: Date?
 
     private enum CodingKeys: String, CodingKey {
-        case flavour
-        case accessAllowed
-        case source
-        case freshness
-        case lastSnapshotAt
+        case flavour, accessAllowed, source, freshness, lastSnapshotAt, readAt
     }
-
     func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(flavour, forKey: .flavour)
-        try container.encode(accessAllowed, forKey: .accessAllowed)
-        try container.encode(source, forKey: .source)
-        try container.encode(freshness, forKey: .freshness)
-        if let lastSnapshotAt {
-            try container.encode(lastSnapshotAt, forKey: .lastSnapshotAt)
-        } else {
-            try container.encodeNil(forKey: .lastSnapshotAt)
-        }
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(flavour, forKey: .flavour)
+        try c.encode(accessAllowed, forKey: .accessAllowed)
+        try c.encode(source, forKey: .source)
+        try c.encode(freshness, forKey: .freshness)
+        try c.encodeNil(forKey: .lastSnapshotAt)
+        try c.encodeIfPresent(readAt, forKey: .readAt)
     }
+}
+
+struct MCPDataRead {
+    let records: [MCPRecord]
+    let metadata: MCPSyncMetadata
 }
 
 @MainActor
 protocol MCPDataProviding: AnyObject {
     func status() async -> MCPSyncMetadata
-    func records(for tool: MCPTool) async throws -> [MCPRecord]
+    func read(tool: MCPTool, query: MCPQuery) async throws -> MCPDataRead
 }
 
 @MainActor
-final class MCPSnapshotDataProvider: MCPDataProviding {
-    static let defaultFreshnessInterval: TimeInterval = 5 * 60
-
+final class MCPDirectDataProvider: MCPDataProviding {
     private let configuration: MCPRuntimeConfiguration
     private let consent: any MCPConsentManaging
-    private let snapshot: any MCPSnapshotReading
-    private let freshnessInterval: TimeInterval
-    private let now: () -> Date
+    private let open: () throws -> ModelContainer
 
     init(
-        configuration: MCPRuntimeConfiguration,
-        consent: any MCPConsentManaging,
-        snapshot: any MCPSnapshotReading,
-        freshnessInterval: TimeInterval = defaultFreshnessInterval,
-        now: @escaping () -> Date = Date.init
+        configuration: MCPRuntimeConfiguration, consent: any MCPConsentManaging,
+        open: @escaping () throws -> ModelContainer
     ) {
         self.configuration = configuration
         self.consent = consent
-        self.snapshot = snapshot
-        self.freshnessInterval = freshnessInterval
-        self.now = now
+        self.open = open
     }
 
     func status() async -> MCPSyncMetadata {
-        guard consent.isAllowed else { return metadata(freshness: .disabled, generatedAt: nil) }
+        guard consent.isAllowed else { return metadata(.disabled) }
         do {
-            guard let generatedAt = try snapshot.generatedAt() else {
-                return metadata(freshness: .unavailable, generatedAt: nil)
-            }
-            let age = max(0, now().timeIntervalSince(generatedAt))
-            return metadata(
-                freshness: age <= freshnessInterval ? .fresh : .stale,
-                generatedAt: generatedAt
-            )
-        } catch {
-            return metadata(freshness: .unavailable, generatedAt: nil)
+            _ = try open()
+            return metadata(.fresh, readAt: .now)
+        } catch { return metadata(.unavailable) }
+    }
+
+    func read(tool: MCPTool, query: MCPQuery) async throws -> MCPDataRead {
+        guard consent.isAllowed else { throw MCPToolError.disabled }
+        do {
+            let container = try open()
+            let context = ModelContext(container)
+            context.autosaveEnabled = false
+            let records = try MCPDataRepository(context: context).records(for: tool, query: query)
+            guard consent.isAllowed else { throw MCPToolError.disabled }
+            return MCPDataRead(records: records, metadata: metadata(.fresh, readAt: .now))
+        } catch let error as MCPToolError { throw error } catch {
+            throw MCPToolError.storeUnavailable
         }
     }
 
-    func records(for tool: MCPTool) async throws -> [MCPRecord] {
-        guard consent.isAllowed else { throw MCPToolError.disabled }
-        return try snapshot.records(for: tool)
-    }
-
-    private func metadata(
-        freshness: MCPSnapshotFreshness,
-        generatedAt: Date?
-    ) -> MCPSyncMetadata {
+    private func metadata(_ freshness: MCPDataFreshness, readAt: Date? = nil) -> MCPSyncMetadata {
         MCPSyncMetadata(
-            flavour: configuration.flavour,
-            accessAllowed: consent.isAllowed,
-            source: "localSnapshot",
-            freshness: freshness,
-            lastSnapshotAt: generatedAt
-        )
+            flavour: configuration.flavour, accessAllowed: consent.isAllowed,
+            source: "localStore", freshness: freshness, readAt: readAt)
     }
 }
 
@@ -484,7 +267,7 @@ struct MCPResponseEnvelope: Codable, Equatable, Sendable {
 
 @MainActor
 final class MCPService {
-    static let schemaVersion = "1.0"
+    static let schemaVersion = "2.0"
 
     private let provider: any MCPDataProviding
 
@@ -504,14 +287,15 @@ final class MCPService {
                 MCPRecord(
                     recordType: "DataStatus",
                     id: id,
-                    sortDate: sync.lastSnapshotAt ?? .distantPast,
+                    sortDate: sync.readAt ?? .distantPast,
                     fields: [
                         "recordType": .string("DataStatus"),
                         "flavour": .string(sync.flavour),
                         "accessAllowed": .bool(sync.accessAllowed),
                         "source": .string(sync.source),
                         "freshness": .string(sync.freshness.rawValue),
-                        "lastSnapshotAt": sync.lastSnapshotAt.map {
+                        "lastSnapshotAt": .null,
+                        "readAt": sync.readAt.map {
                             .string(
                                 $0.formatted(
                                     Date.ISO8601FormatStyle(includingFractionalSeconds: true)))
@@ -520,8 +304,15 @@ final class MCPService {
                 )
             ]
         } else {
-            records = try await provider.records(for: tool)
-            sync = await provider.status()
+            let read = try await provider.read(tool: tool, query: query)
+            records = read.records
+            sync = read.metadata
+        }
+        if tool == .summary {
+            return MCPResponseEnvelope(
+                schemaVersion: Self.schemaVersion,
+                records: records.map(\.fields),
+                page: MCPPageEnvelope(limit: 1, nextCursor: nil, hasMore: false), sync: sync)
         }
         let result = try MCPPaginator.page(records: records, query: query, tool: tool)
         return MCPResponseEnvelope(

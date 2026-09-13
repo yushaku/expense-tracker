@@ -29,12 +29,19 @@
                 .accessibilityIdentifier("mcp-privacy-warning")
 
                 Label(
-                    "MCP reads a local snapshot. Open MonMon on this Mac to refresh data changed on another device.",
+                    "MCP reads saved data directly from this Mac, even when MonMon is closed. Unsaved edits are not shared.",
                     systemImage: "externaldrive.fill.badge.timemachine"
                 )
                 .font(.caption)
                 .foregroundStyle(MonMonTheme.textSecondary)
-                .accessibilityIdentifier("mcp-snapshot-note")
+                .accessibilityIdentifier("mcp-store-note")
+
+                NavigationLink {
+                    ResearchNotebookView()
+                } label: {
+                    Label("Research & proposals", systemImage: "text.book.closed")
+                }
+                .accessibilityIdentifier("mcp-research-notebook")
 
                 Divider()
                     .overlay(MonMonTheme.border)
@@ -48,8 +55,21 @@
                     accessibilityIdentifier: "mcp-claude-state"
                 )
 
+                clientRow(
+                    name: "Hermes", state: accessManager.hermesState,
+                    accessibilityIdentifier: "mcp-hermes-state"
+                )
+                if accessManager.isAllowed && accessManager.hermesState == .notConfigured {
+                    Button("Connect Hermes") {
+                        Task { await accessManager.connectHermes() }
+                    }
+                    .disabled(accessManager.isWorking)
+                    .accessibilityIdentifier("mcp-connect-hermes")
+                }
+
                 if accessManager.codexState == .repairNeeded
                     || accessManager.claudeState == .repairNeeded
+                    || accessManager.hermesState == .repairNeeded
                 {
                     Button {
                         Task { await accessManager.repair() }
