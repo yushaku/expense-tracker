@@ -19,6 +19,7 @@
         private(set) var isAllowed: Bool
         private(set) var isWorking = false
         private(set) var codexState: MCPClientState = .notConfigured
+        private(set) var hermesState: MCPClientState = .notConfigured
         private(set) var claudeState: MCPClientState = .notConfigured
         private(set) var message: Message?
         private(set) var needsReplacementConfirmation = false
@@ -77,6 +78,7 @@
         }
 
         func refresh() async {
+            hermesState = await installer.hermesState()
             codexState = await installer.codexState()
             do {
                 claudeState = try installer.claudeState()
@@ -113,11 +115,32 @@
             )
         }
 
+        func connectHermes() async {
+            guard isAllowed, !isWorking else { return }
+            isWorking = true
+            defer { isWorking = false }
+            do {
+                try await installer.installHermes(replaceExisting: false)
+                await refresh()
+                message = Message(
+                    kind: .information,
+                    text: "AI access is enabled. Restart your AI client to connect.")
+            } catch {
+                await refresh()
+                message = Message(
+                    kind: .failure,
+                    text: "Client configuration could not be repaired.")
+            }
+        }
+
         func repair() async {
             message = nil
             isWorking = true
             defer { isWorking = false }
             do {
+                if hermesState == .repairNeeded {
+                    try await installer.installHermes(replaceExisting: true)
+                }
                 if codexState == .repairNeeded {
                     try await installer.installCodex(replaceExisting: true)
                 }
@@ -139,8 +162,9 @@
             isWorking = true
             await refresh()
             isWorking = false
-            if [codexState, claudeState].contains(where: { $0 == .conflict || $0 == .repairNeeded })
-            {
+            if [codexState, claudeState, hermesState].contains(where: {
+                $0 == .conflict || $0 == .repairNeeded
+            }) {
                 needsReplacementConfirmation = true
                 return
             }
@@ -158,13 +182,16 @@
                 if claudeState != .unavailable {
                     try installer.installClaude(replaceExisting: replaceExisting)
                 }
+                if hermesState != .unavailable {
+                    try await installer.installHermes(replaceExisting: replaceExisting)
+                }
                 consent.allow()
                 isAllowed = true
                 needsReplacementConfirmation = false
                 await refresh()
                 message = Message(
                     kind: .information,
-                    text: "AI access is enabled. Restart Codex or Claude Desktop to connect."
+                    text: "AI access is enabled. Restart your AI client to connect."
                 )
             } catch {
                 consent.revoke()
@@ -188,6 +215,9 @@
             }
             if claudeState == .current || claudeState == .repairNeeded {
                 do { try installer.removeClaude() } catch { cleanupFailed = true }
+            }
+            if hermesState == .current || hermesState == .repairNeeded {
+                do { try await installer.removeHermes() } catch { cleanupFailed = true }
             }
             await refresh()
             isWorking = false

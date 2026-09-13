@@ -183,3 +183,11 @@ until the owner follows a link.
 This first version is local to Mac and excluded from Device Sync and financial
 backups. Use **Export research** to save an ISO-8601 JSON copy of notes, proposals
 and decisions. Disabling AI access preserves the local notebook for the owner.
+
+### Hermes Agent
+
+On macOS, AI access also configures Hermes installed at `~/.local/bin/hermes` (the standard installer location). Existing AI access users can choose **Connect Hermes** without toggling access off. Restart Hermes after setup.
+
+MonMon uses `hermes config get mcp_servers.<server-name> --json`, `config set`, and `config unset` to manage only its own entry in the active Hermes profile. It requires a Hermes version supporting these commands. A moved helper can be repaired; conflicting entries require confirmation. Unreadable configuration is never treated as an empty config. The Dev and Prod server names remain separate.
+
+See [Hermes MCP documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp) for the stdio `command` / `args` configuration.
