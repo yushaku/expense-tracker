@@ -300,9 +300,6 @@ struct BackupRestoreView: View {
                 try SyncWriteGate.save(modelContext)
                 try syncCoordinator.resetDatabase(using: service, backupURL: url)
                 lastResetPath = url.path
-                notice = BackupRestoreNotice(
-                    message: localized("Database reset complete. Your backup is available below."),
-                    isFailure: false)
             } catch {
                 // A successful backup remains useful even if the later save failed.
                 if (try? service.preview(MonMonBackupFileReader.read(url))) != nil {

@@ -49,6 +49,7 @@ final class SyncCoordinator {
     }
 
     var isPresented = false
+    var isPresentingResetNotice = false
     private(set) var phase: Phase = .idle
     private(set) var errorMessage: String?
     private(set) var peerName = ""
@@ -211,6 +212,10 @@ final class SyncCoordinator {
     func resetDatabase(using service: MonMonBackupService, backupURL: URL) throws {
         let state = try store.state()
         try service.reset(backupURL: backupURL)
+        // SwiftUI's retained rows and sheets still hold the deleted models.
+        // Replace the content tree before its next render, as a sync commit does.
+        contentRevision += 1
+        isPresentingResetNotice = true
         if let id = state.pairID { deletePairing(id) }
         pair = nil
         localSnapshot = nil
