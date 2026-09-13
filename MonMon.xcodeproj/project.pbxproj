@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B4F2CA028D32490D88AD2D26 /* ResearchNotebookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF8CAB5B92814145A9EBB00E /* ResearchNotebookView.swift */; platformFilters = (macos, ); };
+		B4F2CA028D32490D88AD2D26 /* ResearchNotebookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF8CAB5B92814145A9EBB00E /* ResearchNotebookView.swift */; };
 		7086E22C2333497B9D7264A9 /* MCPResearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3C10BC4F574A6AAB81F9B9 /* MCPResearchTests.swift */; platformFilters = (macos, ); };
 		EA79E4BCCF204494A05697A6 /* MCPResearchTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60363FA0F6B74E25908D0BEB /* MCPResearchTools.swift */; platformFilters = (macos, ); };
 		81DC62B34406437A85CC4056 /* MCPResearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5D8916801F1478AB72A80EE /* MCPResearchService.swift */; platformFilters = (macos, ); };
-		68CFDBC298854B97B5A09C66 /* ResearchNotebook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0FEA3C7ABC42D88EB7AA1E /* ResearchNotebook.swift */; platformFilters = (macos, ); };
+		68CFDBC298854B97B5A09C66 /* ResearchNotebook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0FEA3C7ABC42D88EB7AA1E /* ResearchNotebook.swift */; };
 		5401CD67261742D2BA1623AB /* MCP in Frameworks */ = {isa = PBXBuildFile; productRef = M50000000000000000000702 /* MCP */; platformFilters = (macos, ); };
 		B7A402B869FA4370879CFAE6 /* GoalCelebration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8997F500F62B4B1EBF575157 /* GoalCelebration.swift */; };
 		1830A82886604C5A8156B9DE /* ReportHighlightsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFBFF40EFA0D46F6BEB1D71B /* ReportHighlightsTests.swift */; };

@@ -33,6 +33,9 @@ struct SyncCoordinatorTests {
         AccountSeed.ensureUnassignedExists(in: container.mainContext)
         return SyncSessionStore(
             container: container,
+            researchStore: ResearchNotebookStore(
+                directory: FileManager.default.temporaryDirectory.appending(
+                    path: "ResearchSyncTest-\(UUID())")),
             recoveryDirectory: FileManager.default.temporaryDirectory.appending(
                 path: UUID().uuidString))
     }
@@ -114,6 +117,17 @@ struct SyncCoordinatorTests {
             createdAt: .now)
         a.container.mainContext.insert(account)
         try a.container.mainContext.save()
+        let now = Date.now
+        let note = ResearchNote(
+            id: UUID(), title: "Synced research", content: "Test note",
+            sources: [
+                ResearchSource(
+                    title: "Source", url: try #require(URL(string: "https://example.com")),
+                    accessedAt: now)
+            ],
+            instrumentID: nil, researchedAt: now, reviewAfter: now.addingTimeInterval(86400),
+            createdAt: now)
+        try a.notebookStore().update { $0.notes.append(note) }
         try connect(ca, cb, ta, tb)
         #expect(ca.canStart && cb.canStart)
         ca.startSync()
@@ -126,7 +140,8 @@ struct SyncCoordinatorTests {
         #expect(ca.phase == .complete, "\(ca.errorMessage ?? "")")
         #expect(cb.phase == .complete, "\(cb.errorMessage ?? "")")
         #expect(try a.snapshot().digest() == b.snapshot().digest())
-        #expect(try b.snapshot().records.count == 2)
+        #expect(try b.snapshot().records.count == 3)
+        #expect(try b.notebookStore().load().notes == [note])
         cb.startSync()
         try drain(ta, tb)
         #expect(cb.previewLocal.isEmpty && cb.previewRemote.isEmpty)
