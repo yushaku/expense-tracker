@@ -2,6 +2,8 @@ import Foundation
 
 enum MCPTool: String, CaseIterable, Sendable {
     case summary = "monmon_summary"
+    case accountBalances = "monmon_account_balances"
+    case portfolio = "monmon_portfolio"
     case dataStatus = "monmon_data_status"
     case accounts = "monmon_list_accounts"
     case transactions = "monmon_list_transactions"
@@ -18,7 +20,7 @@ enum MCPTool: String, CaseIterable, Sendable {
 
     var recordTypes: Set<String> {
         switch self {
-        case .dataStatus, .summary: []
+        case .dataStatus, .summary, .accountBalances, .portfolio: []
         case .accounts: ["CashAccount"]
         case .transactions: ["MoneyTransaction"]
         case .transfers: ["AccountTransfer"]
@@ -39,6 +41,8 @@ enum MCPTool: String, CaseIterable, Sendable {
         if self == .summary {
             return ["dateFrom", "dateTo", "accountID", "categoryID", "budgetJarID", "groupBy"]
         }
+        if self == .accountBalances { return ["limit", "cursor", "accountID", "kind"] }
+        if self == .portfolio { return ["instrumentID", "kind"] }
         var common: Set<String> = [
             "limit", "cursor", "id", "ids", "createdAtFrom", "createdAtTo",
         ]
@@ -54,10 +58,10 @@ enum MCPTool: String, CaseIterable, Sendable {
         case .transactions:
             specific = [
                 "kind", "accountID", "categoryID", "sourceRuleID", "tripWorkspaceID",
-                "budgetJarOverrideID",
+                "budgetJarOverrideID", "noteContains", "include",
             ]
         case .transfers:
-            specific = ["sourceAccountID", "destinationAccountID"]
+            specific = ["sourceAccountID", "destinationAccountID", "noteContains"]
         case .categories:
             specific = ["kind", "budgetJarID"]
         case .recurringRules:
@@ -76,17 +80,48 @@ enum MCPTool: String, CaseIterable, Sendable {
                 "proceedsAccountID",
             ]
         case .debts:
-            specific = ["recordType", "direction", "debtID", "accountID"]
+            specific = ["recordType", "direction", "debtID", "accountID", "noteContains"]
         case .pendingCaptures:
-            specific = ["kind", "accountID", "categoryID"]
+            specific = ["kind", "accountID", "categoryID", "noteContains"]
+        case .accountBalances, .portfolio:
+            specific = []
         }
         return common.union(specific)
+    }
+
+    var dateFilterFields: [String: String] {
+        switch self {
+        case .transactions: ["MoneyTransaction": "occurredAt"]
+        case .transfers: ["AccountTransfer": "occurredAt"]
+        case .recurringRules: ["RecurringRule": "anchorDate"]
+        case .goals: ["FinancialGoal": "targetDate"]
+        case .trips: ["TripWorkspace": "startedAt"]
+        case .savings: ["SavingsDeposit": "openedAt", "SavingsWithdrawal": "withdrawnAt"]
+        case .investments:
+            [
+                "FundInstrument": "priceAsOf", "FundHolding": "purchasedAt ?? createdAt",
+                "FundSale": "soldAt",
+            ]
+        case .debts: ["Debt": "openedAt", "DebtPayment": "occurredAt"]
+        case .pendingCaptures: ["PendingTransactionCapture": "occurredAt"]
+        case .summary: ["MoneyTransaction": "occurredAt"]
+        case .dataStatus, .accounts, .categories, .budgetJars, .accountBalances, .portfolio: [:]
+        }
+    }
+
+    var sortDescription: String {
+        switch self {
+        case .dataStatus: "single record"
+        case .summary: "totals by currency asc; expense groups by currency asc, groupID asc"
+        case .portfolio: "positions by marketValue desc, symbol asc; totals by currency asc"
+        default: "businessDate desc, id asc, recordType asc"
+        }
     }
 }
 
 struct MCPQuery: Equatable, Sendable {
     static let defaultLimit = 50
-    static let maximumLimit = 200
+    static let maximumLimit = 500
 
     var limit = defaultLimit
     var cursor: String?
@@ -95,26 +130,29 @@ struct MCPQuery: Equatable, Sendable {
     var createdAtTo: Date?
     var dateFrom: Date?
     var dateTo: Date?
+    var includes: Set<String> = []
     var fieldFilters: [String: String] = [:]
 
     static func parse(
         arguments: [String: MCPJSONValue],
         for tool: MCPTool
     ) throws -> MCPQuery {
-        guard Set(arguments.keys).isSubset(of: tool.filterKeys) else {
-            throw MCPToolError.invalidArgument
+        if let unknown = Set(arguments.keys).subtracting(tool.filterKeys).sorted().first {
+            throw MCPArgumentError(field: unknown, reason: "is not supported by \(tool.rawValue)")
         }
 
         var query = MCPQuery()
         if let value = arguments["limit"] {
             guard case .int(let limit) = value, (1...maximumLimit).contains(limit) else {
-                throw MCPToolError.invalidArgument
+                throw MCPArgumentError(
+                    field: "limit",
+                    reason: "must be an integer from 1 through \(maximumLimit)")
             }
             query.limit = limit
         }
         if let value = arguments["cursor"] {
             guard case .string(let cursor) = value, !cursor.isEmpty else {
-                throw MCPToolError.invalidArgument
+                throw MCPArgumentError(field: "cursor", reason: "must be a non-empty string")
             }
             query.cursor = cursor
         }
@@ -122,59 +160,84 @@ struct MCPQuery: Equatable, Sendable {
         var ids = Set<UUID>()
         if let value = arguments["id"] {
             guard case .string(let raw) = value, let id = UUID(uuidString: raw) else {
-                throw MCPToolError.invalidArgument
+                throw MCPArgumentError(field: "id", reason: "must be a UUID")
             }
             ids.insert(id)
         }
         if let value = arguments["ids"] {
-            guard case .array(let values) = value else { throw MCPToolError.invalidArgument }
+            guard case .array(let values) = value else {
+                throw MCPArgumentError(field: "ids", reason: "must be an array of UUID strings")
+            }
             for value in values {
                 guard case .string(let raw) = value, let id = UUID(uuidString: raw) else {
-                    throw MCPToolError.invalidArgument
+                    throw MCPArgumentError(
+                        field: "ids", reason: "contains a value that is not a UUID")
                 }
                 ids.insert(id)
             }
         }
         query.ids = arguments["id"] == nil && arguments["ids"] == nil ? nil : ids
 
-        query.createdAtFrom = try parseDate(arguments["createdAtFrom"])
-        query.createdAtTo = try parseDate(arguments["createdAtTo"])
-        query.dateFrom = try parseDate(arguments["dateFrom"])
-        query.dateTo = try parseDate(arguments["dateTo"])
-        guard validRange(query.createdAtFrom, query.createdAtTo),
-            validRange(query.dateFrom, query.dateTo)
-        else {
-            throw MCPToolError.invalidArgument
+        query.createdAtFrom = try parseDate(arguments["createdAtFrom"], field: "createdAtFrom")
+        query.createdAtTo = try parseDate(arguments["createdAtTo"], field: "createdAtTo")
+        query.dateFrom = try parseDate(arguments["dateFrom"], field: "dateFrom")
+        query.dateTo = try parseDate(arguments["dateTo"], field: "dateTo")
+        if !validRange(query.createdAtFrom, query.createdAtTo) {
+            throw MCPArgumentError(
+                field: "createdAtTo", reason: "must be on or after createdAtFrom")
+        }
+        if !validRange(query.dateFrom, query.dateTo) {
+            throw MCPArgumentError(field: "dateTo", reason: "must be after dateFrom")
+        }
+        if let value = arguments["include"] {
+            guard case .array(let values) = value else {
+                throw MCPArgumentError(field: "include", reason: "must be an array")
+            }
+            for value in values {
+                guard case .string(let name) = value, name == "allocationSlices" else {
+                    throw MCPArgumentError(
+                        field: "include", reason: "supports only allocationSlices")
+                }
+                query.includes.insert(name)
+            }
         }
 
         let reserved: Set<String> = [
-            "limit", "cursor", "id", "ids", "createdAtFrom", "createdAtTo", "dateFrom", "dateTo",
+            "limit", "cursor", "id", "ids", "createdAtFrom", "createdAtTo", "dateFrom",
+            "dateTo", "include",
         ]
         for (key, value) in arguments where !reserved.contains(key) {
             guard case .string(let raw) = value, !raw.isEmpty else {
-                throw MCPToolError.invalidArgument
+                throw MCPArgumentError(field: key, reason: "must be a non-empty string")
             }
             let normalized = normalizedFilter(raw, key: key)
             guard validFilterValue(normalized, key: key, tool: tool) else {
-                throw MCPToolError.invalidArgument
+                throw MCPArgumentError(field: key, reason: "has an unsupported value")
             }
             query.fieldFilters[key] = normalized
         }
         if tool == .summary {
             guard let from = query.dateFrom, let to = query.dateTo, from < to else {
-                throw MCPToolError.invalidArgument
+                throw MCPArgumentError(field: "dateTo", reason: "must be after dateFrom")
             }
         }
         return query
     }
 
-    private static func parseDate(_ value: MCPJSONValue?) throws -> Date? {
+    private static func parseDate(_ value: MCPJSONValue?, field: String) throws -> Date? {
         guard let value else { return nil }
-        guard case .string(let raw) = value else { throw MCPToolError.invalidArgument }
+        guard case .string(let raw) = value else {
+            throw MCPArgumentError(
+                field: field, reason: "must be an ISO 8601 date-time string with timezone")
+        }
         let fractional = Date.ISO8601FormatStyle(includingFractionalSeconds: true)
         let whole = Date.ISO8601FormatStyle(includingFractionalSeconds: false)
         guard let date = (try? fractional.parse(raw)) ?? (try? whole.parse(raw)) else {
-            throw MCPToolError.invalidArgument
+            throw MCPArgumentError(
+                field: field,
+                reason:
+                    "must be an ISO 8601 date-time with timezone, for example 2026-09-01T00:00:00+07:00"
+            )
         }
         return date
     }
@@ -202,6 +265,8 @@ struct MCPQuery: Equatable, Sendable {
             allowed = ["none", "category", "budgetJar"]
         case (.accounts, "kind"):
             allowed = ["normal", "credit"]
+        case (.accountBalances, "kind"):
+            allowed = ["normal", "credit"]
         case (.transactions, "kind"), (.categories, "kind"),
             (.recurringRules, "kind"), (.pendingCaptures, "kind"):
             allowed = ["income", "expense"]
@@ -216,7 +281,9 @@ struct MCPQuery: Equatable, Sendable {
         case (.investments, "recordType"):
             allowed = ["FundInstrument", "FundHolding", "FundSale"]
         case (.investments, "kind"):
-            allowed = ["fund", "etf", "gold"]
+            allowed = ["fund", "etf", "gold", "crypto"]
+        case (.portfolio, "kind"):
+            allowed = ["fund", "etf", "gold", "crypto"]
         case (.debts, "recordType"):
             allowed = ["Debt", "DebtPayment"]
         case (.debts, "direction"):
@@ -283,8 +350,15 @@ enum MCPPaginator {
             else { return false }
         }
         if let dateFrom = query.dateFrom, record.sortDate < dateFrom { return false }
-        if let dateTo = query.dateTo, record.sortDate > dateTo { return false }
+        if let dateTo = query.dateTo, record.sortDate >= dateTo { return false }
         for (key, wanted) in query.fieldFilters {
+            if key == "noteContains" {
+                guard
+                    record.fields["note"]?.stringValue?.localizedCaseInsensitiveContains(wanted)
+                        == true
+                else { return false }
+                continue
+            }
             guard record.fields[key]?.stringValue == wanted else { return false }
         }
         return true
