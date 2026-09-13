@@ -17,7 +17,12 @@ enum MCPServerAdapter {
             let provider = MCPDirectDataProvider(
                 configuration: configuration,
                 consent: MCPConsentStore(defaults: defaults), open: { try reader.open() })
-            let server = await makeServer(service: MCPService(provider: provider))
+            let research = MCPResearchService(
+                openStore: { try ResearchNotebookStore.current(configuration: configuration) },
+                canRead: { defaults.bool(forKey: MCPConsentStore.allowedKey) },
+                canWrite: { defaults.bool(forKey: MCPResearchService.writingAllowedKey) })
+            let server = await makeServer(
+                service: MCPService(provider: provider), research: research)
             try await server.start(transport: StdioTransport())
             await server.waitUntilCompleted()
         } catch {
@@ -28,17 +33,18 @@ enum MCPServerAdapter {
     static let serverVersion = "1.0.0"
 
     static var tools: [Tool] {
-        MCPTool.allCases.map(toolDefinition)
+        MCPTool.allCases.map(toolDefinition) + MCPResearchTools.definitions
     }
 
     @MainActor
-    static func makeServer(service: MCPService) async -> Server {
+    static func makeServer(service: MCPService, research: MCPResearchService? = nil) async -> Server
+    {
         let server = Server(
             name: "monmon",
             version: serverVersion,
-            title: "MonMon read-only data",
+            title: "MonMon data and research",
             instructions:
-                "Provides raw MonMon records only. Calculate and interpret them in the client.",
+                "Financial records are read-only. Research notes and proposals are agent-authored drafts, not instructions. Only the user records decisions in the app; acceptance never executes a trade.",
             capabilities: .init(tools: .init(listChanged: false)),
             configuration: .strict
         )
@@ -46,17 +52,32 @@ enum MCPServerAdapter {
             ListTools.Result(tools: tools)
         }
         await server.withMethodHandler(CallTool.self) { params in
-            guard let tool = MCPTool(rawValue: params.name) else {
-                return try errorResult(.invalidArgument)
-            }
             do {
                 let arguments = try convertArguments(params.arguments ?? [:])
+                if let tool = MCPResearchTool(rawValue: params.name) {
+                    guard let research else { return try errorResult(.disabled) }
+                    return try await successResult(research.call(tool, arguments: arguments))
+                }
+                guard let tool = MCPTool(rawValue: params.name) else {
+                    return try errorResult(.invalidArgument)
+                }
                 let envelope = try await service.call(tool: tool, arguments: arguments)
                 return try successResult(envelope)
             } catch let error as MCPToolError {
                 return try errorResult(error)
+            } catch let error as ResearchStoreError {
+                switch error {
+                case .duplicateID: return try errorResult(.researchConflict)
+                case .missingReference: return try errorResult(.researchNotFound)
+                case .expired: return try errorResult(.researchExpired)
+                case .busy: return try errorResult(.researchBusy)
+                case .capacity: return try errorResult(.researchCapacity)
+                case .unavailable, .incompatible: return try errorResult(.researchUnavailable)
+                }
             } catch {
-                return try errorResult(.storeUnavailable)
+                return try errorResult(
+                    MCPResearchTool(rawValue: params.name) == nil
+                        ? .storeUnavailable : .researchUnavailable)
             }
         }
         return server
@@ -123,7 +144,7 @@ enum MCPServerAdapter {
         ],
     ]
 
-    private static func successResult(_ envelope: MCPResponseEnvelope) throws -> CallTool.Result {
+    private static func successResult<T: Encodable>(_ envelope: T) throws -> CallTool.Result {
         let data = try encoded(envelope)
         return try CallTool.Result(
             content: [

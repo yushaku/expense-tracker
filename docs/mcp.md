@@ -65,7 +65,7 @@ The reader uses Apple's [read-only ModelConfiguration](https://developer.apple.c
 
 ## Tools
 
-The server exposes exactly 13 tools:
+The server exposes 13 financial read tools:
 
 - `monmon_data_status`
 - `monmon_list_accounts`
@@ -81,8 +81,9 @@ The server exposes exactly 13 tools:
 - `monmon_list_debts`
 - `monmon_list_pending_captures`
 
-All are annotated read-only, non-destructive, idempotent, and closed-world. The
-server offers no prompts, sampling, HTTP transport, or mutation tools.
+These financial tools are annotated read-only, non-destructive, idempotent, and
+closed-world. The server offers no prompts, sampling, HTTP transport, or financial
+mutation tools. Separate research tools are described below.
 
 Each successful response contains `schemaVersion`, `records`, `page`, and
 `sync`, both as structured content and as a JSON text fallback. Decimal values
@@ -111,3 +112,74 @@ written to operational logs.
 
 The helper uses the official Swift MCP SDK pinned exactly to `0.12.1`:
 <https://github.com/modelcontextprotocol/swift-sdk/tree/0.12.1>.
+
+## Research notes and investment proposals (Mac)
+
+Settings → AI access → Research & proposals opens the local notebook. Enable
+**Allow AI to create research and proposals** separately after enabling AI read
+access. Both permissions are required to create drafts. Turning AI access off
+also clears draft-writing consent; it does not delete the owner's notebook.
+
+There are six additional tools (19 total):
+
+| Tool | Purpose |
+| --- | --- |
+| `monmon_list_notes` | Paginated note summaries (`limit` 1–100, `offset`) |
+| `monmon_get_note` | Full note, sources and research/review times by UUID |
+| `monmon_create_research_note` | Create an immutable, sourced research note |
+| `monmon_list_proposals` | Paginated proposals with latest user decision |
+| `monmon_get_proposal` | Full proposal, decision history and `needsReview` |
+| `monmon_create_investment_proposal` | Create a draft for review, never a financial transaction |
+
+The two create tools have `readOnlyHint: false`; all financial tools remain
+read-only. There is no tool to accept a proposal, forge a user decision, trade,
+transfer money or modify the financial database. Source pages are not fetched by
+MonMon: research is performed by the connected agent using its own tools.
+
+### Schemas
+
+- **ResearchNote**: `id`, `title`, `content`, `sources` (title, HTTP(S) URL,
+  accessedAt), optional `instrumentID`, `researchedAt`, `reviewAfter`, `createdAt`.
+- **InvestmentProposal**: `id`, `title`, `action` (`buyFund`, `saveCash`,
+  `holdCash`), `target` (fund/product/bank and term as appropriate), `amount`
+  (positive exact decimal string), `currencyCode` (VND), `rationale`, `risks`,
+  `assumptions`, `alternatives`, `noteIDs`, `financialDataReadAt`, `validUntil`,
+  `createdAt`. Its initial status is always `draft`.
+- **DecisionRecord**: `id`, `proposalID`, `decision` (`accepted`, `deferred`,
+  `rejected`), `reason`, `createdAt`. Only the app's review screen appends these.
+  Acceptance is intent, not execution; no transaction link is inferred.
+
+Create requests use a UUID `requestID` which becomes the record ID. Reuse it
+with identical fields after a timeout: retries return the original record.
+Different content under an existing ID is rejected, including after the user
+has reviewed a proposal. Corrections require a new draft. A proposal must link
+to existing, unexpired research; expired proposals or research cannot be accepted.
+Dates in MCP responses are ISO 8601. Source claims and `financialDataReadAt` are
+agent-supplied provenance, not independent verification or a guarantee that the
+owner's finances have not changed since. The app shows these times for review.
+
+### Agent workflow
+
+1. Read the needed financial records through the read-only tools. Retain their
+   `sync.readAt` and ask the owner for missing risk tolerance, time horizon and
+   liquidity needs rather than inventing them.
+2. Research current product information using primary sources. Save a research
+   note with actual source URLs, access times, assumptions and a review deadline.
+3. Create a proposal referencing the returned note ID(s), explicitly stating
+   the target product, amount, reasoning, risks and alternatives. Copy the
+   financial response's `readAt` to `financialDataReadAt`.
+4. The owner refreshes Research & proposals and records a reason with Accept,
+   Defer or Reject. The agent can read the resulting history, but must not treat
+   acceptance as permission for an external purchase or a completed transaction.
+
+The notebook is separate from the financial SwiftData store, under the flavour's
+App Group (`ResearchNotebook/notebook.json`). Writes use an atomic replacement
+and a nonblocking cross-process file lock. Malformed/unknown-version files are
+never overwritten by a failed read. Storage is bounded at 20 MiB; a busy writer
+returns a retryable error. List pagination is live, so new drafts may shift offsets.
+No content is generated automatically by MonMon and no source URLs are opened
+until the owner follows a link.
+
+This first version is local to Mac and excluded from Device Sync and financial
+backups. Use **Export research** to save an ISO-8601 JSON copy of notes, proposals
+and decisions. Disabling AI access preserves the local notebook for the owner.

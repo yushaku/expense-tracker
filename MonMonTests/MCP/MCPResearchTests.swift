@@ -1,5 +1,6 @@
 import Darwin
 import Foundation
+import MCP
 import Testing
 
 @testable import MonMon
@@ -139,6 +140,43 @@ struct MCPResearchTests {
         try Data("broken".utf8).write(to: file)
         #expect(throws: (any Error).self) { try service.call(.createNote, arguments: note()) }
         #expect(try Data(contentsOf: file) == Data("broken".utf8))
+    }
+
+    @Test("MCP creates research through the write tool and returns readable structured content")
+    func protocolRoundTrip() async throws {
+        let fixture = try Fixture()
+        defer { fixture.cleanUp() }
+        let suite = "ResearchProtocol.\(UUID())"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let provider = MCPDirectDataProvider(
+            configuration: MCPRuntimeConfiguration(
+                flavour: "dev", serverName: "test", appGroupIdentifier: suite),
+            consent: MCPConsentStore(defaults: defaults),
+            open: { throw MCPToolError.storeUnavailable })
+        let server = await MCPServerAdapter.makeServer(
+            service: MCPService(provider: provider),
+            research: fixture.service(now: now))
+        let client = Client(name: "ResearchTests", version: "1")
+        let pair = await InMemoryTransport.createConnectedPair()
+        try await server.start(transport: pair.server)
+        _ = try await client.connect(transport: pair.client)
+        let args = try JSONDecoder().decode(
+            [String: Value].self, from: JSONEncoder().encode(note()))
+        let request: RequestContext<CallTool.Result> = try await client.callTool(
+            name: MCPResearchTool.createNote.rawValue, arguments: args)
+        let result = try await request.value
+        #expect(result.isError == false)
+        let id = try #require(result.structuredContent?.objectValue?["id"]?.stringValue)
+        let read: RequestContext<CallTool.Result> = try await client.callTool(
+            name: MCPResearchTool.getNote.rawValue, arguments: ["id": .string(id)])
+        let readResult = try await read.value
+        #expect(readResult.structuredContent == result.structuredContent)
+        let forbidden: RequestContext<CallTool.Result> = try await client.callTool(
+            name: "monmon_accept_proposal", arguments: ["id": .string(id)])
+        #expect(try await forbidden.value.isError == true)
+        await client.disconnect()
+        await server.stop()
     }
 
     @Test("Revoking AI access clears draft-writing permission and retains local notes")

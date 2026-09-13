@@ -146,7 +146,7 @@ struct MCPServerContractTests {
             )
             let listed = try readLine(from: output.fileHandleForReading)
             let tools = (listed["result"] as? [String: Any])?["tools"] as? [[String: Any]]
-            #expect(tools?.count == 13)
+            #expect(tools?.count == 19)
 
             try input.fileHandleForWriting.close()
             process.waitUntilExit()
@@ -156,7 +156,7 @@ struct MCPServerContractTests {
     #endif
 
     @MainActor
-    @Test("In-memory handshake exposes exactly 13 annotated read-only tools")
+    @Test("In-memory handshake exposes 13 read-only financial tools and six research tools")
     func toolList() async throws {
         let provider = ContractDataProvider()
         let server = await MCPServerAdapter.makeServer(service: MCPService(provider: provider))
@@ -172,10 +172,14 @@ struct MCPServerContractTests {
         }
 
         let listed = try await client.listTools()
-        #expect(listed.tools.count == 13)
-        #expect(Set(listed.tools.map(\.name)) == Set(MCPTool.allCases.map(\.rawValue)))
+        #expect(listed.tools.count == 19)
+        #expect(
+            Set(listed.tools.map(\.name))
+                == Set(MCPTool.allCases.map(\.rawValue) + MCPResearchTool.allCases.map(\.rawValue)))
         for tool in listed.tools {
-            #expect(tool.annotations.readOnlyHint == true)
+            #expect(
+                tool.annotations.readOnlyHint
+                    == !(MCPResearchTool(rawValue: tool.name)?.writes ?? false))
             #expect(tool.annotations.destructiveHint == false)
             #expect(tool.annotations.idempotentHint == true)
             #expect(tool.annotations.openWorldHint == false)
