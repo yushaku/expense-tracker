@@ -930,6 +930,50 @@ struct MonMonBackupService {
         return MonMonBackupRestoreReport(restoredRecordCount: validated.payload.recordCount)
     }
 
+    /// Write and read back a restorable backup before staging any deletion.
+    /// Row deletion (rather than deleting SQLite files or batch deletion) keeps
+    /// the live context coherent and lets a failed save roll back the operation.
+    func reset(backupURL: URL) throws {
+        guard !SyncWriteGate.isLocked(container) else { throw SyncError.sessionPending }
+        guard try SyncSessionStore(container: container).state().pending == nil else {
+            throw SyncError.sessionPending
+        }
+        let context = container.mainContext
+        guard !context.hasChanges else { throw MonMonBackupServiceError.storeFailure }
+        do {
+            let data = try exportData()
+            try writeRecovery(data, backupURL)
+            let written = try MonMonBackupFileReader.read(backupURL)
+            guard written == data else { throw MonMonBackupServiceError.recoveryFailure }
+            _ = try preview(written)
+        } catch {
+            throw MonMonBackupServiceError.recoveryFailure
+        }
+        do {
+            func deleteRows<T: PersistentModel>(_ type: T.Type) throws {
+                for row in try context.fetch(FetchDescriptor<T>()) { context.delete(row) }
+            }
+            for type in MonMonSchema.models { try deleteRows(type) }
+            try save(context)
+        } catch {
+            context.rollback()
+            throw MonMonBackupServiceError.storeFailure
+        }
+        for key in [
+            TransactionDefaults.accountStorageKey, TransactionDefaults.categoryStorageKey,
+            TransactionDefaults.incomeCategoryStorageKey, StatementAccountMapping.storageKey,
+        ] {
+            defaults.removeObject(forKey: key)
+        }
+    }
+
+    static func resetBackupURL() -> URL {
+        defaultRecoveryURL.deletingLastPathComponent()
+            .appending(path: "reset-backups", directoryHint: .isDirectory)
+            .appending(path: MonMonBackupFlavour.current.rawValue, directoryHint: .isDirectory)
+            .appending(path: "MonMon-reset-\(UUID().uuidString).json")
+    }
+
     func snapshotPayload() throws -> MonMonBackupPayload {
         let context = ModelContext(container)
         context.autosaveEnabled = false

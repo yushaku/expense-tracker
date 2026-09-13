@@ -1,6 +1,96 @@
 {
   "sourceLanguage": "en",
   "strings": {
+  "Reset local database?": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Đặt lại cơ sở dữ liệu trên thiết bị?"
+        }
+      }
+    }
+  },
+  "Back Up and Reset": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Sao lưu và đặt lại"
+        }
+      }
+    }
+  },
+  "Reset Data": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Đặt lại dữ liệu"
+        }
+      }
+    }
+  },
+  "MonMon will save and verify a financial backup before deleting all local database records and disconnecting Device Sync. Notes, proposals, app settings, and data on other devices are kept. If backup fails, nothing is deleted.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "MonMon sẽ lưu và kiểm tra bản sao lưu tài chính trước khi xoá toàn bộ bản ghi trong cơ sở dữ liệu và ngắt ghép đôi Đồng bộ thiết bị. Ghi chú, đề xuất, cài đặt ứng dụng và dữ liệu trên thiết bị khác được giữ lại. Nếu sao lưu thất bại, dữ liệu sẽ không bị xoá."
+        }
+      }
+    }
+  },
+  "A financial backup is saved on this device before the database is cleared.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Bản sao lưu tài chính được lưu trên thiết bị này trước khi xoá cơ sở dữ liệu."
+        }
+      }
+    }
+  },
+  "Last reset backup": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Bản sao lưu trước lần đặt lại gần nhất"
+        }
+      }
+    }
+  },
+  "Restore Reset Backup": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Phục hồi dữ liệu trước khi đặt lại"
+        }
+      }
+    }
+  },
+  "Back up and reset the MonMon database.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Sao lưu và đặt lại cơ sở dữ liệu MonMon."
+        }
+      }
+    }
+  },
+  "Database reset complete. Your backup is available below.": {
+    "localizations": {
+      "vi": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Đã đặt lại cơ sở dữ liệu. Bạn có thể dùng bản sao lưu bên dưới."
+        }
+      }
+    }
+  },
   "Decision history": {
   "localizations": {
     "vi": {

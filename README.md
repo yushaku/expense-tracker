@@ -299,3 +299,19 @@ full selected period through today even when the comparison window is shortened.
 Income-only reports hide this section; empty periods have no per-expense average.
 
 Research notes and proposals are available in Settings on iPhone and Mac. Device Sync includes notes, proposals and decision history (both devices need the current sync version); AI draft-writing permissions remain local to Mac. Research stays outside financial backups and can be exported separately as JSON.
+
+### Back up and reset the local database
+
+In **Settings → Backup → Reset Data**, confirm **Back Up and Reset**. If App Lock
+is enabled, authenticate first. MonMon saves a unique financial JSON backup under
+`Application Support/MonMon/reset-backups/<flavour>/`, reads it back and validates
+it before deleting database records in one save. A backup failure leaves records
+untouched; a database save failure rolls back deletion and keeps the backup.
+The last reset backup can be exported or restored from the same Settings card.
+
+Reset clears all SwiftData models, including financial records and sync metadata,
+and forgets this device's pairing after success. It is blocked during pending sync.
+Notes/proposals (stored separately), appearance/security settings, exported files,
+and other devices are not erased. Default accounts, categories and jars may be
+created again on the next launch. This is a database reset, not an uninstall or a
+reset of macOS permissions.
