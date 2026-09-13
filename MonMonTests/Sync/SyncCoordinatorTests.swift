@@ -71,6 +71,21 @@ struct SyncCoordinatorTests {
         try drain(ta, tb)
     }
 
+    @Test("A failed Keychain write does not install pairing or show a QR code")
+    func pairingStorageFailure() throws {
+        let local = try store()
+        let transport = TestSyncTransport()
+        let failure = SyncKeychainError(status: -34018)
+        let coordinator = SyncCoordinator(
+            store: local, transport: transport, savePairing: { _ in throw failure })
+        coordinator.createPairing()
+        #expect(coordinator.errorMessage == failure.localizedDescription)
+        #expect(coordinator.pairingCode == nil)
+        #expect(!coordinator.isPaired)
+        #expect(try local.state().pairID == nil)
+        #expect(!transport.started)
+    }
+
     @Test("Database reset forgets pairing only after a verified backup and successful save")
     func resetDisconnectsAfterSuccess() throws {
         let local = try store()

@@ -1,5 +1,6 @@
 import Foundation
 import Network
+import Security
 import Testing
 
 @testable import MonMon
@@ -20,6 +21,35 @@ struct SyncTransportTests {
         wrong.flavour = pair.flavour == .dev ? .prod : .dev
         #expect(throws: SyncError.invalidPairing) { try SyncPairing.decode(wrong.code()) }
         #expect(throws: SyncError.invalidPairing) { try SyncPairing.decode("http://example.com") }
+    }
+
+    @Test("Keychain save reports the original OSStatus instead of a bad pairing code")
+    func keychainSaveErrors() throws {
+        let pair = try SyncPairing.make(hostID: UUID())
+        var added = false
+        #expect(throws: SyncKeychainError(status: errSecMissingEntitlement)) {
+            try SyncKeychain.save(
+                pair, update: { _, _ in errSecMissingEntitlement },
+                add: { _ in
+                    added = true
+                    return errSecSuccess
+                })
+        }
+        #expect(!added)
+        #expect(throws: SyncKeychainError(status: errSecInteractionNotAllowed)) {
+            try SyncKeychain.save(
+                pair, update: { _, _ in errSecItemNotFound },
+                add: { _ in
+                    errSecInteractionNotAllowed
+                })
+        }
+        try SyncKeychain.save(
+            pair, update: { _, _ in errSecItemNotFound },
+            add: { _ in
+                added = true
+                return errSecSuccess
+            })
+        #expect(added)
     }
 
     @Test("TLS PSK only delivers messages with the paired secret", arguments: [false, true])
