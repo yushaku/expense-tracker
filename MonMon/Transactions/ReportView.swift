@@ -204,13 +204,6 @@ struct ReportView: View {
                 )
                 .accessibilityIdentifier("report-overview")
 
-                if let highlights = ReportHighlights(
-                    query: query, transactions: transactions,
-                    categoryNames: categoryNames, accountNames: accountNames, asOf: .now
-                ) {
-                    ReportHighlightsCard(highlights: highlights)
-                }
-
                 if visibility.showsCalendar {
                     TransactionCalendarCard(
                         month: calendarMonth,
@@ -256,6 +249,13 @@ struct ReportView: View {
                     if visibility.showsNetTrend {
                         NetTrendCard(points: report.netTrend)
                     }
+                }
+
+                if let highlights = ReportHighlights(
+                    query: query, transactions: transactions,
+                    categoryNames: categoryNames, accountNames: accountNames, asOf: .now
+                ) {
+                    ReportHighlightsCard(highlights: highlights)
                 }
             }
             .frame(maxWidth: MonMonTheme.maxContentWidth)
