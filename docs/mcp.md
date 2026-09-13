@@ -202,3 +202,11 @@ Returns one Summary record in the standard envelope. `totals` contains `{currenc
 Only saved MoneyTransaction records count. Transfers, pending captures, recurring schedules, deposits, withdrawals, fund purchases and sales are excluded. Jar grouping reuses the app's transaction routing (valid trip override, category mapping, fallback jar). `budgetJarID` selects expenses only. This is transaction spending, not budget allocations, account balances, or the Budget screen's savings/investment usage.
 
 Development certificates remain appropriate for local Dev installs. Distribution to other Macs requires a separate Developer ID signing/notarization release flow; this change does not alter signing.
+
+### Hermes Agent
+
+On macOS, AI access also configures Hermes installed at `~/.local/bin/hermes` (the standard installer location). Existing AI access users can choose **Connect Hermes** without toggling access off. Restart Hermes after setup.
+
+MonMon uses `hermes config get mcp_servers.<server-name> --json`, `config set`, and `config unset` to manage only its own entry in the active Hermes profile. It requires a Hermes version supporting these commands. A moved helper can be repaired; conflicting entries require confirmation. Unreadable configuration is never treated as an empty config. The Dev and Prod server names remain separate.
+
+See [Hermes MCP documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp) for the stdio `command` / `args` configuration.

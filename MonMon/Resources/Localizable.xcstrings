@@ -1,6 +1,36 @@
 {
   "sourceLanguage": "en",
   "strings": {
+  "AI access is enabled. Restart your AI client to connect.": {
+  "localizations": {
+    "vi": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "Đã bật quyền truy cập AI. Khởi động lại ứng dụng AI để kết nối."
+      }
+    }
+  }
+},
+  "Connect Hermes": {
+  "localizations": {
+    "vi": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "Kết nối Hermes"
+      }
+    }
+  }
+},
+  "Hermes": {
+  "localizations": {
+    "vi": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "Hermes"
+      }
+    }
+  }
+},
   "Content": {
     "localizations": {
       "vi": {

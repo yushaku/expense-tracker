@@ -59,6 +59,9 @@
     protocol MCPClientInstalling: AnyObject {
         func codexState() async -> MCPClientState
         func claudeState() throws -> MCPClientState
+        func hermesState() async -> MCPClientState
+        func installHermes(replaceExisting: Bool) async throws
+        func removeHermes() async throws
         func installCodex(replaceExisting: Bool) async throws
         func installClaude(replaceExisting: Bool) throws
         func removeCodex() async throws
@@ -80,6 +83,7 @@
         private let helperURL: URL
         private let runner: any MCPCommandRunning
         private let claudeConfigURL: URL
+        private let hermesCommand: String
         private let isClaudeInstalled: () -> Bool
 
         init(
@@ -88,10 +92,13 @@
             runner: any MCPCommandRunning = MCPProcessRunner(),
             claudeConfigURL: URL = FileManager.default.homeDirectoryForCurrentUser
                 .appending(path: "Library/Application Support/Claude/claude_desktop_config.json"),
+            hermesCommand: String = FileManager.default.homeDirectoryForCurrentUser
+                .appending(path: ".local/bin/hermes").path,
             isClaudeInstalled: @escaping () -> Bool = {
                 FileManager.default.fileExists(atPath: "/Applications/Claude.app")
             }
         ) {
+            self.hermesCommand = hermesCommand
             self.serverName = serverName
             self.helperURL = helperURL.standardizedFileURL
             self.runner = runner
@@ -193,6 +200,69 @@
             servers.removeValue(forKey: serverName)
             root["mcpServers"] = servers
             try writeClaudeConfiguration(root)
+        }
+
+        // Use Hermes' config CLI so YAML parsing and preservation remain owned by Hermes.
+        // Read only our entry: other servers may contain credentials.
+        func hermesState() async -> MCPClientState {
+            do {
+                let result = try await runner.run(arguments: [
+                    hermesCommand, "config", "get", "mcp_servers.\(serverName)", "--json",
+                ])
+                if result.exitCode == 127 { return .unavailable }
+                guard result.exitCode == 0 else {
+                    let diagnostic = String(decoding: result.stdout + result.stderr, as: UTF8.self)
+                    return diagnostic.contains("Config key not set: mcp_servers.\(serverName)")
+                        ? .notConfigured : .conflict
+                }
+                guard
+                    let entry = try JSONSerialization.jsonObject(with: result.stdout)
+                        as? [String: Any],
+                    let command = entry["command"] as? String,
+                    entry["url"] == nil,
+                    entry["transport"] == nil || entry["transport"] as? String == "stdio",
+                    entry["enabled"] == nil || entry["enabled"] as? Bool == true
+                else { return .conflict }
+                let args = entry["args"] ?? [String]()
+                guard let arguments = args as? [String] else { return .conflict }
+                return state(command: command, args: arguments)
+            } catch {
+                return .conflict
+            }
+        }
+
+        func installHermes(replaceExisting: Bool) async throws {
+            switch await hermesState() {
+            case .current: return
+            case .conflict, .repairNeeded:
+                guard replaceExisting else { throw MCPInstallerError.conflict }
+            case .unavailable: throw MCPInstallerError.commandFailed
+            case .notConfigured: break
+            }
+            let data = try JSONSerialization.data(withJSONObject: [
+                "command": helperURL.path, "args": [String](), "enabled": true,
+            ])
+            let result = try await runner.run(arguments: [
+                hermesCommand, "config", "set", "mcp_servers.\(serverName)",
+                String(decoding: data, as: UTF8.self),
+            ])
+            guard result.exitCode == 0, await hermesState() == .current else {
+                throw MCPInstallerError.commandFailed
+            }
+        }
+
+        func removeHermes() async throws {
+            let current = await hermesState()
+            if current == .notConfigured || current == .unavailable { return }
+            guard current == .current || current == .repairNeeded else {
+                throw MCPInstallerError.conflict
+            }
+            let result = try await runner.run(arguments: [
+                hermesCommand, "config", "unset", "mcp_servers.\(serverName)",
+            ])
+            guard result.exitCode == 0, await hermesState() == .notConfigured else {
+                throw MCPInstallerError.commandFailed
+            }
         }
 
         private func state(command: String, args: [String]) -> MCPClientState {

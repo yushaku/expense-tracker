@@ -55,8 +55,21 @@
                     accessibilityIdentifier: "mcp-claude-state"
                 )
 
+                clientRow(
+                    name: "Hermes", state: accessManager.hermesState,
+                    accessibilityIdentifier: "mcp-hermes-state"
+                )
+                if accessManager.isAllowed && accessManager.hermesState == .notConfigured {
+                    Button("Connect Hermes") {
+                        Task { await accessManager.connectHermes() }
+                    }
+                    .disabled(accessManager.isWorking)
+                    .accessibilityIdentifier("mcp-connect-hermes")
+                }
+
                 if accessManager.codexState == .repairNeeded
                     || accessManager.claudeState == .repairNeeded
+                    || accessManager.hermesState == .repairNeeded
                 {
                     Button {
                         Task { await accessManager.repair() }

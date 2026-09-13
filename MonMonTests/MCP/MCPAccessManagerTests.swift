@@ -117,6 +117,25 @@
             #expect(events.values == ["registration.register", "revoke"])
         }
 
+        @Test("Hermes can be connected after consent and removed on revocation")
+        func hermesLifecycle() async {
+            let events = EventLog()
+            let consent = FixtureConsent(events: events, allowed: true)
+            let installer = FixtureInstaller(events: events)
+            installer.hermes = .notConfigured
+            let manager = MCPAccessManager(
+                consent: consent, installer: installer,
+                registration: FixtureRegistration(events: events))
+            await manager.refresh()
+            await manager.connectHermes()
+            #expect(manager.hermesState == .current)
+            #expect(events.values == ["installHermes"])
+            await manager.setAllowed(false)
+            #expect(
+                events.values == ["installHermes", "revoke", "registration.clear", "removeHermes"])
+            #expect(!manager.isAllowed)
+        }
+
         @Test("Every client state has a localized, user-facing status")
         func clientStatePresentation() {
             let expected: [(MCPClientState, String)] = [
@@ -183,6 +202,7 @@
     private final class FixtureInstaller: MCPClientInstalling {
         let events: EventLog
         var codex: MCPClientState = .notConfigured
+        var hermes: MCPClientState = .unavailable
         var claude: MCPClientState = .notConfigured
         var removeCodexError: MCPInstallerError?
         var codexReplaced = false
@@ -191,6 +211,15 @@
             self.events = events
         }
 
+        func hermesState() async -> MCPClientState { hermes }
+        func installHermes(replaceExisting: Bool) async throws {
+            events.values.append("installHermes")
+            hermes = .current
+        }
+        func removeHermes() async throws {
+            events.values.append("removeHermes")
+            hermes = .notConfigured
+        }
         func codexState() async -> MCPClientState { codex }
         func claudeState() throws -> MCPClientState { claude }
 
