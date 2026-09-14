@@ -21,56 +21,6 @@
         }
       }
     },
-    "Your salary, clearly": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hiểu rõ lương của bạn"
-          }
-        }
-      }
-    },
-    "Save your agreed salary and see what reaches your account each month.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lưu mức lương đã thoả thuận và xem số tiền thực nhận mỗi tháng."
-          }
-        }
-      }
-    },
-    "Unsaved changes": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Có thay đổi chưa lưu"
-          }
-        }
-      }
-    },
-    "Set up your salary profile": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Thiết lập hồ sơ lương"
-          }
-        }
-      }
-    },
-    "Profile saved": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Đã lưu hồ sơ"
-          }
-        }
-      }
-    },
     "Estimated monthly take-home": {
       "localizations": {
         "vi": {
@@ -1721,16 +1671,6 @@
         }
       }
     },
-    "Reference: TopCV": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tham khảo: TopCV"
-          }
-        }
-      }
-    },
     "2026 estimate for resident employees with contracts of at least 3 months. Excludes tax-exempt allowances and other deductions. Amounts are rounded to VND.": {
       "localizations": {
         "vi": {
@@ -1787,16 +1727,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Lương Gross hằng tháng (VND)"
-          }
-        }
-      }
-    },
-    "Calculation period": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kỳ tính lương"
           }
         }
       }
