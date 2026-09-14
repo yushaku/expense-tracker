@@ -2,6 +2,8 @@ import Foundation
 
 /// Monthly resident-employee estimate. Sources and scope: docs/salary-calculator.md.
 enum SalaryCalculator {
+    static let currentPeriod = Period.secondHalf
+
     enum Period: String, CaseIterable, Identifiable {
         case firstHalf = "Jan–Jun 2026"
         case secondHalf = "Jul–Dec 2026"
