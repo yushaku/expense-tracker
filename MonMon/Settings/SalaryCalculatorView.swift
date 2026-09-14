@@ -73,18 +73,13 @@ struct SalaryCalculatorView: View {
             .background(MonMonTheme.canvas)
             .navigationTitle("Salary calculator")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
+                ToolbarItem(placement: .primaryAction) {
                     Button("Close", systemImage: "xmark") {
                         if hasUnsavedChanges { isConfirmingDiscard = true } else { dismiss() }
                     }
                     .labelStyle(.iconOnly)
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save profile", action: saveProfile)
-                        .disabled(
-                            !draft.isValid || !hasUnsavedChanges || syncCoordinator.writesLocked
-                        )
-                        .accessibilityIdentifier("salary-save-profile")
+                    .tint(MonMonTheme.textSecondary)
+                    .accessibilityIdentifier("salary-close")
                 }
             }
             .confirmationDialog(
@@ -329,6 +324,7 @@ struct SalaryCalculatorView: View {
         Button("Save profile", action: saveProfile)
             .buttonStyle(.prominentAction)
             .disabled(!draft.isValid || !hasUnsavedChanges || syncCoordinator.writesLocked)
+            .accessibilityIdentifier("salary-save-profile")
         if hasUnsavedChanges {
             Button("Discard changes", action: reloadProfile).buttonStyle(.bordered)
         }
