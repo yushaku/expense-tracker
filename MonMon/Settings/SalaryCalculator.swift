@@ -112,25 +112,6 @@ enum SalaryRecurring {
             }?.id
     }
 
-    static func first(in rules: [RecurringRule], categories: [TransactionCategory])
-        -> RecurringRule?
-    {
-        let salaryIDs = Set(
-            categories.filter {
-                $0.kind == .income
-                    && ($0.id == CategorySeed.defaultID(for: .income)
-                        || ["salary", "lương"].contains($0.name.lowercased()))
-            }.map(\.id))
-        return rules.filter {
-            $0.kind == .income && $0.currencyCode == VNDCurrency.code
-                && $0.frequency == .monthly && $0.interval == 1
-                && $0.categoryID.map(salaryIDs.contains) == true
-        }.min {
-            $0.createdAt == $1.createdAt
-                ? $0.id.uuidString < $1.id.uuidString : $0.createdAt < $1.createdAt
-        }
-    }
-
     static func draft(
         net: Decimal, rule: RecurringRule?, accountID: UUID?, categoryID: UUID?,
         name: String, date: Date

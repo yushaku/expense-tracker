@@ -130,26 +130,29 @@ struct BackupRestoreView: View {
                 } label: {
                     Label("Restore Backup", systemImage: "arrow.counterclockwise")
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.capsule)
+                .controlSize(.large)
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(MonMonTheme.danger)
+                .tint(MonMonTheme.danger)
                 .frame(minHeight: 44)
                 .disabled(isWorking)
                 .accessibilityIdentifier("backup-restore")
-            }
-
-            if hasRecovery {
-                Button {
-                    prepareRecoveryPreview()
-                } label: {
-                    Label("Restore Previous Data", systemImage: "clock.arrow.circlepath")
-                        .frame(minHeight: 44)
+                if hasRecovery {
+                    Button {
+                        prepareRecoveryPreview()
+                    } label: {
+                        Label("Restore Previous Data", systemImage: "clock.arrow.circlepath")
+                    }
+                    .buttonStyle(.bordered)
+                    .buttonBorderShape(.capsule)
+                    .controlSize(.large)
+                    .font(.subheadline.weight(.semibold))
+                    .tint(MonMonTheme.danger)
+                    .frame(minHeight: 44)
+                    .disabled(isWorking)
+                    .accessibilityIdentifier("backup-restore-previous")
                 }
-                .buttonStyle(.plain)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(MonMonTheme.danger)
-                .disabled(isWorking)
-                .accessibilityIdentifier("backup-restore-previous")
             }
 
             resetSection
@@ -232,36 +235,81 @@ struct BackupRestoreView: View {
     }
 
     private var resetSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 16) {
             Divider().overlay(MonMonTheme.border)
-            Button(role: .destructive) {
-                isConfirmingReset = true
-            } label: {
-                Label("Reset Data", systemImage: "trash")
-                    .frame(minHeight: 44)
-            }
-            .buttonStyle(.plain)
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(MonMonTheme.danger)
-            .disabled(isWorking || syncCoordinator.writesLocked)
-            .accessibilityIdentifier("backup-reset")
 
-            Text("A financial backup is saved on this device before the database is cleared.")
+            VStack(alignment: .leading, spacing: 12) {
+                Label("Reset Data", systemImage: "trash")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(MonMonTheme.danger)
+                    .accessibilityAddTraits(.isHeader)
+
+                Text("Clear financial data on this device and disconnect Device Sync.")
+                    .font(.subheadline)
+                    .foregroundStyle(MonMonTheme.textPrimary)
+
+                Text("Notes, proposals, app settings, and data on other devices are kept.")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+
+                Label(
+                    "A financial backup is saved on this device before the database is cleared.",
+                    systemImage: "externaldrive.badge.checkmark"
+                )
                 .font(.caption)
                 .foregroundStyle(MonMonTheme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+                Button(role: .destructive) {
+                    isConfirmingReset = true
+                } label: {
+                    Label("Back Up and Reset", systemImage: "trash")
+                        .padding(.vertical, 4)
+                }
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.capsule)
+                .controlSize(.large)
+                .font(.subheadline.weight(.semibold))
+                .tint(MonMonTheme.danger)
+                .frame(minHeight: 44)
+                .disabled(isWorking || syncCoordinator.writesLocked)
+                .accessibilityIdentifier("backup-reset")
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(16)
+            .background(MonMonTheme.danger.opacity(0.05), in: .rect(cornerRadius: 14))
+            .overlay {
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(MonMonTheme.danger.opacity(0.2), lineWidth: 1)
+            }
 
             if !lastResetPath.isEmpty {
-                Text("Last reset backup")
-                    .font(.caption.weight(.semibold))
-                Text(verbatim: lastResetPath)
-                    .font(.caption2)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-                    .textSelection(.enabled)
-                ViewThatFits(in: .horizontal) {
-                    HStack { resetBackupActions }
-                    VStack(alignment: .leading) { resetBackupActions }
+                VStack(alignment: .leading, spacing: 12) {
+                    Label("Last reset backup", systemImage: "clock.arrow.circlepath")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(MonMonTheme.textPrimary)
+                        .accessibilityAddTraits(.isHeader)
+
+                    Text(verbatim: URL(fileURLWithPath: lastResetPath).lastPathComponent)
+                        .font(.caption)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                        .lineLimit(2)
+                        .truncationMode(.middle)
+                        .textSelection(.enabled)
+
+                    ViewThatFits(in: .horizontal) {
+                        HStack(spacing: 10) { resetBackupActions }
+                        VStack(alignment: .leading, spacing: 10) { resetBackupActions }
+                    }
+                    .buttonStyle(.bordered)
+                    .buttonBorderShape(.capsule)
+                    .controlSize(.large)
+                    .font(.subheadline.weight(.semibold))
+                    .disabled(isWorking)
                 }
-                .disabled(isWorking)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(16)
+                .background(MonMonTheme.field, in: .rect(cornerRadius: 14))
             }
         }
     }
@@ -270,14 +318,20 @@ struct BackupRestoreView: View {
     private var resetBackupActions: some View {
         ShareLink(item: URL(fileURLWithPath: lastResetPath)) {
             Label("Export Backup", systemImage: "square.and.arrow.up")
-                .frame(minHeight: 44)
+                .padding(.vertical, 4)
         }
+        .tint(MonMonTheme.accent)
+        .frame(minHeight: 44)
+        .accessibilityIdentifier("backup-reset-export")
         Button {
             prepareImportedPreview(from: URL(fileURLWithPath: lastResetPath))
         } label: {
             Label("Restore Reset Backup", systemImage: "arrow.counterclockwise")
-                .frame(minHeight: 44)
+                .padding(.vertical, 4)
         }
+        .tint(MonMonTheme.danger)
+        .frame(minHeight: 44)
+        .accessibilityIdentifier("backup-reset-restore")
     }
 
     private func performReset() {
@@ -575,6 +629,7 @@ private struct BackupRestorePreviewSheet: View {
             detailRow("Transactions", value: counts.transactions.formatted())
             detailRow("Categories", value: counts.categories.formatted())
             detailRow("Recurring rules", value: counts.recurringRules.formatted())
+            detailRow("Salary profile", value: counts.salaryProfiles.formatted())
             detailRow("Pending captures", value: counts.pendingCaptures.formatted())
             detailRow("Transfers", value: counts.transfers.formatted())
             detailRow("Savings deposits", value: counts.savingsDeposits.formatted())

@@ -106,7 +106,7 @@ struct SyncSnapshot: Codable, Equatable, Sendable {
     static let financialTypes = [
         "accounts", "savingsDeposits", "savingsWithdrawals", "fundInstruments",
         "fundHoldings", "fundSales", "budgetJars", "goals", "tripWorkspaces", "categories",
-        "transactions", "transfers", "debts", "debtPayments", "recurringRules",
+        "transactions", "transfers", "debts", "debtPayments", "recurringRules", "salaryProfiles",
     ]
     static let researchTypes = ["researchNotes", "investmentProposals", "researchDecisions"]
     static let types = financialTypes + researchTypes
@@ -133,6 +133,7 @@ struct SyncSnapshot: Codable, Equatable, Sendable {
         let root = try JSONDecoder().decode(
             [String: SyncValue].self, from: SyncCoding.encode(payload))
         records = try Self.financialTypes.flatMap { type -> [SyncRecord] in
+            if type == "salaryProfiles", root[type] == nil { return [] }
             guard case .array(let values) = root[type] else { throw SyncError.invalidData }
             return try values.map {
                 guard case .object(let fields) = $0 else { throw SyncError.invalidData }
@@ -182,6 +183,7 @@ struct SyncSnapshot: Codable, Equatable, Sendable {
         "budgetJarOverrideID": "budgetJars", "fundingJarID": "budgetJars",
         "instrumentID": "fundInstruments",
         "holdingID": "fundHoldings", "depositID": "savingsDeposits", "debtID": "debts",
+        "recurringRuleID": "recurringRules",
         "sourceRuleID": "recurringRules", "sourceGoalID": "goals",
         "tripWorkspaceID": "tripWorkspaces",
     ]
@@ -199,6 +201,7 @@ struct SyncSnapshot: Codable, Equatable, Sendable {
                     // These identifiers retain provenance even after the originating
                     // rule or goal is removed; they are not ownership relationships.
                     guard field != "sourceRuleID", field != "sourceGoalID",
+                        field != "recurringRuleID",
                         !(record.type == "researchNotes" && field == "instrumentID"),
                         let id = record.fields[field]?.text
                     else { return nil }

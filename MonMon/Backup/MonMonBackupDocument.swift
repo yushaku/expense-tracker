@@ -139,9 +139,11 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
     var debts: [DebtRecord]
     var debtPayments: [DebtPaymentRecord]
     var recurringRules: [RecurringRuleRecord]
+    var salaryProfiles: [SalaryProfileRecord]
     var preferences: Preferences
     private var includesBudgetJars: Bool
     private var includesGoals: Bool
+    private var includesSalaryProfiles: Bool
     private var includesTripWorkspaces: Bool
 
     private enum CodingKeys: String, CodingKey {
@@ -161,6 +163,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         case debts
         case debtPayments
         case recurringRules
+        case salaryProfiles
         case preferences
     }
 
@@ -201,6 +204,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         debts: [DebtRecord],
         debtPayments: [DebtPaymentRecord],
         recurringRules: [RecurringRuleRecord],
+        salaryProfiles: [SalaryProfileRecord] = [],
         preferences: Preferences
     ) {
         self.accounts = accounts
@@ -219,6 +223,8 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         self.debts = debts
         self.debtPayments = debtPayments
         self.recurringRules = recurringRules
+        self.salaryProfiles = salaryProfiles
+        includesSalaryProfiles = true
         self.preferences = preferences
         includesBudgetJars = true
         includesGoals = true
@@ -261,6 +267,9 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         debts = try container.decode([DebtRecord].self, forKey: .debts)
         debtPayments = try container.decode([DebtPaymentRecord].self, forKey: .debtPayments)
         recurringRules = try container.decode([RecurringRuleRecord].self, forKey: .recurringRules)
+        includesSalaryProfiles = container.contains(.salaryProfiles)
+        salaryProfiles =
+            try container.decodeIfPresent([SalaryProfileRecord].self, forKey: .salaryProfiles) ?? []
         preferences = try container.decode(Preferences.self, forKey: .preferences)
     }
 
@@ -288,6 +297,9 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         try container.encode(debts, forKey: .debts)
         try container.encode(debtPayments, forKey: .debtPayments)
         try container.encode(recurringRules, forKey: .recurringRules)
+        if includesSalaryProfiles || !salaryProfiles.isEmpty {
+            try container.encode(salaryProfiles, forKey: .salaryProfiles)
+        }
         try container.encode(preferences, forKey: .preferences)
     }
 
@@ -309,6 +321,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         result.debts = debts.backupSorted()
         result.debtPayments = debtPayments.backupSorted()
         result.recurringRules = recurringRules.backupSorted()
+        result.salaryProfiles = salaryProfiles.backupSorted()
         return result
     }
 
@@ -319,6 +332,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
             + transactions.count
             + pendingCaptures.count
             + transfers.count + debts.count + debtPayments.count + recurringRules.count
+            + salaryProfiles.count
     }
 
     struct Preferences: Codable, Equatable, Sendable {
@@ -555,6 +569,20 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         var note: String
         var currencyCode: String
         var createdAt: String
+    }
+
+    struct SalaryProfileRecord: Codable, Equatable, Sendable, MonMonBackupRecord {
+        var id: String
+        var name: String
+        var amount: String
+        var basis: String
+        var dependants: Int
+        var period: String
+        var region: Int
+        var insuranceSalary: String?
+        var recurringRuleID: String?
+        var createdAt: String
+        var updatedAt: String
     }
 
     struct RecurringRuleRecord: Codable, Equatable, Sendable, MonMonBackupRecord {

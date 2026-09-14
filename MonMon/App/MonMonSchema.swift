@@ -29,6 +29,7 @@ enum MonMonSchema {
             AccountTransfer.self,
             Debt.self, DebtPayment.self,
             RecurringRule.self,
+            SalaryProfile.self,
             BudgetJar.self,
             FinancialGoal.self,
             TripWorkspace.self,
