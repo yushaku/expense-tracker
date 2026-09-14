@@ -130,26 +130,29 @@ struct BackupRestoreView: View {
                 } label: {
                     Label("Restore Backup", systemImage: "arrow.counterclockwise")
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.capsule)
+                .controlSize(.large)
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(MonMonTheme.danger)
+                .tint(MonMonTheme.danger)
                 .frame(minHeight: 44)
                 .disabled(isWorking)
                 .accessibilityIdentifier("backup-restore")
-            }
-
-            if hasRecovery {
-                Button {
-                    prepareRecoveryPreview()
-                } label: {
-                    Label("Restore Previous Data", systemImage: "clock.arrow.circlepath")
-                        .frame(minHeight: 44)
+                if hasRecovery {
+                    Button {
+                        prepareRecoveryPreview()
+                    } label: {
+                        Label("Restore Previous Data", systemImage: "clock.arrow.circlepath")
+                    }
+                    .buttonStyle(.bordered)
+                    .buttonBorderShape(.capsule)
+                    .controlSize(.large)
+                    .font(.subheadline.weight(.semibold))
+                    .tint(MonMonTheme.danger)
+                    .frame(minHeight: 44)
+                    .disabled(isWorking)
+                    .accessibilityIdentifier("backup-restore-previous")
                 }
-                .buttonStyle(.plain)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(MonMonTheme.danger)
-                .disabled(isWorking)
-                .accessibilityIdentifier("backup-restore-previous")
             }
 
             resetSection

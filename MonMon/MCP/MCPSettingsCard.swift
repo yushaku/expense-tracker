@@ -21,14 +21,6 @@
                 .accessibilityIdentifier("mcp-access-toggle")
 
                 Label(
-                    "App Lock does not protect MCP access. An AI client may send your detailed financial records to its model provider.",
-                    systemImage: "exclamationmark.triangle.fill"
-                )
-                .font(.caption)
-                .foregroundStyle(MonMonTheme.danger)
-                .accessibilityIdentifier("mcp-privacy-warning")
-
-                Label(
                     "MCP reads saved data directly from this Mac, even when MonMon is closed. Unsaved edits are not shared.",
                     systemImage: "externaldrive.fill.badge.timemachine"
                 )

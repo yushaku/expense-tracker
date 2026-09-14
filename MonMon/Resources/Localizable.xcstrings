@@ -15367,16 +15367,6 @@
         }
       }
     },
-    "App Lock does not protect MCP access. An AI client may send your detailed financial records to its model provider.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Khóa ứng dụng không bảo vệ quyền truy cập MCP. Ứng dụng AI có thể gửi các bản ghi tài chính chi tiết của bạn đến nhà cung cấp mô hình."
-          }
-        }
-      }
-    },
     "MCP reads a local snapshot. Open MonMon on this Mac to refresh data changed on another device.": {
       "localizations": {
         "vi": {
