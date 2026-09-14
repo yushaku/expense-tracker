@@ -139,9 +139,19 @@ enum SalaryProfileStore {
         _ rule: RecurringRule, in context: ModelContext,
         save: (ModelContext) throws -> Void = { try SyncWriteGate.save($0) }
     ) throws {
-        guard isCompatible(rule) else { throw SalaryProfileError.incompatibleRule }
-        guard let profile = try personal(in: context) else {
-            throw SalaryProfileError.missingProfile
+        guard isCompatible(rule) else {
+            context.rollback()
+            throw SalaryProfileError.incompatibleRule
+        }
+        let profile: SalaryProfile
+        do {
+            guard let existing = try personal(in: context) else {
+                throw SalaryProfileError.missingProfile
+            }
+            profile = existing
+        } catch {
+            context.rollback()
+            throw error
         }
         let previousID = profile.recurringRuleID
         let previousUpdatedAt = profile.updatedAt

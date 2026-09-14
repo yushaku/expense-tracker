@@ -46,19 +46,22 @@ struct RecurringEditorView: View {
     /// Passed in rather than read from the clock inside, so what the editor
     /// backfills is decided by one value the whole screen agrees on.
     private let asOf: Date
+    private let linkSalaryProfile: Bool
 
     @State private var draft: RecurringRuleDraft
     @State private var validationError: RecurringFormError?
     @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
     @State private var didApplyDefaults = false
+    @State private var savedNewRule: RecurringRule?
 
     init(
         mode: RecurringEditorMode, defaultDate: Date = .now, asOf: Date = .now,
-        initialDraft: RecurringRuleDraft? = nil
+        initialDraft: RecurringRuleDraft? = nil, linkSalaryProfile: Bool = false
     ) {
         self.mode = mode
         self.asOf = asOf
+        self.linkSalaryProfile = linkSalaryProfile
 
         if let initialDraft {
             _draft = State(initialValue: initialDraft)
@@ -184,11 +187,21 @@ struct RecurringEditorView: View {
         validationError = nil
         saveErrorMessage = nil
 
+        if linkSalaryProfile
+            && (draft.kind != .income || draft.frequency != .monthly
+                || Int(draft.intervalText.trimmingCharacters(in: .whitespaces)) != 1)
+        {
+            saveErrorMessage = "A linked salary must be monthly income, repeating every month."
+            return
+        }
+
+        let rule: RecurringRule
         do {
-            if let editedRule = mode.editedRule {
+            if let editedRule = mode.editedRule ?? savedNewRule {
                 try draft.apply(to: editedRule, asOf: asOf)
+                rule = editedRule
             } else {
-                let rule = try draft.makeRule(id: UUID(), createdAt: asOf, asOf: asOf)
+                rule = try draft.makeRule(id: UUID(), createdAt: asOf, asOf: asOf)
                 modelContext.insert(rule)
             }
         } catch let error as RecurringFormError {
@@ -200,16 +213,27 @@ struct RecurringEditorView: View {
         }
 
         do {
-            try SyncWriteGate.save(modelContext)
-            // Saved first, so a rule that fails to write records nothing. What
-            // it owes is recorded now rather than at the next launch, because a
-            // rule the owner just wrote should show its entries straight away.
+            if linkSalaryProfile {
+                try SalaryProfileStore.saveLinkedRule(rule, in: modelContext)
+            } else {
+                try SyncWriteGate.save(modelContext)
+            }
+            // If generation fails after this commit, retry this same rule;
+            // creating another would duplicate salary and change the link.
+            if mode.editedRule == nil { savedNewRule = rule }
+        } catch {
+            if !linkSalaryProfile { modelContext.rollback() }
+            saveErrorMessage = "Couldn’t save this rule. Try again."
+            return
+        }
+
+        do {
             try RecurringGenerator.generate(in: modelContext, asOf: asOf)
             reconcileNotifications()
             dismiss()
         } catch {
             modelContext.rollback()
-            saveErrorMessage = "Couldn’t save this rule. Try again."
+            saveErrorMessage = "Rule saved, but due entries could not be recorded. Try again."
         }
     }
 

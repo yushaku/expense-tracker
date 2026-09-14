@@ -74,7 +74,7 @@ struct SalaryCalculatorTests {
         #expect(SalaryCalculator.calculate(amount: 10_000_000, insuranceSalary: -1) == nil)
     }
 
-    @Test @MainActor func recurringSelectionAndDraft() throws {
+    @Test @MainActor func recurringDraftPreservesScheduleAndAccount() throws {
         let categories = CategorySeed.makeCategories(createdAt: .now)
         let category = try #require(SalaryRecurring.categoryID(in: categories))
         let date = Date(timeIntervalSince1970: 1_700_000_000)
@@ -84,13 +84,6 @@ struct SalaryCalculatorTests {
             frequency: .monthly, interval: 1, anchorDate: date, endDate: nil,
             isPaused: true, lastGeneratedAt: date, createdAt: date
         )
-        let other = RecurringRule(
-            id: UUID(), kind: .expense, amount: 1, note: "Salary",
-            accountID: UUID(), categoryID: category, currencyCode: VNDCurrency.code,
-            frequency: .monthly, interval: 1, anchorDate: date, endDate: nil,
-            isPaused: false, lastGeneratedAt: nil, createdAt: .distantPast
-        )
-        #expect(SalaryRecurring.first(in: [other, rule], categories: categories)?.id == rule.id)
         var expected = RecurringRuleDraft(rule: rule)
         expected.amountText = VNDCurrency.formatPlain(26_215_000)
         let draft = SalaryRecurring.draft(
@@ -103,19 +96,13 @@ struct SalaryCalculatorTests {
         #expect(rule.amount == 26_215_000)
         #expect(rule.lastGeneratedAt == date)
         #expect(rule.isPaused)
-        other.kind = .income
-        #expect(SalaryRecurring.first(in: [rule, other], categories: categories)?.id == other.id)
-        other.frequency = .weekly
-        #expect(SalaryRecurring.first(in: [other, rule], categories: categories)?.id == rule.id)
-        rule.currencyCode = "USD"
-        #expect(SalaryRecurring.first(in: [rule], categories: categories) == nil)
         let new = SalaryRecurring.draft(
-            net: 26_215_000, rule: nil, accountID: other.accountID, categoryID: category,
+            net: 26_215_000, rule: nil, accountID: rule.accountID, categoryID: category,
             name: "Salary", date: date)
         #expect(new.kind == .income)
         #expect(new.frequency == .monthly)
         #expect(new.categoryID == category)
-        #expect(new.accountID == other.accountID)
+        #expect(new.accountID == rule.accountID)
         #expect(new.anchorDate == date)
     }
 }

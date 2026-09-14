@@ -39,12 +39,11 @@ clear profile → inputs → take-home estimate → recurring salary flow.
 - Translate new UI text into Vietnamese and preserve keyboard, VoiceOver and
   Dynamic Type support. Use adaptive layouts for Mac and iPhone.
 
-## Boundaries and open questions
+## Boundaries
 
-- Confirm one personal profile versus multiple people before finalizing the UI.
-- Confirm additional payroll items (allowances, bonuses, overtime, advances or
-  other deductions). The initial proposal persists existing calculator inputs;
-  it does not invent tax treatment for new items.
+- Confirmed: one personal profile.
+- This version persists existing calculator inputs. Additional payroll items
+  require separately specified fields and tax treatment.
 - Preserve the existing calculator's documented scope. Any extension to payroll
   formulas requires verified official sources and explicit calculation tests.
 - Preserve confirmation, write gates, rollback, and recurring generation rules.
@@ -95,3 +94,10 @@ rtk xcodebuild -project MonMon.xcodeproj -scheme MonMon -configuration Debug -sd
 
 Hands-on acceptance belongs to the user after a separately requested merge into
 `dev` and physical-device install.
+
+## Implementation status
+
+- Complete: profile model, validated draft, backup/restore/reset, sync and migration tests.
+- Complete: redesigned calculator, explicit Gross/Net agreement, recurring review and atomic link save.
+- Passed: swift-format lint, all 1,261 Mac tests (1,280 parameterized runs), and iOS SDK compile for arm64/x86_64.
+- User-owned hands-on UI acceptance remains after an explicitly requested merge into `dev`; no app was installed for this branch.

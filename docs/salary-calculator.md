@@ -2,7 +2,45 @@
 
 Settings opens a monthly VND Gross ↔ Net calculator for resident Vietnamese employees with contracts of at least three months. 2026 rules only, selectable January–June or July–December. Inputs: salary, dependants, region, full/custom insurance salary. Show employee insurance, deductions, taxable income, tax and take-home pay. Round final amounts to whole VND.
 
-Use the oldest VND monthly Salary income rule (creation date, UUID tie break) to prefill Net. Saving opens the existing recurring editor with Net and preserves its schedule/account; without a match, prepare a monthly Salary income draft. Nothing persists until the editor saves.
+## Personal salary profile
+
+The SwiftData `SalaryProfile` table stores the owner's name, agreed salary amount,
+agreed Gross/Net basis, dependant count, calculation period, insurance region,
+optional custom insurance salary and explicit recurring rule UUID. A fixed personal
+UUID makes two devices' edits resolve as a normal sync conflict. Save and discard
+are explicit; closing with unsaved changes asks before discarding.
+
+The calculator leads with estimated monthly take-home, groups agreed salary and
+insurance inputs, and shows a separate deduction breakdown. Gross/Net describes
+the employment agreement and is retained when the calculated Net is sent to a
+recurring rule. Additional allowances, bonuses and payroll adjustments are not
+modeled by this version.
+
+## Recurring salary
+
+Choose a specific monthly VND income rule, or create a new Salary rule. There is
+no automatic first-rule selection. An explicit import action can copy a selected
+rule's amount into the profile as Net. Saving profile changes does not update the
+rule or historical transactions.
+
+After saving the profile, review the Net update in the recurring editor. The
+existing account, schedule, pause state and generation history are preserved.
+The rule and profile link save together. Cancel makes no changes; save failures
+restore the old link. If recording due entries fails after the rule committed,
+retry edits that same rule instead of creating another. A removed or repurposed
+rule is shown as unavailable and never silently replaced with another rule.
+
+## Backup and sync
+
+Profiles participate in financial backup, restore, reset and Device Sync. Old
+backups without the new array retain their original checksums and restore with
+no salary profile. Reset saves the profile in its recovery backup before removal.
+Recurring UUID aliases are remapped during sync. A missing linked rule is allowed
+as a weak reference so deleting a rule cannot destroy its salary profile.
+
+Sync hello version is now 3; both devices need the updated app to sync. The store
+change is additive; an on-disk migration test verifies existing accounts survive.
+
 
 Validate progressive bracket boundaries, insurance caps in both periods, reverse conversion and recurring draft preservation. Format lint, full Mac unit suite and iOS compile are required. No device install before an explicitly requested merge.
 
@@ -18,4 +56,6 @@ Estimate excludes tax-exempt allowances, other income/deductions, foreign-worker
 
 ## Validation
 
-Swift-format lint, the full macOS unit suite and iOS SDK compile pass. Tests cover progressive boundaries, both insurance-cap periods, custom bases and dependants, inverse calculations, rule selection and draft application without modifying generation history. Physical UI acceptance follows the next explicitly requested merge into dev.
+Swift-format lint, the full macOS unit suite and iOS SDK compile pass. Tests cover progressive boundaries, both insurance-cap periods, custom bases and dependants, inverse calculations, explicit rule linkage and draft application without modifying generation history. Physical UI acceptance follows the next explicitly requested merge into dev.
+
+Profile tests also cover agreed-basis persistence, invalid-input rejection, atomic Net/link saves, retained-model rollback, sync write locks, legacy backup checksums, reset recovery, UUID remapping and on-disk migration/reopening.

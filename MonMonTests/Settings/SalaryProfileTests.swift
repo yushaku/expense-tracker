@@ -236,4 +236,61 @@ struct SalaryProfileTests {
             configurations: ModelConfiguration(schema: schema, url: url, cloudKitDatabase: .none))
         #expect(try SalaryProfileStore.personal(in: reopened.mainContext)?.basisRaw == "net")
     }
+
+    @Test func syncLockPreventsProfileAndLinkedRuleWrites() throws {
+        let container = try ModelContainer(
+            for: Schema(MonMonSchema.models),
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        var draft = SalaryProfileDraft()
+        draft.name = "An"
+        draft.amountText = "30000000"
+        let profile = try SalaryProfileStore.save(draft, in: container.mainContext)
+        SyncWriteGate.lock(container)
+        defer { SyncWriteGate.unlock(container) }
+        draft.basis = .net
+        draft.recurringRuleID = UUID()
+        #expect(throws: SyncError.sessionPending) {
+            try SalaryProfileStore.save(draft, in: container.mainContext)
+        }
+        #expect(profile.basisRaw == "gross")
+        #expect(profile.recurringRuleID == nil)
+        #expect(try SalaryProfileStore.personal(in: ModelContext(container))?.basisRaw == "gross")
+
+        let rule = RecurringRule(
+            id: UUID(), kind: .income, amount: 26_215_000, note: "Salary",
+            accountID: UUID(), categoryID: nil, currencyCode: "VND",
+            frequency: .monthly, interval: 1, anchorDate: .now, endDate: nil,
+            isPaused: false, lastGeneratedAt: nil, createdAt: .now)
+        container.mainContext.insert(rule)
+        #expect(throws: SyncError.sessionPending) {
+            try SalaryProfileStore.saveLinkedRule(rule, in: container.mainContext)
+        }
+        #expect(profile.recurringRuleID == nil)
+        #expect(try ModelContext(container).fetchCount(FetchDescriptor<RecurringRule>()) == 0)
+    }
+
+    @Test func linkedRuleAndNetCommitTogether() throws {
+        let container = try ModelContainer(
+            for: Schema(MonMonSchema.models),
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        var draft = SalaryProfileDraft()
+        draft.name = "An"
+        draft.amountText = "30000000"
+        let profile = try SalaryProfileStore.save(draft, in: container.mainContext)
+        let result = try #require(draft.result)
+        let recurring = SalaryRecurring.draft(
+            net: result.net, rule: nil, accountID: UUID(), categoryID: UUID(),
+            name: "Salary", date: .now)
+        let rule = try recurring.makeRule(id: UUID(), createdAt: .now, asOf: .now)
+        container.mainContext.insert(rule)
+        try SalaryProfileStore.saveLinkedRule(rule, in: container.mainContext)
+        let reader = ModelContext(container)
+        let storedProfile = try #require(try SalaryProfileStore.personal(in: reader))
+        let storedRule = try #require(try reader.fetch(FetchDescriptor<RecurringRule>()).first)
+        #expect(storedProfile.recurringRuleID == storedRule.id)
+        #expect(storedRule.amount == result.net)
+        #expect(profile.amount == 30_000_000)
+        #expect(profile.basisRaw == "gross")
+        #expect(try reader.fetchCount(FetchDescriptor<MoneyTransaction>()) == 0)
+    }
 }

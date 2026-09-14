@@ -1,6 +1,356 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Save profile": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lưu hồ sơ"
+          }
+        }
+      }
+    },
+    "Discard salary changes?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bỏ thay đổi hồ sơ lương?"
+          }
+        }
+      }
+    },
+    "Your salary, clearly": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hiểu rõ lương của bạn"
+          }
+        }
+      }
+    },
+    "Save your agreed salary and see what reaches your account each month.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lưu mức lương đã thoả thuận và xem số tiền thực nhận mỗi tháng."
+          }
+        }
+      }
+    },
+    "Unsaved changes": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Có thay đổi chưa lưu"
+          }
+        }
+      }
+    },
+    "Set up your salary profile": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thiết lập hồ sơ lương"
+          }
+        }
+      }
+    },
+    "Profile saved": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã lưu hồ sơ"
+          }
+        }
+      }
+    },
+    "Estimated monthly take-home": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thực nhận mỗi tháng (ước tính)"
+          }
+        }
+      }
+    },
+    "Total insurance and tax": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tổng bảo hiểm và thuế"
+          }
+        }
+      }
+    },
+    "Your name": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tên của bạn"
+          }
+        }
+      }
+    },
+    "Use a name with at most 100 characters.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập tên không quá 100 ký tự."
+          }
+        }
+      }
+    },
+    "Agreed salary basis": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hình thức deal lương"
+          }
+        }
+      }
+    },
+    "Gross": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gross"
+          }
+        }
+      }
+    },
+    "Gross is your agreed pay before employee insurance and income tax.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gross là mức lương đã thoả thuận trước khi trừ bảo hiểm người lao động và thuế thu nhập."
+          }
+        }
+      }
+    },
+    "Net is your agreed take-home pay after employee insurance and income tax.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Net là mức thực nhận đã thoả thuận sau khi trừ bảo hiểm người lao động và thuế thu nhập."
+          }
+        }
+      }
+    },
+    "Tax and insurance settings": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thông tin thuế và bảo hiểm"
+          }
+        }
+      }
+    },
+    "Recurring salary": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lương định kỳ"
+          }
+        }
+      }
+    },
+    "Link a monthly income rule to this profile. Review the Net amount before applying it.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liên kết khoản thu nhập hằng tháng với hồ sơ này. Kiểm tra mức Net trước khi áp dụng."
+          }
+        }
+      }
+    },
+    "Linked salary rule": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khoản lương liên kết"
+          }
+        }
+      }
+    },
+    "Create a new salary rule": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tạo khoản lương định kỳ mới"
+          }
+        }
+      }
+    },
+    "Linked rule unavailable": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khoản lương liên kết không còn khả dụng"
+          }
+        }
+      }
+    },
+    "Current recurring amount": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền định kỳ hiện tại"
+          }
+        }
+      }
+    },
+    "Not available": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không khả dụng"
+          }
+        }
+      }
+    },
+    "Next payment": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lần nhận lương tiếp theo"
+          }
+        }
+      }
+    },
+    "This salary rule has ended.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lịch nhận lương này đã kết thúc."
+          }
+        }
+      }
+    },
+    "The recurring amount differs from this estimate.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền định kỳ khác với mức thực nhận đang tính."
+          }
+        }
+      }
+    },
+    "Use recurring amount as Net": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lấy số tiền định kỳ làm Net"
+          }
+        }
+      }
+    },
+    "The linked rule was removed or is no longer monthly VND income. Choose another rule or create a new one.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khoản liên kết đã bị xoá hoặc không còn là thu nhập VND hằng tháng. Chọn khoản khác hoặc tạo mới."
+          }
+        }
+      }
+    },
+    "Review new salary rule": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xem trước khoản lương mới"
+          }
+        }
+      }
+    },
+    "Review recurring update": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xem trước cập nhật lương"
+          }
+        }
+      }
+    },
+    "Save your profile before reviewing the recurring salary.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lưu hồ sơ trước khi xem và cập nhật lương định kỳ."
+          }
+        }
+      }
+    },
+    "Your account and schedule are kept. Past transactions stay unchanged.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giữ nguyên tài khoản và lịch nhận lương. Các giao dịch đã ghi nhận không thay đổi."
+          }
+        }
+      }
+    },
+    "Couldn’t save your salary profile. Try again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể lưu hồ sơ lương. Vui lòng thử lại."
+          }
+        }
+      }
+    },
+    "A linked salary must be monthly income, repeating every month.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khoản lương liên kết phải là thu nhập lặp lại mỗi tháng."
+          }
+        }
+      }
+    },
+    "Rule saved, but due entries could not be recorded. Try again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã lưu khoản định kỳ nhưng chưa ghi nhận được giao dịch đến hạn. Vui lòng thử lại."
+          }
+        }
+      }
+    },
     "Salary profile": {
       "localizations": {
         "vi": {
@@ -1361,16 +1711,6 @@
         }
       }
     },
-    "Review changes to your first monthly Salary rule. Its account and schedule are kept.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kiểm tra thay đổi cho khoản lương hằng tháng đầu tiên. Tài khoản và lịch nhận lương được giữ nguyên."
-          }
-        }
-      }
-    },
     "Enter a valid salary and insurance amount (up to 1 trillion VND).": {
       "localizations": {
         "vi": {
@@ -1487,16 +1827,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Người phụ thuộc"
-          }
-        }
-      }
-    },
-    "Prefilled from your first monthly Salary rule, treated as take-home pay (Net).": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Điền sẵn từ khoản lương hằng tháng đầu tiên, được hiểu là lương thực nhận (Net)."
           }
         }
       }
