@@ -7,7 +7,7 @@ import SwiftData
 #endif
 
 struct SyncHello: Codable, Sendable {
-    var version = 2
+    var version = 3
     var flavour = MonMonBackupFlavour.current
     var pairID: UUID
     var deviceID: UUID
@@ -455,7 +455,7 @@ final class SyncCoordinator {
     }
 
     private func acceptHello(_ hello: SyncHello) throws {
-        guard let pair, hello.version == 2, hello.flavour == .current,
+        guard let pair, hello.version == 3, hello.flavour == .current,
             hello.pairID == pair.pairID, hello.name.count <= 256
         else { throw SyncError.incompatiblePeer }
         let state = try store.state()

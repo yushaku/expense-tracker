@@ -113,6 +113,16 @@ extension MonMonBackupService {
             update: updateRecurringRule
         )
         try reconcile(
+            current: context.fetch(FetchDescriptor<SalaryProfile>()),
+            records: payload.salaryProfiles,
+            in: context,
+            modelID: \SalaryProfile.id,
+            createdAt: \SalaryProfile.createdAt,
+            recordID: { try MonMonBackupScalar.parseUUID($0.id) },
+            make: makeSalaryProfile,
+            update: updateSalaryProfile
+        )
+        try reconcile(
             current: context.fetch(FetchDescriptor<MoneyTransaction>()),
             records: payload.transactions,
             in: context,
@@ -1018,6 +1028,8 @@ struct MonMonBackupService {
             recurringRules: try context.fetch(FetchDescriptor<RecurringRule>()).map(
                 recurringRuleRecord
             ),
+            salaryProfiles: try context.fetch(FetchDescriptor<SalaryProfile>()).map(
+                salaryProfileRecord),
             preferences: preferences
         )
     }

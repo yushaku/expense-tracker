@@ -425,8 +425,10 @@
 		A7A700000000000000000002 /* AppAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7A700000000000000000001 /* AppAvatar.swift */; };
 		A7A700000000000000000004 /* AppAvatarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7A700000000000000000003 /* AppAvatarTests.swift */; };
 		D625B1F0894A4B68A85E065F /* SalaryCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACBEFD298AFF4FCD903ECB40 /* SalaryCalculator.swift */; };
+		D044AA604C8D4B6C925AE203 /* SalaryProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D044AA604C8D4B6C925AE204 /* SalaryProfile.swift */; };
 		FAC313B3BA4345D4BA992263 /* SalaryCalculatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A99B1CAF79C41E0950B20EE /* SalaryCalculatorView.swift */; };
 		2B1230D554EF4DF199447F90 /* SalaryCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1EDFDF371AD424DB36E02D6 /* SalaryCalculatorTests.swift */; };
+		D044AA604C8D4B6C925AE201 /* SalaryProfileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D044AA604C8D4B6C925AE202 /* SalaryProfileTests.swift */; };
 		AF93A4007C91C0774A8A7C01 /* SyncSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D79D516595C63AC7B1498C /* SyncSnapshot.swift */; };
 		91994D21711FB73C09CC0B6E /* SyncMergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD5441149C5B1FA36CF8004D /* SyncMergeTests.swift */; };
 		65F8A088ABC36759ED8976AB /* SyncMergePlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15B41060E5D0B0130297D83 /* SyncMergePlanner.swift */; };
@@ -915,8 +917,10 @@
 		A7A700000000000000000001 /* AppAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAvatar.swift; sourceTree = "<group>"; };
 		A7A700000000000000000003 /* AppAvatarTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAvatarTests.swift; sourceTree = "<group>"; };
 		ACBEFD298AFF4FCD903ECB40 /* SalaryCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SalaryCalculator.swift; sourceTree = "<group>"; };
+		D044AA604C8D4B6C925AE204 /* SalaryProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SalaryProfile.swift; sourceTree = "<group>"; };
 		1A99B1CAF79C41E0950B20EE /* SalaryCalculatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SalaryCalculatorView.swift; sourceTree = "<group>"; };
 		C1EDFDF371AD424DB36E02D6 /* SalaryCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SalaryCalculatorTests.swift; sourceTree = "<group>"; };
+		D044AA604C8D4B6C925AE202 /* SalaryProfileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SalaryProfileTests.swift; sourceTree = "<group>"; };
 		A3D79D516595C63AC7B1498C /* SyncSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sync/SyncSnapshot.swift"; sourceTree = "<group>"; };
 		CD5441149C5B1FA36CF8004D /* SyncMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sync/SyncMergeTests.swift"; sourceTree = "<group>"; };
 		E15B41060E5D0B0130297D83 /* SyncMergePlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sync/SyncMergePlanner.swift"; sourceTree = "<group>"; };
@@ -1581,6 +1585,7 @@
 				A00000000000000000000190 /* SettingsView.swift */,
 				1A99B1CAF79C41E0950B20EE /* SalaryCalculatorView.swift */,
 				ACBEFD298AFF4FCD903ECB40 /* SalaryCalculator.swift */,
+				D044AA604C8D4B6C925AE204 /* SalaryProfile.swift */,
 				A7A700000000000000000001 /* AppAvatar.swift */,
 				N10000000000000000000105 /* NotificationSettingsCard.swift */,
 			);
@@ -1593,6 +1598,7 @@
 				A00000000000000000000191 /* AppLockTests.swift */,
 				C10000000000000000000009 /* AppLanguageTests.swift */,
 				C1EDFDF371AD424DB36E02D6 /* SalaryCalculatorTests.swift */,
+				D044AA604C8D4B6C925AE202 /* SalaryProfileTests.swift */,
 				A7A700000000000000000003 /* AppAvatarTests.swift */,
 				C1000000000000000000000A /* LanguageResolutionTests.swift */,
 			);
@@ -2133,6 +2139,7 @@
 				A00000000000000000000279 /* SettingsView.swift in Sources */,
 				FAC313B3BA4345D4BA992263 /* SalaryCalculatorView.swift in Sources */,
 				D625B1F0894A4B68A85E065F /* SalaryCalculator.swift in Sources */,
+				D044AA604C8D4B6C925AE203 /* SalaryProfile.swift in Sources */,
 				A7A700000000000000000002 /* AppAvatar.swift in Sources */,
 				N10000000000000000000205 /* NotificationSettingsCard.swift in Sources */,
 				A00000000000000000000278 /* LockScreenView.swift in Sources */,
@@ -2345,6 +2352,7 @@
 				A00000000000000000000280 /* AppLockTests.swift in Sources */,
 				C10000000000000000000109 /* AppLanguageTests.swift in Sources */,
 				2B1230D554EF4DF199447F90 /* SalaryCalculatorTests.swift in Sources */,
+				D044AA604C8D4B6C925AE201 /* SalaryProfileTests.swift in Sources */,
 				A7A700000000000000000004 /* AppAvatarTests.swift in Sources */,
 				C1000000000000000000010A /* LanguageResolutionTests.swift in Sources */,
 				A00000000000000000000274 /* AssetAllocationTests.swift in Sources */,

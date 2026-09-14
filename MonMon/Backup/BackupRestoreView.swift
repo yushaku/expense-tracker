@@ -629,6 +629,7 @@ private struct BackupRestorePreviewSheet: View {
             detailRow("Transactions", value: counts.transactions.formatted())
             detailRow("Categories", value: counts.categories.formatted())
             detailRow("Recurring rules", value: counts.recurringRules.formatted())
+            detailRow("Salary profile", value: counts.salaryProfiles.formatted())
             detailRow("Pending captures", value: counts.pendingCaptures.formatted())
             detailRow("Transfers", value: counts.transfers.formatted())
             detailRow("Savings deposits", value: counts.savingsDeposits.formatted())

@@ -46,6 +46,7 @@ struct MonMonBackupCounts: Equatable, Sendable {
     var transfers: Int
     var debts: Int
     var debtPayments: Int
+    var salaryProfiles: Int
     var recurringRules: Int
 
     init(payload: MonMonBackupPayload) {
@@ -65,6 +66,7 @@ struct MonMonBackupCounts: Equatable, Sendable {
         debts = payload.debts.count
         debtPayments = payload.debtPayments.count
         recurringRules = payload.recurringRules.count
+        salaryProfiles = payload.salaryProfiles.count
     }
 }
 
@@ -81,6 +83,7 @@ struct MonMonBackupPreview: Equatable, Sendable {
             + counts.transactions
             + counts.pendingCaptures
             + counts.transfers + counts.debts + counts.debtPayments + counts.recurringRules
+            + counts.salaryProfiles
     }
 }
 
@@ -308,6 +311,25 @@ private struct PayloadChecker {
             try optionalUUID(record.accountID)
             try currency(record.currencyCode)
         }
+        try validateUniqueRecords(payload.salaryProfiles) { record in
+            try scalarIDAndDate(record.id, record.createdAt)
+            try require(record.id == MonMonBackupScalar.uuid(SalaryProfile.personalID))
+            try require(
+                !record.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    && record.name.count <= 100)
+            guard let basis = SalaryBasis(rawValue: record.basis),
+                let period = SalaryCalculator.Period(rawValue: record.period),
+                let region = SalaryCalculator.Region(rawValue: record.region)
+            else { throw MonMonBackupValidationError.invalidPayload }
+            let amount = try MonMonBackupScalar.parseDecimal(record.amount)
+            let insurance = try record.insuranceSalary.map(MonMonBackupScalar.parseDecimal)
+            try require(
+                SalaryCalculator.calculate(
+                    amount: amount, fromNet: basis == .net, dependants: record.dependants,
+                    period: period, region: region, insuranceSalary: insurance) != nil)
+            try optionalUUID(record.recurringRuleID)
+            try date(record.updatedAt)
+        }
         try validateUniqueRecords(payload.recurringRules) { record in
             try scalarIDAndDate(record.id, record.createdAt)
             try require(TransactionKind(rawValue: record.kind) != nil)
@@ -518,6 +540,9 @@ private struct PayloadChecker {
         for record in payload.debtPayments {
             try requiredReference(record.accountID, validIDs: accounts)
             optionalReference(record.debtID, validIDs: debts)
+        }
+        for record in payload.salaryProfiles {
+            optionalReference(record.recurringRuleID, validIDs: rules)
         }
         for record in payload.recurringRules {
             try requiredReference(record.accountID, validIDs: accounts)
@@ -736,3 +761,4 @@ extension MonMonBackupPayload.TransferRecord: BackupIdentified {}
 extension MonMonBackupPayload.DebtRecord: BackupIdentified {}
 extension MonMonBackupPayload.DebtPaymentRecord: BackupIdentified {}
 extension MonMonBackupPayload.RecurringRuleRecord: BackupIdentified {}
+extension MonMonBackupPayload.SalaryProfileRecord: BackupIdentified {}
