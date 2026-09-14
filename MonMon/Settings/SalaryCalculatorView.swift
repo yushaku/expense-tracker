@@ -39,7 +39,6 @@ struct SalaryCalculatorView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    introduction
                     if let result = draft.result { summaryCard(result) }
                     profileCard
                     deductionsCard
@@ -64,7 +63,7 @@ struct SalaryCalculatorView: View {
                         HStack(spacing: 12) { profileButtons }
                         VStack(alignment: .leading, spacing: 12) { profileButtons }
                     }
-                    referenceNote
+                    estimateNote
                 }
                 .frame(maxWidth: 680)
                 .padding(20)
@@ -73,18 +72,13 @@ struct SalaryCalculatorView: View {
             .background(MonMonTheme.canvas)
             .navigationTitle("Salary calculator")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
+                ToolbarItem(placement: .primaryAction) {
                     Button("Close", systemImage: "xmark") {
                         if hasUnsavedChanges { isConfirmingDiscard = true } else { dismiss() }
                     }
                     .labelStyle(.iconOnly)
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save profile", action: saveProfile)
-                        .disabled(
-                            !draft.isValid || !hasUnsavedChanges || syncCoordinator.writesLocked
-                        )
-                        .accessibilityIdentifier("salary-save-profile")
+                    .tint(MonMonTheme.textSecondary)
+                    .accessibilityIdentifier("salary-close")
                 }
             }
             .confirmationDialog(
@@ -115,23 +109,6 @@ struct SalaryCalculatorView: View {
         #if os(macOS)
             .frame(minWidth: 560, minHeight: 720)
         #endif
-    }
-
-    private var introduction: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Your salary, clearly").font(.title2.weight(.bold))
-            Text("Save your agreed salary and see what reaches your account each month.")
-                .font(.subheadline).foregroundStyle(MonMonTheme.textSecondary)
-            Label(
-                hasUnsavedChanges
-                    ? "Unsaved changes"
-                    : (savedDraft == nil ? "Set up your salary profile" : "Profile saved"),
-                systemImage: hasUnsavedChanges
-                    ? "pencil.circle"
-                    : (savedDraft == nil ? "person.crop.circle" : "checkmark.circle")
-            )
-            .font(.caption.weight(.medium)).foregroundStyle(MonMonTheme.textSecondary)
-        }
     }
 
     private func summaryCard(_ result: SalaryCalculator.Result) -> some View {
@@ -194,10 +171,6 @@ struct SalaryCalculatorView: View {
                     LabeledContent("Dependants", value: draft.dependants.formatted())
                 }
                 .accessibilityIdentifier("salary-dependants")
-                LabeledContent("Calculation period") {
-                    Text(LocalizedStringKey(SalaryCalculator.currentPeriod.rawValue))
-                        .foregroundStyle(MonMonTheme.textSecondary)
-                }
                 Picker("Region", selection: $draft.region) {
                     ForEach(SalaryCalculator.Region.allCases) { value in
                         Text(verbatim: value.label).tag(value)
@@ -329,21 +302,17 @@ struct SalaryCalculatorView: View {
         Button("Save profile", action: saveProfile)
             .buttonStyle(.prominentAction)
             .disabled(!draft.isValid || !hasUnsavedChanges || syncCoordinator.writesLocked)
+            .accessibilityIdentifier("salary-save-profile")
         if hasUnsavedChanges {
             Button("Discard changes", action: reloadProfile).buttonStyle(.bordered)
         }
     }
 
-    private var referenceNote: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(
-                "2026 estimate for resident employees with contracts of at least 3 months. Excludes tax-exempt allowances and other deductions. Amounts are rounded to VND."
-            )
-            .font(.caption).foregroundStyle(MonMonTheme.textSecondary)
-            if let url = URL(string: "https://www.topcv.vn/tinh-luong-gross-net") {
-                Link("Reference: TopCV", destination: url).font(.caption)
-            }
-        }
+    private var estimateNote: some View {
+        Text(
+            "2026 estimate for resident employees with contracts of at least 3 months. Excludes tax-exempt allowances and other deductions. Amounts are rounded to VND."
+        )
+        .font(.caption).foregroundStyle(MonMonTheme.textSecondary)
     }
 
     private func salaryAmountField(
