@@ -13,7 +13,8 @@ final class SalaryProfile {
     static let personalID = UUID(uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 1))
 
     var id: UUID = UUID()
-    var name: String = ""
+    // Retained for backup compatibility; the single personal profile needs no name input.
+    var name: String = "Salary"
     var amount: Decimal = Decimal.zero
     var basisRaw: String = "gross"
     var dependants: Int = 0
@@ -37,11 +38,9 @@ enum SalaryProfileError: Error, Equatable {
 }
 
 struct SalaryProfileDraft: Equatable {
-    var name = ""
     var amountText = ""
     var basis = SalaryBasis.gross
     var dependants = 0
-    var period = SalaryCalculator.Period.secondHalf
     var region = SalaryCalculator.Region.i
     var customInsurance = false
     var insuranceText = ""
@@ -50,11 +49,9 @@ struct SalaryProfileDraft: Equatable {
     init() {}
 
     init(profile: SalaryProfile) {
-        name = profile.name
         amountText = VNDCurrency.formatPlain(profile.amount)
         basis = SalaryBasis(rawValue: profile.basisRaw) ?? .gross
         dependants = profile.dependants
-        period = SalaryCalculator.Period(rawValue: profile.periodRaw) ?? .secondHalf
         region = SalaryCalculator.Region(rawValue: profile.regionRaw) ?? .i
         customInsurance = profile.insuranceSalary != nil
         insuranceText = profile.insuranceSalary.map(VNDCurrency.formatPlain) ?? ""
@@ -67,23 +64,21 @@ struct SalaryProfileDraft: Equatable {
         guard !customInsurance || insurance != nil else { return nil }
         return SalaryCalculator.calculate(
             amount: amount, fromNet: basis == .net, dependants: dependants,
-            period: period, region: region, insuranceSalary: insurance)
+            period: SalaryCalculator.currentPeriod, region: region, insuranceSalary: insurance)
     }
 
     var isValid: Bool {
-        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        return !trimmedName.isEmpty && trimmedName.count <= 100 && result != nil
+        result != nil
     }
 
     func apply(to profile: SalaryProfile, now: Date = .now) throws {
         guard isValid, let amount = VNDCurrency.parse(amountText) else {
             throw SalaryProfileError.invalidInput
         }
-        profile.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
         profile.amount = amount
         profile.basisRaw = basis.rawValue
         profile.dependants = dependants
-        profile.periodRaw = period.rawValue
+        profile.periodRaw = SalaryCalculator.currentPeriod.rawValue
         profile.regionRaw = region.rawValue
         profile.insuranceSalary = customInsurance ? VNDCurrency.parse(insuranceText) : nil
         profile.recurringRuleID = recurringRuleID
@@ -108,6 +103,7 @@ enum SalaryProfileStore {
         let profile = try personal(in: context) ?? SalaryProfile(createdAt: .now)
         let previous = profile.modelContext == nil ? nil : SalaryProfileDraft(profile: profile)
         let previousUpdatedAt = profile.updatedAt
+        let previousPeriodRaw = profile.periodRaw
         do {
             try draft.apply(to: profile)
             if profile.modelContext == nil { context.insert(profile) }
@@ -118,6 +114,7 @@ enum SalaryProfileStore {
             context.rollback()
             if let previous {
                 try? previous.apply(to: profile, now: previousUpdatedAt)
+                profile.periodRaw = previousPeriodRaw
             }
             throw error
         }

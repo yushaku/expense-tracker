@@ -8,16 +8,54 @@ import Testing
 @Suite("Salary profile")
 @MainActor
 struct SalaryProfileTests {
+    @Test func salaryAloneCanBeSavedWithoutAName() throws {
+        let container = try ModelContainer(
+            for: Schema(MonMonSchema.models),
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        var draft = SalaryProfileDraft()
+        draft.amountText = "30000000"
+        #expect(draft.isValid)
+        let saved = try SalaryProfileStore.save(draft, in: container.mainContext)
+        #expect(saved.amount == 30_000_000)
+        let reopened = try #require(try SalaryProfileStore.personal(in: ModelContext(container)))
+        #expect(reopened.amount == 30_000_000)
+        let service = MonMonBackupService(container: container)
+        let backup = try service.preview(service.exportData())
+        #expect(backup.payload.salaryProfiles.count == 1)
+    }
+
+    @Test func oldProfileUsesJulyRulesWhenOpenedAndSaved() throws {
+        let container = try ModelContainer(
+            for: Schema(MonMonSchema.models),
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let legacy = SalaryProfile(createdAt: .now)
+        legacy.name = "Legacy name"
+        legacy.amount = 200_000_000
+        legacy.periodRaw = SalaryCalculator.Period.firstHalf.rawValue
+        container.mainContext.insert(legacy)
+        try container.mainContext.save()
+        let draft = SalaryProfileDraft(profile: legacy)
+        #expect(draft.result?.social == 4_048_000)
+        #expect(draft.result?.health == 759_000)
+        SyncWriteGate.lock(container)
+        #expect(throws: SyncError.sessionPending) {
+            try SalaryProfileStore.save(draft, in: container.mainContext)
+        }
+        #expect(legacy.periodRaw == SalaryCalculator.Period.firstHalf.rawValue)
+        SyncWriteGate.unlock(container)
+        let saved = try SalaryProfileStore.save(draft, in: container.mainContext)
+        #expect(saved.periodRaw == SalaryCalculator.Period.secondHalf.rawValue)
+        #expect(saved.name == "Legacy name")
+    }
+
     @Test func savesDealBasisAndRestoresAllInputs() throws {
         let container = try ModelContainer(
             for: Schema(MonMonSchema.models),
             configurations: ModelConfiguration(isStoredInMemoryOnly: true))
         var draft = SalaryProfileDraft()
-        draft.name = "  An  "
         draft.amountText = "30000000"
         draft.basis = .net
         draft.dependants = 2
-        draft.period = .firstHalf
         draft.region = .iv
         draft.customInsurance = true
         draft.insuranceText = "5000000"
@@ -25,12 +63,12 @@ struct SalaryProfileTests {
         let saved = try #require(
             ModelContext(container).fetch(FetchDescriptor<SalaryProfile>()).first)
         #expect(profile.id == SalaryProfile.personalID)
-        #expect(saved.name == "An")
+        #expect(saved.name == "Salary")
         #expect(saved.basisRaw == "net")
         let reopened = SalaryProfileDraft(profile: saved)
         #expect(reopened.basis == .net)
         #expect(reopened.dependants == 2)
-        #expect(reopened.period == .firstHalf)
+        #expect(saved.periodRaw == SalaryCalculator.currentPeriod.rawValue)
         #expect(reopened.region == .iv)
         #expect(reopened.customInsurance)
         #expect(reopened.result?.net == 30_000_000)
@@ -47,7 +85,6 @@ struct SalaryProfileTests {
             for: Schema(MonMonSchema.models),
             configurations: ModelConfiguration(isStoredInMemoryOnly: true))
         var draft = SalaryProfileDraft()
-        draft.name = "An"
         draft.amountText = "30000000"
         let saved = try SalaryProfileStore.save(draft, in: container.mainContext)
         draft.amountText = "-5"
@@ -84,7 +121,6 @@ struct SalaryProfileTests {
             for: Schema(MonMonSchema.models),
             configurations: ModelConfiguration(isStoredInMemoryOnly: true))
         var draft = SalaryProfileDraft()
-        draft.name = "An"
         draft.amountText = "30000000"
         draft.basis = .net
         // A deleted rule is an optional link, not a reason to lose the profile.
@@ -114,7 +150,6 @@ struct SalaryProfileTests {
             for: Schema(MonMonSchema.models),
             configurations: ModelConfiguration(isStoredInMemoryOnly: true))
         var draft = SalaryProfileDraft()
-        draft.name = "An"
         draft.amountText = "30000000"
         let profile = try SalaryProfileStore.save(draft, in: container.mainContext)
         let day = Date(timeIntervalSince1970: 1_700_000_000)
@@ -182,7 +217,6 @@ struct SalaryProfileTests {
             for: Schema(MonMonSchema.models),
             configurations: ModelConfiguration(isStoredInMemoryOnly: true))
         var draft = SalaryProfileDraft()
-        draft.name = "An"
         draft.amountText = "30000000"
         draft.basis = .net
         _ = try SalaryProfileStore.save(draft, in: container.mainContext)
@@ -226,7 +260,6 @@ struct SalaryProfileTests {
                 try migrated.mainContext.fetch(FetchDescriptor<CashAccount>()).first?.id
                     == accountID)
             var draft = SalaryProfileDraft()
-            draft.name = "An"
             draft.amountText = "30000000"
             draft.basis = .net
             _ = try SalaryProfileStore.save(draft, in: migrated.mainContext)
@@ -242,7 +275,6 @@ struct SalaryProfileTests {
             for: Schema(MonMonSchema.models),
             configurations: ModelConfiguration(isStoredInMemoryOnly: true))
         var draft = SalaryProfileDraft()
-        draft.name = "An"
         draft.amountText = "30000000"
         let profile = try SalaryProfileStore.save(draft, in: container.mainContext)
         SyncWriteGate.lock(container)
@@ -274,7 +306,6 @@ struct SalaryProfileTests {
             for: Schema(MonMonSchema.models),
             configurations: ModelConfiguration(isStoredInMemoryOnly: true))
         var draft = SalaryProfileDraft()
-        draft.name = "An"
         draft.amountText = "30000000"
         let profile = try SalaryProfileStore.save(draft, in: container.mainContext)
         let result = try #require(draft.result)

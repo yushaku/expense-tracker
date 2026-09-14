@@ -1,14 +1,23 @@
 # Salary calculator
 
-Settings opens a monthly VND Gross ↔ Net calculator for resident Vietnamese employees with contracts of at least three months. 2026 rules only, selectable January–June or July–December. Inputs: salary, dependants, region, full/custom insurance salary. Show employee insurance, deductions, taxable income, tax and take-home pay. Round final amounts to whole VND.
+Settings opens a monthly VND Gross ↔ Net calculator for resident Vietnamese employees with contracts of at least three months. Fixed July–December 2026 rules; there is no period selector. Inputs: salary, dependants, region, full/custom insurance salary. Show employee insurance, deductions, taxable income, tax and take-home pay. Round final amounts to whole VND.
 
 ## Personal salary profile
 
-The SwiftData `SalaryProfile` table stores the owner's name, agreed salary amount,
+The SwiftData `SalaryProfile` table stores the agreed salary amount,
 agreed Gross/Net basis, dependant count, calculation period, insurance region,
 optional custom insurance salary and explicit recurring rule UUID. A fixed personal
 UUID makes two devices' edits resolve as a normal sync conflict. Save and discard
 are explicit; closing with unsaved changes asks before discarding.
+
+No name is entered or required to save. The legacy name field is retained for
+backup compatibility and defaults to `Salary` on new profiles. Salary and custom
+insurance amounts use the same currency symbol, rounded font, trailing alignment
+and field background as the app’s account and savings editors.
+
+Opening any profile uses July–December 2026 rules, including profiles originally
+saved for January–June. The next successful save records the current period;
+backup validation can still read historical period metadata.
 
 The calculator leads with estimated monthly take-home, groups agreed salary and
 insurance inputs, and shows a separate deduction breakdown. Gross/Net describes
@@ -59,3 +68,5 @@ Estimate excludes tax-exempt allowances, other income/deductions, foreign-worker
 Swift-format lint, the full macOS unit suite and iOS SDK compile pass. Tests cover progressive boundaries, both insurance-cap periods, custom bases and dependants, inverse calculations, explicit rule linkage and draft application without modifying generation history. Physical UI acceptance follows the next explicitly requested merge into dev.
 
 Profile tests also cover agreed-basis persistence, invalid-input rejection, atomic Net/link saves, retained-model rollback, sync write locks, legacy backup checksums, reset recovery, UUID remapping and on-disk migration/reopening.
+
+Regression coverage includes name-free save/reopen/export and current-period calculations for legacy profiles, with old metadata preserved if saving fails.

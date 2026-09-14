@@ -14,12 +14,15 @@ clear profile → inputs → take-home estimate → recurring salary flow.
 
 ## Proposed scope
 
-- Add a SwiftData `SalaryProfile` entity with a stable UUID, display name, salary
-  amount, Gross/Net input mode, dependant count, calculation period, insurance
+- Add a SwiftData `SalaryProfile` entity with a stable UUID, salary
+  amount, Gross/Net input mode, dependant count, fixed Jul–Dec 2026 period, insurance
   region, optional custom insurance salary, optional recurring rule UUID, and
   creation/update timestamps. Money uses `Decimal`, following existing models.
 - Initially expose one personal profile unless the user requests multiple people.
   Do not create authentication, accounts for signing in, or employee management.
+- No name input or name requirement for saving the personal profile. Retain the
+  old name field only for backup compatibility.
+- Match the Accounts/Savings currency input style for salary and insurance.
 - Save validated profile inputs explicitly; reopening restores the saved inputs.
   Canceling edits does not change stored values.
 - Present a clear Net estimate, Gross and total deductions, with a detailed
@@ -99,5 +102,5 @@ Hands-on acceptance belongs to the user after a separately requested merge into
 
 - Complete: profile model, validated draft, backup/restore/reset, sync and migration tests.
 - Complete: redesigned calculator, explicit Gross/Net agreement, recurring review and atomic link save.
-- Passed: swift-format lint, all 1,261 Mac tests (1,280 parameterized runs), and iOS SDK compile for arm64/x86_64.
+- Passed: swift-format lint, all 1,263 Mac tests (1,282 parameterized runs), and iOS SDK compile for arm64/x86_64.
 - User-owned hands-on UI acceptance remains after an explicitly requested merge into `dev`; no app was installed for this branch.

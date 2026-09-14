@@ -51,6 +51,15 @@ struct SalaryCalculatorView: View {
                             .foregroundStyle(MonMonTheme.danger)
                             .accessibilityIdentifier("salary-save-error")
                     }
+                    if syncCoordinator.writesLocked {
+                        Label(
+                            "Reconnect to finish the pending sync first.",
+                            systemImage: "arrow.triangle.2.circlepath"
+                        )
+                        .font(.caption)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                        .accessibilityIdentifier("salary-sync-locked")
+                    }
                     ViewThatFits(in: .horizontal) {
                         HStack(spacing: 12) { profileButtons }
                         VStack(alignment: .leading, spacing: 12) { profileButtons }
@@ -148,15 +157,6 @@ struct SalaryCalculatorView: View {
             VStack(alignment: .leading, spacing: 16) {
                 sectionHeader("Salary profile", systemImage: "person.crop.circle")
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Your name").font(.subheadline.weight(.medium))
-                    TextField("Your name", text: $draft.name)
-                        .textFieldStyle(.roundedBorder)
-                        .accessibilityIdentifier("salary-profile-name")
-                    if draft.name.count > 100 {
-                        validationText("Use a name with at most 100 characters.")
-                    }
-                }
-                VStack(alignment: .leading, spacing: 8) {
                     Text("Agreed salary basis").font(.subheadline.weight(.medium))
                     Picker("Agreed salary basis", selection: $draft.basis) {
                         Text("Gross").tag(SalaryBasis.gross)
@@ -174,16 +174,9 @@ struct SalaryCalculatorView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(draft.basis == .gross ? "Monthly Gross (VND)" : "Monthly Net (VND)")
                         .font(.subheadline.weight(.medium))
-                    VNDTextField(text: $draft.amountText)
-                        .textFieldStyle(.plain)
-                        .font(.title2.weight(.semibold))
-                        .monospacedDigit()
-                        .padding(14)
-                        .background(MonMonTheme.field, in: .rect(cornerRadius: 12))
-                        .accessibilityLabel(
-                            draft.basis == .gross ? "Monthly Gross (VND)" : "Monthly Net (VND)"
-                        )
-                        .accessibilityIdentifier("salary-amount")
+                    salaryAmountField(
+                        draft.basis == .gross ? "Monthly Gross (VND)" : "Monthly Net (VND)",
+                        text: $draft.amountText, identifier: "salary-amount")
                 }
                 if !draft.amountText.isEmpty && draft.result == nil {
                     validationText(
@@ -201,10 +194,9 @@ struct SalaryCalculatorView: View {
                     LabeledContent("Dependants", value: draft.dependants.formatted())
                 }
                 .accessibilityIdentifier("salary-dependants")
-                Picker("Calculation period", selection: $draft.period) {
-                    ForEach(SalaryCalculator.Period.allCases) { value in
-                        Text(LocalizedStringKey(value.rawValue)).tag(value)
-                    }
+                LabeledContent("Calculation period") {
+                    Text(LocalizedStringKey(SalaryCalculator.currentPeriod.rawValue))
+                        .foregroundStyle(MonMonTheme.textSecondary)
                 }
                 Picker("Region", selection: $draft.region) {
                     ForEach(SalaryCalculator.Region.allCases) { value in
@@ -217,10 +209,9 @@ struct SalaryCalculatorView: View {
                 if draft.customInsurance {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Insurance salary (VND)").font(.subheadline.weight(.medium))
-                        VNDTextField("Insurance salary (VND)", text: $draft.insuranceText)
-                            .textFieldStyle(.roundedBorder)
-                            .accessibilityLabel("Insurance salary (VND)")
-                            .accessibilityIdentifier("salary-insurance-amount")
+                        salaryAmountField(
+                            "Insurance salary (VND)", text: $draft.insuranceText,
+                            identifier: "salary-insurance-amount")
                     }
                 } else {
                     Text("Insurance is calculated on full Gross, subject to statutory caps.")
@@ -353,6 +344,26 @@ struct SalaryCalculatorView: View {
                 Link("Reference: TopCV", destination: url).font(.caption)
             }
         }
+    }
+
+    private func salaryAmountField(
+        _ label: LocalizedStringKey, text: Binding<String>, identifier: String
+    ) -> some View {
+        HStack(spacing: 12) {
+            Text("₫")
+                .font(.title2.weight(.bold))
+                .foregroundStyle(MonMonTheme.accent)
+                .accessibilityHidden(true)
+            VNDTextField(text: text)
+                .textFieldStyle(.plain)
+                .font(.system(.title2, design: .rounded, weight: .semibold))
+                .monospacedDigit()
+                .multilineTextAlignment(.trailing)
+                .accessibilityLabel(label)
+                .accessibilityIdentifier(identifier)
+        }
+        .padding(16)
+        .background(MonMonTheme.field, in: .rect(cornerRadius: 12))
     }
 
     private func moneyRow(_ title: LocalizedStringKey, _ amount: Decimal) -> some View {
