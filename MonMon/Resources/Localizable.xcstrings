@@ -1,6 +1,26 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Clear financial data on this device and disconnect Device Sync.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xoá dữ liệu tài chính trên thiết bị này và ngắt Đồng bộ thiết bị."
+          }
+        }
+      }
+    },
+    "Notes, proposals, app settings, and data on other devices are kept.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi chú, đề xuất, cài đặt ứng dụng và dữ liệu trên thiết bị khác được giữ lại."
+          }
+        }
+      }
+    },
   "MonMon cannot access pairing keys. The app's signing or Keychain permissions need to be checked.": {
     "localizations": {
       "vi": {
