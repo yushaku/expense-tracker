@@ -17,8 +17,17 @@ each automation target a different account.
   amount is accepted; balances, bare numbers, OTPs, failed/pending transactions,
   transfers and unknown formats require review. There are no verified bank-specific
   adapters yet. Existing income/expense category defaults apply.
-- Preserve the supplied notification text and source in the note. Use the supplied
-  received date, not an inferred transaction date.
+- Use the value of a single nonempty `ND:` line as the note (as in TPBank
+  notifications). Trim surrounding whitespace, preserve case/accents, and support
+  LF, CRLF and CR line endings. Match the uppercase label only at a line's start
+  after whitespace. Missing, empty or multiple `ND:` lines retain the complete
+  notification and source as the note. Shortcuts must still forward the full text;
+  no Match Text action is needed. This applies to new captures, not existing notes.
+- Preserve the supplied notification text and source separately in the capture's
+  `rawText` for review. Amount parsing, safety checks and event identity continue
+  to use the full message. Extracting `ND:` does not add support for TPBank's `PS:`
+  amount format; those messages still need review. Use the supplied received date,
+  not an inferred transaction date.
 - The same text, source, account and received date produces the same record id.
   Replaying that event cannot add a second pending item or transaction, including
   after review. Different dates distinguish otherwise identical transactions.
@@ -62,9 +71,12 @@ notification-to-action field mapping must be verified on the user's iPhone.
 ## Verification (2026-09-15)
 
 - Swift format lint passed.
-- Complete macOS test suite passed: 1,272 tests, no failures or skips (1,305
+- Complete macOS test suite passed: 1,275 tests, no failures or skips (1,315
   executions including parameterized cases).
+- Note-extraction regression tests failed before the change and passed afterward.
+  They cover the TPBank sample, persisted notes/raw text, retry deduplication,
+  whitespace/Unicode, line endings, and missing/empty/ambiguous fields.
 - iOS compile check passed using the installed iPhoneSimulator 26.5 SDK, arm64
   and x86_64; no Simulator was launched.
 - Physical iOS 27 notification delivery and UI acceptance remain unverified.
-  The branch has not been merged into dev or installed on the phone.
+  The note-extraction change has not been merged into dev or installed on the phone.

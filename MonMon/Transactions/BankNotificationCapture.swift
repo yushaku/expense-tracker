@@ -13,7 +13,16 @@ struct BankNotificationEvent: Sendable {
     let source: String
     let receivedAt: Date
 
-    var note: String { "[\(source.trimmingCharacters(in: .whitespacesAndNewlines))]\n\(text)" }
+    var rawText: String { "[\(source.trimmingCharacters(in: .whitespacesAndNewlines))]\n\(text)" }
+
+    var note: String {
+        let contentLines = text.split(whereSeparator: \.isNewline)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { $0.hasPrefix("ND:") }
+        guard contentLines.count == 1, let line = contentLines.first else { return rawText }
+        let content = line.dropFirst(3).trimmingCharacters(in: .whitespaces)
+        return content.isEmpty ? rawText : content
+    }
 
     /// Include the original event date: equal-valued payments at different times
     /// must remain distinct. Callers must reuse that date when retrying an event.
@@ -113,7 +122,7 @@ enum BankNotificationParser {
             issues.insert(.missingCategory)
         }
         return ParsedTransactionCapture(
-            rawText: event.note,
+            rawText: event.rawText,
             kind: kind,
             amount: amount,
             occurredAt: event.receivedAt,

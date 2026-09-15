@@ -196,7 +196,13 @@ whole-VND amount (for example `GD: -50.000 VND; SD: 9.950.000 VND`). This is a
 conservative generic format, not a verified bank-specific adapter. Unsupported
 formats, transfers and uncertain messages stay in review. Income and expense use
 their existing default categories. The received date is used as the record date;
-no date is inferred from the message. The complete supplied text remains in the note.
+no date is inferred from the message. For new captures, a single nonempty `ND:`
+line becomes the note, with surrounding whitespace removed (for example,
+`ND: Le Van Son chuyen tien zalo` → `Le Van Son chuyen tien zalo`). Missing, empty
+or multiple `ND:` lines keep the complete supplied text and source as the note.
+The original text remains available in Needs review. Send the full notification
+to MonMon; no Shortcuts Match Text step is needed. Note extraction does not add
+support for TPBank's `PS:` amount format, which still requires review.
 
 Retry deduplication uses the same text, source, account and original received date.
 Keep that date unchanged when retrying; a fresh Current Date is a different event.
