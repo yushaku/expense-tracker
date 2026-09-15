@@ -57,8 +57,13 @@ struct SettingsView: View {
                             NavigationLink {
                                 BankNotificationSettingsView()
                             } label: {
-                                Label("Bank notifications", systemImage: "bell.badge")
-                                    .frame(minHeight: 44)
+                                HStack {
+                                    Label("Bank notifications", systemImage: "bell.badge")
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .accessibilityHidden(true)
+                                }
+                                .frame(minHeight: 44)
                             }
                             .settingsButtonLabelStyle()
                             .accessibilityIdentifier("settings-bank-notifications")
@@ -68,8 +73,14 @@ struct SettingsView: View {
                                 NavigationLink {
                                     ResearchNotebookView()
                                 } label: {
-                                    Label("Research & proposals", systemImage: "text.book.closed")
-                                        .frame(minHeight: 44)
+                                    HStack {
+                                        Label(
+                                            "Research & proposals", systemImage: "text.book.closed")
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .accessibilityHidden(true)
+                                    }
+                                    .frame(minHeight: 44)
                                 }
                                 .settingsButtonLabelStyle()
                                 .accessibilityIdentifier("settings-research-notebook")

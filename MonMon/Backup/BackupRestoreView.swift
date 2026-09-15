@@ -119,9 +119,9 @@ struct BackupRestoreView: View {
                     isPresentingExportWarning = true
                 } label: {
                     Label("Export Backup", systemImage: "square.and.arrow.up")
+                        .settingsButtonLabelStyle()
                 }
                 .buttonStyle(.prominentAction)
-                .settingsButtonLabelStyle()
                 .disabled(isWorking)
                 .frame(minHeight: 44)
                 .accessibilityIdentifier("backup-export")
@@ -130,11 +130,11 @@ struct BackupRestoreView: View {
                     isPresentingImporter = true
                 } label: {
                     Label("Restore Backup", systemImage: "arrow.counterclockwise")
+                        .settingsButtonLabelStyle()
                 }
                 .buttonStyle(.bordered)
                 .buttonBorderShape(.capsule)
                 .controlSize(.large)
-                .settingsButtonLabelStyle()
                 .tint(MonMonTheme.danger)
                 .frame(minHeight: 44)
                 .disabled(isWorking)
@@ -144,11 +144,11 @@ struct BackupRestoreView: View {
                         prepareRecoveryPreview()
                     } label: {
                         Label("Restore Previous Data", systemImage: "clock.arrow.circlepath")
+                            .settingsButtonLabelStyle()
                     }
                     .buttonStyle(.bordered)
                     .buttonBorderShape(.capsule)
                     .controlSize(.large)
-                    .settingsButtonLabelStyle()
                     .tint(MonMonTheme.danger)
                     .frame(minHeight: 44)
                     .disabled(isWorking)
@@ -265,12 +265,12 @@ struct BackupRestoreView: View {
                     isConfirmingReset = true
                 } label: {
                     Label("Back Up and Reset", systemImage: "trash")
+                        .settingsButtonLabelStyle()
                         .padding(.vertical, 4)
                 }
                 .buttonStyle(.bordered)
                 .buttonBorderShape(.capsule)
                 .controlSize(.large)
-                .settingsButtonLabelStyle()
                 .tint(MonMonTheme.danger)
                 .frame(minHeight: 44)
                 .disabled(isWorking || syncCoordinator.writesLocked)
@@ -305,7 +305,6 @@ struct BackupRestoreView: View {
                     .buttonStyle(.bordered)
                     .buttonBorderShape(.capsule)
                     .controlSize(.large)
-                    .settingsButtonLabelStyle()
                     .disabled(isWorking)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -319,6 +318,7 @@ struct BackupRestoreView: View {
     private var resetBackupActions: some View {
         ShareLink(item: URL(fileURLWithPath: lastResetPath)) {
             Label("Export Backup", systemImage: "square.and.arrow.up")
+                .settingsButtonLabelStyle()
                 .padding(.vertical, 4)
         }
         .tint(MonMonTheme.accent)
@@ -328,6 +328,7 @@ struct BackupRestoreView: View {
             prepareImportedPreview(from: URL(fileURLWithPath: lastResetPath))
         } label: {
             Label("Restore Reset Backup", systemImage: "arrow.counterclockwise")
+                .settingsButtonLabelStyle()
                 .padding(.vertical, 4)
         }
         .tint(MonMonTheme.danger)
