@@ -4,12 +4,31 @@ import SwiftData
 import SwiftUI
 
 #if os(macOS)
+    import Security
+
     @main
     @MainActor
     enum MonMonEntryPoint {
         static func main() async {
             if CommandLine.arguments.contains("--mcp-stdio") {
                 await MCPServerAdapter.runStdio()
+                return
+            }
+            if CommandLine.arguments.contains("--check-pairing-keychain") {
+                // Exercise the signed app's actual Keychain access without opening
+                // the database or changing the device's real pairing.
+                do {
+                    let probe = try SyncPairing.make(hostID: UUID())
+                    defer { SyncKeychain.delete(probe.pairID) }
+                    try SyncKeychain.save(probe)
+                    guard try SyncKeychain.load(probe.pairID) == probe else {
+                        throw SyncKeychainError(status: errSecDecode)
+                    }
+                    print("Pairing Keychain write/read succeeded.")
+                } catch {
+                    print(error.localizedDescription)
+                    exit(EXIT_FAILURE)
+                }
                 return
             }
             MonMonApp.main()
