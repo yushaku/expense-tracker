@@ -75,12 +75,14 @@ struct AvatarSettingsContent: View {
                 Button("Change avatar", systemImage: "photo") {
                     isPhotoPickerPresented = true
                 }
+                .settingsButtonLabelStyle()
                 .accessibilityIdentifier("change-avatar")
 
                 if !data.isEmpty {
                     Button("Remove photo", systemImage: "trash", role: .destructive) {
                         data = Data()
                     }
+                    .settingsButtonLabelStyle()
                     .accessibilityIdentifier("remove-avatar")
                 }
             } label: {

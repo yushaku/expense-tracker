@@ -33,6 +33,7 @@
                 } label: {
                     Label("Research & proposals", systemImage: "text.book.closed")
                 }
+                .settingsButtonLabelStyle()
                 .accessibilityIdentifier("mcp-research-notebook")
 
                 Divider()
@@ -55,6 +56,7 @@
                     Button("Connect Hermes") {
                         Task { await accessManager.connectHermes() }
                     }
+                    .settingsButtonLabelStyle()
                     .disabled(accessManager.isWorking)
                     .accessibilityIdentifier("mcp-connect-hermes")
                 }
@@ -69,6 +71,7 @@
                         Label("Repair client setup", systemImage: "wrench.and.screwdriver.fill")
                     }
                     .buttonStyle(.prominentAction)
+                    .settingsButtonLabelStyle()
                     .disabled(accessManager.isWorking)
                     .accessibilityIdentifier("mcp-repair")
                 }

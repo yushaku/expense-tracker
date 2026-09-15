@@ -156,6 +156,7 @@ struct NotificationSettingsCard: View {
                     openURL(url)
                 }
                 .buttonStyle(.prominentAction)
+                .settingsButtonLabelStyle()
                 .accessibilityIdentifier("open-notification-settings")
             #endif
         }

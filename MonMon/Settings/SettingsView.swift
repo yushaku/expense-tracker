@@ -54,6 +54,7 @@ struct SettingsView: View {
                                     onOpenDeviceSync()
                                 }
                                 .buttonStyle(.prominentAction)
+                                .settingsButtonLabelStyle()
                                 .accessibilityIdentifier("settings-device-sync")
                             }
                         }
@@ -68,6 +69,7 @@ struct SettingsView: View {
                                 }
                                 .frame(minHeight: 44)
                             }
+                            .settingsButtonLabelStyle()
                             .accessibilityIdentifier("settings-salary-calculator")
                         }
                         notificationCard
@@ -84,6 +86,7 @@ struct SettingsView: View {
                                     Label("Research & proposals", systemImage: "text.book.closed")
                                         .frame(minHeight: 44)
                                 }
+                                .settingsButtonLabelStyle()
                                 .accessibilityIdentifier("settings-research-notebook")
                             }
                         #endif
@@ -291,6 +294,7 @@ struct SettingsView: View {
             #if os(iOS)
                 ShortcutsLink()
                     .shortcutsLinkStyle(.automaticOutline)
+                    .settingsButtonLabelStyle()
                     .accessibilityIdentifier("open-monmon-shortcuts")
                     .padding(.top, 2)
             #endif
@@ -391,6 +395,7 @@ struct SettingsView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .settingsButtonLabelStyle()
         .accessibilityHint("Opens instrument management")
         .accessibilityIdentifier("settings-\(scope.rawValue)-instruments")
     }
@@ -449,6 +454,12 @@ struct SettingsView: View {
         Label(title, systemImage: systemImage)
             .font(.headline)
             .foregroundStyle(MonMonTheme.textPrimary)
+    }
+}
+
+extension View {
+    func settingsButtonLabelStyle() -> some View {
+        font(.subheadline.weight(.semibold))
     }
 }
 
