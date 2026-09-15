@@ -182,6 +182,31 @@ rtk swift format lint --strict --recursive MonMon MonMonTests MonMonShareExtensi
 
 ### Adding transactions
 
+**Bank notifications (iOS 27 Shortcuts)** — open Settings → Bank notifications
+to select a destination account and follow the setup guide. Choose the bank app
+in a Shortcuts notification automation, then add MonMon → Record Bank
+Notification. Pass the notification text, source app label and received date.
+The optional Account parameter overrides the account selected in Settings for
+that automation, allowing multiple banks to use different accounts.
+
+Capture defaults to Needs review. A sample check in Settings previews the result
+without saving. Automatic saving is opt-in and currently recognizes only messages
+starting with `GD:`, `Giao dịch:` or `Transaction:` followed by one signed,
+whole-VND amount (for example `GD: -50.000 VND; SD: 9.950.000 VND`). This is a
+conservative generic format, not a verified bank-specific adapter. Unsupported
+formats, transfers and uncertain messages stay in review. Income and expense use
+their existing default categories. The received date is used as the record date;
+no date is inferred from the message. The complete supplied text remains in the note.
+
+Retry deduplication uses the same text, source, account and original received date.
+Keep that date unchanged when retrying; a fresh Current Date is a different event.
+It does not reconcile notifications with PDF imports or manually entered records.
+Deleting a capture allows that event to be captured again. MonMon cannot read
+other apps' notifications directly. The available Shortcuts payload and delivery
+while locked still need acceptance testing on the physical iPhone.
+
+See [the notification capture spec](docs/bank-notification-capture-spec.md).
+
 Add Transaction has Expense, Income, and Quick Add tabs. In **Quick Add**, type a
 sentence such as `50k lunch cash yesterday`, then choose **Fill transaction details**.
 The editor switches to the matching Expense or Income tab to review or complete

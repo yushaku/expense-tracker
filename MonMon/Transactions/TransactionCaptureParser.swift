@@ -29,6 +29,7 @@ enum TransactionCaptureIssue: String, Codable, Equatable, Hashable, Sendable {
     case ambiguousAccount
     case missingCategory
     case ambiguousCategory
+    case notificationNeedsReview
 }
 
 struct ParsedTransactionCapture: Equatable, Sendable {

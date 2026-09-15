@@ -74,6 +74,16 @@ struct SettingsView: View {
                         }
                         notificationCard
                         voiceCaptureCard
+                        card {
+                            NavigationLink {
+                                BankNotificationSettingsView()
+                            } label: {
+                                Label("Bank notifications", systemImage: "bell.badge")
+                                    .frame(minHeight: 44)
+                            }
+                            .settingsButtonLabelStyle()
+                            .accessibilityIdentifier("settings-bank-notifications")
+                        }
                         securityCard
                         backupCard
                         #if os(macOS)
