@@ -36,79 +36,75 @@ struct SalaryCalculatorView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    if let result = draft.result { summaryCard(result) }
-                    profileCard
-                    deductionsCard
-                    if let result = draft.result { breakdownCard(result) }
-                    recurringCard
-                    if let saveError {
-                        Label(saveError, systemImage: "exclamationmark.circle.fill")
-                            .font(.subheadline)
-                            .foregroundStyle(MonMonTheme.danger)
-                            .accessibilityIdentifier("salary-save-error")
-                    }
-                    if syncCoordinator.writesLocked {
-                        Label(
-                            "Reconnect to finish the pending sync first.",
-                            systemImage: "arrow.triangle.2.circlepath"
-                        )
-                        .font(.caption)
-                        .foregroundStyle(MonMonTheme.textSecondary)
-                        .accessibilityIdentifier("salary-sync-locked")
-                    }
-                    ViewThatFits(in: .horizontal) {
-                        HStack(spacing: 12) { profileButtons }
-                        VStack(alignment: .leading, spacing: 12) { profileButtons }
-                    }
-                    estimateNote
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                if let result = draft.result { summaryCard(result) }
+                profileCard
+                deductionsCard
+                if let result = draft.result { breakdownCard(result) }
+                recurringCard
+                if let saveError {
+                    Label(saveError, systemImage: "exclamationmark.circle.fill")
+                        .font(.subheadline)
+                        .foregroundStyle(MonMonTheme.danger)
+                        .accessibilityIdentifier("salary-save-error")
                 }
-                .frame(maxWidth: 680)
-                .padding(20)
-                .frame(maxWidth: .infinity)
-            }
-            .background(MonMonTheme.canvas)
-            .navigationTitle("Salary calculator")
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button("Close", systemImage: "xmark") {
-                        if hasUnsavedChanges { isConfirmingDiscard = true } else { dismiss() }
-                    }
-                    .labelStyle(.iconOnly)
-                    .tint(MonMonTheme.textSecondary)
-                    .accessibilityIdentifier("salary-close")
+                if syncCoordinator.writesLocked {
+                    Label(
+                        "Reconnect to finish the pending sync first.",
+                        systemImage: "arrow.triangle.2.circlepath"
+                    )
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                    .accessibilityIdentifier("salary-sync-locked")
                 }
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 12) { profileButtons }
+                    VStack(alignment: .leading, spacing: 12) { profileButtons }
+                }
+                estimateNote
             }
-            .confirmationDialog(
-                "Discard salary changes?", isPresented: $isConfirmingDiscard,
-                titleVisibility: .visible
-            ) {
-                Button("Discard changes", role: .destructive) { dismiss() }
-                Button("Keep editing", role: .cancel) {}
-            }
-            .interactiveDismissDisabled(hasUnsavedChanges)
-            .appSheet(item: $editor, onDismiss: reloadProfile) { presentation in
-                RecurringEditorView(
-                    mode: presentation.mode, initialDraft: presentation.draft,
-                    linkSalaryProfile: true)
-            }
-            .onAppear {
-                guard !didLoad else { return }
-                didLoad = true
-                reloadProfile()
-            }
-            .onChange(of: profile?.updatedAt) { _, _ in
-                if !hasUnsavedChanges && editor == nil { reloadProfile() }
-            }
-            .onChange(of: draft) { _, _ in saveError = nil }
-            .tint(MonMonTheme.accent)
-            .foregroundStyle(MonMonTheme.textPrimary)
+            .frame(maxWidth: 680)
+            .padding(20)
+            .frame(maxWidth: .infinity)
         }
-        #if os(macOS)
-            .frame(minWidth: 560, minHeight: 720)
-        #endif
+        .background(MonMonTheme.canvas)
+        .navigationTitle("Salary calculator")
+        .navigationBarBackButtonHidden(hasUnsavedChanges)
+        .toolbar {
+            if hasUnsavedChanges {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Settings", systemImage: "chevron.backward") {
+                        isConfirmingDiscard = true
+                    }
+                    .accessibilityIdentifier("salary-back")
+                }
+            }
+        }
+        .confirmationDialog(
+            "Discard salary changes?", isPresented: $isConfirmingDiscard,
+            titleVisibility: .visible
+        ) {
+            Button("Discard changes", role: .destructive) { dismiss() }
+            Button("Keep editing", role: .cancel) {}
+        }
+        .interactiveDismissDisabled(hasUnsavedChanges)
+        .appSheet(item: $editor, onDismiss: reloadProfile) { presentation in
+            RecurringEditorView(
+                mode: presentation.mode, initialDraft: presentation.draft,
+                linkSalaryProfile: true)
+        }
+        .onAppear {
+            guard !didLoad else { return }
+            didLoad = true
+            reloadProfile()
+        }
+        .onChange(of: profile?.updatedAt) { _, _ in
+            if !hasUnsavedChanges && editor == nil { reloadProfile() }
+        }
+        .onChange(of: draft) { _, _ in saveError = nil }
+        .tint(MonMonTheme.accent)
+        .foregroundStyle(MonMonTheme.textPrimary)
     }
 
     private func summaryCard(_ result: SalaryCalculator.Result) -> some View {
