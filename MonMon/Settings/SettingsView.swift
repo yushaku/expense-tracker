@@ -40,6 +40,42 @@ struct SettingsView: View {
                         appearanceCard
                         instrumentsCard
                         card {
+                            Button {
+                                isSalaryCalculatorPresented = true
+                            } label: {
+                                HStack {
+                                    Label("Salary calculator", systemImage: "banknote")
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                }
+                                .frame(minHeight: 44)
+                            }
+                            .settingsButtonLabelStyle()
+                            .accessibilityIdentifier("settings-salary-calculator")
+                        }
+                        card {
+                            NavigationLink {
+                                BankNotificationSettingsView()
+                            } label: {
+                                Label("Bank notifications", systemImage: "bell.badge")
+                                    .frame(minHeight: 44)
+                            }
+                            .settingsButtonLabelStyle()
+                            .accessibilityIdentifier("settings-bank-notifications")
+                        }
+                        #if !os(macOS)
+                            card {
+                                NavigationLink {
+                                    ResearchNotebookView()
+                                } label: {
+                                    Label("Research & proposals", systemImage: "text.book.closed")
+                                        .frame(minHeight: 44)
+                                }
+                                .settingsButtonLabelStyle()
+                                .accessibilityIdentifier("settings-research-notebook")
+                            }
+                        #endif
+                        card {
                             VStack(alignment: .leading, spacing: 14) {
                                 sectionHeader(
                                     "Device Sync", systemImage: "laptopcomputer.and.iphone")
@@ -58,47 +94,12 @@ struct SettingsView: View {
                                 .accessibilityIdentifier("settings-device-sync")
                             }
                         }
-                        card {
-                            Button {
-                                isSalaryCalculatorPresented = true
-                            } label: {
-                                HStack {
-                                    Label("Salary calculator", systemImage: "banknote")
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                }
-                                .frame(minHeight: 44)
-                            }
-                            .settingsButtonLabelStyle()
-                            .accessibilityIdentifier("settings-salary-calculator")
-                        }
                         notificationCard
                         voiceCaptureCard
-                        card {
-                            NavigationLink {
-                                BankNotificationSettingsView()
-                            } label: {
-                                Label("Bank notifications", systemImage: "bell.badge")
-                                    .frame(minHeight: 44)
-                            }
-                            .settingsButtonLabelStyle()
-                            .accessibilityIdentifier("settings-bank-notifications")
-                        }
                         securityCard
                         backupCard
                         #if os(macOS)
                             MCPSettingsCard()
-                        #else
-                            card {
-                                NavigationLink {
-                                    ResearchNotebookView()
-                                } label: {
-                                    Label("Research & proposals", systemImage: "text.book.closed")
-                                        .frame(minHeight: 44)
-                                }
-                                .settingsButtonLabelStyle()
-                                .accessibilityIdentifier("settings-research-notebook")
-                            }
                         #endif
                         aboutCard
                     }
