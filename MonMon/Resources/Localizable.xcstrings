@@ -1,6 +1,386 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Bank notifications": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thông báo ngân hàng"
+          }
+        }
+      }
+    },
+    "Connect a bank app": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kết nối ứng dụng ngân hàng"
+          }
+        }
+      }
+    },
+    "Choose the app in Shortcuts on your iPhone. MonMon receives only the text your automation sends.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn ứng dụng trong Phím tắt trên iPhone. MonMon chỉ nhận nội dung do tác vụ tự động của bạn gửi đến."
+          }
+        }
+      }
+    },
+    "Notification automation requires iOS 27. Setup and locked-screen delivery must be checked on your iPhone.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tự động hóa từ thông báo cần iOS 27. Hãy kiểm tra thiết lập và việc nhận thông báo khi khóa màn hình trên iPhone."
+          }
+        }
+      }
+    },
+    "Destination account": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tài khoản nhận giao dịch"
+          }
+        }
+      }
+    },
+    "Account unavailable": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tài khoản không còn khả dụng"
+          }
+        }
+      }
+    },
+    "For multiple banks, choose Account inside each MonMon action in Shortcuts. Leaving it empty uses this account.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nếu dùng nhiều ngân hàng, hãy chọn Tài khoản trong từng tác vụ MonMon ở Phím tắt. Để trống sẽ dùng tài khoản này."
+          }
+        }
+      }
+    },
+    "Automatically save recognized transactions": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tự lưu giao dịch đã nhận diện"
+          }
+        }
+      }
+    },
+    "Start with review, then enable automatic saving after checking your bank’s messages. Unknown formats and transfers always need review. Income and expense use your default categories.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bắt đầu với chế độ chờ duyệt, rồi bật tự lưu sau khi kiểm tra thông báo ngân hàng. Mẫu chưa nhận diện và chuyển khoản luôn cần duyệt. Thu và chi dùng danh mục mặc định của bạn."
+          }
+        }
+      }
+    },
+    "Check a sample": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiểm tra mẫu thông báo"
+          }
+        }
+      }
+    },
+    "Paste a notification to see whether MonMon can read it. This check never saves a transaction.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dán thông báo để xem MonMon có đọc được không. Việc kiểm tra này không lưu giao dịch."
+          }
+        }
+      }
+    },
+    "Notification text": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nội dung thông báo"
+          }
+        }
+      }
+    },
+    "Check sample": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiểm tra mẫu"
+          }
+        }
+      }
+    },
+    "Couldn’t check this sample. Check the account and notification text.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể kiểm tra mẫu này. Hãy kiểm tra tài khoản và nội dung thông báo."
+          }
+        }
+      }
+    },
+    "Recognized — eligible for automatic saving": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã nhận diện — có thể tự lưu"
+          }
+        }
+      }
+    },
+    "Needs review — will not be saved automatically": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cần duyệt — không tự lưu"
+          }
+        }
+      }
+    },
+    "Recent activity": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoạt động gần đây"
+          }
+        }
+      }
+    },
+    "Last notification saved as a transaction.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thông báo gần nhất đã được lưu thành giao dịch."
+          }
+        }
+      }
+    },
+    "Last notification is waiting for review.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thông báo gần nhất đang chờ duyệt."
+          }
+        }
+      }
+    },
+    "Last notification was already received.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thông báo gần nhất đã được nhận trước đó."
+          }
+        }
+      }
+    },
+    "Last attempt failed. Check the automation’s text and account.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lần nhận gần nhất thất bại. Hãy kiểm tra nội dung và tài khoản trong tác vụ tự động."
+          }
+        }
+      }
+    },
+    "No notification received yet. Run your automation to check the connection.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa nhận thông báo nào. Chạy tác vụ tự động để kiểm tra kết nối."
+          }
+        }
+      }
+    },
+    "Set up in Shortcuts": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thiết lập trong Phím tắt"
+          }
+        }
+      }
+    },
+    "1. Create a notification automation and choose your bank app. Add a filter for transaction messages.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1. Tạo tác vụ tự động khi nhận thông báo và chọn ứng dụng ngân hàng. Thêm bộ lọc cho thông báo giao dịch."
+          }
+        }
+      }
+    },
+    "2. Add MonMon → Record Bank Notification. Pass the notification’s text, including its title if needed, and enter the source app name.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2. Thêm MonMon → Ghi nhận thông báo ngân hàng. Truyền nội dung thông báo, kèm tiêu đề nếu cần, và nhập tên ứng dụng gửi."
+          }
+        }
+      }
+    },
+    "3. Set Received at to the notification’s date if available. Otherwise, use Current Date once at the start. Reuse that value if you retry the same event.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3. Đặt Thời điểm nhận bằng thời gian của thông báo nếu có. Nếu không, lấy Ngày hiện tại một lần ở đầu tác vụ. Dùng lại giá trị đó khi thử lại cùng thông báo."
+          }
+        }
+      }
+    },
+    "4. Choose Account in the action, or leave it empty to use the account above. Set the automation to run immediately.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "4. Chọn Tài khoản trong tác vụ, hoặc để trống để dùng tài khoản ở trên. Đặt tác vụ tự động chạy ngay lập tức."
+          }
+        }
+      }
+    },
+    "5. Keep automatic saving off for the first real notification. Check Needs review, including a test with your iPhone locked.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5. Giữ chế độ tự lưu tắt với thông báo thật đầu tiên. Kiểm tra mục Cần duyệt, bao gồm thử khi iPhone khóa màn hình."
+          }
+        }
+      }
+    },
+    "Create a separate automation for each bank app. If Shortcuts supplies no message text, this connection cannot create a transaction.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tạo tác vụ tự động riêng cho mỗi ứng dụng ngân hàng. Nếu Phím tắt không cung cấp nội dung thông báo, kết nối này không thể tạo giao dịch."
+          }
+        }
+      }
+    },
+    "Every captured transaction has been handled.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tất cả giao dịch đã ghi nhận đều được xử lý."
+          }
+        }
+      }
+    },
+    "Record Bank Notification": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi nhận thông báo ngân hàng"
+          }
+        }
+      }
+    },
+    "Receive bank notification text from Shortcuts. Choose the bank app in your automation.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhận nội dung thông báo ngân hàng từ Phím tắt. Chọn ứng dụng ngân hàng trong tác vụ tự động."
+          }
+        }
+      }
+    },
+    "Source app": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ứng dụng gửi"
+          }
+        }
+      }
+    },
+    "Received at": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thời điểm nhận"
+          }
+        }
+      }
+    },
+    "Use the original notification date. Keep the same date when retrying.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dùng thời gian gốc của thông báo. Giữ nguyên thời gian khi thử lại."
+          }
+        }
+      }
+    },
+    "This notification was already received.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thông báo này đã được nhận trước đó."
+          }
+        }
+      }
+    },
+    "Couldn’t save the notification. Check its text and account in Bank notifications.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể lưu thông báo. Kiểm tra nội dung và tài khoản trong mục Thông báo ngân hàng."
+          }
+        }
+      }
+    },
+    "Record ${notificationText} from ${sourceApp} at ${receivedAt}": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi nhận ${notificationText} từ ${sourceApp} lúc ${receivedAt}"
+          }
+        }
+      }
+    },
     "Save profile": {
       "localizations": {
         "vi": {

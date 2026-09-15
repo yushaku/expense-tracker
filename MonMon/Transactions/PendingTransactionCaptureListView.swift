@@ -20,7 +20,7 @@ struct PendingTransactionCaptureListView: View {
                     ContentUnavailableView(
                         "Nothing to review",
                         systemImage: "checkmark.circle.fill",
-                        description: Text("Every spoken transaction has been handled.")
+                        description: Text("Every captured transaction has been handled.")
                     )
                 } else {
                     ScrollView {

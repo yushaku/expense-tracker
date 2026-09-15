@@ -97,6 +97,61 @@ struct TransactionCaptureService {
         }
     }
 
+    func prepareNotification(
+        _ event: BankNotificationEvent,
+        accountID: UUID?,
+        automaticSave: Bool? = nil
+    ) throws -> ParsedTransactionCapture {
+        guard !event.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+            !event.source.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+            event.text.utf8.count <= 16_384, event.source.utf8.count <= 256,
+            event.receivedAt.timeIntervalSince1970.isFinite
+        else { throw TransactionCaptureServiceError.emptyCapture }
+
+        let context = ModelContext(container)
+        let accounts = try context.fetch(FetchDescriptor<CashAccount>())
+        let categories = try context.fetch(FetchDescriptor<TransactionCategory>())
+        let selectedID =
+            accountID
+            ?? UUID(
+                uuidString: defaults.string(forKey: BankNotificationPreferences.accountKey) ?? "")
+        guard let selectedID, accounts.contains(where: { $0.id == selectedID }) else {
+            throw TransactionCaptureServiceError.staleCapture
+        }
+        return BankNotificationParser.parse(
+            event, accountID: selectedID,
+            context: captureContext(accounts: accounts, categories: categories),
+            automaticSave: automaticSave
+                ?? defaults.bool(forKey: BankNotificationPreferences.automaticSaveKey)
+        )
+    }
+
+    /// MainActor serializes lookup and save without a suspension point. Reuse the
+    /// event id when review promotes a pending capture to a transaction.
+    func recordNotification(
+        _ event: BankNotificationEvent,
+        accountID: UUID?
+    ) throws -> (result: TransactionCaptureCommitResult, duplicate: Bool) {
+        let capture = try prepareNotification(event, accountID: accountID)
+        guard let destinationID = capture.accountID else {
+            throw TransactionCaptureServiceError.staleCapture
+        }
+        let id = event.id(accountID: destinationID)
+        let context = ModelContext(container)
+        var transactions = FetchDescriptor<MoneyTransaction>(predicate: #Predicate { $0.id == id })
+        transactions.fetchLimit = 1
+        if try !context.fetch(transactions).isEmpty {
+            return (TransactionCaptureCommitResult(id: id, disposition: .transaction), true)
+        }
+        var pending = FetchDescriptor<PendingTransactionCapture>(
+            predicate: #Predicate { $0.id == id })
+        pending.fetchLimit = 1
+        if try !context.fetch(pending).isEmpty {
+            return (TransactionCaptureCommitResult(id: id, disposition: .pendingReview), true)
+        }
+        return (try commit(capture, id: id), false)
+    }
+
     func commit(
         _ capture: ParsedTransactionCapture,
         id: UUID = UUID(),

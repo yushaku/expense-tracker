@@ -252,6 +252,187 @@ struct TransactionCaptureServiceTests {
         #expect(try context.fetch(FetchDescriptor<PendingTransactionCapture>()).isEmpty)
     }
 
+    @Test("Notification parser reads a labelled movement, not its balance or account number")
+    func notificationRecognizesMovement() throws {
+        let fixture = try makeFixture()
+        let event = BankNotificationEvent(
+            text: "GD: -50.000 VND; TK 0123456789; SD: 9.950.000 VND", source: "Bank",
+            receivedAt: now)
+        let capture = try fixture.service.prepareNotification(
+            event, accountID: fixture.accountID, automaticSave: true)
+        #expect(capture.isReady)
+        #expect(capture.amount == 50_000)
+        #expect(capture.kind == .expense)
+        #expect(capture.occurredAt == now)
+        #expect(capture.note == event.note)
+        #expect(capture.categoryID == fixture.categoryID)
+    }
+
+    @Test(
+        "Unknown and unsafe bank notifications never auto-save",
+        arguments: [
+            "SD: +1.000.000 VND", "OTP 123456", "50k ăn trưa", "GD: -50,00 VND",
+            "GD: -0 VND", "GD: -50.000 USD", "GD: -50.000 VND; giao dịch thất bại",
+            "GD: +50.000 VND; chuyển tiền", "GD: -50.000 VND; pending",
+            "GD: -50.000 VND; GD: -60.000 VND", "GD: -999999999999999999 VND",
+            "GD: -50.000 VND; Transaction : -60.000 VND",
+            "GD: -50.000 VND; -60.000 VND", "GD: -50.000 VND; không thành công",
+            "GD: -50.000 VND; ND: CK ABC",
+        ])
+    func notificationRequiresReview(text: String) throws {
+        let fixture = try makeFixture()
+        let capture = try fixture.service.prepareNotification(
+            BankNotificationEvent(text: text, source: "Bank", receivedAt: now),
+            accountID: fixture.accountID, automaticSave: true)
+        #expect(!capture.isReady)
+        #expect(
+            try ModelContext(fixture.container).fetch(FetchDescriptor<MoneyTransaction>()).isEmpty)
+    }
+
+    @Test("Notifications default to review and duplicate delivery creates only one pending item")
+    func notificationDefaultsToReview() throws {
+        let fixture = try makeFixture()
+        fixture.defaults.set(
+            fixture.accountID.uuidString, forKey: BankNotificationPreferences.accountKey)
+        let event = BankNotificationEvent(text: "GD: -50,000 VND", source: "Bank", receivedAt: now)
+        let first = try fixture.service.recordNotification(event, accountID: nil)
+        let replay = try fixture.service.recordNotification(event, accountID: nil)
+        #expect(first.result.disposition == .pendingReview)
+        #expect(!first.duplicate)
+        #expect(replay.duplicate)
+        #expect(first.result.id == replay.result.id)
+        let context = ModelContext(fixture.container)
+        #expect(try context.fetch(FetchDescriptor<PendingTransactionCapture>()).count == 1)
+        #expect(try context.fetch(FetchDescriptor<MoneyTransaction>()).isEmpty)
+    }
+
+    @Test("Automatic notification save is idempotent but permits equal payments at different times")
+    func notificationAutomaticSave() throws {
+        let fixture = try makeFixture()
+        fixture.defaults.set(true, forKey: BankNotificationPreferences.automaticSaveKey)
+        let event = BankNotificationEvent(text: "GD: -50,000 VND", source: "Bank", receivedAt: now)
+        let first = try fixture.service.recordNotification(event, accountID: fixture.accountID)
+        let replay = try fixture.service.recordNotification(event, accountID: fixture.accountID)
+        #expect(first.result.disposition == .transaction)
+        #expect(replay.duplicate)
+        let later = BankNotificationEvent(
+            text: event.text, source: event.source,
+            receivedAt: now.addingTimeInterval(1))
+        #expect(
+            try !fixture.service.recordNotification(later, accountID: fixture.accountID).duplicate)
+        #expect(
+            try ModelContext(fixture.container).fetch(FetchDescriptor<MoneyTransaction>()).count
+                == 2)
+    }
+
+    @Test("Income uses its own category and captures budget allocations")
+    func notificationIncome() throws {
+        let fixture = try makeFixture()
+        fixture.defaults.set(true, forKey: BankNotificationPreferences.automaticSaveKey)
+        fixture.defaults.set(
+            fixture.incomeCategoryID.uuidString,
+            forKey: TransactionDefaults.incomeCategoryStorageKey)
+        _ = try fixture.service.recordNotification(
+            BankNotificationEvent(
+                text: "Giao dịch: +5.000.000 VND", source: "Bank", receivedAt: now),
+            accountID: fixture.accountID)
+        let transaction = try #require(
+            ModelContext(fixture.container).fetch(FetchDescriptor<MoneyTransaction>()).first)
+        #expect(transaction.kind == .income)
+        #expect(transaction.categoryID == fixture.incomeCategoryID)
+        #expect(
+            try IncomeAllocationLifecycle.snapshot(in: transaction)?.allocatedAmount == 5_000_000)
+    }
+
+    @Test("Notification rejects an invalid explicit account without falling back to defaults")
+    func notificationInvalidAccount() throws {
+        let fixture = try makeFixture()
+        fixture.defaults.set(
+            fixture.accountID.uuidString, forKey: BankNotificationPreferences.accountKey)
+        #expect(throws: TransactionCaptureServiceError.staleCapture) {
+            try fixture.service.recordNotification(
+                BankNotificationEvent(text: "GD: -50.000 VND", source: "Bank", receivedAt: now),
+                accountID: UUID())
+        }
+        #expect(throws: TransactionCaptureServiceError.emptyCapture) {
+            try fixture.service.recordNotification(
+                BankNotificationEvent(text: "  ", source: "Bank", receivedAt: now),
+                accountID: fixture.accountID)
+        }
+        let context = ModelContext(fixture.container)
+        #expect(try context.fetch(FetchDescriptor<MoneyTransaction>()).isEmpty)
+        #expect(try context.fetch(FetchDescriptor<PendingTransactionCapture>()).isEmpty)
+    }
+
+    @Test("A reviewed notification retains its event identity for future retries")
+    func notificationReviewIdentity() throws {
+        let fixture = try makeFixture()
+        let event = BankNotificationEvent(text: "GD: -50.000 VND", source: "Bank", receivedAt: now)
+        let first = try fixture.service.recordNotification(event, accountID: fixture.accountID)
+        let context = ModelContext(fixture.container)
+        let pending = try #require(
+            context.fetch(FetchDescriptor<PendingTransactionCapture>()).first)
+        context.insert(try pending.draft.makeTransaction(id: pending.id, createdAt: now))
+        context.delete(pending)
+        try context.save()
+        let replay = try fixture.service.recordNotification(event, accountID: fixture.accountID)
+        #expect(replay.duplicate)
+        #expect(replay.result.id == first.result.id)
+        #expect(replay.result.disposition == .transaction)
+        #expect(try context.fetch(FetchDescriptor<MoneyTransaction>()).count == 1)
+    }
+
+    @Test(
+        "The notification action uses an explicit account and reports receipt without saving in review mode"
+    )
+    func notificationActionAccountAndStatus() async throws {
+        let fixture = try makeFixture()
+        let context = ModelContext(fixture.container)
+        let secondID = UUID()
+        context.insert(
+            CashAccount(
+                id: secondID, name: "Other Bank", kind: .normal,
+                openingBalance: 0, currencyCode: VNDCurrency.code, createdAt: now))
+        try context.save()
+        fixture.defaults.set(
+            fixture.accountID.uuidString, forKey: BankNotificationPreferences.accountKey)
+        let dependency = TransactionCaptureIntentDependency(
+            container: fixture.container, defaults: fixture.defaults)
+        let accounts = try await dependency.notificationAccounts()
+        #expect(Set(accounts.map(\.id)) == [fixture.accountID, secondID])
+        let event = BankNotificationEvent(
+            text: "GD: -50.000 VND", source: "Other Bank", receivedAt: now)
+        #expect(try await dependency.recordNotification(event, accountID: secondID) == "review")
+        let pending = try #require(
+            context.fetch(FetchDescriptor<PendingTransactionCapture>()).first)
+        #expect(pending.accountID == secondID)
+        #expect(
+            fixture.defaults.string(forKey: BankNotificationPreferences.lastResultKey) == "review")
+        #expect(fixture.defaults.double(forKey: BankNotificationPreferences.lastReceivedKey) > 0)
+        #expect(try await dependency.recordNotification(event, accountID: secondID) == "duplicate")
+    }
+
+    @Test("Missing income defaults and malformed or oversized inputs never create transactions")
+    func notificationMissingDefaultsAndInvalidInput() throws {
+        let fixture = try makeFixture()
+        let income = try fixture.service.prepareNotification(
+            BankNotificationEvent(text: "GD: +50.000 VND", source: "Bank", receivedAt: now),
+            accountID: fixture.accountID, automaticSave: true)
+        #expect(income.issues.contains(.missingCategory))
+        #expect(!income.isReady)
+        for event in [
+            BankNotificationEvent(text: "GD: -50.000 VND", source: "", receivedAt: now),
+            BankNotificationEvent(
+                text: String(repeating: "x", count: 16_385), source: "Bank", receivedAt: now),
+        ] {
+            #expect(throws: TransactionCaptureServiceError.emptyCapture) {
+                try fixture.service.recordNotification(event, accountID: fixture.accountID)
+            }
+        }
+        #expect(
+            try ModelContext(fixture.container).fetch(FetchDescriptor<MoneyTransaction>()).isEmpty)
+    }
+
     private func makeFixture() throws -> Fixture {
         let container = try ModelContainer(
             for: Schema(MonMonSchema.models),

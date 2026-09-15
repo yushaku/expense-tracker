@@ -323,7 +323,8 @@ struct TransactionEditorView: View {
                 editedTransaction.incomeAllocationSnapshot = snapshot
             } else {
                 let createdAt = Date.now
-                let transaction = try draft.makeTransaction(id: UUID(), createdAt: createdAt)
+                let transaction = try draft.makeTransaction(
+                    id: mode.pendingCapture?.id ?? UUID(), createdAt: createdAt)
                 try IncomeAllocationLifecycle.captureNew(
                     on: transaction,
                     jars: budgetJars,

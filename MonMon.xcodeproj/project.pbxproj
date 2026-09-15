@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B27000000000000000000201 /* BankNotificationCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B27000000000000000000101 /* BankNotificationCapture.swift */; };
+		B27000000000000000000202 /* BankNotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B27000000000000000000102 /* BankNotificationSettingsView.swift */; };
 		B4F2CA028D32490D88AD2D26 /* ResearchNotebookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF8CAB5B92814145A9EBB00E /* ResearchNotebookView.swift */; };
 		7086E22C2333497B9D7264A9 /* MCPResearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3C10BC4F574A6AAB81F9B9 /* MCPResearchTests.swift */; platformFilters = (macos, ); };
 		EA79E4BCCF204494A05697A6 /* MCPResearchTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60363FA0F6B74E25908D0BEB /* MCPResearchTools.swift */; platformFilters = (macos, ); };
@@ -502,6 +504,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B27000000000000000000101 /* BankNotificationCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankNotificationCapture.swift; sourceTree = "<group>"; };
+		B27000000000000000000102 /* BankNotificationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankNotificationSettingsView.swift; sourceTree = "<group>"; };
 		DF8CAB5B92814145A9EBB00E /* ResearchNotebookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResearchNotebookView.swift; sourceTree = "<group>"; };
 		CB3C10BC4F574A6AAB81F9B9 /* MCPResearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPResearchTests.swift; sourceTree = "<group>"; };
 		60363FA0F6B74E25908D0BEB /* MCPResearchTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPResearchTools.swift; sourceTree = "<group>"; };
@@ -1504,6 +1508,7 @@
 				Q10000000000000000000103 /* PendingTransactionCapture.swift */,
 				Q10000000000000000000104 /* TransactionCaptureService.swift */,
 				Q10000000000000000000101 /* TransactionCaptureParser.swift */,
+				B27000000000000000000101 /* BankNotificationCapture.swift */,
 				A00000000000000000000D12 /* TransactionDefaultsView.swift */,
 				A00000000000000000000D11 /* TransactionDefaultsCard.swift */,
 				A00000000000000000000160 /* TransactionKind.swift */,
@@ -1583,6 +1588,7 @@
 				A00000000000000000000188 /* AppLock.swift */,
 				A00000000000000000000189 /* LockScreenView.swift */,
 				A00000000000000000000190 /* SettingsView.swift */,
+				B27000000000000000000102 /* BankNotificationSettingsView.swift */,
 				1A99B1CAF79C41E0950B20EE /* SalaryCalculatorView.swift */,
 				ACBEFD298AFF4FCD903ECB40 /* SalaryCalculator.swift */,
 				D044AA604C8D4B6C925AE204 /* SalaryProfile.swift */,
@@ -2087,6 +2093,7 @@
 				Q10000000000000000000203 /* PendingTransactionCapture.swift in Sources */,
 				Q10000000000000000000204 /* TransactionCaptureService.swift in Sources */,
 				Q10000000000000000000201 /* TransactionCaptureParser.swift in Sources */,
+				B27000000000000000000201 /* BankNotificationCapture.swift in Sources */,
 				F10000000000000000000202 /* StatementImportInboxService.swift in Sources */,
 				F10000000000000000000204 /* StatementImportInbox.swift in Sources */,
 				F10000000000000000000205 /* StatementImportInboxView.swift in Sources */,
@@ -2137,6 +2144,7 @@
 				A0000000000000000000080E /* PeriodGridPicker.swift in Sources */,
 				A00000000000000000000802 /* SegmentedTabs.swift in Sources */,
 				A00000000000000000000279 /* SettingsView.swift in Sources */,
+				B27000000000000000000202 /* BankNotificationSettingsView.swift in Sources */,
 				FAC313B3BA4345D4BA992263 /* SalaryCalculatorView.swift in Sources */,
 				D625B1F0894A4B68A85E065F /* SalaryCalculator.swift in Sources */,
 				D044AA604C8D4B6C925AE203 /* SalaryProfile.swift in Sources */,
