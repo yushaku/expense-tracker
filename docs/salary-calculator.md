@@ -2,6 +2,11 @@
 
 Settings opens a monthly VND Gross ↔ Net calculator for resident Vietnamese employees with contracts of at least three months. Fixed July–December 2026 rules; there is no period selector. Inputs: salary, dependants, region, full/custom insurance salary. Show employee insurance, deductions, taxable income, tax and take-home pay. Round final amounts to whole VND.
 
+The calculator opens in the Settings navigation stack, like Bank notifications
+and Research & proposals, rather than as a separate sheet. Returning to Settings
+with unsaved edits asks whether to discard them; otherwise the standard back
+navigation is available. The recurring-rule editor remains a separate sheet.
+
 ## Personal salary profile
 
 The SwiftData `SalaryProfile` table stores the agreed salary amount,
