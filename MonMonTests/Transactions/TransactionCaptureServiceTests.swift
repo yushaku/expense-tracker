@@ -268,6 +268,69 @@ struct TransactionCaptureServiceTests {
         #expect(capture.categoryID == fixture.categoryID)
     }
 
+    @Test("TPBank notification keeps only ND as its note and preserves the original for review")
+    func notificationExtractsTPBankNote() throws {
+        let fixture = try makeFixture()
+        let text = """
+            (TPBank): 15/09/26;16:00
+            TK: xxxx1234567
+            PS:-100.000VND
+            SD: 23.841.587VND
+            SD KHA DUNG: 23.841.587VND
+            ND: Le Van Son chuyen tien zalo
+            SO GD: TEST123456789
+            """
+        let event = BankNotificationEvent(text: text, source: "TP bank", receivedAt: now)
+        let result = try fixture.service.recordNotification(event, accountID: fixture.accountID)
+        let context = ModelContext(fixture.container)
+        let pending = try #require(
+            context.fetch(FetchDescriptor<PendingTransactionCapture>()).first)
+
+        #expect(result.result.disposition == .pendingReview)
+        #expect(pending.note == "Le Van Son chuyen tien zalo")
+        #expect(pending.rawText == "[TP bank]\n\(text)")
+        #expect(pending.issues.contains(.missingAmount))
+        #expect(try context.fetch(FetchDescriptor<MoneyTransaction>()).isEmpty)
+        #expect(
+            try fixture.service.recordNotification(event, accountID: fixture.accountID).duplicate)
+    }
+
+    @Test(
+        "Extracted notification notes preserve accents and support line endings",
+        arguments: ["\n", "\r\n", "\r"])
+    func notificationNoteLineEndings(newline: String) throws {
+        let fixture = try makeFixture()
+        fixture.defaults.set(true, forKey: BankNotificationPreferences.automaticSaveKey)
+        let text = ["GD: -100.000 VND", "  ND:\tĂn trưa 🍜  ", "SO GD: TEST123"].joined(
+            separator: newline)
+        let event = BankNotificationEvent(text: text, source: "Bank", receivedAt: now)
+        let capture = try fixture.service.prepareNotification(
+            event, accountID: fixture.accountID, automaticSave: true)
+        #expect(capture.note == "Ăn trưa 🍜")
+        #expect(capture.rawText == "[Bank]\n\(text)")
+        #expect(capture.amount == 100_000)
+        let result = try fixture.service.recordNotification(event, accountID: fixture.accountID)
+        #expect(result.result.disposition == .transaction)
+        let transaction = try #require(
+            ModelContext(fixture.container).fetch(FetchDescriptor<MoneyTransaction>()).first)
+        #expect(transaction.note == "Ăn trưa 🍜")
+    }
+
+    @Test(
+        "Missing, empty or ambiguous ND fields retain the original notification note",
+        arguments: [
+            "GD: -100.000 VND", "ND: \nSO GD: TEST123", "ND:\nND: Lunch",
+            "ND: Lunch\nND: Dinner", "REFERENCE ND: Lunch", "ND KHAC: Lunch",
+        ])
+    func notificationNoteFallback(text: String) throws {
+        let fixture = try makeFixture()
+        let capture = try fixture.service.prepareNotification(
+            BankNotificationEvent(text: text, source: " Bank ", receivedAt: now),
+            accountID: fixture.accountID)
+        #expect(capture.note == "[Bank]\n\(text)")
+        #expect(capture.rawText == "[Bank]\n\(text)")
+    }
+
     @Test(
         "Unknown and unsafe bank notifications never auto-save",
         arguments: [
