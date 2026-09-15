@@ -68,6 +68,13 @@ if [[ ! -d "$app_path" ]]; then
   exit 1
 fi
 
+# Verify the signed app can store pairing keys before replacing a working install.
+# The probe uses a temporary key and never opens the financial database.
+if ! "$app_path/Contents/MacOS/MonMon" --check-pairing-keychain; then
+  echo "refusing: pairing Keychain check failed; verify signing and provisioning profile" >&2
+  exit 1
+fi
+
 mkdir -p "$install_dir"
 rm -rf "$install_path"
 ditto "$app_path" "$install_path"
