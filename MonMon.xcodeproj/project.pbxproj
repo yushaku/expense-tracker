@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		A91600000000000000000203 /* ApplePayCaptureSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91600000000000000000103 /* ApplePayCaptureSettingsView.swift */; };
+		A91600000000000000000204 /* QuickCaptureShortcutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91600000000000000000104 /* QuickCaptureShortcutSettingsView.swift */; };
+		A91600000000000000000205 /* QuickNoteCaptureSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91600000000000000000105 /* QuickNoteCaptureSettingsView.swift */; };
 		A91600000000000000000202 /* ApplePayCaptureIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91600000000000000000102 /* ApplePayCaptureIntent.swift */; };
 		A91600000000000000000201 /* ApplePayCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91600000000000000000101 /* ApplePayCapture.swift */; };
 		B27000000000000000000201 /* BankNotificationCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B27000000000000000000101 /* BankNotificationCapture.swift */; };
@@ -508,6 +510,8 @@
 
 /* Begin PBXFileReference section */
 		A91600000000000000000103 /* ApplePayCaptureSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplePayCaptureSettingsView.swift; sourceTree = "<group>"; };
+		A91600000000000000000104 /* QuickCaptureShortcutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickCaptureShortcutSettingsView.swift; sourceTree = "<group>"; };
+		A91600000000000000000105 /* QuickNoteCaptureSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickNoteCaptureSettingsView.swift; sourceTree = "<group>"; };
 		A91600000000000000000102 /* ApplePayCaptureIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplePayCaptureIntent.swift; sourceTree = "<group>"; };
 		A91600000000000000000101 /* ApplePayCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplePayCapture.swift; sourceTree = "<group>"; };
 		B27000000000000000000101 /* BankNotificationCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankNotificationCapture.swift; sourceTree = "<group>"; };
@@ -1598,6 +1602,8 @@
 				A00000000000000000000190 /* SettingsView.swift */,
 				B27000000000000000000102 /* BankNotificationSettingsView.swift */,
 				A91600000000000000000103 /* ApplePayCaptureSettingsView.swift */,
+				A91600000000000000000104 /* QuickCaptureShortcutSettingsView.swift */,
+				A91600000000000000000105 /* QuickNoteCaptureSettingsView.swift */,
 				1A99B1CAF79C41E0950B20EE /* SalaryCalculatorView.swift */,
 				ACBEFD298AFF4FCD903ECB40 /* SalaryCalculator.swift */,
 				D044AA604C8D4B6C925AE204 /* SalaryProfile.swift */,
@@ -2157,6 +2163,8 @@
 				A00000000000000000000279 /* SettingsView.swift in Sources */,
 				B27000000000000000000202 /* BankNotificationSettingsView.swift in Sources */,
 				A91600000000000000000203 /* ApplePayCaptureSettingsView.swift in Sources */,
+				A91600000000000000000204 /* QuickCaptureShortcutSettingsView.swift in Sources */,
+				A91600000000000000000205 /* QuickNoteCaptureSettingsView.swift in Sources */,
 				FAC313B3BA4345D4BA992263 /* SalaryCalculatorView.swift in Sources */,
 				D625B1F0894A4B68A85E065F /* SalaryCalculator.swift in Sources */,
 				D044AA604C8D4B6C925AE203 /* SalaryProfile.swift in Sources */,

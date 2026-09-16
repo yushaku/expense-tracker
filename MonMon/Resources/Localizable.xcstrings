@@ -1,6 +1,26 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Quick Capture Shortcut": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quick Capture Shortcut"
+          }
+        }
+      }
+    },
+    "Quick note capture": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi chú nhanh"
+          }
+        }
+      }
+    },
     "Apple Pay capture": {
       "localizations": {
         "vi": {
