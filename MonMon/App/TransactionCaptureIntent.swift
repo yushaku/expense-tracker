@@ -53,6 +53,28 @@ struct TransactionCaptureIntentDependency: @unchecked Sendable {
         }
     }
 
+    func recordApplePay(_ event: ApplePayEvent, accountID: UUID?) async throws -> String {
+        try await MainActor.run {
+            do {
+                let service = TransactionCaptureService(container: container, defaults: defaults)
+                let outcome = try service.recordApplePay(event, accountID: accountID)
+                let result =
+                    outcome.duplicate
+                    ? "duplicate"
+                    : outcome.result.disposition == .transaction ? "saved" : "review"
+                defaults.set(result, forKey: ApplePayPreferences.lastResultKey)
+                defaults.set(
+                    Date.now.timeIntervalSince1970, forKey: ApplePayPreferences.lastReceivedKey)
+                return result
+            } catch {
+                defaults.set("failed", forKey: ApplePayPreferences.lastResultKey)
+                defaults.set(
+                    Date.now.timeIntervalSince1970, forKey: ApplePayPreferences.lastReceivedKey)
+                throw error
+            }
+        }
+    }
+
     func recordReady(_ rawText: String) async throws -> TransactionCaptureCommitResult {
         try await MainActor.run {
             let service = TransactionCaptureService(container: container, defaults: defaults)

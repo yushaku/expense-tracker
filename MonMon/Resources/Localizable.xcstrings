@@ -1,6 +1,266 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Apple Pay capture": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi nhận Apple Pay"
+          }
+        }
+      }
+    },
+    "Record Apple Pay Transaction": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi giao dịch Apple Pay"
+          }
+        }
+      }
+    },
+    "Receive a Wallet transaction from your Shortcuts automation. Review by default; automatic saving is optional in Apple Pay settings.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhận giao dịch Ví từ tự động hóa Phím tắt. Mặc định chờ duyệt; có thể bật tự lưu trong cài đặt Apple Pay."
+          }
+        }
+      }
+    },
+    "Use Shortcut Input → Amount, including its currency. Do not convert to a plain number.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn Đầu vào phím tắt → Số tiền, gồm cả loại tiền tệ. Không chuyển thành số thuần."
+          }
+        }
+      }
+    },
+    "Merchant": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cửa hàng"
+          }
+        }
+      }
+    },
+    "Transaction date": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thời điểm giao dịch"
+          }
+        }
+      }
+    },
+    "Keep the same original event date when retrying. A new date creates a new capture.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giữ nguyên thời điểm ban đầu khi gửi lại. Thời điểm mới sẽ tạo bản ghi mới."
+          }
+        }
+      }
+    },
+    "Card label": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tên thẻ"
+          }
+        }
+      }
+    },
+    "Optional card name, not the full card number.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tên thẻ tùy chọn, không phải toàn bộ số thẻ."
+          }
+        }
+      }
+    },
+    "Record Apple Pay ${payment} at ${merchant} on ${occurredAt}": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi Apple Pay ${payment} tại ${merchant} lúc ${occurredAt}"
+          }
+        }
+      }
+    },
+    "This Apple Pay event was already received.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sự kiện Apple Pay này đã được nhận."
+          }
+        }
+      }
+    },
+    "Couldn’t capture Apple Pay. Check the action’s fields and account, then retry with the original date.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể ghi nhận Apple Pay. Kiểm tra các trường và tài khoản trong tác vụ, rồi gửi lại với thời điểm ban đầu."
+          }
+        }
+      }
+    },
+    "Choose Account in each card’s Shortcut action, or leave it empty to use this account.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn Tài khoản trong tác vụ Phím tắt của từng thẻ, hoặc để trống để dùng tài khoản này."
+          }
+        }
+      }
+    },
+    "Automatically save Apple Pay expenses": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tự lưu khoản chi Apple Pay"
+          }
+        }
+      }
+    },
+    "Off by default: captures wait in Needs review. Auto-save requires a valid VND amount, merchant, account and default expense category. Other currencies need a VND amount entered during review.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mặc định tắt: giao dịch nằm trong Chờ duyệt. Tự lưu cần số tiền VND hợp lệ, cửa hàng, tài khoản và danh mục chi mặc định. Với ngoại tệ, cần nhập số tiền VND khi duyệt."
+          }
+        }
+      }
+    },
+    "Use only one automatic capture source per card. Apple Pay and bank notifications can describe the same payment and create duplicates.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chỉ dùng một nguồn tự động ghi nhận cho mỗi thẻ. Apple Pay và thông báo ngân hàng có thể cùng báo một khoản thanh toán và tạo giao dịch trùng."
+          }
+        }
+      }
+    },
+    "Connect Apple Pay": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kết nối Apple Pay"
+          }
+        }
+      }
+    },
+    "1. On iPhone, create a Shortcuts automation with the Wallet / Transaction trigger. Select your card and Run Immediately if offered.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1. Trên iPhone, tạo tự động hóa trong Phím tắt với điều kiện Ví / Giao dịch (Wallet / Transaction). Chọn thẻ và Chạy ngay lập tức nếu có."
+          }
+        }
+      }
+    },
+    "2. Add MonMon’s Record Apple Pay Transaction action. Set Amount to Shortcut Input → Amount and Merchant to Shortcut Input → Merchant. Keep the currency with Amount; do not convert it to Number or Text.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2. Thêm tác vụ Ghi giao dịch Apple Pay của MonMon. Đặt Số tiền = Đầu vào phím tắt → Số tiền, Cửa hàng = Đầu vào phím tắt → Cửa hàng. Giữ cả loại tiền tệ; không chuyển số tiền sang Số hoặc Văn bản."
+          }
+        }
+      }
+    },
+    "3. Set Transaction date to the event’s date if available, otherwise capture Current Date once. Choose the matching MonMon account. Card label is optional. Check your first payment in Needs review.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3. Đặt Thời điểm giao dịch bằng thời điểm sự kiện nếu có; nếu không, lấy Ngày hiện tại một lần. Chọn tài khoản MonMon tương ứng. Tên thẻ có thể để trống. Kiểm tra giao dịch đầu tiên trong Chờ duyệt."
+          }
+        }
+      }
+    },
+    "When retrying, reuse all original fields and the same date. A new date is a new event. Wallet may omit data or fail to trigger; a card tap does not confirm final settlement. This does not import Wallet history.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khi gửi lại, giữ nguyên mọi trường và thời điểm. Thời điểm mới là sự kiện mới. Ví có thể thiếu dữ liệu hoặc không kích hoạt; chạm thẻ chưa xác nhận thanh toán hoàn tất. Tính năng này không nhập lịch sử Ví."
+          }
+        }
+      }
+    },
+    "Last Apple Pay capture saved as an expense.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giao dịch Apple Pay gần nhất đã được lưu thành khoản chi."
+          }
+        }
+      }
+    },
+    "Last Apple Pay capture is waiting for review.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giao dịch Apple Pay gần nhất đang chờ duyệt."
+          }
+        }
+      }
+    },
+    "Last Apple Pay event was already received.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sự kiện Apple Pay gần nhất đã được nhận trước đó."
+          }
+        }
+      }
+    },
+    "Last Apple Pay attempt failed. Check the action’s fields and account.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lần ghi nhận Apple Pay gần nhất thất bại. Kiểm tra các trường và tài khoản trong tác vụ."
+          }
+        }
+      }
+    },
+    "No Apple Pay event received yet. Set up the automation on your iPhone.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa nhận sự kiện Apple Pay nào. Hãy thiết lập tự động hóa trên iPhone."
+          }
+        }
+      }
+    },
     "Set this up once for each bank app. First choose an account above and leave automatic saving off.": {
       "localizations": {
         "vi": {

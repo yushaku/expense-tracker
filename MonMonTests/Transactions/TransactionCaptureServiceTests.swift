@@ -496,6 +496,206 @@ struct TransactionCaptureServiceTests {
             try ModelContext(fixture.container).fetch(FetchDescriptor<MoneyTransaction>()).isEmpty)
     }
 
+    @Test("Apple Pay defaults to review independently of bank notification auto-save")
+    func applePayReviewAndReplay() throws {
+        let fixture = try makeFixture()
+        fixture.defaults.set(true, forKey: BankNotificationPreferences.automaticSaveKey)
+        let event = ApplePayEvent(
+            amount: 50_000, currency: "VND", merchant: "Cafe 123", occurredAt: now)
+        let first = try fixture.service.recordApplePay(event, accountID: fixture.accountID)
+        let replay = try fixture.service.recordApplePay(event, accountID: fixture.accountID)
+        #expect(first.result.disposition == .pendingReview)
+        #expect(!first.duplicate)
+        #expect(replay.duplicate)
+        let context = ModelContext(fixture.container)
+        let pending = try #require(
+            context.fetch(FetchDescriptor<PendingTransactionCapture>()).first)
+        #expect(pending.amount == 50_000)
+        #expect(pending.note == "Cafe 123")
+        #expect(pending.accountID == fixture.accountID)
+        #expect(try context.fetch(FetchDescriptor<PendingTransactionCapture>()).count == 1)
+        #expect(try context.fetch(FetchDescriptor<MoneyTransaction>()).isEmpty)
+        context.insert(try pending.draft.makeTransaction(id: pending.id, createdAt: now))
+        context.delete(pending)
+        try context.save()
+        let approvedReplay = try fixture.service.recordApplePay(event, accountID: fixture.accountID)
+        #expect(approvedReplay.duplicate)
+        #expect(approvedReplay.result.id == first.result.id)
+        #expect(approvedReplay.result.disposition == .transaction)
+    }
+
+    @Test("Apple Pay opt-in saves once and preserves equal payments at different times")
+    func applePayAutomaticSave() throws {
+        let fixture = try makeFixture()
+        fixture.defaults.set(true, forKey: ApplePayPreferences.automaticSaveKey)
+        fixture.defaults.set(fixture.accountID.uuidString, forKey: ApplePayPreferences.accountKey)
+        let event = ApplePayEvent(
+            amount: 50_000, currency: " vnd ", merchant: " Cafe ", occurredAt: now)
+        let first = try fixture.service.recordApplePay(event, accountID: nil)
+        let canonical = ApplePayEvent(
+            amount: 50_000, currency: "VND", merchant: "Cafe", occurredAt: now)
+        #expect(first.result.disposition == .transaction)
+        #expect(try fixture.service.recordApplePay(canonical, accountID: nil).duplicate)
+        let later = ApplePayEvent(
+            amount: 50_000, currency: "VND", merchant: "Cafe", occurredAt: now.addingTimeInterval(1)
+        )
+        #expect(try !fixture.service.recordApplePay(later, accountID: nil).duplicate)
+        let transactions = try ModelContext(fixture.container).fetch(
+            FetchDescriptor<MoneyTransaction>())
+        #expect(transactions.count == 2)
+        #expect(
+            transactions.allSatisfy {
+                $0.kind == .expense && $0.amount == 50_000 && $0.note == "Cafe"
+            })
+    }
+
+    @Test(
+        "Apple Pay never assumes foreign or missing currency is VND",
+        arguments: ["USD", "", "EUR", "đ"])
+    func applePayUnsupportedCurrency(_ currency: String) throws {
+        let fixture = try makeFixture()
+        fixture.defaults.set(true, forKey: ApplePayPreferences.automaticSaveKey)
+        let event = ApplePayEvent(amount: 12, currency: currency, merchant: "Cafe", occurredAt: now)
+        let result = try fixture.service.recordApplePay(event, accountID: fixture.accountID)
+        #expect(result.result.disposition == .pendingReview)
+        let pending = try #require(
+            ModelContext(fixture.container).fetch(FetchDescriptor<PendingTransactionCapture>())
+                .first)
+        #expect(pending.amount == nil)
+        #expect(pending.draft.amountText.isEmpty)
+        #expect(pending.rawText.contains("12"))
+        #expect(pending.issues.contains(.unsupportedCurrency))
+    }
+
+    @Test(
+        "Apple Pay rejects unsafe amounts without extracting merchant digits",
+        arguments: [
+            nil, Decimal.zero, Decimal(-1), Decimal.nan, Decimal(string: "1.5"),
+            Decimal(string: "1000000000000000"),
+        ])
+    func applePayUnsafeAmounts(_ amount: Decimal?) throws {
+        let fixture = try makeFixture()
+        fixture.defaults.set(true, forKey: ApplePayPreferences.automaticSaveKey)
+        let event = ApplePayEvent(
+            amount: amount, currency: "VND", merchant: "Store 12345", occurredAt: now)
+        let capture = try fixture.service.prepareApplePay(event, accountID: fixture.accountID)
+        #expect(capture.amount == nil)
+        #expect(!capture.isReady)
+    }
+
+    @Test("Apple Pay requires a merchant, selected account and valid category for auto-save")
+    func applePayMissingFields() throws {
+        let fixture = try makeFixture()
+        fixture.defaults.set(true, forKey: ApplePayPreferences.automaticSaveKey)
+        let missingMerchant = ApplePayEvent(
+            amount: 50_000, currency: "VND", merchant: "  ", occurredAt: now)
+        #expect(
+            try !fixture.service.prepareApplePay(missingMerchant, accountID: fixture.accountID)
+                .isReady)
+        let event = ApplePayEvent(
+            amount: 50_000, currency: "VND", merchant: "Cafe", occurredAt: now)
+        let missingAccount = try fixture.service.prepareApplePay(event, accountID: nil)
+        #expect(missingAccount.accountID == nil)
+        #expect(missingAccount.issues.contains(.missingAccount))
+        fixture.defaults.set(UUID().uuidString, forKey: TransactionDefaults.categoryStorageKey)
+        let context = ModelContext(fixture.container)
+        for category in try context.fetch(FetchDescriptor<TransactionCategory>()) {
+            context.delete(category)
+        }
+        try context.save()
+        #expect(
+            try fixture.service.prepareApplePay(event, accountID: fixture.accountID).issues
+                .contains(.missingCategory))
+    }
+
+    @Test("Apple Pay invalid explicit accounts and oversized or invalid dates fail without writes")
+    func applePayInvalidInput() throws {
+        let fixture = try makeFixture()
+        fixture.defaults.set(fixture.accountID.uuidString, forKey: ApplePayPreferences.accountKey)
+        let event = ApplePayEvent(
+            amount: 50_000, currency: "VND", merchant: "Cafe", occurredAt: now)
+        #expect(throws: TransactionCaptureServiceError.staleCapture) {
+            try fixture.service.recordApplePay(event, accountID: UUID())
+        }
+        for invalid in [
+            ApplePayEvent(
+                amount: 50_000, currency: "VND", merchant: String(repeating: "x", count: 1025),
+                occurredAt: now),
+            ApplePayEvent(
+                amount: 50_000, currency: "VND", merchant: "Cafe",
+                occurredAt: Date(timeIntervalSince1970: .infinity)),
+        ] {
+            #expect(throws: TransactionCaptureServiceError.emptyCapture) {
+                try fixture.service.recordApplePay(invalid, accountID: fixture.accountID)
+            }
+        }
+        let context = ModelContext(fixture.container)
+        #expect(try context.fetch(FetchDescriptor<PendingTransactionCapture>()).isEmpty)
+        #expect(try context.fetch(FetchDescriptor<MoneyTransaction>()).isEmpty)
+    }
+
+    @Test("Apple Pay action reports review, duplicate, saved and failure independently")
+    func applePayActionStatus() async throws {
+        let fixture = try makeFixture()
+        let dependency = TransactionCaptureIntentDependency(
+            container: fixture.container, defaults: fixture.defaults)
+        let event = ApplePayEvent(
+            amount: 50_000, currency: "VND", merchant: "Cafe", occurredAt: now)
+        #expect(
+            try await dependency.recordApplePay(event, accountID: fixture.accountID) == "review")
+        #expect(fixture.defaults.string(forKey: ApplePayPreferences.lastResultKey) == "review")
+        #expect(
+            try await dependency.recordApplePay(event, accountID: fixture.accountID) == "duplicate")
+        fixture.defaults.set(true, forKey: ApplePayPreferences.automaticSaveKey)
+        let later = ApplePayEvent(
+            amount: 50_000, currency: "VND", merchant: "Cafe", occurredAt: now.addingTimeInterval(1)
+        )
+        #expect(try await dependency.recordApplePay(later, accountID: fixture.accountID) == "saved")
+        do {
+            _ = try await dependency.recordApplePay(event, accountID: UUID())
+            Issue.record("Expected a stale account error")
+        } catch {
+            #expect(fixture.defaults.string(forKey: ApplePayPreferences.lastResultKey) == "failed")
+        }
+        #expect(fixture.defaults.double(forKey: ApplePayPreferences.lastReceivedKey) > 0)
+        #expect(fixture.defaults.object(forKey: BankNotificationPreferences.lastResultKey) == nil)
+    }
+
+    @Test("Apple Pay rolls back when sync prevents writing", arguments: [false, true])
+    func applePaySaveFailure(_ automaticSave: Bool) throws {
+        let fixture = try makeFixture()
+        fixture.defaults.set(automaticSave, forKey: ApplePayPreferences.automaticSaveKey)
+        SyncWriteGate.lock(fixture.container)
+        defer { SyncWriteGate.unlock(fixture.container) }
+        let event = ApplePayEvent(
+            amount: 50_000, currency: "VND", merchant: "Cafe", occurredAt: now)
+        #expect(throws: TransactionCaptureServiceError.storeFailure) {
+            try fixture.service.recordApplePay(event, accountID: fixture.accountID)
+        }
+        let context = ModelContext(fixture.container)
+        #expect(try context.fetch(FetchDescriptor<PendingTransactionCapture>()).isEmpty)
+        #expect(try context.fetch(FetchDescriptor<MoneyTransaction>()).isEmpty)
+        SyncWriteGate.unlock(fixture.container)
+        #expect(try !fixture.service.recordApplePay(event, accountID: fixture.accountID).duplicate)
+    }
+
+    @Test("Apple Pay identity separates cards, accounts, currencies and capture sources")
+    func applePayIdentityScope() throws {
+        let fixture = try makeFixture()
+        let event = ApplePayEvent(
+            amount: 50_000, currency: "VND", merchant: "Cafe", occurredAt: now, card: "Visa")
+        let otherCard = ApplePayEvent(
+            amount: 50_000, currency: "VND", merchant: "Cafe", occurredAt: now, card: "Mastercard")
+        #expect(
+            event.id(accountID: fixture.accountID) != otherCard.id(accountID: fixture.accountID))
+        #expect(event.id(accountID: fixture.accountID) != event.id(accountID: UUID()))
+        let foreign = ApplePayEvent(
+            amount: 50_000, currency: "USD", merchant: "Cafe", occurredAt: now, card: "Visa")
+        #expect(event.id(accountID: fixture.accountID) != foreign.id(accountID: fixture.accountID))
+        let bank = BankNotificationEvent(text: "GD: -50.000 VND", source: "Bank", receivedAt: now)
+        #expect(event.id(accountID: fixture.accountID) != bank.id(accountID: fixture.accountID))
+    }
+
     private func makeFixture() throws -> Fixture {
         let container = try ModelContainer(
             for: Schema(MonMonSchema.models),

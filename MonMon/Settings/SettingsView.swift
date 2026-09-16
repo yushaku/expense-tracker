@@ -68,6 +68,21 @@ struct SettingsView: View {
                             .settingsButtonLabelStyle()
                             .accessibilityIdentifier("settings-bank-notifications")
                         }
+                        card {
+                            NavigationLink {
+                                ApplePayCaptureSettingsView()
+                            } label: {
+                                HStack {
+                                    Label("Apple Pay capture", systemImage: "creditcard")
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .accessibilityHidden(true)
+                                }
+                                .frame(minHeight: 44)
+                            }
+                            .settingsButtonLabelStyle()
+                            .accessibilityIdentifier("settings-apple-pay")
+                        }
                         #if !os(macOS)
                             card {
                                 NavigationLink {
