@@ -1,19 +1,9 @@
 import AppIntents
 import SwiftUI
 
-struct QuickNoteCaptureSettingsView: View {
+struct QuickNoteCaptureSettingsContent: View {
     var body: some View {
-        ScrollView {
-            voiceCaptureCard
-                .appCard()
-                .frame(maxWidth: MonMonTheme.maxContentWidth)
-                .padding(20)
-                .frame(maxWidth: .infinity)
-        }
-        .background(MonMonTheme.canvas)
-        .navigationTitle("Quick note capture")
-        .foregroundStyle(MonMonTheme.textPrimary)
-        .tint(MonMonTheme.accent)
+        voiceCaptureCard.appCard()
     }
 
     private var voiceCaptureCard: some View {

@@ -2,7 +2,7 @@ import AppIntents
 import SwiftData
 import SwiftUI
 
-struct BankNotificationSettingsView: View {
+struct BankNotificationSettingsContent: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \CashAccount.name) private var accounts: [CashAccount]
     @AppStorage(BankNotificationPreferences.accountKey) private var accountID = ""
@@ -19,116 +19,108 @@ struct BankNotificationSettingsView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                VStack(alignment: .leading, spacing: 12) {
-                    Label("Connect a bank app", systemImage: "bell.badge")
-                        .font(.headline)
-                    Text(
-                        "Choose the app in Shortcuts on your iPhone. MonMon receives only the text your automation sends."
-                    )
-                    .font(.subheadline)
-                    Text(
-                        "Notification automation requires iOS 27. Setup and locked-screen delivery must be checked on your iPhone."
-                    )
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-                }
-                .appCard()
-
-                VStack(alignment: .leading, spacing: 14) {
-                    Text("Destination account").font(.headline)
-                    Picker("Account", selection: $accountID) {
-                        Text("Choose an account").tag("")
-                        if !accountID.isEmpty && !selectedAccountExists {
-                            Text("Account unavailable").tag(accountID)
-                        }
-                        ForEach(accounts) { account in
-                            Text(account.name).tag(account.id.uuidString)
-                        }
-                    }
-                    .accessibilityIdentifier("bank-notification-account")
-                    Text(
-                        "For multiple banks, choose Account inside each MonMon action in Shortcuts. Leaving it empty uses this account."
-                    )
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-                    Toggle("Automatically save recognized transactions", isOn: $automaticSave)
-                        .accessibilityIdentifier("bank-notification-auto-save")
-                    Text(
-                        "Start with review, then enable automatic saving after checking your bank’s messages. Unknown formats and transfers always need review. Income and expense use your default categories."
-                    )
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-                }
-                .appCard()
-
-                BankNotificationSetupSteps()
-                    .appCard()
-
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Check a sample").font(.headline)
-                    Text(
-                        "Paste a notification to see whether MonMon can read it. This check never saves a transaction."
-                    )
-                    .font(.caption)
-                    TextField("Notification text", text: $sampleText, axis: .vertical)
-                        .lineLimit(3...8)
-                        .textFieldStyle(.plain)
-                        .padding(12)
-                        .background(MonMonTheme.field, in: RoundedRectangle(cornerRadius: 12))
-                        .accessibilityIdentifier("bank-notification-sample")
-                    Button("Check sample", systemImage: "text.magnifyingglass", action: checkSample)
-                        .buttonStyle(.prominentAction)
-                        .disabled(
-                            !selectedAccountExists
-                                || sampleText.trimmingCharacters(in: .whitespacesAndNewlines)
-                                    .isEmpty
-                        )
-                    if previewError {
-                        Text("Couldn’t check this sample. Check the account and notification text.")
-                            .foregroundStyle(MonMonTheme.danger)
-                    }
-                    if let preview {
-                        Text(
-                            preview.isReady
-                                ? "Recognized — eligible for automatic saving"
-                                : "Needs review — will not be saved automatically"
-                        )
-                        .font(.subheadline.weight(.semibold))
-                        if let amount = preview.amount {
-                            HStack {
-                                Text(preview.kind == .income ? "Income" : "Expense")
-                                Text(VNDCurrency.format(amount))
-                            }
-                        }
-                    }
-                }
-                .appCard()
-
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Recent activity").font(.headline)
-                    Text(statusText).font(.subheadline)
-                    if lastReceived > 0 {
-                        Text(
-                            Date(timeIntervalSince1970: lastReceived),
-                            format: .dateTime.day().month().hour().minute()
-                        )
-                        .font(.caption)
-                        .foregroundStyle(MonMonTheme.textSecondary)
-                    }
-                    Button("Needs review", systemImage: "tray") { showsReview = true }
-                        .buttonStyle(.prominentAction)
-                }
-                .appCard()
+        VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+            VStack(alignment: .leading, spacing: 12) {
+                Label("Connect a bank app", systemImage: "bell.badge")
+                    .font(.headline)
+                Text(
+                    "Choose the app in Shortcuts on your iPhone. MonMon receives only the text your automation sends."
+                )
+                .font(.subheadline)
+                Text(
+                    "Notification automation requires iOS 27. Setup and locked-screen delivery must be checked on your iPhone."
+                )
+                .font(.caption)
+                .foregroundStyle(MonMonTheme.textSecondary)
             }
-            .frame(maxWidth: MonMonTheme.maxContentWidth)
-            .padding(20)
-            .frame(maxWidth: .infinity)
+            .appCard()
+
+            VStack(alignment: .leading, spacing: 14) {
+                Text("Destination account").font(.headline)
+                Picker("Account", selection: $accountID) {
+                    Text("Choose an account").tag("")
+                    if !accountID.isEmpty && !selectedAccountExists {
+                        Text("Account unavailable").tag(accountID)
+                    }
+                    ForEach(accounts) { account in
+                        Text(account.name).tag(account.id.uuidString)
+                    }
+                }
+                .accessibilityIdentifier("bank-notification-account")
+                Text(
+                    "For multiple banks, choose Account inside each MonMon action in Shortcuts. Leaving it empty uses this account."
+                )
+                .font(.caption)
+                .foregroundStyle(MonMonTheme.textSecondary)
+                Toggle("Automatically save recognized transactions", isOn: $automaticSave)
+                    .accessibilityIdentifier("bank-notification-auto-save")
+                Text(
+                    "Start with review, then enable automatic saving after checking your bank’s messages. Unknown formats and transfers always need review. Income and expense use your default categories."
+                )
+                .font(.caption)
+                .foregroundStyle(MonMonTheme.textSecondary)
+            }
+            .appCard()
+
+            BankNotificationSetupSteps()
+                .appCard()
+
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Check a sample").font(.headline)
+                Text(
+                    "Paste a notification to see whether MonMon can read it. This check never saves a transaction."
+                )
+                .font(.caption)
+                TextField("Notification text", text: $sampleText, axis: .vertical)
+                    .lineLimit(3...8)
+                    .textFieldStyle(.plain)
+                    .padding(12)
+                    .background(MonMonTheme.field, in: RoundedRectangle(cornerRadius: 12))
+                    .accessibilityIdentifier("bank-notification-sample")
+                Button("Check sample", systemImage: "text.magnifyingglass", action: checkSample)
+                    .buttonStyle(.prominentAction)
+                    .disabled(
+                        !selectedAccountExists
+                            || sampleText.trimmingCharacters(in: .whitespacesAndNewlines)
+                                .isEmpty
+                    )
+                if previewError {
+                    Text("Couldn’t check this sample. Check the account and notification text.")
+                        .foregroundStyle(MonMonTheme.danger)
+                }
+                if let preview {
+                    Text(
+                        preview.isReady
+                            ? "Recognized — eligible for automatic saving"
+                            : "Needs review — will not be saved automatically"
+                    )
+                    .font(.subheadline.weight(.semibold))
+                    if let amount = preview.amount {
+                        HStack {
+                            Text(preview.kind == .income ? "Income" : "Expense")
+                            Text(VNDCurrency.format(amount))
+                        }
+                    }
+                }
+            }
+            .appCard()
+
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Recent activity").font(.headline)
+                Text(statusText).font(.subheadline)
+                if lastReceived > 0 {
+                    Text(
+                        Date(timeIntervalSince1970: lastReceived),
+                        format: .dateTime.day().month().hour().minute()
+                    )
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
+                }
+                Button("Needs review", systemImage: "tray") { showsReview = true }
+                    .buttonStyle(.prominentAction)
+            }
+            .appCard()
         }
-        .background(MonMonTheme.canvas)
-        .navigationTitle("Bank notifications")
-        .foregroundStyle(MonMonTheme.textPrimary)
         .onChange(of: sampleText) {
             preview = nil
             previewError = false

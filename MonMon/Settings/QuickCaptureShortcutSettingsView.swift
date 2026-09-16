@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum QuickCaptureShortcut: String, CaseIterable, Identifiable {
-    case bankNotification, applePay, quickNote
+    case quickNote, bankNotification, applePay
 
     var id: String { rawValue }
 
@@ -27,18 +27,18 @@ struct QuickCaptureShortcutSettingsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                 ForEach(QuickCaptureShortcut.allCases) { shortcut in
-                    NavigationLink(value: shortcut) {
-                        HStack {
-                            Label(shortcut.title, systemImage: shortcut.symbol)
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+                        Label(shortcut.title, systemImage: shortcut.symbol)
+                            .font(.title2.weight(.bold))
+                            .accessibilityAddTraits(.isHeader)
+
+                        switch shortcut {
+                        case .quickNote: QuickNoteCaptureSettingsContent()
+                        case .bankNotification: BankNotificationSettingsContent()
+                        case .applePay: ApplePayCaptureSettingsContent()
                         }
-                        .frame(minHeight: 44)
-                        .contentShape(Rectangle())
                     }
-                    .settingsButtonLabelStyle()
-                    .appCard()
+                    .padding(.vertical, 8)
                     .accessibilityIdentifier("quick-capture-shortcut-\(shortcut.id)")
                 }
             }
@@ -50,12 +50,5 @@ struct QuickCaptureShortcutSettingsView: View {
         .navigationTitle("Quick Capture Shortcut")
         .foregroundStyle(MonMonTheme.textPrimary)
         .tint(MonMonTheme.accent)
-        .navigationDestination(for: QuickCaptureShortcut.self) { shortcut in
-            switch shortcut {
-            case .bankNotification: BankNotificationSettingsView()
-            case .applePay: ApplePayCaptureSettingsView()
-            case .quickNote: QuickNoteCaptureSettingsView()
-            }
-        }
     }
 }

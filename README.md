@@ -182,13 +182,15 @@ rtk swift format lint --strict --recursive MonMon MonMonTests MonMonShareExtensi
 
 ### Adding transactions
 
-**Quick Capture Shortcut** — the Settings entry below Salary calculator groups
-Bank notifications, Apple Pay capture and Quick note capture. Quick note capture
-contains the existing Record Transaction Siri shortcut and one-tap Dictate Text
-setup. Each capture method keeps its own configuration and behavior.
+**Quick Capture Shortcut** — the Settings entry below Salary calculator shows
+Quick note capture, Bank notifications and Apple Pay capture as three expanded
+sections on one scrolling screen, without separate capture settings screens.
+Quick note capture contains the existing Record Transaction Siri shortcut and
+one-tap Dictate Text setup. Each capture method keeps its own configuration and
+behavior; bank sample checks and both Needs review buttons remain available inline.
 
 **Apple Pay (Wallet Shortcuts automation)** — open Settings → Quick Capture Shortcut
-→ Apple Pay capture.
+and scroll to Apple Pay capture.
 Create a Wallet / Transaction automation on iPhone for the chosen card and add
 MonMon → Record Apple Pay Transaction. Map Shortcut Input → Amount directly to
 Amount (the action receives `IntentCurrencyAmount`, including its currency), and
@@ -215,7 +217,7 @@ is shown without a real tested iCloud link.
 See [the Apple Pay capture spec](docs/apple-pay-capture-spec.md).
 
 **Bank notifications (iOS 27 Shortcuts)** — open Settings → Quick Capture Shortcut
-→ Bank notifications
+and scroll to Bank notifications
 to select a destination account and follow the setup guide. Choose the bank app
 in a Shortcuts notification automation, then add MonMon → Record Bank
 Notification. Pass the notification text, source app label and received date.
