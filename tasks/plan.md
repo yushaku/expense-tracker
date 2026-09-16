@@ -1,4 +1,28 @@
-# P2P sync implementation
+# Apple Pay capture implementation
+
+Status: user approved; implementation, automated verification and code review complete.
+Physical Wallet acceptance remains pending with the owner after a requested dev merge.
+Spec: `docs/apple-pay-capture-spec.md`. Tasks: `tasks/todo.md`.
+
+Implement in three slices:
+1. Validated Apple Pay events into the existing review/save service, with deterministic
+   retry identity and in-memory persistence tests. No schema change.
+2. Dedicated Shortcuts action with explicit fields/account, safe localized outcomes,
+   and no foreground UI requirement. Compile metadata and test the dependency bridge.
+3. Settings navigation, separate opt-in auto-save/account preferences, last result,
+   concise setup and duplicate-source warning. Localize, run all gates, review and
+   commit on `feat/apple-pay-capture`; stop before merge or device installation.
+
+Risks: Wallet can omit fields or fail to deliver; never substitute guessed amounts.
+Foreign/missing currency cannot be silently treated as VND. Retry identity is only
+stable when the original timestamp is reused; bank-notification cross-source
+deduplication is explicitly not claimed. User performs Wallet acceptance testing.
+
+The completed P2P implementation plan below is retained for historical context.
+
+---
+
+# P2P sync implementation (completed)
 
 Approved scope: one iPhone–Mac pair on the same LAN, explicit Sync and preview, union initial data, explicit record conflicts and missing-seed decisions. Financial records only; pending captures and device preferences stay local. No cloud or background sync.
 
