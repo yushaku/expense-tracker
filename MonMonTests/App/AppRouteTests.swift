@@ -7,9 +7,9 @@ import Testing
 @MainActor
 @Suite("App route coordination")
 struct AppRouteTests {
-    @Test("Quick Capture Shortcut groups the three capture routes in order")
-    func quickCaptureShortcutRoutes() {
-        #expect(QuickCaptureShortcut.allCases == [.bankNotification, .applePay, .quickNote])
+    @Test("Quick Capture Shortcut shows note, bank and Apple Pay sections in order")
+    func quickCaptureShortcutSections() {
+        #expect(QuickCaptureShortcut.allCases == [.quickNote, .bankNotification, .applePay])
         #expect(Set(QuickCaptureShortcut.allCases.map(\.id)).count == 3)
     }
 

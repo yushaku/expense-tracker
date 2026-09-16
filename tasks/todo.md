@@ -49,3 +49,34 @@ merge or push performed; actual Wallet delivery is not inferred from these check
 - [ ] On Yushaku verify field mapping and capture of a real Wallet payment.
 - [ ] Verify review default, opt-in saving, account selection and navigation.
 - [ ] Verify replaying identical input does not duplicate an approved capture.
+
+## Follow-up: Apple Pay / bank notification duplicate payments
+
+Requested 2026-09-16. Investigation and implementation pending; not fixed by the
+single-screen Quick Capture Shortcut layout change.
+
+Scenario: pay with bank X's credit card through Apple Pay. The Wallet automation
+captures the payment, then bank X's notification captures the same payment again.
+
+Confirmed in code: `recordApplePay` and `recordNotification` only look up their own
+event-derived IDs in transactions and pending captures. Their fingerprints use
+different namespaces (`apple-pay-v1` / `bank-notification-v1`), so exact replay
+protection does not reconcile the same payment across these two sources.
+
+- [ ] Reproduce both arrival orders, including delayed bank notifications, with
+  one shared destination account and with differing card/account mappings.
+- [ ] Inspect actual payloads and define how a Wallet card maps to bank X's credit
+  card/account. Do not assume a matching bank name alone identifies the same card.
+- [ ] Define cross-source matching using available payment references, card/account,
+  amount, currency, merchant and transaction time (not just notification arrival).
+  Do not merge solely because two payments have the same amount close together.
+- [ ] Define handling for certain vs ambiguous matches. Surface ambiguous pairs for
+  review instead of silently deleting or merging legitimate separate payments.
+- [ ] Cover pending/pending, saved/pending, saved/saved and already-approved captures;
+  preserve both sources for traceability without double-counting the payment.
+- [ ] Add regression tests for both arrival orders, retries/concurrent delivery,
+  delayed events, different cards, repeated equal-valued purchases, missing fields,
+  refunds and reversed/failed payments.
+- [ ] Verify on Yushaku with both automations enabled after an approved dev merge.
+
+Until reconciliation exists, use only one automatic capture source per card.

@@ -2,22 +2,13 @@ import AppIntents
 import SwiftData
 import SwiftUI
 
-struct ApplePayCaptureSettingsView: View {
+struct ApplePayCaptureSettingsContent: View {
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                ApplePayCapturePreferences().appCard()
-                ApplePayCaptureSetup().appCard()
-                ApplePayCaptureActivity().appCard()
-            }
-            .frame(maxWidth: MonMonTheme.maxContentWidth)
-            .padding(20)
-            .frame(maxWidth: .infinity)
+        VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+            ApplePayCapturePreferences().appCard()
+            ApplePayCaptureSetup().appCard()
+            ApplePayCaptureActivity().appCard()
         }
-        .background(MonMonTheme.canvas)
-        .navigationTitle("Apple Pay capture")
-        .foregroundStyle(MonMonTheme.textPrimary)
-        .tint(MonMonTheme.accent)
     }
 }
 
