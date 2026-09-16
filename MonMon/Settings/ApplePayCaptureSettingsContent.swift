@@ -7,7 +7,6 @@ struct ApplePayCaptureSettingsContent: View {
         VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
             ApplePayCapturePreferences().appCard()
             ApplePayCaptureSetup().appCard()
-            ApplePayCaptureActivity().appCard()
         }
     }
 }
@@ -77,39 +76,5 @@ private struct ApplePayCaptureSetup: View {
             #endif
         }
         .font(.subheadline)
-    }
-}
-
-private struct ApplePayCaptureActivity: View {
-    @AppStorage(ApplePayPreferences.lastResultKey) private var lastResult = ""
-    @AppStorage(ApplePayPreferences.lastReceivedKey) private var lastReceived = 0.0
-    @State private var showsReview = false
-
-    private var statusText: LocalizedStringKey {
-        switch lastResult {
-        case "saved": "Last Apple Pay capture saved as an expense."
-        case "review": "Last Apple Pay capture is waiting for review."
-        case "duplicate": "Last Apple Pay event was already received."
-        case "failed": "Last Apple Pay attempt failed. Check the action’s fields and account."
-        default: "No Apple Pay event received yet. Set up the automation on your iPhone."
-        }
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Recent activity").font(.headline)
-            Text(statusText).font(.subheadline)
-            if lastReceived > 0 {
-                Text(
-                    Date(timeIntervalSince1970: lastReceived),
-                    format: .dateTime.day().month().hour().minute()
-                )
-                .font(.caption).foregroundStyle(MonMonTheme.textSecondary)
-            }
-            Button("Needs review", systemImage: "tray") { showsReview = true }
-                .buttonStyle(.prominentAction)
-                .accessibilityIdentifier("apple-pay-review")
-        }
-        .appSheet(isPresented: $showsReview) { PendingTransactionCaptureListView() }
     }
 }
