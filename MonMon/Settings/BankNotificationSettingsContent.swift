@@ -3,16 +3,9 @@ import SwiftData
 import SwiftUI
 
 struct BankNotificationSettingsContent: View {
-    @Environment(\.modelContext) private var modelContext
     @Query(sort: \CashAccount.name) private var accounts: [CashAccount]
     @AppStorage(BankNotificationPreferences.accountKey) private var accountID = ""
     @AppStorage(BankNotificationPreferences.automaticSaveKey) private var automaticSave = false
-    @AppStorage(BankNotificationPreferences.lastResultKey) private var lastResult = ""
-    @AppStorage(BankNotificationPreferences.lastReceivedKey) private var lastReceived = 0.0
-    @State private var sampleText = ""
-    @State private var preview: ParsedTransactionCapture?
-    @State private var previewError = false
-    @State private var showsReview = false
 
     private var selectedAccountExists: Bool {
         accounts.contains { $0.id.uuidString == accountID }
@@ -64,95 +57,6 @@ struct BankNotificationSettingsContent: View {
 
             BankNotificationSetupSteps()
                 .appCard()
-
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Check a sample").font(.headline)
-                Text(
-                    "Paste a notification to see whether MonMon can read it. This check never saves a transaction."
-                )
-                .font(.caption)
-                TextField("Notification text", text: $sampleText, axis: .vertical)
-                    .lineLimit(3...8)
-                    .textFieldStyle(.plain)
-                    .padding(12)
-                    .background(MonMonTheme.field, in: RoundedRectangle(cornerRadius: 12))
-                    .accessibilityIdentifier("bank-notification-sample")
-                Button("Check sample", systemImage: "text.magnifyingglass", action: checkSample)
-                    .buttonStyle(.prominentAction)
-                    .disabled(
-                        !selectedAccountExists
-                            || sampleText.trimmingCharacters(in: .whitespacesAndNewlines)
-                                .isEmpty
-                    )
-                if previewError {
-                    Text("Couldn’t check this sample. Check the account and notification text.")
-                        .foregroundStyle(MonMonTheme.danger)
-                }
-                if let preview {
-                    Text(
-                        preview.isReady
-                            ? "Recognized — eligible for automatic saving"
-                            : "Needs review — will not be saved automatically"
-                    )
-                    .font(.subheadline.weight(.semibold))
-                    if let amount = preview.amount {
-                        HStack {
-                            Text(preview.kind == .income ? "Income" : "Expense")
-                            Text(VNDCurrency.format(amount))
-                        }
-                    }
-                }
-            }
-            .appCard()
-
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Recent activity").font(.headline)
-                Text(statusText).font(.subheadline)
-                if lastReceived > 0 {
-                    Text(
-                        Date(timeIntervalSince1970: lastReceived),
-                        format: .dateTime.day().month().hour().minute()
-                    )
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-                }
-                Button("Needs review", systemImage: "tray") { showsReview = true }
-                    .buttonStyle(.prominentAction)
-            }
-            .appCard()
-        }
-        .onChange(of: sampleText) {
-            preview = nil
-            previewError = false
-        }
-        .onChange(of: accountID) {
-            preview = nil
-            previewError = false
-        }
-        .appSheet(isPresented: $showsReview) { PendingTransactionCaptureListView() }
-    }
-
-    private var statusText: LocalizedStringKey {
-        switch lastResult {
-        case "saved": "Last notification saved as a transaction."
-        case "review": "Last notification is waiting for review."
-        case "duplicate": "Last notification was already received."
-        case "failed": "Last attempt failed. Check the automation’s text and account."
-        default: "No notification received yet. Run your automation to check the connection."
-        }
-    }
-
-    private func checkSample() {
-        do {
-            preview = try TransactionCaptureService(container: modelContext.container)
-                .prepareNotification(
-                    BankNotificationEvent(text: sampleText, source: "Preview", receivedAt: .now),
-                    accountID: UUID(uuidString: accountID), automaticSave: true
-                )
-            previewError = false
-        } catch {
-            preview = nil
-            previewError = true
         }
     }
 }
@@ -214,10 +118,10 @@ private struct BankNotificationSetupSteps: View {
 
             BankNotificationGuideStep(number: 4, title: "Save and check the first notification") {
                 Text(
-                    "Save the shortcut. When your bank next sends a transaction notification, open MonMon → Bank notifications → Needs review."
+                    "Save the shortcut. When your bank next sends a transaction notification, open MonMon → Transactions and review the pending entry."
                 )
                 Text(
-                    "Check the amount, income or expense, and account. Enable automatic saving only after the sample is recognized correctly."
+                    "Check the amount, income or expense, and account. Enable automatic saving only after the first capture is recognized correctly."
                 )
             }
 
@@ -230,7 +134,7 @@ private struct BankNotificationSetupSteps: View {
                         "Shortcuts runs but no text arrives? The bank may hide its message. Check one real notification with the phone unlocked, then one while locked."
                     )
                     Text(
-                        "The Play button alone does not supply a bank notification. Check Recent activity after an actual notification arrives."
+                        "The Play button alone does not supply a bank notification. Check Transactions after an actual notification arrives."
                     )
                 }
                 .padding(.top, 8)

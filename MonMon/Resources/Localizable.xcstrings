@@ -461,22 +461,22 @@
         }
       }
     },
-    "Save the shortcut. When your bank next sends a transaction notification, open MonMon → Bank notifications → Needs review.": {
+    "Save the shortcut. When your bank next sends a transaction notification, open MonMon → Transactions and review the pending entry.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lưu phím tắt. Khi ngân hàng gửi thông báo giao dịch tiếp theo, mở MonMon → Thông báo ngân hàng → Cần duyệt."
+            "value": "Lưu phím tắt. Khi ngân hàng gửi thông báo giao dịch tiếp theo, mở MonMon → Giao dịch và duyệt mục đang chờ."
           }
         }
       }
     },
-    "Check the amount, income or expense, and account. Enable automatic saving only after the sample is recognized correctly.": {
+    "Check the amount, income or expense, and account. Enable automatic saving only after the first capture is recognized correctly.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kiểm tra số tiền, chiều thu/chi và tài khoản. Chỉ bật tự lưu khi mẫu thông báo được nhận diện đúng."
+            "value": "Kiểm tra số tiền, chiều thu/chi và tài khoản. Chỉ bật tự lưu khi giao dịch đầu tiên được nhận diện đúng."
           }
         }
       }
@@ -511,12 +511,12 @@
         }
       }
     },
-    "The Play button alone does not supply a bank notification. Check Recent activity after an actual notification arrives.": {
+    "The Play button alone does not supply a bank notification. Check Transactions after an actual notification arrives.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Chỉ bấm nút Chạy chưa có thông báo ngân hàng để xử lý. Hãy kiểm tra Hoạt động gần đây sau khi nhận thông báo thật."
+            "value": "Chỉ bấm nút Chạy chưa có thông báo ngân hàng để xử lý. Hãy kiểm tra mục Giao dịch sau khi nhận thông báo thật."
           }
         }
       }

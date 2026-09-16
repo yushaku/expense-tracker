@@ -37,9 +37,11 @@ are conservative interpretations of the user's approval on 2026-09-16.
   lack a proven shared ID. Warn users to use one automatic capture source per card.
 - Explain that an observed Wallet trigger is not proof of final bank settlement;
   automatic saving is opt-in and review remains available for reconciliation.
-- Settings opens via NavigationLink, consistent with Bank notifications. Provide
-  concise setup, account preference, review/automatic mode, and last-result status
-  without logging payment details. Localize user-facing text in Vietnamese/English.
+- Quick Capture Shortcut opens via NavigationLink from Settings and shows all
+  three capture setup sections inline. Provide account preferences and
+  review/automatic mode, without recent-activity or sample-check panels. Pending
+  captures remain accessible from Transactions. Localize user-facing text in
+  Vietnamese/English; do not log payment details.
 
 ## Structure and style
 

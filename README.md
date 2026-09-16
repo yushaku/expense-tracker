@@ -187,7 +187,8 @@ Quick note capture, Bank notifications and Apple Pay capture as three expanded
 sections on one scrolling screen, without separate capture settings screens.
 Quick note capture contains the existing Record Transaction Siri shortcut and
 one-tap Dictate Text setup. Each capture method keeps its own configuration and
-behavior; bank sample checks and both Needs review buttons remain available inline.
+behavior. This screen contains setup only; pending captures are reviewed from the
+Transactions screen. Recent activity and sample-check panels are not shown here.
 
 **Apple Pay (Wallet Shortcuts automation)** — open Settings → Quick Capture Shortcut
 and scroll to Apple Pay capture.
@@ -224,8 +225,8 @@ Notification. Pass the notification text, source app label and received date.
 The optional Account parameter overrides the account selected in Settings for
 that automation, allowing multiple banks to use different accounts.
 
-Capture defaults to Needs review. A sample check in Settings previews the result
-without saving. Automatic saving is opt-in and currently recognizes only messages
+Capture defaults to Needs review, accessible from the Transactions screen.
+Automatic saving is opt-in and currently recognizes only messages
 starting with `GD:`, `Giao dịch:` or `Transaction:` followed by one signed,
 whole-VND amount (for example `GD: -50.000 VND; SD: 9.950.000 VND`). This is a
 conservative generic format, not a verified bank-specific adapter. Unsupported
