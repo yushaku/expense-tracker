@@ -7,6 +7,12 @@ import Testing
 @MainActor
 @Suite("App route coordination")
 struct AppRouteTests {
+    @Test("Quick Capture Shortcut groups the three capture routes in order")
+    func quickCaptureShortcutRoutes() {
+        #expect(QuickCaptureShortcut.allCases == [.bankNotification, .applePay, .quickNote])
+        #expect(Set(QuickCaptureShortcut.allCases.map(\.id)).count == 3)
+    }
+
     @Test("Record Transaction is the only advertised app shortcut")
     func onlyRecordTransactionShortcutRemains() {
         #expect(MonMonAppShortcuts.appShortcuts.count == 1)
