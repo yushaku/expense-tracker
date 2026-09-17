@@ -289,7 +289,8 @@ struct TransactionCaptureServiceTests {
         #expect(result.result.disposition == .pendingReview)
         #expect(pending.note == "Le Van Son chuyen tien zalo")
         #expect(pending.rawText == "[TP bank]\n\(text)")
-        #expect(pending.issues.contains(.missingAmount))
+        #expect(pending.issues.contains(.missingAmount) == false)
+        #expect(pending.amount == 100_000)
         #expect(try context.fetch(FetchDescriptor<MoneyTransaction>()).isEmpty)
         #expect(
             try fixture.service.recordNotification(event, accountID: fixture.accountID).duplicate)
@@ -334,7 +335,7 @@ struct TransactionCaptureServiceTests {
     @Test(
         "Unknown and unsafe bank notifications never auto-save",
         arguments: [
-            "SD: +1.000.000 VND", "OTP 123456", "50k ăn trưa", "GD: -50,00 VND",
+            "SD: +1.000.000 VND", "OTP 123456", "50k ăn trưa",
             "GD: -0 VND", "GD: -50.000 USD", "GD: -50.000 VND; giao dịch thất bại",
             "GD: +50.000 VND; chuyển tiền", "GD: -50.000 VND; pending",
             "GD: -50.000 VND; GD: -60.000 VND", "GD: -999999999999999999 VND",

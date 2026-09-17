@@ -44,23 +44,62 @@ struct BankNotificationEvent: Sendable {
 }
 
 enum BankNotificationParser {
-    // Deliberately narrow until real bank samples are verified. Only a labelled
-    // transaction at the start of the notification can supply the amount. Never
-    // reuse natural-language capture: it also finds account numbers and balances.
+    // Deliberately narrow: only a whitelisted movement label that opens a line or
+    // a `|`/`;` separated segment can supply the amount. Balance labels (`SD`,
+    // `SO DU`, `SD KHA DUNG`, `BALANCE`) and account lines (`TK`) are outside the
+    // whitelist, so they can never be read as a movement. Never reuse
+    // natural-language capture: it also finds account numbers and balances.
+    private static let movementLabel =
+        #"(?:gd|giao dich|transaction|ps|so tien|amount|bien dong)"#
+    /// Digits grouped by `.`, `,` or any Unicode space separator (issuers emit
+    /// U+00A0 inside amounts such as `50 000`).
+    private static let amountDigits = #"[0-9]+(?:[.,\p{Zs}][0-9]+)*"#
+    /// `đ`/`Đ` are folded to `d` before matching, so `VNĐ` arrives here as `vnd`.
+    /// The lookahead only rejects a longer word, which lets `.`, `)`, `|`, `;`
+    /// and end of line terminate the amount.
+    private static let currencySuffix = #"\s*(?:vnd|d)(?![0-9a-z])"#
     private static let transaction = try? NSRegularExpression(
         pattern:
-            #"^\s*(?:gd|giao dich|transaction)\s*:\s*([+-])\s*([0-9]+(?:[.,][0-9]+)*)\s*(?:vnd|d)(?=\s|[;,]|$)"#,
-        options: [.caseInsensitive]
+            #"(?:^|[|;])[\p{Zs}]*"# + movementLabel + #"\s*:\s*([+-]?)\s*("# + amountDigits + #")"#
+            + currencySuffix,
+        options: [.caseInsensitive, .anchorsMatchLines]
     )
-    private static let groupedAmount = try? NSRegularExpression(
+    /// One integer, or groups of three behind a single consistent separator.
+    private static let groupedInteger = try? NSRegularExpression(
         pattern: #"^(?:[0-9]+|[0-9]{1,3}(?:\.[0-9]{3})+|[0-9]{1,3}(?:,[0-9]{3})+)$"#
     )
     private static let signedAmounts = try? NSRegularExpression(
-        pattern: #"[+-]\s*[0-9]+(?:[.,][0-9]+)*\s*(?:vnd|d)(?=\s|[;,]|$)"#
+        pattern: #"[+-]\s*"# + amountDigits + currencySuffix,
+        options: [.caseInsensitive]
     )
     private static let transferAbbreviations = try? NSRegularExpression(
         pattern: #"\b(?:ck|ft)\b"#
     )
+
+    /// Reads a Vietnamese bank amount without ever concatenating its digits: a
+    /// trailing `,00` or `.00` is a fraction, not three more thousands. The
+    /// decimal separator is the last `.`/`,` followed by one or two digits;
+    /// every other separator groups thousands. Unicode spaces group thousands too.
+    private static func decimal(from text: String) -> Decimal? {
+        let compact = String(text.unicodeScalars.filter { !$0.properties.isWhitespace })
+        var integerText = compact
+        var fractionText = ""
+        if let separator = compact.lastIndex(where: { $0 == "." || $0 == "," }) {
+            let fraction = compact[compact.index(after: separator)...]
+            if fraction.count <= 2 {
+                integerText = String(compact[..<separator])
+                fractionText = String(fraction)
+            }
+        }
+        let integerRange = NSRange(integerText.startIndex..<integerText.endIndex, in: integerText)
+        guard groupedInteger?.firstMatch(in: integerText, range: integerRange) != nil else {
+            return nil
+        }
+        let digits = integerText.filter(\.isNumber)
+        guard !digits.isEmpty, digits.count <= 15 else { return nil }
+        let normalized = fractionText.isEmpty ? digits : "\(digits).\(fractionText)"
+        return Decimal(string: normalized, locale: Locale(identifier: "en_US_POSIX"))
+    }
 
     static func parse(
         _ event: BankNotificationEvent,
@@ -81,16 +120,8 @@ enum BankNotificationParser {
             let amountRange = Range(match.range(at: 2), in: normalized)
         {
             kind = normalized[signRange] == "+" ? .income : .expense
-            let number = String(normalized[amountRange])
-            let numberRange = NSRange(number.startIndex..<number.endIndex, in: number)
-            if groupedAmount?.firstMatch(in: number, range: numberRange) != nil {
-                let digits = number.filter(\.isNumber)
-                if digits.count <= 15,
-                    let value = Decimal(string: digits, locale: Locale(identifier: "en_US_POSIX")),
-                    value > 0
-                {
-                    amount = value
-                }
+            if let value = decimal(from: String(normalized[amountRange])), value > 0 {
+                amount = value
             }
         }
         if amount == nil { issues.insert(.missingAmount) }
