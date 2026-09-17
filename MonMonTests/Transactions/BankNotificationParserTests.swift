@@ -181,6 +181,197 @@ struct BankNotificationParserTests {
         #expect(!capture.isReady)
     }
 
+    // MARK: - Automatic save and the review gate
+
+    /// The `ND:` line is free text the payer typed, not a status the bank
+    /// asserts. Practically every incoming Vietnamese transfer carries
+    /// "chuyen tien" or "chuyen khoan" there, plenty carry the given name
+    /// "Huy", and "hoan thanh" means completed rather than refunded. Scanning
+    /// that line for review words blocked almost every legitimate credit from
+    /// automatic save, so the scan must not reach it.
+    @Test(
+        "Content lines never send a legitimate credit to review",
+        arguments: [
+            (
+                "TPBank credit with chuyen tien in the content",
+                """
+                (TPBank): 16/09/26;20:30
+                TK: xxxx3688261
+                PS:+62.000VND
+                SD: 23.457.587VND
+                SD KHA DUNG: 23.457.587VND
+                ND: Le Van Son chuyen tien
+                SO GD: 669V60026259AAFF
+                """,
+                Decimal(62_000)
+            ),
+            (
+                "Payer named Huy",
+                """
+                (TPBank): 16/09/26;20:30
+                TK: xxxx3688261
+                PS:+500.000VND
+                SD: 23.457.587VND
+                ND: Nguyen Van Huy chuyen khoan
+                """,
+                Decimal(500_000)
+            ),
+            (
+                "CK abbreviation inside the content",
+                """
+                (TPBank): 16/09/26;20:30
+                TK: xxxx3688261
+                PS:+15.000.000VND
+                SD: 23.457.587VND
+                ND: CK LUONG THANG 9
+                """,
+                Decimal(15_000_000)
+            ),
+            (
+                "hoan thanh means completed, not refunded",
+                """
+                (TPBank): 16/09/26;20:30
+                TK: xxxx3688261
+                PS:+250.000VND
+                SD: 23.457.587VND
+                ND: hoan thanh don hang 123
+                """,
+                Decimal(250_000)
+            ),
+        ])
+    func creditsAutomaticallySave(name: String, text: String, expected: Decimal) throws {
+        let fixture = try makeFixture()
+        let capture = try fixture.service.prepareNotification(
+            BankNotificationEvent(text: text, source: "TP bank", receivedAt: now),
+            accountID: fixture.accountID, automaticSave: true)
+
+        #expect(capture.amount == expected, "\(name) amount")
+        #expect(capture.kind == .income, "\(name) kind")
+        #expect(!capture.issues.contains(.notificationNeedsReview), "\(name) review flag")
+        #expect(capture.issues.isEmpty, "\(name) issues: \(capture.issues)")
+        #expect(capture.isReady, "\(name) readiness")
+    }
+
+    /// The safety rail the content-line exclusion must not break. A status the
+    /// bank asserts itself, an authentication payload, or a genuine refund is
+    /// never proof of a completed movement, wherever in the bank's own
+    /// metadata it appears.
+    @Test(
+        "Bank asserted statuses still force a review",
+        arguments: [
+            (
+                "OTP payload",
+                "Ma OTP cua quy khach la 987654, hieu luc 3 phut."
+            ),
+            (
+                "OTP with an authentication verb",
+                "OTP 123456 xac thuc giao dich tai ngan hang"
+            ),
+            (
+                "Failed transaction",
+                """
+                (TPBank): 16/09/26;20:30
+                TK: xxxx3688261
+                TRANG THAI: GIAO DICH THAT BAI
+                PS:+62.000VND
+                ND: Le Van Son chuyen tien
+                """
+            ),
+            (
+                "khong thanh cong",
+                """
+                (TPBank): 16/09/26;20:30
+                TK: xxxx3688261
+                TRANG THAI: KHONG THANH CONG
+                PS:+62.000VND
+                ND: Le Van Son chuyen tien
+                """
+            ),
+            (
+                "declined",
+                """
+                (TPBank): 16/09/26;20:30
+                TK: xxxx3688261
+                TRANG THAI: DECLINED
+                PS:+62.000VND
+                ND: Le Van Son chuyen tien
+                """
+            ),
+            (
+                "dang xu ly",
+                """
+                (TPBank): 16/09/26;20:30
+                TK: xxxx3688261
+                TRANG THAI: DANG XU LY
+                PS:+62.000VND
+                ND: Le Van Son chuyen tien
+                """
+            ),
+            (
+                "pending",
+                """
+                (TPBank): 16/09/26;20:30
+                TK: xxxx3688261
+                TRANG THAI: PENDING
+                PS:+62.000VND
+                ND: Le Van Son chuyen tien
+                """
+            ),
+            (
+                "hoan tien",
+                """
+                (TPBank): 16/09/26;20:30
+                TK: xxxx3688261
+                LOAI GD: HOAN TIEN DON HANG
+                PS:+62.000VND
+                ND: Le Van Son chuyen tien
+                """
+            ),
+            (
+                "reversed",
+                """
+                (TPBank): 16/09/26;20:30
+                TK: xxxx3688261
+                LOAI GD: REVERSED
+                PS:+62.000VND
+                ND: Le Van Son chuyen tien
+                """
+            ),
+            (
+                "Status packed onto one pipe separated line",
+                "VCB: TK 0011001234567|TRANG THAI: THAT BAI|GD: +250,000 VND|ND: Le Van Son chuyen tien"
+            ),
+        ])
+    func bankAssertedStatusesNeedReview(name: String, text: String) throws {
+        let fixture = try makeFixture()
+        let capture = try fixture.service.prepareNotification(
+            BankNotificationEvent(text: text, source: "TP bank", receivedAt: now),
+            accountID: fixture.accountID, automaticSave: true)
+
+        #expect(capture.issues.contains(.notificationNeedsReview), "\(name) review flag")
+        #expect(!capture.isReady, "\(name) readiness")
+    }
+
+    /// Turning automatic save off is an explicit instruction, not a heuristic:
+    /// it must keep sending even a spotless credit to review.
+    @Test("Automatic save switched off still routes a clean credit to review")
+    func manualSaveAlwaysReviews() throws {
+        let fixture = try makeFixture()
+        let text = """
+            (TPBank): 16/09/26;20:30
+            TK: xxxx3688261
+            PS:+62.000VND
+            SD: 23.457.587VND
+            ND: Le Van Son chuyen tien
+            """
+        let capture = try fixture.service.prepareNotification(
+            BankNotificationEvent(text: text, source: "TP bank", receivedAt: now),
+            accountID: fixture.accountID, automaticSave: false)
+
+        #expect(capture.amount == 62_000)
+        #expect(capture.issues.contains(.notificationNeedsReview))
+    }
+
     // MARK: - Fixture
 
     private func makeFixture() throws -> Fixture {
@@ -228,6 +419,8 @@ struct BankNotificationParserTests {
         let defaults = try #require(UserDefaults(suiteName: suiteName))
         defaults.set(accountID.uuidString, forKey: TransactionDefaults.accountStorageKey)
         defaults.set(categoryID.uuidString, forKey: TransactionDefaults.categoryStorageKey)
+        defaults.set(
+            incomeCategoryID.uuidString, forKey: TransactionDefaults.incomeCategoryStorageKey)
 
         return Fixture(
             container: container,

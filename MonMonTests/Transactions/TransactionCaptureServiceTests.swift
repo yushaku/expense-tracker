@@ -341,7 +341,11 @@ struct TransactionCaptureServiceTests {
             "GD: -50.000 VND; GD: -60.000 VND", "GD: -999999999999999999 VND",
             "GD: -50.000 VND; Transaction : -60.000 VND",
             "GD: -50.000 VND; -60.000 VND", "GD: -50.000 VND; không thành công",
-            "GD: -50.000 VND; ND: CK ABC",
+            // `CK` asserted by the bank as the transaction type still reviews.
+            // The same abbreviation inside an `ND:` content line is the payer's
+            // own shorthand, not a status, and is covered as an automatic save
+            // in `BankNotificationParserTests`.
+            "GD: -50.000 VND; LOAI GD: CK",
         ])
     func notificationRequiresReview(text: String) throws {
         let fixture = try makeFixture()

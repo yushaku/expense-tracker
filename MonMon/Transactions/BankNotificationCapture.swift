@@ -75,6 +75,48 @@ enum BankNotificationParser {
     private static let transferAbbreviations = try? NSRegularExpression(
         pattern: #"\b(?:ck|ft)\b"#
     )
+    /// Labels that introduce free text the payer typed rather than a status the
+    /// bank asserts. A Vietnamese credit almost always carries "chuyen tien" or
+    /// "chuyen khoan" there, often a given name such as "Huy", and "hoan thanh"
+    /// means completed rather than refunded. Scanning that text for status
+    /// words blocked nearly every legitimate credit, so it is cut out of the
+    /// status scan. It stays in `BankNotificationEvent.note` for the user.
+    private static let contentLabel = try? NSRegularExpression(
+        pattern: #"^[\p{Zs}]*(?:nd|noi dung|content|message|remark|mo ta|ghi chu|dien giai)\s*:"#,
+        options: [.caseInsensitive]
+    )
+    /// Transfers, requests, failures and authentication messages aren't proof
+    /// of a completed income/expense. Keep their text for the user's review.
+    ///
+    /// Matched on word boundaries rather than as substrings: `huy` must not
+    /// fire on the name "Huy", `hoan tien` must not be reached by "hoan thanh",
+    /// and `chuyen` must not fire on "chuyen doi".
+    private static let reviewWords = try? NSRegularExpression(
+        pattern: #"\b(?:"#
+            + [
+                "otp", "xac thuc", "verification", "that bai", "failed", "fail",
+                "declined", "decline", "pending", "dang xu ly", "cho xu ly",
+                "yeu cau", "request", "requested", "du kien", "scheduled",
+                "chuyen", "transfer", "transferred", "thanh toan the",
+                "credit card payment", "huy", "cancel", "cancelled", "canceled",
+                "khong thanh cong", "tu choi", "khong thuc hien",
+                "hoan tien", "hoan tra", "refund", "refunded", "reversed", "reversal",
+            ].joined(separator: "|") + #")\b"#,
+        options: [.caseInsensitive]
+    )
+
+    /// The part of the payload the bank asserts about the movement: every
+    /// newline, `|` or `;` separated segment except the payer's free text.
+    private static func bankAssertedText(in normalized: String) -> String {
+        normalized
+            .split(whereSeparator: { $0.isNewline || $0 == "|" || $0 == ";" })
+            .filter { segment in
+                let text = String(segment)
+                let range = NSRange(text.startIndex..<text.endIndex, in: text)
+                return contentLabel?.firstMatch(in: text, range: range) == nil
+            }
+            .joined(separator: "\n")
+    }
 
     /// Reads a Vietnamese bank amount without ever concatenating its digits: a
     /// trailing `,00` or `.00` is a fraction, not three more thousands. The
@@ -126,18 +168,17 @@ enum BankNotificationParser {
         }
         if amount == nil { issues.insert(.missingAmount) }
 
-        // Transfers, requests, failures and authentication messages aren't proof
-        // of a completed income/expense. Keep their text for the user's review.
-        let reviewWords = [
-            "otp", "xac thuc", "verification", "that bai", "failed", "declined",
-            "pending", "dang xu ly", "yeu cau", "request", "du kien", "scheduled",
-            "chuyen", "transfer", "thanh toan the", "credit card payment", "huy", "cancel",
-            "khong thanh cong", "tu choi", "khong thuc hien", "hoan", "reversed", "reversal",
-        ]
-        if !automaticSave || reviewWords.contains(where: { normalized.contains($0) }) {
+        // Status words are read only from what the bank asserts, never from the
+        // payer's free text: a legitimate credit says "chuyen tien" there.
+        let asserted = bankAssertedText(in: normalized)
+        let assertedRange = NSRange(asserted.startIndex..<asserted.endIndex, in: asserted)
+        if !automaticSave || reviewWords?.firstMatch(in: asserted, range: assertedRange) != nil {
             issues.insert(.notificationNeedsReview)
         }
-        if transferAbbreviations?.firstMatch(in: normalized, range: range) != nil {
+        // `CK`/`FT` in the payer's free text is the payer's shorthand for the
+        // transfer they just made, not a bank status, so it is read from the
+        // asserted text too.
+        if transferAbbreviations?.firstMatch(in: asserted, range: assertedRange) != nil {
             issues.insert(.notificationNeedsReview)
         }
         // Multiple signed amounts may be multiple movements, even when a second
