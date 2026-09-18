@@ -60,12 +60,6 @@ struct RecurringListView: View {
             .navigationTitle("Recurring")
             .accessibilityIdentifier("recurring-list")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-
                 if !accounts.isEmpty {
                     ToolbarItem(placement: .primaryAction) {
                         Button("Add Rule", systemImage: "plus") {
@@ -73,6 +67,12 @@ struct RecurringListView: View {
                         }
                         .accessibilityIdentifier("add-recurring")
                     }
+                }
+
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Close", systemImage: "xmark") { dismiss() }
+                        .labelStyle(.iconOnly)
+                        .tint(MonMonTheme.textSecondary)
                 }
             }
             .appSheet(item: $editorMode) { mode in

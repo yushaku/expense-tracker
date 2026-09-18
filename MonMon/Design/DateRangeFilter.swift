@@ -308,11 +308,11 @@ struct DateRangeFilterButton: View {
             .navigationTitle("Period")
             .accessibilityIdentifier(identifier("period-filter-sheet"))
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        isFiltering = false
-                    }
-                    .accessibilityIdentifier(identifier("period-filter-done"))
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Close", systemImage: "xmark") { isFiltering = false }
+                        .labelStyle(.iconOnly)
+                        .tint(MonMonTheme.textSecondary)
+                        .accessibilityIdentifier(identifier("period-filter-done"))
                 }
             }
             .tint(MonMonTheme.accent)

@@ -37,8 +37,10 @@ struct PendingTransactionCaptureListView: View {
             }
             .navigationTitle("Needs review")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Close", systemImage: "xmark") { dismiss() }
+                        .labelStyle(.iconOnly)
+                        .tint(MonMonTheme.textSecondary)
                 }
             }
             .appSheet(item: $selectedCapture) { capture in
