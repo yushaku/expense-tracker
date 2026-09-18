@@ -1,6 +1,11 @@
 import Charts
 import SwiftUI
 
+private struct SelectedSpendingBar: Equatable {
+    let start: Date
+    let kind: TransactionKind
+}
+
 /// How the money moved over the period on show: what went out and what came in,
 /// one point per day when a month is being read and one per month when a year
 /// is.
@@ -20,8 +25,8 @@ struct SpendingTrendCard: View {
     /// against its own figures.
     ///
     /// The last one on show cannot be put away: an empty chart answers nothing.
-    @State private var hiddenKinds: Set<TransactionKind> = []
-    @State private var selectedStart: Date?
+    @State private var hiddenKinds = SpendingTrendBarSelection.initiallyHiddenKinds
+    @State private var selectedBar: SelectedSpendingBar?
 
     private var shownKinds: [TransactionKind] {
         TransactionKind.allCases.filter { !hiddenKinds.contains($0) }
@@ -41,15 +46,11 @@ struct SpendingTrendCard: View {
     }
 
     private var selectedPoint: SpendingTrendPoint? {
-        guard let selectedStart else {
+        guard let selectedBar else {
             return nil
         }
 
-        return TrendChartSelection.nearest(
-            to: selectedStart,
-            in: points,
-            date: { $0.start }
-        )
+        return points.first { $0.start == selectedBar.start }
     }
 
     var body: some View {
@@ -133,6 +134,10 @@ struct SpendingTrendCard: View {
                 hiddenKinds.remove(kind)
             } else if shownKinds.count > 1 {
                 hiddenKinds.insert(kind)
+
+                if selectedBar?.kind == kind {
+                    selectedBar = nil
+                }
             }
         }
     }
@@ -157,16 +162,24 @@ struct SpendingTrendCard: View {
                     )
                     .position(by: .value("Direction", kind.rawValue))
                     .foregroundStyle(by: .value("Direction", kind.rawValue))
+                    .opacity(selectedBar == nil || isSelected(kind, point: point) ? 1 : 0.32)
                 }
             }
 
-            if let selectedPoint {
-                RuleMark(x: .value("Selected period", selectedPoint.start))
-                    .foregroundStyle(MonMonTheme.textMuted.opacity(0.55))
-                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
-                    .annotation(position: .top, spacing: 8) {
-                        selectionLabel(selectedPoint)
-                    }
+            if let selectedBar, let selectedPoint {
+                PointMark(
+                    x: .value("Selected period", selectedPoint.start, unit: unit.component),
+                    y: .value(
+                        "Selected amount",
+                        amount(of: selectedBar.kind, in: selectedPoint).chartValue
+                    )
+                )
+                .position(by: .value("Direction", selectedBar.kind.rawValue))
+                .symbolSize(72)
+                .foregroundStyle(tint(of: selectedBar.kind))
+                .annotation(position: .top, spacing: 8) {
+                    selectionLabel(selectedPoint, kind: selectedBar.kind)
+                }
             }
         }
         .chartForegroundStyleScale(
@@ -174,6 +187,7 @@ struct SpendingTrendCard: View {
             range: TransactionKind.allCases.map(tint(of:))
         )
         .animation(.snappy(duration: 0.28), value: hiddenKinds)
+        .animation(.snappy(duration: 0.28), value: selectedBar)
         // Zero is the floor a direction is read against: a quiet day sits on it
         // rather than at the bottom of whatever the busiest day happened to be.
         .chartYScale(domain: .automatic(includesZero: true))
@@ -208,28 +222,60 @@ struct SpendingTrendCard: View {
                 .foregroundStyle(MonMonTheme.textMuted)
             }
         }
-        .chartXSelection(value: $selectedStart)
+        .chartGesture { proxy in
+            SpatialTapGesture()
+                .onEnded { tap in
+                    selectBar(atX: tap.location.x, proxy: proxy)
+                }
+        }
         .frame(height: 190)
-        .sensoryFeedback(.selection, trigger: selectedPoint?.start)
+        .sensoryFeedback(.selection, trigger: selectedBar)
         .onChange(of: points) {
-            selectedStart = nil
+            selectedBar = nil
         }
         // The sentence under the chart states what the two series average, which
         // is the reading of them that survives being read aloud.
         .accessibilityHidden(true)
     }
 
-    private func selectionLabel(_ point: SpendingTrendPoint) -> some View {
-        HStack(spacing: 10) {
-            ForEach(shownKinds, id: \.self) { kind in
-                HStack(spacing: 5) {
-                    Circle()
-                        .fill(tint(of: kind))
-                        .frame(width: 7, height: 7)
+    private func isSelected(_ kind: TransactionKind, point: SpendingTrendPoint) -> Bool {
+        selectedBar == SelectedSpendingBar(start: point.start, kind: kind)
+    }
 
-                    Text(VNDCurrency.format(amount(of: kind, in: point)))
-                }
-            }
+    private func selectBar(atX x: CGFloat, proxy: ChartProxy) {
+        guard
+            let proposed = proxy.value(atX: x, as: Date.self),
+            let point = TrendChartSelection.nearest(to: proposed, in: points, date: { $0.start }),
+            let centerX = proxy.position(forX: point.start),
+            let kind = SpendingTrendBarSelection.kind(
+                atX: x,
+                relativeTo: centerX,
+                shownKinds: shownKinds
+            )
+        else {
+            selectedBar = nil
+            return
+        }
+
+        let selection = SelectedSpendingBar(start: point.start, kind: kind)
+
+        withAnimation(.snappy(duration: 0.28)) {
+            selectedBar = selectedBar == selection ? nil : selection
+        }
+    }
+
+    private func selectionLabel(
+        _ point: SpendingTrendPoint,
+        kind: TransactionKind
+    ) -> some View {
+        HStack(spacing: 5) {
+            Circle()
+                .fill(tint(of: kind))
+                .frame(width: 7, height: 7)
+
+            Text(kind.displayName)
+
+            Text(VNDCurrency.format(amount(of: kind, in: point)))
         }
         .font(.caption.weight(.semibold))
         .monospacedDigit()
