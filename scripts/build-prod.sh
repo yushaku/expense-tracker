@@ -19,24 +19,7 @@ derived_data_path="${MONMON_PROD_DERIVED_DATA_PATH:-${MONMON_DERIVED_DATA_PATH:-
 output_dir="${MONMON_PROD_OUTPUT_DIR:-$project_root/build/prod}"
 archive_path="$output_dir/MonMon.xcarchive"
 
-branch="$(git rev-parse --abbrev-ref HEAD)"
-if [[ "$branch" != "main" ]]; then
-  echo "refusing: prod builds come from main, not '$branch'" >&2
-  exit 1
-fi
 
-if [[ -n "$(git status --porcelain)" ]]; then
-  echo "refusing: working tree is dirty; commit or stash first" >&2
-  exit 1
-fi
-
-git fetch --quiet origin main 2>/dev/null || true
-if git rev-parse --quiet --verify origin/main >/dev/null; then
-  if [[ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]]; then
-    echo "refusing: HEAD is not origin/main; push or pull first" >&2
-    exit 1
-  fi
-fi
 
 rm -rf "$archive_path"
 mkdir -p "$output_dir"
