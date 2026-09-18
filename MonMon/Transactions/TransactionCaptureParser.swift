@@ -317,24 +317,16 @@ enum TransactionCaptureParser {
         issues: inout Set<TransactionCaptureIssue>
     ) -> UUID? {
         let candidates = context.categories.filter { $0.kind == kind }
-        let scoredMatches = candidates.compactMap { category -> (id: UUID, score: Int)? in
-            let phrases = [normalize(category.name)] + categoryAliases(for: category)
-            let scores = phrases.compactMap { phrase in
-                containsPhrase(phrase, in: text) ? phrase.count : nil
-            }
-            guard let score = scores.max() else { return nil }
-            return (category.id, score)
-        }
-        let bestScore = scoredMatches.map(\.score).max()
-        let uniqueMatches = uniqueIDs(
-            scoredMatches.filter { $0.score == bestScore }.map(\.id)
-        )
-        if uniqueMatches.count > 1 {
+        switch TransactionCategoryClassifier.classify(
+            text, kind: kind, categories: candidates, strategy: .balanced
+        ) {
+        case .matched(let id):
+            return id
+        case .ambiguous:
             issues.insert(.ambiguousCategory)
             return nil
-        }
-        if let match = uniqueMatches.first {
-            return match
+        case .noMatch:
+            break
         }
 
         let defaultID =
@@ -348,54 +340,6 @@ enum TransactionCaptureParser {
             return nil
         }
         return defaultID
-    }
-
-    private static func categoryAliases(for category: CaptureCategory) -> [String] {
-        switch category.symbolName {
-        case "fork.knife":
-            [
-                "an", "an sang", "an trua", "an toi", "an uong", "bua sang", "bua trua",
-                "bua toi", "com", "pho", "bun", "banh mi", "do an", "nha hang", "quan an",
-                "cafe", "ca phe", "tra sua", "nuoc uong", "food", "breakfast", "lunch",
-                "dinner", "coffee",
-            ]
-        case "car.fill":
-            [
-                "di chuyen", "xang", "do xang", "gui xe", "ve xe", "xe buyt", "xe om",
-                "taxi", "grab", "be", "gojek", "tau", "metro", "ve tau", "ve may bay",
-                "transport", "parking",
-            ]
-        case "house.fill":
-            [
-                "nha", "tien nha", "thue nha", "tien dien", "tien nuoc", "wifi", "internet",
-                "gas", "sua nha", "chung cu", "housing", "rent", "utilities",
-            ]
-        case "cart.fill":
-            [
-                "mua sam", "sieu thi", "quan ao", "giay dep", "do gia dung", "shopee",
-                "lazada", "shopping", "groceries",
-            ]
-        case "cross.case.fill":
-            [
-                "thuoc", "kham", "kham benh", "nha khoa", "bac si", "benh vien",
-                "bao hiem y te", "health", "medical", "doctor", "dentist",
-            ]
-        case "gamecontroller.fill":
-            [
-                "game", "phim", "xem phim", "ve xem phim", "rap phim", "di choi", "netflix",
-                "spotify", "karaoke", "giai tri", "concert", "entertainment", "cinema",
-            ]
-        case "tag.fill":
-            ["khac", "other"]
-        case "briefcase.fill":
-            ["luong", "tien luong", "tien cong", "payroll", "salary", "wage"]
-        case "gift.fill":
-            ["thuong", "tien thuong", "hoa hong", "bonus", "commission"]
-        case "building.columns.fill":
-            ["lai", "tien lai", "lai tiet kiem", "co tuc", "interest", "dividend"]
-        default:
-            []
-        }
     }
 
     private static func makeNote(
