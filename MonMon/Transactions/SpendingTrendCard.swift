@@ -1,6 +1,11 @@
 import Charts
 import SwiftUI
 
+private struct SelectedSpendingBar: Equatable {
+    let start: Date
+    let kind: TransactionKind
+}
+
 /// How the money moved over the period on show: what went out and what came in,
 /// one point per day when a month is being read and one per month when a year
 /// is.
@@ -14,14 +19,14 @@ struct SpendingTrendCard: View {
     let unit: SpendingTrendUnit
     let points: [SpendingTrendPoint]
 
-    /// Which lines the owner has put away. Two lines an order of magnitude
+    /// Which series the owner has put away. Two series an order of magnitude
     /// apart — a month of small expenses under one salary — flatten each other
     /// against a shared scale, so either can be dropped and the other redrawn
     /// against its own figures.
     ///
     /// The last one on show cannot be put away: an empty chart answers nothing.
-    @State private var hiddenKinds: Set<TransactionKind> = []
-    @State private var selectedStart: Date?
+    @State private var hiddenKinds = SpendingTrendBarSelection.initiallyHiddenKinds
+    @State private var selectedBar: SelectedSpendingBar?
 
     private var shownKinds: [TransactionKind] {
         TransactionKind.allCases.filter { !hiddenKinds.contains($0) }
@@ -41,15 +46,11 @@ struct SpendingTrendCard: View {
     }
 
     private var selectedPoint: SpendingTrendPoint? {
-        guard let selectedStart else {
+        guard let selectedBar else {
             return nil
         }
 
-        return TrendChartSelection.nearest(
-            to: selectedStart,
-            in: points,
-            date: { $0.start }
-        )
+        return points.first { $0.start == selectedBar.start }
     }
 
     var body: some View {
@@ -81,7 +82,7 @@ struct SpendingTrendCard: View {
 
     private var header: some View {
         HStack(spacing: 12) {
-            Label("SPENDING TREND", systemImage: "chart.line.uptrend.xyaxis")
+            Label("SPENDING TREND", systemImage: "chart.bar.xaxis")
                 .font(.caption.weight(.semibold))
                 .tracking(0.8)
                 .foregroundStyle(MonMonTheme.textSecondary)
@@ -89,7 +90,7 @@ struct SpendingTrendCard: View {
 
             Spacer(minLength: 8)
 
-            // Which line is which, and which are drawn. Two directions on one
+            // Which series is which, and which are drawn. Two directions on one
             // chart cannot be told apart by shape, and the built-in legend can
             // neither be coloured to the hues the rest of the app spends and
             // earns in nor tapped.
@@ -119,7 +120,7 @@ struct SpendingTrendCard: View {
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        // The one line still drawn stays drawn: putting it away would leave an
+        // The one series still drawn stays drawn: putting it away would leave an
         // empty chart, which is not a reading of anything.
         .disabled(isShown && shownKinds.count == 1)
         .accessibilityElement(children: .combine)
@@ -133,6 +134,10 @@ struct SpendingTrendCard: View {
                 hiddenKinds.remove(kind)
             } else if shownKinds.count > 1 {
                 hiddenKinds.insert(kind)
+
+                if selectedBar?.kind == kind {
+                    selectedBar = nil
+                }
             }
         }
     }
@@ -150,39 +155,30 @@ struct SpendingTrendCard: View {
         Chart {
             ForEach(shownKinds, id: \.self) { kind in
                 ForEach(points) { point in
-                    LineMark(
-                        x: .value("Period", point.start),
+                    BarMark(
+                        x: .value("Period", point.start, unit: unit.component),
                         y: .value("Amount", amount(of: kind, in: point).chartValue),
-                        series: .value("Direction", kind.rawValue)
+                        width: .ratio(0.76)
                     )
-                    .interpolationMethod(.monotone)
-                    .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+                    .position(by: .value("Direction", kind.rawValue))
                     .foregroundStyle(by: .value("Direction", kind.rawValue))
+                    .opacity(selectedBar == nil || isSelected(kind, point: point) ? 1 : 0.32)
                 }
             }
 
-            if let selectedPoint {
-                RuleMark(x: .value("Selected period", selectedPoint.start))
-                    .foregroundStyle(MonMonTheme.textMuted.opacity(0.55))
-                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
-                    .annotation(position: .top, spacing: 8) {
-                        selectionLabel(selectedPoint)
-                    }
-
-                ForEach(shownKinds, id: \.self) { kind in
-                    PointMark(
-                        x: .value("Selected period", selectedPoint.start),
-                        y: .value("Selected amount", amount(of: kind, in: selectedPoint).chartValue)
+            if let selectedBar, let selectedPoint {
+                PointMark(
+                    x: .value("Selected period", selectedPoint.start, unit: unit.component),
+                    y: .value(
+                        "Selected amount",
+                        amount(of: selectedBar.kind, in: selectedPoint).chartValue
                     )
-                    .symbolSize(120)
-                    .foregroundStyle(tint(of: kind))
-
-                    PointMark(
-                        x: .value("Selected period", selectedPoint.start),
-                        y: .value("Selected amount", amount(of: kind, in: selectedPoint).chartValue)
-                    )
-                    .symbolSize(42)
-                    .foregroundStyle(MonMonTheme.surface)
+                )
+                .position(by: .value("Direction", selectedBar.kind.rawValue))
+                .symbolSize(72)
+                .foregroundStyle(tint(of: selectedBar.kind))
+                .annotation(position: .top, spacing: 8) {
+                    selectionLabel(selectedPoint, kind: selectedBar.kind)
                 }
             }
         }
@@ -191,10 +187,11 @@ struct SpendingTrendCard: View {
             range: TransactionKind.allCases.map(tint(of:))
         )
         .animation(.snappy(duration: 0.28), value: hiddenKinds)
+        .animation(.snappy(duration: 0.28), value: selectedBar)
         // Zero is the floor a direction is read against: a quiet day sits on it
         // rather than at the bottom of whatever the busiest day happened to be.
         .chartYScale(domain: .automatic(includesZero: true))
-        // The swatches in the header already name the two lines, and they carry
+        // The swatches in the header already name the two series, and they carry
         // the app's own colours.
         .chartLegend(.hidden)
         .chartXAxis {
@@ -225,28 +222,60 @@ struct SpendingTrendCard: View {
                 .foregroundStyle(MonMonTheme.textMuted)
             }
         }
-        .chartXSelection(value: $selectedStart)
-        .frame(height: 190)
-        .sensoryFeedback(.selection, trigger: selectedPoint?.start)
-        .onChange(of: points) {
-            selectedStart = nil
+        .chartGesture { proxy in
+            SpatialTapGesture()
+                .onEnded { tap in
+                    selectBar(atX: tap.location.x, proxy: proxy)
+                }
         }
-        // The sentence under the chart states what the two lines average, which
+        .frame(height: 190)
+        .sensoryFeedback(.selection, trigger: selectedBar)
+        .onChange(of: points) {
+            selectedBar = nil
+        }
+        // The sentence under the chart states what the two series average, which
         // is the reading of them that survives being read aloud.
         .accessibilityHidden(true)
     }
 
-    private func selectionLabel(_ point: SpendingTrendPoint) -> some View {
-        HStack(spacing: 10) {
-            ForEach(shownKinds, id: \.self) { kind in
-                HStack(spacing: 5) {
-                    Circle()
-                        .fill(tint(of: kind))
-                        .frame(width: 7, height: 7)
+    private func isSelected(_ kind: TransactionKind, point: SpendingTrendPoint) -> Bool {
+        selectedBar == SelectedSpendingBar(start: point.start, kind: kind)
+    }
 
-                    Text(VNDCurrency.format(amount(of: kind, in: point)))
-                }
-            }
+    private func selectBar(atX x: CGFloat, proxy: ChartProxy) {
+        guard
+            let proposed = proxy.value(atX: x, as: Date.self),
+            let point = TrendChartSelection.nearest(to: proposed, in: points, date: { $0.start }),
+            let centerX = proxy.position(forX: point.start),
+            let kind = SpendingTrendBarSelection.kind(
+                atX: x,
+                relativeTo: centerX,
+                shownKinds: shownKinds
+            )
+        else {
+            selectedBar = nil
+            return
+        }
+
+        let selection = SelectedSpendingBar(start: point.start, kind: kind)
+
+        withAnimation(.snappy(duration: 0.28)) {
+            selectedBar = selectedBar == selection ? nil : selection
+        }
+    }
+
+    private func selectionLabel(
+        _ point: SpendingTrendPoint,
+        kind: TransactionKind
+    ) -> some View {
+        HStack(spacing: 5) {
+            Circle()
+                .fill(tint(of: kind))
+                .frame(width: 7, height: 7)
+
+            Text(kind.displayName)
+
+            Text(VNDCurrency.format(amount(of: kind, in: point)))
         }
         .font(.caption.weight(.semibold))
         .monospacedDigit()
@@ -266,7 +295,7 @@ struct SpendingTrendCard: View {
     /// What a day or a month of this period came to on average. The busiest one
     /// is what the chart shows; this is what it usually was.
     ///
-    /// It names the lines on show and no others, so a line put away is gone
+    /// It names the series on show and no others, so a series put away is gone
     /// from the card entirely rather than still being spoken about under it.
     private var averageNotice: LocalizedStringKey {
         let count = Decimal(points.count)

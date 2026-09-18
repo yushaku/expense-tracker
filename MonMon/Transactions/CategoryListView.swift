@@ -47,17 +47,17 @@ struct CategoryListView: View {
             .navigationTitle("Categories")
             .accessibilityIdentifier("category-list")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-
                 ToolbarItem(placement: .primaryAction) {
                     Button("Add Category", systemImage: "plus") {
                         editorMode = .add
                     }
                     .accessibilityIdentifier("add-category")
+                }
+
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Close", systemImage: "xmark") { dismiss() }
+                        .labelStyle(.iconOnly)
+                        .tint(MonMonTheme.textSecondary)
                 }
             }
             .appSheet(item: $editorMode) { mode in

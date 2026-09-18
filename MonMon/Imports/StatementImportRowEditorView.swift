@@ -46,8 +46,10 @@ struct StatementImportRowEditorView: View {
             .compactRootNavigationTitle("Review transaction")
             .toolbar {
                 if row.disposition.isExact {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Done") { dismiss() }
+                    ToolbarItem(placement: .primaryAction) {
+                        Button("Close", systemImage: "xmark") { dismiss() }
+                            .labelStyle(.iconOnly)
+                            .tint(MonMonTheme.textSecondary)
                     }
                 } else {
                     ToolbarItem(placement: .cancellationAction) {

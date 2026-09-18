@@ -35,10 +35,10 @@ struct TransactionDefaultsView: View {
             .navigationTitle("Defaults")
             .accessibilityIdentifier("transaction-defaults")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") {
-                        dismiss()
-                    }
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Close", systemImage: "xmark") { dismiss() }
+                        .labelStyle(.iconOnly)
+                        .tint(MonMonTheme.textSecondary)
                 }
             }
             .tint(MonMonTheme.accent)

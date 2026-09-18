@@ -18,8 +18,10 @@ struct StatementImportInboxView: View {
             }
             .navigationTitle("Import Inbox")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Close", systemImage: "xmark") { dismiss() }
+                        .labelStyle(.iconOnly)
+                        .tint(MonMonTheme.textSecondary)
                         .accessibilityIdentifier("close-import-inbox")
                 }
             }

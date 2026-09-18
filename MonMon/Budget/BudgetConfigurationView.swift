@@ -53,17 +53,17 @@ struct BudgetConfigurationView: View {
             }
             .navigationTitle("Budget setup")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-
                 ToolbarItem(placement: .primaryAction) {
                     Button("Add Jar", systemImage: "plus") {
                         editorMode = .add
                     }
                     .accessibilityIdentifier("budget-add-jar")
+                }
+
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Close", systemImage: "xmark") { dismiss() }
+                        .labelStyle(.iconOnly)
+                        .tint(MonMonTheme.textSecondary)
                 }
             }
             .appSheet(item: $editorMode) { mode in

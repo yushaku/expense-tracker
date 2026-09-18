@@ -195,4 +195,40 @@ struct SpendingTrendTests {
     func chartSelectionNeedsPoints() {
         #expect(TrendChartSelection.nearestDate(to: .now, in: []) == nil)
     }
+
+    @Test("The spending report initially shows expenses without income")
+    func spendingBarsInitiallyShowExpenses() {
+        #expect(SpendingTrendBarSelection.initiallyHiddenKinds == [.income])
+    }
+
+    @Test("A tap selects the only visible bar")
+    func barSelectionUsesTheOnlyVisibleKind() {
+        let selected = SpendingTrendBarSelection.kind(
+            atX: 10,
+            relativeTo: 50,
+            shownKinds: [.expense]
+        )
+
+        #expect(selected == .expense)
+    }
+
+    @Test("A tap selects the matching bar in a grouped pair")
+    func barSelectionUsesTheTappedHalfOfTheGroup() {
+        let kinds: [TransactionKind] = [.income, .expense]
+
+        #expect(
+            SpendingTrendBarSelection.kind(
+                atX: 40,
+                relativeTo: 50,
+                shownKinds: kinds
+            ) == .income
+        )
+        #expect(
+            SpendingTrendBarSelection.kind(
+                atX: 60,
+                relativeTo: 50,
+                shownKinds: kinds
+            ) == .expense
+        )
+    }
 }

@@ -372,6 +372,75 @@ struct BankNotificationParserTests {
         #expect(capture.issues.contains(.notificationNeedsReview))
     }
 
+    // MARK: - Category classification
+
+    @Test(
+        "English merchant and purchase vocabulary selects a notification category",
+        arguments: [
+            ("STARBUCKS STORE 123", "Food"),
+            ("GRAB TRIP HCMC", "Transport"),
+            ("SHOPEE ORDER 9988", "Shopping"),
+            ("PHARMACITY DISTRICT 1", "Health"),
+            ("NETFLIX.COM", "Entertainment"),
+            ("EVN HCMC ELECTRICITY BILL", "Housing"),
+        ])
+    func englishCategoryVocabulary(_ content: String, _ category: String) throws {
+        let fixture = try makeFixture()
+        let capture = try fixture.service.prepareNotification(
+            BankNotificationEvent(
+                text: "GD: -100.000 VND\nND: \(content)", source: "Bank", receivedAt: now),
+            accountID: fixture.accountID, automaticSave: true)
+
+        #expect(capture.categoryID == fixture.categoryIDs[category], "Content: \(content)")
+    }
+
+    @Test(
+        "Vietnamese notification vocabulary works without accents",
+        arguments: [
+            ("TIEN DIEN THANG 9", "Housing"),
+            ("NHA THUOC GAN NHA", "Health"),
+            ("VE XEM PHIM", "Entertainment"),
+            ("MUA QUAN AO", "Shopping"),
+            ("DO XANG", "Transport"),
+        ])
+    func unaccentedVietnameseCategoryVocabulary(_ content: String, _ category: String) throws {
+        let fixture = try makeFixture()
+        let capture = try fixture.service.prepareNotification(
+            BankNotificationEvent(
+                text: "GD: -100.000 VND\nND: \(content)", source: "Bank", receivedAt: now),
+            accountID: fixture.accountID, automaticSave: true)
+
+        #expect(capture.categoryID == fixture.categoryIDs[category], "Content: \(content)")
+    }
+
+    @Test("English matches take priority over Vietnamese matches")
+    func englishCategoryPriority() throws {
+        let fixture = try makeFixture()
+        let capture = try fixture.service.prepareNotification(
+            BankNotificationEvent(
+                text: "GD: -100.000 VND\nND: GRAB TRIP TIEN NHA", source: "Bank",
+                receivedAt: now),
+            accountID: fixture.accountID, automaticSave: true)
+
+        #expect(capture.categoryID == fixture.categoryIDs["Transport"])
+    }
+
+    @Test(
+        "Income notification vocabulary selects bonus and interest categories",
+        arguments: [
+            ("QUARTERLY SALES BONUS", "Bonus"),
+            ("BANK DEPOSIT INTEREST", "Interest"),
+        ])
+    func incomeCategoryVocabulary(_ content: String, _ category: String) throws {
+        let fixture = try makeFixture()
+        let capture = try fixture.service.prepareNotification(
+            BankNotificationEvent(
+                text: "GD: +100.000 VND\nND: \(content)", source: "Bank", receivedAt: now),
+            accountID: fixture.accountID, automaticSave: true)
+
+        #expect(capture.categoryID == fixture.categoryIDs[category], "Content: \(content)")
+    }
+
     // MARK: - Fixture
 
     private func makeFixture() throws -> Fixture {
@@ -383,6 +452,17 @@ struct BankNotificationParserTests {
         let accountID = UUID()
         let categoryID = UUID()
         let incomeCategoryID = UUID()
+        let categoryIDs = [
+            "Food": categoryID,
+            "Salary": incomeCategoryID,
+            "Transport": UUID(),
+            "Housing": UUID(),
+            "Shopping": UUID(),
+            "Health": UUID(),
+            "Entertainment": UUID(),
+            "Bonus": UUID(),
+            "Interest": UUID(),
+        ]
         context.insert(
             CashAccount(
                 id: accountID,
@@ -393,26 +473,24 @@ struct BankNotificationParserTests {
                 createdAt: now
             )
         )
-        context.insert(
-            TransactionCategory(
-                id: categoryID,
-                name: "Ăn uống",
-                kind: .expense,
-                symbolName: "fork.knife",
-                colorName: "peach",
-                createdAt: now
-            )
-        )
-        context.insert(
-            TransactionCategory(
-                id: incomeCategoryID,
-                name: "Lương",
-                kind: .income,
-                symbolName: "banknote.fill",
-                colorName: "green",
-                createdAt: now.addingTimeInterval(1)
-            )
-        )
+        let categories: [(String, String, TransactionKind, String)] = [
+            ("Food", "Ăn uống", .expense, "fork.knife"),
+            ("Transport", "Di chuyển", .expense, "car.fill"),
+            ("Housing", "Nhà ở", .expense, "house.fill"),
+            ("Shopping", "Mua sắm", .expense, "cart.fill"),
+            ("Health", "Sức khỏe", .expense, "cross.case.fill"),
+            ("Entertainment", "Giải trí", .expense, "gamecontroller.fill"),
+            ("Salary", "Lương", .income, "banknote.fill"),
+            ("Bonus", "Thưởng", .income, "gift.fill"),
+            ("Interest", "Tiền lãi", .income, "building.columns.fill"),
+        ]
+        for (offset, category) in categories.enumerated() {
+            context.insert(
+                TransactionCategory(
+                    id: try #require(categoryIDs[category.0]), name: category.1,
+                    kind: category.2, symbolName: category.3, colorName: "green",
+                    createdAt: now.addingTimeInterval(Double(offset))))
+        }
         try context.save()
 
         let suiteName = "BankNotificationParserTests-\(UUID().uuidString)"
@@ -425,7 +503,8 @@ struct BankNotificationParserTests {
         return Fixture(
             container: container,
             service: TransactionCaptureService(container: container, defaults: defaults),
-            accountID: accountID
+            accountID: accountID,
+            categoryIDs: categoryIDs
         )
     }
 
@@ -433,5 +512,6 @@ struct BankNotificationParserTests {
         let container: ModelContainer
         let service: TransactionCaptureService
         let accountID: UUID
+        let categoryIDs: [String: UUID]
     }
 }

@@ -133,6 +133,7 @@
 		Q10000000000000000000205 /* TransactionCaptureServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Q10000000000000000000105 /* TransactionCaptureServiceTests.swift */; };
 		QB0000000000000000000201 /* BankNotificationParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = QB0000000000000000000101 /* BankNotificationParserTests.swift */; };
 		Q10000000000000000000201 /* TransactionCaptureParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = Q10000000000000000000101 /* TransactionCaptureParser.swift */; };
+		C31000000000000000000201 /* TransactionCategoryClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = C31000000000000000000101 /* TransactionCategoryClassifier.swift */; };
 		Q10000000000000000000202 /* TransactionCaptureParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Q10000000000000000000102 /* TransactionCaptureParserTests.swift */; };
 		33A69BFF303AE3A900432AF4 /* MijickCalendarView in Frameworks */ = {isa = PBXBuildFile; productRef = 33A69BFE303AE3A900432AF4 /* MijickCalendarView */; };
 		A00000000000000000000201 /* MonMonApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000110 /* MonMonApp.swift */; };
@@ -625,6 +626,7 @@
 		Q10000000000000000000105 /* TransactionCaptureServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureServiceTests.swift; sourceTree = "<group>"; };
 		QB0000000000000000000101 /* BankNotificationParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankNotificationParserTests.swift; sourceTree = "<group>"; };
 		Q10000000000000000000101 /* TransactionCaptureParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureParser.swift; sourceTree = "<group>"; };
+		C31000000000000000000101 /* TransactionCategoryClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCategoryClassifier.swift; sourceTree = "<group>"; };
 		Q10000000000000000000102 /* TransactionCaptureParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureParserTests.swift; sourceTree = "<group>"; };
 		33A69BFF303B567700432AF4 /* MonMon.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MonMon.entitlements; sourceTree = "<group>"; };
 		33DE4088303D787400918EDF /* MonMonDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MonMonDebug.entitlements; sourceTree = "<group>"; };
@@ -1520,6 +1522,7 @@
 				Q10000000000000000000109 /* PendingTransactionCaptureListView.swift */,
 				Q10000000000000000000103 /* PendingTransactionCapture.swift */,
 				Q10000000000000000000104 /* TransactionCaptureService.swift */,
+				C31000000000000000000101 /* TransactionCategoryClassifier.swift */,
 				Q10000000000000000000101 /* TransactionCaptureParser.swift */,
 				B27000000000000000000101 /* BankNotificationCapture.swift */,
 				A91600000000000000000101 /* ApplePayCapture.swift */,
@@ -2111,6 +2114,7 @@
 				Q10000000000000000000207 /* MonMonAppShortcuts.swift in Sources */,
 				Q10000000000000000000203 /* PendingTransactionCapture.swift in Sources */,
 				Q10000000000000000000204 /* TransactionCaptureService.swift in Sources */,
+				C31000000000000000000201 /* TransactionCategoryClassifier.swift in Sources */,
 				Q10000000000000000000201 /* TransactionCaptureParser.swift in Sources */,
 				B27000000000000000000201 /* BankNotificationCapture.swift in Sources */,
 				A91600000000000000000201 /* ApplePayCapture.swift in Sources */,

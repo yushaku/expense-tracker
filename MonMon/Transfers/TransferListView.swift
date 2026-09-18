@@ -48,16 +48,16 @@ struct TransferListView: View {
             .navigationTitle("Transfers")
             .accessibilityIdentifier("transfer-list")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-
                 if accounts.count >= 2 {
                     ToolbarItem(placement: .primaryAction) {
                         addTransferButton
                     }
+                }
+
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Close", systemImage: "xmark") { dismiss() }
+                        .labelStyle(.iconOnly)
+                        .tint(MonMonTheme.textSecondary)
                 }
             }
             .appSheet(item: $editorMode) { mode in

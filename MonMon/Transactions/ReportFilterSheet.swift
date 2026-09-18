@@ -79,10 +79,10 @@ struct ReportFilterSheet: View {
                     .accessibilityIdentifier("clear-\(identifierPrefix)filters")
                 }
 
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        dismiss()
-                    }
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Close", systemImage: "xmark") { dismiss() }
+                        .labelStyle(.iconOnly)
+                        .tint(MonMonTheme.textSecondary)
                 }
             }
             .tint(MonMonTheme.accent)
