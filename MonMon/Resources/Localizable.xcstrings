@@ -261,52 +261,32 @@
         }
       }
     },
-    "Connect Apple Pay": {
+    "Ready-made Apple Pay shortcut": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kết nối Apple Pay"
+            "value": "Shortcut Apple Pay có sẵn"
           }
         }
       }
     },
-    "1. On iPhone, create a Shortcuts automation with the Wallet / Transaction trigger. Select your card and Run Immediately if offered.": {
+    "After adding it, create a Wallet / Transaction automation, select your card and Run Immediately, then choose this shortcut.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "1. Trên iPhone, tạo tự động hóa trong Phím tắt với điều kiện Ví / Giao dịch (Wallet / Transaction). Chọn thẻ và Chạy ngay lập tức nếu có."
+            "value": "Sau khi thêm, tạo tự động hóa Ví / Giao dịch (Wallet / Transaction), chọn thẻ và Chạy ngay lập tức, rồi chọn shortcut này."
           }
         }
       }
     },
-    "2. Add MonMon’s Record Apple Pay Transaction action. Set Amount to Shortcut Input → Amount and Merchant to Shortcut Input → Merchant. Keep the currency with Amount; do not convert it to Number or Text.": {
+    "The Wallet trigger starts the automation; the shortcut sends that transaction to MonMon.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "2. Thêm tác vụ Ghi giao dịch Apple Pay của MonMon. Đặt Số tiền = Đầu vào phím tắt → Số tiền, Cửa hàng = Đầu vào phím tắt → Cửa hàng. Giữ cả loại tiền tệ; không chuyển số tiền sang Số hoặc Văn bản."
-          }
-        }
-      }
-    },
-    "3. Set Transaction date to the event’s date if available, otherwise capture Current Date once. Choose the matching MonMon account. Card label is optional. Check your first payment in Needs review.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "3. Đặt Thời điểm giao dịch bằng thời điểm sự kiện nếu có; nếu không, lấy Ngày hiện tại một lần. Chọn tài khoản MonMon tương ứng. Tên thẻ có thể để trống. Kiểm tra giao dịch đầu tiên trong Chờ duyệt."
-          }
-        }
-      }
-    },
-    "When retrying, reuse all original fields and the same date. A new date is a new event. Wallet may omit data or fail to trigger; a card tap does not confirm final settlement. This does not import Wallet history.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Khi gửi lại, giữ nguyên mọi trường và thời điểm. Thời điểm mới là sự kiện mới. Ví có thể thiếu dữ liệu hoặc không kích hoạt; chạm thẻ chưa xác nhận thanh toán hoàn tất. Tính năng này không nhập lịch sử Ví."
+            "value": "Điều kiện Ví kích hoạt tự động hóa; shortcut gửi giao dịch đó vào MonMon."
           }
         }
       }

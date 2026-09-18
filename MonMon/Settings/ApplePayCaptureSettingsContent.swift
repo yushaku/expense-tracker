@@ -1,12 +1,16 @@
-import AppIntents
 import SwiftData
 import SwiftUI
+
+enum ApplePayCaptureShortcut {
+    static let installURL = URL(
+        string: "https://www.icloud.com/shortcuts/2e5d68434e3a4cfba96d94b0a9dac317")
+}
 
 struct ApplePayCaptureSettingsContent: View {
     var body: some View {
         VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-            ApplePayCapturePreferences().appCard()
             ApplePayCaptureSetup().appCard()
+            ApplePayCapturePreferences().appCard()
         }
     }
 }
@@ -55,25 +59,26 @@ private struct ApplePayCapturePreferences: View {
 private struct ApplePayCaptureSetup: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Connect Apple Pay").font(.headline)
+            Text("Ready-made Apple Pay shortcut")
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
+            if let url = ApplePayCaptureShortcut.installURL {
+                Link(destination: url) {
+                    Label("Install shortcut", systemImage: "arrow.down.circle")
+                }
+                .buttonStyle(.prominentAction)
+                .accessibilityIdentifier("apple-pay-install-shortcut")
+                .accessibilityHint(
+                    "Opens the shared shortcut on iCloud. Confirm installation in Shortcuts.")
+            }
             Text(
-                "1. On iPhone, create a Shortcuts automation with the Wallet / Transaction trigger. Select your card and Run Immediately if offered."
+                "After adding it, create a Wallet / Transaction automation, select your card and Run Immediately, then choose this shortcut."
             )
             Text(
-                "2. Add MonMon’s Record Apple Pay Transaction action. Set Amount to Shortcut Input → Amount and Merchant to Shortcut Input → Merchant. Keep the currency with Amount; do not convert it to Number or Text."
+                "The Wallet trigger starts the automation; the shortcut sends that transaction to MonMon."
             )
-            Text(
-                "3. Set Transaction date to the event’s date if available, otherwise capture Current Date once. Choose the matching MonMon account. Card label is optional. Check your first payment in Needs review."
-            )
-            Text(
-                "When retrying, reuse all original fields and the same date. A new date is a new event. Wallet may omit data or fail to trigger; a card tap does not confirm final settlement. This does not import Wallet history."
-            )
-            .font(.caption).foregroundStyle(MonMonTheme.textSecondary)
-            #if os(iOS)
-                ShortcutsLink()
-                    .shortcutsLinkStyle(.automaticOutline)
-                    .accessibilityIdentifier("apple-pay-open-shortcuts")
-            #endif
+            .font(.caption)
+            .foregroundStyle(MonMonTheme.textSecondary)
         }
         .font(.subheadline)
     }
