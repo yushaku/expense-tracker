@@ -529,6 +529,17 @@ struct TransactionCaptureServiceTests {
         #expect(approvedReplay.result.disposition == .transaction)
     }
 
+    @Test("Apple Pay uses the shared merchant category classifier")
+    func applePayMerchantCategory() throws {
+        let fixture = try makeFixture()
+        let capture = try fixture.service.prepareApplePay(
+            ApplePayEvent(
+                amount: 75_000, currency: "VND", merchant: "GRAB TRIP HCMC", occurredAt: now),
+            accountID: fixture.accountID)
+
+        #expect(capture.categoryID == fixture.transportCategoryID)
+    }
+
     @Test("Apple Pay opt-in saves once and preserves equal payments at different times")
     func applePayAutomaticSave() throws {
         let fixture = try makeFixture()

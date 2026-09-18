@@ -168,9 +168,16 @@ struct TransactionCaptureService {
         // Never redirect an explicit, stale card mapping to a different account.
         if accountID != nil && selected == nil { throw TransactionCaptureServiceError.staleCapture }
         let captureContext = captureContext(accounts: accounts, categories: categories)
-        let categoryID = categories.first {
+        let defaultCategoryID = categories.first {
             $0.id == captureContext.defaultExpenseCategoryID && $0.kind == .expense
         }?.id
+        let categoryID =
+            TransactionCategoryClassifier.classify(
+                event.note,
+                kind: .expense,
+                categories: captureContext.categories,
+                strategy: .englishFirst
+            ).categoryID ?? defaultCategoryID
         return event.capture(
             accountID: selected?.id, categoryID: categoryID,
             automaticSave: defaults.bool(forKey: ApplePayPreferences.automaticSaveKey))

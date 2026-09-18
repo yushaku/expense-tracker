@@ -187,9 +187,16 @@ enum BankNotificationParser {
             issues.insert(.notificationNeedsReview)
         }
 
-        let categoryID =
+        let defaultCategoryID =
             kind == .expense
             ? context.defaultExpenseCategoryID : context.defaultIncomeCategoryID
+        let categoryID =
+            TransactionCategoryClassifier.classify(
+                event.note,
+                kind: kind,
+                categories: context.categories,
+                strategy: .englishFirst
+            ).categoryID ?? defaultCategoryID
         if !context.categories.contains(where: { $0.id == categoryID && $0.kind == kind }) {
             issues.insert(.missingCategory)
         }
