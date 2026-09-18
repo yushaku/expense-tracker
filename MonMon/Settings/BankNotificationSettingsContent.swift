@@ -71,15 +71,6 @@ private struct BankNotificationShortcutInstall: View {
                 .font(.caption)
                 .foregroundStyle(MonMonTheme.textSecondary)
 
-            #if DEBUG
-                Label(
-                    "This shortcut saves to MonMon, not MonMon Dev. Choose the account and auto-save settings in MonMon.",
-                    systemImage: "info.circle"
-                )
-                .font(.caption)
-                .foregroundStyle(MonMonTheme.textSecondary)
-                .accessibilityIdentifier("bank-notification-production-shortcut-notice")
-            #endif
         }
     }
 }
