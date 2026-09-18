@@ -25,6 +25,15 @@ struct AppRouteTests {
         #expect(url.query == nil)
     }
 
+    @Test("Voice capture install opens the published shortcut without running it")
+    func voiceCaptureShortcutInstallDestination() throws {
+        let url = try #require(QuickNoteCaptureShortcut.installURL)
+        #expect(url.scheme == "https")
+        #expect(url.host == "www.icloud.com")
+        #expect(url.path == "/shortcuts/4da1dc6737a24e649447aa2e1e029e35")
+        #expect(url.query == nil)
+    }
+
     @Test("Quick Capture Shortcut shows note, bank and Apple Pay sections in order")
     func quickCaptureShortcutSections() {
         #expect(QuickCaptureShortcut.allCases == [.quickNote, .bankNotification, .applePay])

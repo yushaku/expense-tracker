@@ -51,16 +51,6 @@
         }
       }
     },
-    "This shortcut saves to MonMon, not MonMon Dev. Choose the account and auto-save settings in MonMon.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Shortcut này lưu vào MonMon, không phải MonMon Dev. Hãy chọn tài khoản và chế độ tự lưu trong MonMon."
-          }
-        }
-      }
-    },
     "To use this default account, clear Account in the shortcut’s MonMon action.": {
       "localizations": {
         "vi": {
@@ -6694,42 +6684,22 @@
         }
       }
     },
-    "Add Dictate Text.": {
+    "Ready-made voice capture shortcut": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Thêm Đọc chính tả."
+            "value": "Shortcut ghi giao dịch bằng giọng nói"
           }
         }
       }
     },
-    "Add MonMon → Record Transaction, then set Transaction to Dictated Text.": {
+    "Install the ready-made shortcut, then tap it to dictate a transaction to MonMon.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Thêm MonMon → Ghi giao dịch, rồi đặt Giao dịch thành Văn bản được đọc chính tả."
-          }
-        }
-      }
-    },
-    "Combine Dictate Text with MonMon so one tap starts listening.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ghép Đọc chính tả với MonMon để một lần chạm bắt đầu nghe."
-          }
-        }
-      }
-    },
-    "Create one-tap voice capture": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tạo ghi giọng nói một chạm"
+            "value": "Cài shortcut có sẵn, rồi chạm vào để đọc một giao dịch vào MonMon."
           }
         }
       }
@@ -6840,26 +6810,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mở ghi nhanh"
-          }
-        }
-      }
-    },
-    "Name it Voice Capture and tap it whenever you want to record.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Đặt tên là Ghi bằng giọng nói và chạm vào mỗi khi muốn ghi."
-          }
-        }
-      }
-    },
-    "Open Shortcuts and tap +.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mở Phím tắt và chạm dấu +."
           }
         }
       }
@@ -7030,16 +6980,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Siri & Phím tắt"
-          }
-        }
-      }
-    },
-    "This shortcut is installed automatically with MonMon.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Phím tắt này được cài tự động cùng MonMon."
           }
         }
       }
