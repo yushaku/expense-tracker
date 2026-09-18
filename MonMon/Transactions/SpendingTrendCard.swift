@@ -14,7 +14,7 @@ struct SpendingTrendCard: View {
     let unit: SpendingTrendUnit
     let points: [SpendingTrendPoint]
 
-    /// Which lines the owner has put away. Two lines an order of magnitude
+    /// Which series the owner has put away. Two series an order of magnitude
     /// apart — a month of small expenses under one salary — flatten each other
     /// against a shared scale, so either can be dropped and the other redrawn
     /// against its own figures.
@@ -81,7 +81,7 @@ struct SpendingTrendCard: View {
 
     private var header: some View {
         HStack(spacing: 12) {
-            Label("SPENDING TREND", systemImage: "chart.line.uptrend.xyaxis")
+            Label("SPENDING TREND", systemImage: "chart.bar.xaxis")
                 .font(.caption.weight(.semibold))
                 .tracking(0.8)
                 .foregroundStyle(MonMonTheme.textSecondary)
@@ -89,7 +89,7 @@ struct SpendingTrendCard: View {
 
             Spacer(minLength: 8)
 
-            // Which line is which, and which are drawn. Two directions on one
+            // Which series is which, and which are drawn. Two directions on one
             // chart cannot be told apart by shape, and the built-in legend can
             // neither be coloured to the hues the rest of the app spends and
             // earns in nor tapped.
@@ -119,7 +119,7 @@ struct SpendingTrendCard: View {
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        // The one line still drawn stays drawn: putting it away would leave an
+        // The one series still drawn stays drawn: putting it away would leave an
         // empty chart, which is not a reading of anything.
         .disabled(isShown && shownKinds.count == 1)
         .accessibilityElement(children: .combine)
@@ -150,13 +150,12 @@ struct SpendingTrendCard: View {
         Chart {
             ForEach(shownKinds, id: \.self) { kind in
                 ForEach(points) { point in
-                    LineMark(
-                        x: .value("Period", point.start),
+                    BarMark(
+                        x: .value("Period", point.start, unit: unit.component),
                         y: .value("Amount", amount(of: kind, in: point).chartValue),
-                        series: .value("Direction", kind.rawValue)
+                        width: .ratio(0.76)
                     )
-                    .interpolationMethod(.monotone)
-                    .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+                    .position(by: .value("Direction", kind.rawValue))
                     .foregroundStyle(by: .value("Direction", kind.rawValue))
                 }
             }
@@ -168,22 +167,6 @@ struct SpendingTrendCard: View {
                     .annotation(position: .top, spacing: 8) {
                         selectionLabel(selectedPoint)
                     }
-
-                ForEach(shownKinds, id: \.self) { kind in
-                    PointMark(
-                        x: .value("Selected period", selectedPoint.start),
-                        y: .value("Selected amount", amount(of: kind, in: selectedPoint).chartValue)
-                    )
-                    .symbolSize(120)
-                    .foregroundStyle(tint(of: kind))
-
-                    PointMark(
-                        x: .value("Selected period", selectedPoint.start),
-                        y: .value("Selected amount", amount(of: kind, in: selectedPoint).chartValue)
-                    )
-                    .symbolSize(42)
-                    .foregroundStyle(MonMonTheme.surface)
-                }
             }
         }
         .chartForegroundStyleScale(
@@ -194,7 +177,7 @@ struct SpendingTrendCard: View {
         // Zero is the floor a direction is read against: a quiet day sits on it
         // rather than at the bottom of whatever the busiest day happened to be.
         .chartYScale(domain: .automatic(includesZero: true))
-        // The swatches in the header already name the two lines, and they carry
+        // The swatches in the header already name the two series, and they carry
         // the app's own colours.
         .chartLegend(.hidden)
         .chartXAxis {
@@ -231,7 +214,7 @@ struct SpendingTrendCard: View {
         .onChange(of: points) {
             selectedStart = nil
         }
-        // The sentence under the chart states what the two lines average, which
+        // The sentence under the chart states what the two series average, which
         // is the reading of them that survives being read aloud.
         .accessibilityHidden(true)
     }
@@ -266,7 +249,7 @@ struct SpendingTrendCard: View {
     /// What a day or a month of this period came to on average. The busiest one
     /// is what the chart shows; this is what it usually was.
     ///
-    /// It names the lines on show and no others, so a line put away is gone
+    /// It names the series on show and no others, so a series put away is gone
     /// from the card entirely rather than still being spoken about under it.
     private var averageNotice: LocalizedStringKey {
         let count = Decimal(points.count)
