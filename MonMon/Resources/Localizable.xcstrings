@@ -1,6 +1,86 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Ready-made bank shortcut": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortcut ngân hàng có sẵn"
+          }
+        }
+      }
+    },
+    "Install shortcut": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cài shortcut"
+          }
+        }
+      }
+    },
+    "Opens the shared shortcut on iCloud. Confirm installation in Shortcuts.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở shortcut được chia sẻ trên iCloud. Xác nhận cài trong ứng dụng Phím tắt."
+          }
+        }
+      }
+    },
+    "After adding it, open the shortcut: change TPBank to your bank app in Automation, select your own Account in the MonMon action, then enable the automation.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sau khi thêm, mở shortcut: đổi TPBank thành app ngân hàng của bạn trong Tự động hóa, chọn Tài khoản của bạn ở tác vụ MonMon, rồi bật tự động hóa."
+          }
+        }
+      }
+    },
+    "Set up on an iPhone with iOS 27 and MonMon installed.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thiết lập trên iPhone có iOS 27 và đã cài MonMon."
+          }
+        }
+      }
+    },
+    "This shortcut saves to MonMon, not MonMon Dev. Choose the account and auto-save settings in MonMon.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortcut này lưu vào MonMon, không phải MonMon Dev. Hãy chọn tài khoản và chế độ tự lưu trong MonMon."
+          }
+        }
+      }
+    },
+    "To use this default account, clear Account in the shortcut’s MonMon action.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Để dùng tài khoản mặc định này, bỏ chọn Tài khoản ở tác vụ MonMon trong shortcut."
+          }
+        }
+      }
+    },
+    "Review your first capture in Transactions before enabling auto-save. Unknown formats and transfers still need review.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiểm tra giao dịch đầu tiên trong mục Giao dịch trước khi bật tự lưu. Thông báo chưa nhận diện và chuyển khoản vẫn cần duyệt."
+          }
+        }
+      }
+    },
     "Quick Capture Shortcut": {
       "localizations": {
         "vi": {

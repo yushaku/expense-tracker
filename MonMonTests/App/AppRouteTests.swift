@@ -7,6 +7,15 @@ import Testing
 @MainActor
 @Suite("App route coordination")
 struct AppRouteTests {
+    @Test("Bank capture install opens the published production shortcut without running it")
+    func bankShortcutInstallDestination() throws {
+        let url = try #require(BankNotificationShortcut.installURL)
+        #expect(url.scheme == "https")
+        #expect(url.host == "www.icloud.com")
+        #expect(url.path == "/shortcuts/31c50fdb6a794b2a999a97dff6f7a1e8")
+        #expect(url.query == nil)
+    }
+
     @Test("Quick Capture Shortcut shows note, bank and Apple Pay sections in order")
     func quickCaptureShortcutSections() {
         #expect(QuickCaptureShortcut.allCases == [.quickNote, .bankNotification, .applePay])
