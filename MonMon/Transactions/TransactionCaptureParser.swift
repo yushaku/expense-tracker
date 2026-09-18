@@ -30,6 +30,8 @@ enum TransactionCaptureIssue: String, Codable, Equatable, Hashable, Sendable {
     case missingCategory
     case ambiguousCategory
     case notificationNeedsReview
+    case applePayNeedsReview
+    case unsupportedCurrency
 }
 
 struct ParsedTransactionCapture: Equatable, Sendable {

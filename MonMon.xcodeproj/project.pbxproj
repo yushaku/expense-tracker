@@ -7,8 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A91600000000000000000203 /* ApplePayCaptureSettingsContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91600000000000000000103 /* ApplePayCaptureSettingsContent.swift */; };
+		A91600000000000000000204 /* QuickCaptureShortcutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91600000000000000000104 /* QuickCaptureShortcutSettingsView.swift */; };
+		A91600000000000000000205 /* QuickNoteCaptureSettingsContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91600000000000000000105 /* QuickNoteCaptureSettingsContent.swift */; };
+		A91600000000000000000202 /* ApplePayCaptureIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91600000000000000000102 /* ApplePayCaptureIntent.swift */; };
+		A91600000000000000000201 /* ApplePayCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91600000000000000000101 /* ApplePayCapture.swift */; };
 		B27000000000000000000201 /* BankNotificationCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B27000000000000000000101 /* BankNotificationCapture.swift */; };
-		B27000000000000000000202 /* BankNotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B27000000000000000000102 /* BankNotificationSettingsView.swift */; };
+		B27000000000000000000202 /* BankNotificationSettingsContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B27000000000000000000102 /* BankNotificationSettingsContent.swift */; };
 		B4F2CA028D32490D88AD2D26 /* ResearchNotebookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF8CAB5B92814145A9EBB00E /* ResearchNotebookView.swift */; };
 		7086E22C2333497B9D7264A9 /* MCPResearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3C10BC4F574A6AAB81F9B9 /* MCPResearchTests.swift */; platformFilters = (macos, ); };
 		EA79E4BCCF204494A05697A6 /* MCPResearchTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60363FA0F6B74E25908D0BEB /* MCPResearchTools.swift */; platformFilters = (macos, ); };
@@ -126,6 +131,7 @@
 		Q10000000000000000000203 /* PendingTransactionCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = Q10000000000000000000103 /* PendingTransactionCapture.swift */; };
 		Q10000000000000000000204 /* TransactionCaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = Q10000000000000000000104 /* TransactionCaptureService.swift */; };
 		Q10000000000000000000205 /* TransactionCaptureServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Q10000000000000000000105 /* TransactionCaptureServiceTests.swift */; };
+		QB0000000000000000000201 /* BankNotificationParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = QB0000000000000000000101 /* BankNotificationParserTests.swift */; };
 		Q10000000000000000000201 /* TransactionCaptureParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = Q10000000000000000000101 /* TransactionCaptureParser.swift */; };
 		Q10000000000000000000202 /* TransactionCaptureParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = Q10000000000000000000102 /* TransactionCaptureParserTests.swift */; };
 		33A69BFF303AE3A900432AF4 /* MijickCalendarView in Frameworks */ = {isa = PBXBuildFile; productRef = 33A69BFE303AE3A900432AF4 /* MijickCalendarView */; };
@@ -504,8 +510,13 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A91600000000000000000103 /* ApplePayCaptureSettingsContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplePayCaptureSettingsContent.swift; sourceTree = "<group>"; };
+		A91600000000000000000104 /* QuickCaptureShortcutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickCaptureShortcutSettingsView.swift; sourceTree = "<group>"; };
+		A91600000000000000000105 /* QuickNoteCaptureSettingsContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickNoteCaptureSettingsContent.swift; sourceTree = "<group>"; };
+		A91600000000000000000102 /* ApplePayCaptureIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplePayCaptureIntent.swift; sourceTree = "<group>"; };
+		A91600000000000000000101 /* ApplePayCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplePayCapture.swift; sourceTree = "<group>"; };
 		B27000000000000000000101 /* BankNotificationCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankNotificationCapture.swift; sourceTree = "<group>"; };
-		B27000000000000000000102 /* BankNotificationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankNotificationSettingsView.swift; sourceTree = "<group>"; };
+		B27000000000000000000102 /* BankNotificationSettingsContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankNotificationSettingsContent.swift; sourceTree = "<group>"; };
 		DF8CAB5B92814145A9EBB00E /* ResearchNotebookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResearchNotebookView.swift; sourceTree = "<group>"; };
 		CB3C10BC4F574A6AAB81F9B9 /* MCPResearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPResearchTests.swift; sourceTree = "<group>"; };
 		60363FA0F6B74E25908D0BEB /* MCPResearchTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPResearchTools.swift; sourceTree = "<group>"; };
@@ -612,6 +623,7 @@
 		Q10000000000000000000103 /* PendingTransactionCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingTransactionCapture.swift; sourceTree = "<group>"; };
 		Q10000000000000000000104 /* TransactionCaptureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureService.swift; sourceTree = "<group>"; };
 		Q10000000000000000000105 /* TransactionCaptureServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureServiceTests.swift; sourceTree = "<group>"; };
+		QB0000000000000000000101 /* BankNotificationParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankNotificationParserTests.swift; sourceTree = "<group>"; };
 		Q10000000000000000000101 /* TransactionCaptureParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureParser.swift; sourceTree = "<group>"; };
 		Q10000000000000000000102 /* TransactionCaptureParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCaptureParserTests.swift; sourceTree = "<group>"; };
 		33A69BFF303B567700432AF4 /* MonMon.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MonMon.entitlements; sourceTree = "<group>"; };
@@ -1104,6 +1116,7 @@
 			children = (
 				Q10000000000000000000110 /* AppRoute.swift */,
 				Q10000000000000000000106 /* TransactionCaptureIntent.swift */,
+				A91600000000000000000102 /* ApplePayCaptureIntent.swift */,
 				Q10000000000000000000107 /* MonMonAppShortcuts.swift */,
 				A00000000000000000000816 /* MonMonSchema.swift */,
 				A00000000000000000000A07 /* StoreReconciler.swift */,
@@ -1509,6 +1522,7 @@
 				Q10000000000000000000104 /* TransactionCaptureService.swift */,
 				Q10000000000000000000101 /* TransactionCaptureParser.swift */,
 				B27000000000000000000101 /* BankNotificationCapture.swift */,
+				A91600000000000000000101 /* ApplePayCapture.swift */,
 				A00000000000000000000D12 /* TransactionDefaultsView.swift */,
 				A00000000000000000000D11 /* TransactionDefaultsCard.swift */,
 				A00000000000000000000160 /* TransactionKind.swift */,
@@ -1561,6 +1575,7 @@
 			isa = PBXGroup;
 			children = (
 				Q10000000000000000000105 /* TransactionCaptureServiceTests.swift */,
+				QB0000000000000000000101 /* BankNotificationParserTests.swift */,
 				Q10000000000000000000102 /* TransactionCaptureParserTests.swift */,
 				A00000000000000000000166 /* TransactionPeriodTests.swift */,
 				A00000000000000000000611 /* TransactionRangeTests.swift */,
@@ -1588,7 +1603,10 @@
 				A00000000000000000000188 /* AppLock.swift */,
 				A00000000000000000000189 /* LockScreenView.swift */,
 				A00000000000000000000190 /* SettingsView.swift */,
-				B27000000000000000000102 /* BankNotificationSettingsView.swift */,
+				B27000000000000000000102 /* BankNotificationSettingsContent.swift */,
+				A91600000000000000000103 /* ApplePayCaptureSettingsContent.swift */,
+				A91600000000000000000104 /* QuickCaptureShortcutSettingsView.swift */,
+				A91600000000000000000105 /* QuickNoteCaptureSettingsContent.swift */,
 				1A99B1CAF79C41E0950B20EE /* SalaryCalculatorView.swift */,
 				ACBEFD298AFF4FCD903ECB40 /* SalaryCalculator.swift */,
 				D044AA604C8D4B6C925AE204 /* SalaryProfile.swift */,
@@ -2089,11 +2107,13 @@
 				Q10000000000000000000211 /* TransactionCaptureEntry.swift in Sources */,
 				Q10000000000000000000209 /* PendingTransactionCaptureListView.swift in Sources */,
 				Q10000000000000000000206 /* TransactionCaptureIntent.swift in Sources */,
+				A91600000000000000000202 /* ApplePayCaptureIntent.swift in Sources */,
 				Q10000000000000000000207 /* MonMonAppShortcuts.swift in Sources */,
 				Q10000000000000000000203 /* PendingTransactionCapture.swift in Sources */,
 				Q10000000000000000000204 /* TransactionCaptureService.swift in Sources */,
 				Q10000000000000000000201 /* TransactionCaptureParser.swift in Sources */,
 				B27000000000000000000201 /* BankNotificationCapture.swift in Sources */,
+				A91600000000000000000201 /* ApplePayCapture.swift in Sources */,
 				F10000000000000000000202 /* StatementImportInboxService.swift in Sources */,
 				F10000000000000000000204 /* StatementImportInbox.swift in Sources */,
 				F10000000000000000000205 /* StatementImportInboxView.swift in Sources */,
@@ -2144,7 +2164,10 @@
 				A0000000000000000000080E /* PeriodGridPicker.swift in Sources */,
 				A00000000000000000000802 /* SegmentedTabs.swift in Sources */,
 				A00000000000000000000279 /* SettingsView.swift in Sources */,
-				B27000000000000000000202 /* BankNotificationSettingsView.swift in Sources */,
+				B27000000000000000000202 /* BankNotificationSettingsContent.swift in Sources */,
+				A91600000000000000000203 /* ApplePayCaptureSettingsContent.swift in Sources */,
+				A91600000000000000000204 /* QuickCaptureShortcutSettingsView.swift in Sources */,
+				A91600000000000000000205 /* QuickNoteCaptureSettingsContent.swift in Sources */,
 				FAC313B3BA4345D4BA992263 /* SalaryCalculatorView.swift in Sources */,
 				D625B1F0894A4B68A85E065F /* SalaryCalculator.swift in Sources */,
 				D044AA604C8D4B6C925AE203 /* SalaryProfile.swift in Sources */,
@@ -2334,6 +2357,7 @@
 				Q10000000000000000000212 /* AppRouteTests.swift in Sources */,
 				D30000000000000000000004 /* AppSheetPresentationTests.swift in Sources */,
 				Q10000000000000000000205 /* TransactionCaptureServiceTests.swift in Sources */,
+				QB0000000000000000000201 /* BankNotificationParserTests.swift in Sources */,
 				Q10000000000000000000202 /* TransactionCaptureParserTests.swift in Sources */,
 				F10000000000000000000201 /* StatementImportInboxServiceTests.swift in Sources */,
 				F10000000000000000000203 /* StatementImportInboxTests.swift in Sources */,

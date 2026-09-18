@@ -182,15 +182,51 @@ rtk swift format lint --strict --recursive MonMon MonMonTests MonMonShareExtensi
 
 ### Adding transactions
 
-**Bank notifications (iOS 27 Shortcuts)** — open Settings → Bank notifications
+**Quick Capture Shortcut** — the Settings entry below Salary calculator shows
+Quick note capture, Bank notifications and Apple Pay capture as three expanded
+sections on one scrolling screen, without separate capture settings screens.
+Quick note capture contains the existing Record Transaction Siri shortcut and
+one-tap Dictate Text setup. Each capture method keeps its own configuration and
+behavior. This screen contains setup only; pending captures are reviewed from the
+Transactions screen. Recent activity and sample-check panels are not shown here.
+
+**Apple Pay (Wallet Shortcuts automation)** — open Settings → Quick Capture Shortcut
+and scroll to Apple Pay capture.
+Create a Wallet / Transaction automation on iPhone for the chosen card and add
+MonMon → Record Apple Pay Transaction. Map Shortcut Input → Amount directly to
+Amount (the action receives `IntentCurrencyAmount`, including its currency), and
+Shortcut Input → Merchant to Merchant. Supply the event date if available, or
+capture Current Date once for this event; preserve that value on retries. Choose
+Account in the action, or use the separate Apple Pay destination in Settings.
+Card label is optional and should not contain the full card number.
+
+Captures go to Needs review by default. Opt-in auto-save requires a positive whole
+VND amount below 1,000,000,000,000,000, a merchant, a valid VND account and an expense
+category resolved through the existing defaults. Missing/unsupported currency
+keeps original details in review and leaves the VND amount empty. It never silently
+converts foreign currency. The merchant becomes the transaction note.
+
+Exact retries (same normalized fields, destination and original timestamp) are
+deduplicated, including after review approval. Changing the date or account is a
+new event; deleting the capture/transaction permits capture again. Use one automatic
+source per card: there is no cross-source reconciliation with bank notifications.
+Wallet delivery and amount/currency mapping need verification with your card on the
+physical iPhone. A card tap is not proof of settlement, and this does not read Wallet
+history or automatically create the user's automation. No shared Shortcut download
+is shown without a real tested iCloud link.
+
+See [the Apple Pay capture spec](docs/apple-pay-capture-spec.md).
+
+**Bank notifications (iOS 27 Shortcuts)** — open Settings → Quick Capture Shortcut
+and scroll to Bank notifications
 to select a destination account and follow the setup guide. Choose the bank app
 in a Shortcuts notification automation, then add MonMon → Record Bank
 Notification. Pass the notification text, source app label and received date.
 The optional Account parameter overrides the account selected in Settings for
 that automation, allowing multiple banks to use different accounts.
 
-Capture defaults to Needs review. A sample check in Settings previews the result
-without saving. Automatic saving is opt-in and currently recognizes only messages
+Capture defaults to Needs review, accessible from the Transactions screen.
+Automatic saving is opt-in and currently recognizes only messages
 starting with `GD:`, `Giao dịch:` or `Transaction:` followed by one signed,
 whole-VND amount (for example `GD: -50.000 VND; SD: 9.950.000 VND`). This is a
 conservative generic format, not a verified bank-specific adapter. Unsupported

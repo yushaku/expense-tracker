@@ -152,6 +152,52 @@ struct TransactionCaptureService {
         return (try commit(capture, id: id), false)
     }
 
+    func prepareApplePay(_ event: ApplePayEvent, accountID: UUID?) throws
+        -> ParsedTransactionCapture
+    {
+        try event.validate()
+        let context = ModelContext(container)
+        let accounts = try context.fetch(FetchDescriptor<CashAccount>())
+        let categories = try context.fetch(FetchDescriptor<TransactionCategory>())
+        let requestedID =
+            accountID
+            ?? UUID(uuidString: defaults.string(forKey: ApplePayPreferences.accountKey) ?? "")
+        let selected = accounts.first {
+            $0.id == requestedID && $0.currencyCode == VNDCurrency.code
+        }
+        // Never redirect an explicit, stale card mapping to a different account.
+        if accountID != nil && selected == nil { throw TransactionCaptureServiceError.staleCapture }
+        let captureContext = captureContext(accounts: accounts, categories: categories)
+        let categoryID = categories.first {
+            $0.id == captureContext.defaultExpenseCategoryID && $0.kind == .expense
+        }?.id
+        return event.capture(
+            accountID: selected?.id, categoryID: categoryID,
+            automaticSave: defaults.bool(forKey: ApplePayPreferences.automaticSaveKey))
+    }
+
+    /// Synchronous MainActor lookup + commit prevents concurrent intent retries
+    /// in the app process from interleaving. Review retains this id when approved.
+    func recordApplePay(
+        _ event: ApplePayEvent, accountID: UUID?
+    ) throws -> (result: TransactionCaptureCommitResult, duplicate: Bool) {
+        let capture = try prepareApplePay(event, accountID: accountID)
+        let id = event.id(accountID: capture.accountID)
+        let context = ModelContext(container)
+        var transactions = FetchDescriptor<MoneyTransaction>(predicate: #Predicate { $0.id == id })
+        transactions.fetchLimit = 1
+        if try !context.fetch(transactions).isEmpty {
+            return (TransactionCaptureCommitResult(id: id, disposition: .transaction), true)
+        }
+        var pending = FetchDescriptor<PendingTransactionCapture>(
+            predicate: #Predicate { $0.id == id })
+        pending.fetchLimit = 1
+        if try !context.fetch(pending).isEmpty {
+            return (TransactionCaptureCommitResult(id: id, disposition: .pendingReview), true)
+        }
+        return (try commit(capture, id: id), false)
+    }
+
     func commit(
         _ capture: ParsedTransactionCapture,
         id: UUID = UUID(),
