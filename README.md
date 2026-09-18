@@ -218,12 +218,18 @@ is shown without a real tested iCloud link.
 See [the Apple Pay capture spec](docs/apple-pay-capture-spec.md).
 
 **Bank notifications (iOS 27 Shortcuts)** — open Settings → Quick Capture Shortcut
-and scroll to Bank notifications
-to select a destination account and follow the setup guide. Choose the bank app
-in a Shortcuts notification automation, then add MonMon → Record Bank
-Notification. Pass the notification text, source app label and received date.
+and scroll to Bank notifications. Tap **Install shortcut** to open the
+[production template](https://www.icloud.com/shortcuts/31c50fdb6a794b2a999a97dff6f7a1e8)
+in Shortcuts. On your iPhone, select your bank app in its Automation and your own
+Account in its MonMon action, then enable the automation. The template includes
+the notification trigger and field mappings, but currently selects TPBank and
+the creator's account; these are not portable defaults. It targets MonMon, not
+MonMon Dev, and the Dev UI explicitly warns about that destination. Installation
+and notification delivery must be checked on the recipient's physical iPhone;
+opening the link is not treated as proof of installation.
 The optional Account parameter overrides the account selected in Settings for
-that automation, allowing multiple banks to use different accounts.
+that automation, allowing multiple banks to use different accounts. Clear it in
+the shortcut to use the destination account selected in MonMon Settings.
 
 Capture defaults to Needs review, accessible from the Transactions screen.
 Automatic saving is opt-in and currently recognizes only messages

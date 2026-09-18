@@ -2,10 +2,20 @@
 
 ## Objective and accepted flow
 
-The user chooses a bank app in an iOS 27 Shortcuts notification automation,
-then forwards its text to MonMon. Settings explains this setup and selects the
-default destination account. An optional account parameter on the action lets
-each automation target a different account.
+Settings offers an Install shortcut button for the owner-provided
+[production template](https://www.icloud.com/shortcuts/31c50fdb6a794b2a999a97dff6f7a1e8),
+replacing the long manual setup guide. The recipient installs it on iPhone,
+chooses their bank app and account, and enables its notification automation.
+Settings retains destination-account and optional auto-save preferences.
+
+The shared artifact inspected on 2026-09-18 includes a notification trigger for
+TPBank, a creator-specific account, notification Body and Current Date mappings,
+and the production `com.sonlv.monmon.app.CaptureBankNotificationIntent` action.
+It has no import questions. Recipients must replace the app/account choices;
+the app must not claim zero-configuration installation. Clearing Account uses
+the recipient's default in MonMon. Debug builds warn that this link writes to
+MonMon, not MonMon Dev. Do not change financial account resolution to accommodate
+the creator's account, and do not mark installation complete just for opening a URL.
 
 ## Behavior
 
@@ -33,7 +43,7 @@ each automation target a different account.
   after review. Different dates distinguish otherwise identical transactions.
   This is event retry deduplication, not reconciliation against PDF imports.
 - Empty input or a deleted destination account fails without creating a record.
-- Settings offers a sample preview that never saves and a link to Needs review.
+- Settings offers installation and preferences only; review captures in Transactions.
 - The Shortcuts trigger and the notification data available while locked still
   require user acceptance testing on the physical iPhone.
 
