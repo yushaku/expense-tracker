@@ -1,6 +1,10 @@
-import AppIntents
 import SwiftData
 import SwiftUI
+
+enum BankNotificationShortcut {
+    static let installURL = URL(
+        string: "https://www.icloud.com/shortcuts/31c50fdb6a794b2a999a97dff6f7a1e8")
+}
 
 struct BankNotificationSettingsContent: View {
     @Query(sort: \CashAccount.name) private var accounts: [CashAccount]
@@ -13,20 +17,7 @@ struct BankNotificationSettingsContent: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-            VStack(alignment: .leading, spacing: 12) {
-                Label("Connect a bank app", systemImage: "bell.badge")
-                    .font(.headline)
-                Text(
-                    "Choose the app in Shortcuts on your iPhone. MonMon receives only the text your automation sends."
-                )
-                .font(.subheadline)
-                Text(
-                    "Notification automation requires iOS 27. Setup and locked-screen delivery must be checked on your iPhone."
-                )
-                .font(.caption)
-                .foregroundStyle(MonMonTheme.textSecondary)
-            }
-            .appCard()
+            BankNotificationShortcutInstall().appCard()
 
             VStack(alignment: .leading, spacing: 14) {
                 Text("Destination account").font(.headline)
@@ -40,159 +31,46 @@ struct BankNotificationSettingsContent: View {
                     }
                 }
                 .accessibilityIdentifier("bank-notification-account")
-                Text(
-                    "For multiple banks, choose Account inside each MonMon action in Shortcuts. Leaving it empty uses this account."
-                )
-                .font(.caption)
-                .foregroundStyle(MonMonTheme.textSecondary)
+                Text("To use this default account, clear Account in the shortcut’s MonMon action.")
+                    .font(.caption)
+                    .foregroundStyle(MonMonTheme.textSecondary)
                 Toggle("Automatically save recognized transactions", isOn: $automaticSave)
                     .accessibilityIdentifier("bank-notification-auto-save")
                 Text(
-                    "Start with review, then enable automatic saving after checking your bank’s messages. Unknown formats and transfers always need review. Income and expense use your default categories."
+                    "Review your first capture in Transactions before enabling auto-save. Unknown formats and transfers still need review."
                 )
                 .font(.caption)
                 .foregroundStyle(MonMonTheme.textSecondary)
             }
             .appCard()
-
-            BankNotificationSetupSteps()
-                .appCard()
         }
     }
 }
 
-private struct BankNotificationSetupSteps: View {
+private struct BankNotificationShortcutInstall: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Set up in Shortcuts").font(.headline)
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Ready-made bank shortcut")
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
+            if let url = BankNotificationShortcut.installURL {
+                Link(destination: url) {
+                    Label("Install shortcut", systemImage: "arrow.down.circle")
+                }
+                .buttonStyle(.prominentAction)
+                .accessibilityIdentifier("bank-notification-install-shortcut")
+                .accessibilityHint(
+                    "Opens the shared shortcut on iCloud. Confirm installation in Shortcuts.")
+            }
+
             Text(
-                "Set this up once for each bank app. First choose an account above and leave automatic saving off."
+                "After adding it, open the shortcut: change TPBank to your bank app in Automation, select your own Account in the MonMon action, then enable the automation."
             )
             .font(.subheadline)
-
-            BankNotificationGuideStep(number: 1, title: "Choose the bank app") {
-                Text(
-                    "Open Apple’s Shortcuts app → + to create a shortcut → Automation in the editor."
-                )
-                Text(
-                    "Choose the trigger for receiving an app notification, then select your bank app. Choose Run Immediately if offered."
-                )
-                #if os(iOS)
-                    ShortcutsLink()
-                        .shortcutsLinkStyle(.automaticOutline)
-                        .accessibilityIdentifier("bank-notification-open-shortcuts")
-                #endif
-            }
-
-            BankNotificationGuideStep(number: 2, title: "Add the MonMon action") {
-                Text(
-                    "In the action search box, search for MonMon. Select Record Bank Notification.")
-                Text("If both MonMon and MonMon Dev appear, choose the app you are setting up now.")
-                    .foregroundStyle(MonMonTheme.textSecondary)
-            }
-
-            BankNotificationGuideStep(number: 3, title: "Fill in these four fields") {
-                Text("Tap each field in the MonMon action. Expand the action if Account is hidden.")
-                BankNotificationGuideField(
-                    title: "Notification text",
-                    instruction:
-                        "Select Variable → the notification supplied by the trigger → its message text.",
-                    hint: "Select the notification’s text token; it updates for every new message."
-                )
-                BankNotificationGuideField(
-                    title: "Source app",
-                    instruction: "Type your bank app’s name, for example TPBank.",
-                    hint: "This is a label you type once. The app itself was selected in step 1."
-                )
-                BankNotificationGuideField(
-                    title: "Received at",
-                    instruction: "Open the field’s variable menu and choose Current Date.",
-                    hint: "Shortcuts will supply the date and time when the automation runs."
-                )
-                BankNotificationGuideField(
-                    title: "Account",
-                    instruction: "Select the MonMon account for this bank.",
-                    hint: "You can also leave it empty to use the account selected above."
-                )
-            }
-
-            BankNotificationGuideStep(number: 4, title: "Save and check the first notification") {
-                Text(
-                    "Save the shortcut. When your bank next sends a transaction notification, open MonMon → Transactions and review the pending entry."
-                )
-                Text(
-                    "Check the amount, income or expense, and account. Enable automatic saving only after the first capture is recognized correctly."
-                )
-            }
-
-            DisclosureGroup("If something is missing") {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(
-                        "No notification text to select? Check that step 1 uses the app-notification trigger. A blank shortcut has no incoming notification."
-                    )
-                    Text(
-                        "Shortcuts runs but no text arrives? The bank may hide its message. Check one real notification with the phone unlocked, then one while locked."
-                    )
-                    Text(
-                        "The Play button alone does not supply a bank notification. Check Transactions after an actual notification arrives."
-                    )
-                }
-                .padding(.top, 8)
-            }
-
-            DisclosureGroup("Filters and duplicate notifications") {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(
-                        "Once the connection works, add a text filter to the trigger using a phrase from your bank’s transaction notifications."
-                    )
-                    Text(
-                        "If you retry a saved notification, reuse its original Received at value. A new Current Date is treated as a different event."
-                    )
-                }
-                .padding(.top, 8)
-            }
-        }
-        .font(.subheadline)
-    }
-}
-
-private struct BankNotificationGuideStep<Content: View>: View {
-    let number: Int
-    let title: LocalizedStringKey
-    @ViewBuilder let content: Content
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .firstTextBaseline, spacing: 10) {
-                Text(number.formatted())
-                    .font(.subheadline.weight(.bold))
-                    .foregroundStyle(MonMonTheme.accent)
-                Text(title).font(.subheadline.weight(.semibold))
-            }
-            .accessibilityElement(children: .combine)
-            .accessibilityAddTraits(.isHeader)
-            content
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-}
-
-private struct BankNotificationGuideField: View {
-    let title: LocalizedStringKey
-    let instruction: LocalizedStringKey
-    let hint: LocalizedStringKey
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title).font(.subheadline.weight(.semibold))
-            Text(instruction)
-            Text(hint)
+            Text("Set up on an iPhone with iOS 27 and MonMon installed.")
                 .font(.caption)
                 .foregroundStyle(MonMonTheme.textSecondary)
+
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
-        .background(MonMonTheme.field, in: RoundedRectangle(cornerRadius: 12))
-        .accessibilityElement(children: .combine)
     }
 }

@@ -7,6 +7,33 @@ import Testing
 @MainActor
 @Suite("App route coordination")
 struct AppRouteTests {
+    @Test("Bank capture install opens the published production shortcut without running it")
+    func bankShortcutInstallDestination() throws {
+        let url = try #require(BankNotificationShortcut.installURL)
+        #expect(url.scheme == "https")
+        #expect(url.host == "www.icloud.com")
+        #expect(url.path == "/shortcuts/31c50fdb6a794b2a999a97dff6f7a1e8")
+        #expect(url.query == nil)
+    }
+
+    @Test("Apple Pay capture install opens the published shortcut without running it")
+    func applePayShortcutInstallDestination() throws {
+        let url = try #require(ApplePayCaptureShortcut.installURL)
+        #expect(url.scheme == "https")
+        #expect(url.host == "www.icloud.com")
+        #expect(url.path == "/shortcuts/2e5d68434e3a4cfba96d94b0a9dac317")
+        #expect(url.query == nil)
+    }
+
+    @Test("Voice capture install opens the published shortcut without running it")
+    func voiceCaptureShortcutInstallDestination() throws {
+        let url = try #require(QuickNoteCaptureShortcut.installURL)
+        #expect(url.scheme == "https")
+        #expect(url.host == "www.icloud.com")
+        #expect(url.path == "/shortcuts/4da1dc6737a24e649447aa2e1e029e35")
+        #expect(url.query == nil)
+    }
+
     @Test("Quick Capture Shortcut shows note, bank and Apple Pay sections in order")
     func quickCaptureShortcutSections() {
         #expect(QuickCaptureShortcut.allCases == [.quickNote, .bankNotification, .applePay])

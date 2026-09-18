@@ -1,6 +1,76 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Ready-made bank shortcut": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortcut ngân hàng có sẵn"
+          }
+        }
+      }
+    },
+    "Install shortcut": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cài shortcut"
+          }
+        }
+      }
+    },
+    "Opens the shared shortcut on iCloud. Confirm installation in Shortcuts.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở shortcut được chia sẻ trên iCloud. Xác nhận cài trong ứng dụng Phím tắt."
+          }
+        }
+      }
+    },
+    "After adding it, open the shortcut: change TPBank to your bank app in Automation, select your own Account in the MonMon action, then enable the automation.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sau khi thêm, mở shortcut: đổi TPBank thành app ngân hàng của bạn trong Tự động hóa, chọn Tài khoản của bạn ở tác vụ MonMon, rồi bật tự động hóa."
+          }
+        }
+      }
+    },
+    "Set up on an iPhone with iOS 27 and MonMon installed.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thiết lập trên iPhone có iOS 27 và đã cài MonMon."
+          }
+        }
+      }
+    },
+    "To use this default account, clear Account in the shortcut’s MonMon action.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Để dùng tài khoản mặc định này, bỏ chọn Tài khoản ở tác vụ MonMon trong shortcut."
+          }
+        }
+      }
+    },
+    "Review your first capture in Transactions before enabling auto-save. Unknown formats and transfers still need review.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiểm tra giao dịch đầu tiên trong mục Giao dịch trước khi bật tự lưu. Thông báo chưa nhận diện và chuyển khoản vẫn cần duyệt."
+          }
+        }
+      }
+    },
     "Quick Capture Shortcut": {
       "localizations": {
         "vi": {
@@ -181,52 +251,32 @@
         }
       }
     },
-    "Connect Apple Pay": {
+    "Ready-made Apple Pay shortcut": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kết nối Apple Pay"
+            "value": "Shortcut Apple Pay có sẵn"
           }
         }
       }
     },
-    "1. On iPhone, create a Shortcuts automation with the Wallet / Transaction trigger. Select your card and Run Immediately if offered.": {
+    "After adding it, create a Wallet / Transaction automation, select your card and Run Immediately, then choose this shortcut.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "1. Trên iPhone, tạo tự động hóa trong Phím tắt với điều kiện Ví / Giao dịch (Wallet / Transaction). Chọn thẻ và Chạy ngay lập tức nếu có."
+            "value": "Sau khi thêm, tạo tự động hóa Ví / Giao dịch (Wallet / Transaction), chọn thẻ và Chạy ngay lập tức, rồi chọn shortcut này."
           }
         }
       }
     },
-    "2. Add MonMon’s Record Apple Pay Transaction action. Set Amount to Shortcut Input → Amount and Merchant to Shortcut Input → Merchant. Keep the currency with Amount; do not convert it to Number or Text.": {
+    "The Wallet trigger starts the automation; the shortcut sends that transaction to MonMon.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "2. Thêm tác vụ Ghi giao dịch Apple Pay của MonMon. Đặt Số tiền = Đầu vào phím tắt → Số tiền, Cửa hàng = Đầu vào phím tắt → Cửa hàng. Giữ cả loại tiền tệ; không chuyển số tiền sang Số hoặc Văn bản."
-          }
-        }
-      }
-    },
-    "3. Set Transaction date to the event’s date if available, otherwise capture Current Date once. Choose the matching MonMon account. Card label is optional. Check your first payment in Needs review.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "3. Đặt Thời điểm giao dịch bằng thời điểm sự kiện nếu có; nếu không, lấy Ngày hiện tại một lần. Chọn tài khoản MonMon tương ứng. Tên thẻ có thể để trống. Kiểm tra giao dịch đầu tiên trong Chờ duyệt."
-          }
-        }
-      }
-    },
-    "When retrying, reuse all original fields and the same date. A new date is a new event. Wallet may omit data or fail to trigger; a card tap does not confirm final settlement. This does not import Wallet history.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Khi gửi lại, giữ nguyên mọi trường và thời điểm. Thời điểm mới là sự kiện mới. Ví có thể thiếu dữ liệu hoặc không kích hoạt; chạm thẻ chưa xác nhận thanh toán hoàn tất. Tính năng này không nhập lịch sử Ví."
+            "value": "Điều kiện Ví kích hoạt tự động hóa; shortcut gửi giao dịch đó vào MonMon."
           }
         }
       }
@@ -6634,42 +6684,22 @@
         }
       }
     },
-    "Add Dictate Text.": {
+    "Ready-made voice capture shortcut": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Thêm Đọc chính tả."
+            "value": "Shortcut ghi giao dịch bằng giọng nói"
           }
         }
       }
     },
-    "Add MonMon → Record Transaction, then set Transaction to Dictated Text.": {
+    "Install the ready-made shortcut, then tap it to dictate a transaction to MonMon.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Thêm MonMon → Ghi giao dịch, rồi đặt Giao dịch thành Văn bản được đọc chính tả."
-          }
-        }
-      }
-    },
-    "Combine Dictate Text with MonMon so one tap starts listening.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ghép Đọc chính tả với MonMon để một lần chạm bắt đầu nghe."
-          }
-        }
-      }
-    },
-    "Create one-tap voice capture": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tạo ghi giọng nói một chạm"
+            "value": "Cài shortcut có sẵn, rồi chạm vào để đọc một giao dịch vào MonMon."
           }
         }
       }
@@ -6780,26 +6810,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mở ghi nhanh"
-          }
-        }
-      }
-    },
-    "Name it Voice Capture and tap it whenever you want to record.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Đặt tên là Ghi bằng giọng nói và chạm vào mỗi khi muốn ghi."
-          }
-        }
-      }
-    },
-    "Open Shortcuts and tap +.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mở Phím tắt và chạm dấu +."
           }
         }
       }
@@ -6970,16 +6980,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Siri & Phím tắt"
-          }
-        }
-      }
-    },
-    "This shortcut is installed automatically with MonMon.": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Phím tắt này được cài tự động cùng MonMon."
           }
         }
       }

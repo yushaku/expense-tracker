@@ -1,5 +1,9 @@
-import AppIntents
 import SwiftUI
+
+enum QuickNoteCaptureShortcut {
+    static let installURL = URL(
+        string: "https://www.icloud.com/shortcuts/4da1dc6737a24e649447aa2e1e029e35")
+}
 
 struct QuickNoteCaptureSettingsContent: View {
     var body: some View {
@@ -16,10 +20,6 @@ struct QuickNoteCaptureSettingsContent: View {
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(MonMonTheme.accent)
 
-            Text("This shortcut is installed automatically with MonMon.")
-                .font(.caption)
-                .foregroundStyle(MonMonTheme.textSecondary)
-
             Divider()
                 .overlay(MonMonTheme.border)
 
@@ -29,7 +29,7 @@ struct QuickNoteCaptureSettingsContent: View {
                 systemImage: "square.and.pencil"
             )
 
-            voiceShortcutInstructions
+            voiceShortcutInstall
         }
     }
 
@@ -54,49 +54,27 @@ struct QuickNoteCaptureSettingsContent: View {
         }
     }
 
-    private var voiceShortcutInstructions: some View {
+    private var voiceShortcutInstall: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Create one-tap voice capture")
+            Text("Ready-made voice capture shortcut")
                 .font(.subheadline.weight(.semibold))
 
-            Text("Combine Dictate Text with MonMon so one tap starts listening.")
-                .font(.caption)
-                .foregroundStyle(MonMonTheme.textSecondary)
+            if let url = QuickNoteCaptureShortcut.installURL {
+                Link(destination: url) {
+                    Label("Install shortcut", systemImage: "arrow.down.circle")
+                }
+                .buttonStyle(.prominentAction)
+                .accessibilityIdentifier("voice-capture-install-shortcut")
+                .accessibilityHint(
+                    "Opens the shared shortcut on iCloud. Confirm installation in Shortcuts.")
+            }
 
-            instructionRow(number: 1, text: "Open Shortcuts and tap +.")
-            instructionRow(number: 2, text: "Add Dictate Text.")
-            instructionRow(
-                number: 3,
-                text: "Add MonMon → Record Transaction, then set Transaction to Dictated Text."
+            Text(
+                "Install the ready-made shortcut, then tap it to dictate a transaction to MonMon."
             )
-            instructionRow(
-                number: 4,
-                text: "Name it Voice Capture and tap it whenever you want to record."
-            )
-
-            #if os(iOS)
-                ShortcutsLink()
-                    .shortcutsLinkStyle(.automaticOutline)
-                    .settingsButtonLabelStyle()
-                    .accessibilityIdentifier("open-monmon-shortcuts")
-                    .padding(.top, 2)
-            #endif
+            .font(.caption)
+            .foregroundStyle(MonMonTheme.textSecondary)
         }
         .padding(.top, 2)
-    }
-
-    private func instructionRow(number: Int, text: LocalizedStringKey) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 10) {
-            Text(number.formatted())
-                .font(.caption2.weight(.bold))
-                .foregroundStyle(MonMonTheme.onAccent)
-                .frame(width: 22, height: 22)
-                .background(MonMonTheme.accent, in: Circle())
-                .accessibilityHidden(true)
-
-            Text(text)
-                .font(.caption)
-                .foregroundStyle(MonMonTheme.textSecondary)
-        }
     }
 }
