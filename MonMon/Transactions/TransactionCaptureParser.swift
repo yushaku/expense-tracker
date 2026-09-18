@@ -59,6 +59,12 @@ enum TransactionCaptureParser {
         pattern:
             #"(?<![\p{L}\p{N}])(\d+(?:[.,]\d+)*)(?:\s*)(k|nghin|ngan|tr|trieu)?(?![\p{L}\p{N}])"#
     )
+    private static let amountWord =
+        #"(?:khong|mot|hai|ba|bon|tu|nam|lam|sau|bay|tam|chin|muoi|tram|linh|le|nghin|ngan|trieu)"#
+    private static let wordAmountExpression = try? NSRegularExpression(
+        pattern: #"(?<![\p{L}\p{N}])("# + amountWord + #"(?:\s+"# + amountWord
+            + #")+)(?![\p{L}\p{N}])"#
+    )
 
     static func parse(
         _ rawText: String,
@@ -69,7 +75,7 @@ enum TransactionCaptureParser {
         let trimmed = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
         let searchable = normalize(trimmed)
         let amountMatches = findAmounts(in: trimmed)
-        let kind = inferKind(from: searchable)
+        let kind = inferKind(from: searchable, original: trimmed)
         let occurredAt = inferDate(from: searchable, now: now, calendar: calendar)
 
         var issues = Set<TransactionCaptureIssue>()
@@ -122,27 +128,44 @@ enum TransactionCaptureParser {
         let normalized = normalize(text)
         let range = NSRange(normalized.startIndex..<normalized.endIndex, in: normalized)
 
-        return amountExpression.matches(in: normalized, range: range).compactMap { match in
-            guard
-                let wholeRange = Range(match.range(at: 0), in: text),
-                let numberRange = Range(match.range(at: 1), in: normalized)
-            else {
-                return nil
+        var matches: [AmountMatch] = amountExpression.matches(in: normalized, range: range)
+            .compactMap {
+                match in
+                guard
+                    let wholeRange = Range(match.range(at: 0), in: text),
+                    let numberRange = Range(match.range(at: 1), in: normalized)
+                else {
+                    return nil
+                }
+
+                let number = String(normalized[numberRange])
+                let suffix: String
+                if let suffixRange = Range(match.range(at: 2), in: normalized) {
+                    suffix = String(normalized[suffixRange])
+                } else {
+                    suffix = ""
+                }
+
+                return AmountMatch(
+                    range: wholeRange,
+                    amount: parseAmount(number: number, suffix: suffix)
+                )
             }
 
-            let number = String(normalized[numberRange])
-            let suffix: String
-            if let suffixRange = Range(match.range(at: 2), in: normalized) {
-                suffix = String(normalized[suffixRange])
-            } else {
-                suffix = ""
-            }
-
-            return AmountMatch(
-                range: wholeRange,
-                amount: parseAmount(number: number, suffix: suffix)
-            )
+        if let wordAmountExpression {
+            matches.append(
+                contentsOf: wordAmountExpression.matches(in: normalized, range: range).compactMap {
+                    match in
+                    guard
+                        let wholeRange = Range(match.range(at: 0), in: text),
+                        let wordsRange = Range(match.range(at: 1), in: normalized),
+                        let amount = parseVietnameseAmountWords(String(normalized[wordsRange]))
+                    else { return nil }
+                    return AmountMatch(range: wholeRange, amount: amount)
+                })
         }
+
+        return matches
     }
 
     private static func parseAmount(number: String, suffix: String) -> Decimal? {
@@ -182,17 +205,77 @@ enum TransactionCaptureParser {
         return value * multiplier
     }
 
-    private static func inferKind(from text: String) -> TransactionKind {
-        let incomePhrases = ["thu", "nhan", "luong", "thuong", "hoan tien", "income"]
-        return incomePhrases.contains { containsPhrase($0, in: text) } ? .income : .expense
+    private static func parseVietnameseAmountWords(_ words: String) -> Decimal? {
+        let tokens = words.split(whereSeparator: \Character.isWhitespace).map(String.init)
+        guard tokens.contains(where: { ["nghin", "ngan", "trieu"].contains($0) }) else {
+            return nil
+        }
+
+        let digits = [
+            "khong": 0, "mot": 1, "hai": 2, "ba": 3, "bon": 4, "tu": 4,
+            "nam": 5, "lam": 5, "sau": 6, "bay": 7, "tam": 8, "chin": 9,
+        ]
+        var total = 0
+        var group = 0
+        var currentDigit: Int?
+
+        for token in tokens {
+            if let digit = digits[token] {
+                currentDigit = digit
+                continue
+            }
+            switch token {
+            case "muoi":
+                group += (currentDigit ?? 1) * 10
+                currentDigit = nil
+            case "tram":
+                group += (currentDigit ?? 1) * 100
+                currentDigit = nil
+            case "nghin", "ngan":
+                group += currentDigit ?? 0
+                total += group * 1_000
+                group = 0
+                currentDigit = nil
+            case "trieu":
+                group += currentDigit ?? 0
+                total += group * 1_000_000
+                group = 0
+                currentDigit = nil
+            case "linh", "le":
+                continue
+            default:
+                return nil
+            }
+        }
+
+        total += group + (currentDigit ?? 0)
+        return total > 0 ? Decimal(total) : nil
+    }
+
+    private static func inferKind(from text: String, original: String) -> TransactionKind {
+        let incomePhrases = [
+            "nhan", "duoc nhan", "duoc tra", "tien vao", "chuyen den",
+            "luong", "thuong", "hoa hong", "tien lai", "lai tiet kiem", "co tuc", "hoan tien",
+            "income", "salary", "bonus", "interest", "refund",
+        ]
+        let accentSensitive = original.lowercased(with: Locale(identifier: "vi_VN"))
+        let hasAccentSensitiveIncome = ["thu", "lãi"].contains {
+            containsPhrase($0, in: accentSensitive)
+        }
+        let hasFoldedIncome = incomePhrases.contains { containsPhrase($0, in: text) }
+        return hasAccentSensitiveIncome || hasFoldedIncome ? .income : .expense
     }
 
     private static func inferDate(from text: String, now: Date, calendar: Calendar) -> Date {
-        guard containsPhrase("hom qua", in: text) else {
-            return now
+        let relativeDates: [(phrases: [String], days: Int)] = [
+            (["hom kia", "the day before yesterday"], -2),
+            (["hom qua", "toi qua", "sang qua", "chieu qua", "dem qua", "yesterday"], -1),
+        ]
+        for relativeDate in relativeDates
+        where relativeDate.phrases.contains(where: { containsPhrase($0, in: text) }) {
+            return calendar.date(byAdding: .day, value: relativeDate.days, to: now) ?? now
         }
-
-        return calendar.date(byAdding: .day, value: -1, to: now) ?? now
+        return now
     }
 
     private static func resolveAccount(
@@ -234,18 +317,18 @@ enum TransactionCaptureParser {
         issues: inout Set<TransactionCaptureIssue>
     ) -> UUID? {
         let candidates = context.categories.filter { $0.kind == kind }
-        var matches = candidates.filter { category in
-            containsPhrase(normalize(category.name), in: text)
+        let scoredMatches = candidates.compactMap { category -> (id: UUID, score: Int)? in
+            let phrases = [normalize(category.name)] + categoryAliases(for: category)
+            let scores = phrases.compactMap { phrase in
+                containsPhrase(phrase, in: text) ? phrase.count : nil
+            }
+            guard let score = scores.max() else { return nil }
+            return (category.id, score)
         }
-
-        for category in candidates
-        where categoryAliases(for: category).contains(where: {
-            containsPhrase($0, in: text)
-        }) {
-            matches.append(category)
-        }
-
-        let uniqueMatches = uniqueIDs(matches.map(\.id))
+        let bestScore = scoredMatches.map(\.score).max()
+        let uniqueMatches = uniqueIDs(
+            scoredMatches.filter { $0.score == bestScore }.map(\.id)
+        )
         if uniqueMatches.count > 1 {
             issues.insert(.ambiguousCategory)
             return nil
@@ -270,23 +353,46 @@ enum TransactionCaptureParser {
     private static func categoryAliases(for category: CaptureCategory) -> [String] {
         switch category.symbolName {
         case "fork.knife":
-            ["an", "an trua", "an toi", "com", "cafe", "ca phe", "food"]
+            [
+                "an", "an sang", "an trua", "an toi", "an uong", "bua sang", "bua trua",
+                "bua toi", "com", "pho", "bun", "banh mi", "do an", "nha hang", "quan an",
+                "cafe", "ca phe", "tra sua", "nuoc uong", "food", "breakfast", "lunch",
+                "dinner", "coffee",
+            ]
         case "car.fill":
-            ["xang", "taxi", "grab", "xe", "transport"]
+            [
+                "di chuyen", "xang", "do xang", "gui xe", "ve xe", "xe buyt", "xe om",
+                "taxi", "grab", "be", "gojek", "tau", "metro", "ve tau", "ve may bay",
+                "transport", "parking",
+            ]
         case "house.fill":
-            ["nha", "tien nha", "dien", "nuoc", "housing"]
+            [
+                "nha", "tien nha", "thue nha", "tien dien", "tien nuoc", "wifi", "internet",
+                "gas", "sua nha", "chung cu", "housing", "rent", "utilities",
+            ]
         case "cart.fill":
-            ["mua sam", "shopping"]
+            [
+                "mua sam", "sieu thi", "quan ao", "giay dep", "do gia dung", "shopee",
+                "lazada", "shopping", "groceries",
+            ]
         case "cross.case.fill":
-            ["thuoc", "kham", "benh vien", "health"]
+            [
+                "thuoc", "kham", "kham benh", "nha khoa", "bac si", "benh vien",
+                "bao hiem y te", "health", "medical", "doctor", "dentist",
+            ]
         case "gamecontroller.fill":
-            ["game", "phim", "giai tri", "entertainment"]
+            [
+                "game", "phim", "xem phim", "ve xem phim", "rap phim", "di choi", "netflix",
+                "spotify", "karaoke", "giai tri", "concert", "entertainment", "cinema",
+            ]
+        case "tag.fill":
+            ["khac", "other"]
         case "briefcase.fill":
-            ["luong", "salary"]
+            ["luong", "tien luong", "tien cong", "payroll", "salary", "wage"]
         case "gift.fill":
-            ["thuong", "bonus"]
+            ["thuong", "tien thuong", "hoa hong", "bonus", "commission"]
         case "building.columns.fill":
-            ["lai", "interest"]
+            ["lai", "tien lai", "lai tiet kiem", "co tuc", "interest", "dividend"]
         default:
             []
         }
@@ -302,7 +408,9 @@ enum TransactionCaptureParser {
         }
 
         let removablePhrases = [
-            "hôm qua", "hôm nay", "tiền mặt", "cash", "thu", "nhận", "income",
+            "hôm kia", "hôm qua", "tối qua", "sáng qua", "chiều qua", "đêm qua", "hôm nay",
+            "the day before yesterday", "yesterday", "today", "tiền mặt", "cash", "thu", "nhận",
+            "income",
         ]
         for phrase in removablePhrases {
             note = note.replacingOccurrences(
