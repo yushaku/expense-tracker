@@ -78,6 +78,29 @@ enum TrendChartSelection {
     }
 }
 
+/// Maps a tap inside a grouped spending bar to the series occupying that side
+/// of the bucket. Reports lead with spending, while income remains one tap away
+/// when the owner wants the comparison.
+enum SpendingTrendBarSelection {
+    static let initiallyHiddenKinds: Set<TransactionKind> = [.income]
+
+    static func kind(
+        atX x: CGFloat,
+        relativeTo bucketCenterX: CGFloat,
+        shownKinds: [TransactionKind]
+    ) -> TransactionKind? {
+        guard let first = shownKinds.first else {
+            return nil
+        }
+
+        guard shownKinds.count > 1 else {
+            return first
+        }
+
+        return x < bucketCenterX ? first : shownKinds[1]
+    }
+}
+
 /// Money out and money in, bucket by bucket, over the period on show.
 ///
 /// The totals above the card say what a period came to; this says how it got
