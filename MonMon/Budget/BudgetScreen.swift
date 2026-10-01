@@ -55,6 +55,10 @@ struct BudgetScreen: View {
 
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+                            Text("Income allocation")
+                                .font(.title3.weight(.semibold))
+                                .accessibilityAddTraits(.isHeader)
+
                             BudgetIncomeCard(
                                 snapshot: snapshot,
                                 monthTitle: monthTitle,
@@ -94,7 +98,7 @@ struct BudgetScreen: View {
                 selectedGoalID = id
                 appRoute.consumeGoal()
             }
-            .rootScreenHeader("Budget")
+            .rootScreenHeader("Plan")
             .accessibilityIdentifier("budget")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
