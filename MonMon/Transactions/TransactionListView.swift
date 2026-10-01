@@ -31,10 +31,17 @@ struct TransactionListView: View {
     @Query(sort: \PendingTransactionCapture.createdAt, order: .reverse)
     private var pendingCaptures: [PendingTransactionCapture]
 
+    @Query(sort: \BudgetJar.createdAt, order: .forward)
+    private var budgetJars: [BudgetJar]
+
+    @Query(sort: \RecurringRule.createdAt, order: .forward)
+    private var recurringRules: [RecurringRule]
+
     @State private var query = TransactionQuery(range: .month(containing: .now))
     @State private var editorMode: TransactionEditorMode?
     @State private var isManagingCategories = false
     @State private var isManagingRecurring = false
+    @State private var isShowingGoals = false
     @State private var isFiltering = false
     @State private var transactionActions = TransactionActions()
     @State private var importInbox = StatementImportInbox.live()
@@ -166,6 +173,10 @@ struct TransactionListView: View {
             }
             .appSheet(isPresented: $isManagingRecurring) {
                 RecurringListView()
+            }
+            .appSheet(isPresented: $isShowingGoals) {
+                let asOf = Date.now
+                GoalListView(capacityByJar: goalCapacityByJar(asOf: asOf), asOf: asOf)
             }
             .appSheet(isPresented: $isShowingImportInbox) {
                 StatementImportInboxView(inbox: importInbox)
@@ -422,11 +433,21 @@ struct TransactionListView: View {
         SpendingFeaturedTrip.select(from: tripWorkspaces)
     }
 
-    /// The three things the owner sets up rather than records: categories,
-    /// recurring entries, and accounts. They sit above the transactions, and
-    /// none of them belongs on the floating add button.
+    private func goalCapacityByJar(asOf: Date) -> [UUID: Decimal] {
+        BudgetSummary.goalCapacityByJar(
+            monthContaining: asOf,
+            asOf: asOf,
+            jars: budgetJars,
+            recurringRules: recurringRules,
+            transactions: transactions
+        )
+    }
+
+    /// The four things the owner sets up rather than records: categories,
+    /// recurring entries, goals, and accounts. They sit above the transactions,
+    /// and none of them belongs on the floating add button.
     private var quickActions: some View {
-        // Three labelled buttons can crowd an iPhone in one row, so the labels drop
+        // Four labelled buttons crowd an iPhone in one row, so the labels drop
         // below the icons before the row wraps.
         ViewThatFits(in: .horizontal) {
             HStack(spacing: 10) {
@@ -457,6 +478,15 @@ struct TransactionListView: View {
             accessibilityIdentifier: "manage-recurring"
         ) {
             isManagingRecurring = true
+        }
+
+        quickAction(
+            "Goals",
+            systemImage: "target",
+            isStacked: isStacked,
+            accessibilityIdentifier: "open-goals"
+        ) {
+            isShowingGoals = true
         }
 
         quickAction(
