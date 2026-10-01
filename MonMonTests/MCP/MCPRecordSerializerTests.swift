@@ -182,7 +182,8 @@ struct MCPRecordSerializerTests {
                     )),
                 [
                     "recordType", "id", "sourceGoalID", "name", "budgetAmount", "fundingJarID",
-                    "symbolName", "colorName", "status", "startedAt", "completedAt", "createdAt",
+                    "symbolName", "colorName", "status", "startedAt", "completedAt", "archivedAt",
+                    "createdAt",
                 ]
             ),
             (

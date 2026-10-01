@@ -114,6 +114,7 @@ enum MCPRecordSerializer {
                 "symbolName": .string(value.symbolName),
                 "colorName": .string(value.colorName), "status": .string(value.status.rawValue),
                 "startedAt": date(value.startedAt), "completedAt": optionalDate(value.completedAt),
+                "archivedAt": optionalDate(value.archivedAt),
                 "createdAt": date(value.createdAt),
             ])
     }

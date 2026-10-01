@@ -2,6 +2,7 @@ import SwiftData
 import SwiftUI
 
 private enum TripLifecycleConfirmation: String, Identifiable {
+    case archive
     case cancel
     case complete
 
@@ -53,17 +54,30 @@ struct TripDetailView: View {
                 onComplete: { confirmation = .complete },
                 onReopen: reopen,
                 onCancel: { confirmation = .cancel },
+                isArchived: workspace.archivedAt != nil,
                 saveErrorMessage: saveErrorMessage
             )
         }
         .navigationTitle(workspace.name)
         .toolbar {
-            if let goal = sourceGoal {
-                ToolbarItem(placement: .primaryAction) {
+            ToolbarItemGroup(placement: .primaryAction) {
+                if let goal = sourceGoal {
                     Button("Edit goal", systemImage: "pencil") {
                         goalEditorMode = .edit(goal)
                     }
                     .accessibilityIdentifier("trip-detail-edit-goal")
+                }
+
+                if workspace.archivedAt != nil {
+                    Button("Restore trip", systemImage: "arrow.uturn.backward.circle") {
+                        restore()
+                    }
+                    .accessibilityIdentifier("trip-detail-restore")
+                } else if workspace.status == .completed {
+                    Button("Archive trip", systemImage: "archivebox") {
+                        confirmation = .archive
+                    }
+                    .accessibilityIdentifier("trip-detail-archive")
                 }
             }
         }
@@ -84,7 +98,10 @@ struct TripDetailView: View {
             isPresented: confirmationBinding,
             titleVisibility: .visible
         ) {
-            if confirmation == .complete {
+            if confirmation == .archive {
+                Button("Archive", role: .destructive) { archive() }
+                Button("Cancel", role: .cancel) {}
+            } else if confirmation == .complete {
                 Button("Complete trip") { complete() }
                 Button("Keep active", role: .cancel) {}
             } else {
@@ -132,13 +149,25 @@ struct TripDetailView: View {
     }
 
     private var confirmationTitle: LocalizedStringKey {
-        confirmation == .complete ? "Complete this trip?" : "Cancel this trip workspace?"
+        switch confirmation {
+        case .archive:
+            "Archive this trip?"
+        case .complete:
+            "Complete this trip?"
+        case .cancel, .none:
+            "Cancel this trip workspace?"
+        }
     }
 
     private var confirmationMessage: LocalizedStringKey {
-        confirmation == .complete
-            ? "The trip moves to history. No account balance or transaction changes."
-            : "This removes the empty workspace only. The funded goal remains ready to spend."
+        switch confirmation {
+        case .archive:
+            "The trip moves out of history. Its linked expenses and budget summary stay intact."
+        case .complete:
+            "The trip moves to history. No account balance or transaction changes."
+        case .cancel, .none:
+            "This removes the empty workspace only. The funded goal remains ready to spend."
+        }
     }
 
     private func complete() {
@@ -150,6 +179,24 @@ struct TripDetailView: View {
     private func reopen() {
         saveErrorMessage = nil
         TripWorkspaceLifecycle.reopen(workspace)
+        saveWorkspaceChange()
+    }
+
+    private func archive() {
+        saveErrorMessage = nil
+        do {
+            try TripWorkspaceLifecycle.archive(workspace, at: .now)
+            try SyncWriteGate.save(modelContext)
+            dismiss()
+        } catch {
+            modelContext.rollback()
+            saveErrorMessage = "Couldn’t update this trip. Try again."
+        }
+    }
+
+    private func restore() {
+        saveErrorMessage = nil
+        TripWorkspaceLifecycle.restore(workspace)
         saveWorkspaceChange()
     }
 
@@ -189,6 +236,7 @@ private struct TripDetailContent: View {
     let onComplete: () -> Void
     let onReopen: () -> Void
     let onCancel: () -> Void
+    let isArchived: Bool
     let saveErrorMessage: LocalizedStringKey?
 
     init(
@@ -200,6 +248,7 @@ private struct TripDetailContent: View {
         onComplete: @escaping () -> Void,
         onReopen: @escaping () -> Void,
         onCancel: @escaping () -> Void,
+        isArchived: Bool,
         saveErrorMessage: LocalizedStringKey?
     ) {
         self.workspace = workspace
@@ -218,6 +267,7 @@ private struct TripDetailContent: View {
         self.onComplete = onComplete
         self.onReopen = onReopen
         self.onCancel = onCancel
+        self.isArchived = isArchived
         self.saveErrorMessage = saveErrorMessage
     }
 
@@ -260,7 +310,8 @@ private struct TripDetailContent: View {
                     remainingAmount: snapshot.remainingAmount,
                     onComplete: onComplete,
                     onReopen: onReopen,
-                    onCancel: onCancel
+                    onCancel: onCancel,
+                    isArchived: isArchived
                 )
             }
             .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -332,6 +383,7 @@ private struct TripLifecycleSection: View {
     let onComplete: () -> Void
     let onReopen: () -> Void
     let onCancel: () -> Void
+    let isArchived: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -345,6 +397,10 @@ private struct TripLifecycleSection: View {
                     }
                     .frame(maxWidth: .infinity)
                 }
+            } else if isArchived {
+                Text("Restore this trip before reopening it.")
+                    .font(.subheadline)
+                    .foregroundStyle(MonMonTheme.textSecondary)
             } else {
                 Text(
                     "The unused \(VNDCurrency.format(remainingAmount)) is available to plan again. No refund or transfer was created."

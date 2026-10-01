@@ -19,6 +19,7 @@ final class TripWorkspace {
     var status: TripWorkspaceStatus = TripWorkspaceStatus.active
     var startedAt: Date = Date(timeIntervalSince1970: 0)
     var completedAt: Date?
+    var archivedAt: Date?
     var createdAt: Date = Date(timeIntervalSince1970: 0)
 
     init(
@@ -32,6 +33,7 @@ final class TripWorkspace {
         status: TripWorkspaceStatus,
         startedAt: Date,
         completedAt: Date?,
+        archivedAt: Date? = nil,
         createdAt: Date
     ) {
         self.id = id
@@ -44,6 +46,7 @@ final class TripWorkspace {
         self.status = status
         self.startedAt = startedAt
         self.completedAt = completedAt
+        self.archivedAt = archivedAt
         self.createdAt = createdAt
     }
 }

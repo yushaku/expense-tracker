@@ -11,6 +11,7 @@ struct GoalListSnapshot {
     let archivedGoals: [FinancialGoal]
     let activeTrips: [TripWorkspace]
     let completedTrips: [TripWorkspace]
+    let archivedTrips: [TripWorkspace]
 
     var isEmpty: Bool {
         activeGoals.isEmpty && completedGoals.isEmpty && activeTrips.isEmpty
@@ -41,7 +42,8 @@ struct GoalListSnapshot {
                 .filter { $0.archivedAt != nil }
                 .sorted { ($0.archivedAt ?? $0.createdAt) > ($1.archivedAt ?? $1.createdAt) },
             activeTrips: trips.activeWorkspaces,
-            completedTrips: trips.completedWorkspaces
+            completedTrips: trips.completedWorkspaces,
+            archivedTrips: trips.archivedWorkspaces
         )
     }
 }
@@ -168,14 +170,20 @@ struct GoalListView: View {
                 )
             }
         case .archived:
-            if listSnapshot.archivedGoals.isEmpty {
+            if listSnapshot.archivedGoals.isEmpty && listSnapshot.archivedTrips.isEmpty {
                 filteredEmptyState(
-                    "No archived goals",
+                    "No archived items",
                     systemImage: "archivebox",
-                    description: "Archived completed goals will appear here."
+                    description: "Archived completed goals and trips will appear here."
                 )
             } else {
-                goalCollection(title: "Archived", goals: listSnapshot.archivedGoals)
+                goalCollection(title: "Archived goals", goals: listSnapshot.archivedGoals)
+                TripWorkspaceSection(
+                    title: "Archived trips",
+                    workspaces: listSnapshot.archivedTrips,
+                    transactions: transactions,
+                    categories: categories
+                )
             }
         }
     }

@@ -61,6 +61,7 @@ struct MonMonBackupServiceTests {
         )
         #expect(validated.payload.goals.single?.contributions?.single?.amount == "2000000")
         #expect(validated.payload.goals.single?.archivedAt != nil)
+        #expect(validated.payload.tripWorkspaces.single?.archivedAt != nil)
         #expect(validated.payload.categories.count == 1)
         #expect(
             validated.payload.categories.single?.budgetJarID
@@ -301,6 +302,7 @@ struct MonMonBackupServiceTests {
         #expect(restoredTrip.id == fixture.tripWorkspaceID)
         #expect(restoredTrip.sourceGoalID == fixture.goalID)
         #expect(restoredTrip.fundingJarID == fixture.savingsJarID)
+        #expect(restoredTrip.archivedAt == instant.addingTimeInterval(259_200))
         let restoredTransaction = try #require(
             destination.mainContext.fetch(FetchDescriptor<MoneyTransaction>()).single
         )
@@ -711,9 +713,10 @@ struct MonMonBackupServiceTests {
                 fundingJarID: savingsJarID,
                 symbolName: "airplane",
                 colorName: "sky",
-                status: .active,
+                status: .completed,
                 startedAt: instant,
-                completedAt: nil,
+                completedAt: instant.addingTimeInterval(86_400),
+                archivedAt: instant.addingTimeInterval(259_200),
                 createdAt: instant
             )
         )
