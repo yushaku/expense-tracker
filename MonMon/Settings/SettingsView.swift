@@ -54,6 +54,36 @@ struct SettingsView: View {
                         }
                         card {
                             NavigationLink {
+                                TransactionDefaultsView()
+                            } label: {
+                                HStack {
+                                    Label("Transaction default", systemImage: "slider.horizontal.3")
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .accessibilityHidden(true)
+                                }
+                                .frame(minHeight: 44)
+                            }
+                            .settingsButtonLabelStyle()
+                            .accessibilityIdentifier("settings-transaction-defaults")
+                        }
+                        card {
+                            NavigationLink {
+                                QuickExpenseSettingsView()
+                            } label: {
+                                HStack {
+                                    Label("Quick expenses", systemImage: "bolt.fill")
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .accessibilityHidden(true)
+                                }
+                                .frame(minHeight: 44)
+                            }
+                            .settingsButtonLabelStyle()
+                            .accessibilityIdentifier("settings-quick-expenses")
+                        }
+                        card {
+                            NavigationLink {
                                 QuickCaptureShortcutSettingsView()
                             } label: {
                                 HStack {

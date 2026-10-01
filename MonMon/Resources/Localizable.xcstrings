@@ -3654,12 +3654,12 @@
         }
       }
     },
-    "Choose an account in Defaults before using the widget.": {
+    "Choose an account in Transaction default before using the widget.": {
       "localizations": {
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Chọn tài khoản trong phần Mặc định trước khi dùng widget."
+            "value": "Chọn tài khoản trong phần Mặc định giao dịch trước khi dùng widget."
           }
         }
       }

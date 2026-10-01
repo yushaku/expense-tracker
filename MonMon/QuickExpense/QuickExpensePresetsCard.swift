@@ -4,6 +4,24 @@ import SwiftUI
 import UniformTypeIdentifiers
 import WidgetKit
 
+/// Quick Expense widget presets, managed from their own Settings entry.
+struct QuickExpenseSettingsView: View {
+    var body: some View {
+        ScrollView {
+            QuickExpensePresetsCard()
+                .frame(maxWidth: MonMonTheme.maxContentWidth)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .frame(maxWidth: .infinity)
+        }
+        .background(MonMonTheme.canvas)
+        .navigationTitle("Quick expenses")
+        .accessibilityIdentifier("quick-expense-settings")
+        .tint(MonMonTheme.accent)
+        .foregroundStyle(MonMonTheme.textPrimary)
+    }
+}
+
 struct QuickExpensePresetsCard: View {
     @Environment(\.locale) private var locale
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -307,7 +325,7 @@ struct QuickExpenseAccountSummary: View {
                 Label("Choose a default account", systemImage: "exclamationmark.circle")
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(MonMonTheme.danger)
-                Text("Choose an account in Defaults before using the widget.")
+                Text("Choose an account in Transaction default before using the widget.")
                     .font(.caption)
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
