@@ -182,7 +182,7 @@ rtk swift format lint --strict --recursive MonMon MonMonTests MonMonShareExtensi
 
 ### Adding transactions
 
-**Quick Capture Shortcut** — the Settings entry below Salary calculator shows
+**Quick Capture Shortcut** — the Settings entry shows
 Quick note capture, Bank notifications and Apple Pay capture as three expanded
 sections on one scrolling screen, without separate capture settings screens.
 Quick note capture contains the existing Record Transaction Siri shortcut and

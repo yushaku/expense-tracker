@@ -287,18 +287,19 @@ struct GoalDetailView: View {
         .navigationTitle(goal?.name ?? String(localized: "Goal"))
         .toolbar {
             if let goal {
-                if goal.archivedAt == nil {
-                    ToolbarItem(placement: .primaryAction) {
+                ToolbarItemGroup(placement: .primaryAction) {
+                    if goal.archivedAt == nil {
                         Button("Edit goal", systemImage: "pencil") {
                             editorMode = .edit(goal)
                         }
                         .accessibilityIdentifier("goal-detail-edit")
                     }
-                }
 
-                if goal.archivedAt != nil || goal.earmarkedAmount >= goal.targetAmount {
-                    ToolbarItem(placement: .secondaryAction) {
-                        GoalArchiveMenu(goal: goal)
+                    if goal.archivedAt != nil || goal.earmarkedAmount >= goal.targetAmount {
+                        GoalArchiveControl(
+                            goal: goal,
+                            dismissAfterArchive: true
+                        )
                     }
                 }
             }
@@ -502,44 +503,49 @@ struct GoalDetailView: View {
     }
 }
 
-private struct GoalArchiveMenu: View {
+struct GoalArchiveControl: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
     let goal: FinancialGoal
+    let dismissAfterArchive: Bool
 
     @State private var isConfirmingArchive = false
     @State private var updateFailed = false
 
     var body: some View {
-        Menu("More", systemImage: "ellipsis.circle") {
-            if goal.archivedAt == nil {
-                Button("Archive goal", systemImage: "archivebox") {
-                    isConfirmingArchive = true
-                }
-            } else {
-                Button("Restore goal", systemImage: "arrow.uturn.backward.circle") {
-                    restore()
-                }
+        trigger
+            .confirmationDialog(
+                "Archive this goal?",
+                isPresented: $isConfirmingArchive,
+                titleVisibility: .visible
+            ) {
+                Button("Archive", role: .destructive) { archive() }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text(
+                    "The goal moves out of active views. Its earmark and contribution history stay intact."
+                )
             }
-        }
-        .accessibilityIdentifier("goal-more-actions")
-        .confirmationDialog(
-            "Archive this goal?",
-            isPresented: $isConfirmingArchive,
-            titleVisibility: .visible
-        ) {
-            Button("Archive", role: .destructive) { archive() }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text(
-                "The goal moves out of active views. Its earmark and contribution history stay intact."
-            )
-        }
-        .alert("Couldn’t update this goal", isPresented: $updateFailed) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Your changes were not saved. Please try again.")
+            .alert("Couldn’t update this goal", isPresented: $updateFailed) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Your changes were not saved. Please try again.")
+            }
+    }
+
+    @ViewBuilder
+    private var trigger: some View {
+        if goal.archivedAt == nil {
+            Button("Archive goal", systemImage: "archivebox") {
+                isConfirmingArchive = true
+            }
+            .accessibilityIdentifier("goal-detail-archive")
+        } else {
+            Button("Restore goal", systemImage: "arrow.uturn.backward.circle") {
+                restore()
+            }
+            .accessibilityIdentifier("goal-detail-restore")
         }
     }
 
@@ -547,7 +553,9 @@ private struct GoalArchiveMenu: View {
         do {
             try GoalArchive.archive(goal, at: .now)
             try SyncWriteGate.save(modelContext)
-            dismiss()
+            if dismissAfterArchive {
+                dismiss()
+            }
         } catch {
             modelContext.rollback()
             updateFailed = true

@@ -500,6 +500,7 @@ struct MonMonBackupPayload: Codable, Equatable, Sendable {
         var status: String
         var startedAt: String
         var completedAt: String?
+        var archivedAt: String? = nil
         var createdAt: String
     }
 

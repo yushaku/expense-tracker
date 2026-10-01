@@ -287,6 +287,11 @@ struct MonMonBackupValidatorTests {
         #expect(throws: MonMonBackupValidationError.invalidPayload) {
             try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
         }
+
+        payload.tripWorkspaces[0] = tripWorkspace(archivedAt: instant)
+        #expect(throws: MonMonBackupValidationError.invalidPayload) {
+            try MonMonBackupValidator.validate(try signed(payload), expectedFlavour: .dev)
+        }
     }
 
     @Test("Trip optional references warn while impossible transaction routing is rejected")
@@ -464,7 +469,8 @@ struct MonMonBackupValidatorTests {
         sourceGoalID: UUID? = nil,
         fundingJarID: UUID? = nil,
         status: TripWorkspaceStatus = .active,
-        completedAt: Date? = nil
+        completedAt: Date? = nil,
+        archivedAt: Date? = nil
     ) -> MonMonBackupPayload.TripWorkspaceRecord {
         MonMonBackupPayload.TripWorkspaceRecord(
             id: MonMonBackupScalar.uuid(id),
@@ -477,6 +483,7 @@ struct MonMonBackupValidatorTests {
             status: status.rawValue,
             startedAt: MonMonBackupScalar.date(instant),
             completedAt: completedAt.map(MonMonBackupScalar.date),
+            archivedAt: archivedAt.map(MonMonBackupScalar.date),
             createdAt: MonMonBackupScalar.date(instant)
         )
     }
