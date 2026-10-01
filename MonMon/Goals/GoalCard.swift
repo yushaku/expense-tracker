@@ -298,7 +298,11 @@ struct GoalDetailView: View {
 
                 if goal.archivedAt != nil || goal.earmarkedAmount >= goal.targetAmount {
                     ToolbarItem(placement: .secondaryAction) {
-                        GoalArchiveMenu(goal: goal)
+                        GoalArchiveControl(
+                            goal: goal,
+                            presentation: .menu,
+                            dismissAfterArchive: true
+                        )
                     }
                 }
             }
@@ -502,44 +506,66 @@ struct GoalDetailView: View {
     }
 }
 
-private struct GoalArchiveMenu: View {
+struct GoalArchiveControl: View {
+    enum Presentation {
+        case button
+        case menu
+    }
+
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
     let goal: FinancialGoal
+    let presentation: Presentation
+    let dismissAfterArchive: Bool
 
     @State private var isConfirmingArchive = false
     @State private var updateFailed = false
 
     var body: some View {
-        Menu("More", systemImage: "ellipsis.circle") {
-            if goal.archivedAt == nil {
-                Button("Archive goal", systemImage: "archivebox") {
-                    isConfirmingArchive = true
-                }
-            } else {
-                Button("Restore goal", systemImage: "arrow.uturn.backward.circle") {
-                    restore()
+        trigger
+            .confirmationDialog(
+                "Archive this goal?",
+                isPresented: $isConfirmingArchive,
+                titleVisibility: .visible
+            ) {
+                Button("Archive", role: .destructive) { archive() }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text(
+                    "The goal moves out of active views. Its earmark and contribution history stay intact."
+                )
+            }
+            .alert("Couldn’t update this goal", isPresented: $updateFailed) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Your changes were not saved. Please try again.")
+            }
+    }
+
+    @ViewBuilder
+    private var trigger: some View {
+        switch presentation {
+        case .button:
+            Button("Archive", systemImage: "archivebox") {
+                isConfirmingArchive = true
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .accessibilityIdentifier("goal-archive-\(goal.id.uuidString)")
+        case .menu:
+            Menu("More", systemImage: "ellipsis.circle") {
+                if goal.archivedAt == nil {
+                    Button("Archive goal", systemImage: "archivebox") {
+                        isConfirmingArchive = true
+                    }
+                } else {
+                    Button("Restore goal", systemImage: "arrow.uturn.backward.circle") {
+                        restore()
+                    }
                 }
             }
-        }
-        .accessibilityIdentifier("goal-more-actions")
-        .confirmationDialog(
-            "Archive this goal?",
-            isPresented: $isConfirmingArchive,
-            titleVisibility: .visible
-        ) {
-            Button("Archive", role: .destructive) { archive() }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text(
-                "The goal moves out of active views. Its earmark and contribution history stay intact."
-            )
-        }
-        .alert("Couldn’t update this goal", isPresented: $updateFailed) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Your changes were not saved. Please try again.")
+            .accessibilityIdentifier("goal-more-actions")
         }
     }
 
@@ -547,7 +573,9 @@ private struct GoalArchiveMenu: View {
         do {
             try GoalArchive.archive(goal, at: .now)
             try SyncWriteGate.save(modelContext)
-            dismiss()
+            if dismissAfterArchive {
+                dismiss()
+            }
         } catch {
             modelContext.rollback()
             updateFailed = true

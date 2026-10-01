@@ -153,7 +153,11 @@ struct GoalListView: View {
                 GoalEmptyState { editorMode = .add }
             } else {
                 goalCollection(title: "Accumulating", goals: snapshot.activeGoals)
-                goalCollection(title: "Completed", goals: snapshot.completedGoals)
+                goalCollection(
+                    title: "Completed",
+                    goals: snapshot.completedGoals,
+                    showsArchiveActions: true
+                )
                 TripWorkspaceSection(
                     title: "Active trips",
                     workspaces: snapshot.activeTrips,
@@ -182,13 +186,15 @@ struct GoalListView: View {
 
     private func goalCollection(
         title: LocalizedStringKey,
-        goals: [FinancialGoal]
+        goals: [FinancialGoal],
+        showsArchiveActions: Bool = false
     ) -> some View {
         GoalCollection(
             title: title,
             goals: goals,
             jars: jars,
             asOf: asOf,
+            showsArchiveActions: showsArchiveActions,
             onSelect: { selectedGoalID = $0.id }
         )
     }
@@ -323,6 +329,7 @@ private struct GoalCollection: View {
     let goals: [FinancialGoal]
     let jarNames: [UUID: String]
     let asOf: Date
+    let showsArchiveActions: Bool
     let onSelect: (FinancialGoal) -> Void
 
     init(
@@ -330,12 +337,14 @@ private struct GoalCollection: View {
         goals: [FinancialGoal],
         jars: [BudgetJar],
         asOf: Date,
+        showsArchiveActions: Bool,
         onSelect: @escaping (FinancialGoal) -> Void
     ) {
         self.title = title
         self.goals = goals
         jarNames = Dictionary(firstWins: jars.map { ($0.id, $0.name) })
         self.asOf = asOf
+        self.showsArchiveActions = showsArchiveActions
         self.onSelect = onSelect
     }
 
@@ -346,19 +355,29 @@ private struct GoalCollection: View {
                     .font(.title3.weight(.semibold))
 
                 ForEach(goals) { goal in
-                    Button {
-                        onSelect(goal)
-                    } label: {
-                        GoalCard(
-                            goal: goal,
-                            jarName: goal.fundingJarID.flatMap { jarNames[$0] }
-                                ?? String(localized: "No jar"),
-                            asOf: asOf
-                        )
+                    VStack(alignment: .trailing, spacing: 8) {
+                        Button {
+                            onSelect(goal)
+                        } label: {
+                            GoalCard(
+                                goal: goal,
+                                jarName: goal.fundingJarID.flatMap { jarNames[$0] }
+                                    ?? String(localized: "No jar"),
+                                asOf: asOf
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("goal-\(goal.id.uuidString)")
+                        .accessibilityHint("Opens this goal's details")
+
+                        if showsArchiveActions {
+                            GoalArchiveControl(
+                                goal: goal,
+                                presentation: .button,
+                                dismissAfterArchive: false
+                            )
+                        }
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("goal-\(goal.id.uuidString)")
-                    .accessibilityHint("Opens this goal's details")
                 }
             }
         }
