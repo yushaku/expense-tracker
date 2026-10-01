@@ -260,9 +260,11 @@ private struct PayloadChecker {
             }
             try date(record.startedAt)
             try optionalDate(record.completedAt)
+            try optionalDate(record.archivedAt)
             switch status {
             case .active:
                 try require(record.completedAt == nil)
+                try require(record.archivedAt == nil)
             case .completed:
                 try require(record.completedAt != nil)
             }

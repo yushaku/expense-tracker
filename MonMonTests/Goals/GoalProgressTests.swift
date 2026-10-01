@@ -317,16 +317,31 @@ struct GoalArchiveTests {
             completedAt: nil,
             createdAt: Date(timeIntervalSince1970: 1_940_000_000)
         )
+        let archivedTrip = TripWorkspace(
+            id: UUID(),
+            sourceGoalID: nil,
+            name: "Old trip",
+            budgetAmount: 15_000,
+            fundingJarID: tripGoal.fundingJarID,
+            symbolName: "airplane",
+            colorName: "sky",
+            status: .completed,
+            startedAt: Date(timeIntervalSince1970: 1_930_000_000),
+            completedAt: Date(timeIntervalSince1970: 1_935_000_000),
+            archivedAt: Date(timeIntervalSince1970: 1_945_000_000),
+            createdAt: Date(timeIntervalSince1970: 1_930_000_000)
+        )
 
         let snapshot = GoalListSnapshot.snapshot(
             goals: [active, complete, archived, tripGoal],
-            workspaces: [trip]
+            workspaces: [trip, archivedTrip]
         )
 
         #expect(snapshot.activeGoals.map(\.id) == [active.id])
         #expect(snapshot.completedGoals.map(\.id) == [complete.id])
         #expect(snapshot.archivedGoals.map(\.id) == [archived.id])
         #expect(snapshot.activeTrips.map(\.id) == [trip.id])
+        #expect(snapshot.archivedTrips.map(\.id) == [archivedTrip.id])
     }
 
     private func goal(

@@ -358,6 +358,7 @@ extension MonMonBackupService {
             status: try enumValue(record.status),
             startedAt: try MonMonBackupScalar.parseDate(record.startedAt),
             completedAt: try optionalDate(record.completedAt),
+            archivedAt: try optionalDate(record.archivedAt),
             createdAt: try MonMonBackupScalar.parseDate(record.createdAt)
         )
     }
@@ -376,6 +377,7 @@ extension MonMonBackupService {
         model.status = try enumValue(record.status)
         model.startedAt = try MonMonBackupScalar.parseDate(record.startedAt)
         model.completedAt = try optionalDate(record.completedAt)
+        model.archivedAt = try optionalDate(record.archivedAt)
         model.createdAt = try MonMonBackupScalar.parseDate(record.createdAt)
     }
 
@@ -1217,6 +1219,7 @@ struct MonMonBackupService {
             status: model.status.rawValue,
             startedAt: MonMonBackupScalar.date(model.startedAt),
             completedAt: model.completedAt.map(MonMonBackupScalar.date),
+            archivedAt: model.archivedAt.map(MonMonBackupScalar.date),
             createdAt: MonMonBackupScalar.date(model.createdAt)
         )
     }

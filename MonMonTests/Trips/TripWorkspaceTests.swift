@@ -223,6 +223,42 @@ struct TripWorkspaceTests {
         }
     }
 
+    @Test("Workspace collection separates active completed and archived trips")
+    func collectionSeparatesArchivedTrips() {
+        let active = workspace(status: .active)
+        let completed = workspace(status: .completed)
+        let archived = workspace(status: .completed, archivedAt: startedAt)
+
+        let snapshot = TripWorkspaceCollection.snapshot(
+            goals: [],
+            workspaces: [active, completed, archived]
+        )
+
+        #expect(snapshot.activeWorkspaceIDs == [active.id])
+        #expect(snapshot.completedWorkspaceIDs == [completed.id])
+        #expect(snapshot.archivedWorkspaceIDs == [archived.id])
+    }
+
+    private func workspace(
+        status: TripWorkspaceStatus,
+        archivedAt: Date? = nil
+    ) -> TripWorkspace {
+        TripWorkspace(
+            id: UUID(),
+            sourceGoalID: nil,
+            name: "Da Nang",
+            budgetAmount: 30_000_000,
+            fundingJarID: BudgetJarSeed.savingsID,
+            symbolName: "airplane",
+            colorName: "sky",
+            status: status,
+            startedAt: startedAt,
+            completedAt: status == .completed ? startedAt : nil,
+            archivedAt: archivedAt,
+            createdAt: startedAt
+        )
+    }
+
     private func makeGoal(
         earmarkedAmount: Decimal = 30_000_000,
         fundingJarID: UUID? = BudgetJarSeed.savingsID
