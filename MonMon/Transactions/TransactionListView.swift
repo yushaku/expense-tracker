@@ -35,7 +35,6 @@ struct TransactionListView: View {
     @State private var editorMode: TransactionEditorMode?
     @State private var isManagingCategories = false
     @State private var isManagingRecurring = false
-    @State private var isEditingDefaults = false
     @State private var isFiltering = false
     @State private var transactionActions = TransactionActions()
     @State private var importInbox = StatementImportInbox.live()
@@ -167,9 +166,6 @@ struct TransactionListView: View {
             }
             .appSheet(isPresented: $isManagingRecurring) {
                 RecurringListView()
-            }
-            .appSheet(isPresented: $isEditingDefaults) {
-                TransactionDefaultsView()
             }
             .appSheet(isPresented: $isShowingImportInbox) {
                 StatementImportInboxView(inbox: importInbox)
@@ -426,12 +422,11 @@ struct TransactionListView: View {
         SpendingFeaturedTrip.select(from: tripWorkspaces)
     }
 
-    /// The three things the owner sets up rather than records: what a
-    /// transaction can be filed under, what records itself, and what a new one
-    /// starts on. They sit above the transactions, and none of them belongs on
-    /// the floating add button.
+    /// The three things the owner sets up rather than records: categories,
+    /// recurring entries, and accounts. They sit above the transactions, and
+    /// none of them belongs on the floating add button.
     private var quickActions: some View {
-        // Four labelled buttons crowd an iPhone in one row, so the labels drop
+        // Three labelled buttons can crowd an iPhone in one row, so the labels drop
         // below the icons before the row wraps.
         ViewThatFits(in: .horizontal) {
             HStack(spacing: 10) {
@@ -462,15 +457,6 @@ struct TransactionListView: View {
             accessibilityIdentifier: "manage-recurring"
         ) {
             isManagingRecurring = true
-        }
-
-        quickAction(
-            "Defaults",
-            systemImage: "slider.horizontal.3",
-            isStacked: isStacked,
-            accessibilityIdentifier: "manage-transaction-defaults"
-        ) {
-            isEditingDefaults = true
         }
 
         quickAction(
