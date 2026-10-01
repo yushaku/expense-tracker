@@ -13,7 +13,7 @@ enum RootTab: String, CaseIterable, Identifiable {
     var title: LocalizedStringKey {
         switch self {
         case .budget:
-            "Budget"
+            "Plan"
         case .report:
             "Report"
         case .wealth:
