@@ -164,7 +164,8 @@ private struct BudgetAllocationOverview: View {
             context: AppText.string("Budget allocation", in: locale),
             items: items,
             totalLabel: "Allocated",
-            totalValueLabel: "\(PercentInput.format(allocatedPercent))%"
+            totalValueLabel: "\(PercentInput.format(allocatedPercent))%",
+            showsLegend: false
         )
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Budget allocation")
