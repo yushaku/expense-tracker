@@ -287,20 +287,17 @@ struct GoalDetailView: View {
         .navigationTitle(goal?.name ?? String(localized: "Goal"))
         .toolbar {
             if let goal {
-                if goal.archivedAt == nil {
-                    ToolbarItem(placement: .primaryAction) {
+                ToolbarItemGroup(placement: .primaryAction) {
+                    if goal.archivedAt == nil {
                         Button("Edit goal", systemImage: "pencil") {
                             editorMode = .edit(goal)
                         }
                         .accessibilityIdentifier("goal-detail-edit")
                     }
-                }
 
-                if goal.archivedAt != nil || goal.earmarkedAmount >= goal.targetAmount {
-                    ToolbarItem(placement: .secondaryAction) {
+                    if goal.archivedAt != nil || goal.earmarkedAmount >= goal.targetAmount {
                         GoalArchiveControl(
                             goal: goal,
-                            presentation: .menu,
                             dismissAfterArchive: true
                         )
                     }
@@ -507,16 +504,10 @@ struct GoalDetailView: View {
 }
 
 struct GoalArchiveControl: View {
-    enum Presentation {
-        case button
-        case menu
-    }
-
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
     let goal: FinancialGoal
-    let presentation: Presentation
     let dismissAfterArchive: Bool
 
     @State private var isConfirmingArchive = false
@@ -545,27 +536,16 @@ struct GoalArchiveControl: View {
 
     @ViewBuilder
     private var trigger: some View {
-        switch presentation {
-        case .button:
-            Button("Archive", systemImage: "archivebox") {
+        if goal.archivedAt == nil {
+            Button("Archive goal", systemImage: "archivebox") {
                 isConfirmingArchive = true
             }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-            .accessibilityIdentifier("goal-archive-\(goal.id.uuidString)")
-        case .menu:
-            Menu("More", systemImage: "ellipsis.circle") {
-                if goal.archivedAt == nil {
-                    Button("Archive goal", systemImage: "archivebox") {
-                        isConfirmingArchive = true
-                    }
-                } else {
-                    Button("Restore goal", systemImage: "arrow.uturn.backward.circle") {
-                        restore()
-                    }
-                }
+            .accessibilityIdentifier("goal-detail-archive")
+        } else {
+            Button("Restore goal", systemImage: "arrow.uturn.backward.circle") {
+                restore()
             }
-            .accessibilityIdentifier("goal-more-actions")
+            .accessibilityIdentifier("goal-detail-restore")
         }
     }
 
