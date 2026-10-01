@@ -34,6 +34,7 @@ struct TripWorkspaceTests {
         #expect(workspace.status == .active)
         #expect(workspace.startedAt == startedAt)
         #expect(workspace.completedAt == nil)
+        #expect(workspace.archivedAt == nil)
         #expect(workspace.createdAt == startedAt)
     }
 
@@ -97,6 +98,30 @@ struct TripWorkspaceTests {
         #expect(goal.earmarkedAmount == originalGoalAmount)
     }
 
+    @Test("Only completed trips can be archived and restored")
+    func archiveCompletedWorkspace() throws {
+        let workspace = try TripWorkspaceLifecycle.start(
+            goal: makeGoal(),
+            existingWorkspaces: [],
+            id: UUID(),
+            startedAt: startedAt
+        )
+        let archivedAt = startedAt.addingTimeInterval(172_800)
+
+        #expect(throws: TripWorkspaceLifecycleError.workspaceNotCompleted) {
+            try TripWorkspaceLifecycle.archive(workspace, at: archivedAt)
+        }
+
+        TripWorkspaceLifecycle.complete(workspace, at: startedAt.addingTimeInterval(86_400))
+        try TripWorkspaceLifecycle.archive(workspace, at: archivedAt)
+
+        #expect(workspace.archivedAt == archivedAt)
+
+        TripWorkspaceLifecycle.restore(workspace)
+
+        #expect(workspace.archivedAt == nil)
+    }
+
     @Test("A workspace persists through the shared MonMon schema")
     func workspacePersists() throws {
         let container = try ModelContainer(
@@ -119,6 +144,7 @@ struct TripWorkspaceTests {
         #expect(stored.budgetAmount == 30_000_000)
         #expect(stored.status == .active)
         #expect(stored.completedAt == nil)
+        #expect(stored.archivedAt == nil)
     }
 
     @Test("Only an empty active workspace can be cancelled")

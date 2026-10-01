@@ -7,6 +7,7 @@ enum TripWorkspaceLifecycleError: Error, Equatable {
     case workspaceAlreadyExists
     case workspaceHasTransactions
     case workspaceNotActive
+    case workspaceNotCompleted
 }
 
 enum TripWorkspaceLifecycle {
@@ -74,6 +75,18 @@ enum TripWorkspaceLifecycle {
     static func reopen(_ workspace: TripWorkspace) {
         workspace.status = .active
         workspace.completedAt = nil
+        workspace.archivedAt = nil
+    }
+
+    static func archive(_ workspace: TripWorkspace, at archivedAt: Date) throws {
+        guard workspace.status == .completed else {
+            throw TripWorkspaceLifecycleError.workspaceNotCompleted
+        }
+        workspace.archivedAt = archivedAt
+    }
+
+    static func restore(_ workspace: TripWorkspace) {
+        workspace.archivedAt = nil
     }
 
     @MainActor
