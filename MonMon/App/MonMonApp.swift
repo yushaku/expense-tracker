@@ -175,11 +175,15 @@ struct MonMonApp: App {
                     if syncCoordinator.writesLocked && !appLock.isLocked {
                         syncCoordinator.isPresented = true
                     }
-                    // Two paired devices on one Wi-Fi find each other while both
-                    // apps are simply open. Pairing was the consent; the review
-                    // is still the only thing that writes anything.
+                    // Pairing enables automatic sync while both apps are open and unlocked.
                     syncCoordinator.connectIfPaired()
                     await notificationCoordinator.reconcile(in: container.mainContext)
+                }
+                .task(id: scenePhase == .active && !appLock.isLocked) {
+                    guard scenePhase == .active, !appLock.isLocked,
+                        !MonMonProcess.isRunningUnitTests
+                    else { return }
+                    await syncCoordinator.runAutomaticSync()
                 }
                 .onChange(of: appLock.isLocked) { _, locked in
                     if locked {
@@ -189,20 +193,6 @@ struct MonMonApp: App {
                     } else {
                         syncCoordinator.connectIfPaired()
                     }
-                }
-                // Closing the sheet ends the session it held open. The link
-                // itself belongs to the app, so it comes straight back.
-                .onChange(of: syncCoordinator.isPresented) { _, presented in
-                    guard !presented else { return }
-                    syncCoordinator.connectIfPaired()
-                }
-                // The other device started a comparison. Its owner is this
-                // owner, seconds ago, on their other screen — so bring the
-                // review up rather than letting it sit unseen while they carry
-                // on editing the data it snapshotted.
-                .onChange(of: syncCoordinator.phase) { _, phase in
-                    guard phase == .receiving, !appLock.isLocked else { return }
-                    syncCoordinator.isPresented = true
                 }
                 #if os(macOS)
                     .environment(mcpAccessManager)

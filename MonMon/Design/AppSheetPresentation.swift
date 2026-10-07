@@ -15,6 +15,7 @@ extension View {
         sheet(isPresented: isPresented, onDismiss: onDismiss) {
             content()
                 .presentationContentInteraction(AppSheetPresentation.contentInteraction)
+                .modifier(SyncEditingSheet())
         }
     }
 
@@ -26,6 +27,19 @@ extension View {
         sheet(item: item, onDismiss: onDismiss) { item in
             content(item)
                 .presentationContentInteraction(AppSheetPresentation.contentInteraction)
+                .modifier(SyncEditingSheet())
         }
+    }
+}
+
+/// Keep draft forms alive while automatic sync is waiting to refresh model-backed views.
+private struct SyncEditingSheet: ViewModifier {
+    @Environment(SyncCoordinator.self) private var sync: SyncCoordinator?
+    @State private var token = UUID()
+
+    func body(content: Content) -> some View {
+        content
+            .onAppear { sync?.setEditing(true, token: token) }
+            .onDisappear { sync?.setEditing(false, token: token) }
     }
 }

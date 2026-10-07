@@ -1,4 +1,5 @@
 import Foundation
+import Network
 import Observation
 import SwiftData
 
@@ -7,7 +8,7 @@ import SwiftData
 #endif
 
 struct SyncHello: Codable, Sendable {
-    var version = 3
+    var version = 4
     var flavour = MonMonBackupFlavour.current
     var pairID: UUID
     var deviceID: UUID
@@ -22,7 +23,7 @@ struct SyncHello: Codable, Sendable {
 struct SyncMessage: Codable, Sendable {
     enum Kind: String, Codable {
         case hello, request, snapshot, prepare, prepared, commit, committed, complete, finished,
-            cancel, failure
+            cancel, failure, changed, unchanged
     }
     var kind: Kind
     var id: UUID?
@@ -31,6 +32,7 @@ struct SyncMessage: Codable, Sendable {
     var expectedDigest: String?
     var otherDigest: String?
     var choices: [String: Int]?
+    var automatic: Bool?
 }
 
 @MainActor
@@ -58,6 +60,8 @@ final class SyncCoordinator {
     private(set) var reports: [SyncReport] = []
     private(set) var plan: SyncMergePlan?
     var choices: [String: Int] = [:]
+    private(set) var pendingChangeCount = 0
+    private(set) var lastCheckedAt: Date?
     private(set) var contentRevision = 0
     private(set) var writesLocked = false
     private(set) var hasPending = false
@@ -76,6 +80,20 @@ final class SyncCoordinator {
     @ObservationIgnored private var remoteSnapshot: SyncSnapshot?
     @ObservationIgnored private var proposedSession: SyncSession?
     @ObservationIgnored private var stageTimeout: Task<Void, Never>?
+    @ObservationIgnored private var automaticSession = false
+    @ObservationIgnored private var awaitingUnchanged = false
+    @ObservationIgnored private var comparedDigest: String?
+    @ObservationIgnored private var remoteChanged = false
+    @ObservationIgnored private var retryAutomatically = true
+    @ObservationIgnored private var nextRetryAt = Date.distantPast
+    @ObservationIgnored private var retryDelay: TimeInterval = 3
+    private var editingSheets: Set<UUID> = []
+    var isEditing: Bool { !editingSheets.isEmpty || store.container.mainContext.hasChanges }
+
+    func setEditing(_ editing: Bool, token: UUID) {
+        if editing { editingSheets.insert(token) } else { editingSheets.remove(token) }
+    }
+
     @ObservationIgnored var onApplied: (() -> Void)?
     @ObservationIgnored var mayConnect: () -> Bool = { true }
 
@@ -108,7 +126,9 @@ final class SyncCoordinator {
             peerName = state.peerName
             reports = state.reports
             hasPending = state.pending != nil
-            setLocked(state.pending != nil && state.pending?.applied == false)
+            setLocked(
+                state.pending != nil && state.pending?.applied == false
+                    && state.pending?.localAtPreparation == nil)
         } catch {
             setLocked(true)
             errorMessage = error.localizedDescription
@@ -159,8 +179,46 @@ final class SyncCoordinator {
         return deviceID == pair.hostID
     }
 
-    /// Opening this screen on a paired device is the intent to sync. Pairing
-    /// was the consent; going on the air again needs no second tap.
+    /// The app owns this loop, not the sync sheet. Only the host starts comparisons.
+    /// Polling also detects changes made by App Intents and the separate MCP process.
+    func runAutomaticSync() async {
+        while !Task.isCancelled {
+            automaticSyncTick()
+            do { try await Task.sleep(for: .seconds(3)) } catch { return }
+        }
+    }
+
+    func automaticSyncTick(now: Date = .now) {
+        guard isPaired, mayConnect() else { return }
+        perform {
+            let snapshot = try store.snapshot()
+            let baseline = try store.state().baseline
+            pendingChangeCount = Self.changeCount(from: baseline, to: snapshot)
+            guard !isEditing else { return }
+            if phase == .idle || phase == .interrupted {
+                if retryAutomatically && now >= nextRetryAt { connectIfPaired() }
+                return
+            }
+            guard canStart else { return }
+            let digest = try snapshot.digest()
+            if isHost {
+                if comparedDigest == nil || digest != comparedDigest || remoteChanged {
+                    startSync(automatically: true)
+                }
+            } else if digest != comparedDigest {
+                try send(SyncMessage(kind: .changed))
+                comparedDigest = digest
+            }
+        }
+    }
+
+    private static func changeCount(from baseline: SyncSnapshot?, to snapshot: SyncSnapshot) -> Int
+    {
+        let before = Dictionary(grouping: baseline?.records ?? [], by: \.id)
+        let after = Dictionary(grouping: snapshot.records, by: \.id)
+        return Set(before.keys).union(after.keys).filter { before[$0] != after[$0] }.count
+    }
+
     func connectIfPaired() {
         guard isPaired, phase == .idle || phase == .interrupted, mayConnect() else { return }
         connect()
@@ -177,6 +235,10 @@ final class SyncCoordinator {
                 pairingCode = try pairing.code()
             }
             peer = nil
+            comparedDigest = nil
+            remoteChanged = false
+            awaitingUnchanged = false
+            retryAutomatically = true
             requestID = nil
             plan = nil
             proposedSession = nil
@@ -228,9 +290,13 @@ final class SyncCoordinator {
         onApplied?()
     }
 
-    func startSync() {
+    func startSync(automatically: Bool = false) {
         perform {
             guard canStart else { throw SyncError.sessionPending }
+            guard !isEditing else { return }
+            automaticSession = automatically
+            remoteChanged = false
+            awaitingUnchanged = false
             try SyncWriteGate.save(store.container.mainContext)
             localSnapshot = try store.snapshot()
             remoteSnapshot = nil
@@ -240,7 +306,11 @@ final class SyncCoordinator {
             initiator = true
             requestID = UUID()
             phase = .comparing
-            try send(SyncMessage(kind: .request, id: requestID, snapshot: localSnapshot))
+            comparedDigest = try localSnapshot?.digest()
+            try send(
+                SyncMessage(
+                    kind: .request, id: requestID, snapshot: localSnapshot,
+                    automatic: automatically))
             armTimeout()
         }
     }
@@ -262,6 +332,7 @@ final class SyncCoordinator {
 
     func apply() {
         perform {
+            guard !isEditing else { return }
             guard canApply, let plan, let id = requestID, let localSnapshot, let remoteSnapshot
             else { throw SyncError.unresolvedConflicts }
             if let proposedSession {
@@ -288,7 +359,7 @@ final class SyncCoordinator {
                 SyncMessage(
                     kind: .prepare, id: id, snapshot: target, expectedDigest: otherDigest,
                     otherDigest: ownDigest, choices: choices))
-            stageTimeout?.cancel()  // The other device is waiting on a person.
+            armTimeout()  // The peer applies the validated proposal without another approval.
         }
     }
 
@@ -328,10 +399,24 @@ final class SyncCoordinator {
             }
             guard peer != nil else { throw SyncError.notPaired }
             switch message.kind {
+            case .changed:
+                guard isHost else { throw SyncError.invalidData }
+                remoteChanged = true
+            case .unchanged:
+                guard !initiator, message.id == requestID, let localSnapshot,
+                    let remoteSnapshot, !isEditing,
+                    try localSnapshot.digest() == remoteSnapshot.digest(),
+                    try store.snapshot().digest() == localSnapshot.digest(),
+                    try store.state().baseline?.digest() == localSnapshot.digest()
+                else { throw SyncError.stalePreview }
+                try send(SyncMessage(kind: .finished, id: requestID))
+                finished()
             case .request:
                 guard canStart, let id = message.id, let snapshot = message.snapshot else {
                     throw SyncError.sessionPending
                 }
+                guard !isEditing else { throw SyncError.stalePreview }
+                automaticSession = message.automatic == true
                 try checkSize(snapshot)
                 remoteSnapshot = snapshot
                 proposedSession = nil
@@ -339,6 +424,7 @@ final class SyncCoordinator {
                 requestID = id
                 initiator = false
                 localSnapshot = try store.snapshot()
+                comparedDigest = try localSnapshot?.digest()
                 phase = .receiving
                 try send(SyncMessage(kind: .snapshot, id: id, snapshot: localSnapshot))
                 stageTimeout?.cancel()  // Human review is not a network timeout.
@@ -352,19 +438,33 @@ final class SyncCoordinator {
                 let baseline = state.commonBaselineValid ? state.baseline : nil
                 plan = try SyncMergePlanner.plan(
                     base: baseline, local: localSnapshot, remote: snapshot)
-                // The Mac creates the pairing as host; the iPhone joins it.
-                // Resolve provenance relative to the initiator, not its display name.
-                guard let pair else { throw SyncError.notPaired }
-                let phoneOrigin = state.deviceID == pair.hostID ? "Other device" : "This device"
-                choices = plan?.preferredChoices(origin: phoneOrigin) ?? [:]
+                guard !isEditing else { throw SyncError.stalePreview }
+                choices = [:]
                 phase = .review
                 stageTimeout?.cancel()
                 updatePreview()
+                if automaticSession, let plan, plan.conflicts.isEmpty {
+                    let target = try plan.finalized([:])
+                    let digest = try target.digest()
+                    if try localSnapshot.digest() == digest,
+                        try snapshot.digest() == digest, try baseline?.digest() == digest
+                    {
+                        awaitingUnchanged = true
+                        phase = .comparing
+                        try send(SyncMessage(kind: .unchanged, id: requestID))
+                        armTimeout()
+                    } else {
+                        apply()
+                    }
+                } else if automaticSession {
+                    isPresented = true
+                }
             case .prepare:
                 guard !initiator, phase == .receiving, message.id == requestID,
                     let target = message.snapshot, let expected = message.expectedDigest,
                     let other = message.otherDigest, let id = message.id
                 else { throw SyncError.invalidData }
+                guard !isEditing else { throw SyncError.stalePreview }
                 try checkSize(target)
                 guard let localSnapshot, let remoteSnapshot,
                     expected == (try localSnapshot.digest()),
@@ -390,15 +490,11 @@ final class SyncCoordinator {
                     sourceRecords: localSnapshot.records + remoteSnapshot.records)
                 choices = [:]
                 phase = .review
-                isPresented = true
                 stageTimeout?.cancel()
                 updatePreview()
-                // One approval, both devices. The owner chose this exact result
-                // on the other device, and every check above re-derived it here
-                // from this device's own data: the merge was recomputed, both
-                // digests matched, deletions were validated, and the live store
-                // still equals the snapshot that was compared. A second tap
-                // would only ask the same person the same question.
+                // Pairing authorizes conflict-free automatic merges. Conflicts
+                // require the initiator's explicit choices. In both cases this
+                // peer independently validates the exact proposed result.
                 apply()
             case .prepared:
                 guard initiator, let id = message.id, id == requestID else {
@@ -432,9 +528,13 @@ final class SyncCoordinator {
                 try send(SyncMessage(kind: .finished, id: id))
                 finished()
             case .finished:
-                guard let id = message.id,
-                    try store.state().reports.contains(where: { $0.id == id })
-                else { throw SyncError.invalidData }
+                guard let id = message.id else { throw SyncError.invalidData }
+                if awaitingUnchanged {
+                    guard id == requestID, initiator else { throw SyncError.invalidData }
+                } else {
+                    guard try store.state().reports.contains(where: { $0.id == id })
+                    else { throw SyncError.invalidData }
+                }
                 finished()
             case .cancel:
                 guard let id = message.id else { throw SyncError.invalidData }
@@ -455,7 +555,7 @@ final class SyncCoordinator {
     }
 
     private func acceptHello(_ hello: SyncHello) throws {
-        guard let pair, hello.version == 3, hello.flavour == .current,
+        guard let pair, hello.version == 4, hello.flavour == .current,
             hello.pairID == pair.pairID, hello.name.count <= 256
         else { throw SyncError.incompatiblePeer }
         let state = try store.state()
@@ -522,6 +622,7 @@ final class SyncCoordinator {
     }
 
     private func commit(_ id: UUID) throws {
+        guard !isEditing else { throw SyncError.stalePreview }
         setLocked(true)
         try store.commit(id)
         contentRevision += 1
@@ -533,6 +634,13 @@ final class SyncCoordinator {
     private func finished() {
         stageTimeout?.cancel()
         refresh()
+        comparedDigest = try? store.state().baseline?.digest()
+        lastCheckedAt = .now
+        if let snapshot = try? store.snapshot() {
+            pendingChangeCount = Self.changeCount(from: try? store.state().baseline, to: snapshot)
+        }
+        awaitingUnchanged = false
+        retryDelay = 3
         phase = .complete
         errorMessage = nil
         plan = nil
@@ -629,6 +737,12 @@ final class SyncCoordinator {
         resetReview()
         refresh()
         phase = .interrupted
+        // Invalid data and incompatible versions need attention, not an endless retry loop.
+        retryAutomatically =
+            error as? SyncError == .disconnected
+            || error as? SyncError == .stalePreview || error is Network.NWError
+        nextRetryAt = .now.addingTimeInterval(retryDelay)
+        retryDelay = min(retryDelay * 2, 30)
     }
 
     static var deviceName: String {
