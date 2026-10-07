@@ -43,7 +43,7 @@ enum RootTab: String, CaseIterable, Identifiable {
 
 struct RootTabView: View {
     @Environment(AppRoute.self) private var appRoute
-    @State private var selection: RootTab = .spending
+    @SceneStorage("selectedRootTab") private var selection: RootTab = .spending
 
     #if os(macOS)
         @Namespace private var pill
@@ -222,6 +222,19 @@ private struct RootScreenHeader: ViewModifier {
         content
             .compactRootNavigationTitle("")
             .toolbar {
+                if syncCoordinator.isPaired {
+                    ToolbarItem(placement: .automatic) {
+                        Button {
+                            syncCoordinator.isPresented = true
+                        } label: {
+                            Image(systemName: syncSymbol)
+                        }
+                        .accessibilityLabel(
+                            Text(LocalizedStringKey(syncCoordinator.phase.rawValue))
+                        )
+                        .accessibilityIdentifier("open-sync-status")
+                    }
+                }
                 if #available(iOS 26.0, macOS 26.0, *) {
                     headerItem
                         .sharedBackgroundVisibility(.hidden)
@@ -244,6 +257,15 @@ private struct RootScreenHeader: ViewModifier {
                     isShowingSettings = false
                 }
             }
+    }
+
+    private var syncSymbol: String {
+        if syncCoordinator.phase == .review { return "exclamationmark.arrow.triangle.2.circlepath" }
+        if syncCoordinator.hasPending || syncCoordinator.errorMessage != nil {
+            return "exclamationmark.triangle"
+        }
+        if syncCoordinator.pendingChangeCount > 0 { return "arrow.triangle.2.circlepath" }
+        return syncCoordinator.phase == .complete ? "checkmark.circle" : "laptopcomputer.and.iphone"
     }
 
     private var headerItem: some ToolbarContent {

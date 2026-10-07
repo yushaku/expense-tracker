@@ -71,6 +71,191 @@ struct SyncCoordinatorTests {
         try drain(ta, tb)
     }
 
+    @Test("Automatic sync converges without opening review, and an unchanged retry writes nothing")
+    func automaticSync() throws {
+        let a = try store(), b = try store()
+        let pair = try SyncPairing.make(hostID: a.state().deviceID)
+        try a.updateState { $0.pairID = pair.pairID }
+        try b.updateState { $0.pairID = pair.pairID }
+        let ta = TestSyncTransport(), tb = TestSyncTransport()
+        let ca = SyncCoordinator(store: a, transport: ta, loadPairing: { _ in pair })
+        let cb = SyncCoordinator(store: b, transport: tb, loadPairing: { _ in pair })
+        let account = CashAccount(
+            id: UUID(), name: "Personal", kind: .normal, openingBalance: 100,
+            currencyCode: "VND", createdAt: .now)
+        a.container.mainContext.insert(account)
+        try a.container.mainContext.save()
+        try connect(ca, cb, ta, tb)
+        ca.automaticSyncTick()
+        try drain(ta, tb)
+        #expect(ca.phase == .complete && cb.phase == .complete)
+        #expect(!ca.isPresented && !cb.isPresented)
+        #expect(try a.snapshot().digest() == b.snapshot().digest())
+        #expect(try b.container.mainContext.fetchCount(FetchDescriptor<CashAccount>()) == 2)
+        let reports = try a.state().reports.count
+        try connect(ca, cb, ta, tb)
+        ca.automaticSyncTick()
+        try drain(ta, tb)
+        #expect(ca.phase == .complete && cb.phase == .complete)
+        #expect(try a.state().reports.count == reports)
+        #expect(try b.state().reports.count == reports)
+        ca.disconnect()
+        cb.disconnect()
+    }
+
+    @Test("Automatic sync asks for conflicts without selecting either device")
+    func automaticConflicts() throws {
+        let a = try store(), b = try store()
+        let pair = try SyncPairing.make(hostID: a.state().deviceID)
+        try a.updateState { $0.pairID = pair.pairID }
+        try b.updateState { $0.pairID = pair.pairID }
+        let account = try #require(
+            a.container.mainContext.fetch(FetchDescriptor<CashAccount>()).first)
+        account.name = "Mac edit"
+        try a.container.mainContext.save()
+        let ta = TestSyncTransport(), tb = TestSyncTransport()
+        let ca = SyncCoordinator(store: a, transport: ta, loadPairing: { _ in pair })
+        let cb = SyncCoordinator(store: b, transport: tb, loadPairing: { _ in pair })
+        try connect(ca, cb, ta, tb)
+        ca.automaticSyncTick()
+        try drain(ta, tb)
+        #expect(ca.phase == .review)
+        #expect(ca.isPresented)
+        #expect(ca.choices.isEmpty)
+        #expect(!ca.canApply)
+        #expect(!ca.writesLocked && !cb.writesLocked)
+        #expect(try a.state().pending == nil && b.state().pending == nil)
+        ca.disconnect()
+        cb.disconnect()
+    }
+
+    @Test(
+        "Edits made on iPhone sync while connected, and repeated delivery does not duplicate transactions"
+    )
+    func automaticPhoneEdits() throws {
+        let a = try store(), b = try store()
+        let pair = try SyncPairing.make(hostID: a.state().deviceID)
+        try a.updateState { $0.pairID = pair.pairID }
+        try b.updateState { $0.pairID = pair.pairID }
+        let ta = TestSyncTransport(), tb = TestSyncTransport()
+        let ca = SyncCoordinator(store: a, transport: ta, loadPairing: { _ in pair })
+        let cb = SyncCoordinator(store: b, transport: tb, loadPairing: { _ in pair })
+        try connect(ca, cb, ta, tb)
+        ca.automaticSyncTick()
+        try drain(ta, tb)
+        let transaction = MoneyTransaction(
+            id: UUID(), kind: .expense, amount: 45000, occurredAt: .now,
+            note: "Coffee", accountID: AccountSeed.unassignedID, categoryID: nil,
+            sourceRuleID: nil, currencyCode: "VND", createdAt: .now)
+        b.container.mainContext.insert(transaction)
+        try SyncWriteGate.save(b.container.mainContext)
+        cb.automaticSyncTick()
+        #expect(cb.pendingChangeCount == 1)
+        try drain(ta, tb)
+        ca.automaticSyncTick()
+        try drain(ta, tb)
+        #expect(ca.phase == .complete && cb.phase == .complete)
+        for _ in 0..<3 {
+            try connect(ca, cb, ta, tb)
+            ca.automaticSyncTick()
+            try drain(ta, tb)
+        }
+        let transactions = try a.container.mainContext.fetch(FetchDescriptor<MoneyTransaction>())
+        #expect(transactions.map(\.id) == [transaction.id])
+        #expect(transactions.first?.amount == 45000)
+        #expect(try a.snapshot().digest() == b.snapshot().digest())
+        ca.disconnect()
+        cb.disconnect()
+    }
+
+    @Test("Automatic sync waits for a draft and reconnects after a transient failure")
+    func automaticWaitsForEditing() throws {
+        let a = try store(), b = try store()
+        let pair = try SyncPairing.make(hostID: a.state().deviceID)
+        try a.updateState { $0.pairID = pair.pairID }
+        try b.updateState { $0.pairID = pair.pairID }
+        let ta = TestSyncTransport(), tb = TestSyncTransport()
+        let ca = SyncCoordinator(store: a, transport: ta, loadPairing: { _ in pair })
+        let cb = SyncCoordinator(store: b, transport: tb, loadPairing: { _ in pair })
+        try connect(ca, cb, ta, tb)
+        let token = UUID()
+        ca.setEditing(true, token: token)
+        ca.automaticSyncTick()
+        try drain(ta, tb)
+        #expect(ca.phase == .connected)
+        ca.setEditing(false, token: token)
+        let account = try #require(
+            a.container.mainContext.fetch(FetchDescriptor<CashAccount>()).first)
+        account.name = "Unsaved form edit"
+        ca.automaticSyncTick()
+        #expect(ca.phase == .connected)
+        #expect(account.name == "Unsaved form edit")
+        #expect(a.container.mainContext.hasChanges)
+        a.container.mainContext.rollback()
+        cb.setEditing(true, token: token)
+        ca.automaticSyncTick()
+        try drain(ta, tb)
+        #expect(try a.state().pending == nil && b.state().pending == nil)
+        #expect(!ca.writesLocked && !cb.writesLocked)
+        cb.setEditing(false, token: token)
+        ta.onError?(SyncError.disconnected)
+        tb.onError?(SyncError.disconnected)
+        ca.automaticSyncTick(now: .distantFuture)
+        cb.automaticSyncTick(now: .distantFuture)
+        #expect(ta.started && tb.started)
+        ta.onConnected?()
+        tb.onConnected?()
+        try drain(ta, tb)
+        ca.automaticSyncTick()
+        try drain(ta, tb)
+        #expect(ca.phase == .complete && cb.phase == .complete)
+        ca.disconnect()
+        cb.disconnect()
+        ca.mayConnect = { false }
+        ca.automaticSyncTick(now: .distantFuture)
+        #expect(!ta.started)
+    }
+
+    @Test("Interrupted automatic preparation allows new edits and recovers them on both devices")
+    func automaticRecoveryKeepsEdits() throws {
+        let a = try store(), b = try store()
+        let pair = try SyncPairing.make(hostID: a.state().deviceID)
+        try a.updateState { $0.pairID = pair.pairID }
+        try b.updateState { $0.pairID = pair.pairID }
+        let ta = TestSyncTransport(), tb = TestSyncTransport()
+        let ca = SyncCoordinator(store: a, transport: ta, loadPairing: { _ in pair })
+        let cb = SyncCoordinator(store: b, transport: tb, loadPairing: { _ in pair })
+        try connect(ca, cb, ta, tb)
+        ca.automaticSyncTick()
+        try drain(ta, tb, drop: .commit)
+        ca.disconnect()
+        cb.disconnect()
+        #expect(try b.state().pending?.applied == false)
+        #expect(!cb.writesLocked)
+        let transaction = MoneyTransaction(
+            id: UUID(), kind: .expense, amount: 45000, occurredAt: .now,
+            note: "While disconnected", accountID: AccountSeed.unassignedID,
+            categoryID: nil, sourceRuleID: nil, currencyCode: "VND", createdAt: .now)
+        b.container.mainContext.insert(transaction)
+        try SyncWriteGate.save(b.container.mainContext)
+        let ra = SyncCoordinator(store: a, transport: ta, loadPairing: { _ in pair })
+        let rb = SyncCoordinator(store: b, transport: tb, loadPairing: { _ in pair })
+        #expect(!rb.writesLocked)
+        try connect(ra, rb, ta, tb)
+        #expect(rb.pendingChangeCount == 1)
+        rb.automaticSyncTick()
+        try drain(ta, tb)
+        ra.automaticSyncTick()
+        try drain(ta, tb)
+        #expect(try a.snapshot().digest() == b.snapshot().digest())
+        #expect(
+            try a.container.mainContext.fetch(FetchDescriptor<MoneyTransaction>()).map(\.id)
+                == [transaction.id])
+        #expect(!ra.hasPending && !rb.hasPending)
+        ra.disconnect()
+        rb.disconnect()
+    }
+
     @Test("A failed Keychain write does not install pairing or show a QR code")
     func pairingStorageFailure() throws {
         let local = try store()
@@ -202,9 +387,9 @@ struct SyncCoordinatorTests {
     }
 
     @Test(
-        "Conflicts prefer iPhone regardless of the initiator and remain editable",
+        "Conflicts require an explicit choice regardless of the initiator",
         arguments: [false, true])
-    func prefersPhoneVersion(phoneInitiates: Bool) throws {
+    func requiresConflictChoice(phoneInitiates: Bool) throws {
         let a = try store(), b = try store()
         let pair = try SyncPairing.make(hostID: a.state().deviceID)
         try a.updateState { $0.pairID = pair.pairID }
@@ -226,9 +411,8 @@ struct SyncCoordinatorTests {
         initiator.startSync()
         try drain(ta, tb)
         let conflict = try #require(initiator.plan?.conflicts.first)
-        let preferred = try #require(initiator.choices[conflict.id])
-        #expect(conflict.options[preferred]?.fields["name"] == .string("iPhone version"))
-        #expect(initiator.canApply)
+        #expect(initiator.choices.isEmpty)
+        #expect(!initiator.canApply)
         #expect(try a.state().pending == nil && b.state().pending == nil)
         let macIndex = try #require(
             conflict.options.firstIndex { $0?.fields["name"] == .string("Mac version") })
@@ -271,7 +455,7 @@ struct SyncCoordinatorTests {
         #expect(initiator.phase == .interrupted)
         #expect(initiator.plan == nil)
         #expect(responder.plan == nil)
-        #expect(initiator.hasPending && initiator.writesLocked)
+        #expect(initiator.hasPending && !initiator.writesLocked)
         #expect(try initiatorStore.state().pending?.id == pendingID)
         #expect(try initiatorStore.state().pending?.applied == false)
         #expect(try initiatorStore.snapshot().digest() == before)

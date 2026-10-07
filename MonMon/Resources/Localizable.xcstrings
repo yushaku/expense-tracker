@@ -1,6 +1,76 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Changes waiting to sync": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Có thay đổi đang chờ đồng bộ"
+          }
+        }
+      }
+    },
+    "Choose which version to keep for each conflict. Neither device is selected automatically.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn phiên bản cần giữ cho từng xung đột. Không thiết bị nào được chọn sẵn."
+          }
+        }
+      }
+    },
+    "Keep MonMon open and unlocked on both devices on the same Wi-Fi. Changes sync automatically; only conflicts need your review.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giữ MonMon mở và đã mở khóa trên cả hai thiết bị cùng Wi-Fi. Dữ liệu tự đồng bộ; chỉ xung đột mới cần bạn kiểm tra."
+          }
+        }
+      }
+    },
+    "A sync is unfinished. MonMon will reconnect automatically while both apps are open. Saved data will not be applied twice.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Một phiên đồng bộ chưa hoàn tất. MonMon sẽ tự kết nối lại khi cả hai app đang mở. Dữ liệu đã lưu sẽ không bị ghi lặp."
+          }
+        }
+      }
+    },
+    "Changes sync automatically with your paired device on the same Wi-Fi. Only conflicts need your review.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dữ liệu tự đồng bộ với thiết bị đã ghép cặp trên cùng Wi-Fi. Chỉ xung đột mới cần bạn kiểm tra."
+          }
+        }
+      }
+    },
+    "Last synced: %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đồng bộ gần nhất: %@"
+          }
+        }
+      }
+    },
+    "%lld local changes waiting to sync": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld thay đổi trên thiết bị đang chờ đồng bộ"
+          }
+        }
+      }
+    },
     "Ready-made bank shortcut": {
       "localizations": {
         "vi": {

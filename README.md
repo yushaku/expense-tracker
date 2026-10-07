@@ -66,7 +66,7 @@ MonMon is a private personal-finance app for iPhone and Mac, built with SwiftUI 
 
 ### Data, sync, and privacy
 
-- **Local first** — data stays on your devices. Optional, manually initiated P2P sync connects one iPhone–Mac pair on the same local network. No account, cloud storage, or relay server.
+- **Local first** — data stays on your devices. Optional P2P sync automatically keeps one paired iPhone and Mac in sync while both apps are open and unlocked on the same local network. No account, cloud storage, or relay server.
 - **Optional read-only AI access on Mac** — an embedded local MCP helper exposes committed records directly from the local store, even while the app is closed to Codex or Claude Desktop after explicit consent. Financial tools cannot write data. A research notebook shared through Device Sync lets the Mac agent create sourced notes and investment drafts with additional consent; the owner reviews and records decisions without executing trades.
 - **Backup and restore** — a validated document covering every model, including jars, goals, and trips, with a confirmation step before a restore replaces what is on the device.
 - **App lock** — Face ID or Touch ID with device-passcode fallback, re-locking after time in the background.
@@ -298,22 +298,32 @@ Open **Settings → Device Sync** on both devices. On Mac, choose **Pair an iPho
 on iPhone, scan that QR code. Keep the pairing code private: it authorizes access
 to this pair's financial data. Camera access is only needed for scanning; a manual
 code entry is available. After pairing, a device connects by itself whenever the
-app is open, unlocked, and on the same Wi-Fi as its pair, and opening **Device
-Sync** on either one opens the review. Local Network permission is required;
+app is open, unlocked, and on the same Wi-Fi as its pair. Local Network permission is required;
 guest-network isolation and firewalls can prevent discovery.
 
-Every sync shows a preview. The reviewing device chooses between conflicting
-records and confirms **Apply to both devices**, which is the only approval needed:
-the receiving device re-derives the same merge from its own data, checks both
-digests and the deletions, and commits only if its store still matches the
-snapshot that was compared. While the other device is reviewing, the receiving
-device can still cancel the session. Initial sync unions existing data;
-a starter category/account/jar missing on one device requires an explicit keep or
-remove decision. Hand-entered transactions with different IDs remain separate,
-even when their date and amount match. Recurring occurrences and imported records
-use their existing domain identities. A deletion cannot strand a retained record
-that needs the deleted item: retain the referenced item or change the choices.
-Existing optional provenance, such as a deleted recurring rule, is preserved.
+After pairing, changes sync automatically without opening Device Sync or pressing
+Apply. The Mac coordinates comparisons; either device can request **Sync now**.
+The app checks for saved changes every three seconds while active, including
+changes made by App Intents and the Mac research helper. Only changed data prompts
+a comparison; reconnecting with identical data does not create another backup or
+history entry. A toolbar indicator opens the status, last successful sync time,
+local change count, and history. Both devices need sync protocol version 4.
+
+Only conflicting records need review. Neither device is selected by default;
+choose the versions to keep and confirm **Apply to both devices** once. The peer
+re-derives the merge, validates digests and deletions, and rejects a stale preview.
+Dismissing Device Sync leaves the connection running. Open sheets and unsaved
+model edits defer sync so a data refresh cannot discard an editor's draft.
+Transient failures reconnect with a delay increasing from 3 to 30 seconds;
+invalid data and incompatible versions require attention instead of endless retries.
+
+Initial sync unions existing data; a starter category/account/jar missing on one
+device requires an explicit keep or remove decision. Hand-entered transactions
+with different IDs remain separate, even when their date and amount match.
+Recurring occurrences and imported records use their existing domain identities.
+A deletion cannot strand a retained record that needs the deleted item: retain
+the referenced item or change the choices. Existing optional provenance, such as
+a deleted recurring rule, is preserved.
 
 Financial records sync; pending captures and preferences stay local. Local draft,
 default-account/category, import mapping, and Quick Expense references follow
@@ -321,10 +331,13 @@ merged IDs or become unselected if their target was deleted. Theme, language,
 app lock, notification choices, and MCP authorization never come from the peer.
 
 No background or remote-Internet sync is attempted. Leaving the app or locking it
-interrupts the connection. Reconnect to finish an interrupted session. The status
-is complete only after both stores have saved the reviewed result. An uncommitted
-prepared store stays read-only until recovery; an already committed store can keep
-new edits, which participate in the next sync rather than being overwritten on retry.
+interrupts the connection; returning to the app reconnects automatically. The
+status is complete only after both stores acknowledge the session. New prepared
+sessions preserve their original local snapshot, so an interrupted session does
+not block ordinary editing. Recovery replays later local field edits over the
+agreed result and sends them in the next sync; it does not overwrite them on retry.
+Legacy pending sessions without that snapshot remain read-only until recovered.
+Backup restore, reset, and unpairing still require the pending session to finish.
 A prepared session with no preparation on its peer is safely abandoned on reconnect.
 
 The most recent 20 completed sessions show per-device change counts. A recovery
@@ -350,7 +363,7 @@ Data and local apply receipts commit in one SwiftData save; reconnect retries us
 receipts, not a repeated restore. This is resumable synchronization, not a distributed
 atomic transaction: one store can temporarily be ahead of the other.
 
-No financial changes are committed while the receiving device is still reviewing.
+Conflicting financial changes are not committed until the reviewing device approves them.
 Transfers imported from complementary statement sides without a common provenance
 key remain separate; equal amounts and dates alone do not prove identity.
 

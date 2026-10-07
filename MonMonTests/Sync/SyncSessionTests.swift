@@ -98,8 +98,8 @@ struct SyncSessionTests {
         #expect(try mac.state().reports.first?.added == 1)
     }
 
-    @Test("An agent write after preview prevents committing stale research")
-    func staleResearchPreview() throws {
+    @Test("An agent write after preparation is retained when the session commits")
+    func retainsResearchAfterPreparation() throws {
         let store = try store()
         let before = try store.snapshot()
         let session = SyncSession(
@@ -108,9 +108,9 @@ struct SyncSessionTests {
         try store.prepare(session)
         let notebook = try researchFixture()
         try store.notebookStore().update { $0 = notebook }
-        #expect(throws: SyncError.stalePreview) { try store.commit(session.id) }
+        try store.commit(session.id)
         #expect(try store.notebookStore().load() == notebook)
-        #expect(try store.state().pending?.applied == false)
+        #expect(try store.state().pending?.applied == true)
     }
 
     @Test("Recovery finishes notebook writing after the financial receipt, preserving newer data")
@@ -211,6 +211,51 @@ struct SyncSessionTests {
         try store.container.mainContext.save()
         #expect(throws: SyncError.stalePreview) { try store.prepare(session) }
         #expect(try store.state().pending == nil)
+    }
+
+    @Test("Recovery replays later local fields without losing independent incoming fields")
+    func replayLaterFields() throws {
+        let store = try store()
+        let original = try store.snapshot()
+        var target = original
+        let index = try #require(target.records.firstIndex { $0.type == "accounts" })
+        target.records[index].fields["openingBalance"] = .string("200")
+        let session = SyncSession(
+            id: UUID(), target: target, expectedLocalDigest: try original.digest(), applied: false)
+        try store.prepare(session)
+        let account = try #require(
+            store.container.mainContext.fetch(FetchDescriptor<CashAccount>()).first)
+        account.name = "Later local name"
+        try SyncWriteGate.save(store.container.mainContext)
+        try store.commit(session.id)
+        let result = try #require(store.snapshot().records.first { $0.type == "accounts" })
+        #expect(result.fields["name"] == .string("Later local name"))
+        #expect(result.fields["openingBalance"] == .string("200"))
+        #expect(try store.state().baseline == target)
+        try store.commit(session.id)
+        #expect(try store.snapshot().records.first { $0.type == "accounts" } == result)
+    }
+
+    @Test("Pending sessions from older versions keep their write lock and reject stale data")
+    func legacyPendingLock() throws {
+        let store = try store()
+        let before = try store.snapshot()
+        let session = SyncSession(
+            id: UUID(), target: before, expectedLocalDigest: try before.digest(), applied: false)
+        // Older metadata decodes with no localAtPreparation; do not guess its old contents.
+        try store.updateState { $0.pending = session }
+        let coordinator = SyncCoordinator(store: store)
+        #expect(coordinator.writesLocked)
+        let account = try #require(
+            store.container.mainContext.fetch(FetchDescriptor<CashAccount>()).first)
+        account.name = "Uncommitted"
+        #expect(throws: SyncError.sessionPending) {
+            try SyncWriteGate.save(store.container.mainContext)
+        }
+        #expect(try store.snapshot().digest() == before.digest())
+        try store.commit(session.id)
+        coordinator.refresh()
+        #expect(!coordinator.writesLocked)
     }
 
     @Test("Local drafts are not part of a sync snapshot")

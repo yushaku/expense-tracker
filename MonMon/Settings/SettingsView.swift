@@ -121,7 +121,7 @@ struct SettingsView: View {
                                 sectionHeader(
                                     "Device Sync", systemImage: "laptopcomputer.and.iphone")
                                 Text(
-                                    "Sync with your paired device over the same Wi-Fi. You review every change."
+                                    "Changes sync automatically with your paired device on the same Wi-Fi. Only conflicts need your review."
                                 )
                                 .font(.subheadline).foregroundStyle(MonMonTheme.textSecondary)
                                 Button(
