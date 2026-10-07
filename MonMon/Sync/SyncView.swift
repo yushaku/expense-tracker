@@ -9,7 +9,6 @@ struct SyncView: View {
     @State private var code = ""
     @State private var showScanner = false
     @State private var confirmUnpair = false
-    @State private var didAutoReview = false
 
     var body: some View {
         @Bindable var sync = sync
@@ -46,7 +45,7 @@ struct SyncView: View {
                         if sync.hasPending {
                             banner(
                                 Text(
-                                    "A sync is unfinished. Reconnect the paired device to finish it. Data already saved will not be applied twice."
+                                    "A sync is unfinished. MonMon will reconnect automatically while both apps are open. Saved data will not be applied twice."
                                 ),
                                 systemImage: "clock.arrow.circlepath",
                                 tint: MonMonTheme.savings
@@ -66,7 +65,6 @@ struct SyncView: View {
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Close", systemImage: "xmark") {
-                        sync.disconnect()
                         dismiss()
                     }
                     .labelStyle(.iconOnly)
@@ -81,14 +79,11 @@ struct SyncView: View {
             .interactiveDismissDisabled(sync.writesLocked)
             .task {
                 sync.connectIfPaired()
-                // The app may have connected long before this screen opened.
-                reactToPhase(sync.phase)
+                sync.automaticSyncTick()
             }
-            .onChange(of: sync.phase) { _, phase in reactToPhase(phase) }
             .onChange(of: sync.choices) { _, _ in sync.updatePreview() }
             .onChange(of: appLock.isLocked) { _, locked in if locked { sync.disconnect() } }
             .onChange(of: scenePhase) { _, phase in if phase == .background { sync.disconnect() } }
-            .onDisappear { sync.disconnect() }
             .confirmationDialog(
                 "Unpair this device?", isPresented: $confirmUnpair, titleVisibility: .visible
             ) {
@@ -121,22 +116,6 @@ struct SyncView: View {
         }
     }
 
-    /// Comparing reads both devices and writes nothing, and every change still
-    /// waits for Apply on both sides. So once two paired devices are on the
-    /// air, the review opens itself rather than asking for the same tap twice.
-    /// The host leads, so the two can never both be the initiator.
-    private func reactToPhase(_ phase: SyncCoordinator.Phase) {
-        if phase == .idle || phase == .interrupted {
-            didAutoReview = false
-            return
-        }
-
-        guard phase == .connected, !didAutoReview, sync.isHost, sync.canStart else { return }
-
-        didAutoReview = true
-        sync.startSync()
-    }
-
     // MARK: - Status
 
     private var statusCard: some View {
@@ -150,7 +129,7 @@ struct SyncView: View {
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(sync.isPaired ? LocalizedStringKey(sync.phase.rawValue) : "Pair your devices")
+                Text(statusTitle)
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(MonMonTheme.textPrimary)
 
@@ -160,6 +139,16 @@ struct SyncView: View {
                         .foregroundStyle(MonMonTheme.textSecondary)
                 }
 
+                if let date = sync.lastCheckedAt ?? sync.reports.first?.completedAt {
+                    Text("Last synced: \(date.formatted(date: .abbreviated, time: .shortened))")
+                        .font(.caption)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                }
+                if sync.pendingChangeCount > 0 {
+                    Text("\(sync.pendingChangeCount) local changes waiting to sync")
+                        .font(.caption)
+                        .foregroundStyle(MonMonTheme.textSecondary)
+                }
                 if let statusHint {
                     Text(statusHint)
                         .font(.subheadline)
@@ -187,6 +176,14 @@ struct SyncView: View {
             .font(.title3.weight(.semibold))
             .foregroundStyle(MonMonTheme.accent)
         }
+    }
+
+    private var statusTitle: LocalizedStringKey {
+        if !sync.isPaired { return "Pair your devices" }
+        if sync.phase == .complete && sync.pendingChangeCount > 0 {
+            return "Changes waiting to sync"
+        }
+        return LocalizedStringKey(sync.phase.rawValue)
     }
 
     private var statusHint: LocalizedStringKey? {
@@ -295,9 +292,11 @@ struct SyncView: View {
                         .background(MonMonTheme.accent.opacity(0.16), in: Capsule())
                     }
 
-                    Text("iPhone versions are selected by default. You can change any selection.")
-                        .font(.subheadline)
-                        .foregroundStyle(MonMonTheme.textSecondary)
+                    Text(
+                        "Choose which version to keep for each conflict. Neither device is selected automatically."
+                    )
+                    .font(.subheadline)
+                    .foregroundStyle(MonMonTheme.textSecondary)
                 }
                 .appCard()
             }
@@ -362,8 +361,8 @@ struct SyncView: View {
                     } else if sync.canStart {
                         Spacer(minLength: 0)
 
-                        Button("Review changes", systemImage: "arrow.triangle.2.circlepath") {
-                            sync.startSync()
+                        Button("Sync now", systemImage: "arrow.triangle.2.circlepath") {
+                            sync.startSync(automatically: true)
                         }
                         .buttonStyle(.prominentAction)
                         .accessibilityIdentifier("sync-start")
@@ -622,7 +621,7 @@ struct SyncView: View {
         disclosure("About device sync", systemImage: "info.circle") {
             VStack(alignment: .leading, spacing: 12) {
                 Text(
-                    "Open MonMon on both devices on the same Wi-Fi. Review changes before applying them to both devices."
+                    "Keep MonMon open and unlocked on both devices on the same Wi-Fi. Changes sync automatically; only conflicts need your review."
                 )
 
                 Text(

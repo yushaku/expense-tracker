@@ -8,6 +8,9 @@ struct SyncSession: Codable, Equatable, Sendable {
     var applied: Bool
     var expectedRemoteDigest: String = ""
     var startedAt: Date = .now
+    // Older pending sessions lack this snapshot and retain their write lock until recovered.
+    var localAtPreparation: SyncSnapshot?
+    var researchAtCommit: ResearchNotebook?
 }
 
 struct SyncReport: Codable, Equatable, Identifiable, Sendable {
@@ -103,7 +106,8 @@ struct SyncSessionStore {
             else { throw SyncError.sessionPending }
             return
         }
-        guard try snapshot().digest() == session.expectedLocalDigest else {
+        let local = try snapshot()
+        guard try local.digest() == session.expectedLocalDigest else {
             throw SyncError.stalePreview
         }
         _ = try session.target.validated()
@@ -136,7 +140,9 @@ struct SyncSessionStore {
                 try data.write(to: recoveryURL, options: .atomic)
             #endif
         } catch { throw SyncError.backupFailed }
-        try updateState { $0.pending = session }
+        var prepared = session
+        prepared.localAtPreparation = local
+        try updateState { $0.pending = prepared }
     }
 
     /// Financial data and its receipt share one save. The notebook is locked across
@@ -148,7 +154,6 @@ struct SyncSessionStore {
             if state.reports.contains(where: { $0.id == sessionID }) { return }
             throw SyncError.sessionPending
         }
-        let targetResearch = try pending.target.researchNotebook()
         var appliedFinancialData = false
         defer {
             if appliedFinancialData {
@@ -159,26 +164,30 @@ struct SyncSessionStore {
             }
         }
         try notebookStore().update { notebook in
-            var merged = notebook
-            try merged.mergeReviewed(targetResearch)
             if pending.applied {
-                notebook = merged
+                try notebook.mergeReviewed(
+                    pending.researchAtCommit ?? pending.target.researchNotebook())
                 return
             }
-            guard try snapshot().digest() == pending.expectedLocalDigest else {
-                throw SyncError.stalePreview
-            }
-            let payload = try pending.target.validated()
+            // A form may have opened while the peer was preparing. Never roll its
+            // unsaved context back; recover after the form has saved or closed.
+            guard !container.mainContext.hasChanges else { throw SyncError.stalePreview }
+            let current = try snapshot()
+            let result = try preservingLaterEdits(in: current, session: pending)
+            var merged = notebook
+            try merged.mergeReviewed(result.researchNotebook())
+            let payload = try result.validated()
             let context = ModelContext(container)
             context.autosaveEnabled = false
             do {
                 try MonMonBackupService(container: container).apply(
                     payload, in: context, includeDeviceData: false)
-                try remapLocalDrafts(pending.target, in: context)
+                try remapLocalDrafts(result, in: context)
                 for type in ["categories", "budgetJars", "defaultBank", "migration"] {
                     try SeedState.mark(type, in: context)
                 }
                 pending.applied = true
+                pending.researchAtCommit = try result.researchNotebook()
                 state.pending = pending
                 state.baseline = pending.target
                 state.commonBaselineValid = true
@@ -191,6 +200,49 @@ struct SyncSessionStore {
             }
             notebook = merged
         }
+    }
+
+    /// Writes after preparation are later local edits, just like writes after a
+    /// successful commit. Replay them over the agreed target, keeping that target
+    /// as the common baseline so the next sync transmits these edits to the peer.
+    private func preservingLaterEdits(in current: SyncSnapshot, session: SyncSession) throws
+        -> SyncSnapshot
+    {
+        if try current.digest() == session.expectedLocalDigest { return session.target }
+        guard let original = session.localAtPreparation,
+            try original.digest() == session.expectedLocalDigest
+        else { throw SyncError.stalePreview }
+        var plan = try SyncMergePlanner.plan(base: original, local: current, remote: session.target)
+        let originals = Dictionary(
+            grouping: original.records.map {
+                SyncMergePlanner.remap($0, aliases: plan.aliases)
+            }, by: \.id)
+        let choicesForLocal = plan.preferredChoices(origin: "This device")
+        for index in plan.conflicts.indices {
+            let conflict = plan.conflicts[index]
+            guard let localIndex = choicesForLocal[conflict.id],
+                let local = conflict.options[localIndex],
+                let remoteIndex = conflict.origins.firstIndex(of: "Other device"),
+                var remote = conflict.options[remoteIndex],
+                let old = originals[conflict.id], old.count == 1
+            else { continue }
+            // Replay only fields actually edited since preparation; keep independent
+            // incoming edits to the other fields of the same record.
+            for field in Set(old[0].fields.keys).union(local.fields.keys)
+            where old[0].fields[field] != local.fields[field] {
+                remote.fields[field] = local.fields[field]
+            }
+            plan.conflicts[index].options[localIndex] = remote
+        }
+        var choices = choicesForLocal
+        for conflict in plan.conflicts where choices[conflict.id] == nil {
+            // A newly added child can still need a parent deleted by the agreed
+            // target. Keep that parent locally along with the later child edit.
+            if let keep = conflict.origins.firstIndex(of: "Keep referenced item") {
+                choices[conflict.id] = keep
+            }
+        }
+        return try plan.finalized(choices)
     }
 
     func complete(_ sessionID: UUID) throws {
