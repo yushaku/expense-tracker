@@ -206,6 +206,7 @@ struct RootTabView: View {
 /// Keeps Settings one tap away from each root screen without taking a tab slot.
 private struct RootScreenHeader: ViewModifier {
     let title: LocalizedStringKey
+    let showsSync: Bool
     @Environment(SyncCoordinator.self) private var syncCoordinator
     @State private var isShowingSettings = false
     @State private var opensSyncAfterSettings = false
@@ -222,7 +223,7 @@ private struct RootScreenHeader: ViewModifier {
         content
             .compactRootNavigationTitle("")
             .toolbar {
-                if syncCoordinator.isPaired {
+                if showsSync && syncCoordinator.isPaired {
                     ToolbarItem(placement: .automatic) {
                         Button {
                             syncCoordinator.isPresented = true
@@ -297,8 +298,8 @@ private struct RootScreenHeader: ViewModifier {
 }
 
 extension View {
-    func rootScreenHeader(_ title: LocalizedStringKey) -> some View {
-        modifier(RootScreenHeader(title: title))
+    func rootScreenHeader(_ title: LocalizedStringKey, showsSync: Bool = false) -> some View {
+        modifier(RootScreenHeader(title: title, showsSync: showsSync))
     }
 }
 
