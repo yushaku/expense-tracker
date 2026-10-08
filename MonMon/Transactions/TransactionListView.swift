@@ -119,17 +119,8 @@ struct TransactionListView: View {
                 monthRail
             }
             .toolbar {
-                ToolbarItemGroup(placement: .primaryAction) {
+                ToolbarItem(placement: .primaryAction) {
                     importInboxButton
-
-                    TransactionSearchButton(
-                        isActive: query.hasSearchText,
-                        accessibilityIdentifier: "open-spending-search"
-                    ) {
-                        isFiltering = true
-                    }
-
-                    DateRangeFilterButton(range: $query.range, systemImage: "calendar")
                 }
             }
             .navigationDestination(for: DayPeriod.self) { period in
@@ -154,7 +145,7 @@ struct TransactionListView: View {
             .navigationDestination(for: AccountDetailRoute.self) { route in
                 AccountDetailView(route: route)
             }
-            .rootScreenHeader("Transactions")
+            .rootScreenHeader("Transactions", showsSync: true)
             .accessibilityIdentifier("spending-list")
             .appSheet(item: $editorMode) { mode in
                 TransactionEditorView(mode: mode, defaultDate: defaultDate)
@@ -549,9 +540,23 @@ struct TransactionListView: View {
     /// The months either side of the one on show, pinned under the navigation
     /// bar so a month is one tap away wherever the screen is scrolled to.
     private var monthRail: some View {
-        PeriodRail(unit: .month, periods: railMonths, selection: selectedMonth) { month in
-            query.range = .month(containing: month)
+        HStack(spacing: 8) {
+            PeriodRail(unit: .month, periods: railMonths, selection: selectedMonth) { month in
+                query.range = .month(containing: month)
+            }
+
+            TransactionSearchButton(
+                isActive: query.hasSearchText,
+                accessibilityIdentifier: "open-spending-search"
+            ) {
+                isFiltering = true
+            }
+            .frame(minWidth: 44, minHeight: 44)
+
+            DateRangeFilterButton(range: $query.range, systemImage: "calendar")
+                .frame(minWidth: 44, minHeight: 44)
         }
+        .padding(.trailing, 12)
         .background(MonMonTheme.canvas)
         .overlay(alignment: .bottom) {
             Rectangle()
