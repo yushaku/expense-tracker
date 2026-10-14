@@ -2,7 +2,6 @@ import Foundation
 import SwiftData
 
 enum TripWorkspaceLifecycleError: Error, Equatable {
-    case emptyName
     case goalHasNoFunds
     case missingFundingJar
     case workspaceAlreadyExists
@@ -12,20 +11,6 @@ enum TripWorkspaceLifecycleError: Error, Equatable {
 }
 
 enum TripWorkspaceLifecycle {
-    @MainActor
-    static func rename(_ workspace: TripWorkspace, to name: String, in context: ModelContext) throws
-    {
-        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedName.isEmpty else { throw TripWorkspaceLifecycleError.emptyName }
-        workspace.name = trimmedName
-        do {
-            try SyncWriteGate.save(context)
-        } catch {
-            context.rollback()
-            throw error
-        }
-    }
-
     static func start(
         goal: FinancialGoal,
         existingWorkspaces: [TripWorkspace],

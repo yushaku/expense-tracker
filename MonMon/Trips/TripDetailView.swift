@@ -9,7 +9,7 @@ private enum TripLifecycleConfirmation: String, Identifiable {
     var id: String { rawValue }
 }
 
-struct TripDetailView: View {
+struct GoalSpendingDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
@@ -36,7 +36,6 @@ struct TripDetailView: View {
 
     @State private var editorMode: TransactionEditorMode?
     @State private var goalEditorMode: GoalEditorMode?
-    @State private var isRenaming = false
     @State private var confirmation: TripLifecycleConfirmation?
     @State private var transactionActions = TransactionActions()
     @State private var saveErrorMessage: LocalizedStringKey?
@@ -48,6 +47,7 @@ struct TripDetailView: View {
 
             TripDetailContent(
                 workspace: workspace,
+                goal: sourceGoal,
                 transactions: transactions,
                 categories: categories,
                 accounts: accounts,
@@ -62,17 +62,10 @@ struct TripDetailView: View {
         .navigationTitle(workspace.name)
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
-                Button("Rename trip", systemImage: "square.and.pencil") {
-                    isRenaming = true
+                Button("Edit", systemImage: "pencil") {
+                    goalEditorMode = .edit(GoalJourney(goal: sourceGoal, workspace: workspace))
                 }
-                .accessibilityIdentifier("trip-detail-rename")
-
-                if let goal = sourceGoal {
-                    Button("Edit goal", systemImage: "pencil") {
-                        goalEditorMode = .edit(goal)
-                    }
-                    .accessibilityIdentifier("trip-detail-edit-goal")
-                }
+                .accessibilityIdentifier("goal-detail-edit")
 
                 if workspace.archivedAt != nil {
                     Button("Restore trip", systemImage: "arrow.uturn.backward.circle") {
@@ -99,9 +92,6 @@ struct TripDetailView: View {
         .appSheet(item: $goalEditorMode) { mode in
             GoalEditorView(mode: mode, capacityByJar: goalCapacityByJar, asOf: asOf)
         }
-        .appSheet(isPresented: $isRenaming) {
-            TripNameEditor(workspace: workspace)
-        }
         .confirmationDialog(
             confirmationTitle,
             isPresented: confirmationBinding,
@@ -114,7 +104,12 @@ struct TripDetailView: View {
                 Button("Complete trip") { complete() }
                 Button("Keep active", role: .cancel) {}
             } else {
-                Button("Cancel trip workspace", role: .destructive) { cancel() }
+                Button(
+                    sourceGoal == nil ? "Cancel trip workspace" : "Return to saving",
+                    role: .destructive
+                ) {
+                    cancel()
+                }
                 Button("Keep trip", role: .cancel) {}
             }
         } message: {
@@ -164,7 +159,7 @@ struct TripDetailView: View {
         case .complete:
             "Complete this trip?"
         case .cancel, .none:
-            "Cancel this trip workspace?"
+            sourceGoal == nil ? "Cancel this trip workspace?" : "Return to saving?"
         }
     }
 
@@ -175,7 +170,7 @@ struct TripDetailView: View {
         case .complete:
             "The trip moves to history. No account balance or transaction changes."
         case .cancel, .none:
-            "This removes the empty workspace only. The funded goal remains ready to spend."
+            "The empty spending budget will be removed. Your saved amount and contribution history stay intact."
         }
     }
 
@@ -220,13 +215,14 @@ struct TripDetailView: View {
 
     private func cancel() {
         saveErrorMessage = nil
+        let returnsToSaving = sourceGoal != nil
         do {
             try TripWorkspaceLifecycle.cancel(
                 workspace,
                 transactions: transactions,
                 in: modelContext
             )
-            dismiss()
+            if !returnsToSaving { dismiss() }
         } catch TripWorkspaceLifecycleError.workspaceHasTransactions {
             saveErrorMessage = "A trip with expenses cannot be cancelled."
         } catch {
@@ -235,81 +231,9 @@ struct TripDetailView: View {
     }
 }
 
-private struct TripNameEditor: View {
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
-    @FocusState private var isNameFocused: Bool
-    let workspace: TripWorkspace
-    // An independent draft lets Cancel leave the persisted trip untouched.
-    @State private var name: String
-    @State private var saveError: LocalizedStringKey?
-
-    init(workspace: TripWorkspace) {
-        self.workspace = workspace
-        _name = State(initialValue: workspace.name)
-    }
-
-    private var trimmedName: String {
-        name.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Trip name").font(.headline)
-                        TextField("Trip name", text: $name)
-                            .textFieldStyle(.roundedBorder)
-                            .focused($isNameFocused)
-                            .submitLabel(.done)
-                            .onSubmit(save)
-                            .accessibilityIdentifier("trip-name-field")
-                    }
-                    .appCard()
-                    if let saveError {
-                        TripErrorBanner(message: saveError)
-                    }
-                }
-                .padding(20)
-            }
-            .background(MonMonTheme.canvas)
-            .compactRootNavigationTitle("Rename trip")
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save", action: save)
-                        .disabled(trimmedName.isEmpty)
-                        .accessibilityIdentifier("save-trip-name")
-                }
-            }
-            .task { isNameFocused = true }
-        }
-        .tint(MonMonTheme.accent)
-        .foregroundStyle(MonMonTheme.textPrimary)
-        #if os(macOS)
-            .frame(width: 460, height: 300)
-        #else
-            .presentationDetents([.medium, .large])
-        #endif
-    }
-
-    private func save() {
-        guard !trimmedName.isEmpty else { return }
-        saveError = nil
-        do {
-            try TripWorkspaceLifecycle.rename(workspace, to: name, in: modelContext)
-            dismiss()
-        } catch {
-            saveError = "Couldn’t update this trip. Try again."
-        }
-    }
-}
-
 private struct TripDetailContent: View {
     let workspace: TripWorkspace
+    let goal: FinancialGoal?
     let snapshot: TripSummarySnapshot
     let linkedTransactions: [MoneyTransaction]
     let categories: [TransactionCategory]
@@ -323,6 +247,7 @@ private struct TripDetailContent: View {
 
     init(
         workspace: TripWorkspace,
+        goal: FinancialGoal?,
         transactions: [MoneyTransaction],
         categories: [TransactionCategory],
         accounts: [CashAccount],
@@ -334,6 +259,7 @@ private struct TripDetailContent: View {
         saveErrorMessage: LocalizedStringKey?
     ) {
         self.workspace = workspace
+        self.goal = goal
         snapshot = TripSummary.snapshot(
             workspace: workspace,
             transactions: transactions,
@@ -380,8 +306,14 @@ private struct TripDetailContent: View {
                     showsCount: true
                 )
 
+                if let goal {
+                    GoalSavingsHistoryCard(goal: goal)
+                    GoalContributionCard(goal: goal)
+                }
+
                 TripLifecycleSection(
                     status: workspace.status,
+                    hasSavingsGoal: goal != nil,
                     hasTransactions: !linkedTransactions.isEmpty,
                     remainingAmount: snapshot.remainingAmount,
                     onComplete: onComplete,
@@ -429,10 +361,10 @@ private struct TripSummarySection: View {
 
                 VStack(alignment: .leading, spacing: 3) {
                     if workspace.status == .active {
-                        Text("Active trip")
+                        Text("Spending")
                             .font(.title3.weight(.semibold))
                     } else {
-                        Text("Completed trip")
+                        Text("Completed")
                             .font(.title3.weight(.semibold))
                     }
                     Text("Only linked expenses reduce this budget.")
@@ -467,8 +399,25 @@ private struct TripSummarySection: View {
     }
 }
 
+private struct GoalSavingsHistoryCard: View {
+    @Environment(\.appDateFormat) private var dateFormat
+    let goal: FinancialGoal
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Savings history").font(.headline)
+            LabeledContent("Target amount", value: VNDCurrency.format(goal.targetAmount))
+            LabeledContent("Already earmarked", value: VNDCurrency.format(goal.earmarkedAmount))
+            LabeledContent("Target date", value: dateFormat.calendarDay(goal.targetDate))
+        }
+        .font(.subheadline)
+        .appCard()
+    }
+}
+
 private struct TripLifecycleSection: View {
     let status: TripWorkspaceStatus
+    let hasSavingsGoal: Bool
     let hasTransactions: Bool
     let remainingAmount: Decimal
     let onComplete: () -> Void
@@ -483,7 +432,10 @@ private struct TripLifecycleSection: View {
                     .buttonStyle(.prominentAction)
 
                 if !hasTransactions {
-                    Button("Cancel trip workspace", systemImage: "trash", role: .destructive) {
+                    Button(
+                        hasSavingsGoal ? "Return to saving" : "Cancel trip workspace",
+                        systemImage: hasSavingsGoal ? "arrow.uturn.backward" : "trash"
+                    ) {
                         onCancel()
                     }
                     .frame(maxWidth: .infinity)
