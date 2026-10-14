@@ -39,6 +39,7 @@ struct TransactionFilterChips: View {
     let categories: [TransactionCategory]
     let accounts: [CashAccount]
     var includesPeriod = false
+    var includesDirection = true
 
     var body: some View {
         ViewThatFits(in: .horizontal) {
@@ -68,7 +69,7 @@ struct TransactionFilterChips: View {
             }
         }
 
-        if query.filter != .all {
+        if includesDirection && query.filter != .all {
             chip(
                 AppText.string(key: filterName, in: locale),
                 systemImage: "arrow.left.arrow.right"
