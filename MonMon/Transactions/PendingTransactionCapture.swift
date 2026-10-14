@@ -69,3 +69,64 @@ final class PendingTransactionCapture {
         )
     }
 }
+
+struct DeletedPendingCapture: Identifiable {
+    let id: UUID
+    let rawText: String
+    let kind: TransactionKind
+    let amount: Decimal?
+    let occurredAt: Date
+    let note: String
+    let accountID: UUID?
+    let categoryID: UUID?
+    let issueCodes: String
+    let createdAt: Date
+
+    init(_ capture: PendingTransactionCapture) {
+        id = capture.id
+        rawText = capture.rawText
+        kind = capture.kind
+        amount = capture.amount
+        occurredAt = capture.occurredAt
+        note = capture.note
+        accountID = capture.accountID
+        categoryID = capture.categoryID
+        issueCodes = capture.issueCodes
+        createdAt = capture.createdAt
+    }
+
+    func makeCapture() -> PendingTransactionCapture {
+        PendingTransactionCapture(
+            id: id, rawText: rawText, kind: kind, amount: amount,
+            occurredAt: occurredAt, note: note, accountID: accountID,
+            categoryID: categoryID, issueCodes: issueCodes, createdAt: createdAt
+        )
+    }
+}
+
+@MainActor
+enum PendingCaptureDeletion {
+    static func delete(_ capture: PendingTransactionCapture, from context: ModelContext) throws
+        -> DeletedPendingCapture
+    {
+        let snapshot = DeletedPendingCapture(capture)
+        context.delete(capture)
+        do {
+            try SyncWriteGate.save(context)
+            return snapshot
+        } catch {
+            context.rollback()
+            throw error
+        }
+    }
+
+    static func restore(_ snapshot: DeletedPendingCapture, in context: ModelContext) throws {
+        context.insert(snapshot.makeCapture())
+        do {
+            try SyncWriteGate.save(context)
+        } catch {
+            context.rollback()
+            throw error
+        }
+    }
+}

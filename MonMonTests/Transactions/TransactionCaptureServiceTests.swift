@@ -712,6 +712,84 @@ struct TransactionCaptureServiceTests {
         #expect(event.id(accountID: fixture.accountID) != bank.id(accountID: fixture.accountID))
     }
 
+    @Test(
+        "Deleting and undoing a pending capture preserves its data and saved transactions",
+        arguments: [false, true])
+    func pendingCaptureDeletionRoundTrip(hasResolvedFields: Bool) throws {
+        let fixture = try makeFixture()
+        let ready = try fixture.service.prepare("50k ăn trưa", now: now)
+        let saved = try fixture.service.commit(ready, createdAt: now)
+        let context = ModelContext(fixture.container)
+        let captureID = UUID()
+        let capture = PendingTransactionCapture(
+            id: captureID, rawText: "[Apple Pay] Cafe", kind: .expense,
+            amount: hasResolvedFields ? 25_000 : nil, occurredAt: now,
+            note: "Cafe", accountID: hasResolvedFields ? fixture.accountID : nil,
+            categoryID: hasResolvedFields ? fixture.categoryID : nil,
+            issueCodes: "applePayNeedsReview,futureIssue", createdAt: now.addingTimeInterval(10)
+        )
+        context.insert(capture)
+        try context.save()
+
+        let snapshot = try PendingCaptureDeletion.delete(capture, from: context)
+        #expect(
+            try ModelContext(fixture.container).fetch(FetchDescriptor<PendingTransactionCapture>())
+                .isEmpty)
+
+        try PendingCaptureDeletion.restore(snapshot, in: context)
+        let verification = ModelContext(fixture.container)
+        let pending = try verification.fetch(FetchDescriptor<PendingTransactionCapture>())
+        #expect(pending.count == 1)
+        let restored = try #require(pending.first)
+        #expect(restored.id == captureID)
+        #expect(restored.rawText == "[Apple Pay] Cafe")
+        #expect(restored.kind == .expense)
+        #expect(restored.amount == (hasResolvedFields ? 25_000 : nil))
+        #expect(restored.occurredAt == now)
+        #expect(restored.note == "Cafe")
+        #expect(restored.accountID == (hasResolvedFields ? fixture.accountID : nil))
+        #expect(restored.categoryID == (hasResolvedFields ? fixture.categoryID : nil))
+        #expect(restored.issueCodes == "applePayNeedsReview,futureIssue")
+        #expect(restored.createdAt == now.addingTimeInterval(10))
+        let transactions = try verification.fetch(FetchDescriptor<MoneyTransaction>())
+        #expect(transactions.count == 1)
+        #expect(transactions.first?.id == saved.id)
+        #expect(transactions.first?.amount == 50_000)
+    }
+
+    @Test("Pending capture delete and undo roll back when sync blocks writes")
+    func pendingCaptureDeletionRespectsSyncLock() throws {
+        let fixture = try makeFixture()
+        let prepared = try fixture.service.prepare("ăn trưa tiền mặt", now: now)
+        _ = try fixture.service.commit(prepared, createdAt: now)
+        let context = ModelContext(fixture.container)
+        let capture = try #require(
+            context.fetch(FetchDescriptor<PendingTransactionCapture>()).first)
+        let captureID = capture.id
+        SyncWriteGate.lock(fixture.container)
+        defer { SyncWriteGate.unlock(fixture.container) }
+
+        #expect(throws: SyncError.sessionPending) {
+            try PendingCaptureDeletion.delete(capture, from: context)
+        }
+        #expect(
+            try context.fetch(FetchDescriptor<PendingTransactionCapture>()).map(\.id) == [captureID]
+        )
+        SyncWriteGate.unlock(fixture.container)
+        let snapshot = try PendingCaptureDeletion.delete(capture, from: context)
+        SyncWriteGate.lock(fixture.container)
+
+        #expect(throws: SyncError.sessionPending) {
+            try PendingCaptureDeletion.restore(snapshot, in: context)
+        }
+        #expect(try context.fetch(FetchDescriptor<PendingTransactionCapture>()).isEmpty)
+        SyncWriteGate.unlock(fixture.container)
+        try PendingCaptureDeletion.restore(snapshot, in: context)
+        #expect(
+            try ModelContext(fixture.container).fetch(FetchDescriptor<PendingTransactionCapture>())
+                .map(\.id) == [captureID])
+    }
+
     private func makeFixture() throws -> Fixture {
         let container = try ModelContainer(
             for: Schema(MonMonSchema.models),
