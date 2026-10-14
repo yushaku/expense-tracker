@@ -37,6 +37,8 @@ struct SettingsView: View {
                         card { AvatarSettingsContent() }
                         appearanceCard
                         instrumentsCard
+                        TransactionDefaultsCard()
+                            .accessibilityIdentifier("settings-transaction-defaults")
                         card {
                             NavigationLink {
                                 SalaryCalculatorView()
@@ -51,21 +53,6 @@ struct SettingsView: View {
                             }
                             .settingsButtonLabelStyle()
                             .accessibilityIdentifier("settings-salary-calculator")
-                        }
-                        card {
-                            NavigationLink {
-                                TransactionDefaultsView()
-                            } label: {
-                                HStack {
-                                    Label("Transaction default", systemImage: "slider.horizontal.3")
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .accessibilityHidden(true)
-                                }
-                                .frame(minHeight: 44)
-                            }
-                            .settingsButtonLabelStyle()
-                            .accessibilityIdentifier("settings-transaction-defaults")
                         }
                         card {
                             NavigationLink {
