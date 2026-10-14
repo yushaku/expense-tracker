@@ -158,4 +158,15 @@ struct TransactionPeriodTests {
                 == "between 12/31/2025 and 01/02/2026")
     }
 
+    @Test("GMT history headings show the ledger day without a time or a date shift")
+    func gmtHistoryDayHeading() {
+        let day = date(2026, 1, 1)
+        #expect(AppDateFormat.gmt.calendarDay(day) == "01 Jan 2026")
+        #expect(AppDateFormat.gmt.calendarDay(date(2026, 10, 14)) == "14 Oct 2026")
+        #expect(AppDateFormat.gmt.format(day) == "31 Dec 2025 17:00 GMT")
+        for format in [AppDateFormat.dayMonthYear, .monthDayYear, .yearMonthDay] {
+            #expect(format.calendarDay(day) == format.format(day))
+        }
+    }
+
 }

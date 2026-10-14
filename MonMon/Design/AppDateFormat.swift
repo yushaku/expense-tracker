@@ -48,6 +48,17 @@ enum AppDateFormat: String, CaseIterable, Identifiable {
         style.format(date)
     }
 
+    /// A history heading names a ledger day, not a timestamp to convert to GMT.
+    func calendarDay(_ date: Date) -> String {
+        guard self == .gmt else { return format(date) }
+        return Date.VerbatimFormatStyle(
+            format: "\(day: .twoDigits) \(month: .abbreviated) \(year: .defaultDigits)",
+            locale: Locale(identifier: "en_US_POSIX"),
+            timeZone: TransactionPeriod.calendar.timeZone,
+            calendar: TransactionPeriod.calendar
+        ).format(date)
+    }
+
     func dateTime(_ date: Date, in locale: Locale) -> String {
         if self == .gmt { return format(date) }
         let time = TransactionPeriod.format(
