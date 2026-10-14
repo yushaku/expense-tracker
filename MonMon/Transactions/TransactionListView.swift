@@ -573,12 +573,15 @@ struct TransactionListView: View {
 
     private var transactionsSection: some View {
         VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-            if query.isNarrowed || query.range != .month(containing: .now) {
+            if query.hasSearchText || !query.categoryIDs.isEmpty || !query.accountIDs.isEmpty
+                || query.range != .month(containing: .now)
+            {
                 TransactionFilterChips(
                     query: $query,
                     categories: categories,
                     accounts: accounts,
-                    includesPeriod: true
+                    includesPeriod: true,
+                    includesDirection: false
                 )
             }
 
