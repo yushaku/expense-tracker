@@ -137,11 +137,11 @@ struct BudgetScreen: View {
                 }
             }
             .navigationDestination(item: $selectedGoalID) { goalID in
-                GoalDetailView(goalID: goalID, capacityByJar: goalCapacityByJar, asOf: asOf)
+                GoalDetailView(goalID: goalID, asOf: asOf)
             }
             .navigationDestination(item: $selectedTripID) { tripID in
                 if let workspace = tripWorkspaces.first(where: { $0.id == tripID }) {
-                    TripDetailView(workspace: workspace)
+                    GoalDetailView(workspace: workspace)
                 }
             }
             .tint(MonMonTheme.accent)

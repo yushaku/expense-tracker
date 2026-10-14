@@ -12,6 +12,7 @@ enum FinancialGoalFormError: Error, Equatable {
     case targetDateInPast
     case missingFundingJar
     case monthlyCommitmentExceedsJar
+    case invalidSpendingBudget
 }
 
 struct FinancialGoalDraft: Equatable {
@@ -23,6 +24,7 @@ struct FinancialGoalDraft: Equatable {
     var fundingJarID: UUID?
     var symbolName: String
     var colorName: String
+    var spendingBudgetText: String = ""
 
     init(
         name: String = "",
@@ -56,6 +58,62 @@ struct FinancialGoalDraft: Equatable {
             symbolName: goal.symbolName,
             colorName: goal.colorName
         )
+    }
+
+    init(journey: GoalJourney) {
+        if let goal = journey.goal {
+            self.init(goal: goal)
+        } else {
+            self.init(targetDate: journey.workspace?.startedAt ?? .now)
+        }
+        if let workspace = journey.workspace {
+            // Preserve the visible trip's identity for older, independently edited records.
+            name = workspace.name
+            symbolName = workspace.symbolName
+            colorName = workspace.colorName
+            fundingJarID = workspace.fundingJarID
+            spendingBudgetText = VNDCurrency.formatPlain(workspace.budgetAmount)
+        }
+    }
+
+    func apply(
+        to journey: GoalJourney,
+        jars: [BudgetJar], goals: [FinancialGoal],
+        capacityByJar: [UUID: Decimal], asOf: Date
+    ) throws {
+        guard let workspace = journey.workspace else {
+            if let goal = journey.goal {
+                try apply(
+                    to: goal, jars: jars, goals: goals,
+                    capacityByJar: capacityByJar, asOf: asOf
+                )
+            }
+            return
+        }
+
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else { throw FinancialGoalFormError.emptyName }
+        guard let budget = VNDCurrency.parse(spendingBudgetText), budget > 0 else {
+            throw FinancialGoalFormError.invalidSpendingBudget
+        }
+        // An old/deleted jar must not prevent renaming. A new selection must exist.
+        guard
+            fundingJarID == workspace.fundingJarID
+                || jars.contains(where: { $0.id == fundingJarID })
+        else { throw FinancialGoalFormError.missingFundingJar }
+
+        // Validate everything before changing either record; the caller saves both together.
+        workspace.name = trimmedName
+        workspace.symbolName = CategoryPalette.symbolName(symbolName)
+        workspace.colorName = CategoryPalette.colorName(colorName)
+        workspace.fundingJarID = fundingJarID
+        workspace.budgetAmount = budget
+        if let goal = journey.goal {
+            goal.name = workspace.name
+            goal.symbolName = workspace.symbolName
+            goal.colorName = workspace.colorName
+            goal.fundingJarID = workspace.fundingJarID
+        }
     }
 
     struct ValidatedValues: Equatable {
