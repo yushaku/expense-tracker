@@ -17716,6 +17716,16 @@
           }
         }
       }
+    },
+    "This week": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tuần này"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

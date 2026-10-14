@@ -112,7 +112,7 @@ private struct TransactionFilterFields: View {
         VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
             searchCard
             if includesPeriod { periodCard }
-            directionCard
+            if !includesPeriod { directionCard }
             if includesPeriod {
                 DisclosureGroup {
                     categoriesCard
@@ -187,6 +187,7 @@ private struct TransactionFilterFields: View {
 
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 8) {
                 periodShortcut("Today", range: .day(containing: .now))
+                periodShortcut("This week", range: .week(containing: .now))
                 periodShortcut("This month", range: .month(containing: .now))
                 periodShortcut("This year", range: .year(containing: .now))
             }
@@ -356,10 +357,12 @@ private struct TransactionFilterFields: View {
 
                 Spacer(minLength: 8)
 
-                Image(systemName: isOn ? "checkmark.circle.fill" : "circle")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(isOn ? MonMonTheme.accent : MonMonTheme.textMuted)
-                    .accessibilityHidden(true)
+                if !includesPeriod {
+                    Image(systemName: isOn ? "checkmark.circle.fill" : "circle")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(isOn ? MonMonTheme.accent : MonMonTheme.textMuted)
+                        .accessibilityHidden(true)
+                }
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
