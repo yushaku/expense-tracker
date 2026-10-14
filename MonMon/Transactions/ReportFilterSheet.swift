@@ -7,7 +7,6 @@ import SwiftUI
 /// the field, while opening from the filter icon leaves the whole sheet ready.
 struct ReportFilterSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @FocusState private var isSearchFocused: Bool
 
     @Binding var query: TransactionQuery
 
@@ -15,8 +14,6 @@ struct ReportFilterSheet: View {
     let accounts: [CashAccount]
     let focusesSearchOnAppear: Bool
     let identifierPrefix: String
-
-    private let selectionColumns = [GridItem(.adaptive(minimum: 140), spacing: 10)]
 
     init(
         query: Binding<TransactionQuery>,
@@ -49,10 +46,12 @@ struct ReportFilterSheet: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                        searchCard
-                        directionCard
-                        categoriesCard
-                        accountsCard
+                        TransactionFilterFields(
+                            query: $query, categories: categories, accounts: accounts,
+                            identifierPrefix: identifierPrefix,
+                            focusesSearchOnAppear: focusesSearchOnAppear,
+                            onSubmit: { dismiss() }
+                        )
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
                     .padding(.horizontal, 20)
@@ -62,14 +61,6 @@ struct ReportFilterSheet: View {
             }
             .navigationTitle("Search & Filters")
             .accessibilityIdentifier("\(identifierPrefix)filters")
-            .task {
-                guard focusesSearchOnAppear else {
-                    return
-                }
-
-                await Task.yield()
-                isSearchFocused = true
-            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Clear") {
@@ -100,10 +91,132 @@ struct ReportFilterSheet: View {
         query.accountIDs = []
     }
 
+}
+
+/// Shared controls; Transactions adds its period here while Report keeps its own date controls.
+private struct TransactionFilterFields: View {
+    @Environment(\.locale) private var locale
+    @Environment(\.appDateFormat) private var dateFormat
+    @FocusState private var isSearchFocused: Bool
+    @Binding var query: TransactionQuery
+    let categories: [TransactionCategory]
+    let accounts: [CashAccount]
+    let identifierPrefix: String
+    var focusesSearchOnAppear = false
+    var includesPeriod = false
+    let onSubmit: () -> Void
+
+    private let selectionColumns = [GridItem(.adaptive(minimum: 140), spacing: 10)]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+            searchCard
+            if includesPeriod { periodCard }
+            directionCard
+            if includesPeriod {
+                DisclosureGroup {
+                    categoriesCard
+                } label: {
+                    selectionLabel("Categories", symbol: "tag.fill", count: query.categoryIDs.count)
+                }
+                .appCard()
+                DisclosureGroup {
+                    accountsCard
+                } label: {
+                    selectionLabel(
+                        "Accounts", symbol: "wallet.bifold.fill", count: query.accountIDs.count)
+                }
+                .appCard()
+            } else {
+                categoriesCard
+                accountsCard
+            }
+        }
+        .task {
+            guard focusesSearchOnAppear else { return }
+            await Task.yield()
+            isSearchFocused = true
+        }
+    }
+
+    private func selectionLabel(_ title: LocalizedStringKey, symbol: String, count: Int)
+        -> some View
+    {
+        HStack {
+            sectionHeader(title, systemImage: symbol)
+            Spacer(minLength: 8)
+            if count == 0 {
+                Text("All").foregroundStyle(MonMonTheme.textSecondary)
+            } else {
+                Text("\(count) selected").foregroundStyle(MonMonTheme.accent)
+            }
+        }
+        .font(.subheadline)
+        .frame(minHeight: 44)
+    }
+
+    private var periodCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            NavigationLink {
+                VStack(alignment: .leading, spacing: 0) {
+                    DateRangeFilter(range: $query.range, identifierPrefix: "spending")
+                    Spacer(minLength: 0)
+                }
+                .padding(20)
+                .frame(maxWidth: MonMonTheme.maxContentWidth)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .background(MonMonTheme.canvas)
+                .navigationTitle("Period")
+            } label: {
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        sectionHeader("Period", systemImage: "calendar")
+                        Text(query.range.title(in: locale, dateFormat: dateFormat))
+                            .font(.subheadline)
+                            .foregroundStyle(MonMonTheme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right").accessibilityHidden(true)
+                }
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("spending-filter-period")
+
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 8) {
+                periodShortcut("Today", range: .day(containing: .now))
+                periodShortcut("This month", range: .month(containing: .now))
+                periodShortcut("This year", range: .year(containing: .now))
+            }
+        }
+        .appCard()
+    }
+
+    private func periodShortcut(_ title: LocalizedStringKey, range: TransactionRange) -> some View {
+        Button {
+            query.range = range
+        } label: {
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .background(
+                    query.range == range ? MonMonTheme.accent.opacity(0.14) : MonMonTheme.field,
+                    in: .rect(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(query.range == range ? MonMonTheme.accent : MonMonTheme.textPrimary)
+        .accessibilityAddTraits(query.range == range ? [.isSelected] : [])
+    }
+
     private var searchCard: some View {
         card {
             VStack(alignment: .leading, spacing: 14) {
-                sectionHeader("Search", systemImage: "magnifyingglass")
+                if !includesPeriod {
+                    sectionHeader("Search", systemImage: "magnifyingglass")
+                }
 
                 HStack(spacing: 10) {
                     Image(systemName: "magnifyingglass")
@@ -114,7 +227,7 @@ struct ReportFilterSheet: View {
                         .focused($isSearchFocused)
                         .submitLabel(.search)
                         .onSubmit {
-                            dismiss()
+                            onSubmit()
                         }
                         .accessibilityIdentifier("\(identifierPrefix)search-field")
 
@@ -158,9 +271,9 @@ struct ReportFilterSheet: View {
     }
 
     private var categoriesCard: some View {
-        card {
+        selectionCard {
             VStack(alignment: .leading, spacing: 14) {
-                sectionHeader("Categories", systemImage: "tag.fill")
+                if !includesPeriod { sectionHeader("Categories", systemImage: "tag.fill") }
 
                 if categories.isEmpty {
                     emptyNotice("No categories yet.")
@@ -184,9 +297,9 @@ struct ReportFilterSheet: View {
     }
 
     private var accountsCard: some View {
-        card {
+        selectionCard {
             VStack(alignment: .leading, spacing: 14) {
-                sectionHeader("Accounts", systemImage: "wallet.bifold.fill")
+                if !includesPeriod { sectionHeader("Accounts", systemImage: "wallet.bifold.fill") }
 
                 if accounts.isEmpty {
                     emptyNotice("No accounts yet.")
@@ -239,7 +352,7 @@ struct ReportFilterSheet: View {
                 Text(name)
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(MonMonTheme.textPrimary)
-                    .lineLimit(1)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 Spacer(minLength: 8)
 
@@ -267,6 +380,15 @@ struct ReportFilterSheet: View {
         .accessibilityAddTraits(isOn ? [.isSelected] : [])
     }
 
+    @ViewBuilder
+    private func selectionCard<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        if includesPeriod {
+            content().padding(.top, 12)
+        } else {
+            card(content: content)
+        }
+    }
+
     private func emptyNotice(_ text: LocalizedStringKey) -> some View {
         Text(text)
             .font(.subheadline)
@@ -291,5 +413,83 @@ struct ReportFilterSheet: View {
                 RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
                     .stroke(MonMonTheme.border, lineWidth: 1)
             }
+    }
+}
+
+/// An owned draft keeps Cancel and swipe-to-dismiss from changing the list.
+struct TransactionFilterSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding private var query: TransactionQuery
+    @State private var draft: TransactionQuery
+    let categories: [TransactionCategory]
+    let accounts: [CashAccount]
+    let resultCount: (TransactionQuery) -> Int
+
+    init(
+        query: Binding<TransactionQuery>, categories: [TransactionCategory],
+        accounts: [CashAccount], resultCount: @escaping (TransactionQuery) -> Int
+    ) {
+        _query = query
+        _draft = State(initialValue: query.wrappedValue)
+        self.categories = categories
+        self.accounts = accounts
+        self.resultCount = resultCount
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                TransactionFilterFields(
+                    query: $draft, categories: categories, accounts: accounts,
+                    identifierPrefix: "spending-", includesPeriod: true, onSubmit: apply
+                )
+                .frame(maxWidth: MonMonTheme.maxContentWidth)
+                .padding(20)
+                .frame(maxWidth: .infinity)
+            }
+            .scrollDismissesKeyboard(.interactively)
+            .background(MonMonTheme.canvas)
+            .compactRootNavigationTitle("Filters")
+            .accessibilityIdentifier("spending-filters")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Reset") { draft = TransactionQuery(range: .month(containing: .now)) }
+                        .accessibilityIdentifier("clear-spending-filters")
+                }
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                VStack(spacing: 8) {
+                    let count = resultCount(draft)
+                    if count == 0 {
+                        Text("No matches. Try another period or fewer filters.")
+                            .font(.caption)
+                            .foregroundStyle(MonMonTheme.textSecondary)
+                    }
+                    Button(action: apply) {
+                        Text("Show \(count) transactions")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.prominentAction)
+                    .accessibilityIdentifier("apply-spending-filters")
+                }
+                .padding(16)
+                .background(MonMonTheme.canvas)
+            }
+        }
+        .tint(MonMonTheme.accent)
+        .foregroundStyle(MonMonTheme.textPrimary)
+        #if os(macOS)
+            .frame(width: 560, height: 720)
+        #else
+            .presentationDetents([.large])
+        #endif
+    }
+
+    private func apply() {
+        query = draft
+        dismiss()
     }
 }
