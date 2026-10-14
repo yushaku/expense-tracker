@@ -3,23 +3,23 @@ import SwiftUI
 
 enum GoalEditorMode: Identifiable {
     case add
-    case edit(FinancialGoal)
+    case edit(GoalJourney)
 
     var id: String {
         switch self {
         case .add:
             "add"
-        case .edit(let goal):
-            goal.id.uuidString
+        case .edit(let journey):
+            journey.goal?.id.uuidString ?? journey.workspace?.id.uuidString ?? "edit"
         }
     }
 
-    var editedGoal: FinancialGoal? {
+    var journey: GoalJourney? {
         switch self {
         case .add:
             nil
-        case .edit(let goal):
-            goal
+        case .edit(let journey):
+            journey
         }
     }
 }
@@ -52,8 +52,8 @@ struct GoalEditorView: View {
         case .add:
             let targetDate = Calendar.current.date(byAdding: .year, value: 1, to: asOf) ?? asOf
             _draft = State(initialValue: FinancialGoalDraft(targetDate: targetDate))
-        case .edit(let goal):
-            _draft = State(initialValue: FinancialGoalDraft(goal: goal))
+        case .edit(let journey):
+            _draft = State(initialValue: FinancialGoalDraft(journey: journey))
         }
     }
 
@@ -72,13 +72,14 @@ struct GoalEditorView: View {
                 draft: $draft,
                 jars: jars,
                 plannedCapacity: draft.fundingJarID.flatMap { capacityByJar[$0] } ?? .zero,
-                isEditing: mode.editedGoal != nil,
+                isEditing: mode.journey != nil,
+                isSpending: mode.journey?.workspace != nil,
                 validationError: validationError,
                 saveErrorMessage: saveErrorMessage,
                 minimumTargetDate: Calendar.current.startOfDay(for: asOf),
                 onDelete: { isConfirmingDelete = true }
             )
-            .navigationTitle(mode.editedGoal == nil ? "Add goal" : "Edit goal")
+            .navigationTitle(mode.journey == nil ? "Add goal" : "Edit")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
@@ -101,7 +102,7 @@ struct GoalEditorView: View {
                 Text("This removes the earmark only. It does not move or delete financial records.")
             }
             .task {
-                if draft.fundingJarID == nil {
+                if mode.journey == nil && draft.fundingJarID == nil {
                     draft.fundingJarID = jars.first { $0.role == .savings }?.id ?? jars.first?.id
                 }
             }
@@ -116,13 +117,14 @@ struct GoalEditorView: View {
         saveErrorMessage = nil
 
         do {
-            if let goal = mode.editedGoal {
-                try draft.apply(
-                    to: goal,
+            if let journey = mode.journey {
+                try journey.save(
+                    draft: draft,
                     jars: jars,
                     goals: goals,
                     capacityByJar: capacityByJar,
-                    asOf: asOf
+                    asOf: asOf,
+                    in: modelContext
                 )
             } else {
                 modelContext.insert(
@@ -135,26 +137,22 @@ struct GoalEditorView: View {
                         asOf: asOf
                     )
                 )
+                try SyncWriteGate.save(modelContext)
             }
+            dismiss()
         } catch let error as FinancialGoalFormError {
             validationError = error
             return
         } catch {
-            saveErrorMessage = "Something went wrong. Try again."
-            return
-        }
-
-        do {
-            try SyncWriteGate.save(modelContext)
-            dismiss()
-        } catch {
-            modelContext.rollback()
+            if mode.journey == nil { modelContext.rollback() }
             saveErrorMessage = "Couldn’t save this goal. Try again."
         }
     }
 
     private func delete() {
-        guard let goal = mode.editedGoal else {
+        guard let journey = mode.journey, journey.workspace == nil,
+            let goal = journey.goal
+        else {
             return
         }
 
@@ -175,6 +173,7 @@ private struct GoalEditorForm: View {
     let jars: [BudgetJar]
     let plannedCapacity: Decimal
     let isEditing: Bool
+    let isSpending: Bool
     let validationError: FinancialGoalFormError?
     let saveErrorMessage: LocalizedStringKey?
     let minimumTargetDate: Date
@@ -192,15 +191,19 @@ private struct GoalEditorForm: View {
                 VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                     introduction
                     detailsCard
-                    moneyCard
-                    scheduleCard
+                    if isSpending {
+                        spendingBudgetCard
+                    } else {
+                        moneyCard
+                        scheduleCard
+                    }
                     styleCard
 
                     if let saveErrorMessage {
                         errorBanner(saveErrorMessage)
                     }
 
-                    if isEditing {
+                    if isEditing && !isSpending {
                         deleteButton
                     }
                 }
@@ -225,12 +228,16 @@ private struct GoalEditorForm: View {
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(isEditing ? "Shape this goal" : "Create a financial target")
+                Text(isEditing ? "Edit details" : "Create a financial target")
                     .font(.title3.weight(.semibold))
 
-                Text("Goal money stays inside its jar and is never counted as a second asset.")
-                    .font(.subheadline)
-                    .foregroundStyle(MonMonTheme.textSecondary)
+                Text(
+                    isSpending
+                        ? "Update the name, style and spending budget for this goal."
+                        : "Goal money stays inside its jar and is never counted as a second asset."
+                )
+                .font(.subheadline)
+                .foregroundStyle(MonMonTheme.textSecondary)
             }
         }
     }
@@ -301,6 +308,27 @@ private struct GoalEditorForm: View {
                             .accessibilityIdentifier("goal-earmarked")
                     }
                 }
+            }
+        }
+    }
+
+    private var spendingBudgetCard: some View {
+        card {
+            VStack(alignment: .leading, spacing: 12) {
+                sectionHeader("Spending budget", systemImage: "banknote.fill")
+                field(
+                    "Budget",
+                    error: validationError == .invalidSpendingBudget
+                        ? "Enter a budget greater than zero." : nil
+                ) {
+                    VNDTextField(text: $draft.spendingBudgetText)
+                        .accessibilityIdentifier("goal-spending-budget")
+                }
+                Text(
+                    "Changing the budget does not change saved contributions or recorded expenses."
+                )
+                .font(.caption)
+                .foregroundStyle(MonMonTheme.textSecondary)
             }
         }
     }

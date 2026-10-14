@@ -217,6 +217,47 @@ private struct GoalActionStatusBanner: View {
 }
 
 struct GoalDetailView: View {
+    @Query private var goals: [FinancialGoal]
+    @Query private var workspaces: [TripWorkspace]
+
+    private let goalID: UUID?
+    private let workspaceID: UUID?
+    private let asOf: Date
+
+    init(goalID: UUID, asOf: Date) {
+        self.goalID = goalID
+        workspaceID = nil
+        self.asOf = asOf
+    }
+
+    init(workspace: TripWorkspace, asOf: Date = .now) {
+        goalID = workspace.sourceGoalID
+        workspaceID = workspace.id
+        self.asOf = asOf
+    }
+
+    var body: some View {
+        if let journey = GoalJourney.resolve(
+            goalID: goalID, workspaceID: workspaceID,
+            goals: goals, workspaces: workspaces
+        ) {
+            if let workspace = journey.workspace {
+                GoalSpendingDetailView(workspace: workspace, asOf: asOf)
+            } else if let goal = journey.goal {
+                GoalAccumulationDetailView(
+                    goalID: goal.id, asOf: asOf
+                )
+            }
+        } else {
+            ContentUnavailableView(
+                "Goal unavailable", systemImage: "flag.slash",
+                description: Text("This goal is no longer in the current store.")
+            )
+        }
+    }
+}
+
+private struct GoalAccumulationDetailView: View {
     @Environment(\.appDateFormat) private var dateFormat
 
     @Environment(\.dismiss) private var dismiss
@@ -231,8 +272,10 @@ struct GoalDetailView: View {
     @Query(sort: \TripWorkspace.startedAt, order: .reverse)
     private var tripWorkspaces: [TripWorkspace]
 
+    @Query private var recurringRules: [RecurringRule]
+    @Query private var transactions: [MoneyTransaction]
+
     let goalID: UUID
-    let capacityByJar: [UUID: Decimal]
     let asOf: Date
 
     @State private var editorMode: GoalEditorMode?
@@ -240,11 +283,17 @@ struct GoalDetailView: View {
     @State private var isShowingContribution = false
     @State private var pendingCelebration: String?
     @State private var celebrationName: String?
-    @State private var selectedWorkspaceID: UUID?
     @State private var startErrorMessage: LocalizedStringKey?
 
     private var goal: FinancialGoal? {
         goals.first { $0.id == goalID }
+    }
+
+    private var capacityByJar: [UUID: Decimal] {
+        BudgetSummary.goalCapacityByJar(
+            monthContaining: asOf, asOf: asOf, jars: jars,
+            recurringRules: recurringRules, transactions: transactions
+        )
     }
 
     var body: some View {
@@ -289,8 +338,8 @@ struct GoalDetailView: View {
             if let goal {
                 ToolbarItemGroup(placement: .primaryAction) {
                     if goal.archivedAt == nil {
-                        Button("Edit goal", systemImage: "pencil") {
-                            editorMode = .edit(goal)
+                        Button("Edit", systemImage: "pencil") {
+                            editorMode = .edit(GoalJourney(goal: goal))
                         }
                         .accessibilityIdentifier("goal-detail-edit")
                     }
@@ -329,28 +378,19 @@ struct GoalDetailView: View {
             }
         }
         .onDisappear { celebrationName = nil }
-        .navigationDestination(item: $selectedWorkspaceID) { workspaceID in
-            if let workspace = tripWorkspaces.first(where: { $0.id == workspaceID }) {
-                TripDetailView(workspace: workspace)
-            } else {
-                ContentUnavailableView(
-                    "Trip unavailable",
-                    systemImage: "airplane",
-                    description: Text("This trip is no longer in the current store.")
-                )
-            }
-        }
         .confirmationDialog(
-            "Use this amount",
+            "Start spending?",
             isPresented: $isShowingUseOptions,
             titleVisibility: .visible
         ) {
-            Button("Start a trip", systemImage: "airplane.departure") {
+            Button("Start spending", systemImage: "arrow.up.forward.circle") {
                 startTrip()
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("The accumulated amount will become this trip's budget.")
+            Text(
+                "Your saved amount becomes the spending budget. Contributions stay in this goal's history."
+            )
         }
         .alert(
             "Couldn’t start this trip",
@@ -397,23 +437,16 @@ struct GoalDetailView: View {
 
     @ViewBuilder
     private func useAmountCard(_ goal: FinancialGoal) -> some View {
-        if let workspace = workspace(for: goal) {
-            Button("Open trip", systemImage: "airplane") {
-                selectedWorkspaceID = workspace.id
-            }
-            .buttonStyle(.prominentAction)
-            .frame(maxWidth: .infinity, alignment: .trailing)
-            .accessibilityIdentifier("goal-open-trip")
-        } else if canUse(goal) {
+        if canUse(goal) {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Use this amount")
+                Text("Ready to spend")
                     .font(.headline)
 
-                Text("Turn the money accumulated so far into a separate spending workspace.")
+                Text("Start tracking expenses here using the money saved so far.")
                     .font(.subheadline)
                     .foregroundStyle(MonMonTheme.textSecondary)
 
-                Button("Use this amount", systemImage: "arrow.up.forward.app") {
+                Button("Start spending", systemImage: "arrow.up.forward.app") {
                     isShowingUseOptions = true
                 }
                 .buttonStyle(.prominentAction)
@@ -456,10 +489,6 @@ struct GoalDetailView: View {
         return jars.first { $0.id == jarID }?.name ?? String(localized: "No jar")
     }
 
-    private func workspace(for goal: FinancialGoal) -> TripWorkspace? {
-        tripWorkspaces.first { $0.sourceGoalID == goal.id }
-    }
-
     private func canUse(_ goal: FinancialGoal) -> Bool {
         TripWorkspaceCollection.snapshot(goals: [goal], workspaces: tripWorkspaces)
             .usableGoalIDs.contains(goal.id)
@@ -483,14 +512,13 @@ struct GoalDetailView: View {
 
         startErrorMessage = nil
         do {
-            let workspace = try TripWorkspaceLifecycle.start(
+            try TripWorkspaceLifecycle.start(
                 goal: goal,
                 existingWorkspaces: tripWorkspaces,
                 id: UUID(),
                 startedAt: .now,
                 in: modelContext
             )
-            selectedWorkspaceID = workspace.id
         } catch TripWorkspaceLifecycleError.workspaceAlreadyExists {
             startErrorMessage = "This goal already has a trip workspace."
         } catch TripWorkspaceLifecycleError.goalHasNoFunds {
@@ -573,11 +601,11 @@ struct GoalArchiveControl: View {
     }
 }
 
-private struct GoalContributionCard: View {
+struct GoalContributionCard: View {
     @Environment(\.appDateFormat) private var dateFormat
 
     let goal: FinancialGoal
-    let onMarkContribution: () -> Void
+    var onMarkContribution: (() -> Void)? = nil
 
     private var entries: [GoalContribution] {
         GoalContributionStore.entries(for: goal).reversed()
@@ -591,7 +619,9 @@ private struct GoalContributionCard: View {
 
                 Spacer(minLength: 8)
 
-                if goal.earmarkedAmount < goal.targetAmount {
+                if goal.archivedAt == nil, goal.earmarkedAmount < goal.targetAmount,
+                    let onMarkContribution
+                {
                     Button("Mark contribution", systemImage: "plus.circle.fill") {
                         onMarkContribution()
                     }

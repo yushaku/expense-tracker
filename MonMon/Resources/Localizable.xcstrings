@@ -1,6 +1,126 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Return to saving": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quay lại tích lũy"
+          }
+        }
+      }
+    },
+    "Return to saving?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quay lại tích lũy?"
+          }
+        }
+      }
+    },
+    "The empty spending budget will be removed. Your saved amount and contribution history stay intact.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngân sách chưa có chi tiêu sẽ được xóa. Số tiền đã tích lũy và lịch sử đóng góp được giữ nguyên."
+          }
+        }
+      }
+    },
+    "Edit details": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chỉnh sửa thông tin"
+          }
+        }
+      }
+    },
+    "Update the name, style and spending budget for this goal.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cập nhật tên, giao diện và ngân sách chi tiêu cho mục tiêu này."
+          }
+        }
+      }
+    },
+    "Spending budget": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngân sách chi tiêu"
+          }
+        }
+      }
+    },
+    "Enter a budget greater than zero.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhập ngân sách lớn hơn 0."
+          }
+        }
+      }
+    },
+    "Changing the budget does not change saved contributions or recorded expenses.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thay đổi ngân sách không làm thay đổi các khoản tích lũy hay giao dịch đã ghi nhận."
+          }
+        }
+      }
+    },
+    "Start spending?": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bắt đầu chi tiêu?"
+          }
+        }
+      }
+    },
+    "Your saved amount becomes the spending budget. Contributions stay in this goal's history.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tiền đã tích lũy sẽ trở thành ngân sách chi tiêu. Các khoản tích lũy vẫn được giữ trong lịch sử của mục tiêu."
+          }
+        }
+      }
+    },
+    "Start tracking expenses here using the money saved so far.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bắt đầu theo dõi chi tiêu ngay tại đây bằng số tiền đã tích lũy."
+          }
+        }
+      }
+    },
+    "Savings history": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lịch sử tích lũy"
+          }
+        }
+      }
+    },
     "Changes waiting to sync": {
       "localizations": {
         "vi": {
@@ -17723,6 +17843,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tuần này"
+          }
+        }
+      }
+    },
+    "Rename trip": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đổi tên chuyến đi"
+          }
+        }
+      }
+    },
+    "Trip name": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tên chuyến đi"
           }
         }
       }

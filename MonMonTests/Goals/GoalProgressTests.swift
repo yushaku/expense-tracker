@@ -304,6 +304,8 @@ struct GoalArchiveTests {
         let archived = goal(name: "Old goal", target: 5_000, earmarked: 5_000)
         archived.archivedAt = Date(timeIntervalSince1970: 1_950_000_000)
         let tripGoal = goal(name: "Japan", target: 20_000, earmarked: 20_000)
+        // Older versions allowed the source goal to be archived separately.
+        tripGoal.archivedAt = Date(timeIntervalSince1970: 1_940_000_000)
         let trip = TripWorkspace(
             id: UUID(),
             sourceGoalID: tripGoal.id,

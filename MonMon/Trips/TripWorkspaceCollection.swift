@@ -1,4 +1,71 @@
 import Foundation
+import SwiftData
+
+/// One user-facing goal throughout accumulation and spending. The existing storage
+/// records keep their IDs so backups, sync and transaction links remain compatible.
+struct GoalJourney {
+    let goal: FinancialGoal?
+    var workspace: TripWorkspace? = nil
+
+    @MainActor
+    func save(
+        draft: FinancialGoalDraft, jars: [BudgetJar], goals: [FinancialGoal],
+        capacityByJar: [UUID: Decimal], asOf: Date, in context: ModelContext
+    ) throws {
+        let restoreGoal = goal.map { goal in
+            let identity = (goal.name, goal.symbolName, goal.colorName, goal.fundingJarID)
+            let plan = (
+                goal.targetAmount, goal.earmarkedAmount, goal.targetDate, goal.monthlyContribution
+            )
+            return {
+                (goal.name, goal.symbolName, goal.colorName, goal.fundingJarID) = identity
+                (
+                    goal.targetAmount, goal.earmarkedAmount, goal.targetDate,
+                    goal.monthlyContribution
+                ) = plan
+            }
+        }
+        let restoreWorkspace = workspace.map { workspace in
+            let identity = (
+                workspace.name, workspace.symbolName, workspace.colorName, workspace.fundingJarID
+            )
+            let budget = workspace.budgetAmount
+            return {
+                (
+                    workspace.name, workspace.symbolName, workspace.colorName,
+                    workspace.fundingJarID
+                ) = identity
+                workspace.budgetAmount = budget
+            }
+        }
+
+        // Validation completes before either model changes.
+        try draft.apply(
+            to: self, jars: jars, goals: goals, capacityByJar: capacityByJar, asOf: asOf)
+        do {
+            try SyncWriteGate.save(context)
+        } catch {
+            context.rollback()
+            // SwiftData can retain just-mutated values in its live model cache after rollback.
+            restoreGoal?()
+            restoreWorkspace?()
+            throw error
+        }
+    }
+
+    static func resolve(
+        goalID: UUID?, workspaceID: UUID?,
+        goals: [FinancialGoal], workspaces: [TripWorkspace]
+    ) -> GoalJourney? {
+        let workspace =
+            workspaces.first { $0.id == workspaceID }
+            ?? workspaces.first { goalID != nil && $0.sourceGoalID == goalID }
+        let resolvedGoalID = workspace?.sourceGoalID ?? goalID
+        let goal = goals.first { $0.id == resolvedGoalID }
+        guard goal != nil || workspace != nil else { return nil }
+        return GoalJourney(goal: goal, workspace: workspace)
+    }
+}
 
 struct TripWorkspaceCollection {
     let usableGoals: [FinancialGoal]

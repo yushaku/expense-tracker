@@ -9,6 +9,157 @@ import Testing
 struct TripWorkspaceTests {
     private let startedAt = Date(timeIntervalSince1970: 1_800_000_000)
 
+    @Test("Either goal or trip entry opens the same journey, including legacy orphan trips")
+    func resolvesOneJourney() throws {
+        let goal = makeGoal()
+        let trip = try TripWorkspaceLifecycle.start(
+            goal: goal, existingWorkspaces: [], id: UUID(), startedAt: startedAt)
+        let fromGoal = try #require(
+            GoalJourney.resolve(
+                goalID: goal.id, workspaceID: nil, goals: [goal], workspaces: [trip]))
+        let fromTrip = try #require(
+            GoalJourney.resolve(
+                goalID: nil, workspaceID: trip.id, goals: [goal], workspaces: [trip]))
+        #expect(fromGoal.workspace?.id == fromTrip.workspace?.id)
+        #expect(fromGoal.goal?.id == fromTrip.goal?.id)
+        #expect(
+            GoalJourney.resolve(
+                goalID: goal.id, workspaceID: nil, goals: [goal], workspaces: [])?.workspace == nil)
+        let orphan = try #require(
+            GoalJourney.resolve(
+                goalID: nil, workspaceID: trip.id, goals: [], workspaces: [trip]))
+        #expect(orphan.goal == nil)
+        #expect(orphan.workspace?.id == trip.id)
+    }
+
+    @Test(
+        "Spending edits preserve savings and expenses, even below the amount already spent",
+        arguments: [15_000_000, 2_000_000])
+    func editSpendingJourney(budget: Int) throws {
+        let container = try ModelContainer(
+            for: Schema(MonMonSchema.models),
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let goal = makeGoal(earmarkedAmount: 12_000_000)
+        goal.targetDate = startedAt.addingTimeInterval(-86_400)
+        try GoalContributionStore.record(
+            amount: 1_000_000, on: goal, id: UUID(), occurredAt: startedAt)
+        let history = goal.contributionHistoryData
+        container.mainContext.insert(goal)
+        let trip = try TripWorkspaceLifecycle.start(
+            goal: goal, existingWorkspaces: [], id: UUID(), startedAt: startedAt,
+            in: container.mainContext)
+        let expense = MoneyTransaction(
+            id: UUID(), kind: .expense, amount: 3_000_000, occurredAt: startedAt,
+            note: "Hotel", accountID: UUID(), categoryID: nil, sourceRuleID: nil,
+            currencyCode: VNDCurrency.code, createdAt: startedAt, tripWorkspaceID: trip.id)
+        container.mainContext.insert(expense)
+        let journey = GoalJourney(goal: goal, workspace: trip)
+        var draft = FinancialGoalDraft(journey: journey)
+        draft.name = "  Hoi An  "
+        draft.symbolName = "sailboat.fill"
+        draft.colorName = "mauve"
+        draft.spendingBudgetText = String(budget)
+        try journey.save(
+            draft: draft, jars: [], goals: [goal], capacityByJar: [:], asOf: startedAt,
+            in: container.mainContext)
+
+        let context = ModelContext(container)
+        let storedGoal = try #require(try context.fetch(FetchDescriptor<FinancialGoal>()).first)
+        let storedTrip = try #require(try context.fetch(FetchDescriptor<TripWorkspace>()).first)
+        #expect(storedGoal.name == "Hoi An")
+        #expect(storedTrip.name == storedGoal.name)
+        #expect(storedTrip.symbolName == storedGoal.symbolName)
+        #expect(storedTrip.colorName == storedGoal.colorName)
+        #expect(storedTrip.id == trip.id)
+        #expect(storedTrip.sourceGoalID == goal.id)
+        #expect(storedTrip.budgetAmount == Decimal(budget))
+        #expect(storedTrip.status == .active)
+        #expect(storedGoal.targetAmount == 30_000_000)
+        #expect(storedGoal.earmarkedAmount == 13_000_000)
+        #expect(storedGoal.contributionHistoryData == history)
+        #expect(storedGoal.targetDate == goal.targetDate)
+        let storedExpenses = try context.fetch(FetchDescriptor<MoneyTransaction>())
+        #expect(storedExpenses.count == 1)
+        #expect(storedExpenses.first?.tripWorkspaceID == trip.id)
+        let summary = TripSummary.snapshot(
+            workspace: storedTrip, transactions: storedExpenses, categories: [])
+        #expect(summary.spentAmount == 3_000_000)
+        #expect(summary.overBudgetAmount == max(0, 3_000_000 - Decimal(budget)))
+    }
+
+    @Test("A sync write lock rolls back both records together")
+    func lockedJourneySaveRollsBack() throws {
+        let container = try ModelContainer(
+            for: Schema(MonMonSchema.models),
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let goal = makeGoal()
+        container.mainContext.insert(goal)
+        let trip = try TripWorkspaceLifecycle.start(
+            goal: goal, existingWorkspaces: [], id: UUID(), startedAt: startedAt,
+            in: container.mainContext)
+        let journey = GoalJourney(goal: goal, workspace: trip)
+        var draft = FinancialGoalDraft(journey: journey)
+        draft.name = "Unsaved"
+        draft.spendingBudgetText = "1000000"
+        SyncWriteGate.lock(container)
+        defer { SyncWriteGate.unlock(container) }
+        #expect(throws: SyncError.sessionPending) {
+            try journey.save(
+                draft: draft, jars: [], goals: [goal], capacityByJar: [:], asOf: startedAt,
+                in: container.mainContext)
+        }
+        #expect(goal.name == "Da Nang")
+        #expect(trip.name == "Da Nang")
+        #expect(trip.budgetAmount == 30_000_000)
+        let storedGoal = try #require(
+            ModelContext(container).fetch(FetchDescriptor<FinancialGoal>()).first)
+        let storedTrip = try #require(
+            ModelContext(container).fetch(FetchDescriptor<TripWorkspace>()).first)
+        #expect(storedGoal.name == "Da Nang")
+        #expect(storedTrip.name == "Da Nang")
+        #expect(storedTrip.budgetAmount == 30_000_000)
+    }
+
+    @Test(
+        "Invalid spending edits leave both records unchanged",
+        arguments: [
+            ("New name", "0", FinancialGoalFormError.invalidSpendingBudget),
+            ("New name", "invalid", FinancialGoalFormError.invalidSpendingBudget),
+            (" \n\t", "10000000", FinancialGoalFormError.emptyName),
+        ])
+    func invalidJourneyEditIsAtomic(name: String, budget: String, error: FinancialGoalFormError)
+        throws
+    {
+        let goal = makeGoal()
+        let trip = try TripWorkspaceLifecycle.start(
+            goal: goal, existingWorkspaces: [], id: UUID(), startedAt: startedAt)
+        let journey = GoalJourney(goal: goal, workspace: trip)
+        var draft = FinancialGoalDraft(journey: journey)
+        draft.name = name
+        draft.spendingBudgetText = budget
+        #expect(throws: error) {
+            try draft.apply(
+                to: journey, jars: [], goals: [goal], capacityByJar: [:], asOf: startedAt)
+        }
+        #expect(goal.name == "Da Nang")
+        #expect(trip.name == "Da Nang")
+        #expect(trip.budgetAmount == 30_000_000)
+    }
+
+    @Test("Completed orphan journeys remain editable without inventing a savings goal")
+    func editOrphanJourney() throws {
+        let trip = workspace(status: .completed, archivedAt: startedAt)
+        let journey = GoalJourney(goal: nil, workspace: trip)
+        var draft = FinancialGoalDraft(journey: journey)
+        draft.name = "Old holiday"
+        try draft.apply(to: journey, jars: [], goals: [], capacityByJar: [:], asOf: startedAt)
+        #expect(trip.name == "Old holiday")
+        #expect(trip.budgetAmount == 30_000_000)
+        #expect(trip.sourceGoalID == nil)
+        #expect(trip.status == .completed)
+        #expect(trip.archivedAt == startedAt)
+    }
+
     @Test("A partially funded goal starts a workspace with its accumulated amount")
     func partiallyFundedGoalStartsWorkspace() throws {
         let goal = makeGoal(earmarkedAmount: 12_000_000)
@@ -20,9 +171,7 @@ struct TripWorkspaceTests {
             id: workspaceID,
             startedAt: startedAt
         )
-        goal.name = "Renamed goal"
         goal.targetAmount = 40_000_000
-        goal.symbolName = "sailboat.fill"
 
         #expect(workspace.id == workspaceID)
         #expect(workspace.sourceGoalID == goal.id)

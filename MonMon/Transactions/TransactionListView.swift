@@ -129,7 +129,7 @@ struct TransactionListView: View {
                     AccountsScreen()
                 case .trip(let workspaceID):
                     if let workspace = tripWorkspaces.first(where: { $0.id == workspaceID }) {
-                        TripDetailView(workspace: workspace)
+                        GoalDetailView(workspace: workspace)
                     } else {
                         ContentUnavailableView(
                             "Trip unavailable",

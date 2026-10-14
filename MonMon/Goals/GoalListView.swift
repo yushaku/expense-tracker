@@ -39,7 +39,7 @@ struct GoalListSnapshot {
                 .sorted { $0.createdAt < $1.createdAt },
             archivedGoals:
                 goals
-                .filter { $0.archivedAt != nil }
+                .filter { $0.archivedAt != nil && !startedGoalIDs.contains($0.id) }
                 .sorted { ($0.archivedAt ?? $0.createdAt) > ($1.archivedAt ?? $1.createdAt) },
             activeTrips: trips.activeWorkspaces,
             completedTrips: trips.completedWorkspaces,
@@ -117,7 +117,7 @@ struct GoalListView: View {
                 )
             }
             .navigationDestination(item: $selectedGoalID) { goalID in
-                GoalDetailView(goalID: goalID, capacityByJar: capacityByJar, asOf: asOf)
+                GoalDetailView(goalID: goalID, asOf: asOf)
             }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -155,15 +155,15 @@ struct GoalListView: View {
                 GoalEmptyState { editorMode = .add }
             } else {
                 goalCollection(title: "Accumulating", goals: snapshot.activeGoals)
-                goalCollection(title: "Completed", goals: snapshot.completedGoals)
+                goalCollection(title: "Ready to spend", goals: snapshot.completedGoals)
                 TripWorkspaceSection(
-                    title: "Active trips",
+                    title: "Spending",
                     workspaces: snapshot.activeTrips,
                     transactions: transactions,
                     categories: categories
                 )
                 TripWorkspaceSection(
-                    title: "Trip history",
+                    title: "Completed",
                     workspaces: snapshot.completedTrips,
                     transactions: transactions,
                     categories: categories
@@ -315,7 +315,7 @@ private struct TripDestinationView: View {
 
     var body: some View {
         if let workspace {
-            TripDetailView(workspace: workspace)
+            GoalDetailView(workspace: workspace)
         } else {
             ContentUnavailableView(
                 "Trip unavailable",

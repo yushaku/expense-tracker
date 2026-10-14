@@ -125,7 +125,7 @@ struct TransactionListSection<Accessory: View>: View {
     private func dayHeader(for group: TransactionHistoryDay) -> some View {
         HStack(spacing: 12) {
             Text(
-                dateFormat.format(group.day)
+                dateFormat.calendarDay(group.day)
                     .uppercased()
             )
             .font(.caption.weight(.semibold))
