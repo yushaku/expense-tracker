@@ -132,10 +132,12 @@ struct BackupRestoreView: View {
                     Label("Restore Backup", systemImage: "arrow.counterclockwise")
                         .settingsButtonLabelStyle()
                 }
-                .buttonStyle(.bordered)
-                .buttonBorderShape(.capsule)
-                .controlSize(.large)
-                .tint(MonMonTheme.danger)
+                .buttonStyle(
+                    ProminentActionButtonStyle(
+                        foreground: MonMonTheme.danger,
+                        background: MonMonTheme.danger.opacity(0.12)
+                    )
+                )
                 .frame(minHeight: 44)
                 .disabled(isWorking)
                 .accessibilityIdentifier("backup-restore")
@@ -266,12 +268,13 @@ struct BackupRestoreView: View {
                 } label: {
                     Label("Back Up and Reset", systemImage: "trash")
                         .settingsButtonLabelStyle()
-                        .padding(.vertical, 4)
                 }
-                .buttonStyle(.bordered)
-                .buttonBorderShape(.capsule)
-                .controlSize(.large)
-                .tint(MonMonTheme.danger)
+                .buttonStyle(
+                    ProminentActionButtonStyle(
+                        foreground: MonMonTheme.danger,
+                        background: MonMonTheme.danger.opacity(0.12)
+                    )
+                )
                 .frame(minHeight: 44)
                 .disabled(isWorking || syncCoordinator.writesLocked)
                 .accessibilityIdentifier("backup-reset")

@@ -17666,6 +17666,66 @@
           }
         }
       }
+    },
+    "This month": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tháng này"
+          }
+        }
+      }
+    },
+    "This year": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Năm nay"
+          }
+        }
+      }
+    },
+    "Reset": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đặt lại"
+          }
+        }
+      }
+    },
+    "Show %lld transactions": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hiển thị %lld giao dịch"
+          }
+        }
+      }
+    },
+    "No matches. Try another period or fewer filters.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không có kết quả. Thử khoảng thời gian khác hoặc bớt điều kiện lọc."
+          }
+        }
+      }
+    },
+    "This week": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tuần này"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

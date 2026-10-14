@@ -2,6 +2,13 @@ import CoreImage.CIFilterBuiltins
 import SwiftUI
 
 struct SyncView: View {
+    enum Presentation {
+        case sheet
+        case navigation
+    }
+
+    var presentation: Presentation = .sheet
+
     @Environment(SyncCoordinator.self) private var sync
     @Environment(AppLock.self) private var appLock
     @Environment(\.scenePhase) private var scenePhase
@@ -11,99 +18,21 @@ struct SyncView: View {
     @State private var confirmUnpair = false
 
     var body: some View {
-        @Bindable var sync = sync
-        NavigationStack {
-            ZStack {
-                MonMonTheme.canvas
-                    .ignoresSafeArea()
-
-                ScrollView {
-                    VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                        statusCard
-
-                        if let error = sync.errorMessage {
-                            banner(
-                                Text(error),
-                                systemImage: "exclamationmark.triangle.fill",
-                                tint: MonMonTheme.danger
-                            )
-                            .accessibilityIdentifier("sync-error")
-                        }
-
-                        if !sync.isPaired {
-                            pairingCard
-                        } else {
-                            if let pairingCode = sync.pairingCode {
-                                qrCard(pairingCode)
-                            }
-
-                            if sync.plan != nil {
-                                review
-                            }
-                        }
-
-                        if sync.hasPending {
-                            banner(
-                                Text(
-                                    "A sync is unfinished. MonMon will reconnect automatically while both apps are open. Saved data will not be applied twice."
-                                ),
-                                systemImage: "clock.arrow.circlepath",
-                                tint: MonMonTheme.savings
-                            )
-                        }
-
-                        historyCard
-                        aboutCard
-                    }
-                    .frame(maxWidth: MonMonTheme.maxContentWidth)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
-                    .frame(maxWidth: .infinity)
+        Group {
+            switch presentation {
+            case .sheet:
+                NavigationStack {
+                    syncContent
+                        .compactRootNavigationTitle("Device Sync")
                 }
+                #if os(macOS)
+                    .frame(width: 720, height: 740)
+                #endif
+            case .navigation:
+                syncContent
             }
-            .compactRootNavigationTitle("Device Sync")
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button("Close", systemImage: "xmark") {
-                        dismiss()
-                    }
-                    .labelStyle(.iconOnly)
-                    .tint(MonMonTheme.textSecondary)
-                    .disabled(sync.writesLocked)
-                    .accessibilityIdentifier("sync-close")
-                }
-            }
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                actions
-            }
-            .interactiveDismissDisabled(sync.writesLocked)
-            .task {
-                sync.connectIfPaired()
-                sync.automaticSyncTick()
-            }
-            .onChange(of: sync.choices) { _, _ in sync.updatePreview() }
-            .onChange(of: appLock.isLocked) { _, locked in if locked { sync.disconnect() } }
-            .onChange(of: scenePhase) { _, phase in if phase == .background { sync.disconnect() } }
-            .confirmationDialog(
-                "Unpair this device?", isPresented: $confirmUnpair, titleVisibility: .visible
-            ) {
-                Button("Unpair", role: .destructive) { sync.unpair() }
-            } message: {
-                Text("Your local data stays intact. Pair again to sync with another device.")
-            }
-            #if os(iOS)
-                .appSheet(isPresented: $showScanner) {
-                    SyncQRScanner { result in
-                        showScanner = false
-                        if let result { sync.acceptPairing(result) }
-                    }
-                }
-            #endif
         }
         .tint(MonMonTheme.accent)
-        #if os(macOS)
-            .frame(width: 720, height: 740)
-        #endif
         .privacySensitive()
         .accessibilityHidden(appLock.isLocked)
         .overlay {
@@ -114,6 +43,101 @@ struct SyncView: View {
                 }
             }
         }
+    }
+
+    @ViewBuilder
+    private var syncContent: some View {
+        @Bindable var sync = sync
+        ZStack {
+            MonMonTheme.canvas
+                .ignoresSafeArea()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+                    statusCard
+
+                    if let error = sync.errorMessage {
+                        banner(
+                            Text(error),
+                            systemImage: "exclamationmark.triangle.fill",
+                            tint: MonMonTheme.danger
+                        )
+                        .accessibilityIdentifier("sync-error")
+                    }
+
+                    if !sync.isPaired {
+                        pairingCard
+                    } else {
+                        if let pairingCode = sync.pairingCode {
+                            qrCard(pairingCode)
+                        }
+
+                        if sync.plan != nil {
+                            review
+                        }
+                    }
+
+                    if sync.hasPending {
+                        banner(
+                            Text(
+                                "A sync is unfinished. MonMon will reconnect automatically while both apps are open. Saved data will not be applied twice."
+                            ),
+                            systemImage: "clock.arrow.circlepath",
+                            tint: MonMonTheme.savings
+                        )
+                    }
+
+                    historyCard
+                    aboutCard
+                }
+                .frame(maxWidth: MonMonTheme.maxContentWidth)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .navigationTitle("Device Sync")
+        .navigationBarBackButtonHidden(presentation == .navigation && sync.writesLocked)
+        .toolbar {
+            if presentation == .sheet {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Close", systemImage: "xmark") {
+                        dismiss()
+                    }
+                    .labelStyle(.iconOnly)
+                    .tint(MonMonTheme.textSecondary)
+                    .disabled(sync.writesLocked)
+                    .accessibilityIdentifier("sync-close")
+                }
+            }
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            actions
+        }
+        .interactiveDismissDisabled(sync.writesLocked)
+        .task {
+            sync.refresh()
+            sync.connectIfPaired()
+            sync.automaticSyncTick()
+        }
+        .onChange(of: sync.choices) { _, _ in sync.updatePreview() }
+        .onChange(of: appLock.isLocked) { _, locked in if locked { sync.disconnect() } }
+        .onChange(of: scenePhase) { _, phase in if phase == .background { sync.disconnect() } }
+        .confirmationDialog(
+            "Unpair this device?", isPresented: $confirmUnpair, titleVisibility: .visible
+        ) {
+            Button("Unpair", role: .destructive) { sync.unpair() }
+        } message: {
+            Text("Your local data stays intact. Pair again to sync with another device.")
+        }
+        #if os(iOS)
+            .appSheet(isPresented: $showScanner) {
+                SyncQRScanner { result in
+                    showScanner = false
+                    if let result { sync.acceptPairing(result) }
+                }
+            }
+        #endif
     }
 
     // MARK: - Status

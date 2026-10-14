@@ -206,10 +206,7 @@ struct RootTabView: View {
 /// Keeps Settings one tap away from each root screen without taking a tab slot.
 private struct RootScreenHeader: ViewModifier {
     let title: LocalizedStringKey
-    let showsSync: Bool
-    @Environment(SyncCoordinator.self) private var syncCoordinator
-    @State private var isShowingSettings = false
-    @State private var opensSyncAfterSettings = false
+    @Environment(AppRoute.self) private var appRoute
 
     private var placement: ToolbarItemPlacement {
         #if os(iOS)
@@ -223,19 +220,6 @@ private struct RootScreenHeader: ViewModifier {
         content
             .compactRootNavigationTitle("")
             .toolbar {
-                if showsSync && syncCoordinator.isPaired {
-                    ToolbarItem(placement: .automatic) {
-                        Button {
-                            syncCoordinator.isPresented = true
-                        } label: {
-                            Image(systemName: syncSymbol)
-                        }
-                        .accessibilityLabel(
-                            Text(LocalizedStringKey(syncCoordinator.phase.rawValue))
-                        )
-                        .accessibilityIdentifier("open-sync-status")
-                    }
-                }
                 if #available(iOS 26.0, macOS 26.0, *) {
                     headerItem
                         .sharedBackgroundVisibility(.hidden)
@@ -243,48 +227,28 @@ private struct RootScreenHeader: ViewModifier {
                     headerItem
                 }
             }
-            .appSheet(
-                isPresented: $isShowingSettings,
-                onDismiss: {
-                    guard opensSyncAfterSettings else { return }
-                    opensSyncAfterSettings = false
-                    // The root can present Sync only after the Settings sheet is gone.
-                    syncCoordinator.refresh()
-                    syncCoordinator.isPresented = true
-                }
-            ) {
-                SettingsView {
-                    opensSyncAfterSettings = true
-                    isShowingSettings = false
-                }
-            }
     }
 
-    private var syncSymbol: String {
-        if syncCoordinator.phase == .review { return "exclamationmark.arrow.triangle.2.circlepath" }
-        if syncCoordinator.hasPending || syncCoordinator.errorMessage != nil {
-            return "exclamationmark.triangle"
-        }
-        if syncCoordinator.pendingChangeCount > 0 { return "arrow.triangle.2.circlepath" }
-        return syncCoordinator.phase == .complete ? "checkmark.circle" : "laptopcomputer.and.iphone"
+    private var headerTitle: some View {
+        Text(title)
+            .font(.headline)
+            .foregroundStyle(MonMonTheme.textPrimary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.85)
     }
 
     private var headerItem: some ToolbarContent {
         ToolbarItem(placement: placement) {
             Button {
-                isShowingSettings = true
+                appRoute.isShowingSettings = true
             } label: {
-                Label {
-                    Text(title)
-                        .font(.headline)
-                        .foregroundStyle(MonMonTheme.textPrimary)
-                        .lineLimit(1)
-                } icon: {
+                HStack(spacing: 8) {
                     AvatarImage(size: 35.2)
-                        .frame(minWidth: 44, minHeight: 44)
+                        .frame(width: 44, height: 44)
+
+                    headerTitle
                 }
-                // Toolbar labels otherwise adapt to icon-only presentation.
-                .labelStyle(.titleAndIcon)
+                // Reserve space for both parts instead of allowing the toolbar to collapse the title.
                 .fixedSize(horizontal: true, vertical: false)
                 .contentShape(Rectangle())
             }
@@ -298,8 +262,8 @@ private struct RootScreenHeader: ViewModifier {
 }
 
 extension View {
-    func rootScreenHeader(_ title: LocalizedStringKey, showsSync: Bool = false) -> some View {
-        modifier(RootScreenHeader(title: title, showsSync: showsSync))
+    func rootScreenHeader(_ title: LocalizedStringKey) -> some View {
+        modifier(RootScreenHeader(title: title))
     }
 }
 

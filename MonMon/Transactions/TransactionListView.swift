@@ -66,14 +66,6 @@ struct TransactionListView: View {
                             importStatusCard
                         }
 
-                        if query.isNarrowed {
-                            TransactionFilterChips(
-                                query: $query,
-                                categories: categories,
-                                accounts: accounts
-                            )
-                        }
-
                         if accounts.isEmpty {
                             noAccountState
                         } else {
@@ -119,8 +111,12 @@ struct TransactionListView: View {
                 monthRail
             }
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    importInboxButton
+                ToolbarItemGroup(placement: .primaryAction) {
+                    searchAndFilterButton
+
+                    if hasPendingImports {
+                        importInboxButton
+                    }
                 }
             }
             .navigationDestination(for: DayPeriod.self) { period in
@@ -145,19 +141,33 @@ struct TransactionListView: View {
             .navigationDestination(for: AccountDetailRoute.self) { route in
                 AccountDetailView(route: route)
             }
-            .rootScreenHeader("Transactions", showsSync: true)
+            .rootScreenHeader("Transactions")
+            // Match the pinned month rail, including when content scrolls under the toolbar.
+            #if os(macOS)
+                .toolbarBackground(MonMonTheme.canvas, for: .windowToolbar)
+                .toolbarBackgroundVisibility(.visible, for: .windowToolbar)
+            #else
+                .toolbarBackground(MonMonTheme.canvas, for: .navigationBar)
+                .toolbarBackgroundVisibility(.visible, for: .navigationBar)
+            #endif
             .accessibilityIdentifier("spending-list")
             .appSheet(item: $editorMode) { mode in
                 TransactionEditorView(mode: mode, defaultDate: defaultDate)
             }
             .appSheet(isPresented: $isFiltering) {
-                ReportFilterSheet(
+                TransactionFilterSheet(
                     query: $query,
                     categories: categories,
-                    accounts: accounts,
-                    focusesSearchOnAppear: true,
-                    identifierPrefix: "spending-"
-                )
+                    accounts: accounts
+                ) { draft in
+                    TransactionSearch.results(
+                        of: draft, transactions: transactions,
+                        categoryNames: categoryNames, accountNames: accountNames
+                    ).count
+                        + TransactionSearch.transferResults(
+                            of: draft, transfers: transfers, accountNames: accountNames
+                        ).count
+                }
             }
             .appSheet(isPresented: $isManagingCategories) {
                 CategoryListView()
@@ -540,23 +550,9 @@ struct TransactionListView: View {
     /// The months either side of the one on show, pinned under the navigation
     /// bar so a month is one tap away wherever the screen is scrolled to.
     private var monthRail: some View {
-        HStack(spacing: 8) {
-            PeriodRail(unit: .month, periods: railMonths, selection: selectedMonth) { month in
-                query.range = .month(containing: month)
-            }
-
-            TransactionSearchButton(
-                isActive: query.hasSearchText,
-                accessibilityIdentifier: "open-spending-search"
-            ) {
-                isFiltering = true
-            }
-            .frame(minWidth: 44, minHeight: 44)
-
-            DateRangeFilterButton(range: $query.range, systemImage: "calendar")
-                .frame(minWidth: 44, minHeight: 44)
+        PeriodRail(unit: .month, periods: railMonths, selection: selectedMonth) { month in
+            query.range = .month(containing: month)
         }
-        .padding(.trailing, 12)
         .background(MonMonTheme.canvas)
         .overlay(alignment: .bottom) {
             Rectangle()
@@ -575,6 +571,46 @@ struct TransactionListView: View {
     }
 
     private var transactionsSection: some View {
+        VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+            if query.isNarrowed || query.range != .month(containing: .now) {
+                TransactionFilterChips(
+                    query: $query,
+                    categories: categories,
+                    accounts: accounts,
+                    includesPeriod: true
+                )
+            }
+
+            transactionHistory
+        }
+    }
+
+    private var searchAndFilterButton: some View {
+        Button {
+            isFiltering = true
+        } label: {
+            Image(
+                systemName: hasActiveFilters
+                    ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease"
+            )
+            .font(.footnote.weight(.bold))
+            .foregroundStyle(hasActiveFilters ? MonMonTheme.accent : MonMonTheme.textPrimary)
+            .frame(width: 44, height: 44)
+            .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Filters")
+        .accessibilityValue(
+            query.range.title(in: locale, dateFormat: dateFormat) + " " + query.trimmedText
+        )
+        .accessibilityIdentifier("open-spending-search")
+    }
+
+    private var hasActiveFilters: Bool {
+        query.isNarrowed || query.range != .month(containing: .now)
+    }
+
+    private var transactionHistory: some View {
         TransactionListSection(
             title: "Transactions",
             transactions: visibleTransactions,

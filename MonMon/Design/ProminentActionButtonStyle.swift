@@ -10,18 +10,20 @@ import SwiftUI
 /// capsule with `onAccent` text, so the two read as the same control family.
 struct ProminentActionButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
+    var foreground: Color = MonMonTheme.onAccent
+    var background: Color = MonMonTheme.accent
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.subheadline.weight(.semibold))
-            .foregroundStyle(MonMonTheme.onAccent)
+            .foregroundStyle(foreground)
             .lineLimit(1)
             .minimumScaleFactor(0.7)
             .padding(.vertical, 12)
             .padding(.horizontal, 20)
             .background {
                 Capsule(style: .continuous)
-                    .fill(MonMonTheme.accent)
+                    .fill(background)
             }
             .opacity(isEnabled ? (configuration.isPressed ? 0.72 : 1) : 0.45)
             .contentShape(Capsule(style: .continuous))

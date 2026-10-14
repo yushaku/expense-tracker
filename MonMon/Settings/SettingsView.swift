@@ -2,12 +2,11 @@ import SwiftData
 import SwiftUI
 
 struct SettingsView: View {
-    let onOpenDeviceSync: () -> Void
-
     @Environment(\.dismiss) private var dismiss
     @Environment(AppLock.self) private var appLock
     @Environment(NotificationCoordinator.self) private var notificationCoordinator
     @Environment(\.modelContext) private var modelContext
+    @Environment(SyncCoordinator.self) private var syncCoordinator
 
     @Environment(\.locale) private var locale
 
@@ -16,6 +15,12 @@ struct SettingsView: View {
     @AppStorage(AppLock.enabledKey) private var isLockEnabled = false
     @AppStorage(AppDateFormat.storageKey) private var dateFormat = AppDateFormat.dayMonthYear
     @State private var instrumentScope: FundInstrumentListScope?
+    @State private var path: [Destination] = []
+    @State private var editingToken = UUID()
+
+    private enum Destination: Hashable {
+        case deviceSync
+    }
 
     var body: some View {
         #if os(macOS)
@@ -27,7 +32,7 @@ struct SettingsView: View {
     }
 
     private var settingsContent: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             ZStack {
                 MonMonTheme.canvas
                     .ignoresSafeArea()
@@ -37,6 +42,8 @@ struct SettingsView: View {
                         card { AvatarSettingsContent() }
                         appearanceCard
                         instrumentsCard
+                        TransactionDefaultsCard()
+                            .accessibilityIdentifier("settings-transaction-defaults")
                         card {
                             NavigationLink {
                                 SalaryCalculatorView()
@@ -51,21 +58,6 @@ struct SettingsView: View {
                             }
                             .settingsButtonLabelStyle()
                             .accessibilityIdentifier("settings-salary-calculator")
-                        }
-                        card {
-                            NavigationLink {
-                                TransactionDefaultsView()
-                            } label: {
-                                HStack {
-                                    Label("Transaction default", systemImage: "slider.horizontal.3")
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .accessibilityHidden(true)
-                                }
-                                .frame(minHeight: 44)
-                            }
-                            .settingsButtonLabelStyle()
-                            .accessibilityIdentifier("settings-transaction-defaults")
                         }
                         card {
                             NavigationLink {
@@ -117,23 +109,17 @@ struct SettingsView: View {
                             }
                         #endif
                         card {
-                            VStack(alignment: .leading, spacing: 14) {
-                                sectionHeader(
-                                    "Device Sync", systemImage: "laptopcomputer.and.iphone")
-                                Text(
-                                    "Changes sync automatically with your paired device on the same Wi-Fi. Only conflicts need your review."
-                                )
-                                .font(.subheadline).foregroundStyle(MonMonTheme.textSecondary)
-                                Button(
-                                    "Open Device Sync",
-                                    systemImage: "laptopcomputer.and.iphone"
-                                ) {
-                                    onOpenDeviceSync()
+                            NavigationLink(value: Destination.deviceSync) {
+                                HStack {
+                                    Label("Device Sync", systemImage: "laptopcomputer.and.iphone")
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .accessibilityHidden(true)
                                 }
-                                .buttonStyle(.prominentAction)
-                                .settingsButtonLabelStyle()
-                                .accessibilityIdentifier("settings-device-sync")
+                                .frame(minHeight: 44)
                             }
+                            .settingsButtonLabelStyle()
+                            .accessibilityIdentifier("settings-device-sync")
                         }
                         notificationCard
                         securityCard
@@ -149,12 +135,20 @@ struct SettingsView: View {
                     .frame(maxWidth: .infinity)
                 }
             }
+            .id(syncCoordinator.contentRevision)
             .compactRootNavigationTitle("Settings")
+            .navigationDestination(for: Destination.self) { destination in
+                switch destination {
+                case .deviceSync:
+                    SyncView(presentation: .navigation)
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Close", systemImage: "xmark") { dismiss() }
                         .labelStyle(.iconOnly)
                         .tint(MonMonTheme.textSecondary)
+                        .disabled(syncCoordinator.writesLocked)
                         .accessibilityIdentifier("settings-done")
                 }
             }
@@ -171,6 +165,17 @@ struct SettingsView: View {
                     )
                 }
             }
+        }
+        // Settings edits pause sync; its Device Sync destination must allow it to run.
+        .onAppear { syncCoordinator.setEditing(path.isEmpty, token: editingToken) }
+        .onDisappear { syncCoordinator.setEditing(false, token: editingToken) }
+        .onChange(of: path) { _, newPath in
+            syncCoordinator.setEditing(newPath.isEmpty, token: editingToken)
+        }
+        .onChange(of: syncCoordinator.isPresented, initial: true) { _, requested in
+            guard requested else { return }
+            if path.isEmpty { path = [.deviceSync] }
+            syncCoordinator.isPresented = false
         }
     }
 
@@ -419,7 +424,7 @@ extension View {
 
 #if DEBUG
     #Preview("Settings") {
-        SettingsView(onOpenDeviceSync: {})
+        SettingsView()
             .environment(AppLock(isLocked: false))
             .environment(NotificationCoordinator())
             .modelContainer(PreviewData.populated)

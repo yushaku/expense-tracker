@@ -143,18 +143,21 @@ struct MonMonApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .id(syncCoordinator.contentRevision)
                 .alert("Backup", isPresented: $syncCoordinator.isPresentingResetNotice) {
                     Button("OK", role: .cancel) {}
                 } message: {
                     Text("Database reset complete. Find your backup in Settings → Backup.")
                 }
-                .disabled(syncCoordinator.writesLocked)
                 .environment(syncCoordinator)
                 .environment(appLock)
                 .environment(appRoute)
                 .environment(notificationCoordinator)
-                .sheet(isPresented: $syncCoordinator.isPresented) {
+                .sheet(
+                    isPresented: Binding(
+                        get: { syncCoordinator.isPresented && !appRoute.isShowingSettings },
+                        set: { syncCoordinator.isPresented = $0 }
+                    )
+                ) {
                     SyncView()
                         .environment(syncCoordinator)
                         .environment(appLock)
