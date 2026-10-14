@@ -17726,6 +17726,26 @@
           }
         }
       }
+    },
+    "Rename trip": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đổi tên chuyến đi"
+          }
+        }
+      }
+    },
+    "Trip name": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tên chuyến đi"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -9,6 +9,53 @@ import Testing
 struct TripWorkspaceTests {
     private let startedAt = Date(timeIntervalSince1970: 1_800_000_000)
 
+    @Test("Renaming an active trip persists its name without changing its goal or budget")
+    func renameActiveTrip() throws {
+        let container = try ModelContainer(
+            for: Schema(MonMonSchema.models),
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let goal = makeGoal()
+        container.mainContext.insert(goal)
+        let workspace = try TripWorkspaceLifecycle.start(
+            goal: goal, existingWorkspaces: [], id: UUID(), startedAt: startedAt,
+            in: container.mainContext
+        )
+        let originalID = workspace.id
+
+        try TripWorkspaceLifecycle.rename(workspace, to: "  Hoi An \n", in: container.mainContext)
+
+        let context = ModelContext(container)
+        let stored = try #require(try context.fetch(FetchDescriptor<TripWorkspace>()).first)
+        let storedGoal = try #require(try context.fetch(FetchDescriptor<FinancialGoal>()).first)
+        #expect(stored.name == "Hoi An")
+        #expect(stored.id == originalID)
+        #expect(stored.sourceGoalID == goal.id)
+        #expect(stored.budgetAmount == 30_000_000)
+        #expect(stored.fundingJarID == BudgetJarSeed.savingsID)
+        #expect(stored.status == .active)
+        #expect(stored.startedAt == startedAt)
+        #expect(storedGoal.name == "Da Nang")
+        #expect(storedGoal.earmarkedAmount == 30_000_000)
+    }
+
+    @Test("A blank trip name is rejected without changing the saved name")
+    func renameRejectsBlankName() throws {
+        let container = try ModelContainer(
+            for: Schema(MonMonSchema.models),
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let workspace = workspace(status: .active)
+        container.mainContext.insert(workspace)
+        try container.mainContext.save()
+
+        #expect(throws: TripWorkspaceLifecycleError.emptyName) {
+            try TripWorkspaceLifecycle.rename(workspace, to: " \n\t ", in: container.mainContext)
+        }
+        #expect(workspace.name == "Da Nang")
+        #expect(!container.mainContext.hasChanges)
+    }
+
     @Test("A partially funded goal starts a workspace with its accumulated amount")
     func partiallyFundedGoalStartsWorkspace() throws {
         let goal = makeGoal(earmarkedAmount: 12_000_000)
