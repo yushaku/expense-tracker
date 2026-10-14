@@ -206,9 +206,7 @@ struct RootTabView: View {
 /// Keeps Settings one tap away from each root screen without taking a tab slot.
 private struct RootScreenHeader: ViewModifier {
     let title: LocalizedStringKey
-    @Environment(SyncCoordinator.self) private var syncCoordinator
-    @State private var isShowingSettings = false
-    @State private var opensSyncAfterSettings = false
+    @Environment(AppRoute.self) private var appRoute
 
     private var placement: ToolbarItemPlacement {
         #if os(iOS)
@@ -229,21 +227,6 @@ private struct RootScreenHeader: ViewModifier {
                     headerItem
                 }
             }
-            .appSheet(
-                isPresented: $isShowingSettings,
-                onDismiss: {
-                    guard opensSyncAfterSettings else { return }
-                    opensSyncAfterSettings = false
-                    // The root can present Sync only after the Settings sheet is gone.
-                    syncCoordinator.refresh()
-                    syncCoordinator.isPresented = true
-                }
-            ) {
-                SettingsView {
-                    opensSyncAfterSettings = true
-                    isShowingSettings = false
-                }
-            }
     }
 
     private var headerTitle: some View {
@@ -257,7 +240,7 @@ private struct RootScreenHeader: ViewModifier {
     private var headerItem: some ToolbarContent {
         ToolbarItem(placement: placement) {
             Button {
-                isShowingSettings = true
+                appRoute.isShowingSettings = true
             } label: {
                 HStack(spacing: 8) {
                     AvatarImage(size: 35.2)

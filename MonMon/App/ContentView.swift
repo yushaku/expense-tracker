@@ -4,6 +4,7 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(AppLock.self) private var appLock
     @Environment(AppRoute.self) private var appRoute
+    @Environment(SyncCoordinator.self) private var syncCoordinator
 
     @AppStorage(AppTheme.storageKey) private var theme = AppTheme.system
     @AppStorage(AppLanguage.storageKey) private var language = AppLanguage.system
@@ -11,7 +12,15 @@ struct ContentView: View {
     @AppStorage(AppDateFormat.storageKey) private var dateFormat = AppDateFormat.dayMonthYear
 
     var body: some View {
+        @Bindable var appRoute = appRoute
         RootTabView()
+            // Refresh model-backed screens after sync without dismissing Settings.
+            .id(syncCoordinator.contentRevision)
+            .disabled(syncCoordinator.writesLocked)
+            .sheet(isPresented: $appRoute.isShowingSettings) {
+                SettingsView()
+                    .presentationContentInteraction(AppSheetPresentation.contentInteraction)
+            }
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
             // Reading the stored theme here as well as through
