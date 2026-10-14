@@ -3,10 +3,12 @@ import SwiftUI
 
 struct PendingTransactionCaptureListView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.locale) private var locale
 
     @Query(sort: \PendingTransactionCapture.createdAt, order: .reverse)
     private var captures: [PendingTransactionCapture]
+
+    @Query private var categories: [TransactionCategory]
+    @Query private var accounts: [CashAccount]
 
     @State private var selectedCapture: PendingTransactionCapture?
 
@@ -56,45 +58,16 @@ struct PendingTransactionCaptureListView: View {
         Button {
             selectedCapture = capture
         } label: {
-            HStack(spacing: 14) {
-                Image(systemName: "waveform.badge.exclamationmark")
-                    .font(.title3)
-                    .foregroundStyle(MonMonTheme.credit)
-                    .frame(width: 44, height: 44)
-                    .background(
-                        MonMonTheme.credit.opacity(0.16),
-                        in: RoundedRectangle(cornerRadius: 12)
-                    )
-                    .accessibilityHidden(true)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(capture.rawText)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(MonMonTheme.textPrimary)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
-
-                    Text(captureSummary(capture))
-                        .font(.caption)
-                        .foregroundStyle(MonMonTheme.textSecondary)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
-                }
-
-                Spacer(minLength: 8)
-
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(MonMonTheme.textMuted)
-                    .accessibilityHidden(true)
-            }
-            .padding(14)
-            .frame(maxWidth: .infinity, minHeight: 72, alignment: .leading)
-            .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 16))
-            .overlay {
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(MonMonTheme.border, lineWidth: 1)
-            }
+            TransactionCardContent(
+                kind: capture.kind,
+                amount: capture.amount,
+                occurredAt: capture.occurredAt,
+                note: capture.note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    ? capture.rawText : capture.note,
+                category: categories.first { $0.id == capture.categoryID },
+                account: accounts.first { $0.id == capture.accountID }
+            )
+            .multilineTextAlignment(.leading)
             .contentShape(RoundedRectangle(cornerRadius: 16))
         }
         .buttonStyle(.plain)
@@ -102,14 +75,4 @@ struct PendingTransactionCaptureListView: View {
         .accessibilityIdentifier("review-capture-\(capture.id.uuidString)")
     }
 
-    private func captureSummary(_ capture: PendingTransactionCapture) -> String {
-        var parts: [String] = []
-        if let amount = capture.amount {
-            parts.append(VNDCurrency.format(amount))
-        } else {
-            parts.append(AppText.string("Amount missing", in: locale))
-        }
-        parts.append(capture.kind.displayName(in: locale))
-        return parts.joined(separator: " · ")
-    }
 }
