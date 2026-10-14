@@ -224,12 +224,16 @@ private struct RootScreenHeader: ViewModifier {
             .compactRootNavigationTitle("")
             .toolbar {
                 if showsSync && syncCoordinator.isPaired {
-                    ToolbarItem(placement: .automatic) {
+                    ToolbarItem(placement: .primaryAction) {
                         Button {
                             syncCoordinator.isPresented = true
                         } label: {
                             Image(systemName: syncSymbol)
+                                .frame(width: 32, height: 32)
+                                .contentShape(Rectangle())
                         }
+                        .buttonStyle(.plain)
+                        .headerIconStyle()
                         .accessibilityLabel(
                             Text(LocalizedStringKey(syncCoordinator.phase.rawValue))
                         )
@@ -279,13 +283,13 @@ private struct RootScreenHeader: ViewModifier {
                         .font(.headline)
                         .foregroundStyle(MonMonTheme.textPrimary)
                         .lineLimit(1)
+                        .minimumScaleFactor(0.85)
                 } icon: {
                     AvatarImage(size: 35.2)
-                        .frame(minWidth: 44, minHeight: 44)
+                        .frame(width: 44, height: 44)
                 }
                 // Toolbar labels otherwise adapt to icon-only presentation.
                 .labelStyle(.titleAndIcon)
-                .fixedSize(horizontal: true, vertical: false)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)

@@ -559,10 +559,10 @@ struct TransactionListView: View {
             ) {
                 isFiltering = true
             }
-            .frame(minWidth: 44, minHeight: 44)
+            .frame(width: 44, height: 44)
 
             DateRangeFilterButton(range: $query.range, systemImage: "calendar")
-                .frame(minWidth: 44, minHeight: 44)
+                .frame(width: 44, height: 44)
         }
         .padding(.trailing, 12)
         .background(MonMonTheme.canvas)
