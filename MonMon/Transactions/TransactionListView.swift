@@ -66,14 +66,6 @@ struct TransactionListView: View {
                             importStatusCard
                         }
 
-                        if query.isNarrowed {
-                            TransactionFilterChips(
-                                query: $query,
-                                categories: categories,
-                                accounts: accounts
-                            )
-                        }
-
                         if accounts.isEmpty {
                             noAccountState
                         } else {
@@ -553,16 +545,9 @@ struct TransactionListView: View {
                 query.range = .month(containing: month)
             }
 
-            TransactionSearchButton(
-                isActive: query.hasSearchText,
-                accessibilityIdentifier: "open-spending-search"
-            ) {
-                isFiltering = true
-            }
-            .frame(minWidth: 44, minHeight: 44)
-
-            DateRangeFilterButton(range: $query.range, systemImage: "calendar")
-                .frame(minWidth: 44, minHeight: 44)
+            DateRangeFilterButton(
+                range: $query.range, systemImage: "calendar", hitTargetSize: 44
+            )
         }
         .padding(.trailing, 12)
         .background(MonMonTheme.canvas)
@@ -583,6 +568,59 @@ struct TransactionListView: View {
     }
 
     private var transactionsSection: some View {
+        VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+            searchAndFilterButton
+
+            if query.isNarrowed {
+                TransactionFilterChips(
+                    query: $query,
+                    categories: categories,
+                    accounts: accounts
+                )
+            }
+
+            transactionHistory
+        }
+    }
+
+    private var searchAndFilterButton: some View {
+        Button {
+            isFiltering = true
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "magnifyingglass")
+                    .accessibilityHidden(true)
+
+                if query.hasSearchText {
+                    Text(query.trimmedText)
+                } else {
+                    Text("Search & Filters")
+                }
+
+                Spacer(minLength: 8)
+
+                Image(
+                    systemName: query.hasStructuredFilters
+                        ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease"
+                )
+                .accessibilityHidden(true)
+            }
+            .font(.subheadline)
+            .lineLimit(1)
+            .foregroundStyle(query.isNarrowed ? MonMonTheme.accent : MonMonTheme.textSecondary)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+            .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 12))
+            .contentShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Search & Filters")
+        .accessibilityValue(query.trimmedText)
+        .accessibilityIdentifier("open-spending-search")
+    }
+
+    private var transactionHistory: some View {
         TransactionListSection(
             title: "Transactions",
             transactions: visibleTransactions,
