@@ -1,10 +1,6 @@
 import SwiftUI
 
 struct TransactionCard: View {
-    @Environment(\.appDateFormat) private var dateFormat
-
-    @Environment(\.locale) private var locale
-
     let transaction: MoneyTransaction
     let category: TransactionCategory?
     let account: CashAccount?
@@ -12,6 +8,37 @@ struct TransactionCard: View {
     /// The shared transaction list puts one date over each day of cards, so
     /// the card drops its own copy there and keeps it everywhere else.
     var showsDate = true
+
+    var body: some View {
+        TransactionCardContent(
+            kind: transaction.kind,
+            amount: transaction.amount,
+            occurredAt: transaction.occurredAt,
+            note: transaction.note,
+            category: category,
+            account: account,
+            tripName: tripName,
+            showsDate: showsDate,
+            isRecurring: transaction.sourceRuleID != nil
+        )
+    }
+}
+
+/// Shared appearance for saved transactions and captures awaiting review.
+/// A capture can have no amount yet; it must not look like a zero-value transaction.
+struct TransactionCardContent: View {
+    @Environment(\.appDateFormat) private var dateFormat
+    @Environment(\.locale) private var locale
+
+    let kind: TransactionKind
+    let amount: Decimal?
+    let occurredAt: Date
+    let note: String
+    let category: TransactionCategory?
+    let account: CashAccount?
+    var tripName: String? = nil
+    var showsDate = true
+    var isRecurring = false
 
     var body: some View {
         HStack(spacing: 14) {
@@ -25,7 +52,7 @@ struct TransactionCard: View {
 
                     // Marks what a rule recorded, so an entry the owner does not
                     // remember typing is explained rather than suspicious.
-                    if transaction.sourceRuleID != nil {
+                    if isRecurring {
                         Image(systemName: "arrow.triangle.2.circlepath")
                             .font(.caption2.weight(.bold))
                             .foregroundStyle(MonMonTheme.textSecondary)
@@ -54,8 +81,8 @@ struct TransactionCard: View {
                 .lineLimit(1)
                 .labelStyle(.titleAndIcon)
 
-                if !note.isEmpty {
-                    Text(note)
+                if !displayNote.isEmpty {
+                    Text(displayNote)
                         .font(.subheadline)
                         .foregroundStyle(MonMonTheme.textSecondary)
                         .lineLimit(2)
@@ -64,7 +91,7 @@ struct TransactionCard: View {
 
             Spacer(minLength: 12)
 
-            amount
+            amountLabel
         }
         .padding(16)
         .background {
@@ -87,10 +114,10 @@ struct TransactionCard: View {
             .accessibilityHidden(true)
     }
 
-    private var amount: some View {
+    private var amountLabel: some View {
         VStack(alignment: .trailing, spacing: 3) {
             // The sign carries the direction; colour only reinforces it.
-            Text("\(transaction.kind.signLabel)\(VNDCurrency.format(transaction.amount))")
+            Text(amountText)
                 .font(.headline)
                 .monospacedDigit()
                 .lineLimit(1)
@@ -99,13 +126,20 @@ struct TransactionCard: View {
 
             Label(
                 showsDate
-                    ? dateFormat.format(transaction.occurredAt)
-                    : transaction.kind.displayName(in: locale),
-                systemImage: transaction.kind.symbolName
+                    ? dateFormat.format(occurredAt)
+                    : kind.displayName(in: locale),
+                systemImage: kind.symbolName
             )
             .font(.caption2.weight(.semibold))
             .foregroundStyle(MonMonTheme.textSecondary)
         }
+    }
+
+    private var amountText: String {
+        guard let amount else {
+            return AppText.string("Amount missing", in: locale)
+        }
+        return "\(kind.signLabel)\(VNDCurrency.format(amount))"
     }
 
     private var categoryName: String {
@@ -116,13 +150,13 @@ struct TransactionCard: View {
         account?.name ?? AppText.string("Unknown account", in: locale)
     }
 
-    private var note: String {
-        transaction.note.trimmingCharacters(in: .whitespacesAndNewlines)
+    private var displayNote: String {
+        note.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private var symbolName: String {
         guard let category else {
-            return transaction.kind.symbolName
+            return kind.symbolName
         }
 
         return CategoryPalette.symbolName(category.symbolName)
@@ -137,6 +171,6 @@ struct TransactionCard: View {
     }
 
     private var directionTint: Color {
-        transaction.kind == .income ? MonMonTheme.gain : MonMonTheme.textPrimary
+        kind == .income ? MonMonTheme.gain : MonMonTheme.textPrimary
     }
 }
