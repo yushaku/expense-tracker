@@ -111,8 +111,14 @@ struct TransactionListView: View {
                 monthRail
             }
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    importInboxButton
+                ToolbarItemGroup(placement: .primaryAction) {
+                    DateRangeFilterButton(range: $query.range, systemImage: "calendar")
+
+                    searchAndFilterButton
+
+                    if hasPendingImports {
+                        importInboxButton
+                    }
                 }
             }
             .navigationDestination(for: DayPeriod.self) { period in
@@ -137,7 +143,7 @@ struct TransactionListView: View {
             .navigationDestination(for: AccountDetailRoute.self) { route in
                 AccountDetailView(route: route)
             }
-            .rootScreenHeader("Transactions", showsSync: true)
+            .rootScreenHeader("Transactions")
             // Match the pinned month rail, including when content scrolls under the toolbar.
             #if os(macOS)
                 .toolbarBackground(MonMonTheme.canvas, for: .windowToolbar)
@@ -155,7 +161,7 @@ struct TransactionListView: View {
                     query: $query,
                     categories: categories,
                     accounts: accounts,
-                    focusesSearchOnAppear: true,
+                    focusesSearchOnAppear: false,
                     identifierPrefix: "spending-"
                 )
             }
@@ -540,16 +546,9 @@ struct TransactionListView: View {
     /// The months either side of the one on show, pinned under the navigation
     /// bar so a month is one tap away wherever the screen is scrolled to.
     private var monthRail: some View {
-        HStack(spacing: 8) {
-            PeriodRail(unit: .month, periods: railMonths, selection: selectedMonth) { month in
-                query.range = .month(containing: month)
-            }
-
-            DateRangeFilterButton(
-                range: $query.range, systemImage: "calendar", hitTargetSize: 44
-            )
+        PeriodRail(unit: .month, periods: railMonths, selection: selectedMonth) { month in
+            query.range = .month(containing: month)
         }
-        .padding(.trailing, 12)
         .background(MonMonTheme.canvas)
         .overlay(alignment: .bottom) {
             Rectangle()
@@ -569,8 +568,6 @@ struct TransactionListView: View {
 
     private var transactionsSection: some View {
         VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-            searchAndFilterButton
-
             if query.isNarrowed {
                 TransactionFilterChips(
                     query: $query,
@@ -587,32 +584,14 @@ struct TransactionListView: View {
         Button {
             isFiltering = true
         } label: {
-            HStack(spacing: 10) {
-                Image(systemName: "magnifyingglass")
-                    .accessibilityHidden(true)
-
-                if query.hasSearchText {
-                    Text(query.trimmedText)
-                } else {
-                    Text("Search & Filters")
-                }
-
-                Spacer(minLength: 8)
-
-                Image(
-                    systemName: query.hasStructuredFilters
-                        ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease"
-                )
-                .accessibilityHidden(true)
-            }
-            .font(.subheadline)
-            .lineLimit(1)
-            .foregroundStyle(query.isNarrowed ? MonMonTheme.accent : MonMonTheme.textSecondary)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-            .background(MonMonTheme.surface, in: RoundedRectangle(cornerRadius: 12))
-            .contentShape(RoundedRectangle(cornerRadius: 12))
+            Image(
+                systemName: query.isNarrowed
+                    ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease"
+            )
+            .font(.footnote.weight(.bold))
+            .foregroundStyle(query.isNarrowed ? MonMonTheme.accent : MonMonTheme.textPrimary)
+            .frame(width: 30, height: 30)
+            .contentShape(Circle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Search & Filters")
