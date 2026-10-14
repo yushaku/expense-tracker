@@ -206,7 +206,6 @@ struct RootTabView: View {
 /// Keeps Settings one tap away from each root screen without taking a tab slot.
 private struct RootScreenHeader: ViewModifier {
     let title: LocalizedStringKey
-    let showsSync: Bool
     @Environment(SyncCoordinator.self) private var syncCoordinator
     @State private var isShowingSettings = false
     @State private var opensSyncAfterSettings = false
@@ -247,51 +246,6 @@ private struct RootScreenHeader: ViewModifier {
             }
     }
 
-    private var showsSyncStatus: Bool {
-        showsSync && syncCoordinator.isPaired
-    }
-
-    private var syncNeedsAttention: Bool {
-        syncCoordinator.phase == .review || syncCoordinator.hasPending
-            || syncCoordinator.errorMessage != nil || syncCoordinator.phase == .interrupted
-    }
-
-    private var syncSymbol: String {
-        if syncNeedsAttention { return "exclamationmark" }
-        if syncCoordinator.pendingChangeCount > 0
-            || [.comparing, .applying, .receiving].contains(syncCoordinator.phase)
-        {
-            return "arrow.triangle.2.circlepath"
-        }
-        return syncCoordinator.phase == .complete ? "checkmark" : "clock"
-    }
-
-    private var syncAvatar: some View {
-        Button {
-            syncCoordinator.isPresented = true
-        } label: {
-            AvatarImage(size: 35.2)
-                .frame(width: 44, height: 44)
-                .overlay(alignment: .bottomTrailing) {
-                    Image(systemName: syncSymbol)
-                        .font(.system(size: 9, weight: .bold))
-                        .foregroundStyle(
-                            syncNeedsAttention ? MonMonTheme.danger : MonMonTheme.accent
-                        )
-                        .frame(width: 16, height: 16)
-                        .background(MonMonTheme.surface, in: Circle())
-                        .overlay { Circle().stroke(MonMonTheme.canvas, lineWidth: 2) }
-                        .accessibilityHidden(true)
-                }
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Sync")
-        .accessibilityValue(Text(LocalizedStringKey(syncCoordinator.phase.rawValue)))
-        .accessibilityIdentifier("open-sync-status")
-        .help("Sync")
-    }
-
     private var headerTitle: some View {
         Text(title)
             .font(.headline)
@@ -302,43 +256,30 @@ private struct RootScreenHeader: ViewModifier {
 
     private var headerItem: some ToolbarContent {
         ToolbarItem(placement: placement) {
-            HStack(spacing: 8) {
-                if showsSyncStatus {
-                    syncAvatar
+            Button {
+                isShowingSettings = true
+            } label: {
+                Label {
+                    headerTitle
+                } icon: {
+                    AvatarImage(size: 35.2)
+                        .frame(width: 44, height: 44)
                 }
-
-                Button {
-                    isShowingSettings = true
-                } label: {
-                    Group {
-                        if showsSyncStatus {
-                            headerTitle
-                                .frame(minHeight: 44)
-                        } else {
-                            Label {
-                                headerTitle
-                            } icon: {
-                                AvatarImage(size: 35.2)
-                                    .frame(width: 44, height: 44)
-                            }
-                            .labelStyle(.titleAndIcon)
-                        }
-                    }
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(title)
-                .accessibilityHint("Opens Settings")
-                .accessibilityIdentifier("settings-avatar")
-                .help("Settings")
+                .labelStyle(.titleAndIcon)
+                .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel(title)
+            .accessibilityHint("Opens Settings")
+            .accessibilityIdentifier("settings-avatar")
+            .help("Settings")
         }
     }
 }
 
 extension View {
-    func rootScreenHeader(_ title: LocalizedStringKey, showsSync: Bool = false) -> some View {
-        modifier(RootScreenHeader(title: title, showsSync: showsSync))
+    func rootScreenHeader(_ title: LocalizedStringKey) -> some View {
+        modifier(RootScreenHeader(title: title))
     }
 }
 
