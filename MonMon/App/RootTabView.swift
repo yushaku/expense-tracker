@@ -259,13 +259,14 @@ private struct RootScreenHeader: ViewModifier {
             Button {
                 isShowingSettings = true
             } label: {
-                Label {
-                    headerTitle
-                } icon: {
+                HStack(spacing: 8) {
                     AvatarImage(size: 35.2)
                         .frame(width: 44, height: 44)
+
+                    headerTitle
                 }
-                .labelStyle(.titleAndIcon)
+                // Reserve space for both parts instead of allowing the toolbar to collapse the title.
+                .fixedSize(horizontal: true, vertical: false)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
