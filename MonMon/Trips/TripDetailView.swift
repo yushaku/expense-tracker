@@ -296,13 +296,7 @@ private struct TripDetailContent: View {
                     emptyNotice: "Record an expense and keep its normal category.",
                     accessibilityIdentifierPrefix: "trip-expense",
                     showsCount: true
-                ) {
-                    if workspace.status == .active {
-                        Button("Add expense", systemImage: "plus", action: onAddExpense)
-                            .font(.subheadline.weight(.semibold))
-                            .accessibilityIdentifier("trip-add-expense")
-                    }
-                }
+                )
 
                 TripLifecycleSection(
                     status: workspace.status,
@@ -316,9 +310,24 @@ private struct TripDetailContent: View {
             }
             .frame(maxWidth: MonMonTheme.maxContentWidth)
             .padding(.horizontal, 20)
-            .padding(.vertical, 16)
+            .padding(.top, 16)
+            .padding(.bottom, canAddExpense ? FloatingAddButton.contentInset : 16)
             .frame(maxWidth: .infinity)
         }
+        .overlay(alignment: .bottomTrailing) {
+            if canAddExpense {
+                FloatingAddButton(
+                    title: "Add expense",
+                    accessibilityIdentifier: "trip-add-expense",
+                    usesLiquidGlass: true,
+                    action: onAddExpense
+                )
+            }
+        }
+    }
+
+    private var canAddExpense: Bool {
+        workspace.status == .active && !isArchived && !accounts.isEmpty
     }
 }
 
