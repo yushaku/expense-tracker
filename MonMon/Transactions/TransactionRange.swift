@@ -78,6 +78,18 @@ struct TransactionRange: Hashable {
         )
     }
 
+    /// The quick week preset covers Monday through Sunday in the ledger's time zone.
+    /// Represent it as a custom range so the date editor can adjust either end.
+    static func week(containing date: Date) -> Self {
+        var weekCalendar = calendar
+        weekCalendar.firstWeekday = 2
+        let start =
+            weekCalendar.dateInterval(of: .weekOfYear, for: date)?.start
+            ?? weekCalendar.startOfDay(for: date)
+        let end = weekCalendar.date(byAdding: .day, value: 7, to: start) ?? start
+        return Self(scope: .custom, start: start, end: end)
+    }
+
     static func year(containing date: Date) -> Self {
         let components = calendar.dateComponents([.year], from: date)
         let start = calendar.date(from: components) ?? date

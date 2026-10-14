@@ -112,8 +112,6 @@ struct TransactionListView: View {
             }
             .toolbar {
                 ToolbarItemGroup(placement: .primaryAction) {
-                    DateRangeFilterButton(range: $query.range, systemImage: "calendar")
-
                     searchAndFilterButton
 
                     if hasPendingImports {
@@ -157,13 +155,19 @@ struct TransactionListView: View {
                 TransactionEditorView(mode: mode, defaultDate: defaultDate)
             }
             .appSheet(isPresented: $isFiltering) {
-                ReportFilterSheet(
+                TransactionFilterSheet(
                     query: $query,
                     categories: categories,
-                    accounts: accounts,
-                    focusesSearchOnAppear: false,
-                    identifierPrefix: "spending-"
-                )
+                    accounts: accounts
+                ) { draft in
+                    TransactionSearch.results(
+                        of: draft, transactions: transactions,
+                        categoryNames: categoryNames, accountNames: accountNames
+                    ).count
+                        + TransactionSearch.transferResults(
+                            of: draft, transfers: transfers, accountNames: accountNames
+                        ).count
+                }
             }
             .appSheet(isPresented: $isManagingCategories) {
                 CategoryListView()
@@ -568,11 +572,12 @@ struct TransactionListView: View {
 
     private var transactionsSection: some View {
         VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-            if query.isNarrowed {
+            if query.isNarrowed || query.range != .month(containing: .now) {
                 TransactionFilterChips(
                     query: $query,
                     categories: categories,
-                    accounts: accounts
+                    accounts: accounts,
+                    includesPeriod: true
                 )
             }
 
@@ -585,18 +590,24 @@ struct TransactionListView: View {
             isFiltering = true
         } label: {
             Image(
-                systemName: query.isNarrowed
+                systemName: hasActiveFilters
                     ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease"
             )
             .font(.footnote.weight(.bold))
-            .foregroundStyle(query.isNarrowed ? MonMonTheme.accent : MonMonTheme.textPrimary)
-            .frame(width: 30, height: 30)
+            .foregroundStyle(hasActiveFilters ? MonMonTheme.accent : MonMonTheme.textPrimary)
+            .frame(width: 44, height: 44)
             .contentShape(Circle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Search & Filters")
-        .accessibilityValue(query.trimmedText)
+        .accessibilityLabel("Filters")
+        .accessibilityValue(
+            query.range.title(in: locale, dateFormat: dateFormat) + " " + query.trimmedText
+        )
         .accessibilityIdentifier("open-spending-search")
+    }
+
+    private var hasActiveFilters: Bool {
+        query.isNarrowed || query.range != .month(containing: .now)
     }
 
     private var transactionHistory: some View {

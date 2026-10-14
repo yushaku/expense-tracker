@@ -5,8 +5,7 @@ import SwiftUI
 ///
 /// It owns the preferences rather than taking them as bindings, so the screen
 /// presenting it never holds a copy that could drift from what the editors
-/// actually read. It carries no heading of its own: it is shown inside
-/// `TransactionDefaultsView`, whose navigation title already names it.
+/// actually read. Settings presents this section directly below Instruments.
 struct TransactionDefaultsCard: View {
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
@@ -24,6 +23,10 @@ struct TransactionDefaultsCard: View {
     var body: some View {
         card {
             VStack(alignment: .leading, spacing: 14) {
+                Label("Transaction default", systemImage: "slider.horizontal.3")
+                    .font(.headline)
+                    .accessibilityAddTraits(.isHeader)
+
                 picker(
                     title: "Account",
                     selection: $defaultAccountValue,
@@ -86,6 +89,7 @@ struct TransactionDefaultsCard: View {
                 .foregroundStyle(MonMonTheme.textSecondary)
             }
         }
+        .foregroundStyle(MonMonTheme.textPrimary)
         .onAppear {
             persistInitialDefaults()
         }
@@ -169,15 +173,6 @@ struct TransactionDefaultsCard: View {
 
     private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {
         content()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(20)
-            .background {
-                RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                    .fill(MonMonTheme.surface)
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
-                    .stroke(MonMonTheme.border, lineWidth: 1)
-            }
+            .appCard()
     }
 }

@@ -4,6 +4,8 @@ import Observation
 @MainActor
 @Observable
 final class AppRoute {
+    var isShowingSettings = false
+
     private(set) var quickCaptureRequestID: UUID?
     private(set) var goalRequestID: UUID?
     private(set) var goalRequestRevision: UUID?

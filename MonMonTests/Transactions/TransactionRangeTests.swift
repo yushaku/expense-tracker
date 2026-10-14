@@ -46,6 +46,29 @@ struct TransactionRangeTests {
         #expect(range.end == date(2027, 1, 1))
     }
 
+    @Test("This week includes Monday through Sunday and excludes the following Monday")
+    func weekBounds() {
+        let range = TransactionRange.week(containing: date(2026, 10, 14, 13, 45))
+
+        #expect(range.start == date(2026, 10, 12))
+        #expect(range.end == date(2026, 10, 19))
+        #expect(range.contains(date(2026, 10, 12)))
+        #expect(range.contains(date(2026, 10, 18, 23, 59)))
+        #expect(!range.contains(date(2026, 10, 19)))
+        #expect(!range.contains(date(2026, 10, 11, 23, 59)))
+        #expect(TransactionRange.week(containing: date(2026, 10, 18, 23, 59)) == range)
+        #expect(TransactionRange.week(containing: date(2026, 10, 19)).start == range.end)
+    }
+
+    @Test("The week preset crosses the year and remains editable as a custom range")
+    func weekCrossesYear() {
+        let range = TransactionRange.week(containing: date(2026, 1, 1))
+
+        #expect(range.start == date(2025, 12, 29))
+        #expect(range.end == date(2026, 1, 5))
+        #expect(range == .custom(from: date(2025, 12, 29), to: date(2026, 1, 4)))
+    }
+
     @Test("Membership includes the first instant and excludes the upper bound")
     func membershipBoundaries() {
         let august = TransactionRange.month(containing: date(2026, 8, 15))

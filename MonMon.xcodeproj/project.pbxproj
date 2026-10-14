@@ -379,7 +379,6 @@
 		A00000000000000000000E0D /* RecurringEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D0F /* RecurringEditorView.swift */; };
 		A00000000000000000000E0E /* RecurringListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D10 /* RecurringListView.swift */; };
 		A00000000000000000000E0F /* TransactionDefaultsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D11 /* TransactionDefaultsCard.swift */; };
-		A00000000000000000000E10 /* TransactionDefaultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D12 /* TransactionDefaultsView.swift */; };
 		A00000000000000000000F02 /* WebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F01 /* WebPage.swift */; };
 		A00000000000000000000F04 /* FmarketLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F03 /* FmarketLink.swift */; };
 		A00000000000000000000F11 /* FundPositionGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000F10 /* FundPositionGroup.swift */; };
@@ -879,7 +878,6 @@
 		A00000000000000000000D0F /* RecurringEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringEditorView.swift; sourceTree = "<group>"; };
 		A00000000000000000000D10 /* RecurringListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringListView.swift; sourceTree = "<group>"; };
 		A00000000000000000000D11 /* TransactionDefaultsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDefaultsCard.swift; sourceTree = "<group>"; };
-		A00000000000000000000D12 /* TransactionDefaultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDefaultsView.swift; sourceTree = "<group>"; };
 		A00000000000000000000F01 /* WebPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPage.swift; sourceTree = "<group>"; };
 		A00000000000000000000F03 /* FmarketLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FmarketLink.swift; sourceTree = "<group>"; };
 		A00000000000000000000F10 /* FundPositionGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundPositionGroup.swift; sourceTree = "<group>"; };
@@ -1526,7 +1524,6 @@
 				Q10000000000000000000101 /* TransactionCaptureParser.swift */,
 				B27000000000000000000101 /* BankNotificationCapture.swift */,
 				A91600000000000000000101 /* ApplePayCapture.swift */,
-				A00000000000000000000D12 /* TransactionDefaultsView.swift */,
 				A00000000000000000000D11 /* TransactionDefaultsCard.swift */,
 				A00000000000000000000160 /* TransactionKind.swift */,
 				A00000000000000000000161 /* TransactionCategory.swift */,
@@ -2134,7 +2131,6 @@
 				A00000000000000000002004 /* FundSaleDraft.swift in Sources */,
 				A00000000000000000002002 /* FundSaleSummary.swift in Sources */,
 				A00000000000000000002001 /* FundSale.swift in Sources */,
-				A00000000000000000000E10 /* TransactionDefaultsView.swift in Sources */,
 				A00000000000000000000E0F /* TransactionDefaultsCard.swift in Sources */,
 				A00000000000000000000E0E /* RecurringListView.swift in Sources */,
 				A00000000000000000000E0D /* RecurringEditorView.swift in Sources */,

@@ -32,11 +32,13 @@ struct TransactionSearchButton: View {
 /// each removable without reopening the filter sheet.
 struct TransactionFilterChips: View {
     @Environment(\.locale) private var locale
+    @Environment(\.appDateFormat) private var dateFormat
 
     @Binding var query: TransactionQuery
 
     let categories: [TransactionCategory]
     let accounts: [CashAccount]
+    var includesPeriod = false
 
     var body: some View {
         ViewThatFits(in: .horizontal) {
@@ -54,6 +56,12 @@ struct TransactionFilterChips: View {
 
     @ViewBuilder
     private var chips: some View {
+        if includesPeriod && query.range != .month(containing: .now) {
+            chip(query.range.title(in: locale, dateFormat: dateFormat), systemImage: "calendar") {
+                query.range = .month(containing: .now)
+            }
+        }
+
         if !query.trimmedText.isEmpty {
             chip(query.trimmedText, systemImage: "magnifyingglass") {
                 query.text = ""
