@@ -266,6 +266,7 @@ struct DateRangeFilterButton: View {
     /// asks for a calendar, which names what the sheet holds; a screen that only
     /// narrows a list keeps the filter lines.
     var systemImage: String = "line.3.horizontal.decrease"
+    var hitTargetSize: CGFloat = 30
 
     @State private var isFiltering = false
 
@@ -275,7 +276,7 @@ struct DateRangeFilterButton: View {
         } label: {
             Image(systemName: systemImage)
                 .font(.footnote.weight(.bold))
-                .frame(width: 30, height: 30)
+                .frame(width: hitTargetSize, height: hitTargetSize)
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)

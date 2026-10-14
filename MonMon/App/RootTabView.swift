@@ -223,23 +223,6 @@ private struct RootScreenHeader: ViewModifier {
         content
             .compactRootNavigationTitle("")
             .toolbar {
-                if showsSync && syncCoordinator.isPaired {
-                    ToolbarItem(placement: .primaryAction) {
-                        Button {
-                            syncCoordinator.isPresented = true
-                        } label: {
-                            Image(systemName: syncSymbol)
-                                .frame(width: 32, height: 32)
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .headerIconStyle()
-                        .accessibilityLabel(
-                            Text(LocalizedStringKey(syncCoordinator.phase.rawValue))
-                        )
-                        .accessibilityIdentifier("open-sync-status")
-                    }
-                }
                 if #available(iOS 26.0, macOS 26.0, *) {
                     headerItem
                         .sharedBackgroundVisibility(.hidden)
@@ -264,39 +247,91 @@ private struct RootScreenHeader: ViewModifier {
             }
     }
 
+    private var showsSyncStatus: Bool {
+        showsSync && syncCoordinator.isPaired
+    }
+
+    private var syncNeedsAttention: Bool {
+        syncCoordinator.phase == .review || syncCoordinator.hasPending
+            || syncCoordinator.errorMessage != nil || syncCoordinator.phase == .interrupted
+    }
+
     private var syncSymbol: String {
-        if syncCoordinator.phase == .review { return "exclamationmark.arrow.triangle.2.circlepath" }
-        if syncCoordinator.hasPending || syncCoordinator.errorMessage != nil {
-            return "exclamationmark.triangle"
+        if syncNeedsAttention { return "exclamationmark" }
+        if syncCoordinator.pendingChangeCount > 0
+            || [.comparing, .applying, .receiving].contains(syncCoordinator.phase)
+        {
+            return "arrow.triangle.2.circlepath"
         }
-        if syncCoordinator.pendingChangeCount > 0 { return "arrow.triangle.2.circlepath" }
-        return syncCoordinator.phase == .complete ? "checkmark.circle" : "laptopcomputer.and.iphone"
+        return syncCoordinator.phase == .complete ? "checkmark" : "clock"
+    }
+
+    private var syncAvatar: some View {
+        Button {
+            syncCoordinator.isPresented = true
+        } label: {
+            AvatarImage(size: 35.2)
+                .frame(width: 44, height: 44)
+                .overlay(alignment: .bottomTrailing) {
+                    Image(systemName: syncSymbol)
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundStyle(
+                            syncNeedsAttention ? MonMonTheme.danger : MonMonTheme.accent
+                        )
+                        .frame(width: 16, height: 16)
+                        .background(MonMonTheme.surface, in: Circle())
+                        .overlay { Circle().stroke(MonMonTheme.canvas, lineWidth: 2) }
+                        .accessibilityHidden(true)
+                }
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Sync")
+        .accessibilityValue(Text(LocalizedStringKey(syncCoordinator.phase.rawValue)))
+        .accessibilityIdentifier("open-sync-status")
+        .help("Sync")
+    }
+
+    private var headerTitle: some View {
+        Text(title)
+            .font(.headline)
+            .foregroundStyle(MonMonTheme.textPrimary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.85)
     }
 
     private var headerItem: some ToolbarContent {
         ToolbarItem(placement: placement) {
-            Button {
-                isShowingSettings = true
-            } label: {
-                Label {
-                    Text(title)
-                        .font(.headline)
-                        .foregroundStyle(MonMonTheme.textPrimary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.85)
-                } icon: {
-                    AvatarImage(size: 35.2)
-                        .frame(width: 44, height: 44)
+            HStack(spacing: 8) {
+                if showsSyncStatus {
+                    syncAvatar
                 }
-                // Toolbar labels otherwise adapt to icon-only presentation.
-                .labelStyle(.titleAndIcon)
-                .contentShape(Rectangle())
+
+                Button {
+                    isShowingSettings = true
+                } label: {
+                    Group {
+                        if showsSyncStatus {
+                            headerTitle
+                                .frame(minHeight: 44)
+                        } else {
+                            Label {
+                                headerTitle
+                            } icon: {
+                                AvatarImage(size: 35.2)
+                                    .frame(width: 44, height: 44)
+                            }
+                            .labelStyle(.titleAndIcon)
+                        }
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(title)
+                .accessibilityHint("Opens Settings")
+                .accessibilityIdentifier("settings-avatar")
+                .help("Settings")
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(title)
-            .accessibilityHint("Opens Settings")
-            .accessibilityIdentifier("settings-avatar")
-            .help("Settings")
         }
     }
 }
