@@ -9,6 +9,7 @@ import SwiftUI
 struct FloatingAddButton: View {
     let title: LocalizedStringKey
     let accessibilityIdentifier: String
+    var usesLiquidGlass = false
     let action: () -> Void
 
     /// How much room a list should leave below its content so the last card
@@ -17,19 +18,28 @@ struct FloatingAddButton: View {
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: "plus")
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(MonMonTheme.onAccent)
-                .frame(width: 56, height: 56)
-                .background(MonMonTheme.accent, in: Circle())
-                .shadow(color: .black.opacity(0.28), radius: 12, y: 4)
-                .contentShape(Circle())
+            if usesLiquidGlass, #available(iOS 26.0, macOS 26.0, *) {
+                icon
+                    .glassEffect(.regular.tint(MonMonTheme.accent).interactive(), in: .circle)
+            } else {
+                icon
+                    .background(MonMonTheme.accent, in: Circle())
+                    .shadow(color: .black.opacity(0.28), radius: 12, y: 4)
+            }
         }
         .buttonStyle(.plain)
         .padding(.trailing, 20)
         .padding(.bottom, 20)
         .accessibilityIdentifier(accessibilityIdentifier)
         .accessibilityLabel(title)
+    }
+
+    private var icon: some View {
+        Image(systemName: "plus")
+            .font(.system(size: 22, weight: .semibold))
+            .foregroundStyle(MonMonTheme.onAccent)
+            .frame(width: 56, height: 56)
+            .contentShape(Circle())
     }
 }
 
@@ -42,6 +52,7 @@ struct FloatingAddButton: View {
             FloatingAddButton(
                 title: "Add Transaction",
                 accessibilityIdentifier: "add-transaction",
+                usesLiquidGlass: true,
                 action: {}
             )
         }

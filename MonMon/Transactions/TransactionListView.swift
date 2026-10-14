@@ -101,7 +101,8 @@ struct TransactionListView: View {
                 if !accounts.isEmpty {
                     FloatingAddButton(
                         title: "Add Transaction",
-                        accessibilityIdentifier: "add-transaction"
+                        accessibilityIdentifier: "add-transaction",
+                        usesLiquidGlass: true
                     ) {
                         editorMode = .add
                     }
