@@ -36,6 +36,7 @@ struct TripDetailView: View {
 
     @State private var editorMode: TransactionEditorMode?
     @State private var goalEditorMode: GoalEditorMode?
+    @State private var isRenaming = false
     @State private var confirmation: TripLifecycleConfirmation?
     @State private var transactionActions = TransactionActions()
     @State private var saveErrorMessage: LocalizedStringKey?
@@ -61,6 +62,11 @@ struct TripDetailView: View {
         .navigationTitle(workspace.name)
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
+                Button("Rename trip", systemImage: "square.and.pencil") {
+                    isRenaming = true
+                }
+                .accessibilityIdentifier("trip-detail-rename")
+
                 if let goal = sourceGoal {
                     Button("Edit goal", systemImage: "pencil") {
                         goalEditorMode = .edit(goal)
@@ -92,6 +98,9 @@ struct TripDetailView: View {
         )
         .appSheet(item: $goalEditorMode) { mode in
             GoalEditorView(mode: mode, capacityByJar: goalCapacityByJar, asOf: asOf)
+        }
+        .appSheet(isPresented: $isRenaming) {
+            TripNameEditor(workspace: workspace)
         }
         .confirmationDialog(
             confirmationTitle,
@@ -222,6 +231,79 @@ struct TripDetailView: View {
             saveErrorMessage = "A trip with expenses cannot be cancelled."
         } catch {
             saveErrorMessage = "Couldn’t cancel this trip. Try again."
+        }
+    }
+}
+
+private struct TripNameEditor: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    @FocusState private var isNameFocused: Bool
+    let workspace: TripWorkspace
+    // An independent draft lets Cancel leave the persisted trip untouched.
+    @State private var name: String
+    @State private var saveError: LocalizedStringKey?
+
+    init(workspace: TripWorkspace) {
+        self.workspace = workspace
+        _name = State(initialValue: workspace.name)
+    }
+
+    private var trimmedName: String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Trip name").font(.headline)
+                        TextField("Trip name", text: $name)
+                            .textFieldStyle(.roundedBorder)
+                            .focused($isNameFocused)
+                            .submitLabel(.done)
+                            .onSubmit(save)
+                            .accessibilityIdentifier("trip-name-field")
+                    }
+                    .appCard()
+                    if let saveError {
+                        TripErrorBanner(message: saveError)
+                    }
+                }
+                .padding(20)
+            }
+            .background(MonMonTheme.canvas)
+            .compactRootNavigationTitle("Rename trip")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save", action: save)
+                        .disabled(trimmedName.isEmpty)
+                        .accessibilityIdentifier("save-trip-name")
+                }
+            }
+            .task { isNameFocused = true }
+        }
+        .tint(MonMonTheme.accent)
+        .foregroundStyle(MonMonTheme.textPrimary)
+        #if os(macOS)
+            .frame(width: 460, height: 300)
+        #else
+            .presentationDetents([.medium, .large])
+        #endif
+    }
+
+    private func save() {
+        guard !trimmedName.isEmpty else { return }
+        saveError = nil
+        do {
+            try TripWorkspaceLifecycle.rename(workspace, to: name, in: modelContext)
+            dismiss()
+        } catch {
+            saveError = "Couldn’t update this trip. Try again."
         }
     }
 }

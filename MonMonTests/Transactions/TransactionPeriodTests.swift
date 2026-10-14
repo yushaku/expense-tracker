@@ -101,13 +101,16 @@ struct TransactionPeriodTests {
         }
     }
 
-    @Test("Each format is exact and zero-padded", arguments: AppDateFormat.allCases)
+    @Test(
+        "Each numeric format is exact and zero-padded",
+        arguments: [AppDateFormat.dayMonthYear, .monthDayYear, .yearMonthDay])
     func selectableFormats(format: AppDateFormat) {
         let expected: String
         switch format {
         case .dayMonthYear: expected = "05/09/2026"
         case .monthDayYear: expected = "09/05/2026"
-        case .yearMonthDay: expected = "2026-09-05"
+        case .yearMonthDay: expected = "2026/09/05"
+        case .gmt: return  // GMT includes a time and is covered separately below.
         }
         for locale in [Locale(identifier: "en_US"), Locale(identifier: "vi_VN")] {
             let value = date(2026, 9, 5, 13, 45)
@@ -128,7 +131,20 @@ struct TransactionPeriodTests {
     func numericDatesKeepAppCalendar() {
         let instant = Date(timeIntervalSince1970: 1_767_222_000)  // 2025-12-31 18:00 UTC
         #expect(AppDateFormat.dayMonthYear.format(instant) == "01/01/2026")
-        #expect(AppDateFormat.yearMonthDay.format(date(2024, 2, 29)) == "2024-02-29")
+        #expect(AppDateFormat.yearMonthDay.format(date(2024, 2, 29)) == "2024/02/29")
+    }
+
+    @Test("GMT uses English month names and a 24-hour UTC time without repeating the time")
+    func gmtDateTimeFormat() {
+        let instant = date(2026, 10, 14, 16, 30)
+        let expected = "14 Oct 2026 09:30 GMT"
+        #expect(AppDateFormat.gmt.format(instant) == expected)
+        #expect(instant.formatted(AppDateFormat.gmt.style) == expected)
+        for locale in [Locale(identifier: "en_US"), Locale(identifier: "vi_VN")] {
+            #expect(AppDateFormat.gmt.dateTime(instant, in: locale) == expected)
+        }
+        #expect(AppDateFormat.gmt.format(date(2026, 1, 1, 1)) == "31 Dec 2025 18:00 GMT")
+        #expect(AppDateFormat.gmt.format(date(2026, 1, 1, 7)) == "01 Jan 2026 00:00 GMT")
     }
 
     @Test("A custom range applies the selected format at both ends")
@@ -136,7 +152,7 @@ struct TransactionPeriodTests {
         let range = TransactionRange.custom(from: date(2025, 12, 31), to: date(2026, 1, 2))
         #expect(
             range.title(in: Locale(identifier: "vi"), dateFormat: .yearMonthDay)
-                == "2025-12-31 – 2026-01-02")
+                == "2025/12/31 – 2026/01/02")
         #expect(
             range.phrase(in: Locale(identifier: "en"), dateFormat: .monthDayYear)
                 == "between 12/31/2025 and 01/02/2026")

@@ -225,7 +225,7 @@ struct SettingsView: View {
                     Spacer(minLength: 8)
                     Picker("Date format", selection: $dateFormat) {
                         ForEach(AppDateFormat.allCases) { option in
-                            Text(option.format(Self.dateFormatExample))
+                            Text(verbatim: option.displayName)
                                 .tag(option)
                         }
                     }
@@ -237,11 +237,6 @@ struct SettingsView: View {
             }
         }
     }
-
-    private static let dateFormatExample =
-        TransactionPeriod.calendar.date(
-            from: DateComponents(year: 2026, month: 12, day: 24)
-        ) ?? .distantPast
 
     private var securityCard: some View {
         card {
