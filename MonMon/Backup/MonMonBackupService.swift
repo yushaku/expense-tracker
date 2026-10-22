@@ -974,6 +974,7 @@ struct MonMonBackupService {
         for key in [
             TransactionDefaults.accountStorageKey, TransactionDefaults.categoryStorageKey,
             TransactionDefaults.incomeCategoryStorageKey, StatementAccountMapping.storageKey,
+            SpendingFeaturedTrip.pinnedIDKey,
         ] {
             defaults.removeObject(forKey: key)
         }

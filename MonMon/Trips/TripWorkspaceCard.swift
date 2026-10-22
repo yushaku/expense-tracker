@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct TripWorkspaceCard: View {
+    @AppStorage(SpendingFeaturedTrip.pinnedIDKey) private var pinnedTripID = ""
     let workspace: TripWorkspace
     let snapshot: TripSummarySnapshot
 
@@ -12,8 +13,7 @@ struct TripWorkspaceCard: View {
         VStack(alignment: .leading, spacing: 14) {
             TripCardHeader(
                 name: workspace.name,
-                subtitle: workspace.status == .active
-                    ? Text("Active trip") : Text("Completed trip"),
+                subtitle: subtitle,
                 symbolName: workspace.symbolName,
                 tint: tint,
                 status: workspace.status == .active ? "Active" : "Completed"
@@ -48,6 +48,16 @@ struct TripWorkspaceCard: View {
             1,
             NSDecimalNumber(decimal: snapshot.spentAmount / snapshot.budgetAmount).doubleValue
         )
+    }
+
+    private var subtitle: Text {
+        if workspace.status == .active && workspace.archivedAt == nil
+            && UUID(uuidString: pinnedTripID) == workspace.id
+        {
+            Text("Pinned trip")
+        } else {
+            workspace.status == .active ? Text("Active trip") : Text("Completed trip")
+        }
     }
 }
 

@@ -507,6 +507,7 @@ struct MonMonBackupServiceTests {
     func resetBacksUpAndClearsDatabase() throws {
         let container = try makeContainer()
         let defaults = makeDefaults()
+        defaults.set(UUID().uuidString, forKey: SpendingFeaturedTrip.pinnedIDKey)
         _ = try insertCompleteFixture(in: container.mainContext)
         let before = try service(container: container, defaults: defaults).snapshotPayload()
             .sorted()
@@ -514,6 +515,7 @@ struct MonMonBackupServiceTests {
         defer { try? FileManager.default.removeItem(at: url) }
         let resetService = service(container: container, defaults: defaults)
         try resetService.reset(backupURL: url)
+        #expect(defaults.string(forKey: SpendingFeaturedTrip.pinnedIDKey) == nil)
         let backup = try resetService.preview(Data(contentsOf: url))
         #expect(backup.payload == before)
         func expectEmpty<T: PersistentModel>(_ type: T.Type) throws {

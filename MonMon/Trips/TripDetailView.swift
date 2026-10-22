@@ -10,6 +10,7 @@ private enum TripLifecycleConfirmation: String, Identifiable {
 }
 
 struct GoalSpendingDetailView: View {
+    @AppStorage(SpendingFeaturedTrip.pinnedIDKey) private var pinnedTripID = ""
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
@@ -62,6 +63,17 @@ struct GoalSpendingDetailView: View {
         .navigationTitle(workspace.name)
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
+                if workspace.status == .active && workspace.archivedAt == nil {
+                    Button(
+                        isPinned ? "Unpin trip" : "Pin trip",
+                        systemImage: isPinned ? "pin.slash" : "pin"
+                    ) {
+                        pinnedTripID = isPinned ? "" : workspace.id.uuidString
+                    }
+                    .accessibilityHint("Choose the trip shown in Transactions on this device")
+                    .accessibilityIdentifier("trip-detail-pin")
+                }
+
                 Button("Edit", systemImage: "pencil") {
                     goalEditorMode = .edit(GoalJourney(goal: sourceGoal, workspace: workspace))
                 }
@@ -121,6 +133,10 @@ struct GoalSpendingDetailView: View {
 
     private var sourceGoal: FinancialGoal? {
         workspace.sourceGoalID.flatMap { goalID in goals.first { $0.id == goalID } }
+    }
+
+    private var isPinned: Bool {
+        UUID(uuidString: pinnedTripID) == workspace.id
     }
 
     private func category(for transaction: MoneyTransaction) -> TransactionCategory? {
