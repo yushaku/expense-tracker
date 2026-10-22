@@ -7,6 +7,7 @@ private enum SpendingDestination: Hashable {
 }
 
 struct TransactionListView: View {
+    @AppStorage(SpendingFeaturedTrip.pinnedIDKey) private var pinnedTripID = ""
     @Environment(\.appDateFormat) private var dateFormat
 
     @Environment(AppRoute.self) private var appRoute
@@ -432,7 +433,7 @@ struct TransactionListView: View {
     }
 
     private var featuredTrip: TripWorkspace? {
-        SpendingFeaturedTrip.select(from: tripWorkspaces)
+        SpendingFeaturedTrip.select(from: tripWorkspaces, pinnedID: UUID(uuidString: pinnedTripID))
     }
 
     private func goalCapacityByJar(asOf: Date) -> [UUID: Decimal] {

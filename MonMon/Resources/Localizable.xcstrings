@@ -1,6 +1,46 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Pin trip": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghim chuyến đi"
+          }
+        }
+      }
+    },
+    "Unpin trip": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bỏ ghim chuyến đi"
+          }
+        }
+      }
+    },
+    "Pinned trip": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chuyến đi đã ghim"
+          }
+        }
+      }
+    },
+    "Choose the trip shown in Transactions on this device": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn chuyến đi hiển thị trong Giao dịch trên thiết bị này"
+          }
+        }
+      }
+    },
     "Return to saving": {
       "localizations": {
         "vi": {

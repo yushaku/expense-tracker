@@ -120,17 +120,22 @@ struct TripWorkspaceCollection {
 }
 
 enum SpendingFeaturedTrip {
-    static func select(from workspaces: [TripWorkspace]) -> TripWorkspace? {
-        workspaces
-            .filter { $0.status == .active && $0.archivedAt == nil }
-            .max {
-                if $0.startedAt != $1.startedAt {
-                    return $0.startedAt < $1.startedAt
-                }
-                if $0.createdAt != $1.createdAt {
-                    return $0.createdAt < $1.createdAt
-                }
-                return $0.id.uuidString < $1.id.uuidString
+    // A display preference for this device, independent of the synced trip data.
+    static let pinnedIDKey = "trips.pinnedWorkspaceID"
+
+    static func select(from workspaces: [TripWorkspace], pinnedID: UUID? = nil) -> TripWorkspace? {
+        let active = workspaces.filter { $0.status == .active && $0.archivedAt == nil }
+        if let pinnedID, let pinned = active.first(where: { $0.id == pinnedID }) {
+            return pinned
+        }
+        return active.max {
+            if $0.startedAt != $1.startedAt {
+                return $0.startedAt < $1.startedAt
             }
+            if $0.createdAt != $1.createdAt {
+                return $0.createdAt < $1.createdAt
+            }
+            return $0.id.uuidString < $1.id.uuidString
+        }
     }
 }

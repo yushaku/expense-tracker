@@ -103,6 +103,36 @@ struct TripSummaryTests {
         #expect(SpendingFeaturedTrip.select(from: [completed]) == nil)
     }
 
+    @Test(
+        "A pinned trip stays featured when newer trips open; changing or clearing the pin takes effect"
+    )
+    func pinOverridesLatestTrip() {
+        let older = trip(budget: 10_000_000)
+        let newer = trip(budget: 8_000_000)
+        newer.startedAt = occurredAt.addingTimeInterval(1)
+        let trips = [newer, older]
+
+        #expect(SpendingFeaturedTrip.select(from: trips, pinnedID: older.id)?.id == older.id)
+        #expect(SpendingFeaturedTrip.select(from: trips, pinnedID: newer.id)?.id == newer.id)
+        #expect(SpendingFeaturedTrip.select(from: trips, pinnedID: nil)?.id == newer.id)
+    }
+
+    @Test("A completed, archived or missing pin falls back to the latest active trip")
+    func unavailablePinFallsBack() {
+        let active = trip(budget: 10_000_000)
+        let completed = trip(budget: 5_000_000, status: .completed)
+        let archived = trip(budget: 8_000_000)
+        archived.archivedAt = occurredAt
+        let trips = [completed, archived, active]
+
+        for pinnedID in [completed.id, archived.id, UUID()] {
+            #expect(SpendingFeaturedTrip.select(from: trips, pinnedID: pinnedID)?.id == active.id)
+        }
+        #expect(
+            SpendingFeaturedTrip.select(from: [completed, archived], pinnedID: completed.id) == nil)
+        #expect(SpendingFeaturedTrip.select(from: [], pinnedID: active.id) == nil)
+    }
+
     @Test("Selecting a Trip defaults its jar and detaching clears Trip routing")
     func transactionSelectionDefaultsAndClearsRouting() {
         let active = trip(budget: 10_000_000)
