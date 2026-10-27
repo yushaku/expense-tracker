@@ -173,8 +173,15 @@ enum TransactionHistoryEntry: Identifiable {
 struct TransactionHistoryDay: Identifiable {
     let day: Date
     let entries: [TransactionHistoryEntry]
+    /// Summed once when the day is built; the header reads it on every update.
+    let net: Decimal
     var id: Date { day }
-    var net: Decimal { entries.reduce(0) { $0 + $1.signedAmount } }
+
+    init(day: Date, entries: [TransactionHistoryEntry]) {
+        self.day = day
+        self.entries = entries
+        self.net = entries.reduce(0) { $0 + $1.signedAmount }
+    }
 }
 
 enum TransactionHistory {
