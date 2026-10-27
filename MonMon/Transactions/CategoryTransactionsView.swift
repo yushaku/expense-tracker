@@ -16,8 +16,9 @@ struct CategoryTransactionsView: View {
 
     @Environment(\.locale) private var locale
 
-    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
-    private var transactions: [MoneyTransaction]
+    /// Only the period on show is fetched; the category and direction are
+    /// still picked out below, exactly as when the whole ledger was read.
+    @Query private var transactions: [MoneyTransaction]
 
     @Query(sort: \TransactionCategory.createdAt, order: .forward)
     private var categories: [TransactionCategory]
@@ -29,6 +30,11 @@ struct CategoryTransactionsView: View {
 
     @State private var editorMode: TransactionEditorMode?
     @State private var transactionActions = TransactionActions()
+
+    init(period: CategoryPeriod) {
+        self.period = period
+        _transactions = Query(LedgerFetch.transactions(in: period.range))
+    }
 
     var body: some View {
         ZStack {
