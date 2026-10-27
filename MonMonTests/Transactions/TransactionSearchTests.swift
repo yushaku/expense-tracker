@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 import Testing
 
 @testable import MonMon
@@ -296,5 +297,141 @@ struct TransactionSearchTests {
 
         query.range = .custom(from: date(2026, 1, 2), to: date(2026, 3, 4))
         #expect(!ReportContentVisibility(query: query).showsCalendar)
+    }
+}
+
+@Suite("Ledger fetches cut to a period")
+@MainActor
+struct LedgerFetchTests {
+    private let accountID = UUID()
+    private let otherAccountID = UUID()
+
+    private func date(_ year: Int, _ month: Int, _ day: Int, hour: Int = 0) -> Date {
+        let components = DateComponents(year: year, month: month, day: day, hour: hour)
+        return TransactionPeriod.calendar.date(from: components) ?? .distantPast
+    }
+
+    /// Returns the container, not just its context, so the store outlives the
+    /// test's use of the context.
+    private func makeContainer() throws -> ModelContainer {
+        try ModelContainer(
+            for: MoneyTransaction.self, AccountTransfer.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+    }
+
+    private func transaction(
+        at date: Date, kind: TransactionKind = .expense, note: String = "",
+        tripWorkspaceID: UUID? = nil
+    ) -> MoneyTransaction {
+        MoneyTransaction(
+            id: UUID(), kind: kind, amount: 100_000, occurredAt: date, note: note,
+            accountID: accountID, categoryID: nil, sourceRuleID: nil,
+            currencyCode: VNDCurrency.code, createdAt: date,
+            tripWorkspaceID: tripWorkspaceID
+        )
+    }
+
+    private func transfer(at date: Date) -> AccountTransfer {
+        AccountTransfer(
+            id: UUID(), amount: 50_000, occurredAt: date, note: "",
+            sourceAccountID: accountID, destinationAccountID: otherAccountID,
+            currencyCode: VNDCurrency.code, createdAt: date
+        )
+    }
+
+    @Test("A period fetch keeps its start, drops its end, and lists newest first")
+    func transactionsInRange() throws {
+        let container = try makeContainer()
+        let context = ModelContext(container)
+        let range = TransactionRange.month(containing: date(2026, 3, 15))
+        let first = transaction(at: range.start)
+        let middle = transaction(at: date(2026, 3, 15, hour: 9))
+        let before = transaction(at: range.start.addingTimeInterval(-1))
+        let atEnd = transaction(at: range.end)
+        [first, middle, before, atEnd].forEach(context.insert)
+        try context.save()
+
+        let fetched = try context.fetch(LedgerFetch.transactions(in: range))
+
+        #expect(fetched.map(\.id) == [middle.id, first.id])
+    }
+
+    @Test("Transfers are cut to the same half-open period")
+    func transfersInRange() throws {
+        let container = try makeContainer()
+        let context = ModelContext(container)
+        let range = TransactionRange.day(containing: date(2026, 3, 15))
+        let inside = transfer(at: date(2026, 3, 15, hour: 12))
+        let outside = transfer(at: range.end)
+        [inside, outside].forEach(context.insert)
+        try context.save()
+
+        let fetched = try context.fetch(LedgerFetch.transfers(in: range))
+
+        #expect(fetched.map(\.id) == [inside.id])
+    }
+
+    @Test("A trip fetch keeps only the transactions linked to that trip")
+    func tripTransactions() throws {
+        let container = try makeContainer()
+        let context = ModelContext(container)
+        let tripID = UUID()
+        let linked = transaction(at: date(2026, 3, 1), tripWorkspaceID: tripID)
+        let otherTrip = transaction(at: date(2026, 3, 2), tripWorkspaceID: UUID())
+        let unlinked = transaction(at: date(2026, 3, 3))
+        [linked, otherTrip, unlinked].forEach(context.insert)
+        try context.save()
+
+        let fetched = try context.fetch(LedgerFetch.tripTransactions(tripID))
+
+        #expect(fetched.map(\.id) == [linked.id])
+    }
+
+    @Test("The result count matches searching the whole ledger in memory")
+    func resultCountMatchesInMemorySearch() throws {
+        let container = try makeContainer()
+        let context = ModelContext(container)
+        let transactions = [
+            transaction(at: date(2026, 3, 2), note: "Phở bò"),
+            transaction(at: date(2026, 3, 9), kind: .income, note: "Lương"),
+            transaction(at: date(2026, 4, 1), note: "Phở gà"),
+        ]
+        let transfers = [transfer(at: date(2026, 3, 5)), transfer(at: date(2026, 5, 5))]
+        transactions.forEach(context.insert)
+        transfers.forEach(context.insert)
+        try context.save()
+
+        var query = TransactionQuery(range: .month(containing: date(2026, 3, 1)))
+        let names = [accountID: "Ví", otherAccountID: "Ngân hàng"]
+
+        func inMemory(_ query: TransactionQuery) -> Int {
+            TransactionSearch.results(
+                of: query, transactions: transactions, accountNames: names
+            ).count
+                + TransactionSearch.transferResults(
+                    of: query, transfers: transfers, accountNames: names
+                ).count
+        }
+
+        func fetched(_ query: TransactionQuery) -> Int {
+            LedgerFetch.resultCount(
+                of: query, in: context, categoryNames: [:], accountNames: names)
+        }
+
+        #expect(fetched(query) == 3)
+        #expect(fetched(query) == inMemory(query))
+
+        query.text = "pho"
+        #expect(fetched(query) == 1)
+        #expect(fetched(query) == inMemory(query))
+
+        query.text = ""
+        query.filter = .expense
+        #expect(fetched(query) == inMemory(query))
+
+        query = TransactionQuery(range: .year(containing: date(2026, 1, 1)))
+        #expect(fetched(query) == 5)
+        #expect(fetched(query) == inMemory(query))
     }
 }

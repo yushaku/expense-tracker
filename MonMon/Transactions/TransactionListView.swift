@@ -14,11 +14,11 @@ struct TransactionListView: View {
     @Environment(\.locale) private var locale
     @Environment(\.scenePhase) private var scenePhase
 
-    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
-    private var transactions: [MoneyTransaction]
-
-    @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
-    private var transfers: [AccountTransfer]
+    // No whole-ledger query lives here. This body runs again whenever a sheet
+    // opens or closes, a swipe asks for the editor, or the import inbox
+    // refreshes; holding every transaction made each of those filter and
+    // regroup a few thousand rows while the animation was running. The
+    // history, the featured trip and the sheets fetch what they show.
 
     @Query(sort: \TransactionCategory.createdAt, order: .forward)
     private var categories: [TransactionCategory]
@@ -31,12 +31,6 @@ struct TransactionListView: View {
 
     @Query(sort: \PendingTransactionCapture.createdAt, order: .reverse)
     private var pendingCaptures: [PendingTransactionCapture]
-
-    @Query(sort: \BudgetJar.createdAt, order: .forward)
-    private var budgetJars: [BudgetJar]
-
-    @Query(sort: \RecurringRule.createdAt, order: .forward)
-    private var recurringRules: [RecurringRule]
 
     @State private var query = TransactionQuery(range: .month(containing: .now))
     @State private var editorMode: TransactionEditorMode?
@@ -73,22 +67,17 @@ struct TransactionListView: View {
                             quickActions
 
                             if let featuredTrip {
-                                NavigationLink(value: SpendingDestination.trip(featuredTrip.id)) {
-                                    TripWorkspaceCard(
-                                        workspace: featuredTrip,
-                                        snapshot: TripSummary.snapshot(
-                                            workspace: featuredTrip,
-                                            transactions: transactions,
-                                            categories: categories
-                                        )
-                                    )
-                                }
-                                .buttonStyle(.plain)
-                                .accessibilityHint("Opens this trip workspace")
-                                .accessibilityIdentifier("spending-featured-trip")
+                                SpendingFeaturedTripLink(
+                                    workspace: featuredTrip,
+                                    categories: categories
+                                )
                             }
 
-                            transactionsSection
+                            SpendingHistory(
+                                query: $query,
+                                categories: categories,
+                                accounts: accounts
+                            )
                         }
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -157,19 +146,11 @@ struct TransactionListView: View {
                 TransactionEditorView(mode: mode, defaultDate: defaultDate)
             }
             .appSheet(isPresented: $isFiltering) {
-                TransactionFilterSheet(
+                SpendingFilterSheet(
                     query: $query,
                     categories: categories,
                     accounts: accounts
-                ) { draft in
-                    TransactionSearch.results(
-                        of: draft, transactions: transactions,
-                        categoryNames: categoryNames, accountNames: accountNames
-                    ).count
-                        + TransactionSearch.transferResults(
-                            of: draft, transfers: transfers, accountNames: accountNames
-                        ).count
-                }
+                )
             }
             .appSheet(isPresented: $isManagingCategories) {
                 CategoryListView()
@@ -178,8 +159,7 @@ struct TransactionListView: View {
                 RecurringListView()
             }
             .appSheet(isPresented: $isShowingGoals) {
-                let asOf = Date.now
-                GoalListView(capacityByJar: goalCapacityByJar(asOf: asOf), asOf: asOf)
+                SpendingGoalsSheet(asOf: .now)
             }
             .appSheet(isPresented: $isShowingImportInbox) {
                 StatementImportInboxView(inbox: importInbox)
@@ -415,35 +395,8 @@ struct TransactionListView: View {
         TransactionPeriod.startOfMonth(for: query.range.start)
     }
 
-    private var visibleTransactions: [MoneyTransaction] {
-        TransactionSearch.results(
-            of: query,
-            transactions: transactions,
-            categoryNames: categoryNames,
-            accountNames: accountNames
-        )
-    }
-
-    private var categoryNames: [UUID: String] {
-        Dictionary(firstWins: categories.map { ($0.id, $0.name) })
-    }
-
-    private var accountNames: [UUID: String] {
-        Dictionary(firstWins: accounts.map { ($0.id, $0.name) })
-    }
-
     private var featuredTrip: TripWorkspace? {
         SpendingFeaturedTrip.select(from: tripWorkspaces, pinnedID: UUID(uuidString: pinnedTripID))
-    }
-
-    private func goalCapacityByJar(asOf: Date) -> [UUID: Decimal] {
-        BudgetSummary.goalCapacityByJar(
-            monthContaining: asOf,
-            asOf: asOf,
-            jars: budgetJars,
-            recurringRules: recurringRules,
-            transactions: transactions
-        )
     }
 
     /// The four things the owner sets up rather than records: categories,
@@ -572,24 +525,6 @@ struct TransactionListView: View {
         )
     }
 
-    private var transactionsSection: some View {
-        VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-            if query.hasSearchText || !query.categoryIDs.isEmpty || !query.accountIDs.isEmpty
-                || query.range != .month(containing: .now)
-            {
-                TransactionFilterChips(
-                    query: $query,
-                    categories: categories,
-                    accounts: accounts,
-                    includesPeriod: true,
-                    includesDirection: false
-                )
-            }
-
-            transactionHistory
-        }
-    }
-
     private var searchAndFilterButton: some View {
         Button {
             isFiltering = true
@@ -615,32 +550,6 @@ struct TransactionListView: View {
         query.isNarrowed || query.range != .month(containing: .now)
     }
 
-    private var transactionHistory: some View {
-        TransactionListSection(
-            title: "Transactions",
-            transactions: visibleTransactions,
-            transfers: TransactionSearch.transferResults(
-                of: query, transfers: transfers, accountNames: accountNames
-            ),
-            categories: categories,
-            accounts: accounts,
-            emptyNotice: emptyFilterNotice
-        ) {
-            // This affects the rows only. The period-wide figures live on
-            // Report and continue to count both directions.
-            Picker("Show", selection: $query.filter) {
-                ForEach(TransactionListFilter.allCases) { filter in
-                    Text(filter.displayName)
-                        .tag(filter)
-                }
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .frame(maxWidth: 210)
-            .accessibilityIdentifier("transaction-filter")
-        }
-    }
-
     private func category(for transaction: MoneyTransaction) -> TransactionCategory? {
         guard let categoryID = transaction.categoryID else {
             return nil
@@ -651,12 +560,6 @@ struct TransactionListView: View {
 
     private func account(for transaction: MoneyTransaction) -> CashAccount? {
         accounts.first { $0.id == transaction.accountID }
-    }
-
-    private var emptyFilterNotice: LocalizedStringKey {
-        query.isNarrowed
-            ? "Nothing matches what you are looking for."
-            : "Nothing recorded \(query.range.phrase(in: locale, dateFormat: dateFormat))."
     }
 
     private var noAccountState: some View {
@@ -708,5 +611,177 @@ struct TransactionListView: View {
             RoundedRectangle(cornerRadius: MonMonTheme.cardRadius, style: .continuous)
                 .stroke(MonMonTheme.border, lineWidth: 1)
         }
+    }
+}
+
+/// The period's history under the quick actions. It fetches only the period on
+/// show, and takes nothing from the screen that changes when a sheet opens, so
+/// presenting or dismissing one leaves this subtree alone.
+private struct SpendingHistory: View {
+    @Environment(\.appDateFormat) private var dateFormat
+    @Environment(\.locale) private var locale
+
+    @Binding var query: TransactionQuery
+    let categories: [TransactionCategory]
+    let accounts: [CashAccount]
+
+    @Query private var transactions: [MoneyTransaction]
+    @Query private var transfers: [AccountTransfer]
+
+    init(
+        query: Binding<TransactionQuery>,
+        categories: [TransactionCategory],
+        accounts: [CashAccount]
+    ) {
+        _query = query
+        self.categories = categories
+        self.accounts = accounts
+        let range = query.wrappedValue.range
+        _transactions = Query(LedgerFetch.transactions(in: range))
+        _transfers = Query(LedgerFetch.transfers(in: range))
+    }
+
+    var body: some View {
+        let accountNames = Dictionary(firstWins: accounts.map { ($0.id, $0.name) })
+
+        VStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+            if query.hasSearchText || !query.categoryIDs.isEmpty || !query.accountIDs.isEmpty
+                || query.range != .month(containing: .now)
+            {
+                TransactionFilterChips(
+                    query: $query,
+                    categories: categories,
+                    accounts: accounts,
+                    includesPeriod: true,
+                    includesDirection: false
+                )
+            }
+
+            TransactionListSection(
+                title: "Transactions",
+                transactions: TransactionSearch.results(
+                    of: query,
+                    transactions: transactions,
+                    categoryNames: Dictionary(firstWins: categories.map { ($0.id, $0.name) }),
+                    accountNames: accountNames
+                ),
+                transfers: TransactionSearch.transferResults(
+                    of: query, transfers: transfers, accountNames: accountNames
+                ),
+                categories: categories,
+                accounts: accounts,
+                emptyNotice: emptyFilterNotice
+            ) {
+                // This affects the rows only. The period-wide figures live on
+                // Report and continue to count both directions.
+                Picker("Show", selection: $query.filter) {
+                    ForEach(TransactionListFilter.allCases) { filter in
+                        Text(filter.displayName)
+                            .tag(filter)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .frame(maxWidth: 210)
+                .accessibilityIdentifier("transaction-filter")
+            }
+        }
+    }
+
+    private var emptyFilterNotice: LocalizedStringKey {
+        query.isNarrowed
+            ? "Nothing matches what you are looking for."
+            : "Nothing recorded \(query.range.phrase(in: locale, dateFormat: dateFormat))."
+    }
+}
+
+/// The pinned or most recent trip, summed from its own linked expenses rather
+/// than from a scan of the whole ledger on every update of the screen.
+private struct SpendingFeaturedTripLink: View {
+    let workspace: TripWorkspace
+    let categories: [TransactionCategory]
+
+    @Query private var linked: [MoneyTransaction]
+
+    init(workspace: TripWorkspace, categories: [TransactionCategory]) {
+        self.workspace = workspace
+        self.categories = categories
+        _linked = Query(LedgerFetch.tripTransactions(workspace.id))
+    }
+
+    var body: some View {
+        NavigationLink(value: SpendingDestination.trip(workspace.id)) {
+            TripWorkspaceCard(
+                workspace: workspace,
+                snapshot: TripSummary.snapshot(
+                    workspace: workspace,
+                    transactions: linked,
+                    categories: categories
+                )
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint("Opens this trip workspace")
+        .accessibilityIdentifier("spending-featured-trip")
+    }
+}
+
+/// The filter sheet counts what a draft would show by fetching the draft's
+/// own period, only while the sheet is open.
+private struct SpendingFilterSheet: View {
+    @Environment(\.modelContext) private var modelContext
+
+    @Binding var query: TransactionQuery
+    let categories: [TransactionCategory]
+    let accounts: [CashAccount]
+
+    var body: some View {
+        let categoryNames = Dictionary(firstWins: categories.map { ($0.id, $0.name) })
+        let accountNames = Dictionary(firstWins: accounts.map { ($0.id, $0.name) })
+
+        TransactionFilterSheet(
+            query: $query,
+            categories: categories,
+            accounts: accounts
+        ) { draft in
+            LedgerFetch.resultCount(
+                of: draft,
+                in: modelContext,
+                categoryNames: categoryNames,
+                accountNames: accountNames
+            )
+        }
+    }
+}
+
+/// Goals opened from Transactions. Capacity only reads the month `asOf` sits
+/// in, so that month is all the sheet fetches.
+private struct SpendingGoalsSheet: View {
+    @Query(sort: \BudgetJar.createdAt, order: .forward)
+    private var budgetJars: [BudgetJar]
+
+    @Query(sort: \RecurringRule.createdAt, order: .forward)
+    private var recurringRules: [RecurringRule]
+
+    @Query private var monthTransactions: [MoneyTransaction]
+
+    let asOf: Date
+
+    init(asOf: Date) {
+        self.asOf = asOf
+        _monthTransactions = Query(LedgerFetch.transactions(in: .month(containing: asOf)))
+    }
+
+    var body: some View {
+        GoalListView(
+            capacityByJar: BudgetSummary.goalCapacityByJar(
+                monthContaining: asOf,
+                asOf: asOf,
+                jars: budgetJars,
+                recurringRules: recurringRules,
+                transactions: monthTransactions
+            ),
+            asOf: asOf
+        )
     }
 }

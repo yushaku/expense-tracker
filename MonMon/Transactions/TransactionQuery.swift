@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 
 /// What a transaction screen is asking of the ledger: some words to look for, a
 /// slice of time, a direction, and the categories and accounts worth keeping.
@@ -179,5 +180,62 @@ enum TransactionSearch {
     /// Lowercased and stripped of accents, so `an` finds `Ăn uống`.
     private static func fold(_ text: String) -> String {
         text.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: nil)
+    }
+}
+
+/// Fetches cut to a period in the store rather than in memory.
+///
+/// A screen that only ever shows one period used to fetch the whole ledger and
+/// filter it on every update, which with a few thousand rows is most of the
+/// work behind a hitch. These descriptors keep the same newest-first order as
+/// the unfiltered queries they replace, so `TransactionSearch` sees the rows
+/// it saw before, minus the ones its range test would have dropped anyway.
+enum LedgerFetch {
+    static func transactions(in range: TransactionRange) -> FetchDescriptor<MoneyTransaction> {
+        let start = range.start
+        let end = range.end
+        return FetchDescriptor(
+            predicate: #Predicate { $0.occurredAt >= start && $0.occurredAt < end },
+            sortBy: [SortDescriptor(\.occurredAt, order: .reverse)]
+        )
+    }
+
+    static func transfers(in range: TransactionRange) -> FetchDescriptor<AccountTransfer> {
+        let start = range.start
+        let end = range.end
+        return FetchDescriptor(
+            predicate: #Predicate { $0.occurredAt >= start && $0.occurredAt < end },
+            sortBy: [SortDescriptor(\.occurredAt, order: .reverse)]
+        )
+    }
+
+    /// Every expense linked to one trip, newest first.
+    static func tripTransactions(_ workspaceID: UUID) -> FetchDescriptor<MoneyTransaction> {
+        let id: UUID? = workspaceID
+        return FetchDescriptor(
+            predicate: #Predicate { $0.tripWorkspaceID == id },
+            sortBy: [SortDescriptor(\.occurredAt, order: .reverse)]
+        )
+    }
+
+    /// How many history rows, transactions and transfers, a query would show.
+    /// A failed fetch counts as nothing, the way an empty store would.
+    @MainActor
+    static func resultCount(
+        of query: TransactionQuery,
+        in context: ModelContext,
+        categoryNames: [UUID: String],
+        accountNames: [UUID: String]
+    ) -> Int {
+        let transactions = (try? context.fetch(Self.transactions(in: query.range))) ?? []
+        let transfers = (try? context.fetch(Self.transfers(in: query.range))) ?? []
+
+        return TransactionSearch.results(
+            of: query, transactions: transactions,
+            categoryNames: categoryNames, accountNames: accountNames
+        ).count
+            + TransactionSearch.transferResults(
+                of: query, transfers: transfers, accountNames: accountNames
+            ).count
     }
 }
