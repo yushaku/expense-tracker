@@ -155,6 +155,31 @@ struct TransactionSummaryTests {
         #expect(TransactionSummary.count(for: food, transactions: transactions) == 1)
     }
 
+    @Test("Category usage counts every category in one pass, skipping uncategorized")
+    func countsByCategory() {
+        let account = makeAccount()
+        let food = UUID()
+        let rent = UUID()
+        let transactions = [
+            makeTransaction(kind: .expense, amount: 1, accountID: account.id, categoryID: food),
+            makeTransaction(kind: .expense, amount: 2, accountID: account.id, categoryID: rent),
+            makeTransaction(kind: .expense, amount: 3, accountID: account.id, categoryID: food),
+            makeTransaction(kind: .income, amount: 4, accountID: account.id),
+        ]
+
+        let counts = TransactionSummary.countsByCategory(transactions)
+
+        #expect(counts == [food: 2, rent: 1])
+        for id in [food, rent] {
+            let category = TransactionCategory(
+                id: id, name: "", kind: .expense, symbolName: "cart", colorName: "blue",
+                createdAt: createdAt
+            )
+            #expect(
+                counts[id] == TransactionSummary.count(for: category, transactions: transactions))
+        }
+    }
+
     @Test("No transactions make no day groups")
     func emptyGroupsAreEmpty() {
         #expect(TransactionSummary.byDay([]).isEmpty)
