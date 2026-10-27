@@ -100,12 +100,10 @@ struct ReportData {
 }
 
 struct ReportView: View {
-    @Environment(\.appDateFormat) private var dateFormat
-
-    @Environment(\.locale) private var locale
-
-    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
-    private var transactions: [MoneyTransaction]
+    // The ledger query and every figure derived from it live in
+    // `ReportContent`. This body runs again whenever a sheet opens or closes
+    // here, and recomputing the whole report on each of those made the sheet
+    // animation wait for it.
 
     @Query(sort: \TransactionCategory.createdAt, order: .forward)
     private var categories: [TransactionCategory]
@@ -129,7 +127,12 @@ struct ReportView: View {
                 MonMonTheme.canvas
                     .ignoresSafeArea()
 
-                content
+                ReportContent(
+                    query: $query,
+                    breakdownKind: $breakdownKind,
+                    categories: categories,
+                    accounts: accounts
+                )
             }
             .rootScreenHeader("Report")
             .accessibilityIdentifier("report")
@@ -180,6 +183,70 @@ struct ReportView: View {
             )
             .tint(MonMonTheme.accent)
         }
+    }
+
+    /// Editing from a period that does not include today starts on its first
+    /// day, so a new entry lands where the owner is looking.
+    private var defaultDate: Date {
+        query.range.contains(.now) ? .now : query.range.start
+    }
+
+    /// The rail walks in whatever unit the header is filtering by, and a tap on
+    /// it moves that filter rather than a period kept beside it: a screen
+    /// showing a year steps by years, one showing a day by days.
+    private var periodRail: some View {
+        let periods = PeriodRailPeriods(range: query.range, today: .now)
+
+        return PeriodRail(
+            unit: periods.unit,
+            periods: periods.periods,
+            selection: periods.selection
+        ) { period in
+            query.range = periods.unit.range(containing: period)
+        }
+        .background(MonMonTheme.canvas)
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(MonMonTheme.border)
+                .frame(height: 1)
+        }
+    }
+
+    private func category(for transaction: MoneyTransaction) -> TransactionCategory? {
+        guard let categoryID = transaction.categoryID else {
+            return nil
+        }
+
+        return categories.first { $0.id == categoryID }
+    }
+
+    private func account(for transaction: MoneyTransaction) -> CashAccount? {
+        account(transaction.accountID)
+    }
+
+    private func account(_ id: UUID) -> CashAccount? {
+        accounts.first { $0.id == id }
+    }
+}
+
+/// Everything on Report that is computed from the ledger. It takes only the
+/// query, the breakdown direction and the small category and account lists,
+/// none of which change when a sheet is presented or dismissed, so SwiftUI
+/// leaves this subtree alone during those animations.
+private struct ReportContent: View {
+    @Environment(\.appDateFormat) private var dateFormat
+    @Environment(\.locale) private var locale
+
+    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
+    private var transactions: [MoneyTransaction]
+
+    @Binding var query: TransactionQuery
+    @Binding var breakdownKind: TransactionKind
+    let categories: [TransactionCategory]
+    let accounts: [CashAccount]
+
+    var body: some View {
+        content
     }
 
     private var content: some View {
@@ -303,33 +370,6 @@ struct ReportView: View {
         return .constant(globalKind)
     }
 
-    /// Editing from a period that does not include today starts on its first
-    /// day, so a new entry lands where the owner is looking.
-    private var defaultDate: Date {
-        query.range.contains(.now) ? .now : query.range.start
-    }
-
-    /// The rail walks in whatever unit the header is filtering by, and a tap on
-    /// it moves that filter rather than a period kept beside it: a screen
-    /// showing a year steps by years, one showing a day by days.
-    private var periodRail: some View {
-        let periods = PeriodRailPeriods(range: query.range, today: .now)
-
-        return PeriodRail(
-            unit: periods.unit,
-            periods: periods.periods,
-            selection: periods.selection
-        ) { period in
-            query.range = periods.unit.range(containing: period)
-        }
-        .background(MonMonTheme.canvas)
-        .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(MonMonTheme.border)
-                .frame(height: 1)
-        }
-    }
-
     private var emptyState: some View {
         VStack(spacing: 14) {
             Image(systemName: "magnifyingglass")
@@ -375,22 +415,6 @@ struct ReportView: View {
             accessibilityIdentifierPrefix: "report-transaction",
             showsCount: true
         )
-    }
-
-    private func category(for transaction: MoneyTransaction) -> TransactionCategory? {
-        guard let categoryID = transaction.categoryID else {
-            return nil
-        }
-
-        return categories.first { $0.id == categoryID }
-    }
-
-    private func account(for transaction: MoneyTransaction) -> CashAccount? {
-        account(transaction.accountID)
-    }
-
-    private func account(_ id: UUID) -> CashAccount? {
-        accounts.first { $0.id == id }
     }
 }
 

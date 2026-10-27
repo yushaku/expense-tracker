@@ -18,11 +18,11 @@ struct DayTransactionsView: View {
 
     @Environment(\.locale) private var locale
 
-    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
-    private var transactions: [MoneyTransaction]
+    /// Only the day on show is fetched. The whole ledger used to be read and
+    /// filtered on every update, including the ones a sheet or a swipe causes.
+    @Query private var transactions: [MoneyTransaction]
 
-    @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
-    private var transfers: [AccountTransfer]
+    @Query private var transfers: [AccountTransfer]
 
     @Query(sort: \TransactionCategory.createdAt, order: .forward)
     private var categories: [TransactionCategory]
@@ -34,6 +34,12 @@ struct DayTransactionsView: View {
 
     @State private var editorMode: TransactionEditorMode?
     @State private var transactionActions = TransactionActions()
+
+    init(period: DayPeriod) {
+        self.period = period
+        _transactions = Query(LedgerFetch.transactions(in: period.range))
+        _transfers = Query(LedgerFetch.transfers(in: period.range))
+    }
 
     var body: some View {
         ZStack {

@@ -34,8 +34,11 @@ struct CategoryListView: View {
                         if categories.isEmpty {
                             emptyState
                         } else {
-                            section(for: .expense)
-                            section(for: .income)
+                            // One pass over the ledger for every row's count,
+                            // rather than one pass per category.
+                            let usage = TransactionSummary.countsByCategory(transactions)
+                            section(for: .expense, usage: usage)
+                            section(for: .income, usage: usage)
                         }
                     }
                     .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -70,7 +73,7 @@ struct CategoryListView: View {
     }
 
     @ViewBuilder
-    private func section(for kind: TransactionKind) -> some View {
+    private func section(for kind: TransactionKind, usage: [UUID: Int]) -> some View {
         let matching = categories.filter { $0.kind == kind }
 
         if !matching.isEmpty {
@@ -93,7 +96,7 @@ struct CategoryListView: View {
                     Button {
                         editorMode = .edit(category)
                     } label: {
-                        row(for: category)
+                        row(for: category, usage: usage[category.id] ?? 0)
                     }
                     .buttonStyle(.plain)
                     .accessibilityIdentifier("category-\(category.id.uuidString)")
@@ -103,7 +106,7 @@ struct CategoryListView: View {
         }
     }
 
-    private func row(for category: TransactionCategory) -> some View {
+    private func row(for category: TransactionCategory, usage: Int) -> some View {
         HStack(spacing: 14) {
             Image(systemName: CategoryPalette.symbolName(category.symbolName))
                 .font(.system(size: 17, weight: .semibold))
@@ -120,7 +123,7 @@ struct CategoryListView: View {
                     .font(.headline)
                     .lineLimit(2)
 
-                Text(usageLabel(for: category))
+                Text(usageLabel(count: usage))
                     .font(.subheadline)
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
@@ -144,9 +147,7 @@ struct CategoryListView: View {
         .accessibilityElement(children: .combine)
     }
 
-    private func usageLabel(for category: TransactionCategory) -> String {
-        let count = TransactionSummary.count(for: category, transactions: transactions)
-
+    private func usageLabel(count: Int) -> String {
         guard count > 0 else {
             return AppText.string("Not used yet", in: locale)
         }

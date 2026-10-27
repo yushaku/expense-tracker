@@ -37,6 +37,18 @@ enum TransactionSummary {
         transactions.filter { $0.categoryID == category.id }.count
     }
 
+    /// Every category's usage from one pass over the ledger. A list that asked
+    /// `count(for:transactions:)` per row walked the ledger once per category.
+    static func countsByCategory(_ transactions: [MoneyTransaction]) -> [UUID: Int] {
+        var counts: [UUID: Int] = [:]
+        for transaction in transactions {
+            if let categoryID = transaction.categoryID {
+                counts[categoryID, default: 0] += 1
+            }
+        }
+        return counts
+    }
+
     static func inRange(
         _ range: TransactionRange,
         transactions: [MoneyTransaction]
@@ -173,8 +185,15 @@ enum TransactionHistoryEntry: Identifiable {
 struct TransactionHistoryDay: Identifiable {
     let day: Date
     let entries: [TransactionHistoryEntry]
+    /// Summed once when the day is built; the header reads it on every update.
+    let net: Decimal
     var id: Date { day }
-    var net: Decimal { entries.reduce(0) { $0 + $1.signedAmount } }
+
+    init(day: Date, entries: [TransactionHistoryEntry]) {
+        self.day = day
+        self.entries = entries
+        self.net = entries.reduce(0) { $0 + $1.signedAmount }
+    }
 }
 
 enum TransactionHistory {
