@@ -388,6 +388,24 @@ struct LedgerFetchTests {
         #expect(fetched.map(\.id) == [linked.id])
     }
 
+    @Test("A category fetch keeps that category only, and no category fetches nothing")
+    func categoryTransactions() throws {
+        let container = try makeContainer()
+        let context = ModelContext(container)
+        let food = UUID()
+        let filed = transaction(at: date(2026, 3, 1))
+        filed.categoryID = food
+        let elsewhere = transaction(at: date(2026, 3, 2))
+        elsewhere.categoryID = UUID()
+        let uncategorized = transaction(at: date(2026, 3, 3))
+        [filed, elsewhere, uncategorized].forEach(context.insert)
+        try context.save()
+
+        #expect(
+            try context.fetch(LedgerFetch.transactions(inCategory: food)).map(\.id) == [filed.id])
+        #expect(try context.fetch(LedgerFetch.transactions(inCategory: nil)).isEmpty)
+    }
+
     @Test("The result count matches searching the whole ledger in memory")
     func resultCountMatchesInMemorySearch() throws {
         let container = try makeContainer()

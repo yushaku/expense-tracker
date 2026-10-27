@@ -218,6 +218,20 @@ enum LedgerFetch {
         )
     }
 
+    /// The transactions filed under one category, newest first. Without a
+    /// category, as when one is still being added, nothing is filed under it.
+    static func transactions(inCategory categoryID: UUID?) -> FetchDescriptor<MoneyTransaction> {
+        guard let categoryID else {
+            return FetchDescriptor(predicate: #Predicate { _ in false })
+        }
+
+        let id: UUID? = categoryID
+        return FetchDescriptor(
+            predicate: #Predicate { $0.categoryID == id },
+            sortBy: [SortDescriptor(\.occurredAt, order: .reverse)]
+        )
+    }
+
     /// How many history rows, transactions and transfers, a query would show.
     /// A failed fetch counts as nothing, the way an empty store would.
     @MainActor
