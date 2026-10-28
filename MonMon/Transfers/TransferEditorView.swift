@@ -179,7 +179,7 @@ struct TransferEditorContent: View {
         }
 
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             onSave?()
             dismiss()
         } catch {
@@ -197,7 +197,7 @@ struct TransferEditorContent: View {
         modelContext.delete(editedTransfer)
 
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()

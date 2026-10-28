@@ -217,7 +217,7 @@ struct GoalSpendingDetailView: View {
         saveErrorMessage = nil
         do {
             try TripWorkspaceLifecycle.archive(workspace, at: .now)
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()
@@ -233,7 +233,7 @@ struct GoalSpendingDetailView: View {
 
     private func saveWorkspaceChange() {
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
         } catch {
             modelContext.rollback()
             saveErrorMessage = "Couldn’t update this trip. Try again."

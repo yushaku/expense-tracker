@@ -602,7 +602,7 @@ struct GoalArchiveControl: View {
     private func archive() {
         do {
             try GoalArchive.archive(goal, at: .now)
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             if dismissAfterArchive {
                 dismiss()
             }
@@ -615,7 +615,7 @@ struct GoalArchiveControl: View {
     private func restore() {
         GoalArchive.restore(goal)
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
         } catch {
             modelContext.rollback()
             updateFailed = true

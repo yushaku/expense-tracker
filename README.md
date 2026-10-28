@@ -53,7 +53,7 @@ MonMon is a private personal-finance app for iPhone and Mac, built with SwiftUI 
 - **Quick-expense widget** — configurable one-tap presets on the Home Screen, with
   the app’s Catppuccin palette. The large size shows today’s total and five latest
   expenses above up to nine quick buttons; overflow opens Transactions in the app.
-  Spending refreshes after saves, sync, and app activation. Yesterday’s snapshot
+  Spending refreshes after saves and app activation. Yesterday’s snapshot
   clears at midnight (Vietnam time); open the app to publish a fresh day’s data.
 - **Bank-statement import** — a PDF shared from the bank app lands in the extension's inbox and is parsed off the main thread. Valid new rows are checked by default. Invalid rows appear first, unchecked, with a reason; uncheck any row to leave it out, or tap its details to edit category and note. Import creates income/expense transactions only, without reconciling account balances or statement totals. The selected rows are committed in one atomic save. If validation fails at save time, affected rows move to Needs attention with a reason and are unchecked; the remaining valid selections can be retried. A storage failure keeps selections and explicitly reports that nothing was saved. Existing import fingerprints prevent duplicates when the same report is imported again.
 
@@ -64,10 +64,10 @@ MonMon is a private personal-finance app for iPhone and Mac, built with SwiftUI 
 - Per-account detail with its own activity and spending sections.
 - Per-category and per-day transaction lists reachable from any chart.
 
-### Data, sync, and privacy
+### Data and privacy
 
-- **Local first** — data stays on your devices. Optional P2P sync automatically keeps one paired iPhone and Mac in sync while both apps are open and unlocked on the same local network. No account, cloud storage, or relay server.
-- **Optional read-only AI access on Mac** — an embedded local MCP helper exposes committed records directly from the local store, even while the app is closed to Codex or Claude Desktop after explicit consent. Financial tools cannot write data. A research notebook shared through Device Sync lets the Mac agent create sourced notes and investment drafts with additional consent; the owner reviews and records decisions without executing trades.
+- **Local first** — data stays on each device. iPhone and Mac keep separate stores; move data between them with a backup export and restore. No account, cloud storage, or relay server.
+- **Optional read-only AI access on Mac** — an embedded local MCP helper exposes committed records directly from the local store, even while the app is closed to Codex or Claude Desktop after explicit consent. Financial tools cannot write data. A local research notebook lets the Mac agent create sourced notes and investment drafts with additional consent; the owner reviews and records decisions without executing trades.
 - **Backup and restore** — a validated document covering every model, including jars, goals, and trips, with a confirmation step before a restore replaces what is on the device.
 - **App lock** — Face ID or Touch ID with device-passcode fallback, re-locking after time in the background.
 - **Language** — Vietnamese, English, or whatever the system is set to.
@@ -292,78 +292,19 @@ and shortcut identities stay with their items. Hidden presets keep their order;
 increase **Presets shown** to include them. VoiceOver offers **Move earlier** and
 **Move later** actions. Dropping outside the grid leaves the order unchanged.
 
-### Peer-to-peer device sync
+### Moving data between devices
 
-Open **Settings → Device Sync** on both devices. On Mac, choose **Pair an iPhone**;
-on iPhone, scan that QR code. Keep the pairing code private: it authorizes access
-to this pair's financial data. Camera access is only needed for scanning; a manual
-code entry is available. After pairing, a device connects by itself whenever the
-app is open, unlocked, and on the same Wi-Fi as its pair. Local Network permission is required;
-guest-network isolation and firewalls can prevent discovery.
+There is no device sync. Each device keeps its own store: export a backup in
+**Settings → Backup** on one device and restore it on the other. A restore
+replaces what is on the receiving device after a confirmation step.
 
-After pairing, changes sync automatically without opening Device Sync or pressing
-Apply. The Mac coordinates comparisons; either device can request **Sync now**.
-The app checks for saved changes every three seconds while active, including
-changes made by App Intents and the Mac research helper. Only changed data prompts
-a comparison; reconnecting with identical data does not create another backup or
-history entry. A toolbar indicator opens the status, last successful sync time,
-local change count, and history. Both devices need sync protocol version 4.
+Builds before this change offered peer-to-peer Device Sync. On first launch,
+MonMon deletes what it left behind: the `sync/*` rows in its metadata store and
+the pairing secret in Keychain. Seed markers and financial records are kept, and
+so are any recovery files under
+`Application Support/MonMon/p2p-recovery/<dev|prod>/`; remove those by hand once
+they are no longer needed.
 
-Only conflicting records need review. Neither device is selected by default;
-choose the versions to keep and confirm **Apply to both devices** once. The peer
-re-derives the merge, validates digests and deletions, and rejects a stale preview.
-Dismissing Device Sync leaves the connection running. Open sheets and unsaved
-model edits defer sync so a data refresh cannot discard an editor's draft.
-Transient failures reconnect with a delay increasing from 3 to 30 seconds;
-invalid data and incompatible versions require attention instead of endless retries.
-
-Initial sync unions existing data; a starter category/account/jar missing on one
-device requires an explicit keep or remove decision. Hand-entered transactions
-with different IDs remain separate, even when their date and amount match.
-Recurring occurrences and imported records use their existing domain identities.
-A deletion cannot strand a retained record that needs the deleted item: retain
-the referenced item or change the choices. Existing optional provenance, such as
-a deleted recurring rule, is preserved.
-
-Financial records sync; pending captures and preferences stay local. Local draft,
-default-account/category, import mapping, and Quick Expense references follow
-merged IDs or become unselected if their target was deleted. Theme, language,
-app lock, notification choices, and MCP authorization never come from the peer.
-
-No background or remote-Internet sync is attempted. Leaving the app or locking it
-interrupts the connection; returning to the app reconnects automatically. The
-status is complete only after both stores acknowledge the session. New prepared
-sessions preserve their original local snapshot, so an interrupted session does
-not block ordinary editing. Recovery replays later local field edits over the
-agreed result and sends them in the next sync; it does not overwrite them on retry.
-Legacy pending sessions without that snapshot remain read-only until recovered.
-Backup restore, reset, and unpairing still require the pending session to finish.
-A prepared session with no preparation on its peer is safely abandoned on reconnect.
-
-The most recent 20 completed sessions show per-device change counts. A recovery
-backup is written locally before every commit; completed sessions offer export of
-that backup. Recovery files are in the app's Application Support directory under
-`MonMon/p2p-recovery/<dev|prod>/`. Files are retained locally until removed by the owner. They contain financial data and local preferences,
-not pairing secrets. A recovery from an already-corrupt store preserves its duplicate
-rows; ordinary backup import will reject conflicting duplicate IDs rather than
-silently discard a version. Preserve that file for explicit reconciliation.
-
-Unpairing keeps financial data. An unfinished session must finish first. Restoring
-a backup invalidates pairing and the common baseline, so unpair the other device
-and pair again to preview an initial merge. Missing/corrupt sync metadata or different
-protocol versions never trigger a blind replacement of a store. Dev and Prod use
-separate service identifiers, pairing namespaces, and recovery directories.
-
-Implementation notes: SwiftData remains local; a versioned canonical snapshot
-and common baseline drive three-way reconciliation. Messages are length-prefixed
-and each snapshot is capped at 100 MiB. TLS-PSK uses TLS 1.2 with AES-GCM because
-[Apple's Network framework does not support TLS 1.3 PSK](https://developer.apple.com/documentation/technotes/tn3213-moving-from-multipeer-connectivity-to-network-framework).
-The 256-bit pairing secret lives in non-synchronizing, device-only Keychain storage.
-Data and local apply receipts commit in one SwiftData save; reconnect retries use
-receipts, not a repeated restore. This is resumable synchronization, not a distributed
-atomic transaction: one store can temporarily be ahead of the other.
-
-Conflicting financial changes are not committed until the reviewing device approves them.
 Transfers imported from complementary statement sides without a common provenance
 key remain separate; equal amounts and dates alone do not prove identity.
 
@@ -384,7 +325,7 @@ expense amount. It retains all report filters, excludes future days, and uses th
 full selected period through today even when the comparison window is shortened.
 Income-only reports hide this section; empty periods have no per-expense average.
 
-Research notes and proposals are available in Settings on iPhone and Mac. Device Sync includes notes, proposals and decision history (both devices need the current sync version); AI draft-writing permissions remain local to Mac. Research stays outside financial backups and can be exported separately as JSON.
+Research notes and proposals are available in Settings on iPhone and Mac and stay on the device that holds them; AI draft-writing permissions remain local to Mac. Research stays outside financial backups and can be exported separately as JSON.
 
 ### Back up and reset the local database
 
@@ -395,8 +336,7 @@ it before deleting database records in one save. A backup failure leaves records
 untouched; a database save failure rolls back deletion and keeps the backup.
 The last reset backup can be exported or restored from the same Settings card.
 
-Reset clears all SwiftData models, including financial records and sync metadata,
-and forgets this device's pairing after success. It is blocked during pending sync.
+Reset clears all SwiftData models, including financial records and seed markers.
 Notes/proposals (stored separately), appearance/security settings, exported files,
 and other devices are not erased. Default accounts, categories and jars may be
 created again on the next launch. This is a database reset, not an uninstall or a

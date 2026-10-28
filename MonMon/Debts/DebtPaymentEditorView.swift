@@ -194,7 +194,7 @@ struct DebtPaymentEditorView: View {
         }
 
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()
@@ -211,7 +211,7 @@ struct DebtPaymentEditorView: View {
         modelContext.delete(editedPayment)
 
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()

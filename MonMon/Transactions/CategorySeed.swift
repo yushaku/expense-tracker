@@ -165,7 +165,7 @@ enum CategorySeed {
                 }
             }
             try SeedState.mark("categories", in: context)
-            try SyncWriteGate.save(context)
+            try StoreWrite.save(context)
         } catch {
             context.rollback()
         }

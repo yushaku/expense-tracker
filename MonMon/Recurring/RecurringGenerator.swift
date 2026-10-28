@@ -125,7 +125,7 @@ enum RecurringGenerator {
         // dates were all already present wrote no transaction and still moved
         // its `lastGeneratedAt`.
         if context.hasChanges {
-            try SyncWriteGate.save(context)
+            try StoreWrite.save(context)
         }
 
         return report

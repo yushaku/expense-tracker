@@ -2,7 +2,7 @@ import SwiftData
 import SwiftUI
 
 /// Completion is emitted only by a successful local contribution save. Opening
-/// an already complete goal or applying a sync snapshot never replays it.
+/// an already complete goal or restoring a backup never replays it.
 @MainActor
 enum GoalContributionCommit {
     static func save(
@@ -15,7 +15,7 @@ enum GoalContributionCommit {
         do {
             try GoalContributionStore.record(
                 amount: amount, on: goal, id: UUID(), occurredAt: occurredAt)
-            try SyncWriteGate.save(context)
+            try StoreWrite.save(context)
             return wasIncomplete && goal.targetAmount > 0
                 && goal.earmarkedAmount >= goal.targetAmount
         } catch {

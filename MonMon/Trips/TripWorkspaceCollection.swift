@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 /// One user-facing goal throughout accumulation and spending. The existing storage
-/// records keep their IDs so backups, sync and transaction links remain compatible.
+/// records keep their IDs so backups and transaction links remain compatible.
 struct GoalJourney {
     let goal: FinancialGoal?
     var workspace: TripWorkspace? = nil
@@ -43,7 +43,7 @@ struct GoalJourney {
         try draft.apply(
             to: self, jars: jars, goals: goals, capacityByJar: capacityByJar, asOf: asOf)
         do {
-            try SyncWriteGate.save(context)
+            try StoreWrite.save(context)
         } catch {
             context.rollback()
             // SwiftData can retain just-mutated values in its live model cache after rollback.

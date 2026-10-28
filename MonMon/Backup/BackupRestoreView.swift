@@ -76,7 +76,7 @@ struct MonMonBackupFileDocument: FileDocument {
 
 struct BackupRestoreView: View {
     @Environment(AppLock.self) private var appLock
-    @Environment(SyncCoordinator.self) private var syncCoordinator
+    @Environment(StoreResetCoordinator.self) private var storeReset
     @Environment(\.modelContext) private var modelContext
     @Environment(\.locale) private var locale
 
@@ -177,7 +177,7 @@ struct BackupRestoreView: View {
             Button("Back Up and Reset", role: .destructive) { performReset() }
         } message: {
             Text(
-                "MonMon will save and verify a financial backup before deleting all local database records and disconnecting Device Sync. Notes, proposals, app settings, and data on other devices are kept. If backup fails, nothing is deleted."
+                "MonMon will save and verify a financial backup before deleting all local database records. Notes, proposals, app settings, and data on other devices are kept. If backup fails, nothing is deleted."
             )
         }
         .alert("Export readable JSON?", isPresented: $isPresentingExportWarning) {
@@ -247,7 +247,7 @@ struct BackupRestoreView: View {
                     .foregroundStyle(MonMonTheme.danger)
                     .accessibilityAddTraits(.isHeader)
 
-                Text("Clear financial data on this device and disconnect Device Sync.")
+                Text("Clear financial data on this device.")
                     .font(.subheadline)
                     .foregroundStyle(MonMonTheme.textPrimary)
 
@@ -276,7 +276,7 @@ struct BackupRestoreView: View {
                     )
                 )
                 .frame(minHeight: 44)
-                .disabled(isWorking || syncCoordinator.writesLocked)
+                .disabled(isWorking)
                 .accessibilityIdentifier("backup-reset")
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -356,8 +356,8 @@ struct BackupRestoreView: View {
             }
             let url = MonMonBackupService.resetBackupURL()
             do {
-                try SyncWriteGate.save(modelContext)
-                try syncCoordinator.resetDatabase(using: service, backupURL: url)
+                try StoreWrite.save(modelContext)
+                try storeReset.resetDatabase(using: service, backupURL: url)
                 lastResetPath = url.path
             } catch {
                 // A successful backup remains useful even if the later save failed.
@@ -381,7 +381,7 @@ struct BackupRestoreView: View {
             await Task.yield()
             defer { isWorking = false }
             do {
-                try SyncWriteGate.save(modelContext)
+                try StoreWrite.save(modelContext)
                 let now = Date.now
                 exportDocument = MonMonBackupFileDocument(
                     data: try service.exportData(exportedAt: now))
@@ -472,7 +472,7 @@ struct BackupRestoreView: View {
             }
 
             do {
-                try SyncWriteGate.save(modelContext)
+                try StoreWrite.save(modelContext)
                 _ = try service.restore(selection.validated)
                 hasRecovery = true
                 self.selection = nil

@@ -211,7 +211,7 @@ struct CategoryEditorView: View {
         }
 
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()
@@ -228,7 +228,7 @@ struct CategoryEditorView: View {
         modelContext.delete(editedCategory)
 
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()
@@ -258,7 +258,7 @@ struct CategoryEditorView: View {
         modelContext.delete(editedCategory)
 
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             isReassigning = false
             dismiss()
         } catch {
