@@ -93,29 +93,33 @@ struct ReportHighlights {
         var currentQuery = query
         currentQuery.range = periods.current
         currentQuery.filter = kind == .income ? .income : .expense
-        var previousQuery = currentQuery
-        previousQuery.range = periods.previous
-        let currentRows = TransactionSearch.results(
-            of: currentQuery, transactions: transactions,
+        // Rhythm describes the entire selected period through today, even when
+        // a shorter previous month trims the comparison windows.
+        let rhythmPeriod = TransactionRange(
+            scope: .custom, start: query.range.start,
+            end: min(query.range.end, TransactionRange.day(containing: asOf).end))
+        // One text and filter pass over the span all three windows share, then
+        // each window is cut from it by date. The search's range test is a
+        // plain conjunction with the rest of its filters, so this keeps the
+        // same rows as searching each window on its own, at a third of the
+        // cost of folding every note.
+        var spanQuery = currentQuery
+        spanQuery.range = TransactionRange(
+            scope: .custom,
+            start: min(periods.previous.start, periods.current.start, rhythmPeriod.start),
+            end: max(periods.previous.end, periods.current.end, rhythmPeriod.end))
+        let spanRows = TransactionSearch.results(
+            of: spanQuery, transactions: transactions,
             categoryNames: categoryNames, accountNames: accountNames)
-        let previousRows = TransactionSearch.results(
-            of: previousQuery, transactions: transactions,
-            categoryNames: categoryNames, accountNames: accountNames)
+        let currentRows = spanRows.filter { periods.current.contains($0.occurredAt) }
+        let previousRows = spanRows.filter { periods.previous.contains($0.occurredAt) }
         current = currentRows.reduce(0) { $0 + $1.amount }
         previous = previousRows.reduce(0) { $0 + $1.amount }
         hasTransactions = !currentRows.isEmpty || !previousRows.isEmpty
         if kind == .expense {
-            var rhythmQuery = currentQuery
-            // Rhythm describes the entire selected period through today, even
-            // when a shorter previous month trims the comparison windows.
-            rhythmQuery.range = TransactionRange(
-                scope: .custom, start: query.range.start,
-                end: min(query.range.end, TransactionRange.day(containing: asOf).end))
-            let rows = TransactionSearch.results(
-                of: rhythmQuery, transactions: transactions,
-                categoryNames: categoryNames, accountNames: accountNames)
+            let rows = spanRows.filter { rhythmPeriod.contains($0.occurredAt) }
             spendingRhythm = ReportSpendingRhythm(
-                period: rhythmQuery.range, count: rows.count,
+                period: rhythmPeriod, count: rows.count,
                 total: rows.reduce(0) { $0 + $1.amount })
         } else {
             spendingRhythm = nil

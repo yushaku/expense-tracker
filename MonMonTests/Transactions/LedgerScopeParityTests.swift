@@ -116,6 +116,115 @@ struct LedgerScopeParityTests {
         #expect(!fromFetch.isEmpty)
     }
 
+    /// The highlights as they were computed before they shared one pass:
+    /// a separate search for each window.
+    private func separateSearches(
+        _ query: TransactionQuery, _ rows: [MoneyTransaction], names: [UUID: String],
+        asOf: Date
+    ) -> (current: Decimal, previous: Decimal, rhythmCount: Int, rhythmTotal: Decimal)? {
+        guard let periods = ReportComparisonPeriods(range: query.range, asOf: asOf) else {
+            return nil
+        }
+        let kind = query.filter.kind ?? .expense
+        var current = query
+        current.range = periods.current
+        current.filter = kind == .income ? .income : .expense
+        var previous = current
+        previous.range = periods.previous
+        var rhythm = current
+        rhythm.range = TransactionRange(
+            scope: .custom, start: query.range.start,
+            end: min(query.range.end, TransactionRange.day(containing: asOf).end))
+        func sum(_ q: TransactionQuery) -> [MoneyTransaction] {
+            TransactionSearch.results(of: q, transactions: rows, categoryNames: names)
+        }
+        let rhythmRows = sum(rhythm)
+        return (
+            sum(current).reduce(0) { $0 + $1.amount },
+            sum(previous).reduce(0) { $0 + $1.amount },
+            rhythmRows.count, rhythmRows.reduce(0) { $0 + $1.amount }
+        )
+    }
+
+    @Test("Report highlights match separate searches, from the whole ledger or the fetched span")
+    func reportHighlights() throws {
+        let container = try makeContainer()
+        let context = ModelContext(container)
+        let food = UUID()
+        let names = [food: "Ăn uống"]
+        var ledger: [MoneyTransaction] = []
+        for month in 6...10 {
+            for day in [1, 13, 14, 28, 30] {
+                guard
+                    let at = calendar.date(from: DateComponents(year: 2026, month: month, day: day))
+                else { continue }
+                ledger.append(
+                    transaction(
+                        .expense, Decimal(month * 1000 + day), at: at,
+                        categoryID: day.isMultiple(of: 2) ? food : nil,
+                        note: day == 13 ? "Phở" : ""))
+                ledger.append(
+                    transaction(.income, Decimal(day * 7), at: at.addingTimeInterval(3600)))
+            }
+        }
+        ledger.forEach(context.insert)
+        try context.save()
+
+        let asOf = date(2026, 9, 13, hour: 15)
+        var queries: [TransactionQuery] = [
+            TransactionQuery(range: .month(containing: asOf)),
+            TransactionQuery(range: .month(containing: date(2026, 7, 2))),
+            TransactionQuery(range: .year(containing: asOf)),
+            TransactionQuery(range: .day(containing: asOf)),
+            TransactionQuery(range: .custom(from: date(2026, 8, 10), to: date(2026, 9, 2))),
+        ]
+        var text = TransactionQuery(range: .month(containing: asOf))
+        text.text = "pho"
+        var income = TransactionQuery(range: .month(containing: asOf))
+        income.filter = .income
+        var category = TransactionQuery(range: .month(containing: asOf))
+        category.categoryIDs = [food]
+        queries += [text, income, category]
+
+        for query in queries {
+            let span = ReportContentSpan.fetchedSpan(for: query.range, asOf: asOf)
+            let fetched = try context.fetch(LedgerFetch.transactions(in: span))
+            let expected = try #require(
+                separateSearches(query, ledger, names: names, asOf: asOf))
+
+            for rows in [ledger, fetched] {
+                let highlights = try #require(
+                    ReportHighlights(
+                        query: query, transactions: rows, categoryNames: names,
+                        accountNames: [:], asOf: asOf))
+                #expect(highlights.current == expected.current)
+                #expect(highlights.previous == expected.previous)
+                if query.filter.kind != .income {
+                    #expect(highlights.spendingRhythm?.count == expected.rhythmCount)
+                    #expect(highlights.spendingRhythm?.total == expected.rhythmTotal)
+                }
+            }
+
+            let fromLedger = try #require(
+                ReportHighlights(
+                    query: query, transactions: ledger, categoryNames: names,
+                    accountNames: [:], asOf: asOf))
+            let fromFetch = try #require(
+                ReportHighlights(
+                    query: query, transactions: fetched, categoryNames: names,
+                    accountNames: [:], asOf: asOf))
+            #expect(fromLedger.changes.map(\.id) == fromFetch.changes.map(\.id))
+            #expect(fromLedger.changes.map(\.delta) == fromFetch.changes.map(\.delta))
+
+            let report = ReportData(
+                query: query, transactions: fetched, categoryNames: names, accountNames: [:])
+            let whole = ReportData(
+                query: query, transactions: ledger, categoryNames: names, accountNames: [:])
+            #expect(Set(report.transactions.map(\.id)) == Set(whole.transactions.map(\.id)))
+            #expect(report.transactions.count == whole.transactions.count)
+        }
+    }
+
     @Test("An account fetch keeps that account's transactions and both ends of its transfers")
     func accountFetches() throws {
         let container = try makeContainer()
