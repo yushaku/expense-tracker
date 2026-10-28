@@ -416,7 +416,6 @@
 		B10000000000000000000203 /* TPBankPDFTestFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000103 /* TPBankPDFTestFixture.swift */; };
 		B10000000000000000000204 /* TPBankPDFStatementParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000104 /* TPBankPDFStatementParserTests.swift */; };
 		B10000000000000000000205 /* TPBankPDFStatementParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000105 /* TPBankPDFStatementParser.swift */; };
-		B12345678901234567890101 /* AssetGrowthCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B12345678901234567890201 /* AssetGrowthCard.swift */; };
 		C10000000000000000000101 /* TransactionCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000001 /* TransactionCalendar.swift */; };
 		C10000000000000000000102 /* TransactionCalendarCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000002 /* TransactionCalendarCard.swift */; };
 		C10000000000000000000103 /* DayTransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000003 /* DayTransactionsView.swift */; };
@@ -919,7 +918,6 @@
 		B10000000000000000000103 /* TPBankPDFTestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TPBankPDFTestFixture.swift; sourceTree = "<group>"; };
 		B10000000000000000000104 /* TPBankPDFStatementParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TPBankPDFStatementParserTests.swift; sourceTree = "<group>"; };
 		B10000000000000000000105 /* TPBankPDFStatementParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TPBankPDFStatementParser.swift; sourceTree = "<group>"; };
-		B12345678901234567890201 /* AssetGrowthCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetGrowthCard.swift; sourceTree = "<group>"; };
 		C10000000000000000000001 /* TransactionCalendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCalendar.swift; sourceTree = "<group>"; };
 		C10000000000000000000002 /* TransactionCalendarCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCalendarCard.swift; sourceTree = "<group>"; };
 		C10000000000000000000003 /* DayTransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayTransactionsView.swift; sourceTree = "<group>"; };
@@ -1373,7 +1371,6 @@
 				A00000000000000000000809 /* WealthAccountsSection.swift */,
 				A00000000000000000000183 /* AssetAllocation.swift */,
 				A00000000000000000000184 /* AssetAllocationCard.swift */,
-				B12345678901234567890201 /* AssetGrowthCard.swift */,
 			);
 			path = Accounts;
 			sourceTree = "<group>";
@@ -2193,7 +2190,6 @@
 				A00000000000000000000275 /* DateField.swift in Sources */,
 				A00000000000000000000273 /* AssetAllocationCard.swift in Sources */,
 				A00000000000000000000F31 /* AllocationDoughnut.swift in Sources */,
-				B12345678901234567890101 /* AssetGrowthCard.swift in Sources */,
 				A00000000000000000000806 /* AccountBalanceAllocation.swift in Sources */,
 				A00000000000000000000808 /* AccountBalanceCard.swift in Sources */,
 				A0000000000000000000080A /* WealthAccountsSection.swift in Sources */,
