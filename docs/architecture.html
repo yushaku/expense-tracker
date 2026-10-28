@@ -218,8 +218,9 @@
 
     .field {
       display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: baseline;
+      grid-template-columns: auto 1fr auto;
+      grid-template-areas: "name badges type";
+      align-items: center;
       gap: 4px 10px;
       padding: 6px 15px;
       border-bottom: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
@@ -230,11 +231,12 @@
     .field:last-child { border-bottom: 0; }
     .field.key { background: color-mix(in srgb, var(--e) 5%, transparent); }
 
-    .fname { color: var(--text); }
+    .fname { grid-area: name; color: var(--text); }
     .field.key .fname { font-weight: 600; }
-    .ftype { color: var(--muted); font-size: var(--docs-type-xs); text-align: right; white-space: nowrap; }
+    .ftype { grid-area: type; color: var(--muted); font-size: var(--docs-type-xs); text-align: right; white-space: nowrap; }
 
-    .badges { grid-column: 1 / -1; display: flex; gap: 5px; flex-wrap: wrap; margin-top: 1px; }
+    .badges { grid-area: badges; min-width: 0; display: flex; gap: 5px; flex-wrap: wrap; }
+    .field:has(.badge.long) { grid-template-columns: 1fr auto; grid-template-areas: "name type" "badges badges"; }
 
     .badge {
       font-family: var(--mono);
@@ -689,7 +691,7 @@
           <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">kind</span><span class="ftype">CashAccountKind</span>
-            <span class="badges"><span class="badge enum">enum: cash | bank | credit</span></span>
+            <span class="badges"><span class="badge enum long">enum: cash | bank | credit</span></span>
           </li>
           <li class="field"><span class="fname">openingBalance</span><span class="ftype">Decimal</span></li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
@@ -777,9 +779,9 @@
           <li class="field"><span class="fname">averageCostPerUnit</span><span class="ftype">Decimal</span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">purchasedAt</span><span class="ftype">Date?</span>
-            <span class="badges"><span class="badge null">? &mdash; falls back to createdAt</span></span></li>
+            <span class="badges"><span class="badge null long">? &mdash; falls back to createdAt</span></span></li>
           <li class="field"><span class="fname">purchaseExchangeRate</span><span class="ftype">Decimal?</span>
-            <span class="badges"><span class="badge null">₫ per $ when the cost was typed in dollars</span></span></li>
+            <span class="badges"><span class="badge null long">₫ per $ when the cost was typed in dollars</span></span></li>
           <li class="field key" data-anchor="FundHolding.instrumentID">
             <span class="fname">instrumentID</span><span class="ftype">UUID?</span>
             <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span></span>
@@ -810,36 +812,36 @@
           </li>
           <li class="field">
             <span class="fname">symbol</span><span class="ftype">String</span>
-            <span class="badges"><span class="badge null">unique &mdash; enforced by draft + reconciliation, not @Attribute</span></span>
+            <span class="badges"><span class="badge null long">unique &mdash; enforced by draft + reconciliation, not @Attribute</span></span>
           </li>
           <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">kind</span><span class="ftype">FundInstrumentKind</span>
-            <span class="badges"><span class="badge enum">enum: fund | etf | gold | crypto</span></span>
+            <span class="badges"><span class="badge enum long">enum: fund | etf | gold | crypto</span></span>
           </li>
           <li class="field"><span class="fname">currentPricePerUnit</span><span class="ftype">Decimal</span></li>
           <li class="field"><span class="fname">askPricePerUnit</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge null">gold shop-sell side; zero otherwise</span></span></li>
+            <span class="badges"><span class="badge null long">gold shop-sell side; zero otherwise</span></span></li>
           <li class="field">
             <span class="fname">priceAsOf</span><span class="ftype">Date</span>
-            <span class="badges"><span class="badge null">trading day of the price</span></span>
+            <span class="badges"><span class="badge null long">trading day of the price</span></span>
           </li>
           <li class="field">
             <span class="fname">priceFetchedAt</span><span class="ftype">Date?</span>
-            <span class="badges"><span class="badge null">when the app asked</span></span>
+            <span class="badges"><span class="badge null long">when the app asked</span></span>
           </li>
           <li class="field">
             <span class="fname">priceSource</span><span class="ftype">String</span>
-            <span class="badges"><span class="badge enum">manual | fmarket | vndirect | vangToday | coinGecko</span></span>
+            <span class="badges"><span class="badge enum long">manual | fmarket | vndirect | vangToday | coinGecko</span></span>
           </li>
           <li class="field"><span class="fname">autoQuoteEnabled</span><span class="ftype">Bool</span></li>
           <li class="field">
             <span class="fname">logoURL</span><span class="ftype">String?</span>
-            <span class="badges"><span class="badge null">cosmetic; manager or coin image</span></span>
+            <span class="badges"><span class="badge null long">cosmetic; manager or coin image</span></span>
           </li>
           <li class="field">
             <span class="fname">providerID</span><span class="ftype">String?</span>
-            <span class="badges"><span class="badge null">provider's own key when it is not the ticker</span></span>
+            <span class="badges"><span class="badge null long">provider's own key when it is not the ticker</span></span>
           </li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
@@ -871,16 +873,16 @@
             <span class="badges"><span class="badge">0 unless the shop deducted one</span></span></li>
           <li class="field key" data-anchor="FundSale.proceedsAccountID">
             <span class="fname">proceedsAccountID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span><span class="badge null">ignored on a swap</span></span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req long">NOT NULL</span><span class="badge null long">ignored on a swap</span></span>
           </li>
           <li class="field"><span class="fname">soldAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">exchangeRate</span><span class="ftype">Decimal?</span>
-            <span class="badges"><span class="badge null">₫ per $ when the price was typed in dollars</span></span></li>
+            <span class="badges"><span class="badge null long">₫ per $ when the price was typed in dollars</span></span></li>
           <li class="field key" data-anchor="FundSale.swapHoldingID">
             <span class="fname">swapHoldingID</span><span class="ftype">UUID?</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge null">the lot a swap bought</span></span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null long">the lot a swap bought</span></span>
           </li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
         </ul>
@@ -903,17 +905,17 @@
             <span class="badges"><span class="badge pk">PK</span></span></li>
           <li class="field">
             <span class="fname">kind</span><span class="ftype">TransactionKind</span>
-            <span class="badges"><span class="badge enum">enum: income | expense</span></span>
+            <span class="badges"><span class="badge enum long">enum: income | expense</span></span>
           </li>
           <li class="field">
             <span class="fname">amount</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge null">always positive &mdash; kind carries sign</span></span>
+            <span class="badges"><span class="badge null long">always positive &mdash; kind carries sign</span></span>
           </li>
           <li class="field"><span class="fname">occurredAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
           <li class="field key" data-anchor="MoneyTransaction.accountID">
             <span class="fname">accountID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req long">NOT NULL</span></span>
           </li>
           <li class="field key" data-anchor="MoneyTransaction.categoryID">
             <span class="fname">categoryID</span><span class="ftype">UUID?</span>
@@ -921,21 +923,21 @@
           </li>
           <li class="field key" data-anchor="MoneyTransaction.sourceRuleID">
             <span class="fname">sourceRuleID</span><span class="ftype">UUID?</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge null">? &mdash; nil when typed by hand</span></span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null long">? &mdash; nil when typed by hand</span></span>
           </li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">sourceImportID</span><span class="ftype">String?</span>
-            <span class="badges"><span class="badge null">? &mdash; SHA-256 candidate provenance</span></span></li>
+            <span class="badges"><span class="badge null long">? &mdash; SHA-256 candidate provenance</span></span></li>
           <li class="field"><span class="fname">incomeAllocationSnapshot</span><span class="ftype">String?</span>
-            <span class="badges"><span class="badge null">? &mdash; frozen jar split, JSON</span></span></li>
+            <span class="badges"><span class="badge null long">? &mdash; frozen jar split, JSON</span></span></li>
           <li class="field key" data-anchor="MoneyTransaction.tripWorkspaceID">
             <span class="fname">tripWorkspaceID</span><span class="ftype">UUID?</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge null">? &mdash; expenses only</span></span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null long">? &mdash; expenses only</span></span>
           </li>
           <li class="field key" data-anchor="MoneyTransaction.budgetJarOverrideID">
             <span class="fname">budgetJarOverrideID</span><span class="ftype">UUID?</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge null">? &mdash; stale id falls back to the category</span></span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null long">? &mdash; stale id falls back to the category</span></span>
           </li>
         </ul>
         <div class="derived">
@@ -957,24 +959,24 @@
             <span class="badges"><span class="badge pk">PK</span></span></li>
           <li class="field">
             <span class="fname">amount</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge null">always positive &mdash; the pair carries direction</span></span>
+            <span class="badges"><span class="badge null long">always positive &mdash; the pair carries direction</span></span>
           </li>
           <li class="field"><span class="fname">occurredAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
           <li class="field key" data-anchor="AccountTransfer.sourceAccountID">
             <span class="fname">sourceAccountID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req long">NOT NULL</span></span>
           </li>
           <li class="field key" data-anchor="AccountTransfer.destinationAccountID">
             <span class="fname">destinationAccountID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req long">NOT NULL</span></span>
           </li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">sourceAccountImportID</span><span class="ftype">String?</span>
-            <span class="badges"><span class="badge null">? &mdash; provenance for source side</span></span></li>
+            <span class="badges"><span class="badge null long">? &mdash; provenance for source side</span></span></li>
           <li class="field"><span class="fname">destinationAccountImportID</span><span class="ftype">String?</span>
-            <span class="badges"><span class="badge null">? &mdash; provenance for destination side</span></span></li>
+            <span class="badges"><span class="badge null long">? &mdash; provenance for destination side</span></span></li>
         </ul>
         <div class="derived">
           <div class="derived-label">Derived &mdash; computed, not stored</div>
@@ -996,21 +998,21 @@
           <li class="field"><span class="fname">counterparty</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">direction</span><span class="ftype">DebtDirection</span>
-            <span class="badges"><span class="badge null">borrowed / lent &mdash; carries the sign</span></span>
+            <span class="badges"><span class="badge null long">borrowed / lent &mdash; carries the sign</span></span>
           </li>
           <li class="field">
             <span class="fname">principal</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge null">always positive</span></span>
+            <span class="badges"><span class="badge null long">always positive</span></span>
           </li>
           <li class="field"><span class="fname">annualInterestRate</span><span class="ftype">Decimal</span></li>
           <li class="field"><span class="fname">openedAt</span><span class="ftype">Date</span></li>
           <li class="field">
             <span class="fname">dueDate</span><span class="ftype">Date?</span>
-            <span class="badges"><span class="badge null">nil = open-ended</span></span>
+            <span class="badges"><span class="badge null long">nil = open-ended</span></span>
           </li>
           <li class="field key" data-anchor="Debt.accountID">
             <span class="fname">accountID</span><span class="ftype">UUID?</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge null">nil = already in an opening balance</span></span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null long">nil = already in an opening balance</span></span>
           </li>
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
@@ -1035,16 +1037,16 @@
             <span class="badges"><span class="badge pk">PK</span></span></li>
           <li class="field key" data-anchor="DebtPayment.debtID">
             <span class="fname">debtID</span><span class="ftype">UUID?</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span><span class="badge null">deleted with its debt</span></span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span><span class="badge null long">deleted with its debt</span></span>
           </li>
           <li class="field">
             <span class="fname">amount</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge null">always positive</span></span>
+            <span class="badges"><span class="badge null long">always positive</span></span>
           </li>
           <li class="field"><span class="fname">occurredAt</span><span class="ftype">Date</span></li>
           <li class="field key" data-anchor="DebtPayment.accountID">
             <span class="fname">accountID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req long">NOT NULL</span></span>
           </li>
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
@@ -1072,13 +1074,13 @@
           <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">kind</span><span class="ftype">TransactionKind</span>
-            <span class="badges"><span class="badge enum">enum: income | expense</span></span>
+            <span class="badges"><span class="badge enum long">enum: income | expense</span></span>
           </li>
           <li class="field"><span class="fname">symbolName</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">colorName</span><span class="ftype">String</span></li>
           <li class="field key" data-anchor="TransactionCategory.budgetJarID">
             <span class="fname">budgetJarID</span><span class="ftype">UUID?</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge null">? &mdash; expense routing; income leaves it empty</span></span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null long">? &mdash; expense routing; income leaves it empty</span></span>
           </li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
         </ul>
@@ -1099,16 +1101,16 @@
           </li>
           <li class="field">
             <span class="fname">kind</span><span class="ftype">TransactionKind</span>
-            <span class="badges"><span class="badge enum">enum: income | expense</span></span>
+            <span class="badges"><span class="badge enum long">enum: income | expense</span></span>
           </li>
           <li class="field">
             <span class="fname">amount</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge null">always positive &mdash; kind carries sign</span></span>
+            <span class="badges"><span class="badge null long">always positive &mdash; kind carries sign</span></span>
           </li>
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
           <li class="field key" data-anchor="RecurringRule.accountID">
             <span class="fname">accountID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req long">NOT NULL</span></span>
           </li>
           <li class="field key" data-anchor="RecurringRule.categoryID">
             <span class="fname">categoryID</span><span class="ftype">UUID?</span>
@@ -1117,22 +1119,22 @@
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">frequency</span><span class="ftype">RecurrenceFrequency</span>
-            <span class="badges"><span class="badge enum">enum: daily | weekly | monthly | yearly</span></span>
+            <span class="badges"><span class="badge enum long">enum: daily | weekly | monthly | yearly</span></span>
           </li>
           <li class="field">
             <span class="fname">interval</span><span class="ftype">Int</span>
-            <span class="badges"><span class="badge null">at least 1</span></span>
+            <span class="badges"><span class="badge null long">at least 1</span></span>
           </li>
           <li class="field">
             <span class="fname">anchorDate</span><span class="ftype">Date</span>
-            <span class="badges"><span class="badge null">every occurrence is measured from here</span></span>
+            <span class="badges"><span class="badge null long">every occurrence is measured from here</span></span>
           </li>
           <li class="field"><span class="fname">endDate</span><span class="ftype">Date?</span>
-            <span class="badges"><span class="badge null">? &mdash; open-ended</span></span>
+            <span class="badges"><span class="badge null long">? &mdash; open-ended</span></span>
           </li>
           <li class="field"><span class="fname">isPaused</span><span class="ftype">Bool</span></li>
           <li class="field"><span class="fname">lastGeneratedAt</span><span class="ftype">Date?</span>
-            <span class="badges"><span class="badge null">? &mdash; caught up through</span></span>
+            <span class="badges"><span class="badge null long">? &mdash; caught up through</span></span>
           </li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
         </ul>
@@ -1158,11 +1160,11 @@
           <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">allocationPercent</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge null">every jar together may not pass 100</span></span>
+            <span class="badges"><span class="badge null long">every jar together may not pass 100</span></span>
           </li>
           <li class="field">
             <span class="fname">role</span><span class="ftype">BudgetJarRole</span>
-            <span class="badges"><span class="badge enum">enum: custom | investment | savings</span></span>
+            <span class="badges"><span class="badge enum long">enum: custom | investment | savings</span></span>
           </li>
           <li class="field"><span class="fname">symbolName</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">colorName</span><span class="ftype">String</span></li>
@@ -1191,13 +1193,13 @@
           <li class="field"><span class="fname">targetAmount</span><span class="ftype">Decimal</span></li>
           <li class="field">
             <span class="fname">earmarkedAmount</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge null">never above the target</span></span>
+            <span class="badges"><span class="badge null long">never above the target</span></span>
           </li>
           <li class="field"><span class="fname">targetDate</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">monthlyContribution</span><span class="ftype">Decimal</span></li>
           <li class="field key" data-anchor="FinancialGoal.fundingJarID">
             <span class="fname">fundingJarID</span><span class="ftype">UUID?</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge null">? in the store, required by the editor</span></span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null long">? in the store, required by the editor</span></span>
           </li>
           <li class="field"><span class="fname">symbolName</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">colorName</span><span class="ftype">String</span></li>
@@ -1224,12 +1226,12 @@
           </li>
           <li class="field key" data-anchor="TripWorkspace.sourceGoalID">
             <span class="fname">sourceGoalID</span><span class="ftype">UUID?</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge null">? &mdash; the funded goal it started from</span></span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null long">? &mdash; the funded goal it started from</span></span>
           </li>
           <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">budgetAmount</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge null">copied from the goal's earmarked amount at start</span></span>
+            <span class="badges"><span class="badge null long">copied from the goal's earmarked amount at start</span></span>
           </li>
           <li class="field key" data-anchor="TripWorkspace.fundingJarID">
             <span class="fname">fundingJarID</span><span class="ftype">UUID?</span>
@@ -1239,11 +1241,11 @@
           <li class="field"><span class="fname">colorName</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">status</span><span class="ftype">TripWorkspaceStatus</span>
-            <span class="badges"><span class="badge enum">enum: active | completed</span></span>
+            <span class="badges"><span class="badge enum long">enum: active | completed</span></span>
           </li>
           <li class="field"><span class="fname">startedAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">completedAt</span><span class="ftype">Date?</span>
-            <span class="badges"><span class="badge null">? &mdash; nil while active</span></span>
+            <span class="badges"><span class="badge null long">? &mdash; nil while active</span></span>
           </li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
         </ul>
@@ -1267,10 +1269,10 @@
           <li class="field"><span class="fname">rawText</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">kind</span><span class="ftype">TransactionKind</span>
-            <span class="badges"><span class="badge enum">enum: income | expense</span></span>
+            <span class="badges"><span class="badge enum long">enum: income | expense</span></span>
           </li>
           <li class="field"><span class="fname">amount</span><span class="ftype">Decimal?</span>
-            <span class="badges"><span class="badge null">? &mdash; nil when the parse found none</span></span>
+            <span class="badges"><span class="badge null long">? &mdash; nil when the parse found none</span></span>
           </li>
           <li class="field"><span class="fname">occurredAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
@@ -1284,7 +1286,7 @@
           </li>
           <li class="field">
             <span class="fname">issueCodes</span><span class="ftype">String</span>
-            <span class="badges"><span class="badge null">sorted, comma-joined issue raw values</span></span>
+            <span class="badges"><span class="badge null long">sorted, comma-joined issue raw values</span></span>
           </li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
         </ul>
@@ -1616,9 +1618,9 @@
   </div>
 
   <div class="legend">
-    <span class="item"><span class="badge pk">SHA-256</span> stable file and row provenance</span>
-    <span class="item"><span class="badge req">atomic</span> one financial save or rollback</span>
-    <span class="item"><span class="badge fk">local</span> PDF bytes never leave the device</span>
+    <span class="item"><span class="badge pk long">SHA-256</span> stable file and row provenance</span>
+    <span class="item"><span class="badge req long">atomic</span> one financial save or rollback</span>
+    <span class="item"><span class="badge fk long">local</span> PDF bytes never leave the device</span>
     <span class="hint">Scroll horizontally to follow the full sequence</span>
   </div>
 
