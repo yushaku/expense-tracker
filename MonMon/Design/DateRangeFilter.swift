@@ -269,8 +269,15 @@ struct DateRangeFilterButton: View {
 
     @State private var isFiltering = false
 
+    /// The range being edited while the sheet is open. Picks land here and
+    /// reach the screen once, when the sheet closes, by the close button or a
+    /// swipe. Writing each pick straight to `range` re-ran the screen's query
+    /// and everything built on it underneath the open sheet.
+    @State private var draft = TransactionRange.month(containing: .now)
+
     var body: some View {
         Button {
+            draft = range
             isFiltering = true
         } label: {
             Image(systemName: systemImage)
@@ -283,7 +290,7 @@ struct DateRangeFilterButton: View {
         .accessibilityLabel("Filter by date")
         .accessibilityValue(range.title(in: locale, dateFormat: dateFormat))
         .accessibilityIdentifier(identifier("period-filter"))
-        .appSheet(isPresented: $isFiltering) {
+        .appSheet(isPresented: $isFiltering, onDismiss: commitDraft) {
             sheet
         }
     }
@@ -297,7 +304,7 @@ struct DateRangeFilterButton: View {
                 // No scroll view around this: every picker it shows scrolls on
                 // its own, by month or by year.
                 VStack(alignment: .leading, spacing: 0) {
-                    DateRangeFilter(range: $range, identifierPrefix: identifierPrefix)
+                    DateRangeFilter(range: $draft, identifierPrefix: identifierPrefix)
                         .frame(maxWidth: MonMonTheme.maxContentWidth)
 
                     Spacer(minLength: 0)
@@ -322,8 +329,25 @@ struct DateRangeFilterButton: View {
         #if os(macOS)
             .frame(minWidth: 420, minHeight: 520)
         #else
-            .presentationDetents([.large])
+            .presentationDetents(detents)
         #endif
+    }
+
+    /// A month or year grid fits in half a screen; the day and span calendars
+    /// need the height.
+    private var detents: Set<PresentationDetent> {
+        switch draft.scope {
+        case .month, .year:
+            [.medium, .large]
+        case .day, .custom:
+            [.large]
+        }
+    }
+
+    private func commitDraft() {
+        if draft != range {
+            range = draft
+        }
     }
 
     private func identifier(_ name: String) -> String {
