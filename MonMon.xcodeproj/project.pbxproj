@@ -206,6 +206,7 @@
 		A00000000000000000000255 /* TransactionPeriodTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000166 /* TransactionPeriodTests.swift */; };
 		A00000000000000000000256 /* TransactionSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000167 /* TransactionSummaryTests.swift */; };
 		A00000000000000000009002 /* TransactionSearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000009102 /* TransactionSearchTests.swift */; };
+		42BAFD47B01C4244A3F01F77 /* LedgerScopeParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C14CF9C06574418BB7FE0867 /* LedgerScopeParityTests.swift */; };
 		R20000000000000000000104 /* AccountReportSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = R20000000000000000000004 /* AccountReportSummaryTests.swift */; };
 		A00000000000000000000257 /* CategoryDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000168 /* CategoryDraft.swift */; };
 		A00000000000000000000258 /* CategorySeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000169 /* CategorySeed.swift */; };
@@ -265,6 +266,7 @@
 		A00000000000000000000742 /* InvestmentsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000722 /* InvestmentsScreen.swift */; };
 		A00000000000000000000750 /* InvestmentSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000730 /* InvestmentSummaryTests.swift */; };
 		A00000000000000000000802 /* SegmentedTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000801 /* SegmentedTabs.swift */; };
+		63F2F388F35449119E6E3822 /* CurrentDateRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68DDC0D8DE64DBC9CD5CECC /* CurrentDateRefresh.swift */; };
 		A00000000000000000000804 /* ProminentActionButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000803 /* ProminentActionButtonStyle.swift */; };
 		A00000000000000000000806 /* AccountBalanceAllocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000805 /* AccountBalanceAllocation.swift */; };
 		A00000000000000000000808 /* AccountBalanceCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000807 /* AccountBalanceCard.swift */; };
@@ -705,6 +707,7 @@
 		A00000000000000000000166 /* TransactionPeriodTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionPeriodTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000167 /* TransactionSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionSummaryTests.swift; sourceTree = "<group>"; };
 		A00000000000000000009102 /* TransactionSearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionSearchTests.swift; sourceTree = "<group>"; };
+		C14CF9C06574418BB7FE0867 /* LedgerScopeParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LedgerScopeParityTests.swift; sourceTree = "<group>"; };
 		R20000000000000000000004 /* AccountReportSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountReportSummaryTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000168 /* CategoryDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryDraft.swift; sourceTree = "<group>"; };
 		A00000000000000000000169 /* CategorySeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySeed.swift; sourceTree = "<group>"; };
@@ -764,6 +767,7 @@
 		A00000000000000000000722 /* InvestmentsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvestmentsScreen.swift; sourceTree = "<group>"; };
 		A00000000000000000000730 /* InvestmentSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvestmentSummaryTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000801 /* SegmentedTabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentedTabs.swift; sourceTree = "<group>"; };
+		D68DDC0D8DE64DBC9CD5CECC /* CurrentDateRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentDateRefresh.swift; sourceTree = "<group>"; };
 		A00000000000000000000803 /* ProminentActionButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProminentActionButtonStyle.swift; sourceTree = "<group>"; };
 		A00000000000000000000805 /* AccountBalanceAllocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceAllocation.swift; sourceTree = "<group>"; };
 		A00000000000000000000807 /* AccountBalanceCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceCard.swift; sourceTree = "<group>"; };
@@ -1387,6 +1391,7 @@
 				A00000000000000000000F01 /* WebPage.swift */,
 				A0000000000000000000080D /* PeriodGridPicker.swift */,
 				A00000000000000000000801 /* SegmentedTabs.swift */,
+				D68DDC0D8DE64DBC9CD5CECC /* CurrentDateRefresh.swift */,
 				A00000000000000000000193 /* Percentage.swift */,
 				A00000000000000000000198 /* CalendarTheme.swift */,
 				A00000000000000000000F30 /* AllocationDoughnut.swift */,
@@ -1585,6 +1590,7 @@
 				A00000000000000000000701 /* PeriodRailTests.swift */,
 				A00000000000000000000167 /* TransactionSummaryTests.swift */,
 				A00000000000000000009102 /* TransactionSearchTests.swift */,
+				C14CF9C06574418BB7FE0867 /* LedgerScopeParityTests.swift */,
 				R20000000000000000000004 /* AccountReportSummaryTests.swift */,
 				BFBFF40EFA0D46F6BEB1D71B /* ReportHighlightsTests.swift */,
 				C10000000000000000000004 /* TransactionCalendarTests.swift */,
@@ -2166,6 +2172,7 @@
 				A00000000000000000000F02 /* WebPage.swift in Sources */,
 				A0000000000000000000080E /* PeriodGridPicker.swift in Sources */,
 				A00000000000000000000802 /* SegmentedTabs.swift in Sources */,
+				63F2F388F35449119E6E3822 /* CurrentDateRefresh.swift in Sources */,
 				A00000000000000000000279 /* SettingsView.swift in Sources */,
 				B27000000000000000000202 /* BankNotificationSettingsContent.swift in Sources */,
 				A91600000000000000000203 /* ApplePayCaptureSettingsContent.swift in Sources */,
@@ -2399,6 +2406,7 @@
 				A00000000000000000000263 /* CategoryDraftTests.swift in Sources */,
 				A00000000000000000000256 /* TransactionSummaryTests.swift in Sources */,
 				A00000000000000000009002 /* TransactionSearchTests.swift in Sources */,
+				42BAFD47B01C4244A3F01F77 /* LedgerScopeParityTests.swift in Sources */,
 				R20000000000000000000104 /* AccountReportSummaryTests.swift in Sources */,
 				1830A82886604C5A8156B9DE /* ReportHighlightsTests.swift in Sources */,
 				C10000000000000000000104 /* TransactionCalendarTests.swift in Sources */,
