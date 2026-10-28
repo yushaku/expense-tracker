@@ -4913,66 +4913,14 @@
   <!-- monmon-catppuccin:end -->
 </head>
 <body>
-  <!-- Toolbar: theme, live visual style, trace motion, presentation stage, and export.
-       Motion appears only for trace-enabled artifacts and has no shortcut;
-       Keyboard: T toggles theme, S cycles style, F toggles the stage, E opens export. -->
+  <!-- Toolbar: trace motion and export. E opens export. -->
   <div class="toolbar" role="toolbar" aria-label="Diagram actions">
-    <button id="btn-theme" type="button"
-            title="Toggle theme (T)"
-            aria-label="Toggle color theme"
-            aria-pressed="false">
-      <span id="theme-icon" class="toolbar-icon" aria-hidden="true"></span>
-      <span id="theme-label">Dark</span>
-    </button>
-    <div class="preset-wrap">
-      <button id="btn-preset" type="button"
-              title="Choose visual style (S cycles)"
-              aria-label="Choose visual style"
-              aria-haspopup="menu"
-              aria-expanded="false"
-              aria-controls="preset-menu"
-              aria-keyshortcuts="S">
-        <span class="preset-control-mark" aria-hidden="true"></span>
-        <span id="preset-label">Style</span>
-        <span class="toolbar-icon toolbar-chevron" aria-hidden="true"></span>
-      </button>
-      <div class="preset-menu" id="preset-menu" role="menu" aria-label="Visual style">
-        <div class="preset-menu-heading" role="presentation"><span>Visual identity</span><span>S cycles</span></div>
-        <button class="preset-option" data-preset-value="classic" type="button" role="menuitemradio" aria-checked="false" tabindex="-1">
-          <span class="preset-option-swatch classic" aria-hidden="true"></span>
-          <span class="preset-option-copy"><strong>Classic</strong><small>Stable technical default</small></span>
-          <span class="preset-option-check" aria-hidden="true"></span>
-        </button>
-        <button class="preset-option" data-preset-value="signal-flow" type="button" role="menuitemradio" aria-checked="false" tabindex="-1">
-          <span class="preset-option-swatch signal-flow" aria-hidden="true"></span>
-          <span class="preset-option-copy"><strong>Signal Flow</strong><small>Motion-forward presentation</small></span>
-          <span class="preset-option-check" aria-hidden="true"></span>
-        </button>
-        <button class="preset-option" data-preset-value="blueprint" type="button" role="menuitemradio" aria-checked="false" tabindex="-1">
-          <span class="preset-option-swatch blueprint" aria-hidden="true"></span>
-          <span class="preset-option-copy"><strong>Blueprint</strong><small>Engineering review</small></span>
-          <span class="preset-option-check" aria-hidden="true"></span>
-        </button>
-        <button class="preset-option" data-preset-value="editorial" type="button" role="menuitemradio" aria-checked="false" tabindex="-1">
-          <span class="preset-option-swatch editorial" aria-hidden="true"></span>
-          <span class="preset-option-copy"><strong>Editorial</strong><small>Publication and launch notes</small></span>
-          <span class="preset-option-check" aria-hidden="true"></span>
-        </button>
-      </div>
-    </div>
     <button id="btn-motion" type="button" hidden
             title="Pause motion"
             aria-label="Pause motion"
             aria-pressed="true">
       <span class="motion-control-dot" aria-hidden="true"></span>
       <span id="motion-label">Live</span>
-    </button>
-    <button id="btn-present" type="button"
-            title="Presentation stage (F)"
-            aria-label="Enter presentation stage"
-            aria-pressed="false">
-      <span id="present-icon" class="toolbar-icon" aria-hidden="true"></span>
-      <span id="present-label">Present</span>
     </button>
     <div class="export-wrap">
       <button id="btn-export" type="button"
@@ -5503,20 +5451,8 @@
        ============================================================ */
     Archify.preset = (function () {
       var PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial'];
-      var LABELS = {
-        classic: viewerText('viewer.preset.classic.short'),
-        'signal-flow': viewerText('viewer.preset.flow.short'),
-        blueprint: viewerText('viewer.preset.blueprint'),
-        editorial: viewerText('viewer.preset.editorial')
-      };
       var html = document.documentElement;
       var svg = document.querySelector('.diagram-container svg');
-      var btn = document.getElementById('btn-preset');
-      var label = document.getElementById('preset-label');
-      var menu = document.getElementById('preset-menu');
-      var options = function () {
-        return Array.prototype.slice.call(menu.querySelectorAll('[data-preset-value]'));
-      };
       var authored = PRESETS.indexOf(html.getAttribute('data-preset')) >= 0
         ? html.getAttribute('data-preset')
         : 'classic';
@@ -5533,82 +5469,12 @@
         if (PRESETS.indexOf(preset) < 0) return false;
         html.setAttribute('data-preset', preset);
         svg.setAttribute('data-preset', preset);
-        btn.setAttribute('data-preset-option', preset);
-        label.textContent = LABELS[preset];
-        btn.setAttribute('aria-label', viewerText('viewer.preset.current', { style: LABELS[preset] }));
-        btn.title = viewerText('viewer.preset.choose.title');
-        options().forEach(function (option) {
-          var selected = option.getAttribute('data-preset-value') === preset;
-          option.setAttribute('aria-checked', String(selected));
-        });
         return true;
       }
       function cycle() { return apply(nextAfter(current())); }
 
-      function isOpen() { return menu.classList.contains('open'); }
-      function open(focusLast) {
-        if (html.getAttribute('data-embed') === 'true') return false;
-        if (Archify.exportMenu && Archify.exportMenu.isOpen()) Archify.exportMenu.close(false);
-        menu.classList.add('open');
-        btn.setAttribute('aria-expanded', 'true');
-        var available = options();
-        var selected = available.find(function (option) { return option.getAttribute('aria-checked') === 'true'; });
-        var target = focusLast ? available[available.length - 1] : (selected || available[0]);
-        if (target) target.focus();
-        return true;
-      }
-      function close(focusTrigger) {
-        menu.classList.remove('open');
-        btn.setAttribute('aria-expanded', 'false');
-        if (focusTrigger) btn.focus();
-        return false;
-      }
-
       apply(authored);
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        if (isOpen()) close(false);
-        else open(false);
-      });
-      btn.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-          e.preventDefault();
-          if (!isOpen()) open(e.key === 'ArrowUp');
-        }
-      });
-      document.addEventListener('click', function (e) {
-        if (!menu.contains(e.target) && e.target !== btn) close(false);
-      });
-      menu.addEventListener('click', function (e) {
-        var option = e.target.closest('[data-preset-value]');
-        if (!option || !menu.contains(option)) return;
-        if (apply(option.getAttribute('data-preset-value'))) close(true);
-      });
-      menu.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') { e.preventDefault(); close(true); return; }
-        if (e.key === 'Tab') { close(false); return; }
-        var available = options();
-        var active = available.indexOf(document.activeElement);
-        switch (e.key) {
-          case 'ArrowDown':
-            e.preventDefault();
-            if (available.length) available[(active + 1 + available.length) % available.length].focus();
-            break;
-          case 'ArrowUp':
-            e.preventDefault();
-            if (available.length) available[(active - 1 + available.length) % available.length].focus();
-            break;
-          case 'Home':
-            e.preventDefault();
-            if (available[0]) available[0].focus();
-            break;
-          case 'End':
-            e.preventDefault();
-            if (available.length) available[available.length - 1].focus();
-            break;
-        }
-      });
-      return { cycle: cycle, apply: apply, current: current, authored: authored, open: open, close: close, isOpen: isOpen };
+      return { cycle: cycle, apply: apply, current: current, authored: authored };
     })();
 
     /* ============================================================
@@ -5618,8 +5484,6 @@
     Archify.theme = (function () {
       var STORAGE_KEY = 'archify-theme';
       var html = document.documentElement;
-      var btn = document.getElementById('btn-theme');
-      var label = document.getElementById('theme-label');
 
       // localStorage can throw (blocked cookies, sandboxed iframes); the whole
       // script element dies on an uncaught error, so guard every access.
@@ -5648,8 +5512,6 @@
 
       function apply(theme) {
         html.setAttribute('data-theme', theme);
-        label.textContent = viewerText(theme === 'dark' ? 'viewer.theme.dark' : 'viewer.theme.light');
-        btn.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
       }
 
       function toggle() {
@@ -5659,7 +5521,6 @@
       }
 
       apply(resolveInitial());
-      btn.addEventListener('click', toggle);
 
       // Follow live OS theme changes while the user has no explicit preference.
       try {
@@ -6827,7 +6688,6 @@
       }
 
       function open(focusLast) {
-        if (Archify.preset && Archify.preset.isOpen()) Archify.preset.close(false);
         if (Archify.semanticLens && typeof Archify.semanticLens.clearPreview === 'function') Archify.semanticLens.clearPreview();
         if (Archify.semanticLens && Archify.semanticLens.isOpen()) Archify.semanticLens.close({ restoreFocus: false });
         syncRouteShareItem();
@@ -12523,8 +12383,6 @@
        ============================================================ */
     Archify.presentation = (function () {
       var html = document.documentElement;
-      var btn = document.getElementById('btn-present');
-      var label = document.getElementById('present-label');
       var previousScrollY = 0;
 
       function active() { return html.getAttribute('data-present') === 'true'; }
@@ -12538,18 +12396,10 @@
         } catch (_) {}
       }
 
-      function render(next) {
-        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
-        btn.setAttribute('aria-label', viewerText(next ? 'viewer.present.exit' : 'viewer.present.enter'));
-        btn.title = viewerText(next ? 'viewer.present.exit.title' : 'viewer.present.enter.title');
-        label.textContent = viewerText(next ? 'viewer.present.exit.label' : 'viewer.present.present');
-      }
-
       function setActive(next, options) {
         options = options || {};
         next = Boolean(next);
         if (next === active()) {
-          render(next);
           return next;
         }
         if (next) {
@@ -12560,7 +12410,6 @@
         } else {
           html.removeAttribute('data-present');
         }
-        render(next);
         if (options.updateUrl !== false) updateUrl(next);
         requestAnimationFrame(function () {
           if (Archify.view && typeof Archify.view.reset === 'function') {
@@ -12577,9 +12426,6 @@
       }
 
       function toggle() { return setActive(!active()); }
-
-      render(active());
-      btn.addEventListener('click', toggle);
 
       return {
         enter: function () { return setActive(true); },
@@ -14773,9 +14619,6 @@
       if (e.defaultPrevented) return;
       var t = e.target;
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
-      if (Archify.preset && Archify.preset.isOpen() && e.key !== 'Escape' && e.key !== 's' && e.key !== 'S') {
-        Archify.preset.close(false);
-      }
       if (e.key === '?') {
         e.preventDefault();
         Archify.guide.toggle();
@@ -14812,9 +14655,6 @@
       } else if (e.key === '0') {
         e.preventDefault();
         Archify.view.reset();
-      } else if (e.key === 'Escape' && Archify.preset.isOpen()) {
-        e.preventDefault();
-        Archify.preset.close(true);
       } else if (e.key === 'Escape' && Archify.semanticLens.isOpen()) {
         e.preventDefault();
         Archify.semanticLens.close({ restoreFocus: true });
