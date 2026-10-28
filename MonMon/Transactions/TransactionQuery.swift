@@ -218,6 +218,24 @@ enum LedgerFetch {
         )
     }
 
+    /// Every transaction booked against one account, newest first.
+    static func transactions(inAccount accountID: UUID) -> FetchDescriptor<MoneyTransaction> {
+        FetchDescriptor(
+            predicate: #Predicate { $0.accountID == accountID },
+            sortBy: [SortDescriptor(\.occurredAt, order: .reverse)]
+        )
+    }
+
+    /// Every transfer with one account at either end, newest first.
+    static func transfers(touching accountID: UUID) -> FetchDescriptor<AccountTransfer> {
+        FetchDescriptor(
+            predicate: #Predicate {
+                $0.sourceAccountID == accountID || $0.destinationAccountID == accountID
+            },
+            sortBy: [SortDescriptor(\.occurredAt, order: .reverse)]
+        )
+    }
+
     /// The transactions filed under one category, newest first. Without a
     /// category, as when one is still being added, nothing is filed under it.
     static func transactions(inCategory categoryID: UUID?) -> FetchDescriptor<MoneyTransaction> {

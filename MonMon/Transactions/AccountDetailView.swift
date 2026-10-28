@@ -27,11 +27,12 @@ struct AccountDetailView: View {
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
 
-    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
-    private var transactions: [MoneyTransaction]
+    /// This account's transactions only, all time: the balance needs every
+    /// one of them, the history and trend only the selected period.
+    @Query private var transactions: [MoneyTransaction]
 
-    @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
-    private var transfers: [AccountTransfer]
+    /// Transfers with this account at either end.
+    @Query private var transfers: [AccountTransfer]
 
     @Query(sort: \TransactionCategory.createdAt, order: .forward)
     private var categories: [TransactionCategory]
@@ -51,8 +52,10 @@ struct AccountDetailView: View {
     @Query(sort: \Debt.createdAt, order: .forward)
     private var debts: [Debt]
 
-    @Query(sort: \DebtPayment.occurredAt, order: .reverse)
-    private var payments: [DebtPayment]
+    /// Payments made from or into this account. The debts stay unfiltered:
+    /// a payment takes its direction from its debt, which may have been
+    /// opened against another account.
+    @Query private var payments: [DebtPayment]
 
     @Query(sort: \FundInstrument.symbol, order: .forward)
     private var instruments: [FundInstrument]
@@ -62,15 +65,28 @@ struct AccountDetailView: View {
     @State private var accountEditorMode: AccountEditorMode?
     @State private var transactionEditorMode: TransactionEditorMode?
     @State private var transactionActions = TransactionActions()
-    @State private var selectedTab: AccountDetailTab = .transactions
     @State private var selectedRange = TransactionRange.month(containing: .now)
-    @State private var trendMetric: AccountTrendMetric = .net
+
+    init(route: AccountDetailRoute) {
+        self.route = route
+        let accountID = route.accountID
+        _transactions = Query(LedgerFetch.transactions(inAccount: accountID))
+        _transfers = Query(LedgerFetch.transfers(touching: accountID))
+        _payments = Query(
+            FetchDescriptor<DebtPayment>(
+                predicate: #Predicate { $0.accountID == accountID },
+                sortBy: [SortDescriptor(\.occurredAt, order: .reverse)]
+            )
+        )
+    }
 
     private var account: CashAccount? {
         accounts.first { $0.id == route.accountID }
     }
 
     var body: some View {
+        let lookup = Lookup(categories: categories, accounts: accounts)
+
         ZStack {
             MonMonTheme.canvas
                 .ignoresSafeArea()
@@ -105,8 +121,8 @@ struct AccountDetailView: View {
         }
         .transactionActions(
             transactionActions,
-            category: category(for:),
-            account: transactionAccount(for:),
+            category: lookup.category(for:),
+            account: lookup.account(for:),
             onEdit: { transactionEditorMode = .edit($0) }
         )
         .tint(MonMonTheme.accent)
@@ -121,64 +137,48 @@ struct AccountDetailView: View {
     }
 
     private func content(for account: CashAccount) -> some View {
-        let accountTransactions = accountTransactions(for: account)
-        let accountTransfers = accountTransfers(for: account)
+        // Both queries are already cut to this account, so the balance reads
+        // them as they are and the period's activity is filtered once and
+        // shared by the trend and the history.
+        let availableBalance = CashBalanceSummary.available(
+            for: account,
+            deposits: deposits,
+            holdings: holdings,
+            withdrawals: withdrawals,
+            transactions: transactions,
+            transfers: transfers,
+            debts: debts,
+            payments: payments,
+            sales: sales
+        )
+        let accountTransactions = transactions.filter { selectedRange.contains($0.occurredAt) }
+        let accountTransfers = transfers.filter { selectedRange.contains($0.occurredAt) }
 
         return ScrollView {
             LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                 CashAccountCard(
                     account: account,
-                    availableBalance: CashBalanceSummary.available(
-                        for: account,
-                        deposits: deposits,
-                        holdings: holdings,
-                        withdrawals: withdrawals,
-                        transactions: transactions,
-                        transfers: transfers,
-                        debts: debts,
-                        payments: payments,
-                        sales: sales
-                    ),
+                    availableBalance: availableBalance,
                     deposits: deposits,
                     withdrawals: withdrawals,
                     holdings: holdings,
                     sales: sales
                 )
 
-                SegmentedTabs(
-                    label: "Account Detail",
-                    selection: $selectedTab,
-                    options: AccountDetailTab.allCases,
-                    title: \.title
+                AccountActivityTabs(
+                    accountID: account.id,
+                    transactions: accountTransactions,
+                    transfers: accountTransfers,
+                    range: selectedRange,
+                    emptyNotice: emptyTransactionNotice,
+                    categories: categories,
+                    accounts: accounts,
+                    deposits: deposits,
+                    withdrawals: withdrawals,
+                    holdings: holdings,
+                    sales: sales,
+                    instruments: instruments
                 )
-                .accessibilityIdentifier("account-detail-tabs")
-
-                switch selectedTab {
-                case .transactions:
-                    AccountTrendCard(
-                        points: trendPoints(for: account),
-                        metric: $trendMetric,
-                        range: selectedRange
-                    )
-
-                    TransactionListSection(
-                        title: "History",
-                        transactions: accountTransactions,
-                        transfers: accountTransfers,
-                        categories: categories,
-                        accounts: accounts,
-                        emptyNotice: emptyTransactionNotice,
-                        accessibilityIdentifierPrefix: "account-detail-transaction",
-                        showsCount: true
-                    )
-
-                case .linkedInvestments:
-                    AccountLinkedInvestmentSections(
-                        accountID: account.id, deposits: deposits, withdrawals: withdrawals,
-                        holdings: holdings, sales: sales, instruments: instruments,
-                        accounts: accounts
-                    )
-                }
             }
             .frame(maxWidth: MonMonTheme.maxContentWidth)
             .padding(.horizontal, 20)
@@ -187,47 +187,90 @@ struct AccountDetailView: View {
         }
     }
 
-    private func trendPoints(for account: CashAccount) -> [SpendingTrendPoint] {
-        SpendingTrend.points(
-            of: AccountActivityItem.transactions(
-                for: account.id,
-                during: selectedRange,
-                in: transactions
-            ),
-            in: selectedRange
-        )
-    }
-
-    private func accountTransactions(for account: CashAccount) -> [MoneyTransaction] {
-        AccountActivityItem.transactions(
-            for: account.id,
-            during: selectedRange,
-            in: transactions
-        )
-    }
-
     private var emptyTransactionNotice: LocalizedStringKey {
         "No transactions recorded \(selectedRange.phrase(in: locale, dateFormat: dateFormat))."
     }
 
-    private func accountTransfers(for account: CashAccount) -> [AccountTransfer] {
-        AccountActivityItem.transfers(for: account.id, in: transfers)
-            .filter { selectedRange.contains($0.occurredAt) }
-    }
+    /// Category and account by id, built once per update instead of a linear
+    /// search per row action.
+    private struct Lookup {
+        let categoriesByID: [UUID: TransactionCategory]
+        let accountsByID: [UUID: CashAccount]
 
-    private func category(for transaction: MoneyTransaction) -> TransactionCategory? {
-        guard let categoryID = transaction.categoryID else {
-            return nil
+        init(categories: [TransactionCategory], accounts: [CashAccount]) {
+            categoriesByID = Dictionary(
+                categories.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+            accountsByID = Dictionary(
+                accounts.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         }
-        return categories.first { $0.id == categoryID }
-    }
 
-    private func transactionAccount(for transaction: MoneyTransaction) -> CashAccount? {
-        account(transaction.accountID)
-    }
+        func category(for transaction: MoneyTransaction) -> TransactionCategory? {
+            transaction.categoryID.flatMap { categoriesByID[$0] }
+        }
 
-    private func account(_ id: UUID) -> CashAccount? {
-        accounts.first { $0.id == id }
+        func account(for transaction: MoneyTransaction) -> CashAccount? {
+            accountsByID[transaction.accountID]
+        }
+    }
+}
+
+/// The tabs below the balance card, with the tab and trend metric they show.
+///
+/// Both pieces of state live here so that switching either redraws this part
+/// alone, not the account screen above it with its balance and its filtering
+/// of the period. The figures come in already worked out.
+private struct AccountActivityTabs: View {
+    let accountID: UUID
+    let transactions: [MoneyTransaction]
+    let transfers: [AccountTransfer]
+    let range: TransactionRange
+    let emptyNotice: LocalizedStringKey
+    let categories: [TransactionCategory]
+    let accounts: [CashAccount]
+    let deposits: [SavingsDeposit]
+    let withdrawals: [SavingsWithdrawal]
+    let holdings: [FundHolding]
+    let sales: [FundSale]
+    let instruments: [FundInstrument]
+
+    @State private var selectedTab: AccountDetailTab = .transactions
+    @State private var trendMetric: AccountTrendMetric = .net
+
+    var body: some View {
+        SegmentedTabs(
+            label: "Account Detail",
+            selection: $selectedTab,
+            options: AccountDetailTab.allCases,
+            title: \.title
+        )
+        .accessibilityIdentifier("account-detail-tabs")
+
+        switch selectedTab {
+        case .transactions:
+            AccountTrendCard(
+                points: SpendingTrend.points(of: transactions, in: range),
+                metric: $trendMetric,
+                range: range
+            )
+
+            TransactionListSection(
+                title: "History",
+                transactions: transactions,
+                transfers: transfers,
+                categories: categories,
+                accounts: accounts,
+                emptyNotice: emptyNotice,
+                accessibilityIdentifierPrefix: "account-detail-transaction",
+                showsCount: true
+            )
+
+        case .linkedInvestments:
+            AccountLinkedInvestmentSections(
+                accountID: accountID, deposits: deposits, withdrawals: withdrawals,
+                holdings: holdings, sales: sales, instruments: instruments,
+                accounts: accounts
+            )
+        }
     }
 }
 
