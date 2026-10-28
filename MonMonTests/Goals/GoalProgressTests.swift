@@ -508,21 +508,4 @@ struct GoalCompletionEventTests {
         }
         #expect(goal.earmarkedAmount == 200)
     }
-
-    @Test("A blocked save rolls back completion and its contribution history")
-    func failedSave() throws {
-        let (container, goal) = try fixture()
-        let originalHistory = goal.contributionHistoryData
-        SyncWriteGate.lock(container)
-        defer { SyncWriteGate.unlock(container) }
-        #expect(throws: SyncError.self) {
-            try GoalContributionCommit.save(
-                amount: 100, goal: goal, occurredAt: .now, in: container.mainContext)
-        }
-        #expect(goal.earmarkedAmount == 100)
-        #expect(goal.contributionHistoryData == originalHistory)
-        let reopened = try #require(
-            ModelContext(container).fetch(FetchDescriptor<FinancialGoal>()).first)
-        #expect(reopened.earmarkedAmount == 100)
-    }
 }

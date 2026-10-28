@@ -4,18 +4,10 @@ import SwiftUI
 struct IncomeAllocationTimelineView: View {
     @Environment(\.modelContext) private var modelContext
 
-    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
-    private var transactions: [MoneyTransaction]
-
     @State private var selectedMonth: Date?
-    @State private var preparation = IncomeAllocationTimeline.Preparation.empty
     @State private var didFailToBackfill = false
 
     private let asOf: Date
-
-    private var unreadableAllocationMessage: LocalizedStringKey {
-        "Some allocations are unreadable. Original records are unchanged."
-    }
 
     init(asOf: Date = .now) {
         self.asOf = asOf
@@ -27,46 +19,10 @@ struct IncomeAllocationTimelineView: View {
                 MonMonTheme.canvas
                     .ignoresSafeArea()
 
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
-                        IncomeAllocationTimelineSummary(
-                            totalAmount: preparation.totalAmount,
-                            month: visibleMonth
-                        )
-
-                        if didFailToBackfill {
-                            IncomeAllocationTimelineNotice(
-                                text: "Couldn’t update older income allocations. Try again."
-                            )
-                        }
-
-                        if preparation.invalidCount > 0 {
-                            IncomeAllocationTimelineNotice(
-                                text: unreadableAllocationMessage
-                            )
-                        }
-
-                        if preparation.events.isEmpty {
-                            ContentUnavailableView(
-                                "No income recorded",
-                                systemImage: "banknote",
-                                description: Text(
-                                    "Recorded income for this month will appear here."
-                                )
-                            )
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 36)
-                        } else {
-                            ForEach(preparation.events) { event in
-                                IncomeAllocationEventCard(event: event)
-                            }
-                        }
-                    }
-                    .frame(maxWidth: MonMonTheme.maxContentWidth)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
-                    .frame(maxWidth: .infinity)
-                }
+                IncomeAllocationMonthList(
+                    month: visibleMonth,
+                    didFailToBackfill: didFailToBackfill
+                )
             }
             .safeAreaInset(edge: .top, spacing: 0) {
                 monthRail
@@ -74,13 +30,7 @@ struct IncomeAllocationTimelineView: View {
             .navigationTitle("Income allocation")
             .accessibilityIdentifier("income-allocation-timeline")
             .task {
-                backfillAndRefresh()
-            }
-            .onChange(of: visibleMonth) { _, _ in
-                refresh()
-            }
-            .onChange(of: transactionRevision) { _, _ in
-                refresh()
+                backfill()
             }
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
@@ -106,11 +56,9 @@ struct IncomeAllocationTimelineView: View {
         .background(MonMonTheme.canvas)
     }
 
-    private var transactionRevision: [IncomeAllocationTimelineRevision] {
-        transactions.map(IncomeAllocationTimelineRevision.init)
-    }
-
-    private func backfillAndRefresh() {
+    /// The refresh that used to follow the backfill now follows from it: a
+    /// backfill writes snapshots, which changes the month list's revision.
+    private func backfill() {
         do {
             _ = try IncomeAllocationLifecycle.backfillMissing(
                 in: modelContext,
@@ -120,13 +68,87 @@ struct IncomeAllocationTimelineView: View {
         } catch {
             didFailToBackfill = true
         }
-        refresh()
+    }
+}
+
+/// One month of the timeline, fetched by month. The revision it watches is
+/// that month's rows only, instead of a value per transaction in the store
+/// rebuilt and compared on every update.
+private struct IncomeAllocationMonthList: View {
+    @Query private var transactions: [MoneyTransaction]
+
+    @State private var preparation = IncomeAllocationTimeline.Preparation.empty
+
+    let month: Date
+    let didFailToBackfill: Bool
+
+    init(month: Date, didFailToBackfill: Bool) {
+        self.month = month
+        self.didFailToBackfill = didFailToBackfill
+        _transactions = Query(LedgerFetch.transactions(in: .month(containing: month)))
+    }
+
+    private var unreadableAllocationMessage: LocalizedStringKey {
+        "Some allocations are unreadable. Original records are unchanged."
+    }
+
+    var body: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+                IncomeAllocationTimelineSummary(
+                    totalAmount: preparation.totalAmount,
+                    month: month
+                )
+
+                if didFailToBackfill {
+                    IncomeAllocationTimelineNotice(
+                        text: "Couldn’t update older income allocations. Try again."
+                    )
+                }
+
+                if preparation.invalidCount > 0 {
+                    IncomeAllocationTimelineNotice(
+                        text: unreadableAllocationMessage
+                    )
+                }
+
+                if preparation.events.isEmpty {
+                    ContentUnavailableView(
+                        "No income recorded",
+                        systemImage: "banknote",
+                        description: Text(
+                            "Recorded income for this month will appear here."
+                        )
+                    )
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 36)
+                } else {
+                    ForEach(preparation.events) { event in
+                        IncomeAllocationEventCard(event: event)
+                    }
+                }
+            }
+            .frame(maxWidth: MonMonTheme.maxContentWidth)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .frame(maxWidth: .infinity)
+        }
+        .onChange(of: transactionRevision, initial: true) { _, _ in
+            refresh()
+        }
+        .onChange(of: month) { _, _ in
+            refresh()
+        }
+    }
+
+    private var transactionRevision: [IncomeAllocationTimelineRevision] {
+        transactions.map(IncomeAllocationTimelineRevision.init)
     }
 
     private func refresh() {
         preparation = IncomeAllocationTimeline.prepare(
             transactions: transactions,
-            monthContaining: visibleMonth
+            monthContaining: month
         )
     }
 }

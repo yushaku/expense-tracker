@@ -112,7 +112,7 @@ enum PendingCaptureDeletion {
         let snapshot = DeletedPendingCapture(capture)
         context.delete(capture)
         do {
-            try SyncWriteGate.save(context)
+            try StoreWrite.save(context)
             return snapshot
         } catch {
             context.rollback()
@@ -123,7 +123,7 @@ enum PendingCaptureDeletion {
     static func restore(_ snapshot: DeletedPendingCapture, in context: ModelContext) throws {
         context.insert(snapshot.makeCapture())
         do {
-            try SyncWriteGate.save(context)
+            try StoreWrite.save(context)
         } catch {
             context.rollback()
             throw error

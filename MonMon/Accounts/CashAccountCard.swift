@@ -1,27 +1,38 @@
 import SwiftUI
 
+/// One account's card. The balance is handed in, worked out by the screen with
+/// `CashBalanceSummary.balances` in one pass for every card it shows, rather
+/// than each card rescanning the whole ledger (several times, since
+/// `ViewThatFits` builds both layouts).
 struct CashAccountCard: View {
     let account: CashAccount
+    let availableBalance: Decimal
     let deposits: [SavingsDeposit]
     let withdrawals: [SavingsWithdrawal]
     let holdings: [FundHolding]
-    let transactions: [MoneyTransaction]
-    let transfers: [AccountTransfer]
-    let debts: [Debt]
-    let payments: [DebtPayment]
     let sales: [FundSale]
 
     var body: some View {
+        let figures = Figures(
+            available: availableBalance,
+            credit: CashBalanceSummary.availableCredit(
+                limit: account.creditLimit,
+                currentBalance: availableBalance
+            ),
+            savings: savingsAmount,
+            funds: fundsAmount
+        )
+
         ViewThatFits(in: .horizontal) {
             HStack(spacing: 16) {
                 identity
                 Spacer(minLength: 12)
-                balance(alignment: .trailing)
+                balance(figures, alignment: .trailing)
             }
 
             VStack(alignment: .leading, spacing: 16) {
                 identity
-                balance(alignment: .leading)
+                balance(figures, alignment: .leading)
             }
         }
         .padding(16)
@@ -57,15 +68,24 @@ struct CashAccountCard: View {
         }
     }
 
-    private func balance(alignment: HorizontalAlignment) -> some View {
+    /// Everything the balance column shows, worked out once per body and
+    /// shared by both of `ViewThatFits`'s layouts.
+    private struct Figures {
+        let available: Decimal
+        let credit: Decimal
+        let savings: Decimal
+        let funds: Decimal
+    }
+
+    private func balance(_ figures: Figures, alignment: HorizontalAlignment) -> some View {
         VStack(alignment: alignment, spacing: 3) {
-            Text(VNDCurrency.format(availableBalance))
+            Text(VNDCurrency.format(figures.available))
                 .font(.headline)
                 .monospacedDigit()
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
                 .foregroundStyle(
-                    availableBalance < 0 ? MonMonTheme.danger : MonMonTheme.textPrimary
+                    figures.available < 0 ? MonMonTheme.danger : MonMonTheme.textPrimary
                 )
 
             Text(account.kind == .credit ? "CURRENT BALANCE" : "AVAILABLE BALANCE")
@@ -74,7 +94,7 @@ struct CashAccountCard: View {
                 .foregroundStyle(MonMonTheme.textSecondary)
 
             if account.kind == .credit {
-                Text(VNDCurrency.format(availableCredit))
+                Text(VNDCurrency.format(figures.credit))
                     .font(.subheadline.weight(.semibold))
                     .monospacedDigit()
                     .lineLimit(1)
@@ -88,8 +108,8 @@ struct CashAccountCard: View {
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
 
-            if savingsAmount > 0 {
-                Text("In savings \(VNDCurrency.format(savingsAmount))")
+            if figures.savings > 0 {
+                Text("In savings \(VNDCurrency.format(figures.savings))")
                     .font(.caption)
                     .monospacedDigit()
                     .lineLimit(1)
@@ -97,8 +117,8 @@ struct CashAccountCard: View {
                     .foregroundStyle(MonMonTheme.savings)
             }
 
-            if fundsAmount > 0 {
-                Text("In funds \(VNDCurrency.format(fundsAmount))")
+            if figures.funds > 0 {
+                Text("In funds \(VNDCurrency.format(figures.funds))")
                     .font(.caption)
                     .monospacedDigit()
                     .lineLimit(1)
@@ -106,27 +126,6 @@ struct CashAccountCard: View {
                     .foregroundStyle(MonMonTheme.funds)
             }
         }
-    }
-
-    private var availableBalance: Decimal {
-        CashBalanceSummary.available(
-            for: account,
-            deposits: deposits,
-            holdings: holdings,
-            withdrawals: withdrawals,
-            transactions: transactions,
-            transfers: transfers,
-            debts: debts,
-            payments: payments,
-            sales: sales
-        )
-    }
-
-    private var availableCredit: Decimal {
-        CashBalanceSummary.availableCredit(
-            limit: account.creditLimit,
-            currentBalance: availableBalance
-        )
     }
 
     private var savingsAmount: Decimal {
@@ -159,13 +158,10 @@ struct CashAccountCard: View {
             VStack(spacing: 16) {
                 CashAccountCard(
                     account: .preview(name: "Wallet", kind: .normal, openingBalance: 1_250_000),
+                    availableBalance: 1_250_000,
                     deposits: [],
                     withdrawals: [],
                     holdings: [],
-                    transactions: [],
-                    transfers: [],
-                    debts: [],
-                    payments: [],
                     sales: []
                 )
 
@@ -175,13 +171,10 @@ struct CashAccountCard: View {
                         kind: .normal,
                         openingBalance: 48_900_000
                     ),
+                    availableBalance: 48_900_000,
                     deposits: [],
                     withdrawals: [],
                     holdings: [],
-                    transactions: [],
-                    transfers: [],
-                    debts: [],
-                    payments: [],
                     sales: []
                 )
 
@@ -192,13 +185,10 @@ struct CashAccountCard: View {
                         openingBalance: -5_200_000,
                         creditLimit: 20_000_000
                     ),
+                    availableBalance: -5_200_000,
                     deposits: [],
                     withdrawals: [],
                     holdings: [],
-                    transactions: [],
-                    transfers: [],
-                    debts: [],
-                    payments: [],
                     sales: []
                 )
 
@@ -208,13 +198,10 @@ struct CashAccountCard: View {
                         kind: .normal,
                         openingBalance: 987_654_321_000
                     ),
+                    availableBalance: 987_654_321_000,
                     deposits: [],
                     withdrawals: [],
                     holdings: [],
-                    transactions: [],
-                    transfers: [],
-                    debts: [],
-                    payments: [],
                     sales: []
                 )
             }

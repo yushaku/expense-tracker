@@ -21,7 +21,25 @@ enum AppDateFormat: String, CaseIterable, Identifiable {
         }
     }
 
+    /// Built once per format. Every date label in a list row and day header
+    /// asks for one, and building a calendar, locale and pattern for each
+    /// label is work repeated on every update of every visible row.
+    private static let styles: [AppDateFormat: Date.VerbatimFormatStyle] = Dictionary(
+        uniqueKeysWithValues: allCases.map { ($0, $0.makeStyle()) }
+    )
+
+    private static let ledgerDayStyle = Date.VerbatimFormatStyle(
+        format: "\(day: .twoDigits) \(month: .abbreviated) \(year: .defaultDigits)",
+        locale: Locale(identifier: "en_US_POSIX"),
+        timeZone: TransactionPeriod.calendar.timeZone,
+        calendar: TransactionPeriod.calendar
+    )
+
     var style: Date.VerbatimFormatStyle {
+        Self.styles[self] ?? makeStyle()
+    }
+
+    private func makeStyle() -> Date.VerbatimFormatStyle {
         let pattern: Date.FormatString
         switch self {
         case .dayMonthYear:
@@ -51,12 +69,7 @@ enum AppDateFormat: String, CaseIterable, Identifiable {
     /// A history heading names a ledger day, not a timestamp to convert to GMT.
     func calendarDay(_ date: Date) -> String {
         guard self == .gmt else { return format(date) }
-        return Date.VerbatimFormatStyle(
-            format: "\(day: .twoDigits) \(month: .abbreviated) \(year: .defaultDigits)",
-            locale: Locale(identifier: "en_US_POSIX"),
-            timeZone: TransactionPeriod.calendar.timeZone,
-            calendar: TransactionPeriod.calendar
-        ).format(date)
+        return Self.ledgerDayStyle.format(date)
     }
 
     func dateTime(_ date: Date, in locale: Locale) -> String {

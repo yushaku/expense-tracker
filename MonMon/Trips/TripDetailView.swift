@@ -14,8 +14,12 @@ struct GoalSpendingDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
-    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
-    private var transactions: [MoneyTransaction]
+    /// Every transaction linked to this trip, any kind: the summary keeps
+    /// the expenses, and cancelling refuses a trip with anything linked.
+    @Query private var tripTransactions: [MoneyTransaction]
+
+    /// The month goal capacity reads, for the goal editor.
+    @Query private var capacityMonthTransactions: [MoneyTransaction]
 
     @Query(sort: \TransactionCategory.createdAt, order: .forward)
     private var categories: [TransactionCategory]
@@ -33,7 +37,14 @@ struct GoalSpendingDetailView: View {
     private var goals: [FinancialGoal]
 
     let workspace: TripWorkspace
-    var asOf: Date = .now
+    let asOf: Date
+
+    init(workspace: TripWorkspace, asOf: Date) {
+        self.workspace = workspace
+        self.asOf = asOf
+        _tripTransactions = Query(LedgerFetch.tripTransactions(workspace.id))
+        _capacityMonthTransactions = Query(LedgerFetch.transactions(in: .month(containing: asOf)))
+    }
 
     @State private var editorMode: TransactionEditorMode?
     @State private var goalEditorMode: GoalEditorMode?
@@ -49,7 +60,7 @@ struct GoalSpendingDetailView: View {
             TripDetailContent(
                 workspace: workspace,
                 goal: sourceGoal,
-                transactions: transactions,
+                tripTransactions: tripTransactions,
                 categories: categories,
                 accounts: accounts,
                 onAddExpense: { editorMode = .addToTrip(workspace) },
@@ -153,7 +164,7 @@ struct GoalSpendingDetailView: View {
             asOf: asOf,
             jars: jars,
             recurringRules: recurringRules,
-            transactions: transactions
+            transactions: capacityMonthTransactions
         )
     }
 
@@ -206,7 +217,7 @@ struct GoalSpendingDetailView: View {
         saveErrorMessage = nil
         do {
             try TripWorkspaceLifecycle.archive(workspace, at: .now)
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()
@@ -222,7 +233,7 @@ struct GoalSpendingDetailView: View {
 
     private func saveWorkspaceChange() {
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
         } catch {
             modelContext.rollback()
             saveErrorMessage = "Couldn’t update this trip. Try again."
@@ -235,7 +246,7 @@ struct GoalSpendingDetailView: View {
         do {
             try TripWorkspaceLifecycle.cancel(
                 workspace,
-                transactions: transactions,
+                transactions: tripTransactions,
                 in: modelContext
             )
             if !returnsToSaving { dismiss() }
@@ -250,8 +261,10 @@ struct GoalSpendingDetailView: View {
 private struct TripDetailContent: View {
     let workspace: TripWorkspace
     let goal: FinancialGoal?
-    let snapshot: TripSummarySnapshot
-    let linkedTransactions: [MoneyTransaction]
+    /// The trip's own rows, already fetched by trip. The summary is worked out
+    /// in `body` rather than in `init`: an initializer runs on every rebuild
+    /// of the parent, whether or not SwiftUI goes on to need this body.
+    let tripTransactions: [MoneyTransaction]
     let categories: [TransactionCategory]
     let accounts: [CashAccount]
     let onAddExpense: () -> Void
@@ -261,41 +274,17 @@ private struct TripDetailContent: View {
     let isArchived: Bool
     let saveErrorMessage: LocalizedStringKey?
 
-    init(
-        workspace: TripWorkspace,
-        goal: FinancialGoal?,
-        transactions: [MoneyTransaction],
-        categories: [TransactionCategory],
-        accounts: [CashAccount],
-        onAddExpense: @escaping () -> Void,
-        onComplete: @escaping () -> Void,
-        onReopen: @escaping () -> Void,
-        onCancel: @escaping () -> Void,
-        isArchived: Bool,
-        saveErrorMessage: LocalizedStringKey?
-    ) {
-        self.workspace = workspace
-        self.goal = goal
-        snapshot = TripSummary.snapshot(
+    var body: some View {
+        let snapshot = TripSummary.snapshot(
             workspace: workspace,
-            transactions: transactions,
+            transactions: tripTransactions,
             categories: categories
         )
-        linkedTransactions = TripSummary.linkedExpenses(
+        let linkedTransactions = TripSummary.linkedExpenses(
             workspaceID: workspace.id,
-            in: transactions
+            in: tripTransactions
         )
-        self.categories = categories
-        self.accounts = accounts
-        self.onAddExpense = onAddExpense
-        self.onComplete = onComplete
-        self.onReopen = onReopen
-        self.onCancel = onCancel
-        self.isArchived = isArchived
-        self.saveErrorMessage = saveErrorMessage
-    }
 
-    var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                 TripSummarySection(workspace: workspace, snapshot: snapshot)

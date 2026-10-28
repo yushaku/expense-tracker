@@ -71,14 +71,14 @@ enum AccountSeed {
         else { return }
         do { try SeedState.mark("defaultBank", in: context) } catch { return }
         if defaults.bool(forKey: defaultBankSeedKey) {
-            do { try SyncWriteGate.save(context) } catch { context.rollback() }
+            do { try StoreWrite.save(context) } catch { context.rollback() }
             return
         }
         let alreadyExists = accounts.contains {
             $0.id == defaultBankID || $0.name == defaultBankName && $0.kind == .normal
         }
         guard !alreadyExists else {
-            do { try SyncWriteGate.save(context) } catch {
+            do { try StoreWrite.save(context) } catch {
                 context.rollback()
                 return
             }
@@ -97,7 +97,7 @@ enum AccountSeed {
         context.insert(account)
 
         do {
-            try SyncWriteGate.save(context)
+            try StoreWrite.save(context)
             defaults.set(true, forKey: defaultBankSeedKey)
         } catch {
             context.rollback()
@@ -139,7 +139,7 @@ enum AccountSeed {
             createdAt: createdAt
         )
         context.insert(account)
-        try? SyncWriteGate.save(context)
+        try? StoreWrite.save(context)
         return account
     }
 

@@ -155,6 +155,31 @@ struct TransactionSummaryTests {
         #expect(TransactionSummary.count(for: food, transactions: transactions) == 1)
     }
 
+    @Test("Category usage counts every category in one pass, skipping uncategorized")
+    func countsByCategory() {
+        let account = makeAccount()
+        let food = UUID()
+        let rent = UUID()
+        let transactions = [
+            makeTransaction(kind: .expense, amount: 1, accountID: account.id, categoryID: food),
+            makeTransaction(kind: .expense, amount: 2, accountID: account.id, categoryID: rent),
+            makeTransaction(kind: .expense, amount: 3, accountID: account.id, categoryID: food),
+            makeTransaction(kind: .income, amount: 4, accountID: account.id),
+        ]
+
+        let counts = TransactionSummary.countsByCategory(transactions)
+
+        #expect(counts == [food: 2, rent: 1])
+        for id in [food, rent] {
+            let category = TransactionCategory(
+                id: id, name: "", kind: .expense, symbolName: "cart", colorName: "blue",
+                createdAt: createdAt
+            )
+            #expect(
+                counts[id] == TransactionSummary.count(for: category, transactions: transactions))
+        }
+    }
+
     @Test("No transactions make no day groups")
     func emptyGroupsAreEmpty() {
         #expect(TransactionSummary.byDay([]).isEmpty)
@@ -388,5 +413,69 @@ struct TransactionHistoryTests {
         query.filter = .all
         query.categoryIDs = [UUID()]
         #expect(results().isEmpty)
+    }
+}
+
+@Suite("Transaction row lookup")
+struct TransactionRowLookupTests {
+    private let createdAt = Date(timeIntervalSince1970: 1_700_000_000)
+
+    private func category(id: UUID, name: String) -> TransactionCategory {
+        TransactionCategory(
+            id: id, name: name, kind: .expense, symbolName: "cart",
+            colorName: "blue", createdAt: createdAt
+        )
+    }
+
+    private func trip(id: UUID, name: String) -> TripWorkspace {
+        TripWorkspace(
+            id: id, sourceGoalID: nil, name: name, budgetAmount: 1_000_000,
+            fundingJarID: nil, symbolName: "airplane", colorName: "blue",
+            status: .active, startedAt: createdAt, completedAt: nil, createdAt: createdAt
+        )
+    }
+
+    @Test("Rows resolve their category, account and trip by id")
+    func resolvesByID() {
+        let food = category(id: UUID(), name: "Food")
+        let wallet = CashAccount.preview(name: "Wallet", kind: .normal, openingBalance: 0)
+        let holiday = trip(id: UUID(), name: "Đà Lạt")
+        let transaction = MoneyTransaction.preview(
+            kind: .expense, amount: 50_000, accountID: wallet.id, categoryID: food.id)
+        transaction.tripWorkspaceID = holiday.id
+
+        let lookup = TransactionRowLookup(
+            categories: [food], accounts: [wallet], trips: [holiday])
+
+        #expect(lookup.category(for: transaction) === food)
+        #expect(lookup.account(transaction.accountID) === wallet)
+        #expect(lookup.tripName(for: transaction) == "Đà Lạt")
+    }
+
+    @Test("Missing links resolve to nothing")
+    func missingLinksAreNil() {
+        let transaction = MoneyTransaction.preview(
+            kind: .expense, amount: 50_000, accountID: UUID(), categoryID: nil)
+        transaction.tripWorkspaceID = UUID()
+
+        let lookup = TransactionRowLookup(
+            categories: [category(id: UUID(), name: "Food")], accounts: [], trips: [])
+
+        #expect(lookup.category(for: transaction) == nil)
+        #expect(lookup.account(transaction.accountID) == nil)
+        #expect(lookup.tripName(for: transaction) == nil)
+    }
+
+    @Test("A duplicated id resolves to the first record, as a linear search did")
+    func firstDuplicateWins() {
+        let id = UUID()
+        let first = category(id: id, name: "First")
+        let second = category(id: id, name: "Second")
+        let transaction = MoneyTransaction.preview(
+            kind: .expense, amount: 50_000, accountID: UUID(), categoryID: id)
+
+        let lookup = TransactionRowLookup(categories: [first, second], accounts: [], trips: [])
+
+        #expect(lookup.category(for: transaction) === first)
     }
 }

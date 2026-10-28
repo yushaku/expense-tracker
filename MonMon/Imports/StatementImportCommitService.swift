@@ -38,7 +38,7 @@ struct StatementImportCommitService {
 
     init(
         container: ModelContainer,
-        save: @MainActor @escaping (ModelContext) throws -> Void = { try SyncWriteGate.save($0) }
+        save: @MainActor @escaping (ModelContext) throws -> Void = { try StoreWrite.save($0) }
     ) {
         self.container = container
         self.save = save

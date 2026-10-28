@@ -31,27 +31,6 @@ struct DebtPaymentEditorView: View {
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
 
-    @Query(sort: \SavingsDeposit.createdAt, order: .forward)
-    private var deposits: [SavingsDeposit]
-
-    @Query(sort: \SavingsWithdrawal.withdrawnAt, order: .reverse)
-    private var withdrawals: [SavingsWithdrawal]
-
-    @Query(sort: \FundHolding.createdAt, order: .forward)
-    private var holdings: [FundHolding]
-
-    @Query(sort: \FundSale.soldAt, order: .reverse)
-    private var sales: [FundSale]
-
-    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
-    private var transactions: [MoneyTransaction]
-
-    @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
-    private var transfers: [AccountTransfer]
-
-    @Query(sort: \Debt.createdAt, order: .forward)
-    private var debts: [Debt]
-
     @Query(sort: \DebtPayment.occurredAt, order: .reverse)
     private var payments: [DebtPayment]
 
@@ -169,17 +148,7 @@ struct DebtPaymentEditorView: View {
             return nil
         }
 
-        var available = CashBalanceSummary.available(
-            for: sourceAccount,
-            deposits: deposits,
-            holdings: holdings,
-            withdrawals: withdrawals,
-            transactions: transactions,
-            transfers: transfers,
-            debts: debts,
-            payments: payments,
-            sales: sales
-        )
+        var available = CashBalanceFetch.available(for: sourceAccount, in: modelContext)
 
         if let editedPayment = mode.editedPayment,
             editedPayment.accountID == sourceAccount.id
@@ -225,7 +194,7 @@ struct DebtPaymentEditorView: View {
         }
 
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()
@@ -242,7 +211,7 @@ struct DebtPaymentEditorView: View {
         modelContext.delete(editedPayment)
 
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()

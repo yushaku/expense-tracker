@@ -8,42 +8,18 @@
   <title>MonMon — Quản lý tài khoản</title>
   <style>
     :root {
-      --w-cash: #1e66f5;
-      --w-savings: #df8e1d;
-      --w-funds: #8839ef;
-      --w-gold: #d97706;
-      --w-lent: #179299;
-      --w-borrowed: #b04458;
-      --w-overdraft: #9a6a12;
-      --w-gain: #2f7a52;
-      --w-loss: #b04458;
+      /* Wealth hues follow MonMonTheme: bank blue, savings yellow, funds mauve,
+         gold peach, lent sky, borrowed peach (credit), gain teal, loss red. */
+      --w-cash: var(--ctp-blue);
+      --w-savings: var(--ctp-yellow);
+      --w-funds: var(--ctp-mauve);
+      --w-gold: var(--ctp-peach);
+      --w-lent: var(--ctp-sky);
+      --w-borrowed: var(--ctp-peach);
+      --w-overdraft: var(--ctp-maroon);
+      --w-gain: var(--ctp-teal);
+      --w-loss: var(--ctp-red);
       --w-track: var(--docs-surface-3);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) {
-        --w-cash: #8caaee;
-        --w-savings: #e5c890;
-        --w-funds: #ca9ee6;
-        --w-gold: #ef9f76;
-        --w-lent: #81c8be;
-        --w-borrowed: #e17c8f;
-        --w-overdraft: #d5a544;
-        --w-gain: #5fbd85;
-        --w-loss: #e17c8f;
-      }
-    }
-
-    :root[data-theme="dark"] {
-      --w-cash: #8caaee;
-      --w-savings: #e5c890;
-      --w-funds: #ca9ee6;
-      --w-gold: #ef9f76;
-      --w-lent: #81c8be;
-      --w-borrowed: #e17c8f;
-      --w-overdraft: #d5a544;
-      --w-gain: #5fbd85;
-      --w-loss: #e17c8f;
     }
 
     .page {
@@ -244,7 +220,7 @@
     <section id="ban-do">
       <p class="section-kicker">01 — Bản đồ</p>
       <h2>Màn hình Tài sản là lớp tổng hợp, không phải bản sao của các danh sách</h2>
-      <p><code>WealthView</code> trình bày toàn bộ tài sản trong một khung hình: vòng phân bổ, đường tăng trưởng, rồi ba khối tóm tắt cho tài khoản, đầu tư và nợ. Mọi chi tiết nằm sâu hơn đúng một lớp điều hướng. Mỗi hàng tóm tắt mang theo một <em>route</em> thay vì mang theo màn hình đích: hàng nằm trong một lazy stack được dựng lại mỗi khi các con số phía trên thay đổi, nên một màn hình đích gắn trực tiếp vào hàng sẽ bị gỡ khỏi ngăn xếp cùng với nó.</p>
+      <p><code>WealthView</code> trình bày toàn bộ tài sản trong một khung hình: vòng phân bổ, rồi ba khối tóm tắt cho tài khoản, đầu tư và nợ. Mỗi lần dựng màn hình, <code>WealthView</code> tính số dư của mọi tài khoản một lần bằng <code>CashBalanceSummary.balances</code>: một lượt duyệt sổ cái, trả về <code>[UUID: Decimal]</code>, rồi các thẻ nhận số dư của mình từ đó. Mọi chi tiết nằm sâu hơn đúng một lớp điều hướng. Mỗi hàng tóm tắt mang theo một <em>route</em> thay vì mang theo màn hình đích: hàng nằm trong một lazy stack được dựng lại mỗi khi các con số phía trên thay đổi, nên một màn hình đích gắn trực tiếp vào hàng sẽ bị gỡ khỏi ngăn xếp cùng với nó.</p>
 
       <figure>
         <span class="fig-label">Hình 1 — Cấu trúc màn hình</span>
@@ -254,16 +230,12 @@
             <text class="s-t" x="450" y="34" text-anchor="middle">Tab Tài sản</text>
             <text class="s-mono" x="450" y="50" text-anchor="middle">WealthView</text>
 
-            <path class="s-line" d="M450 60 L450 78 M200 78 L700 78 M200 78 L200 96 M700 78 L700 96"/>
-            <path class="s-line" d="M450 78 L450 168"/>
+            <path class="s-line" d="M450 60 L450 96"/>
 
-            <rect class="s-box" x="60" y="96" width="280" height="56" rx="10"/>
-            <text class="s-t" x="200" y="118" text-anchor="middle">Vòng phân bổ tài sản</text>
-            <text class="s-mono" x="200" y="136" text-anchor="middle">AssetAllocationCard</text>
+            <rect class="s-box" x="310" y="96" width="280" height="56" rx="10"/>
+            <text class="s-t" x="450" y="118" text-anchor="middle">Vòng phân bổ tài sản</text>
+            <text class="s-mono" x="450" y="136" text-anchor="middle">AssetAllocationCard</text>
 
-            <rect class="s-box" x="560" y="96" width="280" height="56" rx="10"/>
-            <text class="s-t" x="700" y="118" text-anchor="middle">Đường tăng trưởng 12 tháng</text>
-            <text class="s-mono" x="700" y="136" text-anchor="middle">AssetGrowthCard</text>
 
             <rect class="s-box" x="30" y="168" width="250" height="50" rx="10"/>
             <text class="s-t" x="155" y="190" text-anchor="middle">Tài khoản</text>
@@ -387,7 +359,7 @@
     <section id="mo-hinh">
       <p class="section-kicker">03 — Mô hình</p>
       <h2>Sáu thực thể, liên kết bằng khoá ngoại phẳng</h2>
-      <p>Mọi liên kết đều là một <code>UUID</code> lưu phẳng và được join trong Swift. Ràng buộc này đến từ yêu cầu đồng bộ: schema phải chạy được trên CloudKit, mà CloudKit bắt mọi thuộc tính phải optional hoặc có giá trị mặc định, đồng thời không cho phép thuộc tính unique. Hệ quả cần chấp nhận là một <code>instrumentID</code> vẫn có thể trỏ tới bản ghi đã bị xoá, nên mọi nơi đọc nó đều phải xử lý trạng thái đó: <code>FundSummary.unpriced</code> liệt kê vị thế mất mã thay vì định giá nó theo một mức giá không tồn tại.</p>
+      <p>Mọi liên kết đều là một <code>UUID</code> lưu phẳng và được join trong Swift. Ràng buộc này có từ thời app còn đồng bộ qua iCloud: schema được giữ ở dạng CloudKit chấp nhận, tức mọi thuộc tính phải optional hoặc có giá trị mặc định và không có thuộc tính unique. Đồng bộ iCloud và đồng bộ thiết bị đều đã bị gỡ (iPhone và Mac mỗi máy giữ store riêng, chuyển dữ liệu bằng sao lưu và khôi phục), nhưng schema vẫn giữ dạng đó. Hệ quả cần chấp nhận là một <code>instrumentID</code> vẫn có thể trỏ tới bản ghi đã bị xoá, nên mọi nơi đọc nó đều phải xử lý trạng thái đó: <code>FundSummary.unpriced</code> liệt kê vị thế mất mã thay vì định giá nó theo một mức giá không tồn tại.</p>
 
       <figure>
         <span class="fig-label">Hình 4 — Khoá ngoại của phần Tài sản</span>
@@ -571,6 +543,7 @@
       <p class="section-kicker">05 — Lịch sử</p>
       <h2>Mười hai tháng được tái dựng từ các bản ghi có ngày</h2>
       <p>Store không lưu bảng lịch sử. <code>AssetHistory</code> lấy mốc cuối mỗi tháng, lọc dữ liệu xuống những bản ghi đã tồn tại tính đến mốc đó, rồi chạy lại đúng công thức tài sản ròng. Đường tổng và các dải thành phần cùng đọc từ một tập dữ liệu đã lọc, nên không thể lệch nhau ở bất kỳ tháng nào.</p>
+      <p>Hiện chưa có màn hình nào vẽ đường này: thẻ <code>AssetGrowthCard</code> từng dùng nó chỉ còn được gọi từ preview nên đã bị xoá. <code>AssetHistory</code> vẫn nằm trong code và có test riêng; hình dưới minh hoạ dữ liệu nó tạo ra.</p>
 
       <figure>
         <span class="fig-label">Hình 7 — Tài sản ròng 12 tháng gần nhất</span>

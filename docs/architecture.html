@@ -20,19 +20,19 @@
       --edge-hi: var(--docs-accent);
       --accent: var(--docs-accent);
       --shadow: var(--docs-shadow);
-      --e-account: #5b5bd6;
-      --e-savings: #2f8f7e;
-      --e-fund: #a9761f;
-      --e-txn: #c0526b;
-      --e-category: #4a8438;
-      --e-transfer: #2f7d9e;
-      --e-debt: #8a5cc4;
-      --e-recurring: #b06a2c;
-      --e-import: #347c73;
-      --e-budget: #a8452f;
-      --e-goal: #7d8a2c;
-      --e-trip: #c0468f;
-      --e-capture: #6b7280;
+      --e-account: var(--ctp-blue);
+      --e-savings: var(--ctp-yellow);
+      --e-fund: var(--ctp-mauve);
+      --e-txn: var(--ctp-red);
+      --e-category: var(--ctp-green);
+      --e-transfer: var(--ctp-sapphire);
+      --e-debt: var(--ctp-peach);
+      --e-recurring: var(--ctp-flamingo);
+      --e-import: var(--ctp-sky);
+      --e-budget: var(--ctp-maroon);
+      --e-goal: var(--ctp-teal);
+      --e-trip: var(--ctp-pink);
+      --e-capture: var(--ctp-overlay1);
       --ok: var(--docs-success);
       --warn: var(--docs-warning);
       --idle: var(--docs-muted);
@@ -44,40 +44,6 @@
       --docs-section-size: clamp(18px, 2.2vw, 22px);
       --docs-section-line-height: 1.25;
       --docs-section-letter-spacing: -.015em;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) {
-        --e-account: #9a9aff;
-        --e-savings: #57c6b0;
-        --e-fund: #d9a441;
-        --e-txn: #ee8399;
-        --e-category: #86c46b;
-        --e-transfer: #62b4d6;
-        --e-debt: #b79be8;
-        --e-recurring: #e0a06a;
-        --e-import: #70cbbd;
-        --e-budget: #e08a72;
-        --e-goal: #c3cf62;
-        --e-trip: #ef8fce;
-        --e-capture: #a5adba;
-      }
-    }
-
-    :root[data-theme="dark"] {
-      --e-account: #9a9aff;
-      --e-savings: #57c6b0;
-      --e-fund: #d9a441;
-      --e-txn: #ee8399;
-      --e-category: #86c46b;
-      --e-transfer: #62b4d6;
-      --e-debt: #b79be8;
-      --e-recurring: #e0a06a;
-      --e-import: #70cbbd;
-      --e-budget: #e08a72;
-      --e-goal: #c3cf62;
-      --e-trip: #ef8fce;
-      --e-capture: #a5adba;
     }
 
     body {
@@ -201,7 +167,7 @@
     }
 
     .entity:focus-visible {
-      border-color: var(--e);
+      border-color: color-mix(in srgb, var(--e) var(--docs-ink-hue), var(--docs-ink-partner));
       box-shadow: var(--shadow), 0 0 0 3px color-mix(in srgb, var(--e) 34%, transparent);
     }
 
@@ -211,7 +177,7 @@
     .e-head .chip { display: inline-block; margin-top: 7px; }
 
     .stage.focused .entity.dim { opacity: .26; }
-    .stage.focused .entity.live { border-color: var(--e); transform: translateY(-1px); }
+    .stage.focused .entity.live { border-color: color-mix(in srgb, var(--e) var(--docs-ink-hue), var(--docs-ink-partner)); transform: translateY(-1px); }
 
     .e-head {
       padding: 13px 15px 11px;
@@ -227,7 +193,7 @@
       font-size: 14.5px;
       font-weight: 600;
       letter-spacing: -.01em;
-      color: var(--e);
+      color: color-mix(in srgb, var(--e) var(--docs-ink-hue), var(--docs-ink-partner));
     }
 
     .e-name::before {
@@ -238,12 +204,12 @@
       background: var(--e);
     }
 
-    .e-role { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+    .e-role { font-size: 11.5px; color: var(--text-2); margin-top: 2px; }
 
     .e-file {
       font-family: var(--mono);
       font-size: 10.5px;
-      color: var(--muted);
+      color: var(--text-2);
       margin-top: 5px;
       word-break: break-all;
     }
@@ -252,8 +218,9 @@
 
     .field {
       display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: baseline;
+      grid-template-columns: auto 1fr auto;
+      grid-template-areas: "name badges type";
+      align-items: center;
       gap: 4px 10px;
       padding: 6px 15px;
       border-bottom: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
@@ -262,13 +229,14 @@
     }
 
     .field:last-child { border-bottom: 0; }
-    .field.key { background: color-mix(in srgb, var(--e) 7%, transparent); }
+    .field.key { background: color-mix(in srgb, var(--e) 5%, transparent); }
 
-    .fname { color: var(--text); }
+    .fname { grid-area: name; color: var(--text); }
     .field.key .fname { font-weight: 600; }
-    .ftype { color: var(--muted); font-size: var(--docs-type-xs); text-align: right; white-space: nowrap; }
+    .ftype { grid-area: type; color: var(--muted); font-size: var(--docs-type-xs); text-align: right; white-space: nowrap; }
 
-    .badges { grid-column: 1 / -1; display: flex; gap: 5px; flex-wrap: wrap; margin-top: 1px; }
+    .badges { grid-area: badges; min-width: 0; display: flex; gap: 5px; flex-wrap: wrap; }
+    .field:has(.badge.long) { grid-template-columns: 1fr auto; grid-template-areas: "name type" "badges badges"; }
 
     .badge {
       font-family: var(--mono);
@@ -281,9 +249,9 @@
       line-height: 1.5;
     }
 
-    .badge.pk { color: var(--e); border-color: color-mix(in srgb, var(--e) 45%, transparent); background: color-mix(in srgb, var(--e) 10%, transparent); }
+    .badge.pk { color: color-mix(in srgb, var(--e) var(--docs-ink-hue), var(--docs-ink-partner)); border-color: color-mix(in srgb, var(--e) 45%, transparent); background: color-mix(in srgb, var(--e) 6%, transparent); }
     .badge.fk { color: var(--text-2); border-color: var(--border-strong); background: var(--surface-2); }
-    .badge.req { color: var(--e); border-color: color-mix(in srgb, var(--e) 45%, transparent); background: color-mix(in srgb, var(--e) 12%, transparent); }
+    .badge.req { color: color-mix(in srgb, var(--e) var(--docs-ink-hue), var(--docs-ink-partner)); border-color: color-mix(in srgb, var(--e) 45%, transparent); background: color-mix(in srgb, var(--e) 7%, transparent); }
     .badge.null, .badge.enum { color: var(--muted); border-color: var(--border); background: transparent; }
 
     .derived {
@@ -484,7 +452,7 @@
       font-size: 12px;
       font-weight: 700;
       letter-spacing: .08em;
-      color: var(--state);
+      color: color-mix(in srgb, var(--state) var(--docs-ink-hue), var(--docs-ink-partner));
     }
 
     .state-rule {
@@ -510,7 +478,7 @@
     }
 
     .transition-arrow {
-      color: var(--e-savings);
+      color: color-mix(in srgb, var(--e-savings) var(--docs-ink-hue), var(--docs-ink-partner));
       font-size: 24px;
       line-height: 1;
     }
@@ -662,16 +630,18 @@
     <div class="eyebrow">MonMon &middot; persistence and data movement</div>
     <h1>Architecture map</h1>
     <p class="lede">
-      Sixteen <code>@Model</code> types backed by SwiftData, the set registered by
-      <code>MonMonSchema.models</code>. Two more exist in the source and are deliberately
-      absent from it: the MCP snapshot records live in their own App Group store, so nothing
-      the server reads can reach the financial container. Relationships are <strong>not</strong>
+      Eighteen <code>@Model</code> types backed by SwiftData, the set registered by
+      <code>MonMonSchema.models</code>. Sixteen are drawn below; the other two hold no money
+      and no foreign key: <code>SalaryProfile</code> (one personal profile per store) and
+      <code>SyncMetadata</code>, a key/value table that now only carries the <code>seed/*</code>
+      markers (it keeps its old name because SwiftData derives the stored entity name from it).
+      On the Mac, the MCP helper opens this same store read-only (<code>allowsSave: false</code>). Relationships are <strong>not</strong>
       declared with <code>@Relationship</code> &mdash; every association is a hand-stored
       <code>UUID</code> foreign key, resolved in Swift at read time
       (<code>accounts.first { $0.id == someID }</code>). Money-moving records sit around the
       <code>CashAccount</code> hub; the planning layer &mdash; jars, goals and trip workspaces
       &mdash; holds no balance of its own and only earmarks or labels what those records already
-      say. Below the schema: the device, iCloud, market-data and share-extension boundaries, the
+      say. Below the schema: the device, backup, market-data and share-extension boundaries, the
       derived savings lifecycle, and the reviewed bank-statement import path from a shared PDF to
       an atomic SwiftData save.
     </p>
@@ -721,7 +691,7 @@
           <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">kind</span><span class="ftype">CashAccountKind</span>
-            <span class="badges"><span class="badge enum">enum: cash | bank | credit</span></span>
+            <span class="badges"><span class="badge enum long">enum: cash | bank | credit</span></span>
           </li>
           <li class="field"><span class="fname">openingBalance</span><span class="ftype">Decimal</span></li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
@@ -809,9 +779,9 @@
           <li class="field"><span class="fname">averageCostPerUnit</span><span class="ftype">Decimal</span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">purchasedAt</span><span class="ftype">Date?</span>
-            <span class="badges"><span class="badge null">? &mdash; falls back to createdAt</span></span></li>
+            <span class="badges"><span class="badge null long">? &mdash; falls back to createdAt</span></span></li>
           <li class="field"><span class="fname">purchaseExchangeRate</span><span class="ftype">Decimal?</span>
-            <span class="badges"><span class="badge null">₫ per $ when the cost was typed in dollars</span></span></li>
+            <span class="badges"><span class="badge null long">₫ per $ when the cost was typed in dollars</span></span></li>
           <li class="field key" data-anchor="FundHolding.instrumentID">
             <span class="fname">instrumentID</span><span class="ftype">UUID?</span>
             <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span></span>
@@ -842,36 +812,36 @@
           </li>
           <li class="field">
             <span class="fname">symbol</span><span class="ftype">String</span>
-            <span class="badges"><span class="badge null">unique &mdash; enforced by draft + reconciliation, not @Attribute</span></span>
+            <span class="badges"><span class="badge null long">unique &mdash; enforced by draft + reconciliation, not @Attribute</span></span>
           </li>
           <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">kind</span><span class="ftype">FundInstrumentKind</span>
-            <span class="badges"><span class="badge enum">enum: fund | etf | gold | crypto</span></span>
+            <span class="badges"><span class="badge enum long">enum: fund | etf | gold | crypto</span></span>
           </li>
           <li class="field"><span class="fname">currentPricePerUnit</span><span class="ftype">Decimal</span></li>
           <li class="field"><span class="fname">askPricePerUnit</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge null">gold shop-sell side; zero otherwise</span></span></li>
+            <span class="badges"><span class="badge null long">gold shop-sell side; zero otherwise</span></span></li>
           <li class="field">
             <span class="fname">priceAsOf</span><span class="ftype">Date</span>
-            <span class="badges"><span class="badge null">trading day of the price</span></span>
+            <span class="badges"><span class="badge null long">trading day of the price</span></span>
           </li>
           <li class="field">
             <span class="fname">priceFetchedAt</span><span class="ftype">Date?</span>
-            <span class="badges"><span class="badge null">when the app asked</span></span>
+            <span class="badges"><span class="badge null long">when the app asked</span></span>
           </li>
           <li class="field">
             <span class="fname">priceSource</span><span class="ftype">String</span>
-            <span class="badges"><span class="badge enum">manual | fmarket | vndirect | vangToday | coinGecko</span></span>
+            <span class="badges"><span class="badge enum long">manual | fmarket | vndirect | vangToday | coinGecko</span></span>
           </li>
           <li class="field"><span class="fname">autoQuoteEnabled</span><span class="ftype">Bool</span></li>
           <li class="field">
             <span class="fname">logoURL</span><span class="ftype">String?</span>
-            <span class="badges"><span class="badge null">cosmetic; manager or coin image</span></span>
+            <span class="badges"><span class="badge null long">cosmetic; manager or coin image</span></span>
           </li>
           <li class="field">
             <span class="fname">providerID</span><span class="ftype">String?</span>
-            <span class="badges"><span class="badge null">provider's own key when it is not the ticker</span></span>
+            <span class="badges"><span class="badge null long">provider's own key when it is not the ticker</span></span>
           </li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
@@ -903,16 +873,16 @@
             <span class="badges"><span class="badge">0 unless the shop deducted one</span></span></li>
           <li class="field key" data-anchor="FundSale.proceedsAccountID">
             <span class="fname">proceedsAccountID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span><span class="badge null">ignored on a swap</span></span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req long">NOT NULL</span><span class="badge null long">ignored on a swap</span></span>
           </li>
           <li class="field"><span class="fname">soldAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">exchangeRate</span><span class="ftype">Decimal?</span>
-            <span class="badges"><span class="badge null">₫ per $ when the price was typed in dollars</span></span></li>
+            <span class="badges"><span class="badge null long">₫ per $ when the price was typed in dollars</span></span></li>
           <li class="field key" data-anchor="FundSale.swapHoldingID">
             <span class="fname">swapHoldingID</span><span class="ftype">UUID?</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge null">the lot a swap bought</span></span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null long">the lot a swap bought</span></span>
           </li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
         </ul>
@@ -935,17 +905,17 @@
             <span class="badges"><span class="badge pk">PK</span></span></li>
           <li class="field">
             <span class="fname">kind</span><span class="ftype">TransactionKind</span>
-            <span class="badges"><span class="badge enum">enum: income | expense</span></span>
+            <span class="badges"><span class="badge enum long">enum: income | expense</span></span>
           </li>
           <li class="field">
             <span class="fname">amount</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge null">always positive &mdash; kind carries sign</span></span>
+            <span class="badges"><span class="badge null long">always positive &mdash; kind carries sign</span></span>
           </li>
           <li class="field"><span class="fname">occurredAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
           <li class="field key" data-anchor="MoneyTransaction.accountID">
             <span class="fname">accountID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req long">NOT NULL</span></span>
           </li>
           <li class="field key" data-anchor="MoneyTransaction.categoryID">
             <span class="fname">categoryID</span><span class="ftype">UUID?</span>
@@ -953,21 +923,21 @@
           </li>
           <li class="field key" data-anchor="MoneyTransaction.sourceRuleID">
             <span class="fname">sourceRuleID</span><span class="ftype">UUID?</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge null">? &mdash; nil when typed by hand</span></span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null long">? &mdash; nil when typed by hand</span></span>
           </li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">sourceImportID</span><span class="ftype">String?</span>
-            <span class="badges"><span class="badge null">? &mdash; SHA-256 candidate provenance</span></span></li>
+            <span class="badges"><span class="badge null long">? &mdash; SHA-256 candidate provenance</span></span></li>
           <li class="field"><span class="fname">incomeAllocationSnapshot</span><span class="ftype">String?</span>
-            <span class="badges"><span class="badge null">? &mdash; frozen jar split, JSON</span></span></li>
+            <span class="badges"><span class="badge null long">? &mdash; frozen jar split, JSON</span></span></li>
           <li class="field key" data-anchor="MoneyTransaction.tripWorkspaceID">
             <span class="fname">tripWorkspaceID</span><span class="ftype">UUID?</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge null">? &mdash; expenses only</span></span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null long">? &mdash; expenses only</span></span>
           </li>
           <li class="field key" data-anchor="MoneyTransaction.budgetJarOverrideID">
             <span class="fname">budgetJarOverrideID</span><span class="ftype">UUID?</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge null">? &mdash; stale id falls back to the category</span></span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null long">? &mdash; stale id falls back to the category</span></span>
           </li>
         </ul>
         <div class="derived">
@@ -989,24 +959,24 @@
             <span class="badges"><span class="badge pk">PK</span></span></li>
           <li class="field">
             <span class="fname">amount</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge null">always positive &mdash; the pair carries direction</span></span>
+            <span class="badges"><span class="badge null long">always positive &mdash; the pair carries direction</span></span>
           </li>
           <li class="field"><span class="fname">occurredAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
           <li class="field key" data-anchor="AccountTransfer.sourceAccountID">
             <span class="fname">sourceAccountID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req long">NOT NULL</span></span>
           </li>
           <li class="field key" data-anchor="AccountTransfer.destinationAccountID">
             <span class="fname">destinationAccountID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req long">NOT NULL</span></span>
           </li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">sourceAccountImportID</span><span class="ftype">String?</span>
-            <span class="badges"><span class="badge null">? &mdash; provenance for source side</span></span></li>
+            <span class="badges"><span class="badge null long">? &mdash; provenance for source side</span></span></li>
           <li class="field"><span class="fname">destinationAccountImportID</span><span class="ftype">String?</span>
-            <span class="badges"><span class="badge null">? &mdash; provenance for destination side</span></span></li>
+            <span class="badges"><span class="badge null long">? &mdash; provenance for destination side</span></span></li>
         </ul>
         <div class="derived">
           <div class="derived-label">Derived &mdash; computed, not stored</div>
@@ -1028,21 +998,21 @@
           <li class="field"><span class="fname">counterparty</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">direction</span><span class="ftype">DebtDirection</span>
-            <span class="badges"><span class="badge null">borrowed / lent &mdash; carries the sign</span></span>
+            <span class="badges"><span class="badge null long">borrowed / lent &mdash; carries the sign</span></span>
           </li>
           <li class="field">
             <span class="fname">principal</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge null">always positive</span></span>
+            <span class="badges"><span class="badge null long">always positive</span></span>
           </li>
           <li class="field"><span class="fname">annualInterestRate</span><span class="ftype">Decimal</span></li>
           <li class="field"><span class="fname">openedAt</span><span class="ftype">Date</span></li>
           <li class="field">
             <span class="fname">dueDate</span><span class="ftype">Date?</span>
-            <span class="badges"><span class="badge null">nil = open-ended</span></span>
+            <span class="badges"><span class="badge null long">nil = open-ended</span></span>
           </li>
           <li class="field key" data-anchor="Debt.accountID">
             <span class="fname">accountID</span><span class="ftype">UUID?</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge null">nil = already in an opening balance</span></span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null long">nil = already in an opening balance</span></span>
           </li>
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
@@ -1067,16 +1037,16 @@
             <span class="badges"><span class="badge pk">PK</span></span></li>
           <li class="field key" data-anchor="DebtPayment.debtID">
             <span class="fname">debtID</span><span class="ftype">UUID?</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span><span class="badge null">deleted with its debt</span></span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null">?</span><span class="badge null long">deleted with its debt</span></span>
           </li>
           <li class="field">
             <span class="fname">amount</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge null">always positive</span></span>
+            <span class="badges"><span class="badge null long">always positive</span></span>
           </li>
           <li class="field"><span class="fname">occurredAt</span><span class="ftype">Date</span></li>
           <li class="field key" data-anchor="DebtPayment.accountID">
             <span class="fname">accountID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req long">NOT NULL</span></span>
           </li>
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
@@ -1104,13 +1074,13 @@
           <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">kind</span><span class="ftype">TransactionKind</span>
-            <span class="badges"><span class="badge enum">enum: income | expense</span></span>
+            <span class="badges"><span class="badge enum long">enum: income | expense</span></span>
           </li>
           <li class="field"><span class="fname">symbolName</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">colorName</span><span class="ftype">String</span></li>
           <li class="field key" data-anchor="TransactionCategory.budgetJarID">
             <span class="fname">budgetJarID</span><span class="ftype">UUID?</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge null">? &mdash; expense routing; income leaves it empty</span></span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null long">? &mdash; expense routing; income leaves it empty</span></span>
           </li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
         </ul>
@@ -1131,16 +1101,16 @@
           </li>
           <li class="field">
             <span class="fname">kind</span><span class="ftype">TransactionKind</span>
-            <span class="badges"><span class="badge enum">enum: income | expense</span></span>
+            <span class="badges"><span class="badge enum long">enum: income | expense</span></span>
           </li>
           <li class="field">
             <span class="fname">amount</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge null">always positive &mdash; kind carries sign</span></span>
+            <span class="badges"><span class="badge null long">always positive &mdash; kind carries sign</span></span>
           </li>
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
           <li class="field key" data-anchor="RecurringRule.accountID">
             <span class="fname">accountID</span><span class="ftype">UUID</span>
-            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req">NOT NULL</span></span>
+            <span class="badges"><span class="badge">defaults to Unassigned</span><span class="badge fk">FK</span><span class="badge req long">NOT NULL</span></span>
           </li>
           <li class="field key" data-anchor="RecurringRule.categoryID">
             <span class="fname">categoryID</span><span class="ftype">UUID?</span>
@@ -1149,22 +1119,22 @@
           <li class="field"><span class="fname">currencyCode</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">frequency</span><span class="ftype">RecurrenceFrequency</span>
-            <span class="badges"><span class="badge enum">enum: daily | weekly | monthly | yearly</span></span>
+            <span class="badges"><span class="badge enum long">enum: daily | weekly | monthly | yearly</span></span>
           </li>
           <li class="field">
             <span class="fname">interval</span><span class="ftype">Int</span>
-            <span class="badges"><span class="badge null">at least 1</span></span>
+            <span class="badges"><span class="badge null long">at least 1</span></span>
           </li>
           <li class="field">
             <span class="fname">anchorDate</span><span class="ftype">Date</span>
-            <span class="badges"><span class="badge null">every occurrence is measured from here</span></span>
+            <span class="badges"><span class="badge null long">every occurrence is measured from here</span></span>
           </li>
           <li class="field"><span class="fname">endDate</span><span class="ftype">Date?</span>
-            <span class="badges"><span class="badge null">? &mdash; open-ended</span></span>
+            <span class="badges"><span class="badge null long">? &mdash; open-ended</span></span>
           </li>
           <li class="field"><span class="fname">isPaused</span><span class="ftype">Bool</span></li>
           <li class="field"><span class="fname">lastGeneratedAt</span><span class="ftype">Date?</span>
-            <span class="badges"><span class="badge null">? &mdash; caught up through</span></span>
+            <span class="badges"><span class="badge null long">? &mdash; caught up through</span></span>
           </li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
         </ul>
@@ -1190,11 +1160,11 @@
           <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">allocationPercent</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge null">every jar together may not pass 100</span></span>
+            <span class="badges"><span class="badge null long">every jar together may not pass 100</span></span>
           </li>
           <li class="field">
             <span class="fname">role</span><span class="ftype">BudgetJarRole</span>
-            <span class="badges"><span class="badge enum">enum: custom | investment | savings</span></span>
+            <span class="badges"><span class="badge enum long">enum: custom | investment | savings</span></span>
           </li>
           <li class="field"><span class="fname">symbolName</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">colorName</span><span class="ftype">String</span></li>
@@ -1223,13 +1193,13 @@
           <li class="field"><span class="fname">targetAmount</span><span class="ftype">Decimal</span></li>
           <li class="field">
             <span class="fname">earmarkedAmount</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge null">never above the target</span></span>
+            <span class="badges"><span class="badge null long">never above the target</span></span>
           </li>
           <li class="field"><span class="fname">targetDate</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">monthlyContribution</span><span class="ftype">Decimal</span></li>
           <li class="field key" data-anchor="FinancialGoal.fundingJarID">
             <span class="fname">fundingJarID</span><span class="ftype">UUID?</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge null">? in the store, required by the editor</span></span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null long">? in the store, required by the editor</span></span>
           </li>
           <li class="field"><span class="fname">symbolName</span><span class="ftype">String</span></li>
           <li class="field"><span class="fname">colorName</span><span class="ftype">String</span></li>
@@ -1256,12 +1226,12 @@
           </li>
           <li class="field key" data-anchor="TripWorkspace.sourceGoalID">
             <span class="fname">sourceGoalID</span><span class="ftype">UUID?</span>
-            <span class="badges"><span class="badge fk">FK</span><span class="badge null">? &mdash; the funded goal it started from</span></span>
+            <span class="badges"><span class="badge fk">FK</span><span class="badge null long">? &mdash; the funded goal it started from</span></span>
           </li>
           <li class="field"><span class="fname">name</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">budgetAmount</span><span class="ftype">Decimal</span>
-            <span class="badges"><span class="badge null">copied from the goal's earmarked amount at start</span></span>
+            <span class="badges"><span class="badge null long">copied from the goal's earmarked amount at start</span></span>
           </li>
           <li class="field key" data-anchor="TripWorkspace.fundingJarID">
             <span class="fname">fundingJarID</span><span class="ftype">UUID?</span>
@@ -1271,11 +1241,11 @@
           <li class="field"><span class="fname">colorName</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">status</span><span class="ftype">TripWorkspaceStatus</span>
-            <span class="badges"><span class="badge enum">enum: active | completed</span></span>
+            <span class="badges"><span class="badge enum long">enum: active | completed</span></span>
           </li>
           <li class="field"><span class="fname">startedAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">completedAt</span><span class="ftype">Date?</span>
-            <span class="badges"><span class="badge null">? &mdash; nil while active</span></span>
+            <span class="badges"><span class="badge null long">? &mdash; nil while active</span></span>
           </li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
         </ul>
@@ -1299,10 +1269,10 @@
           <li class="field"><span class="fname">rawText</span><span class="ftype">String</span></li>
           <li class="field">
             <span class="fname">kind</span><span class="ftype">TransactionKind</span>
-            <span class="badges"><span class="badge enum">enum: income | expense</span></span>
+            <span class="badges"><span class="badge enum long">enum: income | expense</span></span>
           </li>
           <li class="field"><span class="fname">amount</span><span class="ftype">Decimal?</span>
-            <span class="badges"><span class="badge null">? &mdash; nil when the parse found none</span></span>
+            <span class="badges"><span class="badge null long">? &mdash; nil when the parse found none</span></span>
           </li>
           <li class="field"><span class="fname">occurredAt</span><span class="ftype">Date</span></li>
           <li class="field"><span class="fname">note</span><span class="ftype">String</span></li>
@@ -1316,7 +1286,7 @@
           </li>
           <li class="field">
             <span class="fname">issueCodes</span><span class="ftype">String</span>
-            <span class="badges"><span class="badge null">sorted, comma-joined issue raw values</span></span>
+            <span class="badges"><span class="badge null long">sorted, comma-joined issue raw values</span></span>
           </li>
           <li class="field"><span class="fname">createdAt</span><span class="ftype">Date</span></li>
         </ul>
@@ -1428,8 +1398,9 @@
   <div class="section-head">
     <h2>System components</h2>
     <p class="lede">
-      Runtime and data boundaries in the shipping app. Financial records live in SwiftData
-      and mirror to the owner's private CloudKit database when sync is enabled. Shared PDFs
+      Runtime and data boundaries in the shipping app. Financial records live in one local
+      SwiftData store per device. There is no iCloud or device sync: iPhone and Mac keep
+      independent stores and move data only through a backup file. Shared PDFs
       stay in the App Group inbox until review finishes; only instrument identifiers leave
       the device for market quotes.
     </p>
@@ -1467,21 +1438,7 @@
             Swift Charts for the assets doughnut, LocalAuthentication for the app lock,
             PDFKit for statement text extraction, and CryptoKit for content fingerprints.
           </p>
-          <div class="n-meta">SwiftUI · SwiftData · CloudKit · PDFKit · CryptoKit · Charts · LocalAuthentication · Observation</div>
-        </div>
-
-        <div class="node" id="sys-cloudkit" tabindex="0">
-          <div class="n-top">
-            <span class="n-name">CloudKit private database</span>
-            <span class="chip built">Built</span>
-          </div>
-          <p class="n-desc">
-            Optional SwiftData mirroring through the build's configured container:
-            <code>iCloud.monmon.dev</code> for Dev or <code>iCloud.monmon</code> for Prod. It is
-            enabled by default, owner-controlled in Settings, and applied when the app next
-            launches because the store configuration is fixed when its container opens.
-          </p>
-          <div class="n-meta">private database · mirroring events report observed sync state</div>
+          <div class="n-meta">SwiftUI · SwiftData · PDFKit · CryptoKit · Charts · LocalAuthentication · Observation</div>
         </div>
       </section>
 
@@ -1534,12 +1491,33 @@
             <span class="chip built">Built</span>
           </div>
           <p class="n-desc">
-            One <code>ModelContainer</code> holding all eleven models. Writes from statement
+            One <code>ModelContainer</code> holding all eighteen models. Ordinary writes go
+            through <code>StoreWrite.save</code>: the context save plus the goal and
+            today-expense widget refresh. On every launch <code>LegacySyncCleanup</code> deletes
+            any <code>sync/*</code> metadata rows the retired device sync left; it retries the
+            old pairing secret in Keychain each launch until one delete succeeds. Screens fetch by period, account or trip
+            (<code>LedgerFetch</code>, <code>CashBalanceFetch</code>).
+            Writes from statement
             import use a separate context with autosave disabled, re-check current store state,
             then save once or roll back. The optional Face&nbsp;ID / Touch&nbsp;ID gate protects app
             access; it is not application-level database encryption.
           </p>
           <div class="n-meta">MonMon/App/MonMonApp.swift</div>
+        </div>
+
+        <div class="node" id="sys-backup" tabindex="0">
+          <div class="n-top">
+            <span class="n-name">Backup file</span>
+            <span class="chip built">Built</span>
+          </div>
+          <p class="n-desc">
+            The only way data moves between devices. Settings &rarr; Backup exports the store as
+            a JSON file; a restore reads one back, checks it with
+            <code>MonMonBackupValidator</code> and, once the owner confirms, replaces all local
+            data. The store opens with <code>cloudKitDatabase: .none</code>; iCloud sync and
+            peer-to-peer Device Sync were both removed.
+          </p>
+          <div class="n-meta">MonMon/Backup · one store per device and flavour</div>
         </div>
       </section>
 
@@ -1640,9 +1618,9 @@
   </div>
 
   <div class="legend">
-    <span class="item"><span class="badge pk">SHA-256</span> stable file and row provenance</span>
-    <span class="item"><span class="badge req">atomic</span> one financial save or rollback</span>
-    <span class="item"><span class="badge fk">local</span> PDF bytes never leave the device</span>
+    <span class="item"><span class="badge pk long">SHA-256</span> stable file and row provenance</span>
+    <span class="item"><span class="badge req long">atomic</span> one financial save or rollback</span>
+    <span class="item"><span class="badge fk long">local</span> PDF bytes never leave the device</span>
     <span class="hint">Scroll horizontally to follow the full sequence</span>
   </div>
 
@@ -2006,7 +1984,7 @@
         <code>CashAccountKind</code>, <code>TransactionKind</code>, <code>FundInstrumentKind</code>,
         <code>DebtDirection</code>, <code>RecurrenceFrequency</code>, <code>BudgetJarRole</code>
         and <code>TripWorkspaceStatus</code> are all <code>String, Codable</code>. Raw values are stable across migrations
-        and safe for CloudKit later.
+        and in backup files, which store the same strings.
       </p>
     </div>
     <div class="note">
@@ -2020,11 +1998,13 @@
       </p>
     </div>
     <div class="note">
-      <h3>What flat FKs mean for iCloud</h3>
+      <h3>What flat FKs mean without sync</h3>
       <p>
-        Helpful: CloudKit forbids unique attributes and requires optional relationships &mdash;
-        neither exists here. Risky: manual joins do not self-heal, so a transaction that syncs
-        before its account renders dangling until the account arrives.
+        The schema keeps the shape CloudKit would accept (no unique attributes, no required
+        relationships, every attribute optional or defaulted), although iCloud sync and device
+        sync are gone. Data reaches another device only as a whole backup that replaces its
+        store. Manual joins still do not self-heal: a record whose parent was deleted renders
+        dangling, so every reader has to handle a missing parent.
       </p>
     </div>
     <div class="note">
@@ -2057,8 +2037,8 @@
   </section>
 
   <footer>
-    11 entities built &middot; 18 app-enforced foreign-key edges &middot; 0 declared SwiftData relationships
-    &nbsp;|&nbsp; private CloudKit mirroring &middot; 4 market providers &middot; 1 reviewed PDF import path
+    18 models in the schema, 16 drawn &middot; 26 app-enforced foreign-key edges &middot; 0 declared SwiftData relationships
+    &nbsp;|&nbsp; no sync, devices exchange backups &middot; 4 market providers &middot; 1 reviewed PDF import path
   </footer>
 </div>
 
@@ -2235,7 +2215,7 @@
       { from: 'sys-app', to: 'sys-inbox', label: 'review / remove', dashed: false },
       { from: 'sys-app', to: 'sys-store', label: 'reads / writes', dashed: false },
       { from: 'sys-app', to: 'sys-calendar', label: 'links · no network', dashed: false },
-      { from: 'sys-store', to: 'sys-cloudkit', label: 'optional mirror', dashed: false },
+      { from: 'sys-store', to: 'sys-backup', label: 'export / restore', dashed: false },
       { from: 'sys-app', to: 'sys-fmarket', label: 'ticker only', dashed: false },
       { from: 'sys-app', to: 'sys-vndirect', label: 'ticker only', dashed: false },
       { from: 'sys-app', to: 'sys-vang-today', label: 'type code only', dashed: false },

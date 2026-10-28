@@ -404,7 +404,7 @@ struct BudgetJarEditorView: View {
         }
 
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()

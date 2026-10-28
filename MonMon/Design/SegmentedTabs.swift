@@ -19,6 +19,12 @@ struct SegmentedTabs<Value: Hashable>: View {
 
     @Binding var selection: Value
 
+    /// What the capsule and labels show. Kept apart from `selection` so a tap
+    /// can animate the indicator alone: animating the binding write animated
+    /// every view the parent rebuilt for the new selection, which on a screen
+    /// full of figures is most of the screen.
+    @State private var displayed: Value
+
     @Namespace private var indicator
 
     init(
@@ -29,6 +35,7 @@ struct SegmentedTabs<Value: Hashable>: View {
     ) {
         self.label = label
         _selection = selection
+        _displayed = State(initialValue: selection.wrappedValue)
         self.options = options
         self.title = title
     }
@@ -53,17 +60,26 @@ struct SegmentedTabs<Value: Hashable>: View {
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(label)
+        // A change from elsewhere moves the capsule without a slide, as it
+        // did when the animation lived on the tap's write.
+        .onChange(of: selection) { _, newValue in
+            if displayed != newValue {
+                displayed = newValue
+            }
+        }
     }
 
     private func segment(_ option: Value) -> some View {
-        let isSelected = option == selection
+        let isSelected = option == displayed
 
         return Button {
-            // The animation lives on the write rather than on the view so the
+            // The animation lives on the tap rather than on the view so the
             // capsule only slides for a tap, and does not fly in when the
             // screen first draws or when the selection changes from elsewhere.
+            // Only the indicator is animated; the binding is written plainly.
+            selection = option
             withAnimation(.snappy(duration: 0.28, extraBounce: 0.08)) {
-                selection = option
+                displayed = option
             }
         } label: {
             Text(title(option))

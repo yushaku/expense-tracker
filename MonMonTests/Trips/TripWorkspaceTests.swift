@@ -87,39 +87,6 @@ struct TripWorkspaceTests {
         #expect(summary.overBudgetAmount == max(0, 3_000_000 - Decimal(budget)))
     }
 
-    @Test("A sync write lock rolls back both records together")
-    func lockedJourneySaveRollsBack() throws {
-        let container = try ModelContainer(
-            for: Schema(MonMonSchema.models),
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true))
-        let goal = makeGoal()
-        container.mainContext.insert(goal)
-        let trip = try TripWorkspaceLifecycle.start(
-            goal: goal, existingWorkspaces: [], id: UUID(), startedAt: startedAt,
-            in: container.mainContext)
-        let journey = GoalJourney(goal: goal, workspace: trip)
-        var draft = FinancialGoalDraft(journey: journey)
-        draft.name = "Unsaved"
-        draft.spendingBudgetText = "1000000"
-        SyncWriteGate.lock(container)
-        defer { SyncWriteGate.unlock(container) }
-        #expect(throws: SyncError.sessionPending) {
-            try journey.save(
-                draft: draft, jars: [], goals: [goal], capacityByJar: [:], asOf: startedAt,
-                in: container.mainContext)
-        }
-        #expect(goal.name == "Da Nang")
-        #expect(trip.name == "Da Nang")
-        #expect(trip.budgetAmount == 30_000_000)
-        let storedGoal = try #require(
-            ModelContext(container).fetch(FetchDescriptor<FinancialGoal>()).first)
-        let storedTrip = try #require(
-            ModelContext(container).fetch(FetchDescriptor<TripWorkspace>()).first)
-        #expect(storedGoal.name == "Da Nang")
-        #expect(storedTrip.name == "Da Nang")
-        #expect(storedTrip.budgetAmount == 30_000_000)
-    }
-
     @Test(
         "Invalid spending edits leave both records unchanged",
         arguments: [

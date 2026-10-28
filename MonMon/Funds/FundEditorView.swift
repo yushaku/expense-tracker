@@ -31,31 +31,13 @@ struct FundEditorView: View {
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
 
-    @Query(sort: \SavingsDeposit.createdAt, order: .forward)
-    private var deposits: [SavingsDeposit]
-
-    @Query(sort: \SavingsWithdrawal.withdrawnAt, order: .reverse)
-    private var withdrawals: [SavingsWithdrawal]
-
     @Environment(\.locale) private var locale
-
-    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
-    private var transactions: [MoneyTransaction]
-
-    @Query(sort: \FundHolding.createdAt, order: .forward)
-    private var holdings: [FundHolding]
 
     @Query(sort: \FundSale.soldAt, order: .reverse)
     private var sales: [FundSale]
 
     @Query(sort: \FundInstrument.symbol, order: .forward)
     private var instruments: [FundInstrument]
-
-    @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
-    private var transfers: [AccountTransfer]
-
-    @Query(sort: \Debt.createdAt, order: .forward)
-    private var debts: [Debt]
 
     @Query(sort: \DebtPayment.occurredAt, order: .reverse)
     private var payments: [DebtPayment]
@@ -209,17 +191,7 @@ struct FundEditorView: View {
     /// funded by this account, its own cost basis is added back so re-saving
     /// unchanged values is not reported as an overdraft.
     private func availableBalance(for account: CashAccount) -> Decimal {
-        var available = CashBalanceSummary.available(
-            for: account,
-            deposits: deposits,
-            holdings: holdings,
-            withdrawals: withdrawals,
-            transactions: transactions,
-            transfers: transfers,
-            debts: debts,
-            payments: payments,
-            sales: sales
-        )
+        var available = CashBalanceFetch.available(for: account, in: modelContext)
 
         if let editedHolding = mode.editedHolding,
             editedHolding.sourceAccountID == account.id
@@ -260,7 +232,7 @@ struct FundEditorView: View {
         }
 
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()
@@ -468,7 +440,7 @@ struct FundEditorView: View {
         modelContext.delete(editedHolding)
 
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()

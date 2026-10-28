@@ -5,7 +5,6 @@ struct SalaryCalculatorView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
     @Environment(\.modelContext) private var modelContext
-    @Environment(SyncCoordinator.self) private var syncCoordinator
     @Query private var profiles: [SalaryProfile]
     @Query(sort: \RecurringRule.createdAt) private var rules: [RecurringRule]
     @Query(sort: \TransactionCategory.createdAt) private var categories: [TransactionCategory]
@@ -48,15 +47,6 @@ struct SalaryCalculatorView: View {
                         .font(.subheadline)
                         .foregroundStyle(MonMonTheme.danger)
                         .accessibilityIdentifier("salary-save-error")
-                }
-                if syncCoordinator.writesLocked {
-                    Label(
-                        "Reconnect to finish the pending sync first.",
-                        systemImage: "arrow.triangle.2.circlepath"
-                    )
-                    .font(.caption)
-                    .foregroundStyle(MonMonTheme.textSecondary)
-                    .accessibilityIdentifier("salary-sync-locked")
                 }
                 ViewThatFits(in: .horizontal) {
                     HStack(spacing: 12) { profileButtons }
@@ -277,7 +267,6 @@ struct SalaryCalculatorView: View {
                 .buttonStyle(.prominentAction)
                 .disabled(
                     savedDraft == nil || hasUnsavedChanges || (draft.result?.net ?? 0) <= 0
-                        || syncCoordinator.writesLocked
                         || (draft.recurringRuleID != nil && linkedRule == nil)
                 )
                 .accessibilityIdentifier("salary-save-recurring")
@@ -297,7 +286,7 @@ struct SalaryCalculatorView: View {
     private var profileButtons: some View {
         Button("Save profile", action: saveProfile)
             .buttonStyle(.prominentAction)
-            .disabled(!draft.isValid || !hasUnsavedChanges || syncCoordinator.writesLocked)
+            .disabled(!draft.isValid || !hasUnsavedChanges)
             .accessibilityIdentifier("salary-save-profile")
         if hasUnsavedChanges {
             Button("Discard changes", action: reloadProfile).buttonStyle(.bordered)

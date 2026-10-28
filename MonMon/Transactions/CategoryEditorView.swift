@@ -36,8 +36,10 @@ struct CategoryEditorView: View {
     @Query(sort: \RecurringRule.createdAt, order: .forward)
     private var recurringRules: [RecurringRule]
 
-    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
-    private var transactions: [MoneyTransaction]
+    /// Only the transactions filed under the category being edited. Its usage
+    /// count is read on every keystroke in the form, which over the whole
+    /// ledger meant a scan of every transaction per character typed.
+    @Query private var transactions: [MoneyTransaction]
 
     private let mode: CategoryEditorMode
 
@@ -49,6 +51,7 @@ struct CategoryEditorView: View {
 
     init(mode: CategoryEditorMode) {
         self.mode = mode
+        _transactions = Query(LedgerFetch.transactions(inCategory: mode.editedCategory?.id))
 
         switch mode {
         case .add:
@@ -208,7 +211,7 @@ struct CategoryEditorView: View {
         }
 
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()
@@ -225,7 +228,7 @@ struct CategoryEditorView: View {
         modelContext.delete(editedCategory)
 
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()
@@ -255,7 +258,7 @@ struct CategoryEditorView: View {
         modelContext.delete(editedCategory)
 
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             isReassigning = false
             dismiss()
         } catch {

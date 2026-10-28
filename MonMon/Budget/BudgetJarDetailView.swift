@@ -13,8 +13,8 @@ struct BudgetJarDetailView: View {
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
 
-    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
-    private var transactions: [MoneyTransaction]
+    /// Only the month this screen is about; the activity reads no other.
+    @Query private var transactions: [MoneyTransaction]
 
     @Query(sort: \SavingsDeposit.openedAt, order: .reverse)
     private var savingsDeposits: [SavingsDeposit]
@@ -35,11 +35,21 @@ struct BudgetJarDetailView: View {
     let month: Date
     let asOf: Date
 
+    init(row: BudgetJarSnapshot, month: Date, asOf: Date) {
+        self.row = row
+        self.month = month
+        self.asOf = asOf
+        _transactions = Query(LedgerFetch.transactions(in: .month(containing: month)))
+    }
+
     @State private var editorMode: TransactionEditorMode?
     @State private var transactionActions = TransactionActions()
 
     var body: some View {
         let currentActivity = activity
+        let lookup = Lookup(
+            categories: categories, accounts: accounts,
+            instruments: fundInstruments, sales: fundSales)
 
         ZStack {
             MonMonTheme.canvas
@@ -60,8 +70,8 @@ struct BudgetJarDetailView: View {
                         emptyState
                     } else {
                         transactionSection(currentActivity)
-                        savingsSection(currentActivity)
-                        fundsSection(currentActivity)
+                        savingsSection(currentActivity, lookup: lookup)
+                        fundsSection(currentActivity, lookup: lookup)
                     }
                 }
                 .frame(maxWidth: MonMonTheme.maxContentWidth)
@@ -76,8 +86,8 @@ struct BudgetJarDetailView: View {
         }
         .transactionActions(
             transactionActions,
-            category: category(for:),
-            account: account(for:),
+            category: lookup.category(for:),
+            account: lookup.account(for:),
             onEdit: { editorMode = .edit($0) }
         )
         .tint(MonMonTheme.accent)
@@ -124,14 +134,16 @@ struct BudgetJarDetailView: View {
     }
 
     @ViewBuilder
-    private func savingsSection(_ activity: BudgetJarActivitySnapshot) -> some View {
+    private func savingsSection(_ activity: BudgetJarActivitySnapshot, lookup: Lookup)
+        -> some View
+    {
         if !activity.savingsDeposits.isEmpty {
             activitySection("Savings", count: activity.savingsDeposits.count)
 
             ForEach(activity.savingsDeposits) { deposit in
                 SavingsDepositCard(
                     deposit: deposit,
-                    sourceAccountName: deposit.sourceAccountID.flatMap(accountName),
+                    sourceAccountName: deposit.sourceAccountID.flatMap(lookup.accountName),
                     withdrawals: savingsWithdrawals,
                     asOf: asOf
                 )
@@ -140,16 +152,18 @@ struct BudgetJarDetailView: View {
     }
 
     @ViewBuilder
-    private func fundsSection(_ activity: BudgetJarActivitySnapshot) -> some View {
+    private func fundsSection(_ activity: BudgetJarActivitySnapshot, lookup: Lookup)
+        -> some View
+    {
         if !activity.fundHoldings.isEmpty {
             activitySection("Funds & gold", count: activity.fundHoldings.count)
 
             ForEach(activity.fundHoldings) { holding in
                 FundHoldingCard(
                     holding: holding,
-                    instrument: instrument(for: holding),
-                    sales: sales(for: holding),
-                    sourceAccountName: holding.sourceAccountID.flatMap(accountName),
+                    instrument: lookup.instrument(for: holding),
+                    sales: lookup.sales(for: holding),
+                    sourceAccountName: holding.sourceAccountID.flatMap(lookup.accountName),
                     asOf: asOf
                 )
             }
@@ -181,27 +195,48 @@ struct BudgetJarDetailView: View {
         .padding(.vertical, 28)
     }
 
-    private func category(for transaction: MoneyTransaction) -> TransactionCategory? {
-        transaction.categoryID.flatMap { id in categories.first { $0.id == id } }
-    }
+    /// Categories, accounts, instruments and sales by id, built once per
+    /// update instead of a linear search for every row.
+    private struct Lookup {
+        let categoriesByID: [UUID: TransactionCategory]
+        let accountsByID: [UUID: CashAccount]
+        let instrumentsByID: [UUID: FundInstrument]
+        let salesByHolding: [UUID: [FundSale]]
 
-    private func account(_ id: UUID) -> CashAccount? {
-        accounts.first { $0.id == id }
-    }
+        init(
+            categories: [TransactionCategory], accounts: [CashAccount],
+            instruments: [FundInstrument], sales: [FundSale]
+        ) {
+            categoriesByID = Dictionary(firstWins: categories.map { ($0.id, $0) })
+            accountsByID = Dictionary(firstWins: accounts.map { ($0.id, $0) })
+            instrumentsByID = Dictionary(firstWins: instruments.map { ($0.id, $0) })
+            var salesByHolding: [UUID: [FundSale]] = [:]
+            for sale in sales {
+                if let holdingID = sale.holdingID {
+                    salesByHolding[holdingID, default: []].append(sale)
+                }
+            }
+            self.salesByHolding = salesByHolding
+        }
 
-    private func account(for transaction: MoneyTransaction) -> CashAccount? {
-        account(transaction.accountID)
-    }
+        func category(for transaction: MoneyTransaction) -> TransactionCategory? {
+            transaction.categoryID.flatMap { categoriesByID[$0] }
+        }
 
-    private func accountName(_ id: UUID) -> String? {
-        account(id)?.name
-    }
+        func account(for transaction: MoneyTransaction) -> CashAccount? {
+            accountsByID[transaction.accountID]
+        }
 
-    private func instrument(for holding: FundHolding) -> FundInstrument? {
-        holding.instrumentID.flatMap { id in fundInstruments.first { $0.id == id } }
-    }
+        func accountName(_ id: UUID) -> String? {
+            accountsByID[id]?.name
+        }
 
-    private func sales(for holding: FundHolding) -> [FundSale] {
-        fundSales.filter { $0.holdingID == holding.id }
+        func instrument(for holding: FundHolding) -> FundInstrument? {
+            holding.instrumentID.flatMap { instrumentsByID[$0] }
+        }
+
+        func sales(for holding: FundHolding) -> [FundSale] {
+            salesByHolding[holding.id] ?? []
+        }
     }
 }

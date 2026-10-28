@@ -37,12 +37,7 @@ struct SalaryProfileTests {
         let draft = SalaryProfileDraft(profile: legacy)
         #expect(draft.result?.social == 4_048_000)
         #expect(draft.result?.health == 759_000)
-        SyncWriteGate.lock(container)
-        #expect(throws: SyncError.sessionPending) {
-            try SalaryProfileStore.save(draft, in: container.mainContext)
-        }
         #expect(legacy.periodRaw == SalaryCalculator.Period.firstHalf.rawValue)
-        SyncWriteGate.unlock(container)
         let saved = try SalaryProfileStore.save(draft, in: container.mainContext)
         #expect(saved.periodRaw == SalaryCalculator.Period.secondHalf.rawValue)
         #expect(saved.name == "Legacy name")
@@ -116,7 +111,7 @@ struct SalaryProfileTests {
         #expect(SalaryProfileStore.linkedRule(id: rule.id, in: [rule]) == nil)
     }
 
-    @Test func backupAndSyncRoundTripProfile() throws {
+    @Test func backupRoundTripsProfile() throws {
         let container = try ModelContainer(
             for: Schema(MonMonSchema.models),
             configurations: ModelConfiguration(isStoredInMemoryOnly: true))
@@ -130,14 +125,12 @@ struct SalaryProfileTests {
         let data = try service.exportData()
         let validated = try service.preview(data)
         #expect(validated.payload.recordCount == 1)
-        let sync = try SyncSnapshot(payload: validated.payload)
-        #expect(sync.records.contains { $0.type == "salaryProfiles" })
-        let roundTripped = try sync.validated()
+        #expect(validated.payload.salaryProfiles.count == 1)
         let destination = try ModelContainer(
             for: Schema(MonMonSchema.models),
             configurations: ModelConfiguration(isStoredInMemoryOnly: true))
         try MonMonBackupService(container: destination).apply(
-            roundTripped, in: destination.mainContext, includeDeviceData: false)
+            validated.payload, in: destination.mainContext, includeDeviceData: false)
         try destination.mainContext.save()
         let restored = try #require(try SalaryProfileStore.personal(in: destination.mainContext))
         #expect(restored.basisRaw == "net")
@@ -193,23 +186,7 @@ struct SalaryProfileTests {
         let oldData = try JSONSerialization.data(withJSONObject: root)
         let old = try MonMonBackupValidator.decodeAndValidate(oldData)
         #expect(old.payload.salaryProfiles.isEmpty)
-        #expect(try SyncSnapshot(payload: old.payload).records.isEmpty)
-    }
-
-    @Test func syncRemapsExplicitLinkAndAllowsDeletedRule() throws {
-        let oldID = MonMonBackupScalar.uuid(UUID())
-        let newID = MonMonBackupScalar.uuid(UUID())
-        let profile = SyncRecord(
-            type: "salaryProfiles",
-            fields: [
-                "id": .string(MonMonBackupScalar.uuid(SalaryProfile.personalID)),
-                "recurringRuleID": .string(oldID),
-            ])
-        let remapped = SyncMergePlanner.remap(
-            profile, aliases: ["recurringRules/" + oldID: "recurringRules/" + newID])
-        #expect(remapped.fields["recurringRuleID"]?.text == newID)
-        let rule = SyncRecord(type: "recurringRules", fields: ["id": .string(oldID)])
-        try SyncSnapshot(records: [profile]).validateDeletions(from: [profile, rule])
+        #expect(old.payload.recordCount == 0)
     }
 
     @Test func resetBacksUpProfileBeforeRemovingIt() throws {
@@ -268,37 +245,6 @@ struct SalaryProfileTests {
             for: schema,
             configurations: ModelConfiguration(schema: schema, url: url, cloudKitDatabase: .none))
         #expect(try SalaryProfileStore.personal(in: reopened.mainContext)?.basisRaw == "net")
-    }
-
-    @Test func syncLockPreventsProfileAndLinkedRuleWrites() throws {
-        let container = try ModelContainer(
-            for: Schema(MonMonSchema.models),
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true))
-        var draft = SalaryProfileDraft()
-        draft.amountText = "30000000"
-        let profile = try SalaryProfileStore.save(draft, in: container.mainContext)
-        SyncWriteGate.lock(container)
-        defer { SyncWriteGate.unlock(container) }
-        draft.basis = .net
-        draft.recurringRuleID = UUID()
-        #expect(throws: SyncError.sessionPending) {
-            try SalaryProfileStore.save(draft, in: container.mainContext)
-        }
-        #expect(profile.basisRaw == "gross")
-        #expect(profile.recurringRuleID == nil)
-        #expect(try SalaryProfileStore.personal(in: ModelContext(container))?.basisRaw == "gross")
-
-        let rule = RecurringRule(
-            id: UUID(), kind: .income, amount: 26_215_000, note: "Salary",
-            accountID: UUID(), categoryID: nil, currencyCode: "VND",
-            frequency: .monthly, interval: 1, anchorDate: .now, endDate: nil,
-            isPaused: false, lastGeneratedAt: nil, createdAt: .now)
-        container.mainContext.insert(rule)
-        #expect(throws: SyncError.sessionPending) {
-            try SalaryProfileStore.saveLinkedRule(rule, in: container.mainContext)
-        }
-        #expect(profile.recurringRuleID == nil)
-        #expect(try ModelContext(container).fetchCount(FetchDescriptor<RecurringRule>()) == 0)
     }
 
     @Test func linkedRuleAndNetCommitTogether() throws {

@@ -6,7 +6,7 @@
     "output": "system-design.html",
     "repository": {
       "url": "https://github.com/yushaku/expense-tracker",
-      "revision": "f98486aafbb2073783603e8b69321404d97c616a"
+      "revision": "ffe7de6d37d6f0f90ef31b98947eae8cf4e755dc"
     },
     "quality_profile": "showcase",
     "views": [
@@ -19,7 +19,7 @@
           "app",
           "store"
         ],
-        "note": "Mọi cách ghi giao dịch đều đi qua app rồi mới xuống kho SwiftData."
+        "note": "Mọi cách ghi giao dịch đều đi qua app, rồi StoreWrite.save lưu xuống kho SwiftData và làm mới widget."
       },
       {
         "id": "nhap-sao-ke",
@@ -36,19 +36,28 @@
         "id": "roi-may",
         "label": "Những gì rời máy",
         "focus": [
-          "store",
-          "cloud",
+          "app",
           "backup",
           "fmarket",
           "vndirect",
-          "vang"
+          "vang",
+          "coingecko"
         ],
-        "note": "Chỉ ba thứ rời thiết bị: bản sao CloudKit, tệp backup do người dùng xuất, và mã sản phẩm khi lấy giá."
+        "note": "Không có đồng bộ: iPhone và Mac là hai kho độc lập. Thứ rời thiết bị chỉ có tệp backup người dùng tự xuất và mã sản phẩm gửi đi khi lấy giá."
+      },
+      {
+        "id": "ai-tren-mac",
+        "label": "AI trên Mac",
+        "focus": [
+          "store",
+          "mcp"
+        ],
+        "note": "Trên Mac, helper MCP mở kho ở chế độ chỉ đọc sau khi người dùng cho phép; ghi chú nghiên cứu nằm riêng trên máy đó."
       }
     ],
     "viewBox": [
       1340,
-      700
+      640
     ]
   },
   "components": [
@@ -56,10 +65,10 @@
       "id": "siri",
       "type": "external",
       "label": "Siri & Shortcuts",
-      "sublabel": "App Intents",
+      "sublabel": "App Intents · Apple Pay",
       "pos": [
         60,
-        200
+        160
       ],
       "size": [
         180,
@@ -69,6 +78,10 @@
         {
           "path": "MonMon/App/TransactionCaptureIntent.swift",
           "label": "TransactionCaptureIntent"
+        },
+        {
+          "path": "MonMon/App/ApplePayCaptureIntent.swift",
+          "label": "CaptureApplePayTransactionIntent"
         }
       ]
     },
@@ -79,7 +92,7 @@
       "sublabel": "Preset một chạm",
       "pos": [
         60,
-        320
+        280
       ],
       "size": [
         180,
@@ -99,7 +112,7 @@
       "sublabel": "Nhận PDF sao kê",
       "pos": [
         60,
-        450
+        410
       ],
       "size": [
         180,
@@ -119,7 +132,7 @@
       "sublabel": "App Group · manifest.json",
       "pos": [
         380,
-        450
+        410
       ],
       "size": [
         200,
@@ -140,7 +153,7 @@
       "tag": "Face ID lock",
       "pos": [
         630,
-        250
+        210
       ],
       "size": [
         220,
@@ -152,8 +165,12 @@
           "label": "MonMonApp"
         },
         {
-          "path": "MonMon/App/RootTabView.swift",
-          "label": "RootTabView"
+          "path": "MonMon/App/StoreWrite.swift",
+          "label": "StoreWrite.save"
+        },
+        {
+          "path": "MonMon/App/LegacySyncCleanup.swift",
+          "label": "LegacySyncCleanup"
         }
       ]
     },
@@ -161,10 +178,10 @@
       "id": "store",
       "type": "database",
       "label": "Kho SwiftData",
-      "sublabel": "16 @Model · khoá ngoại UUID",
+      "sublabel": "18 @Model · khoá ngoại UUID",
       "pos": [
         1050,
-        265
+        225
       ],
       "size": [
         210,
@@ -174,26 +191,34 @@
         {
           "path": "MonMon/App/MonMonSchema.swift",
           "label": "MonMonSchema.models"
+        },
+        {
+          "path": "MonMon/App/StoreReconciler.swift",
+          "label": "StoreReconciler"
         }
       ]
     },
     {
-      "id": "cloud",
-      "type": "cloud",
-      "label": "CloudKit private DB",
-      "sublabel": "Bản sao, mặc định tắt",
+      "id": "mcp",
+      "type": "backend",
+      "label": "MCP helper",
+      "sublabel": "Chỉ Mac · đọc read-only",
       "pos": [
         1050,
-        60
+        410
       ],
       "size": [
         210,
-        84
+        76
       ],
       "sources": [
         {
-          "path": "MonMon/Settings/CloudSync.swift",
-          "label": "CloudSync"
+          "path": "MonMonMCPServer/MCPServerAdapter.swift",
+          "label": "MCPServerAdapter"
+        },
+        {
+          "path": "MonMon/MCP/MCPRuntime.swift",
+          "label": "MCPDirectStoreReader"
         }
       ]
     },
@@ -204,7 +229,7 @@
       "sublabel": "Files · JSON được kiểm tra",
       "pos": [
         180,
-        580
+        540
       ],
       "size": [
         210,
@@ -223,12 +248,18 @@
       "label": "Fmarket",
       "sublabel": "NAV quỹ mở",
       "pos": [
-        330,
-        96
+        280,
+        56
       ],
       "size": [
         190,
         66
+      ],
+      "sources": [
+        {
+          "path": "MonMon/Funds/FmarketQuoteProvider.swift",
+          "label": "FmarketQuoteProvider"
+        }
       ]
     },
     {
@@ -237,12 +268,18 @@
       "label": "VNDIRECT",
       "sublabel": "Giá ETF niêm yết",
       "pos": [
-        560,
-        96
+        500,
+        56
       ],
       "size": [
         190,
         66
+      ],
+      "sources": [
+        {
+          "path": "MonMon/Funds/VNDirectQuoteProvider.swift",
+          "label": "VNDirectQuoteProvider"
+        }
       ]
     },
     {
@@ -251,25 +288,52 @@
       "label": "vang.today",
       "sublabel": "Giá vàng mua vào",
       "pos": [
-        790,
-        96
+        720,
+        56
       ],
       "size": [
         190,
         66
+      ],
+      "sources": [
+        {
+          "path": "MonMon/Funds/VangTodayQuoteProvider.swift",
+          "label": "VangTodayQuoteProvider"
+        }
+      ]
+    },
+    {
+      "id": "coingecko",
+      "type": "external",
+      "label": "CoinGecko",
+      "sublabel": "Giá crypto",
+      "pos": [
+        940,
+        56
+      ],
+      "size": [
+        190,
+        66
+      ],
+      "sources": [
+        {
+          "path": "MonMon/Funds/CoinGeckoQuoteProvider.swift",
+          "label": "CoinGeckoQuoteProvider"
+        }
       ]
     }
   ],
   "boundaries": [
     {
       "kind": "region",
-      "label": "iPhone · bản Dev và Prod không dùng chung gì",
+      "label": "Mỗi máy một kho riêng (iPhone, Mac) · Dev và Prod tách biệt",
       "wraps": [
         "widget",
         "share",
         "inbox",
         "app",
-        "store"
+        "store",
+        "mcp"
       ]
     },
     {
@@ -285,7 +349,7 @@
       "id": "siri-to-app",
       "from": "siri",
       "to": "app",
-      "label": "câu lệnh giọng nói",
+      "label": "Shortcuts / giọng nói",
       "variant": "emphasis",
       "fromSide": "right",
       "toSide": "left"
@@ -318,26 +382,30 @@
       "id": "app-to-store",
       "from": "app",
       "to": "store",
-      "label": "đọc / ghi qua ModelContext",
+      "label": "StoreWrite.save",
       "variant": "emphasis",
       "fromSide": "right",
       "toSide": "left",
       "labelDx": 76
     },
     {
-      "id": "store-to-cloud",
+      "id": "store-to-mcp",
       "from": "store",
-      "to": "cloud",
-      "label": "mirror khi bật đồng bộ",
+      "to": "mcp",
+      "label": "chỉ đọc khi được phép",
       "variant": "dashed",
-      "fromSide": "top",
-      "toSide": "bottom"
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        1155,
+        362
+      ]
     },
     {
       "id": "app-to-backup",
       "from": "app",
       "to": "backup",
-      "label": "xuất / phục hồi thủ công",
+      "label": "xuất / phục hồi, cách chuyển máy",
       "variant": "dashed",
       "fromSide": "bottom",
       "toSide": "right"
@@ -368,6 +436,15 @@
       "variant": "dashed",
       "fromSide": "top",
       "toSide": "bottom"
+    },
+    {
+      "id": "app-to-coingecko",
+      "from": "app",
+      "to": "coingecko",
+      "label": "chỉ gửi mã coin",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
     }
   ],
   "cards": [
@@ -375,24 +452,24 @@
       "dot": "cyan",
       "title": "Trên máy",
       "items": [
-        "SwiftUI, một chủ tài khoản, không có tài khoản đăng nhập",
-        "16 @Model SwiftData, quan hệ là khoá ngoại UUID nối trong Swift"
+        "SwiftUI, một chủ tài khoản; 18 @Model SwiftData nối bằng khoá ngoại UUID",
+        "Mỗi lần mở app: dọn dữ liệu sync cũ (LegacySyncCleanup), gộp bản trùng (StoreReconciler)"
       ]
     },
     {
       "dot": "emerald",
       "title": "Đường vào",
       "items": [
-        "Siri và widget chạy App Intent trên container của app",
-        "Parse xong mà thiếu dữ liệu thì thành mục chờ duyệt, không đoán bừa"
+        "Siri, Shortcuts và widget chạy App Intent trên container của app",
+        "Màn hình và editor lưu qua StoreWrite.save: context.save rồi làm mới widget"
       ]
     },
     {
       "dot": "violet",
       "title": "Đường ra",
       "items": [
-        "CloudKit private database, mặc định tắt, bật xong phải mở lại app",
-        "Backup là tệp người dùng tự xuất, có bước xác nhận trước khi phục hồi"
+        "Không đồng bộ: iPhone và Mac là hai kho riêng, chuyển dữ liệu bằng backup",
+        "Lấy giá chỉ gửi mã sản phẩm, không gửi số dư hay giao dịch"
       ]
     }
   ]

@@ -137,7 +137,7 @@ struct GoalEditorView: View {
                         asOf: asOf
                     )
                 )
-                try SyncWriteGate.save(modelContext)
+                try StoreWrite.save(modelContext)
             }
             dismiss()
         } catch let error as FinancialGoalFormError {
@@ -158,7 +158,7 @@ struct GoalEditorView: View {
 
         modelContext.delete(goal)
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             dismiss()
         } catch {
             modelContext.rollback()

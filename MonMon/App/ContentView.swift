@@ -4,7 +4,7 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(AppLock.self) private var appLock
     @Environment(AppRoute.self) private var appRoute
-    @Environment(SyncCoordinator.self) private var syncCoordinator
+    @Environment(StoreResetCoordinator.self) private var storeReset
 
     @AppStorage(AppTheme.storageKey) private var theme = AppTheme.system
     @AppStorage(AppLanguage.storageKey) private var language = AppLanguage.system
@@ -14,9 +14,9 @@ struct ContentView: View {
     var body: some View {
         @Bindable var appRoute = appRoute
         RootTabView()
-            // Refresh model-backed screens after sync without dismissing Settings.
-            .id(syncCoordinator.contentRevision)
-            .disabled(syncCoordinator.writesLocked)
+            // Rebuild model-backed screens after a database reset without
+            // dismissing Settings.
+            .id(storeReset.revision)
             .sheet(isPresented: $appRoute.isShowingSettings) {
                 SettingsView()
                     .presentationContentInteraction(AppSheetPresentation.contentInteraction)
@@ -71,7 +71,7 @@ struct ContentView: View {
     #Preview("App · accounts") {
         ContentView()
             .modelContainer(PreviewData.populated)
-            .environment(SyncCoordinator(store: SyncSessionStore(container: PreviewData.populated)))
+            .environment(StoreResetCoordinator())
             .environment(AppLock(isLocked: false))
             .environment(AppRoute())
             .environment(NotificationCoordinator())
@@ -80,7 +80,7 @@ struct ContentView: View {
     #Preview("App · empty") {
         ContentView()
             .modelContainer(PreviewData.empty)
-            .environment(SyncCoordinator(store: SyncSessionStore(container: PreviewData.empty)))
+            .environment(StoreResetCoordinator())
             .environment(AppLock(isLocked: false))
             .environment(AppRoute())
             .environment(NotificationCoordinator())

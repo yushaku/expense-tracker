@@ -49,7 +49,20 @@ struct TransactionListSection<Accessory: View>: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        // Grouping and the id lookups run once per update rather than once per
+        // row: a month can hold hundreds of rows, and each linear search over
+        // categories, accounts and trips used to run again for every one.
+        let groups = dayGroups
+        let lookup = TransactionRowLookup(
+            categories: categories,
+            accounts: accounts,
+            trips: tripWorkspaces
+        )
+
+        // Lazy, so only the days near the viewport are built. The enclosing
+        // screens put this inside their own scroll view; a plain stack here
+        // made every row of the period exist, and rebuild, at once.
+        LazyVStack(alignment: .leading, spacing: 20) {
             header
 
             if transactions.isEmpty && transfers.isEmpty {
@@ -58,7 +71,7 @@ struct TransactionListSection<Accessory: View>: View {
                     .foregroundStyle(MonMonTheme.textSecondary)
             }
 
-            ForEach(dayGroups) { group in
+            ForEach(groups) { group in
                 VStack(alignment: .leading, spacing: 12) {
                     dayHeader(for: group)
 
@@ -67,9 +80,9 @@ struct TransactionListSection<Accessory: View>: View {
                         case .transaction(let transaction):
                             TransactionItem(
                                 transaction: transaction,
-                                category: category(for: transaction),
-                                account: account(for: transaction),
-                                tripName: tripName(for: transaction),
+                                category: lookup.category(for: transaction),
+                                account: lookup.account(transaction.accountID),
+                                tripName: lookup.tripName(for: transaction),
                                 showsDate: false,
                                 accessibilityIdentifier:
                                     "\(accessibilityIdentifierPrefix)-\(transaction.id.uuidString)"
@@ -77,10 +90,8 @@ struct TransactionListSection<Accessory: View>: View {
                         case .transfer(let transfer):
                             TransferItem(
                                 transfer: transfer,
-                                sourceAccount: accounts.first { $0.id == transfer.sourceAccountID },
-                                destinationAccount: accounts.first {
-                                    $0.id == transfer.destinationAccountID
-                                },
+                                sourceAccount: lookup.account(transfer.sourceAccountID),
+                                destinationAccount: lookup.account(transfer.destinationAccountID),
                                 showsDate: false
                             )
                             .accessibilityIdentifier("history-transfer-\(transfer.id.uuidString)")
@@ -117,11 +128,6 @@ struct TransactionListSection<Accessory: View>: View {
         TransactionHistory.byDay(transactions: transactions, transfers: transfers)
     }
 
-    private func tripName(for transaction: MoneyTransaction) -> String? {
-        guard let workspaceID = transaction.tripWorkspaceID else { return nil }
-        return tripWorkspaces.first { $0.id == workspaceID }?.name
-    }
-
     private func dayHeader(for group: TransactionHistoryDay) -> some View {
         HStack(spacing: 12) {
             Text(
@@ -152,18 +158,6 @@ struct TransactionListSection<Accessory: View>: View {
         return "\(sign)\(VNDCurrency.format(magnitude))"
     }
 
-    private func category(for transaction: MoneyTransaction) -> TransactionCategory? {
-        guard let categoryID = transaction.categoryID else {
-            return nil
-        }
-
-        return categories.first { $0.id == categoryID }
-    }
-
-    private func account(for transaction: MoneyTransaction) -> CashAccount? {
-        accounts.first { $0.id == transaction.accountID }
-    }
-
 }
 
 extension TransactionListSection where Accessory == EmptyView {
@@ -189,5 +183,36 @@ extension TransactionListSection where Accessory == EmptyView {
         ) {
             EmptyView()
         }
+    }
+}
+
+/// What each history row looks up by id, keyed once for the whole list. The
+/// first record with an id wins, which is what the linear `first(where:)`
+/// searches it replaces returned when a duplicate slipped in.
+struct TransactionRowLookup {
+    private let categories: [UUID: TransactionCategory]
+    private let accounts: [UUID: CashAccount]
+    private let tripNames: [UUID: String]
+
+    init(
+        categories: [TransactionCategory],
+        accounts: [CashAccount],
+        trips: [TripWorkspace]
+    ) {
+        self.categories = Dictionary(firstWins: categories.map { ($0.id, $0) })
+        self.accounts = Dictionary(firstWins: accounts.map { ($0.id, $0) })
+        self.tripNames = Dictionary(firstWins: trips.map { ($0.id, $0.name) })
+    }
+
+    func category(for transaction: MoneyTransaction) -> TransactionCategory? {
+        transaction.categoryID.flatMap { categories[$0] }
+    }
+
+    func account(_ id: UUID) -> CashAccount? {
+        accounts[id]
+    }
+
+    func tripName(for transaction: MoneyTransaction) -> String? {
+        transaction.tripWorkspaceID.flatMap { tripNames[$0] }
     }
 }

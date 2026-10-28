@@ -1,7 +1,13 @@
 import Foundation
 import SwiftData
 
-/// Local metadata is saved in the same transaction as the financial records it describes.
+/// Small key/value rows saved in the same transaction as the records they describe.
+///
+/// The class keeps its original name because SwiftData derives the stored
+/// entity name from it: renaming it would orphan every existing store's rows
+/// and need a migration plan for no gain. Today it only holds the `seed/*`
+/// markers `SeedState` reads; the keys the retired device sync wrote are
+/// removed once at launch by `LegacySyncCleanup`.
 @Model
 final class SyncMetadata {
     var key: String = ""
@@ -14,7 +20,9 @@ final class SyncMetadata {
 
     @MainActor
     static func entry(_ key: String, in context: ModelContext) throws -> SyncMetadata? {
-        try context.fetch(FetchDescriptor<SyncMetadata>()).first { $0.key == key }
+        var descriptor = FetchDescriptor<SyncMetadata>(predicate: #Predicate { $0.key == key })
+        descriptor.fetchLimit = 1
+        return try context.fetch(descriptor).first
     }
 
     @MainActor
@@ -37,13 +45,21 @@ enum SeedState {
         try SyncMetadata.set("seed/" + type, value: Data(), in: context)
     }
 
+    /// After a restore the store holds exactly what the backup held, so the
+    /// starter seeders must not add their rows on top of it.
+    static func markAllSeeded(in context: ModelContext) throws {
+        for type in ["categories", "budgetJars", "defaultBank", "migration"] {
+            try mark(type, in: context)
+        }
+    }
+
     /// Called before any legacy seeder. Existing financial data means this is an
     /// upgrade, not an empty installation; missing starter rows stay missing.
     static func migrateExistingStore(in context: ModelContext) throws {
         guard try !isInitialized("migration", in: context) else { return }
-        let hasData =
-            try SyncSnapshot(payload: MonMonBackupService.snapshotPayload(in: context)).records
-            .isEmpty == false
+        let payload = try MonMonBackupService.snapshotPayload(in: context)
+        // Pending captures are drafts, not financial records.
+        let hasData = payload.recordCount - payload.pendingCaptures.count > 0
         if hasData {
             for type in ["categories", "budgetJars", "defaultBank"] { try mark(type, in: context) }
         }

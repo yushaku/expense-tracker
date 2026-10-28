@@ -10,40 +10,16 @@
     /* Màu hũ lấy đúng bảng màu Catppuccin mà ứng dụng đang dùng:
        Latte cho nền sáng, Frappé cho nền tối. */
     :root {
-      --jar-necessities: #1e66f5;
-      --jar-investment: #8839ef;
-      --jar-education: #179299;
-      --jar-savings: #df8e1d;
-      --jar-play: #ea76cb;
-      --jar-giving: #fe640b;
+      --jar-necessities: var(--ctp-blue);
+      --jar-investment: var(--ctp-mauve);
+      --jar-education: var(--ctp-teal);
+      --jar-savings: var(--ctp-yellow);
+      --jar-play: var(--ctp-pink);
+      --jar-giving: var(--ctp-peach);
       --jar-empty: var(--docs-surface-3);
-      --plane-plan: #8839ef;
-      --plane-real: #179299;
+      --plane-plan: var(--ctp-mauve);
+      --plane-real: var(--ctp-teal);
       --chart-track: var(--docs-surface-3);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) {
-        --jar-necessities: #8caaee;
-        --jar-investment: #ca9ee6;
-        --jar-education: #81c8be;
-        --jar-savings: #e5c890;
-        --jar-play: #f4b8e4;
-        --jar-giving: #ef9f76;
-        --plane-plan: #ca9ee6;
-        --plane-real: #81c8be;
-      }
-    }
-
-    :root[data-theme="dark"] {
-      --jar-necessities: #8caaee;
-      --jar-investment: #ca9ee6;
-      --jar-education: #81c8be;
-      --jar-savings: #e5c890;
-      --jar-play: #f4b8e4;
-      --jar-giving: #ef9f76;
-      --plane-plan: #ca9ee6;
-      --plane-real: #81c8be;
     }
 
     .page {
@@ -547,7 +523,10 @@
           <p>
             Màn hình Budget luôn nói về một tháng cụ thể. Giao dịch được tính khi rơi trong tháng
             đó <em>và</em> không nằm ở tương lai so với hôm nay, nên tháng đang diễn ra không bao
-            giờ bị các bản ghi ngày mai làm lệch.
+            giờ bị các bản ghi ngày mai làm lệch. <code>BudgetContent</code> chỉ fetch tháng đang xem
+            (thêm tháng của hôm nay khi cần tính sức góp cho mục tiêu). Mốc hôm nay được đặt lại khi
+            màn hình hiện ra, khi app quay lại foreground và khi sang ngày mới
+            (<code>refreshesCurrentDate</code>), nên app mở qua nửa đêm không giữ mốc của hôm qua.
           </p>
         </div>
       </div>
