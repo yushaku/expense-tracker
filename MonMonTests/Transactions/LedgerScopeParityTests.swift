@@ -102,6 +102,17 @@ struct LedgerScopeParityTests {
                     fundHoldings: [])
             }
             #expect(snapshot(fetched) == snapshot(ledger))
+
+            for jar in jars {
+                func activity(_ rows: [MoneyTransaction]) -> [UUID] {
+                    BudgetJarActivity.snapshot(
+                        for: jar, monthContaining: visible, asOf: asOf, jars: jars,
+                        categories: [], transactions: rows, savingsDeposits: [],
+                        fundHoldings: []
+                    ).transactions.map(\.id)
+                }
+                #expect(Set(activity(fetched)) == Set(activity(ledger)))
+            }
         }
 
         let capacityRows = try context.fetch(

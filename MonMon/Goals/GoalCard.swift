@@ -288,10 +288,17 @@ private struct GoalAccumulationDetailView: View {
     private var tripWorkspaces: [TripWorkspace]
 
     @Query private var recurringRules: [RecurringRule]
+    /// The month capacity reads, which is all this screen reads of the ledger.
     @Query private var transactions: [MoneyTransaction]
 
     let goalID: UUID
     let asOf: Date
+
+    init(goalID: UUID, asOf: Date) {
+        self.goalID = goalID
+        self.asOf = asOf
+        _transactions = Query(LedgerFetch.transactions(in: .month(containing: asOf)))
+    }
 
     @State private var editorMode: GoalEditorMode?
     @State private var isShowingUseOptions = false
