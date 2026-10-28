@@ -364,7 +364,9 @@
 		A00000000000000000000A06 /* DuplicateReconciler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000A05 /* DuplicateReconciler.swift */; };
 		F0948E289FE0A9E03C6D8CC9 /* StoreWrite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E51F07328D6955F0948E28 /* StoreWrite.swift */; };
 		235EEB6082B9E35986E711A4 /* StoreMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96AF9DCB3247FD9A235EEB60 /* StoreMetadata.swift */; };
+		C824B5ABD5302E69E49546FA /* LegacySyncCleanup.swift in Sources */ = {isa = PBXBuildFile; fileRef = C525445ABF384663C824B5AB /* LegacySyncCleanup.swift */; };
 		A00000000000000000000A08 /* StoreReconciler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000A07 /* StoreReconciler.swift */; };
+		BA0FD8BE603A78D031C8DC25 /* LegacySyncCleanupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF699247470549EBA0FD8BE /* LegacySyncCleanupTests.swift */; };
 		A00000000000000000000A0B /* StoreReconcilerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000A0A /* StoreReconcilerTests.swift */; };
 		A00000000000000000000E00 /* RecurrenceFrequency.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D01 /* RecurrenceFrequency.swift */; };
 		A00000000000000000000E01 /* RecurrenceSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D02 /* RecurrenceSchedule.swift */; };
@@ -853,7 +855,9 @@
 		A00000000000000000000A05 /* DuplicateReconciler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateReconciler.swift; sourceTree = "<group>"; };
 		04E51F07328D6955F0948E28 /* StoreWrite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreWrite.swift; sourceTree = "<group>"; };
 		96AF9DCB3247FD9A235EEB60 /* StoreMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreMetadata.swift; sourceTree = "<group>"; };
+		C525445ABF384663C824B5AB /* LegacySyncCleanup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacySyncCleanup.swift; sourceTree = "<group>"; };
 		A00000000000000000000A07 /* StoreReconciler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreReconciler.swift; sourceTree = "<group>"; };
+		DEF699247470549EBA0FD8BE /* LegacySyncCleanupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacySyncCleanupTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000A0A /* StoreReconcilerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreReconcilerTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000D01 /* RecurrenceFrequency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurrenceFrequency.swift; sourceTree = "<group>"; };
 		A00000000000000000000D02 /* RecurrenceSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurrenceSchedule.swift; sourceTree = "<group>"; };
@@ -1091,6 +1095,7 @@
 				Q10000000000000000000107 /* MonMonAppShortcuts.swift */,
 				A00000000000000000000816 /* MonMonSchema.swift */,
 				A00000000000000000000A07 /* StoreReconciler.swift */,
+				C525445ABF384663C824B5AB /* LegacySyncCleanup.swift */,
 				96AF9DCB3247FD9A235EEB60 /* StoreMetadata.swift */,
 				04E51F07328D6955F0948E28 /* StoreWrite.swift */,
 				A00000000000000000000A05 /* DuplicateReconciler.swift */,
@@ -1683,6 +1688,7 @@
 				D30000000000000000000003 /* AppSheetPresentationTests.swift */,
 				Q10000000000000000000112 /* AppRouteTests.swift */,
 				A00000000000000000000A0A /* StoreReconcilerTests.swift */,
+				DEF699247470549EBA0FD8BE /* LegacySyncCleanupTests.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -2000,6 +2006,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C824B5ABD5302E69E49546FA /* LegacySyncCleanup.swift in Sources */,
 				6C0A3FB579F3802AC8A29829 /* StoreResetCoordinator.swift in Sources */,
 				235EEB6082B9E35986E711A4 /* StoreMetadata.swift in Sources */,
 				F0948E289FE0A9E03C6D8CC9 /* StoreWrite.swift in Sources */,
@@ -2283,6 +2290,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BA0FD8BE603A78D031C8DC25 /* LegacySyncCleanupTests.swift in Sources */,
 				7086E22C2333497B9D7264A9 /* MCPResearchTests.swift in Sources */,
 				N10000000000000000000211 /* NotificationPreferencesTests.swift in Sources */,
 				N10000000000000000000212 /* DailyExpenseReminderTests.swift in Sources */,

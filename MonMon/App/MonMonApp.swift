@@ -49,6 +49,12 @@ struct MonMonApp: App {
         }
         container = modelContainer
         modelContainer.mainContext.autosaveEnabled = false
+        if !MonMonProcess.isRunningUnitTests {
+            do { try LegacySyncCleanup.run(in: modelContainer.mainContext) } catch {
+                // Leftover rows are inert; the next launch tries again.
+                assertionFailure("Legacy sync cleanup failed: \(error)")
+            }
+        }
         var canInitializeStore = true
         do { try SeedState.migrateExistingStore(in: modelContainer.mainContext) } catch {
             canInitializeStore = false
