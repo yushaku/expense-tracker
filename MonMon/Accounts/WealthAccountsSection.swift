@@ -39,10 +39,22 @@ struct WealthAccountsSection: View {
             if accounts.isEmpty {
                 emptyState
             } else {
-                if showsBalanceChart && !balanceSlices.isEmpty {
-                    AccountBalanceCard(slices: balanceSlices, overdraft: overdraft)
+                // One pass over the ledger for every card and the ring, rather
+                // than one per account per use.
+                let balances = self.balances
+                if showsBalanceChart {
+                    let slices = AccountBalanceAllocation.slices(
+                        accounts: accounts,
+                        balances: balances
+                    )
+                    if !slices.isEmpty {
+                        AccountBalanceCard(
+                            slices: slices,
+                            overdraft: AssetAllocation.overdraft(in: balances)
+                        )
+                    }
                 }
-                accountsSection
+                accountsSection(balances: balances)
             }
         }
         .accessibilityIdentifier("wealth-accounts")
@@ -52,7 +64,7 @@ struct WealthAccountsSection: View {
         .tint(MonMonTheme.accent)
     }
 
-    private var accountsSection: some View {
+    private func accountsSection(balances: [UUID: Decimal]) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             sectionHeader(
                 "Accounts",
@@ -63,7 +75,7 @@ struct WealthAccountsSection: View {
             )
 
             ForEach(displayAccounts) { account in
-                accountRow(account)
+                accountRow(account, availableBalance: balances[account.id] ?? .zero)
             }
         }
     }
@@ -74,17 +86,14 @@ struct WealthAccountsSection: View {
         }
     }
 
-    private func accountRow(_ account: CashAccount) -> some View {
+    private func accountRow(_ account: CashAccount, availableBalance: Decimal) -> some View {
         NavigationLink(value: AccountDetailRoute(accountID: account.id)) {
             CashAccountCard(
                 account: account,
+                availableBalance: availableBalance,
                 deposits: deposits,
                 withdrawals: withdrawals,
                 holdings: holdings,
-                transactions: transactions,
-                transfers: transfers,
-                debts: debts,
-                payments: payments,
                 sales: sales
             )
         }
@@ -186,26 +195,12 @@ struct WealthAccountsSection: View {
         }
     }
 
-    private var balanceSlices: [AccountBalanceSlice] {
-        AccountBalanceAllocation.slices(
-            accounts: accounts,
+    private var balances: [UUID: Decimal] {
+        CashBalanceSummary.balances(
+            of: accounts,
             deposits: deposits,
-            withdrawals: withdrawals,
             holdings: holdings,
-            transactions: transactions,
-            transfers: transfers,
-            debts: debts,
-            payments: payments,
-            sales: sales
-        )
-    }
-
-    private var overdraft: Decimal {
-        AssetAllocation.overdraft(
-            accounts: accounts,
-            deposits: deposits,
             withdrawals: withdrawals,
-            holdings: holdings,
             transactions: transactions,
             transfers: transfers,
             debts: debts,

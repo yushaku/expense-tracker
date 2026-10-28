@@ -108,18 +108,51 @@ enum AssetAllocation {
         payments: [DebtPayment],
         sales: [FundSale]
     ) -> [AssetAllocationSlice] {
+        amounts(
+            cashBalances: CashBalanceSummary.balances(
+                of: accounts,
+                deposits: deposits,
+                holdings: holdings,
+                withdrawals: withdrawals,
+                transactions: transactions,
+                transfers: transfers,
+                debts: debts,
+                payments: payments,
+                sales: sales
+            ),
+            deposits: deposits,
+            withdrawals: withdrawals,
+            holdings: holdings,
+            instruments: instruments,
+            debts: debts,
+            payments: payments,
+            sales: sales
+        )
+    }
+
+    /// `amounts` from account balances already worked out by
+    /// `CashBalanceSummary.balances`, so the ring, the liabilities and the
+    /// account cards on one screen share a single pass over the ledger.
+    static func amounts(
+        cashBalances: [UUID: Decimal],
+        deposits: [SavingsDeposit],
+        withdrawals: [SavingsWithdrawal],
+        holdings: [FundHolding],
+        instruments: [FundInstrument],
+        debts: [Debt],
+        payments: [DebtPayment],
+        sales: [FundSale]
+    ) -> [AssetAllocationSlice] {
         AssetAllocationSlice.Kind.allCases.map { kind in
             AssetAllocationSlice(
                 kind: kind,
                 amount: amount(
                     of: kind,
-                    accounts: accounts,
+                    cashBalances: cashBalances,
                     deposits: deposits,
                     withdrawals: withdrawals,
                     holdings: holdings,
                     instruments: instruments,
-                    transactions: transactions,
-                    transfers: transfers,
                     debts: debts,
                     payments: payments,
                     sales: sales
@@ -130,30 +163,18 @@ enum AssetAllocation {
 
     private static func amount(
         of kind: AssetAllocationSlice.Kind,
-        accounts: [CashAccount],
+        cashBalances: [UUID: Decimal],
         deposits: [SavingsDeposit],
         withdrawals: [SavingsWithdrawal],
         holdings: [FundHolding],
         instruments: [FundInstrument],
-        transactions: [MoneyTransaction],
-        transfers: [AccountTransfer],
         debts: [Debt],
         payments: [DebtPayment],
         sales: [FundSale]
     ) -> Decimal {
         switch kind {
         case .cash:
-            positiveCash(
-                accounts: accounts,
-                deposits: deposits,
-                withdrawals: withdrawals,
-                holdings: holdings,
-                transactions: transactions,
-                transfers: transfers,
-                debts: debts,
-                payments: payments,
-                sales: sales
-            )
+            positiveCash(in: cashBalances)
         case .savings:
             AssetSummary.totalPrincipal(of: deposits, withdrawals: withdrawals)
         case .funds:
@@ -196,20 +217,51 @@ enum AssetAllocation {
         payments: [DebtPayment],
         sales: [FundSale]
     ) -> [AssetAllocationSlice] {
-        amounts(
-            accounts: accounts,
-            deposits: deposits,
-            withdrawals: withdrawals,
-            holdings: holdings,
-            instruments: instruments,
-            transactions: transactions,
-            transfers: transfers,
-            debts: debts,
-            payments: payments,
-            sales: sales
+        slices(
+            of: amounts(
+                accounts: accounts,
+                deposits: deposits,
+                withdrawals: withdrawals,
+                holdings: holdings,
+                instruments: instruments,
+                transactions: transactions,
+                transfers: transfers,
+                debts: debts,
+                payments: payments,
+                sales: sales
+            )
         )
-        .filter { $0.amount > 0 }
-        .sorted { $0.amount > $1.amount }
+    }
+
+    /// `slices` from balances already worked out.
+    static func slices(
+        cashBalances: [UUID: Decimal],
+        deposits: [SavingsDeposit],
+        withdrawals: [SavingsWithdrawal],
+        holdings: [FundHolding],
+        instruments: [FundInstrument],
+        debts: [Debt],
+        payments: [DebtPayment],
+        sales: [FundSale]
+    ) -> [AssetAllocationSlice] {
+        slices(
+            of: amounts(
+                cashBalances: cashBalances,
+                deposits: deposits,
+                withdrawals: withdrawals,
+                holdings: holdings,
+                instruments: instruments,
+                debts: debts,
+                payments: payments,
+                sales: sales
+            )
+        )
+    }
+
+    private static func slices(of amounts: [AssetAllocationSlice]) -> [AssetAllocationSlice] {
+        amounts
+            .filter { $0.amount > 0 }
+            .sorted { $0.amount > $1.amount }
     }
 
     /// Spendable cash across accounts that are not overdrawn.
@@ -224,9 +276,9 @@ enum AssetAllocation {
         payments: [DebtPayment],
         sales: [FundSale]
     ) -> Decimal {
-        accounts.reduce(Decimal.zero) { total, account in
-            let available = CashBalanceSummary.available(
-                for: account,
+        positiveCash(
+            in: CashBalanceSummary.balances(
+                of: accounts,
                 deposits: deposits,
                 holdings: holdings,
                 withdrawals: withdrawals,
@@ -236,8 +288,14 @@ enum AssetAllocation {
                 payments: payments,
                 sales: sales
             )
+        )
+    }
 
-            return available > 0 ? total + available : total
+    /// `positiveCash` from balances already worked out, so a screen that also
+    /// shows each account's figure reads the ledger once for both.
+    static func positiveCash(in balances: [UUID: Decimal]) -> Decimal {
+        balances.values.reduce(Decimal.zero) { total, available in
+            available > 0 ? total + available : total
         }
     }
 
@@ -259,9 +317,9 @@ enum AssetAllocation {
         payments: [DebtPayment],
         sales: [FundSale]
     ) -> Decimal {
-        accounts.reduce(Decimal.zero) { total, account in
-            let available = CashBalanceSummary.available(
-                for: account,
+        overdraft(
+            in: CashBalanceSummary.balances(
+                of: accounts,
                 deposits: deposits,
                 holdings: holdings,
                 withdrawals: withdrawals,
@@ -271,8 +329,13 @@ enum AssetAllocation {
                 payments: payments,
                 sales: sales
             )
+        )
+    }
 
-            return available < 0 ? total - available : total
+    /// `overdraft` from balances already worked out.
+    static func overdraft(in balances: [UUID: Decimal]) -> Decimal {
+        balances.values.reduce(Decimal.zero) { total, available in
+            available < 0 ? total - available : total
         }
     }
 
@@ -318,6 +381,29 @@ enum AssetAllocation {
         payments: [DebtPayment],
         sales: [FundSale]
     ) -> [LiabilityAllocationSlice] {
+        liabilitySlices(
+            cashBalances: CashBalanceSummary.balances(
+                of: accounts,
+                deposits: deposits,
+                holdings: holdings,
+                withdrawals: withdrawals,
+                transactions: transactions,
+                transfers: transfers,
+                debts: debts,
+                payments: payments,
+                sales: sales
+            ),
+            debts: debts,
+            payments: payments
+        )
+    }
+
+    /// `liabilitySlices` from balances already worked out.
+    static func liabilitySlices(
+        cashBalances: [UUID: Decimal],
+        debts: [Debt],
+        payments: [DebtPayment]
+    ) -> [LiabilityAllocationSlice] {
         let candidates = [
             LiabilityAllocationSlice(
                 kind: .borrowed,
@@ -329,17 +415,7 @@ enum AssetAllocation {
             ),
             LiabilityAllocationSlice(
                 kind: .overdraft,
-                amount: overdraft(
-                    accounts: accounts,
-                    deposits: deposits,
-                    withdrawals: withdrawals,
-                    holdings: holdings,
-                    transactions: transactions,
-                    transfers: transfers,
-                    debts: debts,
-                    payments: payments,
-                    sales: sales
-                )
+                amount: overdraft(in: cashBalances)
             ),
         ]
 

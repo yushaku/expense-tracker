@@ -128,13 +128,20 @@ struct AccountDetailView: View {
             LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
                 CashAccountCard(
                     account: account,
+                    availableBalance: CashBalanceSummary.available(
+                        for: account,
+                        deposits: deposits,
+                        holdings: holdings,
+                        withdrawals: withdrawals,
+                        transactions: transactions,
+                        transfers: transfers,
+                        debts: debts,
+                        payments: payments,
+                        sales: sales
+                    ),
                     deposits: deposits,
                     withdrawals: withdrawals,
                     holdings: holdings,
-                    transactions: transactions,
-                    transfers: transfers,
-                    debts: debts,
-                    payments: payments,
                     sales: sales
                 )
 

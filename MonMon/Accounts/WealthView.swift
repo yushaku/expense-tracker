@@ -55,6 +55,25 @@ struct WealthView: View {
 
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: MonMonTheme.contentSpacing) {
+                        // Worked out once per update: each of these used to be
+                        // evaluated twice, and each evaluation rescanned the
+                        // ledger once per account.
+                        let cashBalances = self.cashBalances
+                        let allocationSlices = AssetAllocation.slices(
+                            cashBalances: cashBalances,
+                            deposits: deposits,
+                            withdrawals: withdrawals,
+                            holdings: holdings,
+                            instruments: instruments,
+                            debts: debts,
+                            payments: payments,
+                            sales: sales
+                        )
+                        let liabilitySlices = AssetAllocation.liabilitySlices(
+                            cashBalances: cashBalances,
+                            debts: debts,
+                            payments: payments
+                        )
                         if !allocationSlices.isEmpty || !liabilitySlices.isEmpty {
                             AssetAllocationCard(
                                 slices: allocationSlices,
@@ -92,27 +111,12 @@ struct WealthView: View {
         }
     }
 
-    private var allocationSlices: [AssetAllocationSlice] {
-        AssetAllocation.slices(
-            accounts: accounts,
+    private var cashBalances: [UUID: Decimal] {
+        CashBalanceSummary.balances(
+            of: accounts,
             deposits: deposits,
-            withdrawals: withdrawals,
             holdings: holdings,
-            instruments: instruments,
-            transactions: transactions,
-            transfers: transfers,
-            debts: debts,
-            payments: payments,
-            sales: sales
-        )
-    }
-
-    private var liabilitySlices: [LiabilityAllocationSlice] {
-        AssetAllocation.liabilitySlices(
-            accounts: accounts,
-            deposits: deposits,
             withdrawals: withdrawals,
-            holdings: holdings,
             transactions: transactions,
             transfers: transfers,
             debts: debts,

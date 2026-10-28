@@ -146,6 +146,7 @@
 		A00000000000000000000210 /* AccountDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000119 /* AccountDraft.swift */; };
 		A00000000000000000000211 /* VNDCurrency.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000122 /* VNDCurrency.swift */; };
 		A00000000000000000000212 /* CashBalanceSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000123 /* CashBalanceSummaryTests.swift */; };
+		4751665FEC1147D1A6B4FFC5 /* CashBalancesParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FB5E07680D2429AAE30E595 /* CashBalancesParityTests.swift */; };
 		A00000000000000000000213 /* CashBalanceSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000124 /* CashBalanceSummary.swift */; };
 		E20000000000000000000002 /* AccountLinkedSourceSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000000000000000000001 /* AccountLinkedSourceSummary.swift */; };
 		A00000000000000000000214 /* WealthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000125 /* WealthView.swift */; };
@@ -644,6 +645,7 @@
 		A00000000000000000000121 /* MonMonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonMonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00000000000000000000122 /* VNDCurrency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VNDCurrency.swift; sourceTree = "<group>"; };
 		A00000000000000000000123 /* CashBalanceSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashBalanceSummaryTests.swift; sourceTree = "<group>"; };
+		1FB5E07680D2429AAE30E595 /* CashBalancesParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashBalancesParityTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000124 /* CashBalanceSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashBalanceSummary.swift; sourceTree = "<group>"; };
 		E20000000000000000000001 /* AccountLinkedSourceSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountLinkedSourceSummary.swift; sourceTree = "<group>"; };
 		A00000000000000000000125 /* WealthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WealthView.swift; sourceTree = "<group>"; };
@@ -1337,6 +1339,7 @@
 				A00000000000000000000118 /* AccountDraftTests.swift */,
 				A00000000000000000000A03 /* AccountSeedTests.swift */,
 				A00000000000000000000123 /* CashBalanceSummaryTests.swift */,
+				1FB5E07680D2429AAE30E595 /* CashBalancesParityTests.swift */,
 				A00000000000000000000199 /* VNDCurrencyFormatTests.swift */,
 				A00000000000000000000115 /* CashAccountPersistenceTests.swift */,
 				A00000000000000000000185 /* AssetAllocationTests.swift */,
@@ -2410,6 +2413,7 @@
 				A00000000000000000000A04 /* AccountSeedTests.swift in Sources */,
 				A00000000000000000000A0B /* StoreReconcilerTests.swift in Sources */,
 				A00000000000000000000212 /* CashBalanceSummaryTests.swift in Sources */,
+				4751665FEC1147D1A6B4FFC5 /* CashBalancesParityTests.swift in Sources */,
 				A00000000000000000000288 /* VNDCurrencyFormatTests.swift in Sources */,
 				A00000000000000000000206 /* CashAccountPersistenceTests.swift in Sources */,
 				A00000000000000000000229 /* SavingsInterestTests.swift in Sources */,
