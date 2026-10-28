@@ -229,6 +229,20 @@ struct ReportView: View {
     }
 }
 
+/// What Report fetches: from the start of the earlier of the comparison period
+/// and the period itself, to the period's end. No figure on the screen reads a
+/// row outside that span. The comparison's start does not depend on the clock,
+/// only whether there is a comparison does, so the fetch and the highlights
+/// agree even though each reads `.now` on its own.
+enum ReportContentSpan {
+    static func fetchedSpan(for range: TransactionRange, asOf: Date) -> TransactionRange {
+        let previousStart =
+            ReportComparisonPeriods(range: range, asOf: asOf)?.previous.start ?? range.start
+        return TransactionRange(
+            scope: .custom, start: min(previousStart, range.start), end: range.end)
+    }
+}
+
 /// Everything on Report that is computed from the ledger. It takes only the
 /// query, the breakdown direction and the small category and account lists,
 /// none of which change when a sheet is presented or dismissed, so SwiftUI
@@ -237,20 +251,44 @@ private struct ReportContent: View {
     @Environment(\.appDateFormat) private var dateFormat
     @Environment(\.locale) private var locale
 
-    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
-    private var transactions: [MoneyTransaction]
+    /// The period on show plus the one the highlights compare it with, and
+    /// nothing else: no figure on this screen reads a row outside that span.
+    @Query private var transactions: [MoneyTransaction]
 
     @Binding var query: TransactionQuery
     @Binding var breakdownKind: TransactionKind
     let categories: [TransactionCategory]
     let accounts: [CashAccount]
 
+    init(
+        query: Binding<TransactionQuery>,
+        breakdownKind: Binding<TransactionKind>,
+        categories: [TransactionCategory],
+        accounts: [CashAccount]
+    ) {
+        _query = query
+        _breakdownKind = breakdownKind
+        self.categories = categories
+        self.accounts = accounts
+        _transactions = Query(
+            LedgerFetch.transactions(
+                in: ReportContentSpan.fetchedSpan(for: query.wrappedValue.range, asOf: .now)))
+    }
+
     var body: some View {
         content
     }
 
     private var content: some View {
-        let report = reportData
+        // Built once per update; the report and the highlights both read them.
+        let categoryNames = Dictionary(firstWins: categories.map { ($0.id, $0.name) })
+        let accountNames = Dictionary(firstWins: accounts.map { ($0.id, $0.name) })
+        let report = ReportData(
+            query: query,
+            transactions: transactions,
+            categoryNames: categoryNames,
+            accountNames: accountNames
+        )
         let visibility = ReportContentVisibility(query: query)
 
         return ScrollView {
@@ -333,15 +371,6 @@ private struct ReportContent: View {
         }
     }
 
-    private var reportData: ReportData {
-        ReportData(
-            query: query,
-            transactions: transactions,
-            categoryNames: categoryNames,
-            accountNames: accountNames
-        )
-    }
-
     /// The month the calendar draws, which is the month the header is filtered
     /// to: the card is only on screen while that period is one month.
     private var calendarMonth: Date {
@@ -352,14 +381,6 @@ private struct ReportContent: View {
     /// above it can never come to describe different months.
     private func stepMonth(_ steps: Int) {
         query.range = query.range.stepped(by: steps)
-    }
-
-    private var categoryNames: [UUID: String] {
-        Dictionary(firstWins: categories.map { ($0.id, $0.name) })
-    }
-
-    private var accountNames: [UUID: String] {
-        Dictionary(firstWins: accounts.map { ($0.id, $0.name) })
     }
 
     private func categoryBreakdownKindBinding(for report: ReportData) -> Binding<TransactionKind> {

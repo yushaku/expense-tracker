@@ -79,8 +79,11 @@ struct GoalListView: View {
     @Query(sort: \TripWorkspace.startedAt, order: .reverse)
     private var tripWorkspaces: [TripWorkspace]
 
-    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
-    private var transactions: [MoneyTransaction]
+    /// Only rows linked to some trip; the trip cards read nothing else.
+    @Query(
+        filter: #Predicate<MoneyTransaction> { $0.tripWorkspaceID != nil },
+        sort: \MoneyTransaction.occurredAt, order: .reverse)
+    private var tripTransactions: [MoneyTransaction]
 
     @Query(sort: \TransactionCategory.createdAt, order: .forward)
     private var categories: [TransactionCategory]
@@ -135,16 +138,16 @@ struct GoalListView: View {
         }
     }
 
-    private var listSnapshot: GoalListSnapshot {
-        GoalListSnapshot.snapshot(goals: goals, workspaces: tripWorkspaces)
-    }
-
     @ViewBuilder
     private var filteredContent: some View {
+        // Worked out once per update, for whichever filter is showing, rather
+        // than each time a section asks.
+        let snapshot = GoalListSnapshot.snapshot(goals: goals, workspaces: tripWorkspaces)
+        // One pass groups the trip rows by trip; each card then reads its own.
+        let rowsByTrip = Dictionary(grouping: tripTransactions) { $0.tripWorkspaceID }
+
         switch selectedFilter {
         case .active:
-            let snapshot = listSnapshot
-
             GoalCommitmentWarnings(
                 jars: jars,
                 goals: goals,
@@ -159,29 +162,29 @@ struct GoalListView: View {
                 TripWorkspaceSection(
                     title: "Spending",
                     workspaces: snapshot.activeTrips,
-                    transactions: transactions,
+                    rowsByTrip: rowsByTrip,
                     categories: categories
                 )
                 TripWorkspaceSection(
                     title: "Completed",
                     workspaces: snapshot.completedTrips,
-                    transactions: transactions,
+                    rowsByTrip: rowsByTrip,
                     categories: categories
                 )
             }
         case .archived:
-            if listSnapshot.archivedGoals.isEmpty && listSnapshot.archivedTrips.isEmpty {
+            if snapshot.archivedGoals.isEmpty && snapshot.archivedTrips.isEmpty {
                 filteredEmptyState(
                     "No archived items",
                     systemImage: "archivebox",
                     description: "Archived completed goals and trips will appear here."
                 )
             } else {
-                goalCollection(title: "Archived goals", goals: listSnapshot.archivedGoals)
+                goalCollection(title: "Archived goals", goals: snapshot.archivedGoals)
                 TripWorkspaceSection(
                     title: "Archived trips",
-                    workspaces: listSnapshot.archivedTrips,
-                    transactions: transactions,
+                    workspaces: snapshot.archivedTrips,
+                    rowsByTrip: rowsByTrip,
                     categories: categories
                 )
             }
@@ -255,29 +258,9 @@ private struct GoalFilterMenu: View {
 private struct TripWorkspaceSection: View {
     let title: LocalizedStringKey
     let workspaces: [TripWorkspace]
-    let snapshots: [UUID: TripSummarySnapshot]
-
-    init(
-        title: LocalizedStringKey,
-        workspaces: [TripWorkspace],
-        transactions: [MoneyTransaction],
-        categories: [TransactionCategory]
-    ) {
-        self.title = title
-        self.workspaces = workspaces
-        snapshots = Dictionary(
-            firstWins: workspaces.map { workspace in
-                (
-                    workspace.id,
-                    TripSummary.snapshot(
-                        workspace: workspace,
-                        transactions: transactions,
-                        categories: categories
-                    )
-                )
-            }
-        )
-    }
+    /// Trip-linked rows grouped by trip, built once by the list.
+    let rowsByTrip: [UUID?: [MoneyTransaction]]
+    let categories: [TransactionCategory]
 
     var body: some View {
         if !workspaces.isEmpty {
@@ -289,12 +272,11 @@ private struct TripWorkspaceSection: View {
                     NavigationLink(value: GoalTripDestination(workspaceID: workspace.id)) {
                         TripWorkspaceCard(
                             workspace: workspace,
-                            snapshot: snapshots[workspace.id]
-                                ?? TripSummary.snapshot(
-                                    workspace: workspace,
-                                    transactions: [],
-                                    categories: []
-                                )
+                            snapshot: TripSummary.snapshot(
+                                workspace: workspace,
+                                transactions: rowsByTrip[workspace.id] ?? [],
+                                categories: categories
+                            )
                         )
                     }
                     .buttonStyle(.plain)

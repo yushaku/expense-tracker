@@ -50,16 +50,26 @@ enum RecurringGenerator {
             return Report()
         }
 
-        let transactions = try context.fetch(FetchDescriptor<MoneyTransaction>())
+        // What is due is worked out from the rules alone, so a store that is
+        // caught up, the usual case on every launch and foreground, never
+        // reads the ledger. Each rule's dates depend only on that rule.
+        let pending = rules.map { rule in
+            (
+                rule: rule,
+                occurrences: rule.pendingOccurrences(asOf: asOf, limit: maxOccurrencesPerRule)
+            )
+        }
+        let dates = pending.flatMap(\.occurrences)
+        guard let earliest = dates.min(), let latest = dates.max() else {
+            return Report()
+        }
+
+        let transactions = try context.fetch(generatedTransactions(from: earliest, through: latest))
         let jars = try context.fetch(FetchDescriptor<BudgetJar>())
         var written = existingKeys(in: transactions)
         var report = Report()
 
-        for rule in rules {
-            let occurrences = rule.pendingOccurrences(
-                asOf: asOf,
-                limit: maxOccurrencesPerRule
-            )
+        for (rule, occurrences) in pending {
             guard !occurrences.isEmpty else {
                 continue
             }
@@ -139,6 +149,24 @@ enum RecurringGenerator {
                 bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
                 bytes[8], bytes[9], bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15]
             ))
+    }
+
+    /// Generated rows that could share a key with a pending date: a key is a
+    /// rule and a day, so only rows from the first pending day through the
+    /// last can collide.
+    static func generatedTransactions(
+        from earliest: Date,
+        through latest: Date
+    ) -> FetchDescriptor<MoneyTransaction> {
+        let calendar = RecurrenceSchedule.calendar
+        let lower = calendar.startOfDay(for: earliest)
+        let lastDay = calendar.startOfDay(for: latest)
+        let upper = calendar.date(byAdding: .day, value: 1, to: lastDay) ?? .distantFuture
+        return FetchDescriptor(
+            predicate: #Predicate {
+                $0.sourceRuleID != nil && $0.occurredAt >= lower && $0.occurredAt < upper
+            }
+        )
     }
 
     private static func existingKeys(in transactions: [MoneyTransaction]) -> Set<String> {

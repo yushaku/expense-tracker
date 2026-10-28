@@ -35,6 +35,28 @@ enum AccountBalanceAllocation {
         payments: [DebtPayment],
         sales: [FundSale]
     ) -> [AccountBalanceSlice] {
+        slices(
+            accounts: accounts,
+            balances: CashBalanceSummary.balances(
+                of: accounts,
+                deposits: deposits,
+                holdings: holdings,
+                withdrawals: withdrawals,
+                transactions: transactions,
+                transfers: transfers,
+                debts: debts,
+                payments: payments,
+                sales: sales
+            )
+        )
+    }
+
+    /// `slices` from balances already worked out by
+    /// `CashBalanceSummary.balances`.
+    static func slices(
+        accounts: [CashAccount],
+        balances: [UUID: Decimal]
+    ) -> [AccountBalanceSlice] {
         accounts
             .map { account in
                 AccountBalanceSlice(
@@ -42,17 +64,7 @@ enum AccountBalanceAllocation {
                     name: account.name,
                     kind: account.kind,
                     colorName: account.colorName,
-                    amount: CashBalanceSummary.available(
-                        for: account,
-                        deposits: deposits,
-                        holdings: holdings,
-                        withdrawals: withdrawals,
-                        transactions: transactions,
-                        transfers: transfers,
-                        debts: debts,
-                        payments: payments,
-                        sales: sales
-                    )
+                    amount: balances[account.id] ?? .zero
                 )
             }
             .filter { $0.amount > 0 }

@@ -34,6 +34,24 @@ struct NetTrendCard: View {
         )
     }
 
+    /// The chart reports the raw date under the finger on every move; what is
+    /// drawn only changes when that lands on a different point. Storing the
+    /// snapped day, and only when it changes, rebuilds the chart once per point
+    /// crossed during a drag instead of once per touch event.
+    private var selection: Binding<Date?> {
+        Binding(
+            get: { selectedDay },
+            set: { raw in
+                let snapped = raw.flatMap { raw in
+                    TrendChartSelection.nearest(to: raw, in: points, date: { $0.day })?.day
+                }
+                if snapped != selectedDay {
+                    selectedDay = snapped
+                }
+            }
+        )
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             header
@@ -86,20 +104,21 @@ struct NetTrendCard: View {
     }
 
     private var chart: some View {
-        Chart {
+        // One fill for the whole area, built once rather than once per point.
+        let fill = LinearGradient(
+            colors: [tint.opacity(0.28), tint.opacity(0.02)],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+
+        return Chart {
             ForEach(points) { point in
                 AreaMark(
                     x: .value("Day", point.day),
                     y: .value("Net", point.net.chartValue)
                 )
                 .interpolationMethod(.monotone)
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [tint.opacity(0.28), tint.opacity(0.02)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
+                .foregroundStyle(fill)
 
                 LineMark(
                     x: .value("Day", point.day),
@@ -161,7 +180,7 @@ struct NetTrendCard: View {
                 .foregroundStyle(MonMonTheme.textMuted)
             }
         }
-        .chartXSelection(value: $selectedDay)
+        .chartXSelection(value: selection)
         .frame(height: 190)
         .sensoryFeedback(.selection, trigger: selectedPoint?.day)
         .onChange(of: points) {

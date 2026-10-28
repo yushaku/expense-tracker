@@ -183,6 +183,32 @@ struct RecurringGeneratorTests {
         #expect(rule.lastGeneratedAt == occurredAt)
     }
 
+    @Test("A row recorded later on the last pending day still counts as that day")
+    func sameDayLaterHourIsSkipped() throws {
+        let container = try makeContainer()
+        let context = ModelContext(container)
+        let first = try day(2026, 7, 5)
+        let last = try day(2026, 8, 5)
+        let rule = makeRule(anchorDate: first)
+        context.insert(rule)
+        // The key is the rule and the day, so a row on the last pending day at
+        // a later hour must be inside the window the generator fetches.
+        context.insert(
+            MoneyTransaction(
+                id: UUID(), kind: .expense, amount: 8_000_000,
+                occurredAt: last.addingTimeInterval(20 * 60 * 60), note: "Rent",
+                accountID: rule.accountID, categoryID: rule.categoryID,
+                sourceRuleID: rule.id, currencyCode: VNDCurrency.code, createdAt: last
+            )
+        )
+
+        let report = try RecurringGenerator.generate(in: context, asOf: try day(2026, 8, 24))
+
+        #expect(report.transactions == 1)
+        #expect(try transactions(in: context).count == 2)
+        #expect(rule.lastGeneratedAt == last)
+    }
+
     @Test("A hand-typed transaction on the same day never blocks a rule")
     func handTypedTransactionDoesNotBlockGeneration() throws {
         let container = try makeContainer()

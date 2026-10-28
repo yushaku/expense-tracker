@@ -222,21 +222,36 @@ struct GoalDetailView: View {
 
     private let goalID: UUID?
     private let workspaceID: UUID?
-    private let asOf: Date
+    private let fixedAsOf: Date?
+
+    /// Used when no date is handed in. Kept in state and refreshed rather than
+    /// a `.now` default, which froze at creation and changed on every rebuild
+    /// of the parent.
+    @State private var today = Date.now
+
+    private var asOf: Date {
+        fixedAsOf ?? today
+    }
 
     init(goalID: UUID, asOf: Date) {
         self.goalID = goalID
         workspaceID = nil
-        self.asOf = asOf
+        fixedAsOf = asOf
     }
 
-    init(workspace: TripWorkspace, asOf: Date = .now) {
+    init(workspace: TripWorkspace, asOf: Date? = nil) {
         goalID = workspace.sourceGoalID
         workspaceID = workspace.id
-        self.asOf = asOf
+        fixedAsOf = asOf
     }
 
     var body: some View {
+        journeyDetail
+            .refreshesCurrentDate($today)
+    }
+
+    @ViewBuilder
+    private var journeyDetail: some View {
         if let journey = GoalJourney.resolve(
             goalID: goalID, workspaceID: workspaceID,
             goals: goals, workspaces: workspaces
@@ -273,10 +288,17 @@ private struct GoalAccumulationDetailView: View {
     private var tripWorkspaces: [TripWorkspace]
 
     @Query private var recurringRules: [RecurringRule]
+    /// The month capacity reads, which is all this screen reads of the ledger.
     @Query private var transactions: [MoneyTransaction]
 
     let goalID: UUID
     let asOf: Date
+
+    init(goalID: UUID, asOf: Date) {
+        self.goalID = goalID
+        self.asOf = asOf
+        _transactions = Query(LedgerFetch.transactions(in: .month(containing: asOf)))
+    }
 
     @State private var editorMode: GoalEditorMode?
     @State private var isShowingUseOptions = false

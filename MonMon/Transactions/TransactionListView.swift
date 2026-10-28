@@ -754,9 +754,9 @@ private struct SpendingFilterSheet: View {
     }
 }
 
-/// Goals opened from Transactions. Capacity only reads the month `asOf` sits
-/// in, so that month is all the sheet fetches.
-private struct SpendingGoalsSheet: View {
+/// Goals opened from Transactions or Plan. Capacity only reads the month
+/// `asOf` sits in, so that month is all the sheet fetches.
+struct SpendingGoalsSheet: View {
     @Query(sort: \BudgetJar.createdAt, order: .forward)
     private var budgetJars: [BudgetJar]
 

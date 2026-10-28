@@ -54,34 +54,13 @@ struct TransferEditorContent: View {
     @Query(sort: \CashAccount.createdAt, order: .forward)
     private var accounts: [CashAccount]
 
-    @Query(sort: \SavingsDeposit.createdAt, order: .forward)
-    private var deposits: [SavingsDeposit]
-
-    @Query(sort: \SavingsWithdrawal.withdrawnAt, order: .reverse)
-    private var withdrawals: [SavingsWithdrawal]
-
-    @Query(sort: \FundHolding.createdAt, order: .forward)
-    private var holdings: [FundHolding]
-
-    @Query(sort: \FundSale.soldAt, order: .reverse)
-    private var sales: [FundSale]
-
-    @Query(sort: \MoneyTransaction.occurredAt, order: .reverse)
-    private var transactions: [MoneyTransaction]
-
-    @Query(sort: \AccountTransfer.occurredAt, order: .reverse)
-    private var transfers: [AccountTransfer]
-
-    @Query(sort: \Debt.createdAt, order: .forward)
-    private var debts: [Debt]
-
-    @Query(sort: \DebtPayment.occurredAt, order: .reverse)
-    private var payments: [DebtPayment]
-
     let mode: TransferEditorMode
     @Binding var draft: TransferDraft
     var onSave: (() -> Void)? = nil
 
+    /// The source account's spendable balance, worked out when the source
+    /// changes rather than on every keystroke, and again before saving.
+    @State private var availableSourceBalance: Decimal?
     @State private var validationError: TransferFormError?
     @State private var saveErrorMessage: LocalizedStringKey?
     @State private var isConfirmingDelete = false
@@ -106,6 +85,10 @@ struct TransferEditorContent: View {
             onDelete: { isConfirmingDelete = true },
             availableSourceBalance: availableSourceBalance
         )
+        // Synchronous, so the first frame already shows the balance.
+        .onChange(of: draft.sourceAccountID, initial: true) {
+            availableSourceBalance = currentAvailableSourceBalance()
+        }
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") {
@@ -153,22 +136,12 @@ struct TransferEditorContent: View {
     /// below zero, so nothing caps it; every other account is capped at its
     /// spendable balance. When editing, this transfer's own amount is added
     /// back so re-saving an unchanged amount is not reported as an overdraft.
-    private var availableSourceBalance: Decimal? {
+    private func currentAvailableSourceBalance() -> Decimal? {
         guard let sourceAccount, !sourceAccount.kind.allowsNegativeBalance else {
             return nil
         }
 
-        var available = CashBalanceSummary.available(
-            for: sourceAccount,
-            deposits: deposits,
-            holdings: holdings,
-            withdrawals: withdrawals,
-            transactions: transactions,
-            transfers: transfers,
-            debts: debts,
-            payments: payments,
-            sales: sales
-        )
+        var available = CashBalanceFetch.available(for: sourceAccount, in: modelContext)
 
         if let editedTransfer = mode.editedTransfer,
             editedTransfer.sourceAccountID == sourceAccount.id
@@ -183,7 +156,8 @@ struct TransferEditorContent: View {
         validationError = nil
         saveErrorMessage = nil
 
-        let sourceBalance = availableSourceBalance
+        let sourceBalance = currentAvailableSourceBalance()
+        availableSourceBalance = sourceBalance
 
         do {
             if let editedTransfer = mode.editedTransfer {

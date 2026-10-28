@@ -74,6 +74,95 @@ enum CashBalanceSummary {
             - fundedAmount(for: account, deposits: deposits, holdings: holdings)
     }
 
+    /// `available(for:...)` for every account at once, keyed by account id.
+    ///
+    /// Each record is read once and credited to the account it names, instead
+    /// of each account rescanning the whole ledger. A screen with N account
+    /// cards used to cost N full passes over every transaction per update; this
+    /// costs one. The terms are added in the same order as `available` adds
+    /// them, so each figure is the same `Decimal`, which the tests pin.
+    /// Records naming an account not in `accounts` are ignored, as they are
+    /// there.
+    static func balances(
+        of accounts: [CashAccount],
+        deposits: [SavingsDeposit],
+        holdings: [FundHolding],
+        withdrawals: [SavingsWithdrawal],
+        transactions: [MoneyTransaction],
+        transfers: [AccountTransfer],
+        debts: [Debt],
+        payments: [DebtPayment],
+        sales: [FundSale]
+    ) -> [UUID: Decimal] {
+        var transactionFlow: [UUID: Decimal] = [:]
+        for transaction in transactions {
+            transactionFlow[transaction.accountID, default: .zero] += transaction.signedAmount
+        }
+
+        var transferFlow: [UUID: Decimal] = [:]
+        for transfer in transfers {
+            // Matches `AccountTransfer.signedAmount(for:)`: when both ends name
+            // the same account the source side wins.
+            transferFlow[transfer.sourceAccountID, default: .zero] -= transfer.amount
+            if transfer.destinationAccountID != transfer.sourceAccountID {
+                transferFlow[transfer.destinationAccountID, default: .zero] += transfer.amount
+            }
+        }
+
+        var debtFlow: [UUID: Decimal] = [:]
+        var directions: [UUID: DebtDirection] = [:]
+        for debt in debts {
+            directions[debt.id] = debt.direction
+            if let accountID = debt.accountID {
+                debtFlow[accountID, default: .zero] += debt.signedPrincipal
+            }
+        }
+        for payment in payments {
+            guard let debtID = payment.debtID, let direction = directions[debtID] else {
+                continue
+            }
+            debtFlow[payment.accountID, default: .zero] += payment.signedAmount(for: direction)
+        }
+
+        var saleFlow: [UUID: Decimal] = [:]
+        for sale in sales where !sale.isSwap {
+            saleFlow[sale.proceedsAccountID, default: .zero] += sale.proceeds
+        }
+
+        var withdrawalFlow: [UUID: Decimal] = [:]
+        for withdrawal in withdrawals {
+            withdrawalFlow[withdrawal.destinationAccountID, default: .zero] +=
+                withdrawal.amountReceived
+        }
+
+        var funded: [UUID: Decimal] = [:]
+        for deposit in deposits {
+            if let accountID = deposit.sourceAccountID {
+                funded[accountID, default: .zero] += deposit.principal
+            }
+        }
+        for holding in holdings {
+            if let accountID = holding.sourceAccountID {
+                funded[accountID, default: .zero] += holding.costBasis
+            }
+        }
+
+        var result: [UUID: Decimal] = [:]
+        result.reserveCapacity(accounts.count)
+        for account in accounts {
+            let id = account.id
+            result[id] =
+                account.openingBalance
+                + (transactionFlow[id] ?? .zero)
+                + (transferFlow[id] ?? .zero)
+                + (debtFlow[id] ?? .zero)
+                + (saleFlow[id] ?? .zero)
+                + (withdrawalFlow[id] ?? .zero)
+                - (funded[id] ?? .zero)
+        }
+        return result
+    }
+
     /// Transfers cancel out here: one account's outflow is another's inflow, so
     /// moving money between two of the owner's accounts leaves this total alone.
     ///
