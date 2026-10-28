@@ -6,8 +6,8 @@ enum SalaryBasis: String, CaseIterable, Identifiable {
     var id: Self { self }
 }
 
-/// One personal profile shared by the owner's devices. The stable identity
-/// makes independently edited profiles a sync conflict, not two separate users.
+/// One personal profile per store. The stable identity makes a restored backup
+/// replace the profile instead of adding a second user.
 @Model
 final class SalaryProfile {
     static let personalID = UUID(uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 1))

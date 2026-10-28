@@ -12985,16 +12985,6 @@
         }
       }
     },
-    "Sync now": {
-      "localizations": {
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Đồng bộ ngay"
-          }
-        }
-      }
-    },
     "Sync to iCloud": {
       "localizations": {
         "vi": {

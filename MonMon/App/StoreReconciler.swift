@@ -247,8 +247,8 @@ enum StoreReconciler {
         return folded
     }
 
-    /// A goal can become one spending workspace only. If two devices start the
-    /// same funded goal before syncing, the oldest workspace survives and all
+    /// A goal can become one spending workspace only. If a store ever holds two
+    /// workspaces for the same funded goal, the oldest survives and all
     /// linked expenses follow it. Workspaces without a source goal are matched
     /// only by their own UUID so independent legacy records remain independent.
     private static func foldTripWorkspaces(in context: ModelContext) throws -> Int {

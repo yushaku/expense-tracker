@@ -2,7 +2,7 @@ import SwiftUI
 
 /// The app's own filled button, used for the one clear action a card or screen
 /// is asking for — the add button under an empty list, the unlock button, the
-/// sync button in Settings.
+/// backup button in Settings.
 ///
 /// `.borderedProminent` paints its label in the system's own on-tint colour,
 /// which on this theme's green track came out too close to the fill to read.
@@ -58,7 +58,7 @@ extension View {
             Button("Add Savings Book", systemImage: "plus", action: {})
                 .buttonStyle(.prominentAction)
 
-            Button("Sync now", systemImage: "arrow.triangle.2.circlepath", action: {})
+            Button("Back Up and Reset", systemImage: "trash", action: {})
                 .buttonStyle(.prominentAction)
                 .disabled(true)
         }
