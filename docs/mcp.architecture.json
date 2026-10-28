@@ -1,0 +1,296 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "MonMon MCP: đọc trực tiếp kho SwiftData trên Mac",
+    "output": "mcp.html",
+    "repository": {
+      "url": "https://github.com/yushaku/expense-tracker",
+      "revision": "ffe7de6d37d6f0f90ef31b98947eae8cf4e755dc"
+    },
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "doc-du-lieu",
+        "label": "AI đọc dữ liệu",
+        "focus": [
+          "clients",
+          "helper",
+          "gate",
+          "store"
+        ],
+        "note": "Mỗi lần gọi tool, helper kiểm tra quyền và descriptor rồi mở kho của app ở chế độ chỉ đọc."
+      },
+      {
+        "id": "so-nghien-cuu",
+        "label": "Sổ nghiên cứu",
+        "focus": [
+          "clients",
+          "helper",
+          "notebook",
+          "app"
+        ],
+        "note": "AI chỉ tạo note và đề xuất; người dùng ghi quyết định trong app. Sổ nằm riêng trên Mac này."
+      },
+      {
+        "id": "cap-quyen",
+        "label": "Cấp quyền",
+        "focus": [
+          "app",
+          "gate",
+          "store"
+        ],
+        "note": "Bật Allow AI access thì app đăng ký descriptor của kho; tắt thì xoá cờ quyền và descriptor."
+      }
+    ],
+    "viewBox": [
+      1290,
+      600
+    ]
+  },
+  "components": [
+    {
+      "id": "clients",
+      "type": "external",
+      "label": "AI clients",
+      "sublabel": "Codex · Claude · Hermes",
+      "pos": [
+        50,
+        268
+      ],
+      "size": [
+        210,
+        80
+      ],
+      "sources": [
+        {
+          "path": "MonMon/MCP/MCPClientInstaller.swift",
+          "label": "MCPClientInstaller"
+        }
+      ]
+    },
+    {
+      "id": "helper",
+      "type": "backend",
+      "label": "MonMonMCPServer",
+      "sublabel": "Helper stdio · 22 tools",
+      "tag": "--mcp-stdio",
+      "pos": [
+        340,
+        260
+      ],
+      "size": [
+        220,
+        96
+      ],
+      "sources": [
+        {
+          "path": "MonMonMCPServer/MonMonMCPServerMain.swift",
+          "label": "MonMonMCPServerMain"
+        },
+        {
+          "path": "MonMonMCPServer/MCPServerAdapter.swift",
+          "label": "MCPServerAdapter"
+        }
+      ]
+    },
+    {
+      "id": "gate",
+      "type": "security",
+      "label": "Consent + descriptor",
+      "sublabel": "App Group · mặc định từ chối",
+      "pos": [
+        680,
+        80
+      ],
+      "size": [
+        220,
+        84
+      ],
+      "sources": [
+        {
+          "path": "MonMon/MCP/MCPRuntime.swift",
+          "label": "MCPConsentStore"
+        }
+      ]
+    },
+    {
+      "id": "store",
+      "type": "database",
+      "label": "Kho SwiftData",
+      "sublabel": "Kho của app · 18 models",
+      "pos": [
+        680,
+        260
+      ],
+      "size": [
+        220,
+        96
+      ],
+      "sources": [
+        {
+          "path": "MonMon/App/MonMonSchema.swift",
+          "label": "MonMonSchema.models"
+        },
+        {
+          "path": "MonMon/MCP/MCPRuntime.swift",
+          "label": "MCPDirectStoreReader"
+        }
+      ]
+    },
+    {
+      "id": "app",
+      "type": "frontend",
+      "label": "MonMon macOS",
+      "sublabel": "Settings · Allow AI access",
+      "pos": [
+        1010,
+        260
+      ],
+      "size": [
+        220,
+        96
+      ],
+      "sources": [
+        {
+          "path": "MonMon/MCP/MCPAccessManager.swift",
+          "label": "MCPAccessManager"
+        },
+        {
+          "path": "MonMon/MCP/MCPSettingsCard.swift",
+          "label": "MCPSettingsCard"
+        },
+        {
+          "path": "MonMon/MCP/ResearchNotebookView.swift",
+          "label": "ResearchNotebookView"
+        }
+      ]
+    },
+    {
+      "id": "notebook",
+      "type": "database",
+      "label": "Sổ nghiên cứu",
+      "sublabel": "notebook.json · khoá file",
+      "pos": [
+        680,
+        460
+      ],
+      "size": [
+        220,
+        84
+      ],
+      "sources": [
+        {
+          "path": "MonMon/MCP/ResearchNotebook.swift",
+          "label": "ResearchNotebookStore"
+        },
+        {
+          "path": "MonMon/MCP/MCPResearchService.swift",
+          "label": "MCPResearchService"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Chỉ trên Mac · không đồng bộ sang iPhone",
+      "wraps": [
+        "helper",
+        "gate",
+        "store",
+        "app",
+        "notebook"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "clients-to-helper",
+      "from": "clients",
+      "to": "helper",
+      "label": "stdio · JSON",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "helper-to-store",
+      "from": "helper",
+      "to": "store",
+      "label": "allowsSave: false",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "app-to-store",
+      "from": "app",
+      "to": "store",
+      "label": "StoreWrite.save",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "helper-to-gate",
+      "from": "helper",
+      "to": "gate",
+      "label": "kiểm tra mỗi lần gọi",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "app-to-gate",
+      "from": "app",
+      "to": "gate",
+      "label": "allow / revoke",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "right"
+    },
+    {
+      "id": "helper-to-notebook",
+      "from": "helper",
+      "to": "notebook",
+      "label": "tạo note / đề xuất",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "left"
+    },
+    {
+      "id": "app-to-notebook",
+      "from": "app",
+      "to": "notebook",
+      "label": "ghi quyết định",
+      "fromSide": "bottom",
+      "toSide": "right"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Đọc trực tiếp",
+      "items": [
+        "Helper mở thẳng kho SwiftData của app ở chế độ chỉ đọc",
+        "App đóng vẫn đọc được; schema hoặc hash model lệch thì trả STORE_UNAVAILABLE"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Quyền",
+      "items": [
+        "Mặc định từ chối; quyền đọc và quyền ghi sổ nghiên cứu là hai công tắc riêng",
+        "Revoke xoá cả hai cờ và descriptor của kho"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "MCP contract",
+      "items": [
+        "22 tools: 16 tool tài chính chỉ đọc, 6 tool sổ nghiên cứu",
+        "AI chỉ tạo note và đề xuất, người dùng ghi quyết định; sổ nằm riêng trên từng máy"
+      ]
+    }
+  ]
+}

@@ -2,16 +2,18 @@
 
 MonMon is a private personal-finance app for iPhone and Mac, built with SwiftUI and SwiftData and themed with Catppuccin — Latte in light, Frappé in dark. It is single-owner and offline by default: every balance is derived from what was recorded, never from a hand-edited number, and the only network calls it ever makes are market-price lookups the owner asks for.
 
-| Page                                                                                             | What it covers                                                                         |
-| ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| `[docs/smart-note.html](docs/smart-note.html)`                                                   | Owner's guide — recording transactions, voice capture, statement import, reports       |
-| `[docs/budget-and-goals.html](docs/budget-and-goals.html)`                                       | How jars split income, how goals earmark money inside them, what the app refuses to do |
-| `[docs/accounts.html](docs/accounts.html)`                                                       | Accounts — derived balances, asset allocation, net worth, twelve-month history         |
-| `[docs/savings.html](docs/savings.html)`                                                         | Term deposits — simple interest, the three states, withdrawals as records              |
-| `[docs/funds.html](docs/funds.html)`                                                             | Funds, ETFs and gold — immutable lots, sales, market pricing, catalogue import         |
-| `[docs/architecture.html](docs/architecture.html)`                                               | The sixteen SwiftData models, their foreign keys, system boundaries, import flow       |
-| `[docs/mcp.md](docs/mcp.md)`                                                                     | Read-only AI access, tool contract, privacy boundary, and client setup                 |
-| `[docs/bank-transaction-auto-note-research.html](docs/bank-transaction-auto-note-research.html)` | Research behind automatic transaction notes                                            |
+| Page                                                                                           | What it covers                                                                            |
+| ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| [docs/smart-note.html](docs/smart-note.html)                                                   | Owner's guide: recording transactions, voice capture, statement import, reports           |
+| [docs/budget-and-goals.html](docs/budget-and-goals.html)                                       | How jars split income, how goals earmark money inside them, what the app refuses to do    |
+| [docs/accounts.html](docs/accounts.html)                                                       | Accounts: derived balances, asset allocation, net worth, twelve-month history             |
+| [docs/savings.html](docs/savings.html)                                                         | Term deposits: simple interest, the three states, withdrawals as records                  |
+| [docs/funds.html](docs/funds.html)                                                             | Funds, ETFs and gold: immutable lots, sales, market pricing, catalogue import             |
+| [docs/architecture.html](docs/architecture.html)                                               | The eighteen SwiftData models, their foreign keys, system boundaries, backup, import flow |
+| [docs/system-design.html](docs/system-design.html)                                             | System design diagram: app, widget, Shortcuts and App Intents, one store per device       |
+| [docs/mcp.html](docs/mcp.html)                                                                 | Read-only AI access on the Mac, tool contract, privacy boundary, and client setup         |
+| [docs/bank-transaction-auto-note-research.html](docs/bank-transaction-auto-note-research.html) | Research behind automatic transaction notes                                               |
+| [docs/PERF.md](docs/PERF.md)                                                                   | Performance ledger: what was changed against jank, and what was left                      |
 
 ## Features
 
@@ -215,8 +217,6 @@ physical iPhone. A card tap is not proof of settlement, and this does not read W
 history or automatically create the user's automation. No shared Shortcut download
 is shown without a real tested iCloud link.
 
-See [the Apple Pay capture spec](docs/apple-pay-capture-spec.md).
-
 **Bank notifications (iOS 27 Shortcuts)** — open Settings → Quick Capture Shortcut
 and scroll to Bank notifications. Tap **Install shortcut** to open the
 [production template](https://www.icloud.com/shortcuts/31c50fdb6a794b2a999a97dff6f7a1e8)
@@ -252,8 +252,6 @@ It does not reconcile notifications with PDF imports or manually entered records
 Deleting a capture allows that event to be captured again. MonMon cannot read
 other apps' notifications directly. The available Shortcuts payload and delivery
 while locked still need acceptance testing on the physical iPhone.
-
-See [the notification capture spec](docs/bank-notification-capture-spec.md).
 
 Add Transaction has Expense, Income, and Quick Add tabs. In **Quick Add**, type a
 sentence such as `50k lunch cash yesterday`, then choose **Fill transaction details**.

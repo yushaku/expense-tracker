@@ -8,43 +8,26 @@
   <title>MonMon — Quản lý quỹ, ETF và vàng</title>
   <style>
     :root {
-      --w-cash: #1e66f5;
-      --w-savings: #df8e1d;
-      --w-funds: #8839ef;
-      --w-gold: #d97706;
-      --w-lent: #179299;
-      --w-borrowed: #b04458;
-      --w-overdraft: #9a6a12;
-      --w-gain: #2f7a52;
-      --w-loss: #b04458;
+      /* Wealth hues follow MonMonTheme: bank blue, savings yellow, funds mauve,
+         gold peach, lent sky, borrowed peach (credit), gain teal, loss red. */
+      --w-cash: var(--ctp-blue);
+      --w-savings: var(--ctp-yellow);
+      --w-funds: var(--ctp-mauve);
+      --w-gold: var(--ctp-peach);
+      --w-lent: var(--ctp-sky);
+      --w-borrowed: var(--ctp-peach);
+      --w-overdraft: var(--ctp-maroon);
+      --w-gain: var(--ctp-teal);
+      --w-loss: var(--ctp-red);
       --w-track: var(--docs-surface-3);
     }
 
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) {
-        --w-cash: #8caaee;
-        --w-savings: #e5c890;
-        --w-funds: #ca9ee6;
-        --w-gold: #ef9f76;
-        --w-lent: #81c8be;
-        --w-borrowed: #e17c8f;
-        --w-overdraft: #d5a544;
-        --w-gain: #5fbd85;
-        --w-loss: #e17c8f;
-      }
-    }
-
-    :root[data-theme="dark"] {
-      --w-cash: #8caaee;
-      --w-savings: #e5c890;
-      --w-funds: #ca9ee6;
-      --w-gold: #ef9f76;
-      --w-lent: #81c8be;
-      --w-borrowed: #e17c8f;
-      --w-overdraft: #d5a544;
-      --w-gain: #5fbd85;
-      --w-loss: #e17c8f;
-    }
+    /* Labelled bars: opaque, darker on Latte and lighter on Frappé, so the
+       label inside keeps AA contrast. */
+    .s-labelled { opacity: 1; }
+    .s-labelled.s-funds { fill: color-mix(in srgb, var(--w-funds) 80%, var(--docs-ink-partner)); }
+    .s-labelled.s-gain { fill: color-mix(in srgb, var(--w-gain) 65%, var(--docs-ink-partner)); }
+    .s-labelled.s-savings { fill: color-mix(in srgb, var(--w-savings) 60%, var(--docs-ink-partner)); }
 
     .page {
       width: min(1120px, calc(100% - var(--docs-page-gutter) - var(--docs-page-gutter)));
@@ -275,9 +258,9 @@
             <text class="s-t3" x="20" y="62">đơn vị</text>
             <rect class="s-track" x="140" y="46" width="740" height="34" rx="6"/>
             <rect class="s-track" x="140" y="46" width="296" height="34" rx="6" opacity=".55"/>
-            <rect class="s-funds" x="436" y="46" width="444" height="34" rx="6" opacity=".85"/>
+            <rect class="s-funds s-labelled" x="436" y="46" width="444" height="34" rx="6"/>
             <text class="s-t2" x="288" y="68" text-anchor="middle" fill="var(--docs-text-2)">đã bán 400</text>
-            <text x="658" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">còn giữ 600</text>
+            <text x="658" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="var(--docs-on-accent)">còn giữ 600</text>
             <path class="s-dash" d="M436 40 L436 320"/>
 
             <text class="s-t3" x="20" y="122">costBasis</text>
@@ -293,15 +276,15 @@
 
             <text class="s-t3" x="20" y="230">marketValue</text>
             <text class="s-t3" x="20" y="244">@ 34.200 ₫</text>
-            <rect class="s-funds" x="436" y="214" width="444" height="30" rx="6" opacity=".55"/>
-            <text x="658" y="234" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">20.520.000 ₫</text>
+            <rect class="s-funds s-labelled" x="436" y="214" width="444" height="30" rx="6"/>
+            <text x="658" y="234" text-anchor="middle" font-size="12" font-weight="700" fill="var(--docs-on-accent)">20.520.000 ₫</text>
 
             <text class="s-t3" x="20" y="288">lãi</text>
-            <rect class="s-gain" x="436" y="272" width="120" height="30" rx="6" opacity=".85"/>
-            <text x="496" y="292" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">+2.520.000</text>
+            <rect class="s-gain s-labelled" x="436" y="272" width="120" height="30" rx="6"/>
+            <text x="496" y="292" text-anchor="middle" font-size="12" font-weight="700" fill="var(--docs-on-accent)">+2.520.000</text>
             <text class="s-t3" x="566" y="292">chưa thực hiện — còn đổi theo giá</text>
-            <rect class="s-gain" x="200" y="272" width="120" height="30" rx="6" opacity=".85"/>
-            <text x="260" y="292" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">+1.200.000</text>
+            <rect class="s-gain s-labelled" x="200" y="272" width="120" height="30" rx="6"/>
+            <text x="260" y="292" text-anchor="middle" font-size="12" font-weight="700" fill="var(--docs-on-accent)">+1.200.000</text>
             <text class="s-t3" x="140" y="320">đã thực hiện — bán 400 @ 33.000 ₫, không giá nào về sau làm nó đổi</text>
           </svg>
         </div>
@@ -396,9 +379,9 @@
             <text class="s-t3" x="430" y="188">giá trị thị trường</text>
             <text class="s-t" x="700" y="188" text-anchor="end">34.200.000 ₫</text>
 
-            <rect class="s-gain" x="730" y="96" width="130" height="72" rx="10" opacity=".85"/>
-            <text x="795" y="128" text-anchor="middle" font-size="17" font-weight="750" fill="#fff">+14,0%</text>
-            <text x="795" y="150" text-anchor="middle" font-size="12" fill="#fff">+4.200.000 ₫</text>
+            <rect class="s-gain s-labelled" x="730" y="96" width="130" height="72" rx="10"/>
+            <text x="795" y="128" text-anchor="middle" font-size="17" font-weight="750" fill="var(--docs-on-accent)">+14,0%</text>
+            <text x="795" y="150" text-anchor="middle" font-size="12" fill="var(--docs-on-accent)">+4.200.000 ₫</text>
             <text class="s-t3" x="795" y="192" text-anchor="middle">chưa thực hiện</text>
           </svg>
         </div>
@@ -558,7 +541,7 @@
             <text class="s-t3" x="392" y="384" text-anchor="middle">một mã lỗi không chặn các mã còn lại</text>
           </svg>
         </div>
-        <figcaption>Khi thất bại, hệ thống <b>không ghi gì</b>: giá cũ, ngày của giá, nguồn và thời điểm lấy đều giữ nguyên. Một con số cũ nhưng hiển thị được vẫn tốt hơn một ô trống. Nếu <code>context.save()</code> lỗi, toàn bộ thay đổi được rollback và mọi kết quả đã cập nhật bị hạ xuống thành lỗi, để không con số nào trên màn hình thể hiện là đã lưu trong khi chưa lưu.</figcaption>
+        <figcaption>Khi thất bại, hệ thống <b>không ghi gì</b>: giá cũ, ngày của giá, nguồn và thời điểm lấy đều giữ nguyên. Một con số cũ nhưng hiển thị được vẫn tốt hơn một ô trống. Nếu <code>StoreWrite.save</code> lỗi, toàn bộ thay đổi được rollback và mọi kết quả đã cập nhật bị hạ xuống thành lỗi, để không con số nào trên màn hình thể hiện là đã lưu trong khi chưa lưu.</figcaption>
       </figure>
 
       <div class="callout warn">
