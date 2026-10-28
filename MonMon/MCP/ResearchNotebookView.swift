@@ -23,7 +23,7 @@ struct ResearchNotebookView: View {
                     )
                     .font(.subheadline).foregroundStyle(MonMonTheme.textSecondary)
                     Text(
-                        "Sync research and decisions with your paired device using Device Sync. Financial backups do not include research; export a copy to keep it."
+                        "Research and decisions stay on this device. Financial backups do not include research; export a copy to keep it."
                     )
                     .font(.caption).foregroundStyle(MonMonTheme.textSecondary)
                     #if os(macOS)
@@ -35,7 +35,7 @@ struct ResearchNotebookView: View {
                         }
                     #else
                         Text(
-                            "Create research with your agent on Mac, then use Device Sync to bring it here."
+                            "Your agent creates research on Mac, and it stays there. Research already on this iPhone stays here."
                         )
                         .font(.caption).foregroundStyle(MonMonTheme.textSecondary)
                     #endif

@@ -563,18 +563,6 @@ struct MonMonBackupServiceTests {
         #expect(try resetService.preview(Data(contentsOf: url)).payload == before)
     }
 
-    @Test("Reset is blocked during sync before creating a backup")
-    func resetRejectsLockedStore() throws {
-        let container = try makeContainer()
-        let url = temporaryRecoveryURL()
-        SyncWriteGate.lock(container)
-        defer { SyncWriteGate.unlock(container) }
-        #expect(throws: SyncError.sessionPending) {
-            try service(container: container, defaults: makeDefaults()).reset(backupURL: url)
-        }
-        #expect(!FileManager.default.fileExists(atPath: url.path))
-    }
-
     private func makeContainer() throws -> ModelContainer {
         try ModelContainer(
             for: Schema(MonMonSchema.models),

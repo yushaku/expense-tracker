@@ -86,7 +86,7 @@ enum BudgetJarSeed {
         else { return }
         do { try SeedState.mark("budgetJars", in: context) } catch { return }
         guard existing == 0 else {
-            if saveChanges { do { try SyncWriteGate.save(context) } catch { context.rollback() } }
+            if saveChanges { do { try StoreWrite.save(context) } catch { context.rollback() } }
             return
         }
 
@@ -112,7 +112,7 @@ enum BudgetJarSeed {
         }
 
         if saveChanges {
-            do { try SyncWriteGate.save(context) } catch { context.rollback() }
+            do { try StoreWrite.save(context) } catch { context.rollback() }
         }
     }
 }

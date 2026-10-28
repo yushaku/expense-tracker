@@ -6,8 +6,8 @@ enum SalaryBasis: String, CaseIterable, Identifiable {
     var id: Self { self }
 }
 
-/// One personal profile shared by the owner's devices. The stable identity
-/// makes independently edited profiles a sync conflict, not two separate users.
+/// One personal profile per store. The stable identity makes a restored backup
+/// replace the profile instead of adding a second user.
 @Model
 final class SalaryProfile {
     static let personalID = UUID(uuid: (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 1))
@@ -108,7 +108,7 @@ enum SalaryProfileStore {
             try draft.apply(to: profile)
             if profile.modelContext == nil { context.insert(profile) }
             context.processPendingChanges()
-            try SyncWriteGate.save(context)
+            try StoreWrite.save(context)
             return profile
         } catch {
             context.rollback()
@@ -134,7 +134,7 @@ enum SalaryProfileStore {
     /// SwiftData rollback can leave a formerly nil UUID cached on that instance.
     static func saveLinkedRule(
         _ rule: RecurringRule, in context: ModelContext,
-        save: (ModelContext) throws -> Void = { try SyncWriteGate.save($0) }
+        save: (ModelContext) throws -> Void = { try StoreWrite.save($0) }
     ) throws {
         guard isCompatible(rule) else {
             context.rollback()

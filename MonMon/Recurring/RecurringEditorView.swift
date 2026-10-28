@@ -216,7 +216,7 @@ struct RecurringEditorView: View {
             if linkSalaryProfile {
                 try SalaryProfileStore.saveLinkedRule(rule, in: modelContext)
             } else {
-                try SyncWriteGate.save(modelContext)
+                try StoreWrite.save(modelContext)
             }
             // If generation fails after this commit, retry this same rule;
             // creating another would duplicate salary and change the link.
@@ -248,7 +248,7 @@ struct RecurringEditorView: View {
         modelContext.delete(editedRule)
 
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
             reconcileNotifications()
             dismiss()
         } catch {

@@ -290,7 +290,7 @@ private struct BudgetCategoryMappingRow: View {
         saveFailed = false
 
         do {
-            try SyncWriteGate.save(modelContext)
+            try StoreWrite.save(modelContext)
         } catch {
             modelContext.rollback()
             saveFailed = true
