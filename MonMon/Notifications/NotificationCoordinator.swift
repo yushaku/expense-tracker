@@ -60,11 +60,8 @@ final class NotificationCoordinator {
     ) async {
         failure = nil
         let status = await refreshAuthorization()
-        let pendingIdentifiers = await client.pendingRequestIdentifiers()
-        let ownedIdentifiers = pendingIdentifiers.filter(NotificationIdentifier.isOwned)
-
-        if !ownedIdentifiers.isEmpty {
-            client.removePendingRequests(withIdentifiers: ownedIdentifiers)
+        let pending = await client.pendingRequests().filter {
+            NotificationIdentifier.isOwned($0.identifier)
         }
 
         let isAuthorized = status == .authorized
@@ -82,7 +79,25 @@ final class NotificationCoordinator {
                 locale: locale
             )
 
-        for plan in plans {
+        // Only what changed is touched: an owned request whose fingerprint
+        // matches a plan is already right, so it stays; anything else owned
+        // goes, and only plans with no matching request are added. Removing
+        // and re-adding every request on each launch and foreground did the
+        // same work for nothing.
+        let wanted = Set(plans.map(\.fingerprint))
+        let kept = Set(pending.compactMap(\.fingerprint).filter(wanted.contains))
+        let stale = pending.filter { request in
+            guard let fingerprint = request.fingerprint else {
+                return true
+            }
+            return !kept.contains(fingerprint)
+        }
+
+        if !stale.isEmpty {
+            client.removePendingRequests(withIdentifiers: stale.map(\.identifier))
+        }
+
+        for plan in plans where !kept.contains(plan.fingerprint) {
             do {
                 try await client.add(plan)
             } catch {

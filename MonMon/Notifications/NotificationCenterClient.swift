@@ -11,7 +11,9 @@ enum NotificationAuthorizationStatus: Equatable, Sendable {
 protocol NotificationCenterClient: AnyObject {
     func currentAuthorizationStatus() async -> NotificationAuthorizationStatus
     func requestAuthorization() async throws -> Bool
-    func pendingRequestIdentifiers() async -> [String]
+    /// Every pending request, with the fingerprint MonMon stamped on it when
+    /// it was added (nil for requests MonMon did not stamp).
+    func pendingRequests() async -> [PendingNotificationRequest]
     func add(_ plan: NotificationRequestPlan) async throws
     func removePendingRequests(withIdentifiers identifiers: [String])
 }
@@ -44,8 +46,14 @@ final class SystemNotificationCenterClient: NotificationCenterClient {
         try await center.requestAuthorization(options: [.alert, .sound])
     }
 
-    func pendingRequestIdentifiers() async -> [String] {
-        await center.pendingNotificationRequests().map(\.identifier)
+    func pendingRequests() async -> [PendingNotificationRequest] {
+        await center.pendingNotificationRequests().map { request in
+            PendingNotificationRequest(
+                identifier: request.identifier,
+                fingerprint: request.content.userInfo[NotificationRequestPlan.fingerprintKey]
+                    as? String
+            )
+        }
     }
 
     func add(_ plan: NotificationRequestPlan) async throws {
@@ -53,6 +61,7 @@ final class SystemNotificationCenterClient: NotificationCenterClient {
         content.title = plan.content.title
         content.body = plan.content.body
         content.sound = .default
+        content.userInfo = [NotificationRequestPlan.fingerprintKey: plan.fingerprint]
 
         // Source: https://developer.apple.com/documentation/usernotifications/scheduling-a-notification-locally-from-your-app
         let trigger: UNNotificationTrigger

@@ -15,6 +15,7 @@ struct NotificationCoordinatorTests {
         var authorizationResult = true
         var authorizationError: Error?
         var pendingIdentifiers: [String] = []
+        var pendingFingerprints: [String: String] = [:]
         var addedPlans: [NotificationRequestPlan] = []
         var removedIdentifiers: [[String]] = []
         var addError: Error?
@@ -33,8 +34,10 @@ struct NotificationCoordinatorTests {
             return authorizationResult
         }
 
-        func pendingRequestIdentifiers() async -> [String] {
-            pendingIdentifiers
+        func pendingRequests() async -> [PendingNotificationRequest] {
+            pendingIdentifiers.map {
+                PendingNotificationRequest(identifier: $0, fingerprint: pendingFingerprints[$0])
+            }
         }
 
         func add(_ plan: NotificationRequestPlan) async throws {
@@ -157,6 +160,41 @@ struct NotificationCoordinatorTests {
             client.addedPlans.contains {
                 $0.identifier.hasPrefix(NotificationIdentifier.recurringPrefix)
             })
+    }
+
+    @Test("Requests that already match their plans are left alone; changed ones are replaced")
+    func unchangedRequestsAreKept() async throws {
+        let client = FakeNotificationCenterClient()
+        client.authorizationStatus = .authorized
+        let coordinator = NotificationCoordinator(client: client)
+        let now = try date(2026, 8, 30, 8)
+        let english = Locale(identifier: "en")
+
+        await coordinator.reconcile(
+            preferences: preferences(daily: true, recurring: false),
+            recurringRules: [], now: now, locale: english)
+        let scheduled = client.addedPlans
+        #expect(scheduled.count == 1)
+
+        // The system now holds what was added, stamped with its fingerprint.
+        client.pendingIdentifiers = scheduled.map(\.identifier) + ["another-feature.request"]
+        client.pendingFingerprints = Dictionary(
+            uniqueKeysWithValues: scheduled.map { ($0.identifier, $0.fingerprint) })
+        client.addedPlans = []
+        client.removedIdentifiers = []
+
+        await coordinator.reconcile(
+            preferences: preferences(daily: true, recurring: false),
+            recurringRules: [], now: now, locale: english)
+        #expect(client.addedPlans.isEmpty)
+        #expect(client.removedIdentifiers.isEmpty)
+
+        // A different language changes the text, so the request is replaced.
+        await coordinator.reconcile(
+            preferences: preferences(daily: true, recurring: false),
+            recurringRules: [], now: now, locale: Locale(identifier: "vi"))
+        #expect(client.removedIdentifiers == [[NotificationIdentifier.dailyExpense]])
+        #expect(client.addedPlans.map(\.identifier) == [NotificationIdentifier.dailyExpense])
     }
 
     @Test("Revoked authorization removes owned requests and adds nothing")

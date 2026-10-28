@@ -23,6 +23,30 @@ struct NotificationRequestPlan: Equatable, Sendable {
     let identifier: String
     let content: NotificationContentPlan
     let schedule: NotificationSchedule
+
+    /// Where `fingerprint` is kept on the scheduled request's `userInfo`.
+    static let fingerprintKey = "monmon.notification.fingerprint"
+
+    /// Everything that decides what the request shows and when, as one value
+    /// stored with the request. Reconciliation compares it with the pending
+    /// request's to leave an unchanged request alone instead of removing and
+    /// re-adding it on every launch and return to the foreground.
+    var fingerprint: String {
+        let when: String
+        switch schedule {
+        case .daily(let time):
+            when = "daily:\(time.minuteOfDay)"
+        case .once(let date):
+            when = "once:\(date.timeIntervalSinceReferenceDate)"
+        }
+        return [identifier, content.title, content.body, when].joined(separator: "\n")
+    }
+}
+
+/// A request already scheduled with the system, as reconciliation sees it.
+struct PendingNotificationRequest: Equatable, Sendable {
+    let identifier: String
+    let fingerprint: String?
 }
 
 struct RecurringReminderRule: Equatable, Sendable {
