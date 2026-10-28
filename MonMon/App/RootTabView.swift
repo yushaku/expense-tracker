@@ -168,36 +168,41 @@ struct RootTabView: View {
     #else
         private var nativeTabs: some View {
             TabView(selection: $selection) {
-                TransactionListView()
-                    .tabItem {
-                        Label(RootTab.spending.title, systemImage: RootTab.spending.symbolName)
-                    }
-                    .accessibilityIdentifier(RootTab.spending.accessibilityIdentifier)
-                    .tag(RootTab.spending)
+                Tab(
+                    RootTab.spending.title,
+                    systemImage: RootTab.spending.symbolName,
+                    value: RootTab.spending
+                ) {
+                    TransactionListView()
+                        .accessibilityIdentifier(RootTab.spending.accessibilityIdentifier)
+                }
 
-                BudgetScreen()
-                    .tabItem {
-                        Label(RootTab.budget.title, systemImage: RootTab.budget.symbolName)
-                    }
-                    .accessibilityIdentifier(RootTab.budget.accessibilityIdentifier)
-                    .tag(RootTab.budget)
+                Tab(
+                    RootTab.budget.title,
+                    systemImage: RootTab.budget.symbolName,
+                    value: RootTab.budget
+                ) {
+                    BudgetScreen()
+                        .accessibilityIdentifier(RootTab.budget.accessibilityIdentifier)
+                }
 
-                ReportView()
-                    .tabItem {
-                        Label(RootTab.report.title, systemImage: RootTab.report.symbolName)
-                    }
-                    .accessibilityIdentifier(RootTab.report.accessibilityIdentifier)
-                    .tag(RootTab.report)
+                Tab(
+                    RootTab.report.title,
+                    systemImage: RootTab.report.symbolName,
+                    value: RootTab.report
+                ) {
+                    ReportView()
+                        .accessibilityIdentifier(RootTab.report.accessibilityIdentifier)
+                }
 
-                WealthView()
-                    .tabItem {
-                        Label(
-                            RootTab.wealth.title,
-                            systemImage: RootTab.wealth.symbolName
-                        )
-                    }
-                    .accessibilityIdentifier(RootTab.wealth.accessibilityIdentifier)
-                    .tag(RootTab.wealth)
+                Tab(
+                    RootTab.wealth.title,
+                    systemImage: RootTab.wealth.symbolName,
+                    value: RootTab.wealth
+                ) {
+                    WealthView()
+                        .accessibilityIdentifier(RootTab.wealth.accessibilityIdentifier)
+                }
             }
         }
     #endif
