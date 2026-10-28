@@ -829,7 +829,7 @@ struct MonMonBackupService {
         container: ModelContainer,
         defaults: UserDefaults = .standard,
         recoveryURL: URL = MonMonBackupService.defaultRecoveryURL,
-        save: @escaping Save = { try SyncWriteGate.save($0) },
+        save: @escaping Save = { try StoreWrite.save($0) },
         writeRecovery: @escaping RecoveryWriter = MonMonBackupService.writeRecoveryData
     ) {
         self.container = container

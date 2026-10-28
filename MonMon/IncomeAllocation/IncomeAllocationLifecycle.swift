@@ -123,7 +123,7 @@ enum IncomeAllocationLifecycle {
             item.transaction.incomeAllocationSnapshot = item.snapshot
         }
         do {
-            try SyncWriteGate.save(context)
+            try StoreWrite.save(context)
         } catch {
             for item in staged {
                 item.transaction.incomeAllocationSnapshot = nil

@@ -67,7 +67,7 @@ enum StoreReconciler {
         report.transfers = try foldImportedTransfers(in: context)
 
         if !report.isEmpty {
-            try SyncWriteGate.save(context)
+            try StoreWrite.save(context)
         }
 
         return report

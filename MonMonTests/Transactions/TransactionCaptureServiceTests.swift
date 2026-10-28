@@ -677,24 +677,6 @@ struct TransactionCaptureServiceTests {
         #expect(fixture.defaults.object(forKey: BankNotificationPreferences.lastResultKey) == nil)
     }
 
-    @Test("Apple Pay rolls back when sync prevents writing", arguments: [false, true])
-    func applePaySaveFailure(_ automaticSave: Bool) throws {
-        let fixture = try makeFixture()
-        fixture.defaults.set(automaticSave, forKey: ApplePayPreferences.automaticSaveKey)
-        SyncWriteGate.lock(fixture.container)
-        defer { SyncWriteGate.unlock(fixture.container) }
-        let event = ApplePayEvent(
-            amount: 50_000, currency: "VND", merchant: "Cafe", occurredAt: now)
-        #expect(throws: TransactionCaptureServiceError.storeFailure) {
-            try fixture.service.recordApplePay(event, accountID: fixture.accountID)
-        }
-        let context = ModelContext(fixture.container)
-        #expect(try context.fetch(FetchDescriptor<PendingTransactionCapture>()).isEmpty)
-        #expect(try context.fetch(FetchDescriptor<MoneyTransaction>()).isEmpty)
-        SyncWriteGate.unlock(fixture.container)
-        #expect(try !fixture.service.recordApplePay(event, accountID: fixture.accountID).duplicate)
-    }
-
     @Test("Apple Pay identity separates cards, accounts, currencies and capture sources")
     func applePayIdentityScope() throws {
         let fixture = try makeFixture()
@@ -755,39 +737,6 @@ struct TransactionCaptureServiceTests {
         #expect(transactions.count == 1)
         #expect(transactions.first?.id == saved.id)
         #expect(transactions.first?.amount == 50_000)
-    }
-
-    @Test("Pending capture delete and undo roll back when sync blocks writes")
-    func pendingCaptureDeletionRespectsSyncLock() throws {
-        let fixture = try makeFixture()
-        let prepared = try fixture.service.prepare("ăn trưa tiền mặt", now: now)
-        _ = try fixture.service.commit(prepared, createdAt: now)
-        let context = ModelContext(fixture.container)
-        let capture = try #require(
-            context.fetch(FetchDescriptor<PendingTransactionCapture>()).first)
-        let captureID = capture.id
-        SyncWriteGate.lock(fixture.container)
-        defer { SyncWriteGate.unlock(fixture.container) }
-
-        #expect(throws: SyncError.sessionPending) {
-            try PendingCaptureDeletion.delete(capture, from: context)
-        }
-        #expect(
-            try context.fetch(FetchDescriptor<PendingTransactionCapture>()).map(\.id) == [captureID]
-        )
-        SyncWriteGate.unlock(fixture.container)
-        let snapshot = try PendingCaptureDeletion.delete(capture, from: context)
-        SyncWriteGate.lock(fixture.container)
-
-        #expect(throws: SyncError.sessionPending) {
-            try PendingCaptureDeletion.restore(snapshot, in: context)
-        }
-        #expect(try context.fetch(FetchDescriptor<PendingTransactionCapture>()).isEmpty)
-        SyncWriteGate.unlock(fixture.container)
-        try PendingCaptureDeletion.restore(snapshot, in: context)
-        #expect(
-            try ModelContext(fixture.container).fetch(FetchDescriptor<PendingTransactionCapture>())
-                .map(\.id) == [captureID])
     }
 
     private func makeFixture() throws -> Fixture {

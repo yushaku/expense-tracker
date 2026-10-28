@@ -361,6 +361,7 @@
 		A00000000000000000000A02 /* AccountSeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000A01 /* AccountSeed.swift */; };
 		A00000000000000000000A04 /* AccountSeedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000A03 /* AccountSeedTests.swift */; };
 		A00000000000000000000A06 /* DuplicateReconciler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000A05 /* DuplicateReconciler.swift */; };
+		F0948E289FE0A9E03C6D8CC9 /* StoreWrite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E51F07328D6955F0948E28 /* StoreWrite.swift */; };
 		A00000000000000000000A08 /* StoreReconciler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000A07 /* StoreReconciler.swift */; };
 		A00000000000000000000A0B /* StoreReconcilerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000A0A /* StoreReconcilerTests.swift */; };
 		A00000000000000000000E00 /* RecurrenceFrequency.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000D01 /* RecurrenceFrequency.swift */; };
@@ -860,6 +861,7 @@
 		A00000000000000000000A01 /* AccountSeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSeed.swift; sourceTree = "<group>"; };
 		A00000000000000000000A03 /* AccountSeedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSeedTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000A05 /* DuplicateReconciler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateReconciler.swift; sourceTree = "<group>"; };
+		04E51F07328D6955F0948E28 /* StoreWrite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreWrite.swift; sourceTree = "<group>"; };
 		A00000000000000000000A07 /* StoreReconciler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreReconciler.swift; sourceTree = "<group>"; };
 		A00000000000000000000A0A /* StoreReconcilerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreReconcilerTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000D01 /* RecurrenceFrequency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurrenceFrequency.swift; sourceTree = "<group>"; };
@@ -1120,6 +1122,7 @@
 				Q10000000000000000000107 /* MonMonAppShortcuts.swift */,
 				A00000000000000000000816 /* MonMonSchema.swift */,
 				A00000000000000000000A07 /* StoreReconciler.swift */,
+				04E51F07328D6955F0948E28 /* StoreWrite.swift */,
 				A00000000000000000000A05 /* DuplicateReconciler.swift */,
 				A00000000000000000000110 /* MonMonApp.swift */,
 				A00000000000000000000112 /* ContentView.swift */,
@@ -2030,6 +2033,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F0948E289FE0A9E03C6D8CC9 /* StoreWrite.swift in Sources */,
 				B4F2CA028D32490D88AD2D26 /* ResearchNotebookView.swift in Sources */,
 				EA79E4BCCF204494A05697A6 /* MCPResearchTools.swift in Sources */,
 				81DC62B34406437A85CC4056 /* MCPResearchService.swift in Sources */,

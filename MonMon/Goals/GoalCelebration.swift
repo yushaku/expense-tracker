@@ -15,7 +15,7 @@ enum GoalContributionCommit {
         do {
             try GoalContributionStore.record(
                 amount: amount, on: goal, id: UUID(), occurredAt: occurredAt)
-            try SyncWriteGate.save(context)
+            try StoreWrite.save(context)
             return wasIncomplete && goal.targetAmount > 0
                 && goal.earmarkedAmount >= goal.targetAmount
         } catch {

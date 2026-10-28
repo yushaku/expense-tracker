@@ -37,12 +37,7 @@ struct SalaryProfileTests {
         let draft = SalaryProfileDraft(profile: legacy)
         #expect(draft.result?.social == 4_048_000)
         #expect(draft.result?.health == 759_000)
-        SyncWriteGate.lock(container)
-        #expect(throws: SyncError.sessionPending) {
-            try SalaryProfileStore.save(draft, in: container.mainContext)
-        }
         #expect(legacy.periodRaw == SalaryCalculator.Period.firstHalf.rawValue)
-        SyncWriteGate.unlock(container)
         let saved = try SalaryProfileStore.save(draft, in: container.mainContext)
         #expect(saved.periodRaw == SalaryCalculator.Period.secondHalf.rawValue)
         #expect(saved.name == "Legacy name")
@@ -268,37 +263,6 @@ struct SalaryProfileTests {
             for: schema,
             configurations: ModelConfiguration(schema: schema, url: url, cloudKitDatabase: .none))
         #expect(try SalaryProfileStore.personal(in: reopened.mainContext)?.basisRaw == "net")
-    }
-
-    @Test func syncLockPreventsProfileAndLinkedRuleWrites() throws {
-        let container = try ModelContainer(
-            for: Schema(MonMonSchema.models),
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true))
-        var draft = SalaryProfileDraft()
-        draft.amountText = "30000000"
-        let profile = try SalaryProfileStore.save(draft, in: container.mainContext)
-        SyncWriteGate.lock(container)
-        defer { SyncWriteGate.unlock(container) }
-        draft.basis = .net
-        draft.recurringRuleID = UUID()
-        #expect(throws: SyncError.sessionPending) {
-            try SalaryProfileStore.save(draft, in: container.mainContext)
-        }
-        #expect(profile.basisRaw == "gross")
-        #expect(profile.recurringRuleID == nil)
-        #expect(try SalaryProfileStore.personal(in: ModelContext(container))?.basisRaw == "gross")
-
-        let rule = RecurringRule(
-            id: UUID(), kind: .income, amount: 26_215_000, note: "Salary",
-            accountID: UUID(), categoryID: nil, currencyCode: "VND",
-            frequency: .monthly, interval: 1, anchorDate: .now, endDate: nil,
-            isPaused: false, lastGeneratedAt: nil, createdAt: .now)
-        container.mainContext.insert(rule)
-        #expect(throws: SyncError.sessionPending) {
-            try SalaryProfileStore.saveLinkedRule(rule, in: container.mainContext)
-        }
-        #expect(profile.recurringRuleID == nil)
-        #expect(try ModelContext(container).fetchCount(FetchDescriptor<RecurringRule>()) == 0)
     }
 
     @Test func linkedRuleAndNetCommitTogether() throws {

@@ -108,7 +108,7 @@ enum SalaryProfileStore {
             try draft.apply(to: profile)
             if profile.modelContext == nil { context.insert(profile) }
             context.processPendingChanges()
-            try SyncWriteGate.save(context)
+            try StoreWrite.save(context)
             return profile
         } catch {
             context.rollback()
@@ -134,7 +134,7 @@ enum SalaryProfileStore {
     /// SwiftData rollback can leave a formerly nil UUID cached on that instance.
     static func saveLinkedRule(
         _ rule: RecurringRule, in context: ModelContext,
-        save: (ModelContext) throws -> Void = { try SyncWriteGate.save($0) }
+        save: (ModelContext) throws -> Void = { try StoreWrite.save($0) }
     ) throws {
         guard isCompatible(rule) else {
             context.rollback()

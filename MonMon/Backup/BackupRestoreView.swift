@@ -356,7 +356,7 @@ struct BackupRestoreView: View {
             }
             let url = MonMonBackupService.resetBackupURL()
             do {
-                try SyncWriteGate.save(modelContext)
+                try StoreWrite.save(modelContext)
                 try syncCoordinator.resetDatabase(using: service, backupURL: url)
                 lastResetPath = url.path
             } catch {
@@ -381,7 +381,7 @@ struct BackupRestoreView: View {
             await Task.yield()
             defer { isWorking = false }
             do {
-                try SyncWriteGate.save(modelContext)
+                try StoreWrite.save(modelContext)
                 let now = Date.now
                 exportDocument = MonMonBackupFileDocument(
                     data: try service.exportData(exportedAt: now))
@@ -472,7 +472,7 @@ struct BackupRestoreView: View {
             }
 
             do {
-                try SyncWriteGate.save(modelContext)
+                try StoreWrite.save(modelContext)
                 _ = try service.restore(selection.validated)
                 hasRecovery = true
                 self.selection = nil

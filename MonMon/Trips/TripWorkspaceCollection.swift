@@ -43,7 +43,7 @@ struct GoalJourney {
         try draft.apply(
             to: self, jars: jars, goals: goals, capacityByJar: capacityByJar, asOf: asOf)
         do {
-            try SyncWriteGate.save(context)
+            try StoreWrite.save(context)
         } catch {
             context.rollback()
             // SwiftData can retain just-mutated values in its live model cache after rollback.
