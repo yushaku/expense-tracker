@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 import Testing
 
 @testable import MonMon
@@ -184,6 +185,33 @@ struct CashBalancesParityTests {
             .sorted { $0.1 > $1.1 }
         #expect(accountSlices.map(\.accountID) == expected.map(\.0))
         #expect(accountSlices.map(\.amount) == expected.map(\.1))
+    }
+
+    @Test("The editors' per-account fetch matches available(for:) over whole tables")
+    func fetchedBalanceMatches() throws {
+        let l = ledger()
+        let container = try ModelContainer(
+            for: Schema(MonMonSchema.models),
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let context = ModelContext(container)
+        l.accounts.forEach(context.insert)
+        l.deposits.forEach(context.insert)
+        l.holdings.forEach(context.insert)
+        l.withdrawals.forEach(context.insert)
+        l.transactions.forEach(context.insert)
+        l.transfers.forEach(context.insert)
+        l.debts.forEach(context.insert)
+        l.payments.forEach(context.insert)
+        l.sales.forEach(context.insert)
+        l.instruments.forEach(context.insert)
+        try context.save()
+
+        for account in l.accounts {
+            #expect(
+                CashBalanceFetch.available(for: account, in: context)
+                    == oldAvailable(account, in: l))
+        }
     }
 
     @Test("An account with no records keeps its opening balance")
