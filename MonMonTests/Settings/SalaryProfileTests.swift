@@ -111,7 +111,7 @@ struct SalaryProfileTests {
         #expect(SalaryProfileStore.linkedRule(id: rule.id, in: [rule]) == nil)
     }
 
-    @Test func backupAndSyncRoundTripProfile() throws {
+    @Test func backupRoundTripsProfile() throws {
         let container = try ModelContainer(
             for: Schema(MonMonSchema.models),
             configurations: ModelConfiguration(isStoredInMemoryOnly: true))
@@ -125,14 +125,12 @@ struct SalaryProfileTests {
         let data = try service.exportData()
         let validated = try service.preview(data)
         #expect(validated.payload.recordCount == 1)
-        let sync = try SyncSnapshot(payload: validated.payload)
-        #expect(sync.records.contains { $0.type == "salaryProfiles" })
-        let roundTripped = try sync.validated()
+        #expect(validated.payload.salaryProfiles.count == 1)
         let destination = try ModelContainer(
             for: Schema(MonMonSchema.models),
             configurations: ModelConfiguration(isStoredInMemoryOnly: true))
         try MonMonBackupService(container: destination).apply(
-            roundTripped, in: destination.mainContext, includeDeviceData: false)
+            validated.payload, in: destination.mainContext, includeDeviceData: false)
         try destination.mainContext.save()
         let restored = try #require(try SalaryProfileStore.personal(in: destination.mainContext))
         #expect(restored.basisRaw == "net")
@@ -188,23 +186,7 @@ struct SalaryProfileTests {
         let oldData = try JSONSerialization.data(withJSONObject: root)
         let old = try MonMonBackupValidator.decodeAndValidate(oldData)
         #expect(old.payload.salaryProfiles.isEmpty)
-        #expect(try SyncSnapshot(payload: old.payload).records.isEmpty)
-    }
-
-    @Test func syncRemapsExplicitLinkAndAllowsDeletedRule() throws {
-        let oldID = MonMonBackupScalar.uuid(UUID())
-        let newID = MonMonBackupScalar.uuid(UUID())
-        let profile = SyncRecord(
-            type: "salaryProfiles",
-            fields: [
-                "id": .string(MonMonBackupScalar.uuid(SalaryProfile.personalID)),
-                "recurringRuleID": .string(oldID),
-            ])
-        let remapped = SyncMergePlanner.remap(
-            profile, aliases: ["recurringRules/" + oldID: "recurringRules/" + newID])
-        #expect(remapped.fields["recurringRuleID"]?.text == newID)
-        let rule = SyncRecord(type: "recurringRules", fields: ["id": .string(oldID)])
-        try SyncSnapshot(records: [profile]).validateDeletions(from: [profile, rule])
+        #expect(old.payload.recordCount == 0)
     }
 
     @Test func resetBacksUpProfileBeforeRemovingIt() throws {

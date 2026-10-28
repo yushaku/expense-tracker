@@ -48,12 +48,6 @@ enum StoreReconciler {
     /// reports zero, so this can run on every launch.
     @discardableResult
     static func reconcile(in context: ModelContext) throws -> Report {
-        // The P2P lifecycle owns reconciliation from its first launch, before
-        // pairing too. Preserve every version for explicit preview decisions.
-        // Never fall back to oldest-wins folding when metadata is corrupt.
-        if try SyncMetadata.entry("sync/state", in: context) != nil {
-            return Report()
-        }
         var report = Report()
 
         report.categories = try foldCategories(in: context)

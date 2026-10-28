@@ -6,7 +6,7 @@ struct SettingsView: View {
     @Environment(AppLock.self) private var appLock
     @Environment(NotificationCoordinator.self) private var notificationCoordinator
     @Environment(\.modelContext) private var modelContext
-    @Environment(SyncCoordinator.self) private var syncCoordinator
+    @Environment(StoreResetCoordinator.self) private var storeReset
 
     @Environment(\.locale) private var locale
 
@@ -15,12 +15,6 @@ struct SettingsView: View {
     @AppStorage(AppLock.enabledKey) private var isLockEnabled = false
     @AppStorage(AppDateFormat.storageKey) private var dateFormat = AppDateFormat.dayMonthYear
     @State private var instrumentScope: FundInstrumentListScope?
-    @State private var path: [Destination] = []
-    @State private var editingToken = UUID()
-
-    private enum Destination: Hashable {
-        case deviceSync
-    }
 
     var body: some View {
         #if os(macOS)
@@ -32,7 +26,7 @@ struct SettingsView: View {
     }
 
     private var settingsContent: some View {
-        NavigationStack(path: $path) {
+        NavigationStack {
             ZStack {
                 MonMonTheme.canvas
                     .ignoresSafeArea()
@@ -108,19 +102,6 @@ struct SettingsView: View {
                                 .accessibilityIdentifier("settings-research-notebook")
                             }
                         #endif
-                        card {
-                            NavigationLink(value: Destination.deviceSync) {
-                                HStack {
-                                    Label("Device Sync", systemImage: "laptopcomputer.and.iphone")
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .accessibilityHidden(true)
-                                }
-                                .frame(minHeight: 44)
-                            }
-                            .settingsButtonLabelStyle()
-                            .accessibilityIdentifier("settings-device-sync")
-                        }
                         notificationCard
                         securityCard
                         backupCard
@@ -135,20 +116,13 @@ struct SettingsView: View {
                     .frame(maxWidth: .infinity)
                 }
             }
-            .id(syncCoordinator.contentRevision)
+            .id(storeReset.revision)
             .compactRootNavigationTitle("Settings")
-            .navigationDestination(for: Destination.self) { destination in
-                switch destination {
-                case .deviceSync:
-                    SyncView(presentation: .navigation)
-                }
-            }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Close", systemImage: "xmark") { dismiss() }
                         .labelStyle(.iconOnly)
                         .tint(MonMonTheme.textSecondary)
-                        .disabled(syncCoordinator.writesLocked)
                         .accessibilityIdentifier("settings-done")
                 }
             }
@@ -165,17 +139,6 @@ struct SettingsView: View {
                     )
                 }
             }
-        }
-        // Settings edits pause sync; its Device Sync destination must allow it to run.
-        .onAppear { syncCoordinator.setEditing(path.isEmpty, token: editingToken) }
-        .onDisappear { syncCoordinator.setEditing(false, token: editingToken) }
-        .onChange(of: path) { _, newPath in
-            syncCoordinator.setEditing(newPath.isEmpty, token: editingToken)
-        }
-        .onChange(of: syncCoordinator.isPresented, initial: true) { _, requested in
-            guard requested else { return }
-            if path.isEmpty { path = [.deviceSync] }
-            syncCoordinator.isPresented = false
         }
     }
 
@@ -423,7 +386,7 @@ extension View {
             .environment(AppLock(isLocked: false))
             .environment(NotificationCoordinator())
             .modelContainer(PreviewData.populated)
-            .environment(SyncCoordinator(store: SyncSessionStore(container: PreviewData.populated)))
+            .environment(StoreResetCoordinator())
             .tint(MonMonTheme.accent)
             .foregroundStyle(MonMonTheme.textPrimary)
             .preferredColorScheme(MonMonTheme.colorScheme)

@@ -23,7 +23,7 @@ import SwiftUI
 struct MonMonApp: App {
     private let container: ModelContainer
     @State private var appLock: AppLock
-    @State private var syncCoordinator: SyncCoordinator
+    @State private var storeReset = StoreResetCoordinator()
     @State private var appRoute: AppRoute
     @State private var notificationCoordinator: NotificationCoordinator
     #if os(macOS)
@@ -49,14 +49,9 @@ struct MonMonApp: App {
         }
         container = modelContainer
         modelContainer.mainContext.autosaveEnabled = false
-        let sync = SyncCoordinator(store: SyncSessionStore(container: modelContainer))
-        sync.mayConnect = { !appLock.isLocked }
-        _syncCoordinator = State(initialValue: sync)
-        var canInitializeStore = !sync.writesLocked
-        if canInitializeStore {
-            do { try SeedState.migrateExistingStore(in: modelContainer.mainContext) } catch {
-                canInitializeStore = false
-            }
+        var canInitializeStore = true
+        do { try SeedState.migrateExistingStore(in: modelContainer.mainContext) } catch {
+            canInitializeStore = false
         }
 
         let transactionCaptureDependency = TransactionCaptureIntentDependency(
@@ -124,77 +119,29 @@ struct MonMonApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .alert("Backup", isPresented: $syncCoordinator.isPresentingResetNotice) {
+                .alert("Backup", isPresented: $storeReset.isPresentingResetNotice) {
                     Button("OK", role: .cancel) {}
                 } message: {
                     Text("Database reset complete. Find your backup in Settings → Backup.")
                 }
-                .environment(syncCoordinator)
+                .environment(storeReset)
                 .environment(appLock)
                 .environment(appRoute)
                 .environment(notificationCoordinator)
-                .sheet(
-                    isPresented: Binding(
-                        get: { syncCoordinator.isPresented && !appRoute.isShowingSettings },
-                        set: { syncCoordinator.isPresented = $0 }
-                    )
-                ) {
-                    SyncView()
-                        .environment(syncCoordinator)
-                        .environment(appLock)
-                }
                 .task {
-                    syncCoordinator.onApplied = {
-                        if let snapshot = try? syncCoordinator.store.snapshot() {
-                            try? SyncLocalReferences.reconcile(snapshot)
-                        }
+                    storeReset.onReset = {
                         Task { await notificationCoordinator.reconcile(in: container.mainContext) }
                     }
-                    if !MonMonProcess.isRunningUnitTests,
-                        let snapshot = try? syncCoordinator.store.snapshot(),
-                        (try? syncCoordinator.store.state().baseline) != nil
-                    {
-                        try? SyncLocalReferences.reconcile(snapshot)
-                    }
-                    if syncCoordinator.writesLocked && !appLock.isLocked {
-                        syncCoordinator.isPresented = true
-                    }
-                    // Pairing enables automatic sync while both apps are open and unlocked.
-                    syncCoordinator.connectIfPaired()
                     await notificationCoordinator.reconcile(in: container.mainContext)
-                }
-                .task(id: scenePhase == .active && !appLock.isLocked) {
-                    guard scenePhase == .active, !appLock.isLocked,
-                        !MonMonProcess.isRunningUnitTests
-                    else { return }
-                    await syncCoordinator.runAutomaticSync()
-                }
-                .onChange(of: appLock.isLocked) { _, locked in
-                    if locked {
-                        syncCoordinator.disconnect()
-                    } else if syncCoordinator.writesLocked {
-                        syncCoordinator.isPresented = true
-                    } else {
-                        syncCoordinator.connectIfPaired()
-                    }
                 }
                 #if os(macOS)
                     .environment(mcpAccessManager)
                 #endif
-                // Duplicates arrive when synchronisation lands, which is after
-                // launch, so reconciling only in `init` would miss the case it
-                // exists for. Coming back to the app is the next moment the
-                // owner could see one.
+                // Coming back to the app is the next moment the owner could see
+                // a duplicate a background writer (an App Intent, the share
+                // extension) left behind, so the store is reconciled again here.
                 .onChange(of: scenePhase) { _, phase in
-                    guard phase == .active else {
-                        if phase == .background { syncCoordinator.disconnect() }
-                        return
-                    }
-                    guard !syncCoordinator.writesLocked else {
-                        if !appLock.isLocked { syncCoordinator.isPresented = true }
-                        return
-                    }
-                    syncCoordinator.connectIfPaired()
+                    guard phase == .active else { return }
                     GoalWidgetSnapshot.refresh(in: container.mainContext)
                     WidgetTodayExpenses.refresh(in: container.mainContext)
                     _ = try? StoreReconciler.reconcile(in: container.mainContext)

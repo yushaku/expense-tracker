@@ -187,7 +187,7 @@ extension MonMonBackupService {
 
         if includeDeviceData && payload.budgetJars.isEmpty {
             // Explicit backup restore historically installs default jars for an
-            // empty payload. Ordinary startup and P2P never reset this marker.
+            // empty payload. Ordinary startup never resets this marker.
             if let marker = try SyncMetadata.entry("seed/budgetJars", in: context) {
                 context.delete(marker)
             }
@@ -922,12 +922,8 @@ struct MonMonBackupService {
         let context = ModelContext(container)
         context.autosaveEnabled = false
         do {
-            guard !SyncWriteGate.isLocked(container) else { throw SyncError.sessionPending }
-            guard try SyncSessionStore(container: container).state().pending == nil else {
-                throw SyncError.sessionPending
-            }
             try apply(validated.payload, in: context)
-            try SyncSessionStore.invalidateAfterRestore(in: context)
+            try SeedState.markAllSeeded(in: context)
             try save(context)
         } catch {
             context.rollback()
@@ -935,9 +931,8 @@ struct MonMonBackupService {
         }
 
         apply(validated.payload.preferences, to: defaults)
-        // CloudKit can materialize duplicate physical rows after the snapshot
-        // has been applied. The existing idempotent reconciler is the store's
-        // normal post-sync guard and also refreshes those invariants here.
+        // A backup can carry rows that collide with seeded or already present
+        // ones. The idempotent reconciler folds them back into one.
         _ = try? StoreReconciler.reconcile(in: context)
         return MonMonBackupRestoreReport(restoredRecordCount: validated.payload.recordCount)
     }
@@ -946,10 +941,6 @@ struct MonMonBackupService {
     /// Row deletion (rather than deleting SQLite files or batch deletion) keeps
     /// the live context coherent and lets a failed save roll back the operation.
     func reset(backupURL: URL) throws {
-        guard !SyncWriteGate.isLocked(container) else { throw SyncError.sessionPending }
-        guard try SyncSessionStore(container: container).state().pending == nil else {
-            throw SyncError.sessionPending
-        }
         let context = container.mainContext
         guard !context.hasChanges else { throw MonMonBackupServiceError.storeFailure }
         do {
