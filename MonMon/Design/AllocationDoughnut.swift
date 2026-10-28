@@ -66,17 +66,12 @@ struct AllocationDoughnut: View {
     @ViewBuilder
     var body: some View {
         if showsLegend {
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .center, spacing: 24) {
-                    doughnut
-                    legend
-                }
-
-                VStack(alignment: .leading, spacing: 20) {
-                    doughnut
-                        .frame(maxWidth: .infinity)
-                    legend
-                }
+            // One chart, placed beside the legend when both fit and above it
+            // otherwise. `ViewThatFits` over two stacks built the chart twice,
+            // once in each candidate, on every update.
+            DoughnutLegendLayout {
+                doughnut
+                legend
             }
         } else {
             doughnut
@@ -296,6 +291,71 @@ struct AllocationDoughnut: View {
     private func percentLabel(for item: AllocationDoughnutItem) -> String {
         let percent = AssetAllocation.percent(of: item.amount, in: total)
         return "\(PercentInput.format(percent))%"
+    }
+}
+
+/// The doughnut and its legend side by side when their ideal widths fit,
+/// stacked otherwise: what `ViewThatFits` choosing between an
+/// `HStack(alignment: .center, spacing: 24)` and a
+/// `VStack(alignment: .leading, spacing: 20)` with a centred chart did, with
+/// the chart built once. The first subview is the chart, the second the legend.
+private struct DoughnutLegendLayout: Layout {
+    private static let horizontalSpacing: CGFloat = 24
+    private static let verticalSpacing: CGFloat = 20
+
+    private func isSideBySide(_ proposal: ProposedViewSize, _ subviews: Subviews) -> Bool {
+        guard let width = proposal.width else {
+            return true
+        }
+        let ideal = ProposedViewSize(width: nil, height: proposal.height)
+        let needed =
+            subviews[0].sizeThatFits(ideal).width + Self.horizontalSpacing
+            + subviews[1].sizeThatFits(ideal).width
+        return needed <= width
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let chart = subviews[0].sizeThatFits(.unspecified)
+
+        if isSideBySide(proposal, subviews) {
+            let legend = subviews[1].sizeThatFits(
+                ProposedViewSize(
+                    width: proposal.width.map { max(0, $0 - chart.width - Self.horizontalSpacing) },
+                    height: proposal.height))
+            return CGSize(
+                width: chart.width + Self.horizontalSpacing + legend.width,
+                height: max(chart.height, legend.height))
+        }
+
+        let legend = subviews[1].sizeThatFits(ProposedViewSize(width: proposal.width, height: nil))
+        return CGSize(
+            width: max(proposal.width ?? chart.width, legend.width),
+            height: chart.height + Self.verticalSpacing + legend.height)
+    }
+
+    func placeSubviews(
+        in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
+    ) {
+        let chart = subviews[0].sizeThatFits(.unspecified)
+
+        if isSideBySide(proposal, subviews) {
+            let legendWidth = max(0, bounds.width - chart.width - Self.horizontalSpacing)
+            let legendProposal = ProposedViewSize(width: legendWidth, height: proposal.height)
+            subviews[0].place(
+                at: CGPoint(x: bounds.minX, y: bounds.midY),
+                anchor: .leading, proposal: .unspecified)
+            subviews[1].place(
+                at: CGPoint(x: bounds.minX + chart.width + Self.horizontalSpacing, y: bounds.midY),
+                anchor: .leading, proposal: legendProposal)
+            return
+        }
+
+        subviews[0].place(
+            at: CGPoint(x: bounds.midX, y: bounds.minY),
+            anchor: .top, proposal: .unspecified)
+        subviews[1].place(
+            at: CGPoint(x: bounds.minX, y: bounds.minY + chart.height + Self.verticalSpacing),
+            anchor: .topLeading, proposal: ProposedViewSize(width: bounds.width, height: nil))
     }
 }
 
