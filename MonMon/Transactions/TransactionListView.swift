@@ -133,14 +133,6 @@ struct TransactionListView: View {
                 AccountDetailView(route: route)
             }
             .rootScreenHeader("Transactions")
-            // Match the pinned month rail, including when content scrolls under the toolbar.
-            #if os(macOS)
-                .toolbarBackground(MonMonTheme.canvas, for: .windowToolbar)
-                .toolbarBackgroundVisibility(.visible, for: .windowToolbar)
-            #else
-                .toolbarBackground(MonMonTheme.canvas, for: .navigationBar)
-                .toolbarBackgroundVisibility(.visible, for: .navigationBar)
-            #endif
             .accessibilityIdentifier("spending-list")
             .appSheet(item: $editorMode) { mode in
                 TransactionEditorView(mode: mode, defaultDate: defaultDate)

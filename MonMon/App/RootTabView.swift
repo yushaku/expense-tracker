@@ -232,6 +232,15 @@ private struct RootScreenHeader: ViewModifier {
                     headerItem
                 }
             }
+            // Every root tab paints its bar with the canvas, so content scrolling
+            // under it, or a pinned period rail below it, reads as one header.
+            #if os(macOS)
+                .toolbarBackground(MonMonTheme.canvas, for: .windowToolbar)
+                .toolbarBackgroundVisibility(.visible, for: .windowToolbar)
+            #else
+                .toolbarBackground(MonMonTheme.canvas, for: .navigationBar)
+                .toolbarBackgroundVisibility(.visible, for: .navigationBar)
+            #endif
     }
 
     private var headerTitle: some View {
